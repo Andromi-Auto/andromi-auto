@@ -65,7 +65,7 @@ class AudioTrackWrapper(stream: Int, sampleRateInHz: Int, bitDepth: Int, channel
          * A multiplication factor to apply to the minimum buffer size requested by the underlying
          * [android.media.AudioTrack].
          */
-        private val BUFFER_MULTIPLICATION_FACTOR = 8
+        private val BUFFER_MULTIPLICATION_FACTOR = 16
         /**
          * A maximum length for the [android.media.AudioTrack] buffer, in microseconds.
          */
