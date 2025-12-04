@@ -59,7 +59,7 @@ class AapMediaPlayback(private val notification: BackgroundNotification) {
     }
 
     private fun notifyRequest(request: MediaPlayback.MediaMetaData) {
-        notification.notify(request)
+        // notification.notify(request)
     }
 
 }

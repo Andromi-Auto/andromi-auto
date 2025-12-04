@@ -68,6 +68,14 @@ object AppLog {
         log(Log.DEBUG, format(msg))
     }
 
+    fun w(msg: String) {
+        log(Log.WARN, format(msg))
+    }
+
+    fun w(msg: String, vararg params: Any) {
+        log(Log.WARN, format(msg, *params))
+    }
+
     private fun log(priority: Int, msg: String) {
         if (priority >= LOG_LEVEL) {
             LOGGER.println(priority, TAG, msg)

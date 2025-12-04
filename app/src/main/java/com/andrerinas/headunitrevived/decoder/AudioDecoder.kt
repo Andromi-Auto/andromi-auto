@@ -28,7 +28,7 @@ class AudioDecoder {
 
     fun stop(chan: Int) {
         val audioTrack = audioTracks.get(chan)
-        audioTrack?.stop()
+        audioTrack?.stopPlayback()
         audioTracks.put(chan, null)
     }
 
