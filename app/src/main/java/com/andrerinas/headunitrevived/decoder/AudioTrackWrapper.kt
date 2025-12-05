@@ -5,6 +5,7 @@ import android.media.AudioFormat
 import android.media.AudioTrack
 import android.os.Build
 import android.os.Process
+import android.os.SystemClock
 import com.andrerinas.headunitrevived.utils.AppLog
 import java.util.concurrent.LinkedBlockingQueue
 
@@ -29,6 +30,8 @@ class AudioTrackWrapper(stream: Int, sampleRateInHz: Int, bitDepth: Int, channel
             try {
                 // take() blocks until an element is available
                 val buffer = dataQueue.take()
+                AppLog.d("AudioTrackWrapper: run - taking %d bytes from queue, playState: %d, headPosition: %d, ts=%d",
+                    buffer.size, audioTrack.playState, audioTrack.playbackHeadPosition, SystemClock.elapsedRealtime())
                 if (isRunning) { // Re-check after waking up
                     audioTrack.write(buffer, 0, buffer.size)
                 }
@@ -81,6 +84,8 @@ class AudioTrackWrapper(stream: Int, sampleRateInHz: Int, bitDepth: Int, channel
     // This method is called by the transport thread. It should be fast and non-blocking.
     fun write(buffer: ByteArray, offset: Int, size: Int) {
         if (!isRunning) return
+
+        AppLog.d("AudioTrackWrapper: write - adding %d bytes to queue, current queue size: %d, ts=%d", size, dataQueue.size, SystemClock.elapsedRealtime())
 
         // We need to copy the relevant part of the buffer to a new array,
         // as the original buffer might be reused by the transport layer.
