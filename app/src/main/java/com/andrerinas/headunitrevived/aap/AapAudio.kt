@@ -1,6 +1,7 @@
 package com.andrerinas.headunitrevived.aap
 
 import android.media.AudioManager
+import android.os.SystemClock
 
 import com.andrerinas.headunitrevived.aap.protocol.AudioConfigs
 import com.andrerinas.headunitrevived.aap.protocol.Channel
@@ -38,6 +39,8 @@ internal class AapAudio(
     }
 
     private fun decode(channel: Int, start: Int, buf: ByteArray, len: Int) {
+        val timestamp = SystemClock.elapsedRealtime()
+        AppLog.d("AapAudio: decode - channel=%d, len=%d, ts=%d", channel, len, timestamp)
         var length = len
         if (length > AUDIO_BUFS_SIZE) {
             AppLog.e("Error audio len: %d  aud_buf_BUFS_SIZE: %d", length, AUDIO_BUFS_SIZE)

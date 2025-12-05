@@ -1,97 +1,123 @@
 package com.andrerinas.headunitrevived.decoder
 
+import android.media.AudioAttributes
 import android.media.AudioFormat
 import android.media.AudioTrack
+import android.os.Build
 import android.os.Process
-
+import android.os.SystemClock
 import com.andrerinas.headunitrevived.utils.AppLog
+import java.util.concurrent.LinkedBlockingQueue
 
+class AudioTrackWrapper(stream: Int, sampleRateInHz: Int, bitDepth: Int, channelCount: Int) : Thread() {
 
-/**
- * @author algavris
- * *
- * @date 26/10/2016.
- */
-class AudioTrackWrapper(stream: Int, sampleRateInHz: Int, bitDepth: Int, channelCount: Int) {
     private val audioTrack: AudioTrack
+    private val dataQueue = LinkedBlockingQueue<ByteArray>()
+    @Volatile private var isRunning = true
 
     init {
-        Process.setThreadPriority(Process.THREAD_PRIORITY_AUDIO)
+        // The thread priority will be set in the run() method.
+        this.name = "AudioPlaybackThread"
         audioTrack = createAudioTrack(stream, sampleRateInHz, bitDepth, channelCount)
         audioTrack.play()
+        // Start the playback thread itself
+        this.start()
+    }
+
+    override fun run() {
+        Process.setThreadPriority(Process.THREAD_PRIORITY_AUDIO)
+        while (isRunning) {
+            try {
+                // take() blocks until an element is available
+                val buffer = dataQueue.take()
+                AppLog.d("AudioTrackWrapper: run - taking %d bytes from queue, playState: %d, headPosition: %d, ts=%d",
+                    buffer.size, audioTrack.playState, audioTrack.playbackHeadPosition, SystemClock.elapsedRealtime())
+                if (isRunning) { // Re-check after waking up
+                    audioTrack.write(buffer, 0, buffer.size)
+                }
+            } catch (e: InterruptedException) {
+                AppLog.i("AudioTrackWrapper thread interrupted.")
+                // isRunning will be set to false by stop(), so we just exit the loop
+                break
+            } catch (e: Exception) {
+                AppLog.e("Error in AudioTrackWrapper run loop", e)
+                isRunning = false
+            }
+        }
+        // Cleanup after the loop finishes
+        cleanup()
+        AppLog.i("AudioTrackWrapper thread finished.")
     }
 
     private fun createAudioTrack(stream: Int, sampleRateInHz: Int, bitDepth: Int, channelCount: Int): AudioTrack {
-        val pcmFrameSize = 2 * channelCount
         val channelConfig = if (channelCount == 2) AudioFormat.CHANNEL_OUT_STEREO else AudioFormat.CHANNEL_OUT_MONO
         val dataFormat = if (bitDepth == 16) AudioFormat.ENCODING_PCM_16BIT else AudioFormat.ENCODING_PCM_8BIT
-        val bufferSize = AudioBuffer.getSize(sampleRateInHz, channelConfig, dataFormat, pcmFrameSize)
 
-        AppLog.i("Audio stream: $stream buffer size: $bufferSize sampleRateInHz: $sampleRateInHz channelCount: $channelCount")
+        val minBufferSize = AudioTrack.getMinBufferSize(sampleRateInHz, channelConfig, dataFormat)
+        val bufferSize = minBufferSize * 8
 
-        return AudioTrack(stream, sampleRateInHz, channelConfig, dataFormat, bufferSize, AudioTrack.MODE_STREAM)
-    }
+        AppLog.i("Audio stream: $stream buffer size: $bufferSize (min: $minBufferSize) sampleRateInHz: $sampleRateInHz channelCount: $channelCount")
 
-    fun write(buffer: ByteArray, offset: Int, size: Int): Int {
-        val written = audioTrack.write(buffer, offset, size)
-        if (written != size) {
-            AppLog.e("Error AudioTrack written: $written  len: $size, playState: ${audioTrack.playState}, playbackHeadPosition: ${audioTrack.playbackHeadPosition}, bufferSizeInFrames: ${audioTrack.bufferSizeInFrames}")
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val audioAttributes = AudioAttributes.Builder()
+                    .setLegacyStreamType(stream)
+                    .build()
+
+            val audioFormat = AudioFormat.Builder()
+                    .setSampleRate(sampleRateInHz)
+                    .setChannelMask(channelConfig)
+                    .setEncoding(dataFormat)
+                    .build()
+
+            AudioTrack.Builder()
+                    .setAudioAttributes(audioAttributes)
+                    .setAudioFormat(audioFormat)
+                    .setBufferSizeInBytes(bufferSize)
+                    .setTransferMode(AudioTrack.MODE_STREAM)
+                    .build()
+        } else {
+            @Suppress("DEPRECATION")
+            AudioTrack(stream, sampleRateInHz, channelConfig, dataFormat, bufferSize, AudioTrack.MODE_STREAM)
         }
-        // AppLog.d("AudioTrack written: $written, requested: $size, playState: ${audioTrack.playState}, playbackHeadPosition: ${audioTrack.playbackHeadPosition}, bufferSizeInFrames: ${audioTrack.bufferSizeInFrames}")
-        return written
     }
 
-    fun stop() {
+    // This method is called by the transport thread. It should be fast and non-blocking.
+    fun write(buffer: ByteArray, offset: Int, size: Int) {
+        if (!isRunning) return
+
+        AppLog.d("AudioTrackWrapper: write - adding %d bytes to queue, current queue size: %d, ts=%d", size, dataQueue.size, SystemClock.elapsedRealtime())
+
+        // We need to copy the relevant part of the buffer to a new array,
+        // as the original buffer might be reused by the transport layer.
+        val chunk = buffer.copyOfRange(offset, offset + size)
+        
+        // offer() is non-blocking. If the queue is full (which it shouldn't be with default capacity),
+        // it returns false. We can log this if it happens.
+        if (!dataQueue.offer(chunk)) {
+            AppLog.w("Audio data queue is full. Dropping audio data.")
+        }
+    }
+
+    fun stopPlayback() {
+        isRunning = false
+        // Interrupt the thread in case it's blocked on dataQueue.take()
+        this.interrupt()
+    }
+
+    private fun cleanup() {
         if (audioTrack.playState == AudioTrack.PLAYSTATE_PLAYING) {
-            audioTrack.pause()
-        }
-        val toRelease = audioTrack
-        // AudioTrack.release can take some time, so we call it on a background thread.
-        object : Thread() {
-            override fun run() {
-                Process.setThreadPriority(Process.THREAD_PRIORITY_AUDIO)
-                toRelease.flush()
-                toRelease.release()
+            try {
+                audioTrack.pause()
+                audioTrack.flush()
+            } catch (e: IllegalStateException) {
+                AppLog.e("Error during audio track cleanup", e)
             }
-        }.start()
-    }
-
-    private object AudioBuffer {
-        /**
-         * A minimum length for the [android.media.AudioTrack] buffer, in microseconds.
-         */
-        private val MIN_BUFFER_DURATION_US: Long = 500000
-        /**
-         * A multiplication factor to apply to the minimum buffer size requested by the underlying
-         * [android.media.AudioTrack].
-         */
-        private val BUFFER_MULTIPLICATION_FACTOR = 8
-        /**
-         * A maximum length for the [android.media.AudioTrack] buffer, in microseconds.
-         */
-        private val MAX_BUFFER_DURATION_US: Long = 1500000
-
-        /**
-         * The number of microseconds in one second.
-         */
-        private val MICROS_PER_SECOND = 1000000L
-
-        internal fun getSize(sampleRate: Int, channelConfig: Int, audioFormat: Int, pcmFrameSize: Int): Int {
-            val minBufferSize = android.media.AudioTrack.getMinBufferSize(sampleRate, channelConfig, audioFormat)
-            val multipliedBufferSize = minBufferSize * BUFFER_MULTIPLICATION_FACTOR
-            val minAppBufferSize = durationUsToFrames(MIN_BUFFER_DURATION_US, sampleRate) * pcmFrameSize
-            val maxAppBufferSize = Math.max(minBufferSize,
-                    durationUsToFrames(MAX_BUFFER_DURATION_US, sampleRate) * pcmFrameSize)
-            return if (multipliedBufferSize < minAppBufferSize)
-                minAppBufferSize
-            else if (multipliedBufferSize > maxAppBufferSize)
-                maxAppBufferSize
-            else
-                multipliedBufferSize
         }
-
-        private fun durationUsToFrames(durationUs: Long, sampleRate: Int): Int {
-            return (durationUs * sampleRate / MICROS_PER_SECOND).toInt()
+        // release() can be slow, but it's essential.
+        try {
+            audioTrack.release()
+        } catch (e: Exception) {
+            AppLog.e("Error releasing audio track", e)
         }
     }
 }
