@@ -10,7 +10,7 @@ import android.net.NetworkRequest
 import android.os.Build
 import android.os.Bundle
 import android.view.KeyEvent
-import android.widget.ImageButton
+import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
@@ -22,6 +22,9 @@ import com.andrerinas.headunitrevived.R
 import com.andrerinas.headunitrevived.aap.AapProjectionActivity
 import com.andrerinas.headunitrevived.utils.AppLog
 import com.andrerinas.headunitrevived.utils.toInetAddress
+import android.view.View // Added import
+import android.widget.FrameLayout
+import android.widget.LinearLayout
 import java.net.Inet4Address
 
 class MainActivity : FragmentActivity() {
@@ -30,11 +33,15 @@ class MainActivity : FragmentActivity() {
     var keyListener: KeyListener? = null
     private val viewModel: MainViewModel by viewModels()
 
-    private lateinit var video_button: ImageButton
-    private lateinit var usb: ImageButton
-    private lateinit var settings: ImageButton
-    private lateinit var wifi: ImageButton
+    private lateinit var video_button: Button
+    private lateinit var usb: Button
+    private lateinit var settings: Button
+    private lateinit var wifi: Button
     private lateinit var ipView: TextView
+    private lateinit var backButton: Button
+    private lateinit var mainButtonsContainer: FrameLayout
+    private lateinit var mainContentFrame: FrameLayout
+    private lateinit var headerContainer: LinearLayout // Added headerContainer declaration
 
     private var networkCallback: ConnectivityManager.NetworkCallback? = null // Made nullable
 
@@ -49,9 +56,15 @@ class MainActivity : FragmentActivity() {
 
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                if (System.currentTimeMillis() - lastBackPressTime < 2000) {
+                AppLog.d("MainActivity: handleOnBackPressed - backStackEntryCount: ${supportFragmentManager.backStackEntryCount}")
+                if (supportFragmentManager.backStackEntryCount > 0) {
+                    AppLog.d("MainActivity: handleOnBackPressed - popping back stack")
+                    supportFragmentManager.popBackStack()
+                } else if (System.currentTimeMillis() - lastBackPressTime < 2000) {
+                    AppLog.d("MainActivity: handleOnBackPressed - finishing activity")
                     finish()
                 } else {
+                    AppLog.d("MainActivity: handleOnBackPressed - showing exit toast")
                     lastBackPressTime = System.currentTimeMillis()
                     Toast.makeText(this@MainActivity, R.string.press_back_again_to_exit, Toast.LENGTH_SHORT).show()
                 }
@@ -59,10 +72,20 @@ class MainActivity : FragmentActivity() {
         })
 
         video_button = findViewById(R.id.video_button)
-        usb = findViewById(R.id.usb)
-        settings = findViewById(R.id.settings)
-        wifi = findViewById(R.id.wifi)
+        usb = findViewById(R.id.usb_button)
+        settings = findViewById(R.id.settings_button)
+        wifi = findViewById(R.id.wifi_button)
         ipView = findViewById(R.id.ip_address)
+        backButton = findViewById(R.id.back_button)
+        mainButtonsContainer = findViewById(R.id.main_buttons_container)
+        mainContentFrame = findViewById(R.id.main_content)
+        headerContainer = findViewById(R.id.header_container) // Initialized headerContainer
+
+        backButton.setOnClickListener {
+            if (supportFragmentManager.backStackEntryCount > 0) {
+                supportFragmentManager.popBackStack()
+            }
+        }
 
         // Initialize networkCallback conditionally
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -91,6 +114,7 @@ class MainActivity : FragmentActivity() {
             supportFragmentManager
                 .beginTransaction()
                 .replace(R.id.main_content, UsbListFragment())
+                .addToBackStack(null) // Added to back stack
                 .commit()
         }
 
@@ -98,6 +122,7 @@ class MainActivity : FragmentActivity() {
             supportFragmentManager
                 .beginTransaction()
                 .replace(R.id.main_content, SettingsFragment())
+                .addToBackStack(null) // Added to back stack
                 .commit()
         }
 
@@ -105,6 +130,7 @@ class MainActivity : FragmentActivity() {
             supportFragmentManager
                 .beginTransaction()
                 .replace(R.id.main_content, NetworkListFragment())
+                .addToBackStack(null) // Added to back stack
                 .commit()
         }
 
@@ -123,6 +149,19 @@ class MainActivity : FragmentActivity() {
                 .replace(R.id.main_content, HomeFragment())
                 .commit()
         }
+        supportFragmentManager.addOnBackStackChangedListener {
+            AppLog.d("MainActivity: onBackStackChanged - backStackEntryCount: ${supportFragmentManager.backStackEntryCount}")
+            updateBackButtonVisibility()
+        }
+        updateBackButtonVisibility() // Initial check
+    }
+
+    private fun updateBackButtonVisibility() {
+        val isFragmentOnStack = supportFragmentManager.backStackEntryCount > 0
+        backButton.visibility = if (isFragmentOnStack) View.VISIBLE else View.GONE
+        ipView.visibility = if (isFragmentOnStack) View.GONE else View.VISIBLE // IP visible only on main screen
+        mainButtonsContainer.visibility = if (isFragmentOnStack) View.GONE else View.VISIBLE
+        mainContentFrame.visibility = if (isFragmentOnStack) View.VISIBLE else View.GONE
     }
 
     override fun onResume() {
@@ -172,13 +211,19 @@ class MainActivity : FragmentActivity() {
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
         AppLog.i("onKeyDown: %d", keyCode)
-
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            // Let the system handle the back button, which will trigger onBackPressedDispatcher
+            return super.onKeyDown(keyCode, event)
+        }
         return keyListener?.onKeyEvent(event) ?: super.onKeyDown(keyCode, event)
     }
 
     override fun onKeyUp(keyCode: Int, event: KeyEvent): Boolean {
         AppLog.i("onKeyUp: %d", keyCode)
-
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            // Let the system handle the back button, which will trigger onBackPressedDispatcher
+            return super.onKeyUp(keyCode, event)
+        }
         return keyListener?.onKeyEvent(event) ?: super.onKeyUp(keyCode, event)
     }
 

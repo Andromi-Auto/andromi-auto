@@ -197,7 +197,7 @@ class NetworkListFragment : Fragment() {
             if (currentAddress.isNotEmpty()) {
                 addressList.add(currentAddress)
             }
-            addressList.addAll(addrs)
+            addressList.addAll(addrs.filterNotNull()) // Filter out any nulls
             notifyDataSetChanged()
         }
 
