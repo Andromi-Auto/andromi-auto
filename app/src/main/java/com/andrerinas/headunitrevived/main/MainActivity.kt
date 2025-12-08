@@ -24,6 +24,7 @@ import com.andrerinas.headunitrevived.utils.AppLog
 import com.andrerinas.headunitrevived.utils.toInetAddress
 import android.view.View // Added import
 import android.widget.FrameLayout
+import android.widget.LinearLayout
 import java.net.Inet4Address
 
 class MainActivity : FragmentActivity() {
@@ -37,9 +38,10 @@ class MainActivity : FragmentActivity() {
     private lateinit var settings: Button
     private lateinit var wifi: Button
     private lateinit var ipView: TextView
-    private lateinit var backButton: Button // Added backButton declaration
-    private lateinit var mainButtonsContainer: FrameLayout // Added mainButtonsContainer declaration
-    private lateinit var mainContentFrame: FrameLayout // Added mainContentFrame declaration
+    private lateinit var backButton: Button
+    private lateinit var mainButtonsContainer: FrameLayout
+    private lateinit var mainContentFrame: FrameLayout
+    private lateinit var headerContainer: LinearLayout // Added headerContainer declaration
 
     private var networkCallback: ConnectivityManager.NetworkCallback? = null // Made nullable
 
@@ -75,8 +77,9 @@ class MainActivity : FragmentActivity() {
         wifi = findViewById(R.id.wifi_button)
         ipView = findViewById(R.id.ip_address)
         backButton = findViewById(R.id.back_button)
-        mainButtonsContainer = findViewById(R.id.main_buttons_container) // Initialized mainButtonsContainer
-        mainContentFrame = findViewById(R.id.main_content) // Initialized mainContentFrame
+        mainButtonsContainer = findViewById(R.id.main_buttons_container)
+        mainContentFrame = findViewById(R.id.main_content)
+        headerContainer = findViewById(R.id.header_container) // Initialized headerContainer
 
         backButton.setOnClickListener {
             if (supportFragmentManager.backStackEntryCount > 0) {
@@ -156,6 +159,7 @@ class MainActivity : FragmentActivity() {
     private fun updateBackButtonVisibility() {
         val isFragmentOnStack = supportFragmentManager.backStackEntryCount > 0
         backButton.visibility = if (isFragmentOnStack) View.VISIBLE else View.GONE
+        ipView.visibility = if (isFragmentOnStack) View.GONE else View.VISIBLE // IP visible only on main screen
         mainButtonsContainer.visibility = if (isFragmentOnStack) View.GONE else View.VISIBLE
         mainContentFrame.visibility = if (isFragmentOnStack) View.VISIBLE else View.GONE
     }

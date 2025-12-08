@@ -6,11 +6,50 @@
     android:layout_height="match_parent"
     android:background="@drawable/bg">
 
+    <!-- Header Area -->
+    <LinearLayout
+        android:id="@+id/header_container"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="@color/primary_dark"
+        android:elevation="4dp">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/back_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="@string/back"
+            android:backgroundTint="@color/material_grey_700"
+            android:textColor="@color/text_primary"
+            app:icon="@drawable/ic_chevron_left_white"
+            app:iconTint="#ffffff"
+            app:iconSize="24dp"
+            app:cornerRadius="8dp"
+            app:iconGravity="textStart"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/ip_address"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center_horizontal"
+            android:layout_marginEnd="8dp"
+            android:textColor="@color/text_primary"
+            android:textSize="12sp"
+            android:singleLine="true"
+            tools:text="192.168.1.1" />
+    </LinearLayout>
+
     <FrameLayout
         android:id="@+id/main_buttons_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="visible"> <!-- Default to visible -->
+        android:layout_marginTop="?attr/actionBarSize"
+        android:visibility="visible">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/main_buttons_layout"
@@ -39,8 +78,8 @@
                 app:iconTint="#ffffff"
                 app:iconSize="72dp"
                 app:iconPadding="0dp"
-                android:paddingTop="28dp"
-                android:paddingBottom="28dp" />
+                android:paddingTop="0dp"
+                android:paddingBottom="0dp" />
             <TextView
                 android:id="@+id/video_text"
                 android:layout_width="0dp"
@@ -74,8 +113,9 @@
                 app:iconTint="#ffffff"
                 app:iconSize="72dp"
                 app:iconPadding="0dp"
-                android:paddingTop="28dp"
-                android:paddingBottom="28dp" />
+                android:paddingTop="0dp"
+                android:paddingBottom="0dp"
+                app:cornerRadius="16dp" />
             <TextView
                 android:id="@+id/usb_text"
                 android:layout_width="0dp"
@@ -109,8 +149,8 @@
                 app:iconTint="#ffffff"
                 app:iconSize="72dp"
                 app:iconPadding="0dp"
-                android:paddingTop="28dp"
-                android:paddingBottom="28dp"
+                android:paddingTop="0dp"
+                android:paddingBottom="0dp"
                 app:cornerRadius="16dp" />
             <TextView
                 android:id="@+id/wifi_text"
@@ -145,8 +185,8 @@
                 app:iconTint="#ffffff"
                 app:iconSize="72dp"
                 app:iconPadding="0dp"
-                android:paddingTop="28dp"
-                android:paddingBottom="28dp"
+                android:paddingTop="0dp"
+                android:paddingBottom="0dp"
                 app:cornerRadius="16dp" />
             <TextView
                 android:id="@+id/settings_text"
@@ -169,36 +209,8 @@
         android:id="@+id/main_content"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_gravity="top|center"
-        android:layout_marginTop="4dp"
-        android:layout_marginLeft="88dp"
-        android:layout_marginRight="88dp"
-        android:layout_marginBottom="68dp"
+        android:layout_marginTop="?attr/actionBarSize"
         android:padding="8dp"
-        android:visibility="gone" /> <!-- Default to gone -->
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/back_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top|left"
-        android:layout_margin="16dp"
-        android:text="@string/back"
-        android:drawableLeft="@drawable/ic_chevron_left_white"
-        android:backgroundTint="@color/material_grey_700"
-        android:textColor="@color/text_primary"
-        app:cornerRadius="8dp"
         android:visibility="gone" />
-
-    <TextView
-        android:id="@+id/ip_address"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top|center_horizontal"
-        android:layout_marginTop="8dp"
-        android:textColor="@color/text_primary"
-        android:textSize="12sp"
-        android:singleLine="true"
-        tools:text="192.168.1.1" />
 
 </FrameLayout>
