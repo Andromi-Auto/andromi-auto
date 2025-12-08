@@ -10,6 +10,11 @@ This project is a revived version of the original headunit project by the great 
 https://github.com/mikereidis/headunit
 
 ## Changelog
+### v1.1.0 - New Design
+- Changed the basic design to a modern look and bigger buttons
+- Hopefully fixed audio-stutters with audio thread and some logs
+- removed some deprecations
+
 ### v1.0.0 - Initial Revived Release
 - Updated dependencies to latest versions.
 - Improved compatibility with newer Android versions.
