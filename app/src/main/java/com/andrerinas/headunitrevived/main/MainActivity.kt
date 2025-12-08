@@ -23,6 +23,7 @@ import com.andrerinas.headunitrevived.aap.AapProjectionActivity
 import com.andrerinas.headunitrevived.utils.AppLog
 import com.andrerinas.headunitrevived.utils.toInetAddress
 import android.view.View // Added import
+import android.widget.FrameLayout
 import java.net.Inet4Address
 
 class MainActivity : FragmentActivity() {
@@ -37,6 +38,8 @@ class MainActivity : FragmentActivity() {
     private lateinit var wifi: Button
     private lateinit var ipView: TextView
     private lateinit var backButton: Button // Added backButton declaration
+    private lateinit var mainButtonsContainer: FrameLayout // Added mainButtonsContainer declaration
+    private lateinit var mainContentFrame: FrameLayout // Added mainContentFrame declaration
 
     private var networkCallback: ConnectivityManager.NetworkCallback? = null // Made nullable
 
@@ -71,7 +74,9 @@ class MainActivity : FragmentActivity() {
         settings = findViewById(R.id.settings_button)
         wifi = findViewById(R.id.wifi_button)
         ipView = findViewById(R.id.ip_address)
-        backButton = findViewById(R.id.back_button) // Initialized backButton
+        backButton = findViewById(R.id.back_button)
+        mainButtonsContainer = findViewById(R.id.main_buttons_container) // Initialized mainButtonsContainer
+        mainContentFrame = findViewById(R.id.main_content) // Initialized mainContentFrame
 
         backButton.setOnClickListener {
             if (supportFragmentManager.backStackEntryCount > 0) {
@@ -149,7 +154,10 @@ class MainActivity : FragmentActivity() {
     }
 
     private fun updateBackButtonVisibility() {
-        backButton.visibility = if (supportFragmentManager.backStackEntryCount > 0) View.VISIBLE else View.GONE
+        val isFragmentOnStack = supportFragmentManager.backStackEntryCount > 0
+        backButton.visibility = if (isFragmentOnStack) View.VISIBLE else View.GONE
+        mainButtonsContainer.visibility = if (isFragmentOnStack) View.GONE else View.VISIBLE
+        mainContentFrame.visibility = if (isFragmentOnStack) View.VISIBLE else View.GONE
     }
 
     override fun onResume() {
