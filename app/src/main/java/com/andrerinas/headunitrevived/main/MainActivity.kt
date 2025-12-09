@@ -10,7 +10,10 @@ import android.net.NetworkRequest
 import android.os.Build
 import android.os.Bundle
 import android.view.KeyEvent
+import android.view.View
 import android.widget.Button
+import android.widget.FrameLayout
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
@@ -22,9 +25,6 @@ import com.andrerinas.headunitrevived.R
 import com.andrerinas.headunitrevived.aap.AapProjectionActivity
 import com.andrerinas.headunitrevived.utils.AppLog
 import com.andrerinas.headunitrevived.utils.toInetAddress
-import android.view.View 
-import android.widget.FrameLayout
-import android.widget.LinearLayout
 import java.net.Inet4Address
 
 class MainActivity : FragmentActivity() {

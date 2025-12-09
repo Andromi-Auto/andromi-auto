@@ -4,33 +4,31 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.hardware.usb.UsbManager
-import android.os.Build 
+import android.os.Build
 import android.os.Bundle
 import android.text.Html
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.Toast
 import android.widget.TextView
+import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.andrerinas.headunitrevived.App
 import com.andrerinas.headunitrevived.R
+import com.andrerinas.headunitrevived.aap.AapProjectionActivity
 import com.andrerinas.headunitrevived.aap.AapService
 import com.andrerinas.headunitrevived.app.UsbAttachedActivity
 import com.andrerinas.headunitrevived.connection.UsbAccessoryMode
-
-import com.andrerinas.headunitrevived.App
 import com.andrerinas.headunitrevived.connection.UsbDeviceCompat
 import com.andrerinas.headunitrevived.utils.Settings
-import androidx.core.content.ContextCompat
-import com.andrerinas.headunitrevived.aap.AapProjectionActivity
-
-import android.view.View.GONE
-import android.view.View.VISIBLE
 
 /**
  * @author algavris
@@ -81,12 +79,12 @@ class UsbListFragment : Fragment() {
         settings.commit()
     }
 
-    private class DeviceViewHolder internal constructor(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        internal val allowButton = itemView.findViewById<Button>(android.R.id.button1)
-        internal val startButton = itemView.findViewById<Button>(android.R.id.button2)
+    private class DeviceViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val allowButton = itemView.findViewById<Button>(android.R.id.button1)
+        val startButton = itemView.findViewById<Button>(android.R.id.button2)
     }
 
-    private class DeviceAdapter internal constructor(private val mContext: Context, private val mSettings: Settings) : RecyclerView.Adapter<DeviceViewHolder>(), View.OnClickListener {
+    private class DeviceAdapter(private val mContext: Context, private val mSettings: Settings) : RecyclerView.Adapter<DeviceViewHolder>(), View.OnClickListener {
         private var allowedDevices: MutableSet<String> = mutableSetOf()
         private var deviceList: List<UsbDeviceCompat> = listOf()
 
@@ -165,7 +163,7 @@ class UsbListFragment : Fragment() {
             }
         }
 
-        internal fun setData(deviceList: List<UsbDeviceCompat>, allowedDevices: Set<String>) {
+        fun setData(deviceList: List<UsbDeviceCompat>, allowedDevices: Set<String>) {
             this.allowedDevices = allowedDevices.toMutableSet()
             this.deviceList = deviceList
             notifyDataSetChanged()

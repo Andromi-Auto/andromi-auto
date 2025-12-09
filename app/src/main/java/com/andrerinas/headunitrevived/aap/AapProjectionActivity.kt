@@ -8,18 +8,17 @@ import android.os.SystemClock
 import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.SurfaceHolder
-import android.view.SurfaceView 
-import com.andrerinas.headunitrevived.R
-
+import android.view.SurfaceView
 import com.andrerinas.headunitrevived.App
-import com.andrerinas.headunitrevived.aap.protocol.Screen
+import com.andrerinas.headunitrevived.R
 import com.andrerinas.headunitrevived.aap.protocol.messages.TouchEvent
 import com.andrerinas.headunitrevived.aap.protocol.messages.VideoFocusEvent
 import com.andrerinas.headunitrevived.app.SurfaceActivity
+import com.andrerinas.headunitrevived.contract.KeyIntent
 import com.andrerinas.headunitrevived.decoder.VideoDecoder
 import com.andrerinas.headunitrevived.utils.AppLog
 import com.andrerinas.headunitrevived.utils.IntentFilters
-import com.andrerinas.headunitrevived.contract.KeyIntent
+
 // Removed import kotlinx.android.synthetic.main.activity_headunit.*
 
 class AapProjectionActivity : SurfaceActivity(), SurfaceHolder.Callback {

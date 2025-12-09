@@ -1,16 +1,16 @@
 package com.andrerinas.headunitrevived.main
 
+import android.app.PendingIntent
 import android.content.Context
 import android.graphics.BitmapFactory
-import androidx.core.app.NotificationCompat
-import com.andrerinas.headunitrevived.R
-import android.app.PendingIntent
+import android.os.Build
 import android.view.KeyEvent
+import androidx.core.app.NotificationCompat
 import com.andrerinas.headunitrevived.App
+import com.andrerinas.headunitrevived.R
 import com.andrerinas.headunitrevived.aap.AapProjectionActivity
 import com.andrerinas.headunitrevived.aap.protocol.proto.MediaPlayback
 import com.andrerinas.headunitrevived.contract.MediaKeyIntent
-import android.os.Build 
 
 /**
  * @author algavris
