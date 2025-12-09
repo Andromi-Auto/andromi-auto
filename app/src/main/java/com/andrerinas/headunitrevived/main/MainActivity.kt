@@ -42,6 +42,7 @@ class MainActivity : FragmentActivity() {
     private lateinit var mainButtonsContainer: FrameLayout
     private lateinit var mainContentFrame: FrameLayout
     private lateinit var headerContainer: LinearLayout // Added headerContainer declaration
+    private lateinit var exitButton: Button // Added exitButton declaration
 
     private var networkCallback: ConnectivityManager.NetworkCallback? = null // Made nullable
 
@@ -80,6 +81,11 @@ class MainActivity : FragmentActivity() {
         mainButtonsContainer = findViewById(R.id.main_buttons_container)
         mainContentFrame = findViewById(R.id.main_content)
         headerContainer = findViewById(R.id.header_container) // Initialized headerContainer
+        exitButton = findViewById(R.id.exit_button) // Initialized exitButton
+
+        exitButton.setOnClickListener {
+            finishAffinity() // Close the app
+        }
 
         backButton.setOnClickListener {
             if (supportFragmentManager.backStackEntryCount > 0) {
