@@ -114,8 +114,7 @@
                 app:iconSize="72dp"
                 app:iconPadding="0dp"
                 android:paddingTop="0dp"
-                android:paddingBottom="0dp"
-                app:cornerRadius="16dp" />
+                android:paddingBottom="0dp" />
             <TextView
                 android:id="@+id/usb_text"
                 android:layout_width="0dp"
@@ -150,8 +149,7 @@
                 app:iconSize="72dp"
                 app:iconPadding="0dp"
                 android:paddingTop="0dp"
-                android:paddingBottom="0dp"
-                app:cornerRadius="16dp" />
+                android:paddingBottom="0dp" />
             <TextView
                 android:id="@+id/wifi_text"
                 android:layout_width="0dp"
@@ -186,8 +184,7 @@
                 app:iconSize="72dp"
                 app:iconPadding="0dp"
                 android:paddingTop="0dp"
-                android:paddingBottom="0dp"
-                app:cornerRadius="16dp" />
+                android:paddingBottom="0dp" />
             <TextView
                 android:id="@+id/settings_text"
                 android:layout_width="0dp"
