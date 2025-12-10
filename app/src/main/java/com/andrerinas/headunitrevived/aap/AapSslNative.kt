@@ -13,8 +13,8 @@ internal class AapSslNative : AapSsl {
 
     companion object {
         init {
-            System.loadLibrary("crypto")
-            System.loadLibrary("ssl")
+            System.loadLibrary("crypto_1_1")
+            System.loadLibrary("ssl_1_1")
             System.loadLibrary("hu_jni")
         }
     }

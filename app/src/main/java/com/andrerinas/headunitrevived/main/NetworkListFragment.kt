@@ -83,7 +83,6 @@ class NetworkListFragment : Fragment() {
             val linkProperties = connectivityManager.getLinkProperties(activeNetwork)
             ipAddress = linkProperties?.linkAddresses?.find { it.address is Inet4Address }?.address
         } else { // API 19, 20, 21, 22
-            @Suppress("DEPRECATION")
             val wifiManager = App.provide(requireContext()).wifiManager
             @Suppress("DEPRECATION")
             val currentIp = wifiManager.connectionInfo.ipAddress
@@ -156,13 +155,12 @@ class NetworkListFragment : Fragment() {
             if (v.id == android.R.id.button2) {
                 if (v.getTag(R.integer.key_position) == 0) {
                     var ip: InetAddress? = null
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { // API 23+ (for getActiveNetwork)
                         val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
                         val activeNetwork = connectivityManager.activeNetwork
                         val linkProperties = connectivityManager.getLinkProperties(activeNetwork)
                         ip = linkProperties?.linkAddresses?.find { it.address is Inet4Address }?.address
-                    } else {
-                        @Suppress("DEPRECATION")
+                    } else { // API 19, 20, 21, 22
                         val wifiManager = App.provide(context).wifiManager
                         @Suppress("DEPRECATION")
                         val currentIp = wifiManager.connectionInfo.ipAddress

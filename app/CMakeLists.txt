@@ -22,13 +22,13 @@ message("OPENSSL_INCLUDE_DIR ${OPENSSL_INCLUDE_DIR}")
 link_directories(${OPENSSL_LIBRARIES_DIR})
 
 # Changed to link against shared libraries (.so)
-add_library(libcrypto SHARED IMPORTED)
-set_target_properties(libcrypto PROPERTIES IMPORTED_LOCATION
-        ${OPENSSL_LIBRARIES_DIR}/libcrypto.so)
+add_library(libcrypto_1_1 SHARED IMPORTED)
+set_target_properties(libcrypto_1_1 PROPERTIES IMPORTED_LOCATION
+        ${OPENSSL_LIBRARIES_DIR}/libcrypto_1_1.so)
 
-add_library(libssl SHARED IMPORTED)
-set_target_properties(libssl PROPERTIES IMPORTED_LOCATION
-        ${OPENSSL_LIBRARIES_DIR}/libssl.so)
+add_library(libssl_1_1 SHARED IMPORTED)
+set_target_properties(libssl_1_1 PROPERTIES IMPORTED_LOCATION
+        ${OPENSSL_LIBRARIES_DIR}/libssl_1_1.so)
 
 add_library(hu_jni SHARED
         src/main/jni/hu_uti.c
@@ -37,7 +37,7 @@ add_library(hu_jni SHARED
 
 target_include_directories(hu_jni PUBLIC ${OPENSSL_INCLUDE_DIR})
 
-target_link_libraries(hu_jni log libssl libcrypto -lc) # Removed -landroid_support
+target_link_libraries(hu_jni log libssl_1_1 libcrypto_1_1 -lc) # Removed -landroid_support
 
 #target_link_libraries(hu_jni log)
 #target_link_libraries(hu_jni ${OPENSSL_LIBRARIES})\
