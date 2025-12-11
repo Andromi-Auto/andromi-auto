@@ -13,6 +13,7 @@ import com.andrerinas.headunitrevived.aap.protocol.proto.Sensors
 import com.andrerinas.headunitrevived.utils.AppLog
 import com.andrerinas.headunitrevived.utils.Settings
 import com.google.protobuf.Message
+import kotlin.math.roundToInt
 
 /**
  * @author alex gavrishev
@@ -30,12 +31,18 @@ class ServiceDiscoveryResponse(private val context: Context)
             val densityDpi = displayMetrics.densityDpi
             AppLog.i("ServiceDiscoveryResponse: Actual width=$width, height=$height, densityDpi=$densityDpi")
 
+
+            val dpiHeight = (displayMetrics.heightPixels / displayMetrics.density).roundToInt()
+            val dpiWidth  = (displayMetrics.widthPixels / displayMetrics.density).roundToInt()
+
+            AppLog.i("ServiceDiscoveryResponse: DPI width=$width, height=$height")
+
             // Lie to the phone for certain non-standard resolutions to improve compatibility.
-            if (width == 1280 && height == 736) {
-                AppLog.i("Overriding reported resolution to 1280x720 for compatibility.")
-                width = 1280
-                height = 720
-            }
+//            if (width == 1280 && height == 736) {
+//                AppLog.i("Overriding reported resolution to 1280x720 for compatibility.")
+//                width = 1280
+//                height = 720
+//            }
 
             val settings = App.provide(context).settings // Get settings from App component
             val resolution = Settings.Resolution.fromId(settings.resolutionId)!!
