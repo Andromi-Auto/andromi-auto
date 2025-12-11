@@ -19,7 +19,7 @@ class Screen(val width: Int, val height: Int)
                     Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType._800x480_VALUE -> _480
                     Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType._1280x720_VALUE -> _720
                     Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType._1920x1080_VALUE -> _1080
-                    else -> _480
+                    else -> _720
                 }
         }
 

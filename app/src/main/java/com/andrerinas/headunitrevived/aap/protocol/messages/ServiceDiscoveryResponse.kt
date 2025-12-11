@@ -38,7 +38,13 @@ class ServiceDiscoveryResponse(private val context: Context)
             }
 
             val settings = App.provide(context).settings // Get settings from App component
-            val videoCodecResolutionType = Screen.forResolution(width, height) // Determine resolution based on actual device size
+            val resolution = Settings.Resolution.fromId(settings.resolutionId)!!
+
+            val videoCodecResolutionType = if (resolution.id == 0) {
+                Screen.forResolution(width, height)
+            } else {
+                resolution.codec!!
+            }
             val screen = Screen.forResolution(videoCodecResolutionType)
 
             val services = mutableListOf<Control.Service>()

@@ -15,4 +15,18 @@
     <style name="SplashTheme" parent="AppTheme">
         <item name="android:windowBackground">@drawable/splash_background</item>
     </style>
+
+    <style name="DarkAlertDialog" parent="Theme.AppCompat.Dialog.Alert">
+        <item name="android:background">@color/primary_dark</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textColorPrimary">@color/text_primary</item>
+        <item name="android:textColorSecondary">@color/text_second</item>
+        <item name="colorAccent">@color/material_orange_700</item>
+        <item name="android:windowTitleStyle">@style/DialogWindowTitle</item>
+    </style>
+
+    <style name="DialogWindowTitle" parent="android:Widget.TextView">
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textSize">22sp</item>
+    </style>
 </resources>

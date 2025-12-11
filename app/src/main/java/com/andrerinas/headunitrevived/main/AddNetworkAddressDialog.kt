@@ -14,7 +14,7 @@ import java.net.InetAddress
 class AddNetworkAddressDialog : DialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): android.app.Dialog {
-        val builder = AlertDialog.Builder(activity)
+        val builder = AlertDialog.Builder(activity, R.style.DarkAlertDialog)
         val content = LayoutInflater.from(activity)
                 .inflate(R.layout.fragment_add_network_address, null, false)
 

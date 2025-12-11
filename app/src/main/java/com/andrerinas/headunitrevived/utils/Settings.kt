@@ -55,12 +55,9 @@ class Settings(context: Context) {
                 .apply()
         }
 
-    var resolution: Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType
-        get() {
-            val number = prefs.getInt("resolution", Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType._800x480_VALUE)
-            return Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType.forNumber(number)
-        }
-        set(value) { prefs.edit().putInt("resolution", value.number).apply() }
+    var resolutionId: Int
+        get() = prefs.getInt("resolutionId", 0)
+        set(value) = prefs.edit().putInt("resolutionId", value).apply()
 
     var micSampleRate: Int
         get() = prefs.getInt("mic-sample-rate", 8000)
@@ -108,6 +105,22 @@ class Settings(context: Context) {
     @SuppressLint("ApplySharedPref")
     fun commit() {
         prefs.edit().commit()
+    }
+
+    enum class Resolution(val id: Int, val resName: String, val width: Int, val height: Int, val codec: Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType?) {
+        AUTO(0, "Auto",0, 0, null),
+        _800x480(1, "800x480", 800, 480, Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType._800x480),
+        _1280x720(2, "1280x720", 1280, 720, Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType._1280x720),
+        _1920x1080(3, "1920x1080", 1920, 1080, Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType._1920x1080);
+
+        companion object {
+            private val map = values().associateBy(Resolution::id)
+            fun fromId(id: Int) = map[id]
+            val allRes: Array<String>
+                get() = values().map { it.resName }.toTypedArray()
+            val allResolutions: Array<Resolution>
+                get() = values()
+        }
     }
 
     enum class NightMode(val value: Int) {

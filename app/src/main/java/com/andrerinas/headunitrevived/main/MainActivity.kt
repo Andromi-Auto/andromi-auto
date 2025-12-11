@@ -20,6 +20,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.FragmentActivity
+import androidx.constraintlayout.widget.ConstraintLayout
 import com.andrerinas.headunitrevived.App
 import com.andrerinas.headunitrevived.R
 import com.andrerinas.headunitrevived.aap.AapProjectionActivity
@@ -39,7 +40,7 @@ class MainActivity : FragmentActivity() {
     private lateinit var wifi: Button
     private lateinit var ipView: TextView
     private lateinit var backButton: Button
-    private lateinit var mainButtonsContainer: FrameLayout
+    private lateinit var mainButtonsContainer: ConstraintLayout
     private lateinit var mainContentFrame: FrameLayout
     private lateinit var headerContainer: LinearLayout // Added headerContainer declaration
     private lateinit var exitButton: Button // Added exitButton declaration

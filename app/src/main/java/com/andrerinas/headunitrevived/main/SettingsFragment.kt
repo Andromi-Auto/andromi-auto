@@ -28,6 +28,7 @@ class SettingsFragment : Fragment() {
     private lateinit var nightModeButton: Button
     private lateinit var btAddressButton: Button
     private lateinit var debugModeButton: Button // Added debug mode button
+    private lateinit var resolutionButton: Button
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.fragment_settings, container, false)
@@ -42,6 +43,7 @@ class SettingsFragment : Fragment() {
         nightModeButton = view.findViewById(R.id.nightModeButton)
         btAddressButton = view.findViewById(R.id.btAddressButton)
         debugModeButton = view.findViewById(R.id.debugModeButton) // Initialize debug mode button
+        resolutionButton = view.findViewById(R.id.resolutionButton)
 
         keymapButton.setOnClickListener {
             parentFragmentManager.
@@ -112,6 +114,21 @@ class SettingsFragment : Fragment() {
             it.tag = newValue
             settings.debugMode = newValue
             (it as Button).text = getString(R.string.debug_mode, if (newValue) getString(R.string.enabled) else getString(R.string.disabled))
+        }
+
+        val resolution = Settings.Resolution.fromId(settings.resolutionId)!!
+        resolutionButton.text = getString(R.string.resolution, resolution.resName)
+
+        resolutionButton.setOnClickListener {
+            AlertDialog.Builder(activity)
+                .setTitle(R.string.change_resolution)
+                .setSingleChoiceItems(Settings.Resolution.allRes, settings.resolutionId) { dialog, which ->
+                    settings.resolutionId = which
+                    val newResolution = Settings.Resolution.fromId(which)!!
+                    resolutionButton.text = getString(R.string.resolution, newResolution.resName)
+                    dialog.dismiss()
+                }
+                .show()
         }
     }
 }

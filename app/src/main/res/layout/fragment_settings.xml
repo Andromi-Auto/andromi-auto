@@ -51,6 +51,13 @@
         android:text="@string/debug_mode"
         android:background="@drawable/button_selectable_background" />
 
+    <Button
+        android:id="@+id/resolutionButton"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:text="@string/resolution"
+        android:background="@drawable/button_selectable_background" />
+
     </LinearLayout>
 
 </ScrollView>
