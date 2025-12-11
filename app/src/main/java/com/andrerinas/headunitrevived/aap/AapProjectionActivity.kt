@@ -136,11 +136,6 @@ class AapProjectionActivity : SurfaceActivity(), SurfaceHolder.Callback {
         return super.onKeyUp(keyCode, event)
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        AppLog.i("AapProjectionActivity: onDestroy - Quitting AapTransport")
-        App.provide(this).transport.quit()
-    }
 
     private fun onKeyEvent(keyCode: Int, isPress: Boolean) {
         transport.send(keyCode, isPress)

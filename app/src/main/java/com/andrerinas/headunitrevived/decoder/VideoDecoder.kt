@@ -140,7 +140,9 @@ class VideoDecoder {
                 AppLog.i("INFO_OUTPUT_BUFFERS_CHANGED")
                 mInputBuffers = mCodec!!.inputBuffers
             } else if (index == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
-                AppLog.i("INFO_OUTPUT_FORMAT_CHANGED")
+                val outputFormat = mCodec!!.outputFormat
+                AppLog.i("--- DECODER OUTPUT FORMAT CHANGED ---")
+                AppLog.i("New video format: $outputFormat")
             } else if (index == MediaCodec.INFO_TRY_AGAIN_LATER) {
                 break
             } else {

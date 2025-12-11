@@ -14,7 +14,6 @@ import com.andrerinas.headunitrevived.utils.AppLog
 import com.andrerinas.headunitrevived.utils.Settings
 import com.andrerinas.headunitrevived.utils.ScreenSpecProvider
 import com.google.protobuf.Message
-import kotlin.math.roundToInt
 
 /**
  * @author alex gavrishev
