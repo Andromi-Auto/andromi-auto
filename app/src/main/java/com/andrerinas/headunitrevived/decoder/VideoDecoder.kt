@@ -159,7 +159,7 @@ class VideoDecoder {
 
         mHolder = holder
         mWidth = width
-        mHeight = if (height > 1080) 1080 else height
+        mHeight = height
         codec_init()
     }
 

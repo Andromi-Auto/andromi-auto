@@ -12,6 +12,7 @@ import com.andrerinas.headunitrevived.aap.protocol.proto.Media
 import com.andrerinas.headunitrevived.aap.protocol.proto.Sensors
 import com.andrerinas.headunitrevived.utils.AppLog
 import com.andrerinas.headunitrevived.utils.Settings
+import com.andrerinas.headunitrevived.utils.ScreenSpecProvider
 import com.google.protobuf.Message
 import kotlin.math.roundToInt
 
@@ -25,32 +26,13 @@ class ServiceDiscoveryResponse(private val context: Context)
 
     companion object {
         private fun makeProto(context: Context): Message {
-            val displayMetrics = context.resources.displayMetrics
-            var width = displayMetrics.widthPixels
-            var height = displayMetrics.heightPixels
-            val rawDensity = displayMetrics.density
-            val densityDpi = displayMetrics.densityDpi
-            AppLog.i("--- SCREEN NEGOTIATION DIAGNOSTICS ---")
-            AppLog.i("[ServiceDiscoveryResponse] Raw DisplayMetrics: widthPixels=$width, heightPixels=$height, density=$rawDensity, densityDpi=$densityDpi")
+            val settings = App.provide(context).settings
+            val spec = ScreenSpecProvider.getSpec(context)
+            val width = spec.width
+            val height = spec.height
+            val densityDpi = spec.densityDpi
 
-
-            val dpiHeight = (height / rawDensity).roundToInt()
-            val dpiWidth  = (width / rawDensity).roundToInt()
-
-            AppLog.i("[ServiceDiscoveryResponse] Calculated DP values: dpiWidth=$dpiWidth, dpiHeight=$dpiHeight")
-            AppLog.w("[ServiceDiscoveryResponse] CURRENTLY USING raw pixel values for negotiation. Width=$width, Height=$height")
-
-
-            // Lie to the phone for certain non-standard resolutions to improve compatibility.
-//            if (width == 1280 && height == 736) {
-//                AppLog.i("Overriding reported resolution to 1280x720 for compatibility.")
-//                width = 1280
-//                height = 720
-//            }
-
-            val settings = App.provide(context).settings // Get settings from App component
             val resolution = Settings.Resolution.fromId(settings.resolutionId)!!
-
             val videoCodecResolutionType = if (resolution.id == 0) {
                 Screen.forResolution(width, height)
             } else {

@@ -19,11 +19,15 @@ import com.andrerinas.headunitrevived.contract.KeyIntent
 import com.andrerinas.headunitrevived.decoder.VideoDecoder
 import com.andrerinas.headunitrevived.utils.AppLog
 import com.andrerinas.headunitrevived.utils.IntentFilters
+import com.andrerinas.headunitrevived.utils.ScreenSpec
+import com.andrerinas.headunitrevived.utils.ScreenSpecProvider
 
 class AapProjectionActivity : SurfaceActivity(), SurfaceHolder.Callback {
 
     private lateinit var surface: SurfaceView // Added lateinit var for surface
     private val videoDecoder: VideoDecoder by lazy { App.provide(this).videoDecoder }
+    private val screenSpec: ScreenSpec by lazy { ScreenSpecProvider.getSpec(this) }
+
 
     private val disconnectReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -80,10 +84,8 @@ class AapProjectionActivity : SurfaceActivity(), SurfaceHolder.Callback {
         get() = App.provide(this).transport
 
     override fun surfaceCreated(holder: SurfaceHolder) {
-        val width = resources.displayMetrics.widthPixels
-        val height = resources.displayMetrics.heightPixels
-        AppLog.i("[AapProjectionActivity] surfaceCreated. Using displayMetrics: width=$width, height=$height")
-        videoDecoder.onSurfaceHolderAvailable(holder, width, height)
+        AppLog.i("[AapProjectionActivity] surfaceCreated. Configuring decoder with negotiated spec: ${screenSpec.width}x${screenSpec.height}")
+        videoDecoder.onSurfaceHolderAvailable(holder, screenSpec.width, screenSpec.height)
     }
 
     override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
@@ -100,9 +102,9 @@ class AapProjectionActivity : SurfaceActivity(), SurfaceHolder.Callback {
         val action = TouchEvent.motionEventToAction(event) ?: return
         val ts = SystemClock.elapsedRealtime()
 
-        val displayMetrics = resources.displayMetrics
-        val scaleX = displayMetrics.widthPixels.toFloat() / surface.width.toFloat()
-        val scaleY = displayMetrics.heightPixels.toFloat() / surface.height.toFloat()
+        // Scale touch events from the actual surface size to the negotiated screen size.
+        val scaleX = screenSpec.width.toFloat() / surface.width.toFloat()
+        val scaleY = screenSpec.height.toFloat() / surface.height.toFloat()
 
         val pointerData = mutableListOf<Triple<Int, Int, Int>>()
         repeat(event.pointerCount) { pointerIndex ->
@@ -110,9 +112,9 @@ class AapProjectionActivity : SurfaceActivity(), SurfaceHolder.Callback {
             val x = event.getX(pointerIndex) * scaleX
             val y = event.getY(pointerIndex) * scaleY
 
-            // Boundary check against display metrics
-            if (x < 0 || x >= displayMetrics.widthPixels || y < 0 || y >= displayMetrics.heightPixels) {
-                AppLog.i("Touch event out of bounds, skipping.")
+            // Boundary check against the negotiated screen size
+            if (x < 0 || x >= screenSpec.width || y < 0 || y >= screenSpec.height) {
+                AppLog.w("Touch event out of bounds of negotiated screen spec, skipping. x=$x, y=$y, spec=$screenSpec")
                 return
             }
             pointerData.add(Triple(pointerId, x.toInt(), y.toInt()))
