@@ -260,11 +260,15 @@ class AapTransport(
     }
 
     fun send(sensor: SensorEvent): Boolean {
-        return if (startedSensors.contains(sensor.sensorType)) {
+        return if (isAlive && startedSensors.contains(sensor.sensorType)) {
             send(sensor as AapMessage)
             true
         } else {
-            AppLog.e("Sensor " + sensor.sensorType + " is not started yet")
+            if (!isAlive) {
+                AppLog.w("AapTransport not alive, ignoring sensor event for sensor ${sensor.sensorType}")
+            } else {
+                AppLog.e("Sensor " + sensor.sensorType + " is not started yet")
+            }
             false
         }
     }
