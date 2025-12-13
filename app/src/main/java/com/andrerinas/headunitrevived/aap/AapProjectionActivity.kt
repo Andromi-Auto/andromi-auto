@@ -58,24 +58,23 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks {
 
         AppLog.i("HeadUnit for Android Auto (tm) - Copyright 2011-2015 Michael A. Reid. All Rights Reserved...")
 
-        projectionView = if (settings.viewMode == Settings.ViewMode.TEXTURE) {
-            TextureProjectionView(this)
+        val container = findViewById<android.widget.FrameLayout>(R.id.container)
+        if (settings.viewMode == Settings.ViewMode.TEXTURE) {
+            AppLog.i("Using TextureView")
+            val textureView = TextureProjectionView(this)
+            textureView.layoutParams = android.widget.FrameLayout.LayoutParams(
+                android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
+                android.widget.FrameLayout.LayoutParams.MATCH_PARENT
+            )
+            projectionView = textureView
+            container.setBackgroundColor(android.graphics.Color.BLACK)
         } else {
-            ProjectionView(this)
+            AppLog.i("Using SurfaceView")
+            projectionView = ProjectionView(this)
         }
 
         val view = projectionView as android.view.View
-        findViewById<android.widget.FrameLayout>(R.id.container).addView(view)
-
-        if (projectionView is TextureProjectionView) {
-            view.post {
-                val layoutParams = view.layoutParams as android.widget.FrameLayout.LayoutParams
-                val margin = (1080 - 720) / 2
-                layoutParams.topMargin = -margin
-                layoutParams.bottomMargin = -margin
-                view.layoutParams = layoutParams
-            }
-        }
+        container.addView(view)
 
         projectionView.addCallback(this)
 
@@ -106,12 +105,14 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks {
         get() = App.provide(this).transport
 
     override fun onSurfaceCreated(surface: android.view.Surface) {
-        AppLog.i("[AapProjectionActivity] surfaceCreated. Configuring decoder with negotiated spec: ${screenSpec.width}x${screenSpec.height}")
-        videoDecoder.onSurfaceAvailable(surface, screenSpec.width, screenSpec.height)
+        AppLog.i("[AapProjectionActivity] onSurfaceCreated")
+        // Decoder configuration is now in onSurfaceChanged
     }
 
     override fun onSurfaceChanged(surface: android.view.Surface, width: Int, height: Int) {
-        AppLog.i("[AapProjectionActivity] surfaceChanged. Actual surface dimensions: width=$width, height=$height")
+        AppLog.i("[AapProjectionActivity] onSurfaceChanged. Actual surface dimensions: width=$width, height=$height")
+        AppLog.i("[AapProjectionActivity] Configuring decoder with negotiated spec: ${screenSpec.width}x${screenSpec.height}")
+        videoDecoder.onSurfaceAvailable(surface, screenSpec.width, screenSpec.height)
         transport.send(VideoFocusEvent(gain = true, unsolicited = false))
     }
 
