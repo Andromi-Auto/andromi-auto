@@ -27,8 +27,8 @@ import com.andrerinas.headunitrevived.utils.Settings
 class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks {
 
     private lateinit var projectionView: IProjectionView
+    private lateinit var screenSpec: ScreenSpec
     private val videoDecoder: VideoDecoder by lazy { App.provide(this).videoDecoder }
-    private val screenSpec: ScreenSpec by lazy { ScreenSpecProvider.getSpec(this) }
     private val settings: Settings by lazy { Settings(this) }
 
 
@@ -61,6 +61,11 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks {
         val container = findViewById<android.widget.FrameLayout>(R.id.container)
         if (settings.viewMode == Settings.ViewMode.TEXTURE) {
             AppLog.i("Using TextureView")
+
+            val displayMetrics = resources.displayMetrics
+            val textureViewSpec = ScreenSpecProvider.getSpecForTextureView(displayMetrics.widthPixels, displayMetrics.heightPixels, displayMetrics.densityDpi)
+            screenSpec = textureViewSpec.screenSpec
+
             val textureView = TextureProjectionView(this)
             textureView.layoutParams = android.widget.FrameLayout.LayoutParams(
                 android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
@@ -70,6 +75,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks {
             container.setBackgroundColor(android.graphics.Color.BLACK)
         } else {
             AppLog.i("Using SurfaceView")
+            screenSpec = ScreenSpecProvider.getSpec(this)
             projectionView = ProjectionView(this)
         }
 
@@ -126,18 +132,24 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks {
         val ts = SystemClock.elapsedRealtime()
 
         val view = projectionView as android.view.View
-        // Scale touch events from the actual surface size to the negotiated screen size.
-        val scaleX = screenSpec.width.toFloat() / view.width.toFloat()
-        val scaleY = screenSpec.height.toFloat() / view.height.toFloat()
+        val displayMetrics = resources.displayMetrics
+        val textureViewSpec = ScreenSpecProvider.getSpecForTextureView(displayMetrics.widthPixels, displayMetrics.heightPixels, displayMetrics.densityDpi)
+
+        // Scale touch events from the actual view size to the negotiated screen size.
+        // The negotiated screen size is the resolution the phone is sending (e.g., 1920x1080).
+        // The view.width/height is the actual size of the TextureView (e.g., 1920x720).
+        val scaleX = textureViewSpec.screenSpec.width.toFloat() / view.width.toFloat()
+        val scaleY = textureViewSpec.screenSpec.height.toFloat() / view.height.toFloat()
 
         val pointerData = mutableListOf<Triple<Int, Int, Int>>()
         repeat(event.pointerCount) { pointerIndex ->
             val pointerId = event.getPointerId(pointerIndex)
-            val x = event.getX(pointerIndex) * scaleX
-            val y = event.getY(pointerIndex) * scaleY
+            // Adjust touch coordinates by the margins that the phone is applying
+            val x = (event.getX(pointerIndex) + textureViewSpec.leftMargin) * scaleX
+            val y = (event.getY(pointerIndex) + textureViewSpec.topMargin) * scaleY
 
             // Boundary check against the negotiated screen size
-            if (x < 0 || x >= screenSpec.width || y < 0 || y >= screenSpec.height) {
+            if (x < 0 || x >= textureViewSpec.screenSpec.width || y < 0 || y >= textureViewSpec.screenSpec.height) {
                 AppLog.w("Touch event out of bounds of negotiated screen spec, skipping. x=$x, y=$y, spec=$screenSpec")
                 return
             }
