@@ -2,41 +2,21 @@ package com.andrerinas.headunitrevived.view
 
 import android.content.Context
 import android.util.AttributeSet
+import android.view.Surface
 import android.view.SurfaceHolder
 import android.view.SurfaceView
-
 import com.andrerinas.headunitrevived.App
 import com.andrerinas.headunitrevived.decoder.VideoDecoder
 import com.andrerinas.headunitrevived.utils.AppLog
 
-/**
- * @author algavris
- * *
- * @date 09/11/2016.
- */
+class ProjectionView @JvmOverloads constructor(
+    context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
+) : SurfaceView(context, attrs, defStyleAttr), IProjectionView, SurfaceHolder.Callback {
 
-class ProjectionView : SurfaceView, SurfaceHolder.Callback {
+    private val callbacks = mutableListOf<IProjectionView.Callbacks>()
     private var videoDecoder: VideoDecoder? = null
-    private var surfaceCallback: SurfaceHolder.Callback? = null
 
-
-    constructor(context: Context) : super(context) {
-        init()
-    }
-
-    constructor(context: Context, attrs: AttributeSet) : super(context, attrs) {
-        init()
-    }
-
-    constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
-        init()
-    }
-
-    fun setSurfaceCallback(surfaceCallback: SurfaceHolder.Callback) {
-        this.surfaceCallback = surfaceCallback
-    }
-
-    private fun init() {
+    init {
         videoDecoder = App.provide(context).videoDecoder
         holder.addCallback(this)
     }
@@ -48,18 +28,26 @@ class ProjectionView : SurfaceView, SurfaceHolder.Callback {
 
     override fun surfaceCreated(holder: SurfaceHolder) {
         AppLog.i("holder $holder")
-        surfaceCallback?.surfaceCreated(holder)
+        callbacks.forEach { it.onSurfaceCreated(holder.surface) }
     }
 
     override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
         AppLog.i("holder %s, format: %d, width: %d, height: %d", holder, format, width, height)
-        videoDecoder?.onSurfaceHolderAvailable(holder, width, height)
-        surfaceCallback?.surfaceChanged(holder, format, width, height)
+        videoDecoder?.onSurfaceAvailable(holder.surface, width, height)
+        callbacks.forEach { it.onSurfaceChanged(holder.surface, width, height) }
     }
 
     override fun surfaceDestroyed(holder: SurfaceHolder) {
         AppLog.i("holder $holder")
         videoDecoder?.stop("surfaceDestroyed")
-        surfaceCallback?.surfaceDestroyed(holder)
+        callbacks.forEach { it.onSurfaceDestroyed(holder.surface) }
+    }
+
+    override fun addCallback(callback: IProjectionView.Callbacks) {
+        callbacks.add(callback)
+    }
+
+    override fun removeCallback(callback: IProjectionView.Callbacks) {
+        callbacks.remove(callback)
     }
 }

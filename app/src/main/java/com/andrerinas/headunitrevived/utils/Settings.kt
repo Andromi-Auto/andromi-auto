@@ -102,6 +102,15 @@ class Settings(context: Context) {
             prefs.edit().putBoolean("debug-mode", value).apply()
         }
 
+    var viewMode: ViewMode
+        get() {
+            val value = prefs.getInt("view-mode", 0)
+            return ViewMode.fromInt(value)!!
+        }
+        set(viewMode) {
+            prefs.edit().putInt("view-mode", viewMode.value).apply()
+        }
+
     @SuppressLint("ApplySharedPref")
     fun commit() {
         prefs.edit().commit()
@@ -149,6 +158,16 @@ class Settings(context: Context) {
             3 to 4,
             4 to 0
         )
+    }
+
+    enum class ViewMode(val value: Int) {
+        SURFACE(0),
+        TEXTURE(1);
+
+        companion object {
+            private val map = values().associateBy(ViewMode::value)
+            fun fromInt(value: Int) = map[value]
+        }
     }
 
 }

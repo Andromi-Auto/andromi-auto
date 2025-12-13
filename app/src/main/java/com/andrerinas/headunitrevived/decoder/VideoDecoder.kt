@@ -2,7 +2,7 @@ package com.andrerinas.headunitrevived.decoder
 
 import android.media.MediaCodec
 import android.media.MediaFormat
-import android.view.SurfaceHolder
+import android.view.Surface
 import com.andrerinas.headunitrevived.utils.AppLog
 import java.io.IOException
 import java.nio.ByteBuffer
@@ -14,7 +14,7 @@ class VideoDecoder {
 
     private var mHeight: Int = 0
     private var mWidth: Int = 0
-    private var mHolder: SurfaceHolder? = null
+    private var mSurface: Surface? = null
     private var mCodecConfigured: Boolean = false
     private var sps: ByteArray? = null
     private var pps: ByteArray? = null
@@ -85,7 +85,7 @@ class VideoDecoder {
         format.setByteBuffer("csd-1", ByteBuffer.wrap(pps))
         AppLog.i("VideoDecoder: configureDecoder with width=$mWidth, height=$mHeight")
         try {
-            mCodec!!.configure(format, mHolder!!.surface, null, 0)
+            mCodec!!.configure(format, mSurface, null, 0)
             mCodec!!.start()
             mInputBuffers = mCodec!!.inputBuffers
             mCodecBufferInfo = MediaCodec.BufferInfo()
@@ -151,7 +151,7 @@ class VideoDecoder {
         }
     }
 
-    fun onSurfaceHolderAvailable(holder: SurfaceHolder, width: Int, height: Int) {
+    fun onSurfaceAvailable(surface: Surface, width: Int, height: Int) {
         synchronized(sLock) {
             if (mCodec != null) {
                 AppLog.i("Codec is running")
@@ -159,7 +159,7 @@ class VideoDecoder {
             }
         }
 
-        mHolder = holder
+        mSurface = surface
         mWidth = width
         mHeight = height
         codec_init()

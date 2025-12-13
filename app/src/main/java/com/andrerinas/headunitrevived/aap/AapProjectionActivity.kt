@@ -8,8 +8,6 @@ import android.os.Bundle
 import android.os.SystemClock
 import android.view.KeyEvent
 import android.view.MotionEvent
-import android.view.SurfaceHolder
-import android.view.SurfaceView
 import com.andrerinas.headunitrevived.App
 import com.andrerinas.headunitrevived.R
 import com.andrerinas.headunitrevived.aap.protocol.messages.TouchEvent
@@ -21,12 +19,17 @@ import com.andrerinas.headunitrevived.utils.AppLog
 import com.andrerinas.headunitrevived.utils.IntentFilters
 import com.andrerinas.headunitrevived.utils.ScreenSpec
 import com.andrerinas.headunitrevived.utils.ScreenSpecProvider
+import com.andrerinas.headunitrevived.view.IProjectionView
+import com.andrerinas.headunitrevived.view.ProjectionView
+import com.andrerinas.headunitrevived.view.TextureProjectionView
+import com.andrerinas.headunitrevived.utils.Settings
 
-class AapProjectionActivity : SurfaceActivity(), SurfaceHolder.Callback {
+class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks {
 
-    private lateinit var surface: SurfaceView // Added lateinit var for surface
+    private lateinit var projectionView: IProjectionView
     private val videoDecoder: VideoDecoder by lazy { App.provide(this).videoDecoder }
     private val screenSpec: ScreenSpec by lazy { ScreenSpecProvider.getSpec(this) }
+    private val settings: Settings by lazy { Settings(this) }
 
 
     private val disconnectReceiver = object : BroadcastReceiver() {
@@ -51,13 +54,32 @@ class AapProjectionActivity : SurfaceActivity(), SurfaceHolder.Callback {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_headunit) // Set content view
+        setContentView(R.layout.activity_headunit)
 
         AppLog.i("HeadUnit for Android Auto (tm) - Copyright 2011-2015 Michael A. Reid. All Rights Reserved...")
 
-        surface = findViewById(R.id.surface) // Initialize surface
-        surface.holder.addCallback(this) // Changed setSurfaceCallback to holder.addCallback
-        surface.setOnTouchListener { _, event ->
+        projectionView = if (settings.viewMode == Settings.ViewMode.TEXTURE) {
+            TextureProjectionView(this)
+        } else {
+            ProjectionView(this)
+        }
+
+        val view = projectionView as android.view.View
+        findViewById<android.widget.FrameLayout>(R.id.container).addView(view)
+
+        if (projectionView is TextureProjectionView) {
+            view.post {
+                val layoutParams = view.layoutParams as android.widget.FrameLayout.LayoutParams
+                val margin = (1080 - 720) / 2
+                layoutParams.topMargin = -margin
+                layoutParams.bottomMargin = -margin
+                view.layoutParams = layoutParams
+            }
+        }
+
+        projectionView.addCallback(this)
+
+        view.setOnTouchListener { _, event ->
             sendTouchEvent(event)
             true
         }
@@ -83,17 +105,17 @@ class AapProjectionActivity : SurfaceActivity(), SurfaceHolder.Callback {
     val transport: AapTransport
         get() = App.provide(this).transport
 
-    override fun surfaceCreated(holder: SurfaceHolder) {
+    override fun onSurfaceCreated(surface: android.view.Surface) {
         AppLog.i("[AapProjectionActivity] surfaceCreated. Configuring decoder with negotiated spec: ${screenSpec.width}x${screenSpec.height}")
-        videoDecoder.onSurfaceHolderAvailable(holder, screenSpec.width, screenSpec.height)
+        videoDecoder.onSurfaceAvailable(surface, screenSpec.width, screenSpec.height)
     }
 
-    override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
+    override fun onSurfaceChanged(surface: android.view.Surface, width: Int, height: Int) {
         AppLog.i("[AapProjectionActivity] surfaceChanged. Actual surface dimensions: width=$width, height=$height")
         transport.send(VideoFocusEvent(gain = true, unsolicited = false))
     }
 
-    override fun surfaceDestroyed(holder: SurfaceHolder) {
+    override fun onSurfaceDestroyed(surface: android.view.Surface) {
         transport.send(VideoFocusEvent(gain = false, unsolicited = false))
         videoDecoder.stop("surfaceDestroyed")
     }
@@ -102,9 +124,10 @@ class AapProjectionActivity : SurfaceActivity(), SurfaceHolder.Callback {
         val action = TouchEvent.motionEventToAction(event) ?: return
         val ts = SystemClock.elapsedRealtime()
 
+        val view = projectionView as android.view.View
         // Scale touch events from the actual surface size to the negotiated screen size.
-        val scaleX = screenSpec.width.toFloat() / surface.width.toFloat()
-        val scaleY = screenSpec.height.toFloat() / surface.height.toFloat()
+        val scaleX = screenSpec.width.toFloat() / view.width.toFloat()
+        val scaleY = screenSpec.height.toFloat() / view.height.toFloat()
 
         val pointerData = mutableListOf<Triple<Int, Int, Int>>()
         repeat(event.pointerCount) { pointerIndex ->
