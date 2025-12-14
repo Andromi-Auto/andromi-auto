@@ -50,6 +50,10 @@ object ScreenSpecProvider {
         val bestResolution = resolutions.firstOrNull { it.width >= screenWidth && it.height >= screenHeight }
             ?: resolutions.last()
 
+        // first bring actual screen width and height in proportion to best resolution:
+        //val scale = screenWidth / bestResolution.width
+        //val scaledHeight = screenHeight * scale
+
         val phoneWidthMargin = (bestResolution.width - screenWidth) / 2
         val phoneHeightMargin = (bestResolution.height - screenHeight) / 2
 

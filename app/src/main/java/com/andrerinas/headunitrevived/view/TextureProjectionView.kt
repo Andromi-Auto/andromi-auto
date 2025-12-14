@@ -20,26 +20,49 @@ class TextureProjectionView @JvmOverloads constructor(
     private var viewHeight = 0
     private var isDecoderConfigured = false
 
+    // Add properties to store desired content size
+    private var desiredContentWidth: Int = 0
+    private var desiredContentHeight: Int = 0
+
     init {
         videoDecoder = App.provide(context).videoDecoder
         surfaceTextureListener = this
     }
 
+    // Add a setter for desired content size
+    fun setDesiredContentSize(width: Int, height: Int) {
+        desiredContentWidth = width
+        desiredContentHeight = height
+        // If surface is already available, apply buffer size immediately
+        if (surface != null && surfaceTexture != null) {
+            surfaceTexture?.setDefaultBufferSize(desiredContentWidth, desiredContentHeight)
+            AppLog.i("TextureProjectionView: setDefaultBufferSize called from setDesiredContentSize with: ${desiredContentWidth}x${desiredContentHeight}")
+        }
+    }
+
     override fun onSurfaceTextureAvailable(surfaceTexture: SurfaceTexture, width: Int, height: Int) {
-        AppLog.i("surfaceTexture available")
+        AppLog.i("TextureProjectionView: surfaceTexture available: width=$width, height=$height") // Added logging
         surface = Surface(surfaceTexture)
+        if (desiredContentWidth > 0 && desiredContentHeight > 0) {
+            surfaceTexture.setDefaultBufferSize(desiredContentWidth, desiredContentHeight)
+            AppLog.i("TextureProjectionView: setDefaultBufferSize called from onSurfaceTextureAvailable with: ${desiredContentWidth}x${desiredContentHeight}")
+        }
         tryConfigureDecoder()
     }
 
     override fun onSurfaceTextureSizeChanged(surfaceTexture: SurfaceTexture, width: Int, height: Int) {
-        AppLog.i("surfaceTexture size changed")
+        AppLog.i("TextureProjectionView: surfaceTexture size changed: width=$width, height=$height") // Added logging
         viewWidth = width
         viewHeight = height
+        if (desiredContentWidth > 0 && desiredContentHeight > 0) {
+            surfaceTexture.setDefaultBufferSize(desiredContentWidth, desiredContentHeight)
+            AppLog.i("TextureProjectionView: setDefaultBufferSize called from onSurfaceTextureSizeChanged with: ${desiredContentWidth}x${desiredContentHeight}")
+        }
         tryConfigureDecoder()
     }
 
     override fun onSurfaceTextureDestroyed(surfaceTexture: SurfaceTexture): Boolean {
-        AppLog.i("surfaceTexture destroyed")
+        AppLog.i("TextureProjectionView: surfaceTexture destroyed")
         surface?.let {
             callbacks.forEach { cb -> cb.onSurfaceDestroyed(it) }
         }
@@ -56,7 +79,7 @@ class TextureProjectionView @JvmOverloads constructor(
 
     private fun tryConfigureDecoder() {
         if (surface != null && viewWidth > 0 && viewHeight > 0 && !isDecoderConfigured) {
-            AppLog.i("Configuring decoder now")
+            AppLog.i("TextureProjectionView: Configuring decoder now")
             surface?.let {
                 // We call onSurfaceChanged from AapProjectionActivity, which will configure the decoder
                 callbacks.forEach { cb -> cb.onSurfaceChanged(it, viewWidth, viewHeight) }
@@ -67,12 +90,12 @@ class TextureProjectionView @JvmOverloads constructor(
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
-        AppLog.i("onMeasure: width=${MeasureSpec.toString(widthMeasureSpec)}, height=${MeasureSpec.toString(heightMeasureSpec)}")
+        AppLog.i("TextureProjectionView: onMeasure: width=${MeasureSpec.toString(widthMeasureSpec)}, height=${MeasureSpec.toString(heightMeasureSpec)}")
     }
 
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
         super.onLayout(changed, left, top, right, bottom)
-        AppLog.i("onLayout: changed=$changed, left=$left, top=$top, right=$right, bottom=$bottom")
+        AppLog.i("TextureProjectionView: onLayout: changed=$changed, left=$left, top=$top, right=$right, bottom=$bottom")
         if (changed) {
             viewWidth = right - left
             viewHeight = bottom - top

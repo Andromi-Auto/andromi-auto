@@ -58,11 +58,19 @@ class ServiceDiscoveryResponse(private val context: Context)
                     mediaSinkServiceBuilder.audioType = Media.AudioStreamType.NONE
                     mediaSinkServiceBuilder.availableWhileInCall = true
 
+                    // Get the actual Screen Dimensions:
+                    AppLog.i("[ServiceDiscovery] Actual screen dimensions: ${actualScreenWidth}x${actualScreenHeight}")
+
                     // Get the desired resolution and margins for the TextureView
                     val textureViewSpec = ScreenSpecProvider.getSpecForTextureView(actualScreenWidth, actualScreenHeight, densityDpi)
                     val negotiatedResolution = textureViewSpec.screenSpec
+
+                    AppLog.i("NegotiatedResolution is: ${negotiatedResolution.width}x${negotiatedResolution.height}");
+
                     val phoneWidthMargin = textureViewSpec.leftMargin // leftMargin and rightMargin are the same
                     val phoneHeightMargin = textureViewSpec.topMargin // topMargin and bottomMargin are the same
+
+                    AppLog.i("Margins are: ${phoneWidthMargin}x${phoneHeightMargin}");
 
                     mediaSinkServiceBuilder.addVideoConfigs(Control.Service.MediaSinkService.VideoConfiguration.newBuilder().apply {
                         codecResolution = textureViewSpec.resolution.codec

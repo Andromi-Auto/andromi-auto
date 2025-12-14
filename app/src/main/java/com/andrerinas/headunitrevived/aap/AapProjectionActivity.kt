@@ -3,6 +3,8 @@ package com.andrerinas.headunitrevived.aap
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.graphics.Matrix
+import android.graphics.RectF
 import android.os.Build
 import android.os.Bundle
 import android.os.SystemClock
@@ -23,6 +25,7 @@ import com.andrerinas.headunitrevived.view.IProjectionView
 import com.andrerinas.headunitrevived.view.ProjectionView
 import com.andrerinas.headunitrevived.view.TextureProjectionView
 import com.andrerinas.headunitrevived.utils.Settings
+import kotlin.math.roundToInt
 
 class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks {
 
@@ -30,6 +33,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks {
     private lateinit var screenSpec: ScreenSpec
     private val videoDecoder: VideoDecoder by lazy { App.provide(this).videoDecoder }
     private val settings: Settings by lazy { Settings(this) }
+    private val touchMatrix = Matrix()
 
 
     private val disconnectReceiver = object : BroadcastReceiver() {
@@ -63,16 +67,66 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks {
             AppLog.i("Using TextureView")
 
             val displayMetrics = resources.displayMetrics
-            val textureViewSpec = ScreenSpecProvider.getSpecForTextureView(displayMetrics.widthPixels, displayMetrics.heightPixels, displayMetrics.densityDpi)
-            screenSpec = textureViewSpec.screenSpec
+            val actualScreenWidth = displayMetrics.widthPixels
+            val actualScreenHeight = displayMetrics.heightPixels
+
+            AppLog.i("Actual screen dimensions: ${actualScreenWidth}x${actualScreenHeight}")
+
+            val textureViewScreenSpec = ScreenSpecProvider.getSpecForTextureView(actualScreenWidth, actualScreenHeight, displayMetrics.densityDpi)
+
+            // Negotiated resolution (what the phone sends)
+            val negotiatedWidth = textureViewScreenSpec.screenSpec.width
+            val negotiatedHeight = textureViewScreenSpec.screenSpec.height
+
+            AppLog.i("Negotiated resolution: ${negotiatedWidth}x${negotiatedHeight}")
+
+            // Calculate crop margins (these are the margins the phone adds)
+            val cropTopBottom = (negotiatedHeight - actualScreenHeight) / 2 // 180
+            val cropLeftRight = (negotiatedWidth - actualScreenWidth) / 2 // 36
+
+            AppLog.i("Crop margins: top/bottom=${cropTopBottom}, left/right=${cropLeftRight}")
+
+            // Source rectangle (part of the video stream we want to show)
+            val srcRect = RectF(
+                cropLeftRight.toFloat(),
+                cropTopBottom.toFloat(),
+                (negotiatedWidth - cropLeftRight).toFloat(),
+                (negotiatedHeight - cropTopBottom).toFloat()
+            )
+
+            // Destination rectangle (TextureView's bounds)
+            val dstRect = RectF(0f, 0f, actualScreenWidth.toFloat(), actualScreenHeight.toFloat())
+
+            AppLog.i("srcRect: $srcRect")
+            AppLog.i("dstRect: $dstRect")
+
+            // Create transformation matrix
+            // If setDefaultBufferSize is doing the scaling/cropping, then the matrix should be identity.
+            val matrix = Matrix() // Identity matrix
+            // No need to call setRectToRect if setDefaultBufferSize is handling the output size.
+            // However, the touchMatrix still needs the inverse transformation.
+            touchMatrix.setRectToRect(dstRect, srcRect, Matrix.ScaleToFit.FILL) // Inverse for touch events
 
             val textureView = TextureProjectionView(this)
+
+            // Set the desired content size for the TextureProjectionView
+            // This tells the SurfaceTexture what size buffers to allocate for the MediaCodec output.
+            // We want the MediaCodec to output the actual content size, which is srcRect's dimensions.
+            val desiredContentWidth = srcRect.width().roundToInt()
+            val desiredContentHeight = srcRect.height().roundToInt()
+            textureView.setDesiredContentSize(desiredContentWidth, desiredContentHeight)
+            AppLog.i("AapProjectionActivity: setDesiredContentSize called on textureView with: ${desiredContentWidth}x${desiredContentHeight}")
+
+
             textureView.layoutParams = android.widget.FrameLayout.LayoutParams(
                 android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
                 android.widget.FrameLayout.LayoutParams.MATCH_PARENT
             )
+            textureView.setTransform(matrix) // Apply the transformation (identity in this case)
             projectionView = textureView
             container.setBackgroundColor(android.graphics.Color.BLACK)
+
+            screenSpec = textureViewScreenSpec.screenSpec // Set screenSpec to the dynamically determined textureViewScreenSpec's internal ScreenSpec
         } else {
             AppLog.i("Using SurfaceView")
             screenSpec = ScreenSpecProvider.getSpec(this)
@@ -133,27 +187,27 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks {
 
         val view = projectionView as android.view.View
         val displayMetrics = resources.displayMetrics
-        val textureViewSpec = ScreenSpecProvider.getSpecForTextureView(displayMetrics.widthPixels, displayMetrics.heightPixels, displayMetrics.densityDpi)
 
-        // Scale touch events from the actual view size to the negotiated screen size.
-        // The negotiated screen size is the resolution the phone is sending (e.g., 1920x1080).
-        // The view.width/height is the actual size of the TextureView (e.g., 1920x720).
-        val scaleX = textureViewSpec.screenSpec.width.toFloat() / view.width.toFloat()
-        val scaleY = textureViewSpec.screenSpec.height.toFloat() / view.height.toFloat()
+        // Get the raw touch coordinates
+        val rawX = event.getX(event.actionIndex)
+        val rawY = event.getY(event.actionIndex)
+
+        // Apply the inverse transformation for touch events
+        val transformedPoints = floatArrayOf(rawX, rawY)
+        touchMatrix.mapPoints(transformedPoints)
 
         val pointerData = mutableListOf<Triple<Int, Int, Int>>()
         repeat(event.pointerCount) { pointerIndex ->
             val pointerId = event.getPointerId(pointerIndex)
-            // Adjust touch coordinates by the margins that the phone is applying
-            val x = (event.getX(pointerIndex) + textureViewSpec.leftMargin) * scaleX
-            val y = (event.getY(pointerIndex) + textureViewSpec.topMargin) * scaleY
+            val x = transformedPoints[0].toInt()
+            val y = transformedPoints[1].toInt()
 
             // Boundary check against the negotiated screen size
-            if (x < 0 || x >= textureViewSpec.screenSpec.width || y < 0 || y >= textureViewSpec.screenSpec.height) {
+            if (x < 0 || x >= screenSpec.width || y < 0 || y >= screenSpec.height) {
                 AppLog.w("Touch event out of bounds of negotiated screen spec, skipping. x=$x, y=$y, spec=$screenSpec")
                 return
             }
-            pointerData.add(Triple(pointerId, x.toInt(), y.toInt()))
+            pointerData.add(Triple(pointerId, x, y))
         }
 
         transport.send(TouchEvent(ts, action, event.actionIndex, pointerData))
