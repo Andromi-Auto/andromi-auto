@@ -184,32 +184,6 @@ class MainActivity : FragmentActivity() {
             testBitmapButton.visibility = View.GONE
             backButton.visibility = View.VISIBLE // Show back button to return
 
-            val displayMetrics = resources.displayMetrics
-            val actualScreenWidth = displayMetrics.widthPixels
-            val actualScreenHeight = displayMetrics.heightPixels
-
-            // Negotiated resolution (for test image, it's 1920x1080)
-            val negotiatedWidth = 1920
-            val negotiatedHeight = 1080
-
-            // Calculate crop margins (these are the margins the phone adds)
-            val cropTopBottom = (negotiatedHeight - actualScreenHeight) / 2 // 180
-            val cropLeftRight = (negotiatedWidth - actualScreenWidth) / 2 // 36
-
-            // Source rectangle (part of the video stream we want to show - blue area)
-            val srcRect = RectF(
-                cropLeftRight.toFloat(),
-                cropTopBottom.toFloat(),
-                (negotiatedWidth - cropLeftRight).toFloat(),
-                (negotiatedHeight - cropTopBottom).toFloat()
-            )
-
-            // Destination rectangle (TextureView's bounds)
-            val dstRect = RectF(0f, 0f, actualScreenWidth.toFloat(), actualScreenHeight.toFloat())
-
-            AppLog.i("MainActivity: Test srcRect: $srcRect")
-            AppLog.i("MainActivity: Test dstRect: $dstRect")
-
             val bitmapView = BitmapProjectionView(this)
             bitmapView.layoutParams = FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT,
@@ -229,62 +203,6 @@ class MainActivity : FragmentActivity() {
             } else {
                 AppLog.e("MainActivity", "Failed to load screentest.png")
             }
-
-            // Apply transformation to show only the blue area
-            //val matrix = Matrix()
-            //matrix.setRectToRect(srcRect, srcRect, Matrix.ScaleToFit.FILL) // Use FILL to map srcRect to dstRect
-            //bitmapView.setTransform(matrix)
-
-
-            val ratioSurface: Float = actualScreenWidth.toFloat() / actualScreenHeight
-            val ratioPreview: Float = negotiatedWidth.toFloat() / negotiatedHeight
-
-            val scaleX: Float
-            val scaleY: Float
-/*
-            if (ratioSurface > ratioPreview) {
-                scaleX = actualScreenHeight.toFloat() / negotiatedHeight
-                scaleY = 1f
-            } else {
-                scaleX = 1f
-                scaleY = actualScreenWidth.toFloat() / negotiatedWidth
-            }
-
-            scaleX = (negotiatedHeight +36) / actualScreenHeight.toFloat()
-            scaleY = (negotiatedWidth + 115) / actualScreenWidth.toFloat()
-
-            AppLog.i("Scale: $scaleX, $scaleY")
-
-            val matrix = Matrix()
-
-
-
-            val scaledWidth: Float = actualScreenWidth * scaleX
-            val scaledHeight: Float = actualScreenHeight * scaleY
-
-            val dx: Float = (actualScreenWidth - scaledWidth) / 2
-            val dy: Float = (actualScreenHeight - scaledHeight) / 2
-*/
-
-/*
-            val matrix = Matrix()
-
-            // KEINE Skalierung
-            matrix.setScale(1f, 1f)
-
-            // Buffer so verschieben, dass das Zentrum sichtbar ist
-            matrix.postTranslate(-36f, -180f)
-            bitmapView.setTransform(matrix)
-*/
-            //AppLog.i("Transpoints: $dx, $dy")
-            //bitmapView.translationX = -40f
-            //bitmapView.translationY = -125f
-
-            //matrix.setScale(2.5f, 3.5f)
-            //bitmapView.setTransform(matrix)
-
-
-            //AppLog.i("MainActivity: Test Bitmap View loaded with transformation.")
 
             // Handle back press for bitmap view
             onBackPressedDispatcher.addCallback(this@MainActivity, object : OnBackPressedCallback(true) {
