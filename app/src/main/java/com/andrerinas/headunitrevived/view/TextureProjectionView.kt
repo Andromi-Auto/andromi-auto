@@ -5,8 +5,6 @@ import android.graphics.SurfaceTexture
 import android.util.AttributeSet
 import android.view.Surface
 import android.view.TextureView
-import com.andrerinas.headunitrevived.App
-import com.andrerinas.headunitrevived.decoder.VideoDecoder
 import com.andrerinas.headunitrevived.utils.AppLog
 
 class TextureProjectionView @JvmOverloads constructor(
@@ -14,94 +12,94 @@ class TextureProjectionView @JvmOverloads constructor(
 ) : TextureView(context, attrs, defStyleAttr), IProjectionView, TextureView.SurfaceTextureListener {
 
     private val callbacks = mutableListOf<IProjectionView.Callbacks>()
-    private var videoDecoder: VideoDecoder? = null
     private var surface: Surface? = null
-    private var viewWidth = 0
-    private var viewHeight = 0
-    private var isDecoderConfigured = false
 
-    // Add properties to store desired content size
-    private var desiredContentWidth: Int = 0
-    private var desiredContentHeight: Int = 0
+    private var videoWidth = 0
+    private var videoHeight = 0
 
     init {
-        videoDecoder = App.provide(context).videoDecoder
         surfaceTextureListener = this
     }
 
-    // Add a setter for desired content size
-    fun setDesiredContentSize(width: Int, height: Int) {
-        desiredContentWidth = width
-        desiredContentHeight = height
-        // If surface is already available, apply buffer size immediately
-        if (surface != null && surfaceTexture != null) {
-            surfaceTexture?.setDefaultBufferSize(desiredContentWidth, desiredContentHeight)
-            AppLog.i("TextureProjectionView: setDefaultBufferSize called from setDesiredContentSize with: ${desiredContentWidth}x${desiredContentHeight}")
-        }
+    // ----------------------------------------------------------------
+    // Public API
+    // ----------------------------------------------------------------
+
+    fun setVideoSize(width: Int, height: Int) {
+        if (videoWidth == width && videoHeight == height) return
+        AppLog.i("TextureProjectionView", "Video size set to ${width}x$height")
+        videoWidth = width
+        videoHeight = height
+        updateScale()
     }
 
+    // ----------------------------------------------------------------
+    // Lifecycle & SurfaceTextureListener
+    // ----------------------------------------------------------------
+
     override fun onSurfaceTextureAvailable(surfaceTexture: SurfaceTexture, width: Int, height: Int) {
-        AppLog.i("TextureProjectionView: surfaceTexture available: width=$width, height=$height") // Added logging
+        AppLog.i("TextureProjectionView", "Surface available: ${width}x$height")
         surface = Surface(surfaceTexture)
-        if (desiredContentWidth > 0 && desiredContentHeight > 0) {
-            surfaceTexture.setDefaultBufferSize(desiredContentWidth, desiredContentHeight)
-            AppLog.i("TextureProjectionView: setDefaultBufferSize called from onSurfaceTextureAvailable with: ${desiredContentWidth}x${desiredContentHeight}")
+        surface?.let {
+            // The width and height of the view are passed here, but the decoder should
+            // use the actual video dimensions it parses from the SPS.
+            callbacks.forEach { cb -> cb.onSurfaceChanged(it, width, height) }
         }
-        tryConfigureDecoder()
+        updateScale()
     }
 
     override fun onSurfaceTextureSizeChanged(surfaceTexture: SurfaceTexture, width: Int, height: Int) {
-        AppLog.i("TextureProjectionView: surfaceTexture size changed: width=$width, height=$height") // Added logging
-        viewWidth = width
-        viewHeight = height
-        if (desiredContentWidth > 0 && desiredContentHeight > 0) {
-            surfaceTexture.setDefaultBufferSize(desiredContentWidth, desiredContentHeight)
-            AppLog.i("TextureProjectionView: setDefaultBufferSize called from onSurfaceTextureSizeChanged with: ${desiredContentWidth}x${desiredContentHeight}")
-        }
-        tryConfigureDecoder()
+        AppLog.i("TextureProjectionView", "Surface size changed: ${width}x$height")
+        updateScale()
     }
 
     override fun onSurfaceTextureDestroyed(surfaceTexture: SurfaceTexture): Boolean {
-        AppLog.i("TextureProjectionView: surfaceTexture destroyed")
+        AppLog.i("TextureProjectionView", "Surface destroyed")
         surface?.let {
             callbacks.forEach { cb -> cb.onSurfaceDestroyed(it) }
         }
-        videoDecoder?.stop("surfaceDestroyed")
         surface?.release()
         surface = null
-        isDecoderConfigured = false
-        return false // As per decompiled code analysis
+        return true
     }
 
     override fun onSurfaceTextureUpdated(surfaceTexture: SurfaceTexture) {
         // Not used
     }
 
-    private fun tryConfigureDecoder() {
-        if (surface != null && viewWidth > 0 && viewHeight > 0 && !isDecoderConfigured) {
-            AppLog.i("TextureProjectionView: Configuring decoder now")
-            surface?.let {
-                // We call onSurfaceChanged from AapProjectionActivity, which will configure the decoder
-                callbacks.forEach { cb -> cb.onSurfaceChanged(it, viewWidth, viewHeight) }
-                isDecoderConfigured = true
-            }
+    // ----------------------------------------------------------------
+    // Core Transformation Logic
+    // ----------------------------------------------------------------
+
+    private fun updateScale() {
+        if (videoWidth == 0 || videoHeight == 0 || width == 0 || height == 0) {
+            return
         }
+
+        // The dimensions of the content area we want to display
+        val contentWidth = 1848f
+        val contentHeight = 720f
+
+        val sourceVideoWidth = videoWidth.toFloat()
+        val sourceVideoHeight = videoHeight.toFloat()
+
+        // This is the magic.
+        // We scale the TextureView itself. Because the default pivot point is the
+        // center, this effectively zooms into the center of the video stream.
+        // The scale factor is the ratio of the full video size to the desired cropped content size.
+        val finalScaleX = sourceVideoWidth / contentWidth
+        val finalScaleY = sourceVideoHeight / contentHeight
+
+        this.scaleX = finalScaleX
+        this.scaleY = finalScaleY
+
+        AppLog.i("TextureProjectionView", "Scale updated. scaleX: $finalScaleX, scaleY: $finalScaleY")
     }
 
-    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
-        AppLog.i("TextureProjectionView: onMeasure: width=${MeasureSpec.toString(widthMeasureSpec)}, height=${MeasureSpec.toString(heightMeasureSpec)}")
-    }
 
-    override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
-        super.onLayout(changed, left, top, right, bottom)
-        AppLog.i("TextureProjectionView: onLayout: changed=$changed, left=$left, top=$top, right=$right, bottom=$bottom")
-        if (changed) {
-            viewWidth = right - left
-            viewHeight = bottom - top
-            tryConfigureDecoder()
-        }
-    }
+    // ----------------------------------------------------------------
+    // Callbacks
+    // ----------------------------------------------------------------
 
     override fun addCallback(callback: IProjectionView.Callbacks) {
         callbacks.add(callback)

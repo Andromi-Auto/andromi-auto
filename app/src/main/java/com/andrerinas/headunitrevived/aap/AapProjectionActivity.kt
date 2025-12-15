@@ -17,6 +17,7 @@ import com.andrerinas.headunitrevived.aap.protocol.messages.VideoFocusEvent
 import com.andrerinas.headunitrevived.app.SurfaceActivity
 import com.andrerinas.headunitrevived.contract.KeyIntent
 import com.andrerinas.headunitrevived.decoder.VideoDecoder
+import com.andrerinas.headunitrevived.decoder.VideoDimensionsListener
 import com.andrerinas.headunitrevived.utils.AppLog
 import com.andrerinas.headunitrevived.utils.IntentFilters
 import com.andrerinas.headunitrevived.utils.ScreenSpec
@@ -25,9 +26,8 @@ import com.andrerinas.headunitrevived.view.IProjectionView
 import com.andrerinas.headunitrevived.view.ProjectionView
 import com.andrerinas.headunitrevived.view.TextureProjectionView
 import com.andrerinas.headunitrevived.utils.Settings
-import kotlin.math.roundToInt
 
-class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks {
+class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, VideoDimensionsListener {
 
     private lateinit var projectionView: IProjectionView
     private lateinit var screenSpec: ScreenSpec
@@ -60,73 +60,24 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_headunit)
 
+        videoDecoder.dimensionsListener = this
+
         AppLog.i("HeadUnit for Android Auto (tm) - Copyright 2011-2015 Michael A. Reid. All Rights Reserved...")
 
         val container = findViewById<android.widget.FrameLayout>(R.id.container)
         if (settings.viewMode == Settings.ViewMode.TEXTURE) {
             AppLog.i("Using TextureView")
-
-            val displayMetrics = resources.displayMetrics
-            val actualScreenWidth = displayMetrics.widthPixels
-            val actualScreenHeight = displayMetrics.heightPixels
-
-            AppLog.i("Actual screen dimensions: ${actualScreenWidth}x${actualScreenHeight}")
-
-            val textureViewScreenSpec = ScreenSpecProvider.getSpecForTextureView(actualScreenWidth, actualScreenHeight, displayMetrics.densityDpi)
-
-            // Negotiated resolution (what the phone sends)
-            val negotiatedWidth = textureViewScreenSpec.screenSpec.width
-            val negotiatedHeight = textureViewScreenSpec.screenSpec.height
-
-            AppLog.i("Negotiated resolution: ${negotiatedWidth}x${negotiatedHeight}")
-
-            // Calculate crop margins (these are the margins the phone adds)
-            val cropTopBottom = (negotiatedHeight - actualScreenHeight) / 2 // 180
-            val cropLeftRight = (negotiatedWidth - actualScreenWidth) / 2 // 36
-
-            AppLog.i("Crop margins: top/bottom=${cropTopBottom}, left/right=${cropLeftRight}")
-
-            // Source rectangle (part of the video stream we want to show)
-            val srcRect = RectF(
-                cropLeftRight.toFloat(),
-                cropTopBottom.toFloat(),
-                (negotiatedWidth - cropLeftRight).toFloat(),
-                (negotiatedHeight - cropTopBottom).toFloat()
-            )
-
-            // Destination rectangle (TextureView's bounds)
-            val dstRect = RectF(0f, 0f, actualScreenWidth.toFloat(), actualScreenHeight.toFloat())
-
-            AppLog.i("srcRect: $srcRect")
-            AppLog.i("dstRect: $dstRect")
-
-            // Create transformation matrix
-            // If setDefaultBufferSize is doing the scaling/cropping, then the matrix should be identity.
-            val matrix = Matrix() // Identity matrix
-            // No need to call setRectToRect if setDefaultBufferSize is handling the output size.
-            // However, the touchMatrix still needs the inverse transformation.
-            touchMatrix.setRectToRect(dstRect, srcRect, Matrix.ScaleToFit.FILL) // Inverse for touch events
-
             val textureView = TextureProjectionView(this)
-
-            // Set the desired content size for the TextureProjectionView
-            // This tells the SurfaceTexture what size buffers to allocate for the MediaCodec output.
-            // We want the MediaCodec to output the actual content size, which is srcRect's dimensions.
-            val desiredContentWidth = srcRect.width().roundToInt()
-            val desiredContentHeight = srcRect.height().roundToInt()
-            textureView.setDesiredContentSize(desiredContentWidth, desiredContentHeight)
-            AppLog.i("AapProjectionActivity: setDesiredContentSize called on textureView with: ${desiredContentWidth}x${desiredContentHeight}")
-
-
             textureView.layoutParams = android.widget.FrameLayout.LayoutParams(
                 android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
                 android.widget.FrameLayout.LayoutParams.MATCH_PARENT
             )
-            textureView.setTransform(matrix) // Apply the transformation (identity in this case)
             projectionView = textureView
             container.setBackgroundColor(android.graphics.Color.BLACK)
 
-            screenSpec = textureViewScreenSpec.screenSpec // Set screenSpec to the dynamically determined textureViewScreenSpec's internal ScreenSpec
+            // Use the screen spec for the texture view for negotiation
+            val displayMetrics = resources.displayMetrics
+            screenSpec = ScreenSpecProvider.getSpecForTextureView(displayMetrics.widthPixels, displayMetrics.heightPixels, displayMetrics.densityDpi).screenSpec
         } else {
             AppLog.i("Using SurfaceView")
             screenSpec = ScreenSpecProvider.getSpec(this)
@@ -171,8 +122,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks {
 
     override fun onSurfaceChanged(surface: android.view.Surface, width: Int, height: Int) {
         AppLog.i("[AapProjectionActivity] onSurfaceChanged. Actual surface dimensions: width=$width, height=$height")
-        AppLog.i("[AapProjectionActivity] Configuring decoder with negotiated spec: ${screenSpec.width}x${screenSpec.height}")
-        videoDecoder.onSurfaceAvailable(surface, screenSpec.width, screenSpec.height)
+        videoDecoder.onSurfaceAvailable(surface)
         transport.send(VideoFocusEvent(gain = true, unsolicited = false))
     }
 
@@ -181,12 +131,43 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks {
         videoDecoder.stop("surfaceDestroyed")
     }
 
+    override fun onVideoDimensionsChanged(width: Int, height: Int) {
+        AppLog.i("[AapProjectionActivity] Received video dimensions: ${width}x$height")
+        runOnUiThread {
+            (projectionView as? TextureProjectionView)?.setVideoSize(width, height)
+
+            // Update the touch matrix for correct touch event transformation
+            val view = projectionView as android.view.View
+            val viewWidth = view.width.toFloat()
+            val viewHeight = view.height.toFloat()
+
+            if (viewWidth > 0 && viewHeight > 0 && width > 0 && height > 0) {
+                val contentWidth = 1848f
+                val contentHeight = 720f
+                val videoWidthF = width.toFloat()
+                val videoHeightF = height.toFloat()
+
+                val scaleX = videoWidthF / contentWidth
+                val scaleY = videoHeightF / contentHeight
+
+                val forwardMatrix = Matrix()
+                // The view is scaled around its center, so we build the forward matrix
+                // the same way.
+                forwardMatrix.setScale(scaleX, scaleY, viewWidth / 2f, viewHeight / 2f)
+
+                // The touch matrix is the inverse of the view's transformation matrix.
+                if (!forwardMatrix.invert(touchMatrix)) {
+                    AppLog.e("AapProjectionActivity", "Failed to invert the transformation matrix for touch events.")
+                }
+
+                AppLog.i("Touch matrix updated for ${width}x$height video on ${viewWidth}x$viewHeight view.")
+            }
+        }
+    }
+
     private fun sendTouchEvent(event: MotionEvent) {
         val action = TouchEvent.motionEventToAction(event) ?: return
         val ts = SystemClock.elapsedRealtime()
-
-        val view = projectionView as android.view.View
-        val displayMetrics = resources.displayMetrics
 
         // Get the raw touch coordinates
         val rawX = event.getX(event.actionIndex)
@@ -229,6 +210,11 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks {
 
     private fun onKeyEvent(keyCode: Int, isPress: Boolean) {
         transport.send(keyCode, isPress)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        videoDecoder.dimensionsListener = null
     }
 
     companion object {

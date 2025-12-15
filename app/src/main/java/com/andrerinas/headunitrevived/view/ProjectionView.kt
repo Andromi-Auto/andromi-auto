@@ -33,7 +33,7 @@ class ProjectionView @JvmOverloads constructor(
 
     override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
         AppLog.i("holder %s, format: %d, width: %d, height: %d", holder, format, width, height)
-        videoDecoder?.onSurfaceAvailable(holder.surface, width, height)
+        videoDecoder?.onSurfaceAvailable(holder.surface)
         callbacks.forEach { it.onSurfaceChanged(holder.surface, width, height) }
     }
 
