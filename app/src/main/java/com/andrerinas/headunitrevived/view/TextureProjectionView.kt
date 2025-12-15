@@ -38,7 +38,7 @@ class TextureProjectionView @JvmOverloads constructor(
     // ----------------------------------------------------------------
 
     override fun onSurfaceTextureAvailable(surfaceTexture: SurfaceTexture, width: Int, height: Int) {
-        AppLog.i("TextureProjectionView", "Surface available: ${width}x$height")
+        AppLog.i("TextureProjectionView: Surface available: ${width}x$height")
         surface = Surface(surfaceTexture)
         surface?.let {
             // The width and height of the view are passed here, but the decoder should
@@ -49,12 +49,12 @@ class TextureProjectionView @JvmOverloads constructor(
     }
 
     override fun onSurfaceTextureSizeChanged(surfaceTexture: SurfaceTexture, width: Int, height: Int) {
-        AppLog.i("TextureProjectionView", "Surface size changed: ${width}x$height")
-        updateScale()
+        AppLog.i("TextureProjectionView: Surface size changed: ${width}x$height")
+        //updateScale()
     }
 
     override fun onSurfaceTextureDestroyed(surfaceTexture: SurfaceTexture): Boolean {
-        AppLog.i("TextureProjectionView", "Surface destroyed")
+        AppLog.i("TextureProjectionView: Surface destroyed")
         surface?.let {
             callbacks.forEach { cb -> cb.onSurfaceDestroyed(it) }
         }
@@ -90,8 +90,8 @@ class TextureProjectionView @JvmOverloads constructor(
         // We scale the TextureView itself. Because the default pivot point is the
         // center, this effectively zooms into the center of the video stream.
         // The scale factor is the ratio of the full video size to the desired cropped content size.
-        val finalScaleX = sourceVideoWidth / contentWidth
-        val finalScaleY = sourceVideoHeight / contentHeight
+        val finalScaleX = (sourceVideoWidth / contentWidth) * 1.0f
+        val finalScaleY = (sourceVideoHeight / contentHeight) * 1.0f
 
         this.scaleX = finalScaleX
         this.scaleY = finalScaleY

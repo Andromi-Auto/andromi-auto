@@ -67,11 +67,10 @@ class ServiceDiscoveryResponse(private val context: Context)
 
                     AppLog.i("NegotiatedResolution is: ${negotiatedResolution.width}x${negotiatedResolution.height}");
 
-                    val phoneWidthMargin = textureViewSpec.leftMargin // leftMargin and rightMargin are the same
-                    val phoneHeightMargin = textureViewSpec.topMargin // topMargin and bottomMargin are the same
+                    val phoneWidthMargin = textureViewSpec.leftMargin + textureViewSpec.rightMargin
+                    val phoneHeightMargin = textureViewSpec.topMargin + textureViewSpec.bottomMargin
 
-                    AppLog.i("Margins are: ${phoneWidthMargin}x${phoneHeightMargin}");
-
+                    AppLog.i("Margins are: ${phoneWidthMargin}x${phoneHeightMargin}")
                     mediaSinkServiceBuilder.addVideoConfigs(Control.Service.MediaSinkService.VideoConfiguration.newBuilder().apply {
                         codecResolution = textureViewSpec.resolution.codec
                         frameRate = Control.Service.MediaSinkService.VideoConfiguration.VideoFrameRateType._60
