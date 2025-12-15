@@ -3,6 +3,9 @@ package com.andrerinas.headunitrevived.main
 import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.graphics.BitmapFactory
+import android.graphics.Matrix
+import android.graphics.RectF
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
@@ -18,15 +21,17 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.FragmentActivity
-import androidx.constraintlayout.widget.ConstraintLayout
 import com.andrerinas.headunitrevived.App
 import com.andrerinas.headunitrevived.R
 import com.andrerinas.headunitrevived.aap.AapProjectionActivity
 import com.andrerinas.headunitrevived.utils.AppLog
 import com.andrerinas.headunitrevived.utils.toInetAddress
+import com.andrerinas.headunitrevived.view.BitmapProjectionView
 import java.net.Inet4Address
+import kotlin.math.max
 
 class MainActivity : FragmentActivity() {
 
@@ -161,6 +166,142 @@ class MainActivity : FragmentActivity() {
             updateBackButtonVisibility()
         }
         updateBackButtonVisibility() // Initial check
+
+        val testBitmapButton = findViewById<Button>(R.id.test_bitmap_button)
+        testBitmapButton.setOnClickListener {
+
+            setContentView(R.layout.activity_headunit)
+            AppLog.i("MainActivity Test Bitmap button clicked.")
+
+            // Remove any existing views from mainContentFrame
+            mainContentFrame.removeAllViews()
+
+            // Make mainContentFrame visible and hide other UI elements
+            mainContentFrame.visibility = View.VISIBLE
+            mainButtonsContainer.visibility = View.GONE
+            headerContainer.visibility = View.GONE
+            exitButton.visibility = View.GONE
+            testBitmapButton.visibility = View.GONE
+            backButton.visibility = View.VISIBLE // Show back button to return
+
+            val displayMetrics = resources.displayMetrics
+            val actualScreenWidth = displayMetrics.widthPixels
+            val actualScreenHeight = displayMetrics.heightPixels
+
+            // Negotiated resolution (for test image, it's 1920x1080)
+            val negotiatedWidth = 1920
+            val negotiatedHeight = 1080
+
+            // Calculate crop margins (these are the margins the phone adds)
+            val cropTopBottom = (negotiatedHeight - actualScreenHeight) / 2 // 180
+            val cropLeftRight = (negotiatedWidth - actualScreenWidth) / 2 // 36
+
+            // Source rectangle (part of the video stream we want to show - blue area)
+            val srcRect = RectF(
+                cropLeftRight.toFloat(),
+                cropTopBottom.toFloat(),
+                (negotiatedWidth - cropLeftRight).toFloat(),
+                (negotiatedHeight - cropTopBottom).toFloat()
+            )
+
+            // Destination rectangle (TextureView's bounds)
+            val dstRect = RectF(0f, 0f, actualScreenWidth.toFloat(), actualScreenHeight.toFloat())
+
+            AppLog.i("MainActivity: Test srcRect: $srcRect")
+            AppLog.i("MainActivity: Test dstRect: $dstRect")
+
+            val bitmapView = BitmapProjectionView(this)
+            bitmapView.layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT
+            )
+            val container = findViewById<android.widget.FrameLayout>(R.id.container)
+            container.addView(bitmapView)
+
+            // Load the test bitmap
+            val options = BitmapFactory.Options().apply {
+                inScaled = false // Disable density scaling
+            }
+            val testBitmap = BitmapFactory.decodeResource(resources, R.drawable.screentest, options)
+            if (testBitmap != null) {
+                bitmapView.setBitmap(testBitmap)
+                AppLog.i("MainActivity: Loaded test bitmap ${testBitmap.width}x${testBitmap.height}")
+            } else {
+                AppLog.e("MainActivity", "Failed to load screentest.png")
+            }
+
+            // Apply transformation to show only the blue area
+            //val matrix = Matrix()
+            //matrix.setRectToRect(srcRect, srcRect, Matrix.ScaleToFit.FILL) // Use FILL to map srcRect to dstRect
+            //bitmapView.setTransform(matrix)
+
+
+            val ratioSurface: Float = actualScreenWidth.toFloat() / actualScreenHeight
+            val ratioPreview: Float = negotiatedWidth.toFloat() / negotiatedHeight
+
+            val scaleX: Float
+            val scaleY: Float
+/*
+            if (ratioSurface > ratioPreview) {
+                scaleX = actualScreenHeight.toFloat() / negotiatedHeight
+                scaleY = 1f
+            } else {
+                scaleX = 1f
+                scaleY = actualScreenWidth.toFloat() / negotiatedWidth
+            }
+
+            scaleX = (negotiatedHeight +36) / actualScreenHeight.toFloat()
+            scaleY = (negotiatedWidth + 115) / actualScreenWidth.toFloat()
+
+            AppLog.i("Scale: $scaleX, $scaleY")
+
+            val matrix = Matrix()
+
+
+
+            val scaledWidth: Float = actualScreenWidth * scaleX
+            val scaledHeight: Float = actualScreenHeight * scaleY
+
+            val dx: Float = (actualScreenWidth - scaledWidth) / 2
+            val dy: Float = (actualScreenHeight - scaledHeight) / 2
+*/
+
+/*
+            val matrix = Matrix()
+
+            // KEINE Skalierung
+            matrix.setScale(1f, 1f)
+
+            // Buffer so verschieben, dass das Zentrum sichtbar ist
+            matrix.postTranslate(-36f, -180f)
+            bitmapView.setTransform(matrix)
+*/
+            //AppLog.i("Transpoints: $dx, $dy")
+            //bitmapView.translationX = -40f
+            //bitmapView.translationY = -125f
+
+            //matrix.setScale(2.5f, 3.5f)
+            //bitmapView.setTransform(matrix)
+
+
+            //AppLog.i("MainActivity: Test Bitmap View loaded with transformation.")
+
+            // Handle back press for bitmap view
+            onBackPressedDispatcher.addCallback(this@MainActivity, object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    setContentView(R.layout.activity_main)
+                    AppLog.d("MainActivity: handleOnBackPressed - removing bitmap view")
+                    mainContentFrame.removeAllViews()
+                    mainContentFrame.visibility = View.GONE
+                    mainButtonsContainer.visibility = View.VISIBLE
+                    headerContainer.visibility = View.VISIBLE
+                    exitButton.visibility = View.VISIBLE
+                    testBitmapButton.visibility = View.VISIBLE
+                    backButton.visibility = View.GONE // Hide back button again
+                    this.remove() // Remove this callback
+                }
+            })
+        }
     }
 
     private fun updateBackButtonVisibility() {

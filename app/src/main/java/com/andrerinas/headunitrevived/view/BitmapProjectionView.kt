@@ -3,6 +3,8 @@ package com.andrerinas.headunitrevived.view
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Rect
 import android.graphics.SurfaceTexture
 import android.util.AttributeSet
 import android.view.Surface
@@ -10,82 +12,108 @@ import android.view.TextureView
 import com.andrerinas.headunitrevived.utils.AppLog
 
 class BitmapProjectionView @JvmOverloads constructor(
-    context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
-) : TextureView(context, attrs, defStyleAttr), IProjectionView, TextureView.SurfaceTextureListener {
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = 0
+) : TextureView(context, attrs, defStyleAttr),
+    TextureView.SurfaceTextureListener,
+    IProjectionView {
 
-    private val callbacks = mutableListOf<IProjectionView.Callbacks>()
     private var bitmap: Bitmap? = null
     private var surface: Surface? = null
 
+    private var surfaceReady = false
+    private var viewReady = false
+
     init {
         surfaceTextureListener = this
-        isOpaque = false // Make TextureView non-opaque
+        isOpaque = false
     }
+
+    // ----------------------------------------------------------------
+    // Public API
+    // ----------------------------------------------------------------
 
     fun setBitmap(bmp: Bitmap) {
-        this.bitmap = bmp
-        drawBitmap() // Call drawBitmap directly when bitmap is set
+        bitmap = bmp
+        drawBitmapIfPossible()
     }
 
-    private fun drawBitmap() {
-        AppLog.i("BitmapProjectionView", "drawBitmap() called.")
-        val currentBitmap = bitmap ?: return
-        val currentSurface = surface ?: return
+    // ----------------------------------------------------------------
+    // Lifecycle
+    // ----------------------------------------------------------------
 
-        var canvas: Canvas? = null
-        try {
-            AppLog.i("BitmapProjectionView", "Attempting to lock canvas...")
-            canvas = currentSurface.lockCanvas(null)
-            AppLog.i("BitmapProjectionView", "Canvas after lockCanvas: $canvas") // Log canvas object itself
-
-            if (canvas == null) {
-                AppLog.e("BitmapProjectionView", "Canvas is null from lockCanvas! Cannot draw.")
-                return // Exit if canvas is null
-            }
-
-            AppLog.i("BitmapProjectionView", "Canvas dimensions: ${canvas.width}x${canvas.height}")
-            // Clear the canvas before drawing
-            canvas.drawColor(android.graphics.Color.TRANSPARENT) // Clear with transparent color
-            // Draw the bitmap scaled to the TextureView's current dimensions
-            val destRect = android.graphics.Rect(0, 0, width, height) // Use TextureView's width and height
-            canvas.drawBitmap(currentBitmap, null, destRect, null)
-        } catch (e: Exception) {
-            AppLog.e("BitmapProjectionView", "Error drawing bitmap: ${e.message}")
-        } finally {
-            canvas?.let {
-                currentSurface.unlockCanvasAndPost(it)
-            }
-        }
+    override fun onSurfaceTextureAvailable(st: SurfaceTexture, w: Int, h: Int) {
+        AppLog.i("BitmapProjectionView", "Surface available ${w}x$h")
+        surface = Surface(st)
+        surfaceReady = true
+        drawBitmapIfPossible()
     }
 
-    override fun onSurfaceTextureAvailable(surfaceTexture: SurfaceTexture, width: Int, height: Int) {
-        AppLog.i("BitmapProjectionView: surfaceTexture available: width=$width, height=$height")
-        surface = Surface(surfaceTexture)
-        drawBitmap() // Draw immediately when surface is available
+    override fun onSurfaceTextureSizeChanged(st: SurfaceTexture, w: Int, h: Int) {
+        AppLog.i("BitmapProjectionView", "Surface size changed ${w}x$h")
+        drawBitmapIfPossible()
     }
 
-    override fun onSurfaceTextureSizeChanged(surfaceTexture: SurfaceTexture, width: Int, height: Int) {
-        AppLog.i("BitmapProjectionView: surfaceTexture size changed: width=$width, height=$height")
-        drawBitmap() // Redraw on size change
-    }
-
-    override fun onSurfaceTextureDestroyed(surfaceTexture: SurfaceTexture): Boolean {
-        AppLog.i("BitmapProjectionView: surfaceTexture destroyed")
+    override fun onSurfaceTextureDestroyed(st: SurfaceTexture): Boolean {
+        AppLog.i("BitmapProjectionView", "Surface destroyed")
+        surfaceReady = false
         surface?.release()
         surface = null
         return true
     }
 
-    override fun onSurfaceTextureUpdated(surfaceTexture: SurfaceTexture) {
-        // Not used
+    override fun onSurfaceTextureUpdated(st: SurfaceTexture) {}
+
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        viewReady = w > 0 && h > 0
+        drawBitmapIfPossible()
     }
 
-    // IProjectionView implementations
-    override fun addCallback(callback: IProjectionView.Callbacks) {
-        callbacks.add(callback)
+    // ----------------------------------------------------------------
+    // Core rendering (DAS IST DER WICHTIGE TEIL)
+    // ----------------------------------------------------------------
+
+    private fun drawBitmapIfPossible() {
+        if (!surfaceReady || !viewReady) return
+        val bmp = bitmap ?: return
+        val sfc = surface ?: return
+
+        var canvas: Canvas? = null
+        try {
+            canvas = sfc.lockCanvas(null)
+            canvas ?: return
+
+            // Clear
+            canvas.drawColor(Color.BLACK)
+
+            // --- SOURCE: zentriertes 1848x720 aus 1920x1080 ---
+            val srcLeft = (bmp.width - 1848) / 2      // 36
+            val srcTop = (bmp.height - 720) / 2       // 180
+            val srcRect = Rect(
+                srcLeft,
+                srcTop,
+                srcLeft + 1848,
+                srcTop + 720
+            )
+
+            // --- DEST: komplette View ---
+            val dstRect = Rect(0, 0, width, height)
+
+            canvas.drawBitmap(bmp, srcRect, dstRect, null)
+
+        } catch (e: Exception) {
+            AppLog.e("BitmapProjectionView", "Draw error: ${e.message}")
+        } finally {
+            canvas?.let { sfc.unlockCanvasAndPost(it) }
+        }
     }
 
-    override fun removeCallback(callback: IProjectionView.Callbacks) {
-        callbacks.remove(callback)
-    }
+    // ----------------------------------------------------------------
+    // IProjectionView (unverändert)
+    // ----------------------------------------------------------------
+
+    override fun addCallback(callback: IProjectionView.Callbacks) {}
+    override fun removeCallback(callback: IProjectionView.Callbacks) {}
 }
