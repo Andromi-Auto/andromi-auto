@@ -27,7 +27,7 @@ class TextureProjectionView @JvmOverloads constructor(
 
     fun setVideoSize(width: Int, height: Int) {
         if (videoWidth == width && videoHeight == height) return
-        AppLog.i("TextureProjectionView", "Video size set to ${width}x$height")
+        AppLog.i("TextureProjectionView: Video size set to ${width}x$height")
         videoWidth = width
         videoHeight = height
         updateScale()
@@ -50,7 +50,7 @@ class TextureProjectionView @JvmOverloads constructor(
 
     override fun onSurfaceTextureSizeChanged(surfaceTexture: SurfaceTexture, width: Int, height: Int) {
         AppLog.i("TextureProjectionView: Surface size changed: ${width}x$height")
-        //updateScale()
+        updateScale()
     }
 
     override fun onSurfaceTextureDestroyed(surfaceTexture: SurfaceTexture): Boolean {
@@ -80,8 +80,6 @@ class TextureProjectionView @JvmOverloads constructor(
         val displayMetrics = resources.displayMetrics
         val contentWidth = displayMetrics.widthPixels
         val contentHeight = displayMetrics.heightPixels
-        //val contentWidth = 1848f
-        //val contentHeight = 720f
 
         val sourceVideoWidth = videoWidth.toFloat()
         val sourceVideoHeight = videoHeight.toFloat()
