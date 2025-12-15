@@ -77,8 +77,11 @@ class TextureProjectionView @JvmOverloads constructor(
         }
 
         // The dimensions of the content area we want to display
-        val contentWidth = 1848f
-        val contentHeight = 720f
+        val displayMetrics = resources.displayMetrics
+        val contentWidth = displayMetrics.widthPixels
+        val contentHeight = displayMetrics.heightPixels
+        //val contentWidth = 1848f
+        //val contentHeight = 720f
 
         val sourceVideoWidth = videoWidth.toFloat()
         val sourceVideoHeight = videoHeight.toFloat()
@@ -92,8 +95,8 @@ class TextureProjectionView @JvmOverloads constructor(
 
         this.scaleX = finalScaleX
         this.scaleY = finalScaleY
-
-        AppLog.i("TextureProjectionView", "Scale updated. scaleX: $finalScaleX, scaleY: $finalScaleY")
+        AppLog.i("TextureProjectionView: Dimensions: Video: ${videoWidth}x$videoHeight, Content: ${contentWidth}x$contentHeight")
+        AppLog.i("TextureProjectionView: Scale updated. scaleX: $finalScaleX, scaleY: $finalScaleY")
     }
 
 
