@@ -25,12 +25,12 @@ class TextureProjectionView @JvmOverloads constructor(
     // Public API
     // ----------------------------------------------------------------
 
-    fun setVideoSize(width: Int, height: Int) {
+    override fun setVideoSize(width: Int, height: Int) {
         if (videoWidth == width && videoHeight == height) return
         AppLog.i("TextureProjectionView", "Video size set to ${width}x$height")
         videoWidth = width
         videoHeight = height
-        updateScale()
+        ProjectionViewScaler.updateScale(this, videoWidth, videoHeight)
     }
 
     // ----------------------------------------------------------------
@@ -41,16 +41,17 @@ class TextureProjectionView @JvmOverloads constructor(
         AppLog.i("TextureProjectionView: Surface available: ${width}x$height")
         surface = Surface(surfaceTexture)
         surface?.let {
+            callbacks.forEach { cb -> cb.onSurfaceCreated(it) }
             // The width and height of the view are passed here, but the decoder should
             // use the actual video dimensions it parses from the SPS.
             callbacks.forEach { cb -> cb.onSurfaceChanged(it, width, height) }
         }
-        updateScale()
+        ProjectionViewScaler.updateScale(this, videoWidth, videoHeight)
     }
 
     override fun onSurfaceTextureSizeChanged(surfaceTexture: SurfaceTexture, width: Int, height: Int) {
         AppLog.i("TextureProjectionView: Surface size changed: ${width}x$height")
-        updateScale()
+        ProjectionViewScaler.updateScale(this, videoWidth, videoHeight)
     }
 
     override fun onSurfaceTextureDestroyed(surfaceTexture: SurfaceTexture): Boolean {
@@ -68,42 +69,16 @@ class TextureProjectionView @JvmOverloads constructor(
     }
 
     // ----------------------------------------------------------------
-    // Core Transformation Logic
-    // ----------------------------------------------------------------
-
-    private fun updateScale() {
-        if (videoWidth == 0 || videoHeight == 0 || width == 0 || height == 0) {
-            return
-        }
-
-        // The dimensions of the content area we want to display
-        val displayMetrics = resources.displayMetrics
-        val contentWidth = displayMetrics.widthPixels
-        val contentHeight = displayMetrics.heightPixels
-
-        val sourceVideoWidth = videoWidth.toFloat()
-        val sourceVideoHeight = videoHeight.toFloat()
-
-        // This is the magic.
-        // We scale the TextureView itself. Because the default pivot point is the
-        // center, this effectively zooms into the center of the video stream.
-        // The scale factor is the ratio of the full video size to the desired cropped content size.
-        val finalScaleX = (sourceVideoWidth / contentWidth) * 1.0f
-        val finalScaleY = (sourceVideoHeight / contentHeight) * 1.0f
-
-        this.scaleX = finalScaleX
-        this.scaleY = finalScaleY
-        AppLog.i("TextureProjectionView: Dimensions: Video: ${videoWidth}x$videoHeight, Content: ${contentWidth}x$contentHeight")
-        AppLog.i("TextureProjectionView: Scale updated. scaleX: $finalScaleX, scaleY: $finalScaleY")
-    }
-
-
-    // ----------------------------------------------------------------
     // Callbacks
     // ----------------------------------------------------------------
 
     override fun addCallback(callback: IProjectionView.Callbacks) {
         callbacks.add(callback)
+        // If surface is already available, notify immediately.
+        surface?.let {
+            callback.onSurfaceCreated(it)
+            callback.onSurfaceChanged(it, width, height)
+        }
     }
 
     override fun removeCallback(callback: IProjectionView.Callbacks) {

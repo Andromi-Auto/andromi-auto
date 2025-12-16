@@ -2,7 +2,6 @@ package com.andrerinas.headunitrevived.view
 
 import android.content.Context
 import android.util.AttributeSet
-import android.view.Surface
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 import com.andrerinas.headunitrevived.App
@@ -15,6 +14,8 @@ class ProjectionView @JvmOverloads constructor(
 
     private val callbacks = mutableListOf<IProjectionView.Callbacks>()
     private var videoDecoder: VideoDecoder? = null
+    private var videoWidth = 0
+    private var videoHeight = 0
 
     init {
         videoDecoder = App.provide(context).videoDecoder
@@ -26,6 +27,11 @@ class ProjectionView @JvmOverloads constructor(
         videoDecoder?.stop("onDetachedFromWindow")
     }
 
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        ProjectionViewScaler.updateScale(this, videoWidth, videoHeight)
+    }
+
     override fun surfaceCreated(holder: SurfaceHolder) {
         AppLog.i("holder $holder")
         callbacks.forEach { it.onSurfaceCreated(holder.surface) }
@@ -35,6 +41,7 @@ class ProjectionView @JvmOverloads constructor(
         AppLog.i("holder %s, format: %d, width: %d, height: %d", holder, format, width, height)
         videoDecoder?.onSurfaceAvailable(holder.surface)
         callbacks.forEach { it.onSurfaceChanged(holder.surface, width, height) }
+        ProjectionViewScaler.updateScale(this, videoWidth, videoHeight)
     }
 
     override fun surfaceDestroyed(holder: SurfaceHolder) {
@@ -45,9 +52,21 @@ class ProjectionView @JvmOverloads constructor(
 
     override fun addCallback(callback: IProjectionView.Callbacks) {
         callbacks.add(callback)
+        if (holder.surface.isValid) {
+            callback.onSurfaceCreated(holder.surface)
+            callback.onSurfaceChanged(holder.surface, width, height)
+        }
     }
 
     override fun removeCallback(callback: IProjectionView.Callbacks) {
         callbacks.remove(callback)
+    }
+
+    override fun setVideoSize(width: Int, height: Int) {
+        if (videoWidth == width && videoHeight == height) return
+        AppLog.i("ProjectionView", "Video size set to ${width}x$height")
+        videoWidth = width
+        videoHeight = height
+        ProjectionViewScaler.updateScale(this, videoWidth, videoHeight)
     }
 }

@@ -66,6 +66,8 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         AppLog.i("HeadUnit for Android Auto (tm) - Copyright 2011-2015 Michael A. Reid. All Rights Reserved...")
 
         val container = findViewById<android.widget.FrameLayout>(R.id.container)
+        val displayMetrics = resources.displayMetrics
+
         if (settings.viewMode == Settings.ViewMode.TEXTURE) {
             AppLog.i("Using TextureView")
             val textureView = TextureProjectionView(this)
@@ -75,15 +77,13 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
             )
             projectionView = textureView
             container.setBackgroundColor(android.graphics.Color.BLACK)
-
-            // Use the screen spec for the texture view for negotiation
-            val displayMetrics = resources.displayMetrics
-            screenSpec = ScreenSpecProvider.getSpecForTextureView(displayMetrics.widthPixels, displayMetrics.heightPixels, displayMetrics.densityDpi).screenSpec
         } else {
             AppLog.i("Using SurfaceView")
-            screenSpec = ScreenSpecProvider.getSpec(this)
             projectionView = ProjectionView(this)
         }
+        // Use the same screen spec for both views for negotiation
+        screenSpec = ScreenSpecProvider.getSpecForTextureView(displayMetrics.widthPixels, displayMetrics.heightPixels, displayMetrics.densityDpi).screenSpec
+
 
         val view = projectionView as android.view.View
         container.addView(view)
@@ -142,8 +142,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         if (currentVideoWidth > 0 && currentVideoHeight > 0) {
             AppLog.i("[AapProjectionActivity] Decoder already has dimensions: ${currentVideoWidth}x$currentVideoHeight. Applying to view.")
             runOnUiThread {
-                val textureProjectionView = (projectionView as? TextureProjectionView)
-                textureProjectionView?.setVideoSize(currentVideoWidth, currentVideoHeight)
+                projectionView.setVideoSize(currentVideoWidth, currentVideoHeight)
             }
         }
     }
@@ -156,8 +155,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
     override fun onVideoDimensionsChanged(width: Int, height: Int) {
         AppLog.i("[AapProjectionActivity] Received video dimensions: ${width}x$height")
         runOnUiThread {
-            val textureProjectionView = (projectionView as? TextureProjectionView)
-            textureProjectionView?.setVideoSize(width, height)
+            projectionView.setVideoSize(width, height)
         }
     }
 
