@@ -29,9 +29,7 @@ import com.andrerinas.headunitrevived.R
 import com.andrerinas.headunitrevived.aap.AapProjectionActivity
 import com.andrerinas.headunitrevived.utils.AppLog
 import com.andrerinas.headunitrevived.utils.toInetAddress
-import com.andrerinas.headunitrevived.view.BitmapProjectionView
 import java.net.Inet4Address
-import kotlin.math.max
 
 class MainActivity : FragmentActivity() {
 
@@ -166,60 +164,6 @@ class MainActivity : FragmentActivity() {
             updateBackButtonVisibility()
         }
         updateBackButtonVisibility() // Initial check
-
-        val testBitmapButton = findViewById<Button>(R.id.test_bitmap_button)
-        testBitmapButton.setOnClickListener {
-
-            setContentView(R.layout.activity_headunit)
-            AppLog.i("MainActivity Test Bitmap button clicked.")
-
-            // Remove any existing views from mainContentFrame
-            mainContentFrame.removeAllViews()
-
-            // Make mainContentFrame visible and hide other UI elements
-            mainContentFrame.visibility = View.VISIBLE
-            mainButtonsContainer.visibility = View.GONE
-            headerContainer.visibility = View.GONE
-            exitButton.visibility = View.GONE
-            testBitmapButton.visibility = View.GONE
-            backButton.visibility = View.VISIBLE // Show back button to return
-
-            val bitmapView = BitmapProjectionView(this)
-            bitmapView.layoutParams = FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.MATCH_PARENT,
-                FrameLayout.LayoutParams.MATCH_PARENT
-            )
-            val container = findViewById<android.widget.FrameLayout>(R.id.container)
-            container.addView(bitmapView)
-
-            // Load the test bitmap
-            val options = BitmapFactory.Options().apply {
-                inScaled = false // Disable density scaling
-            }
-            val testBitmap = BitmapFactory.decodeResource(resources, R.drawable.screentest, options)
-            if (testBitmap != null) {
-                bitmapView.setBitmap(testBitmap)
-                AppLog.i("MainActivity: Loaded test bitmap ${testBitmap.width}x${testBitmap.height}")
-            } else {
-                AppLog.e("MainActivity", "Failed to load screentest.png")
-            }
-
-            // Handle back press for bitmap view
-            onBackPressedDispatcher.addCallback(this@MainActivity, object : OnBackPressedCallback(true) {
-                override fun handleOnBackPressed() {
-                    setContentView(R.layout.activity_main)
-                    AppLog.d("MainActivity: handleOnBackPressed - removing bitmap view")
-                    mainContentFrame.removeAllViews()
-                    mainContentFrame.visibility = View.GONE
-                    mainButtonsContainer.visibility = View.VISIBLE
-                    headerContainer.visibility = View.VISIBLE
-                    exitButton.visibility = View.VISIBLE
-                    testBitmapButton.visibility = View.VISIBLE
-                    backButton.visibility = View.GONE // Hide back button again
-                    this.remove() // Remove this callback
-                }
-            })
-        }
     }
 
     private fun updateBackButtonVisibility() {

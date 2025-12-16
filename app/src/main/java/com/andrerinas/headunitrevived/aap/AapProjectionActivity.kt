@@ -4,12 +4,12 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.graphics.Matrix
-import android.graphics.RectF
 import android.os.Build
 import android.os.Bundle
 import android.os.SystemClock
 import android.view.KeyEvent
 import android.view.MotionEvent
+import android.widget.FrameLayout
 import com.andrerinas.headunitrevived.App
 import com.andrerinas.headunitrevived.R
 import com.andrerinas.headunitrevived.aap.protocol.messages.TouchEvent
@@ -26,6 +26,7 @@ import com.andrerinas.headunitrevived.view.IProjectionView
 import com.andrerinas.headunitrevived.view.ProjectionView
 import com.andrerinas.headunitrevived.view.TextureProjectionView
 import com.andrerinas.headunitrevived.utils.Settings
+import com.andrerinas.headunitrevived.view.OverlayTouchView
 
 class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, VideoDimensionsListener {
 
@@ -68,9 +69,9 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         if (settings.viewMode == Settings.ViewMode.TEXTURE) {
             AppLog.i("Using TextureView")
             val textureView = TextureProjectionView(this)
-            textureView.layoutParams = android.widget.FrameLayout.LayoutParams(
-                android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
-                android.widget.FrameLayout.LayoutParams.MATCH_PARENT
+            textureView.layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT
             )
             projectionView = textureView
             container.setBackgroundColor(android.graphics.Color.BLACK)
@@ -89,10 +90,18 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
 
         projectionView.addCallback(this)
 
-        view.setOnTouchListener { _, event ->
-            sendTouchEvent(event)
-            true
-        }
+        val overlayView = OverlayTouchView(this)
+        overlayView.layoutParams = FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.MATCH_PARENT,
+            FrameLayout.LayoutParams.MATCH_PARENT
+        )
+
+        overlayView.setOnTouchListener { _, event ->
+                sendTouchEvent(event)
+                true
+            }
+
+        container.addView(overlayView)
     }
 
     override fun onPause() {
@@ -149,29 +158,6 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         runOnUiThread {
             val textureProjectionView = (projectionView as? TextureProjectionView)
             textureProjectionView?.setVideoSize(width, height)
-
-            // Update the touch matrix for correct touch event transformation
-            val view = projectionView as android.view.View
-            val viewWidth = view.width.toFloat()
-            val viewHeight = view.height.toFloat()
-
-            if (viewWidth > 0 && viewHeight > 0 && width > 0 && height > 0) {
-                // Retrieve the actual scaleX and scaleY applied to the TextureProjectionView
-                val actualScaleX = (projectionView as TextureProjectionView).scaleX
-                val actualScaleY = (projectionView as TextureProjectionView).scaleY
-
-                val forwardMatrix = Matrix()
-                // The view is scaled around its center, so we build the forward matrix
-                // the same way.
-                forwardMatrix.setScale(actualScaleX, actualScaleY, viewWidth / 2f, viewHeight / 2f)
-
-                // The touch matrix is the inverse of the view's transformation matrix.
-                if (!forwardMatrix.invert(touchMatrix)) {
-                    AppLog.e("AapProjectionActivity", "Failed to invert the transformation matrix for touch events.")
-                }
-
-                AppLog.i("Touch matrix updated for ${width}x$height video on ${viewWidth}x$viewHeight view. Actual scales: ${actualScaleX}x${actualScaleY}")
-            }
         }
     }
 
@@ -179,26 +165,18 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         val action = TouchEvent.motionEventToAction(event) ?: return
         val ts = SystemClock.elapsedRealtime()
 
-        // Get the raw touch coordinates
-        val rawX = event.getX(event.actionIndex)
-        val rawY = event.getY(event.actionIndex)
-
-        // Apply the inverse transformation for touch events
-        val transformedPoints = floatArrayOf(rawX, rawY)
-        touchMatrix.mapPoints(transformedPoints)
-
         val pointerData = mutableListOf<Triple<Int, Int, Int>>()
         repeat(event.pointerCount) { pointerIndex ->
             val pointerId = event.getPointerId(pointerIndex)
-            val x = transformedPoints[0].toInt()
-            val y = transformedPoints[1].toInt()
+            val x = event.getX(pointerIndex)
+            val y = event.getY(pointerIndex)
 
             // Boundary check against the negotiated screen size
             if (x < 0 || x >= screenSpec.width || y < 0 || y >= screenSpec.height) {
                 AppLog.w("Touch event out of bounds of negotiated screen spec, skipping. x=$x, y=$y, spec=$screenSpec")
                 return
             }
-            pointerData.add(Triple(pointerId, x, y))
+            pointerData.add(Triple(pointerId, x.toInt(), y.toInt()))
         }
 
         transport.send(TouchEvent(ts, action, event.actionIndex, pointerData))

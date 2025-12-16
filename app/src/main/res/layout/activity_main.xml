@@ -225,15 +225,4 @@
         android:textColor="@color/text_primary"
         app:cornerRadius="8dp" />
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/test_bitmap_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|start"
-        android:layout_margin="16dp"
-        android:text="Test Bitmap"
-        android:backgroundTint="@color/material_grey_700"
-        android:textColor="@color/text_primary"
-        app:cornerRadius="8dp" />
-
 </FrameLayout>

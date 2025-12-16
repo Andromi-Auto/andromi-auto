@@ -27,7 +27,7 @@ class TextureProjectionView @JvmOverloads constructor(
 
     fun setVideoSize(width: Int, height: Int) {
         if (videoWidth == width && videoHeight == height) return
-        AppLog.i("TextureProjectionView: Video size set to ${width}x$height")
+        AppLog.i("TextureProjectionView", "Video size set to ${width}x$height")
         videoWidth = width
         videoHeight = height
         updateScale()
@@ -44,11 +44,6 @@ class TextureProjectionView @JvmOverloads constructor(
             // The width and height of the view are passed here, but the decoder should
             // use the actual video dimensions it parses from the SPS.
             callbacks.forEach { cb -> cb.onSurfaceChanged(it, width, height) }
-        }
-        // Set the default buffer size of the SurfaceTexture to the video dimensions
-        // This ensures the underlying buffer matches the video content
-        if (videoWidth > 0 && videoHeight > 0) {
-            surfaceTexture.setDefaultBufferSize(videoWidth, videoHeight)
         }
         updateScale()
     }
@@ -77,10 +72,7 @@ class TextureProjectionView @JvmOverloads constructor(
     // ----------------------------------------------------------------
 
     private fun updateScale() {
-        AppLog.i("TextureProjectionView: updateScale() called. videoWidth=$videoWidth, videoHeight=$videoHeight, view.width=${width}, view.height=${height}")
-
         if (videoWidth == 0 || videoHeight == 0 || width == 0 || height == 0) {
-            AppLog.w("TextureProjectionView: Skipping updateScale due to zero dimensions. Video: ${videoWidth}x$videoHeight, View: ${width}x$height")
             return
         }
 
@@ -101,7 +93,7 @@ class TextureProjectionView @JvmOverloads constructor(
 
         this.scaleX = finalScaleX
         this.scaleY = finalScaleY
-        AppLog.i("TextureProjectionView: Dimensions: Video: ${videoWidth}x$videoHeight, Content (DisplayMetrics): ${contentWidth}x$contentHeight, View: ${width}x$height")
+        AppLog.i("TextureProjectionView: Dimensions: Video: ${videoWidth}x$videoHeight, Content: ${contentWidth}x$contentHeight")
         AppLog.i("TextureProjectionView: Scale updated. scaleX: $finalScaleX, scaleY: $finalScaleY")
     }
 
