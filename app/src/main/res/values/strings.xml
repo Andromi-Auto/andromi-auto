@@ -25,6 +25,9 @@
     <string name="disabled">Disabled</string>
     <string name="resolution">Resolution: %s</string>
     <string name="change_resolution">Change resolution</string>
+    <string name="view_mode">View mode: %s</string>
+    <string name="surface_view">SurfaceView</string>
+    <string name="texture_view">TextureView</string>
 
     <string name="usb_status">USB Status: %s</string>
     <string name="projection_status">Projection Status: %s</string>

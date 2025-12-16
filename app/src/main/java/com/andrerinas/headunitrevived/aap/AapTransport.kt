@@ -68,6 +68,7 @@ class AapTransport(
         }
 
         if (ret < 0) {
+            AppLog.i("Quitting because ret < 0");
             this.quit()
         }
         return@Callback true

@@ -67,3 +67,5 @@ java_*.hprof
 openauto/
 bug/
 WirelessAndroidAutoDongle/
+TestImported
+test_files

@@ -2,6 +2,7 @@ package com.andrerinas.headunitrevived.utils
 
 import android.content.Context
 import com.andrerinas.headunitrevived.App
+import com.andrerinas.headunitrevived.aap.protocol.proto.Control
 import kotlin.math.roundToInt
 
 object ScreenSpecProvider {
@@ -41,5 +42,23 @@ object ScreenSpecProvider {
         val finalSpec = ScreenSpec(width, height, densityDpi)
         AppLog.i("[ScreenSpecProvider] Final negotiated spec: $finalSpec")
         return finalSpec
+    }
+
+    fun getSpecForTextureView(screenWidth: Int, screenHeight: Int, densityDpi: Int): TextureViewSpec {
+        val resolutions = Settings.Resolution.allResolutions.filter { it != Settings.Resolution.AUTO }
+
+        val bestResolution = resolutions.firstOrNull { it.width >= screenWidth && it.height >= screenHeight }
+            ?: resolutions.last()
+
+        // first bring actual screen width and height in proportion to best resolution:
+        //val scale = screenWidth / bestResolution.width
+        //val scaledHeight = screenHeight * scale
+
+        val phoneWidthMargin = (bestResolution.width - screenWidth) / 2
+        val phoneHeightMargin = (bestResolution.height - screenHeight) / 2
+
+        val screenSpec = ScreenSpec(bestResolution.width, bestResolution.height, densityDpi)
+
+        return TextureViewSpec(screenSpec, bestResolution, phoneHeightMargin, phoneHeightMargin, phoneWidthMargin, phoneWidthMargin)
     }
 }
