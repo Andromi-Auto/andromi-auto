@@ -46,7 +46,7 @@ android {
         targetSdk = 34
 
         versionCode = 22
-        versionName = "1.0"
+        versionName = "1.2.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner" // Added for multidex
 
@@ -114,5 +114,19 @@ android {
         (this as KotlinJvmOptions).let {
            it.jvmTarget = "1.8"
         }
+    }
+
+    applicationVariants.all {
+        val variant = this
+        variant.outputs
+            .map { it as com.android.build.gradle.internal.api.BaseVariantOutputImpl }
+            .forEach { output ->
+                var outputFileName = "${variant.applicationId}_${variant.versionName}_debug.apk"
+                if(variant.buildType.name == "release") {
+                    outputFileName = "${variant.applicationId}_${variant.versionName}.apk"
+                    output.outputFileName = outputFileName
+                }
+                output.outputFileName = outputFileName
+            }
     }
 }
