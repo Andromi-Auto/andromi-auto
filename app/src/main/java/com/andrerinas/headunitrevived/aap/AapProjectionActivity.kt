@@ -3,13 +3,13 @@ package com.andrerinas.headunitrevived.aap
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.graphics.Matrix
 import android.os.Build
 import android.os.Bundle
 import android.os.SystemClock
 import android.view.KeyEvent
 import android.view.MotionEvent
-import android.view.SurfaceHolder
-import android.view.SurfaceView
+import android.widget.FrameLayout
 import com.andrerinas.headunitrevived.App
 import com.andrerinas.headunitrevived.R
 import com.andrerinas.headunitrevived.aap.protocol.messages.TouchEvent
@@ -17,16 +17,24 @@ import com.andrerinas.headunitrevived.aap.protocol.messages.VideoFocusEvent
 import com.andrerinas.headunitrevived.app.SurfaceActivity
 import com.andrerinas.headunitrevived.contract.KeyIntent
 import com.andrerinas.headunitrevived.decoder.VideoDecoder
+import com.andrerinas.headunitrevived.decoder.VideoDimensionsListener
 import com.andrerinas.headunitrevived.utils.AppLog
 import com.andrerinas.headunitrevived.utils.IntentFilters
 import com.andrerinas.headunitrevived.utils.ScreenSpec
 import com.andrerinas.headunitrevived.utils.ScreenSpecProvider
+import com.andrerinas.headunitrevived.view.IProjectionView
+import com.andrerinas.headunitrevived.view.ProjectionView
+import com.andrerinas.headunitrevived.view.TextureProjectionView
+import com.andrerinas.headunitrevived.utils.Settings
+import com.andrerinas.headunitrevived.view.OverlayTouchView
 
-class AapProjectionActivity : SurfaceActivity(), SurfaceHolder.Callback {
+class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, VideoDimensionsListener {
 
-    private lateinit var surface: SurfaceView // Added lateinit var for surface
+    private lateinit var projectionView: IProjectionView
+    private lateinit var screenSpec: ScreenSpec
     private val videoDecoder: VideoDecoder by lazy { App.provide(this).videoDecoder }
-    private val screenSpec: ScreenSpec by lazy { ScreenSpecProvider.getSpec(this) }
+    private val settings: Settings by lazy { Settings(this) }
+    private val touchMatrix = Matrix()
 
 
     private val disconnectReceiver = object : BroadcastReceiver() {
@@ -51,16 +59,49 @@ class AapProjectionActivity : SurfaceActivity(), SurfaceHolder.Callback {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_headunit) // Set content view
+        setContentView(R.layout.activity_headunit)
+
+        videoDecoder.dimensionsListener = this
 
         AppLog.i("HeadUnit for Android Auto (tm) - Copyright 2011-2015 Michael A. Reid. All Rights Reserved...")
 
-        surface = findViewById(R.id.surface) // Initialize surface
-        surface.holder.addCallback(this) // Changed setSurfaceCallback to holder.addCallback
-        surface.setOnTouchListener { _, event ->
-            sendTouchEvent(event)
-            true
+        val container = findViewById<android.widget.FrameLayout>(R.id.container)
+        val displayMetrics = resources.displayMetrics
+
+        if (settings.viewMode == Settings.ViewMode.TEXTURE) {
+            AppLog.i("Using TextureView")
+            val textureView = TextureProjectionView(this)
+            textureView.layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT
+            )
+            projectionView = textureView
+            container.setBackgroundColor(android.graphics.Color.BLACK)
+        } else {
+            AppLog.i("Using SurfaceView")
+            projectionView = ProjectionView(this)
         }
+        // Use the same screen spec for both views for negotiation
+        screenSpec = ScreenSpecProvider.getSpecForTextureView(displayMetrics.widthPixels, displayMetrics.heightPixels, displayMetrics.densityDpi).screenSpec
+
+
+        val view = projectionView as android.view.View
+        container.addView(view)
+
+        projectionView.addCallback(this)
+
+        val overlayView = OverlayTouchView(this)
+        overlayView.layoutParams = FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.MATCH_PARENT,
+            FrameLayout.LayoutParams.MATCH_PARENT
+        )
+
+        overlayView.setOnTouchListener { _, event ->
+                sendTouchEvent(event)
+                true
+            }
+
+        container.addView(overlayView)
     }
 
     override fun onPause() {
@@ -83,34 +124,50 @@ class AapProjectionActivity : SurfaceActivity(), SurfaceHolder.Callback {
     val transport: AapTransport
         get() = App.provide(this).transport
 
-    override fun surfaceCreated(holder: SurfaceHolder) {
-        AppLog.i("[AapProjectionActivity] surfaceCreated. Configuring decoder with negotiated spec: ${screenSpec.width}x${screenSpec.height}")
-        videoDecoder.onSurfaceHolderAvailable(holder, screenSpec.width, screenSpec.height)
+    override fun onSurfaceCreated(surface: android.view.Surface) {
+        AppLog.i("[AapProjectionActivity] onSurfaceCreated")
+        // Decoder configuration is now in onSurfaceChanged
     }
 
-    override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
-        AppLog.i("[AapProjectionActivity] surfaceChanged. Actual surface dimensions: width=$width, height=$height")
+    override fun onSurfaceChanged(surface: android.view.Surface, width: Int, height: Int) {
+        AppLog.i("[AapProjectionActivity] onSurfaceChanged. Actual surface dimensions: width=$width, height=$height")
+        videoDecoder.onSurfaceAvailable(surface)
         transport.send(VideoFocusEvent(gain = true, unsolicited = false))
+
+        // Explicitly check and set video dimensions if already known by the decoder
+        // This handles cases where the activity is recreated but the decoder already has dimensions
+        val currentVideoWidth = videoDecoder.videoWidth
+        val currentVideoHeight = videoDecoder.videoHeight
+
+        if (currentVideoWidth > 0 && currentVideoHeight > 0) {
+            AppLog.i("[AapProjectionActivity] Decoder already has dimensions: ${currentVideoWidth}x$currentVideoHeight. Applying to view.")
+            runOnUiThread {
+                projectionView.setVideoSize(currentVideoWidth, currentVideoHeight)
+            }
+        }
     }
 
-    override fun surfaceDestroyed(holder: SurfaceHolder) {
+    override fun onSurfaceDestroyed(surface: android.view.Surface) {
         transport.send(VideoFocusEvent(gain = false, unsolicited = false))
         videoDecoder.stop("surfaceDestroyed")
+    }
+
+    override fun onVideoDimensionsChanged(width: Int, height: Int) {
+        AppLog.i("[AapProjectionActivity] Received video dimensions: ${width}x$height")
+        runOnUiThread {
+            projectionView.setVideoSize(width, height)
+        }
     }
 
     private fun sendTouchEvent(event: MotionEvent) {
         val action = TouchEvent.motionEventToAction(event) ?: return
         val ts = SystemClock.elapsedRealtime()
 
-        // Scale touch events from the actual surface size to the negotiated screen size.
-        val scaleX = screenSpec.width.toFloat() / surface.width.toFloat()
-        val scaleY = screenSpec.height.toFloat() / surface.height.toFloat()
-
         val pointerData = mutableListOf<Triple<Int, Int, Int>>()
         repeat(event.pointerCount) { pointerIndex ->
             val pointerId = event.getPointerId(pointerIndex)
-            val x = event.getX(pointerIndex) * scaleX
-            val y = event.getY(pointerIndex) * scaleY
+            val x = event.getX(pointerIndex)
+            val y = event.getY(pointerIndex)
 
             // Boundary check against the negotiated screen size
             if (x < 0 || x >= screenSpec.width || y < 0 || y >= screenSpec.height) {
@@ -139,6 +196,11 @@ class AapProjectionActivity : SurfaceActivity(), SurfaceHolder.Callback {
 
     private fun onKeyEvent(keyCode: Int, isPress: Boolean) {
         transport.send(keyCode, isPress)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        videoDecoder.dimensionsListener = null
     }
 
     companion object {

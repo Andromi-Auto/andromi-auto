@@ -29,6 +29,7 @@ class SettingsFragment : Fragment() {
     private lateinit var btAddressButton: Button
     private lateinit var debugModeButton: Button // Added debug mode button
     private lateinit var resolutionButton: Button
+    private lateinit var viewModeButton: Button
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.fragment_settings, container, false)
@@ -44,6 +45,7 @@ class SettingsFragment : Fragment() {
         btAddressButton = view.findViewById(R.id.btAddressButton)
         debugModeButton = view.findViewById(R.id.debugModeButton) // Initialize debug mode button
         resolutionButton = view.findViewById(R.id.resolutionButton)
+        viewModeButton = view.findViewById(R.id.viewModeButton)
 
         keymapButton.setOnClickListener {
             parentFragmentManager.
@@ -126,6 +128,21 @@ class SettingsFragment : Fragment() {
                     settings.resolutionId = which
                     val newResolution = Settings.Resolution.fromId(which)!!
                     resolutionButton.text = getString(R.string.resolution, newResolution.resName)
+                    dialog.dismiss()
+                }
+                .show()
+        }
+
+        val viewMode = settings.viewMode
+        viewModeButton.text = getString(R.string.view_mode, if (viewMode == Settings.ViewMode.SURFACE) getString(R.string.surface_view) else getString(R.string.texture_view))
+        viewModeButton.setOnClickListener {
+            val viewModes = arrayOf(getString(R.string.surface_view), getString(R.string.texture_view))
+            AlertDialog.Builder(activity)
+                .setTitle(R.string.view_mode)
+                .setSingleChoiceItems(viewModes, settings.viewMode.value) { dialog, which ->
+                    val newViewMode = Settings.ViewMode.fromInt(which)!!
+                    settings.viewMode = newViewMode
+                    viewModeButton.text = getString(R.string.view_mode, if (newViewMode == Settings.ViewMode.SURFACE) getString(R.string.surface_view) else getString(R.string.texture_view))
                     dialog.dismiss()
                 }
                 .show()
