@@ -138,7 +138,7 @@ class SettingsFragment : Fragment() {
         viewModeButton.setOnClickListener {
             val viewModes = arrayOf(getString(R.string.surface_view), getString(R.string.texture_view))
             AlertDialog.Builder(activity)
-                .setTitle(R.string.view_mode)
+                .setTitle(R.string.change_view_mode)
                 .setSingleChoiceItems(viewModes, settings.viewMode.value) { dialog, which ->
                     val newViewMode = Settings.ViewMode.fromInt(which)!!
                     settings.viewMode = newViewMode
