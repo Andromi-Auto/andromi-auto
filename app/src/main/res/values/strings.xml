@@ -25,7 +25,7 @@
     <string name="disabled">Disabled</string>
     <string name="resolution">Resolution: %s</string>
     <string name="change_resolution">Change resolution</string>
-    <string name="view_mode">View mode: %s</string>
+    <string name="view_mode">View mode:</string>
     <string name="surface_view">SurfaceView</string>
     <string name="texture_view">TextureView</string>
 
