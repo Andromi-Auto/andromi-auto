@@ -99,9 +99,9 @@ class AapService : Service(), UsbReceiver.Listener {
 
         val noty = NotificationCompat.Builder(this, App.defaultChannel)
                 .setSmallIcon(R.drawable.ic_stat_aa)
-                .setTicker("HeadUnit is running")
+                .setTicker("Headunit Revived is running")
                 .setWhen(System.currentTimeMillis())
-                .setContentTitle("HeadUnit is running")
+                .setContentTitle("Headunit Revived is running")
                 .setContentText("...")
                 .setAutoCancel(false)
                 .setOngoing(true)

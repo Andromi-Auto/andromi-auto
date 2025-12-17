@@ -30,6 +30,7 @@ https://github.com/mikereidis/headunit
 - Go to your phones wifi settings and search for your IP-Address eg: 192.168.1.25
 - Open Headunit Revived and click on the wireless button
 - Add the IP-Address of your phone and click on it to start Android Auto
+- IMPORTANT: In my tests it only works, if your phone is unlocked AND shows the Android Auto settings page! Otherwise it won't connect
 
 ### Known Issues
 - Often the wireless connection won't start. I need more debugging why
