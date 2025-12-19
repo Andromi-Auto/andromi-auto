@@ -58,7 +58,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
 
         videoDecoder.dimensionsListener = this
 
-        AppLog.i("HeadUnit for Android Auto (tm) - Copyright 2011-2015 Michael A. Reid. All Rights Reserved...")
+        AppLog.i("HeadUnit for Android Auto (tm) - Copyright 2011-2015 Michael A. Reid., since 2025 André Rinas All Rights Reserved...")
 
         val container = findViewById<android.widget.FrameLayout>(R.id.container)
         val displayMetrics = resources.displayMetrics

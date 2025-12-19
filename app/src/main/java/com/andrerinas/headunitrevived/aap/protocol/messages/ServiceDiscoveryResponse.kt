@@ -58,10 +58,6 @@ class ServiceDiscoveryResponse(private val context: Context)
 
                     AppLog.i("[ServiceDiscovery] NegotiatedResolution is: ${HeadUnitScreenConfig.getNegotiatedWidth()}x${HeadUnitScreenConfig.getNegotiatedHeight()}")
                     AppLog.i("[ServiceDiscovery] Margins are: ${phoneWidthMargin}x${phoneHeightMargin}")
-                    AppLog.i("[ServiceDiscovery] Density Values: ${HeadUnitScreenConfig.getDensityWidth()}")
-
-
-
 
                     mediaSinkServiceBuilder.addVideoConfigs(Control.Service.MediaSinkService.VideoConfiguration.newBuilder().apply {
                         codecResolution = negotiatedResolution
