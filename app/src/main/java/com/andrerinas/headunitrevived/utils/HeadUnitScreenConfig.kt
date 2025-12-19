@@ -1,38 +1,34 @@
 package com.andrerinas.headunitrevived.utils
 
-import android.content.Context
+import android.util.DisplayMetrics
 import android.util.Log
 import com.andrerinas.headunitrevived.aap.protocol.proto.Control
 import kotlin.math.roundToInt
 
 object HeadUnitScreenConfig {
 
-    // Corresponds to f7508a in decompiled e4.a.java
     private var screenWidthPx: Int = 0
-    // Corresponds to f7509b in decompiled e4.a.java
     private var screenHeightPx: Int = 0
-    // Corresponds to f7510c in decompiled e4.a.java
+    private var density: Float = 1.0f
     private var scaleFactor: Float = 1.0f
-    // Corresponds to f7511d in decompiled e4.a.java
     private var isSmallScreen: Boolean = true
-    // Corresponds to f7512e in decompiled e4.a.java
     private var isPortraitScaled: Boolean = false
-    // Corresponds to f7513f in decompiled e4.a.java
     var negotiatedResolutionType: Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType? = null
 
-    // Corresponds to a(int i6, int i7, Context context)
-    fun init(widthPx: Int, heightPx: Int, context: Context) {
-        if (widthPx == 0 || heightPx == 0) {
+    fun init(displayMetrics: DisplayMetrics) {
+        screenWidthPx = displayMetrics.widthPixels
+        screenHeightPx = displayMetrics.heightPixels
+        density = displayMetrics.density
+
+        if (screenWidthPx == 0 || screenHeightPx == 0) {
             return
         }
-        Log.d("CarScreen", "width: $widthPx height: $heightPx")
-        screenWidthPx = widthPx
-        screenHeightPx = heightPx
+        AppLog.i("CarScreen: width: $screenWidthPx height: $screenHeightPx")
 
         // Save to SharedPreferences - this part is not strictly needed for calculation but was in original
-        val prefs = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
-        prefs.edit().putInt("screenWidth", widthPx).apply()
-        prefs.edit().putInt("screenHeight", heightPx).apply()
+        /*val prefs = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
+        prefs.edit { putInt("screenWidth", widthPx) }
+        prefs.edit { putInt("screenHeight", heightPx) }*/
 
         // Determine negotiatedResolutionType (f7513f) based on physical pixels
         if (screenHeightPx > screenWidthPx) { // Portrait mode
@@ -68,7 +64,7 @@ object HeadUnitScreenConfig {
                 scaleFactor = (f6 * 1.0f) / getNegotiatedWidth().toFloat()
             }
         }
-        Log.d("CarScreen", "using: $negotiatedResolutionType, number: ${negotiatedResolutionType?.number}")
+        AppLog.i("CarScreen using: $negotiatedResolutionType, number: ${negotiatedResolutionType?.number}, scales: scaleX: ${getScaleX()}, scaleY: ${getScaleY()}")
     }
 
     // Corresponds to b()
@@ -100,28 +96,28 @@ object HeadUnitScreenConfig {
 
     // Corresponds to g()
     fun getHeightMargin(): Int {
-        Log.d("CarScreen", "Zoom is: $scaleFactor, adjusted height: ${getAdjustedHeight()}")
+        AppLog.i("CarScreen: Zoom is: $scaleFactor, adjusted height: ${getAdjustedHeight()}")
         val margin = ((getAdjustedHeight() - screenHeightPx) / scaleFactor).roundToInt()
         return margin.coerceAtLeast(0)
     }
 
     // Corresponds to j()
     fun getWidthMargin(): Int {
-        Log.d("CarScreen", "Zoom is: $scaleFactor, adjusted width: ${getAdjustedWidth()}")
         val margin = ((getAdjustedWidth() - screenWidthPx) / scaleFactor).roundToInt()
+        AppLog.i("CarScreen: Zoom is: $scaleFactor, adjusted width: ${getAdjustedWidth()}")
         return margin.coerceAtLeast(0)
     }
 
     // Corresponds to k()
     fun getHorizontalCorrection(): Float {
-        Log.d("CarScreen", "Horizontal correction: 0, width ${getNegotiatedWidth()}, marg: ${getWidthMargin()}, width: $screenWidthPx")
+        AppLog.i("CarScreen: Horizontal correction: 0, width ${getNegotiatedWidth()}, marg: ${getWidthMargin()}, width: $screenWidthPx")
         return (getNegotiatedWidth() - getWidthMargin()).toFloat() / screenWidthPx.toFloat()
     }
 
     // Corresponds to o()
     fun getVerticalCorrection(): Float {
         val fIntValue = (getNegotiatedHeight() - getHeightMargin()).toFloat() / screenHeightPx.toFloat()
-        Log.d("CarScreen", "Vertical correction: $fIntValue, height ${getNegotiatedHeight()}, marg: ${getHeightMargin()}, height: $screenHeightPx")
+        AppLog.i("CarScreen: Vertical correction: $fIntValue, height ${getNegotiatedHeight()}, marg: ${getHeightMargin()}, height: $screenHeightPx")
         return fIntValue
     }
 
@@ -150,5 +146,17 @@ object HeadUnitScreenConfig {
             return 1.0f
         }
         return divideOrOne((screenWidthPx.toFloat() / screenHeightPx.toFloat()), getAspectRatio())
+    }
+
+    fun getDensityWidth(): Int {
+        return (screenWidthPx / density).roundToInt()
+    }
+
+    fun getDensityHeight(): Int {
+        return (screenHeightPx / density).roundToInt()
+    }
+
+    fun getDensityDpi(): Int {
+        return density.roundToInt()
     }
 }

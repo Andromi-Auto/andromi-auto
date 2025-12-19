@@ -3,7 +3,6 @@ package com.andrerinas.headunitrevived.aap
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.graphics.Matrix
 import android.os.Build
 import android.os.Bundle
 import android.os.SystemClock
@@ -20,22 +19,18 @@ import com.andrerinas.headunitrevived.decoder.VideoDecoder
 import com.andrerinas.headunitrevived.decoder.VideoDimensionsListener
 import com.andrerinas.headunitrevived.utils.AppLog
 import com.andrerinas.headunitrevived.utils.IntentFilters
-import com.andrerinas.headunitrevived.utils.ScreenSpec
-import com.andrerinas.headunitrevived.utils.ScreenSpecProvider
 import com.andrerinas.headunitrevived.view.IProjectionView
 import com.andrerinas.headunitrevived.view.ProjectionView
 import com.andrerinas.headunitrevived.view.TextureProjectionView
 import com.andrerinas.headunitrevived.utils.Settings
 import com.andrerinas.headunitrevived.view.OverlayTouchView
+import com.andrerinas.headunitrevived.utils.HeadUnitScreenConfig
 
 class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, VideoDimensionsListener {
 
     private lateinit var projectionView: IProjectionView
-    private lateinit var screenSpec: ScreenSpec
     private val videoDecoder: VideoDecoder by lazy { App.provide(this).videoDecoder }
     private val settings: Settings by lazy { Settings(this) }
-    private val touchMatrix = Matrix()
-
 
     private val disconnectReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -81,9 +76,8 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
             AppLog.i("Using SurfaceView")
             projectionView = ProjectionView(this)
         }
-        // Use the same screen spec for both views for negotiation
-        screenSpec = ScreenSpecProvider.getSpecForTextureView(displayMetrics.widthPixels, displayMetrics.heightPixels, displayMetrics.densityDpi).screenSpec
-
+        // Use the same screen conf for both views for negotiation
+        HeadUnitScreenConfig.init(displayMetrics)
 
         val view = projectionView as android.view.View
         container.addView(view)
@@ -170,10 +164,10 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
             val y = event.getY(pointerIndex)
 
             // Boundary check against the negotiated screen size
-            if (x < 0 || x >= screenSpec.width || y < 0 || y >= screenSpec.height) {
-                AppLog.w("Touch event out of bounds of negotiated screen spec, skipping. x=$x, y=$y, spec=$screenSpec")
-                return
-            }
+//            if (x < 0 || x >= screenSpec.width || y < 0 || y >= screenSpec.height) {
+//                AppLog.w("Touch event out of bounds of negotiated screen spec, skipping. x=$x, y=$y, spec=$screenSpec")
+//                return
+//            }
             pointerData.add(Triple(pointerId, x.toInt(), y.toInt()))
         }
 
