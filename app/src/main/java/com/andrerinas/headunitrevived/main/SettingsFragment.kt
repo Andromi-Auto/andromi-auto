@@ -13,12 +13,6 @@ import com.andrerinas.headunitrevived.R
 import com.andrerinas.headunitrevived.decoder.MicRecorder
 import com.andrerinas.headunitrevived.utils.Settings
 
-// Removed import kotlinx.android.synthetic.main.fragment_settings.*
-
-/**
- * @author algavris
- * @date 13/06/2017
- */
 class SettingsFragment : Fragment() {
     lateinit var settings: Settings
 
@@ -27,7 +21,7 @@ class SettingsFragment : Fragment() {
     private lateinit var micSampleRateButton: Button
     private lateinit var nightModeButton: Button
     private lateinit var btAddressButton: Button
-    private lateinit var debugModeButton: Button // Added debug mode button
+    private lateinit var debugModeButton: Button
     private lateinit var resolutionButton: Button
     private lateinit var viewModeButton: Button
 
@@ -36,14 +30,14 @@ class SettingsFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState) // Call super.onViewCreated
+        super.onViewCreated(view, savedInstanceState)
 
         keymapButton = view.findViewById(R.id.keymapButton)
         gpsNavigationButton = view.findViewById(R.id.gpsNavigationButton)
         micSampleRateButton = view.findViewById(R.id.micSampleRateButton)
         nightModeButton = view.findViewById(R.id.nightModeButton)
         btAddressButton = view.findViewById(R.id.btAddressButton)
-        debugModeButton = view.findViewById(R.id.debugModeButton) // Initialize debug mode button
+        debugModeButton = view.findViewById(R.id.debugModeButton)
         resolutionButton = view.findViewById(R.id.resolutionButton)
         viewModeButton = view.findViewById(R.id.viewModeButton)
 
@@ -51,16 +45,16 @@ class SettingsFragment : Fragment() {
             parentFragmentManager.
                 beginTransaction()
                         .replace(R.id.main_content, KeymapFragment())
-                        .addToBackStack(null) // Added to back stack
+                        .addToBackStack(null)
                         .commit()
         }
 
-        settings = Settings(requireContext()) // Use requireContext()
+        settings = Settings(requireContext())
 
         gpsNavigationButton.text = getString(R.string.gps_for_navigation, if (settings.useGpsForNavigation) getString(R.string.enabled) else getString(R.string.disabled) )
         gpsNavigationButton.tag = settings.useGpsForNavigation
         gpsNavigationButton.setOnClickListener {
-            val newValue = !(it.tag as Boolean) // Type-safe cast
+            val newValue = !(it.tag as Boolean)
             it.tag = newValue
             settings.useGpsForNavigation = newValue
             (it as Button).text = getString(R.string.gps_for_navigation, if (newValue) getString(R.string.enabled) else getString(R.string.disabled) )
@@ -70,7 +64,7 @@ class SettingsFragment : Fragment() {
         micSampleRateButton.text = getString(R.string.mic_sample_rate, sampleRate/1000)
         micSampleRateButton.tag = sampleRate
         micSampleRateButton.setOnClickListener {
-            val newValue = Settings.MicSampleRates[it.tag as Int]!! // Type-safe cast
+            val newValue = Settings.MicSampleRates[it.tag as Int]!!
 
             val recorder: MicRecorder? = try { MicRecorder(newValue, requireContext().applicationContext) } catch (e: Exception) { null }
 
@@ -89,7 +83,7 @@ class SettingsFragment : Fragment() {
         nightModeButton.text = getString(R.string.night_mode, nightModeTitles[nightMode.value])
         nightModeButton.tag = nightMode.value
         nightModeButton.setOnClickListener {
-            val newValue = Settings.NightModes[it.tag as Int]!! // Type-safe cast
+            val newValue = Settings.NightModes[it.tag as Int]!!
             val newMode = Settings.NightMode.fromInt(newValue)!!
             (it as Button).text = getString(R.string.night_mode, nightModeTitles[newMode.value])
             it.tag = newValue

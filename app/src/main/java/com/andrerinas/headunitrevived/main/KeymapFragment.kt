@@ -17,6 +17,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.andrerinas.headunitrevived.R
 import com.andrerinas.headunitrevived.contract.KeyIntent
+import com.andrerinas.headunitrevived.utils.AppLog
 import com.andrerinas.headunitrevived.utils.IntentFilters
 import com.andrerinas.headunitrevived.utils.Settings
 
@@ -165,15 +166,15 @@ class KeymapFragment : Fragment(), MainActivity.KeyListener, View.OnClickListene
         {
             // clear previous values
             (codesMap.entries.find {
-                it.value == event.keyCode
+                it.value == keyCode
             })?.let {
                 codesMap.remove(it.key)
             }
-            codesMap.put(this.assignCode, event.keyCode)
+            codesMap.put(this.assignCode, keyCode)
             settings.keyCodes = codesMap
 
             val name = KeyEvent.keyCodeToString(this.assignCode)
-            Toast.makeText(activity, "'$name' has been assigned to ${this.assignCode}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(activity, "'$name' has been assigned to $keyName ($keyCode)", Toast.LENGTH_SHORT).show()
             this.assignCode = KeyEvent.KEYCODE_UNKNOWN
         }
 
