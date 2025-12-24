@@ -22,7 +22,7 @@ class ServiceDiscoveryResponse(private val context: Context)
             val settings = App.provide(context).settings
 
             // Initialize HeadUnitScreenConfig with actual physical screen dimensions
-            HeadUnitScreenConfig.init(context.resources.displayMetrics)
+            HeadUnitScreenConfig.init(context.resources.displayMetrics, settings)
 
             val services = mutableListOf<Control.Service>()
 

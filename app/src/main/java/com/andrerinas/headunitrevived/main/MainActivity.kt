@@ -146,11 +146,19 @@ class MainActivity : FragmentActivity() {
 
         viewModel.register()
 
+        val permissionsToRequest = mutableListOf(
+            Manifest.permission.RECORD_AUDIO,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        )
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            permissionsToRequest.add(Manifest.permission.POST_NOTIFICATIONS)
+        }
+
         ActivityCompat.requestPermissions(
-            this, arrayOf(
-                Manifest.permission.RECORD_AUDIO,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ), permissionRequestCode
+            this,
+            permissionsToRequest.toTypedArray(),
+            permissionRequestCode
         )
 
         if (savedInstanceState == null) {

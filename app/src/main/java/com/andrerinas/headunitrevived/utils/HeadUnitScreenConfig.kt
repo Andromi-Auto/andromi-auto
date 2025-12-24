@@ -1,7 +1,6 @@
 package com.andrerinas.headunitrevived.utils
 
 import android.util.DisplayMetrics
-import android.util.Log
 import com.andrerinas.headunitrevived.aap.protocol.proto.Control
 import kotlin.math.roundToInt
 
@@ -14,9 +13,18 @@ object HeadUnitScreenConfig {
     private var scaleFactor: Float = 1.0f
     private var isSmallScreen: Boolean = true
     private var isPortraitScaled: Boolean = false
+    private var isInitialized: Boolean = false // New flag
     var negotiatedResolutionType: Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType? = null
 
-    fun init(displayMetrics: DisplayMetrics) {
+    fun init(displayMetrics: DisplayMetrics, settings: Settings) {
+        if (isInitialized) {
+            AppLog.i("HeadUnitScreenConfig already initialized. Skipping subsequent calls.")
+            return
+        }
+        isInitialized = true
+
+        val selectedResolution = Settings.Resolution.fromId(settings.resolutionId)
+
         screenWidthPx = displayMetrics.widthPixels
         screenHeightPx = displayMetrics.heightPixels
         density = displayMetrics.density
@@ -27,32 +35,36 @@ object HeadUnitScreenConfig {
         }
         AppLog.i("CarScreen: width: $screenWidthPx height: $screenHeightPx")
 
-        // Save to SharedPreferences - this part is not strictly needed for calculation but was in original
-        /*val prefs = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
-        prefs.edit { putInt("screenWidth", widthPx) }
-        prefs.edit { putInt("screenHeight", heightPx) }*/
-
-        // Determine negotiatedResolutionType based on physical pixels
+        // check if small screen
         if (screenHeightPx > screenWidthPx) { // Portrait mode
-            if (screenWidthPx > 720 || screenHeightPx > 1280) {
-                if (screenWidthPx > 1080 || screenHeightPx > 1920) {
-                    isSmallScreen = false
-                }
-                negotiatedResolutionType = Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType._1080x1920
-            } else {
-                negotiatedResolutionType = Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType._720x1280
+            if (screenWidthPx > 1080 || screenHeightPx > 1920) {
+                isSmallScreen = false
             }
-        } else { // Landscape mode
-            if (screenWidthPx <= 800 && screenHeightPx <= 480) {
-                negotiatedResolutionType = Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType._800x480
-            } else if (screenWidthPx > 1280 || screenHeightPx > 720) {
-                if (screenWidthPx > 1920 || screenHeightPx > 1080) {
-                    isSmallScreen = false
-                }
-                negotiatedResolutionType = Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType._1920x1080
-            } else {
-                negotiatedResolutionType = Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType._1280x720
+        } else {
+            if (screenWidthPx > 1920 || screenHeightPx > 1080) {
+                isSmallScreen = false
             }
+        }
+
+        // Determine negotiatedResolutionType based on physical pixels if AUTO was selected
+        if (selectedResolution == Settings.Resolution.AUTO) {
+            if (screenHeightPx > screenWidthPx) { // Portrait mode
+                if (screenWidthPx > 720 || screenHeightPx > 1280) {
+                    negotiatedResolutionType = Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType._1080x1920
+                } else {
+                    negotiatedResolutionType = Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType._720x1280
+                }
+            } else { // Landscape mode
+                if (screenWidthPx <= 800 && screenHeightPx <= 480) {
+                    negotiatedResolutionType = Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType._800x480
+                } else if (screenWidthPx > 1280 || screenHeightPx > 720) {
+                    negotiatedResolutionType = Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType._1920x1080
+                } else {
+                    negotiatedResolutionType = Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType._1280x720
+                }
+            }
+        } else {
+            negotiatedResolutionType = selectedResolution?.codec
         }
 
         if (!isSmallScreen) {
@@ -66,6 +78,7 @@ object HeadUnitScreenConfig {
                 scaleFactor = (sWidth * 1.0f) / getNegotiatedWidth().toFloat()
             }
         }
+        AppLog.i("CarScreen isSmallScreen: $isSmallScreen, scaleFactor: ${scaleFactor}")
         AppLog.i("CarScreen using: $negotiatedResolutionType, number: ${negotiatedResolutionType?.number}, scales: scaleX: ${getScaleX()}, scaleY: ${getScaleY()}")
     }
 
@@ -108,6 +121,7 @@ object HeadUnitScreenConfig {
     }
 
     fun getScaleX(): Float {
+        AppLog.i("GetScaleX: getNegotiatedWidth: ${getNegotiatedWidth()}, screenWidthPx: $screenWidthPx")
         if (getNegotiatedWidth() > screenWidthPx) {
             return divideOrOne(getNegotiatedWidth().toFloat(), screenWidthPx.toFloat())
         }
