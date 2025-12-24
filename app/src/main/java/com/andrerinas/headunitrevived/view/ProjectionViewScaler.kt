@@ -1,7 +1,9 @@
 package com.andrerinas.headunitrevived.view
 
 import android.view.View
+import com.andrerinas.headunitrevived.App
 import com.andrerinas.headunitrevived.utils.AppLog
+import com.andrerinas.headunitrevived.utils.HeadUnitScreenConfig
 
 object ProjectionViewScaler {
 
@@ -15,19 +17,15 @@ object ProjectionViewScaler {
         val contentWidth = displayMetrics.widthPixels
         val contentHeight = displayMetrics.heightPixels
 
-        val sourceVideoWidth = videoWidth.toFloat()
-        val sourceVideoHeight = videoHeight.toFloat()
+        HeadUnitScreenConfig.init(displayMetrics, App.provide(view.context).settings)
 
-        // This is the magic.
-        // We scale the View itself. Because the default pivot point is the
-        // center, this effectively zooms into the center of the video stream.
-        // The scale factor is the ratio of the full video size to the desired cropped content size.
-        val finalScaleX = (sourceVideoWidth / contentWidth) * 1.0f
-        val finalScaleY = (sourceVideoHeight / contentHeight) * 1.0f
+        // The dimensions of the content area we want to display
+        val finalScaleX = HeadUnitScreenConfig.getScaleX()
+        val finalScaleY = HeadUnitScreenConfig.getScaleY()
 
         view.scaleX = finalScaleX
         view.scaleY = finalScaleY
-        AppLog.i("ProjectionViewScaler", "Dimensions: Video: ${videoWidth}x$videoHeight, Content: ${contentWidth}x$contentHeight, View: ${view.width}x${view.height}")
-        AppLog.i("ProjectionViewScaler", "Scale updated for view ${view.javaClass.simpleName}. scaleX: $finalScaleX, scaleY: $finalScaleY")
+        AppLog.i("ProjectionViewScaler: Dimensions: Video: ${videoWidth}x$videoHeight, Content: ${contentWidth}x$contentHeight, View: ${view.width}x${view.height}")
+        AppLog.i("ProjectionViewScaler: Scale updated for view ${view.javaClass.simpleName}. scaleX: $finalScaleX, scaleY: $finalScaleY")
     }
 }

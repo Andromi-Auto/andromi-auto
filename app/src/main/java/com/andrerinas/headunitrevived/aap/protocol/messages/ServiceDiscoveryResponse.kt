@@ -6,33 +6,23 @@ import com.andrerinas.headunitrevived.aap.AapMessage
 import com.andrerinas.headunitrevived.aap.KeyCode
 import com.andrerinas.headunitrevived.aap.protocol.AudioConfigs
 import com.andrerinas.headunitrevived.aap.protocol.Channel
-import com.andrerinas.headunitrevived.aap.protocol.Screen
 import com.andrerinas.headunitrevived.aap.protocol.proto.Control
 import com.andrerinas.headunitrevived.aap.protocol.proto.Media
 import com.andrerinas.headunitrevived.aap.protocol.proto.Sensors
 import com.andrerinas.headunitrevived.utils.AppLog
 import com.andrerinas.headunitrevived.utils.Settings
-import com.andrerinas.headunitrevived.utils.ScreenSpecProvider
+import com.andrerinas.headunitrevived.utils.HeadUnitScreenConfig
 import com.google.protobuf.Message
 
-/**
- * @author alex gavrishev
- *
- * @date 13/02/2017.
- */
 class ServiceDiscoveryResponse(private val context: Context)
     : AapMessage(Channel.ID_CTR, Control.ControlMsgType.SERVICEDISCOVERYRESPONSE_VALUE, makeProto(context)) {
 
     companion object {
         private fun makeProto(context: Context): Message {
             val settings = App.provide(context).settings
-            val spec = ScreenSpecProvider.getSpec(context)
-            val width = spec.width
-            val height = spec.height
 
-            val densityDpi = context.resources.displayMetrics.densityDpi
-            val actualScreenWidth = context.resources.displayMetrics.widthPixels
-            val actualScreenHeight = context.resources.displayMetrics.heightPixels
+            // Initialize HeadUnitScreenConfig with actual physical screen dimensions
+            HeadUnitScreenConfig.init(context.resources.displayMetrics, settings)
 
             val services = mutableListOf<Control.Service>()
 
@@ -59,22 +49,20 @@ class ServiceDiscoveryResponse(private val context: Context)
                     mediaSinkServiceBuilder.availableWhileInCall = true
 
                     // Get the actual Screen Dimensions:
-                    AppLog.i("[ServiceDiscovery] Actual screen dimensions: ${actualScreenWidth}x${actualScreenHeight}")
+                    //AppLog.i("[ServiceDiscovery] Actual screen dimensions: ${actualScreenWidth}x${actualScreenHeight}")
 
-                    // Get the desired resolution and margins for the TextureView
-                    val textureViewSpec = ScreenSpecProvider.getSpecForTextureView(actualScreenWidth, actualScreenHeight, densityDpi)
-                    val negotiatedResolution = textureViewSpec.screenSpec
+                    // Use HeadUnitScreenConfig for negotiated resolution and margins
+                    val negotiatedResolution = HeadUnitScreenConfig.negotiatedResolutionType
+                    val phoneWidthMargin = HeadUnitScreenConfig.getWidthMargin()
+                    val phoneHeightMargin = HeadUnitScreenConfig.getHeightMargin()
 
-                    AppLog.i("NegotiatedResolution is: ${negotiatedResolution.width}x${negotiatedResolution.height}");
+                    AppLog.i("[ServiceDiscovery] NegotiatedResolution is: ${HeadUnitScreenConfig.getNegotiatedWidth()}x${HeadUnitScreenConfig.getNegotiatedHeight()}")
+                    AppLog.i("[ServiceDiscovery] Margins are: ${phoneWidthMargin}x${phoneHeightMargin}")
 
-                    val phoneWidthMargin = textureViewSpec.leftMargin + textureViewSpec.rightMargin
-                    val phoneHeightMargin = textureViewSpec.topMargin + textureViewSpec.bottomMargin
-
-                    AppLog.i("Margins are: ${phoneWidthMargin}x${phoneHeightMargin}")
                     mediaSinkServiceBuilder.addVideoConfigs(Control.Service.MediaSinkService.VideoConfiguration.newBuilder().apply {
-                        codecResolution = textureViewSpec.resolution.codec
+                        codecResolution = negotiatedResolution
                         frameRate = Control.Service.MediaSinkService.VideoConfiguration.VideoFrameRateType._60
-                        setDensity(densityDpi)
+                        setDensity(HeadUnitScreenConfig.getDensityDpi()) // Use actual densityDpi
                         setMarginWidth(phoneWidthMargin)
                         setMarginHeight(phoneHeightMargin)
                     }.build())
@@ -87,8 +75,8 @@ class ServiceDiscoveryResponse(private val context: Context)
                 service.id = Channel.ID_INP
                 service.inputSourceService = Control.Service.InputSourceService.newBuilder().also {
                     it.touchscreen = Control.Service.InputSourceService.TouchConfig.newBuilder().apply {
-                        setWidth(width)
-                        setHeight(height)
+                        setWidth(HeadUnitScreenConfig.getDensityWidth()) // Use effective width
+                        setHeight(HeadUnitScreenConfig.getDensityHeight()) // Use effective height
                     }.build()
                     it.addAllKeycodesSupported(KeyCode.supported)
                 }.build()
@@ -169,7 +157,7 @@ class ServiceDiscoveryResponse(private val context: Context)
                 headUnitModel = "Generic Headunit"
                 headUnitMake = "Generic Make"
                 headUnitSoftwareBuild = "1.0"
-                headUnitSoftwareVersion = "1.0"
+                headUnitSoftwareVersion = "1.2"
                 driverPosition = true
                 canPlayNativeMediaDuringVr = false
                 hideProjectedClock = false
