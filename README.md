@@ -36,7 +36,16 @@ https://github.com/mikereidis/headunit
 - Often the wireless connection won't start. I need more debugging why
 - Handshake failed sometimes and the devices won't connect. You need to try again, restart phone or clear caches
 
+## Next Steps:
+- Adding self mode
+- Add higher resolutions
+- Change the whole ssl engine and working, because this often keeps the device from connecting
+
 ## Changelog
+### v.1.2.1 - Resolution enhancement
+- Just a minor enhancement for the resolution. Not yet perfect in my opinion but better than before
+- The is the last release for this year. Happy Holidays to all and a happy new year
+
 ### v.1.2.0 - Bugfix Release
 - Added Exit button to app
 - Added resolution settings back for better compatibility with different screen sizes
