@@ -2,28 +2,26 @@ package com.andrerinas.headunitrevived.main
 
 import android.app.AlertDialog
 import android.os.Bundle
+import android.text.InputType
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.andrerinas.headunitrevived.App
 import com.andrerinas.headunitrevived.R
 import com.andrerinas.headunitrevived.decoder.MicRecorder
+import com.andrerinas.headunitrevived.main.settings.SettingItem
+import com.andrerinas.headunitrevived.main.settings.SettingsAdapter
 import com.andrerinas.headunitrevived.utils.Settings
 
 class SettingsFragment : Fragment() {
-    lateinit var settings: Settings
-
-    private lateinit var keymapButton: Button
-    private lateinit var gpsNavigationButton: Button
-    private lateinit var micSampleRateButton: Button
-    private lateinit var nightModeButton: Button
-    private lateinit var btAddressButton: Button
-    private lateinit var debugModeButton: Button
-    private lateinit var resolutionButton: Button
-    private lateinit var viewModeButton: Button
+    private lateinit var settings: Settings
+    private lateinit var settingsRecyclerView: RecyclerView
+    private lateinit var settingsAdapter: SettingsAdapter
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.fragment_settings, container, false)
@@ -32,114 +30,201 @@ class SettingsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        keymapButton = view.findViewById(R.id.keymapButton)
-        gpsNavigationButton = view.findViewById(R.id.gpsNavigationButton)
-        micSampleRateButton = view.findViewById(R.id.micSampleRateButton)
-        nightModeButton = view.findViewById(R.id.nightModeButton)
-        btAddressButton = view.findViewById(R.id.btAddressButton)
-        debugModeButton = view.findViewById(R.id.debugModeButton)
-        resolutionButton = view.findViewById(R.id.resolutionButton)
-        viewModeButton = view.findViewById(R.id.viewModeButton)
+        settings = App.provide(requireContext()).settings
 
-        keymapButton.setOnClickListener {
-            parentFragmentManager.
-                beginTransaction()
-                        .replace(R.id.main_content, KeymapFragment())
-                        .addToBackStack(null)
-                        .commit()
-        }
+        settingsRecyclerView = view.findViewById(R.id.settingsRecyclerView)
+        settingsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
 
-        settings = Settings(requireContext())
+        updateSettingsList()
+    }
 
-        gpsNavigationButton.text = getString(R.string.gps_for_navigation, if (settings.useGpsForNavigation) getString(R.string.enabled) else getString(R.string.disabled) )
-        gpsNavigationButton.tag = settings.useGpsForNavigation
-        gpsNavigationButton.setOnClickListener {
-            val newValue = !(it.tag as Boolean)
-            it.tag = newValue
-            settings.useGpsForNavigation = newValue
-            (it as Button).text = getString(R.string.gps_for_navigation, if (newValue) getString(R.string.enabled) else getString(R.string.disabled) )
-        }
+    private fun updateSettingsList() {
+        val items = mutableListOf<SettingItem>()
 
-        val sampleRate = settings.micSampleRate
-        micSampleRateButton.text = getString(R.string.mic_sample_rate, sampleRate/1000)
-        micSampleRateButton.tag = sampleRate
-        micSampleRateButton.setOnClickListener {
-            val newValue = Settings.MicSampleRates[it.tag as Int]!!
+        // --- General Settings ---
+        items.add(SettingItem.CategoryHeader(R.string.category_general))
 
-            val recorder: MicRecorder? = try { MicRecorder(newValue, requireContext().applicationContext) } catch (e: Exception) { null }
-
-            if (recorder == null) {
-                Toast.makeText(activity, "Value not supported: $newValue", Toast.LENGTH_LONG).show()
-            } else {
-                settings.micSampleRate = newValue
-                (it as Button).text = getString(R.string.mic_sample_rate, newValue / 1000)
-                it.tag = newValue
+        items.add(SettingItem.SettingEntry(
+            id = "keymap",
+            nameResId = R.string.keymap,
+            value = getString(R.string.keymap_description), // Use new string resource
+            onClick = { _ ->
+                parentFragmentManager.beginTransaction()
+                    .replace(R.id.main_content, KeymapFragment())
+                    .addToBackStack(null)
+                    .commit()
             }
-        }
+        ))
 
+        items.add(SettingItem.SettingEntry(
+            id = "gpsNavigation",
+            nameResId = R.string.gps_for_navigation,
+            value = if (settings.useGpsForNavigation) getString(R.string.enabled) else getString(R.string.disabled),
+            onClick = { _ ->
+                settings.useGpsForNavigation = !settings.useGpsForNavigation
+                updateSettingsList() // Refresh the list
+            }
+        ))
 
-        val nightMode = settings.nightMode
-        val nightModeTitles = resources.getStringArray(R.array.night_mode)
-        nightModeButton.text = getString(R.string.night_mode, nightModeTitles[nightMode.value])
-        nightModeButton.tag = nightMode.value
-        nightModeButton.setOnClickListener {
-            val newValue = Settings.NightModes[it.tag as Int]!!
-            val newMode = Settings.NightMode.fromInt(newValue)!!
-            (it as Button).text = getString(R.string.night_mode, nightModeTitles[newMode.value])
-            it.tag = newValue
-            settings.nightMode = newMode
-        }
+        items.add(SettingItem.SettingEntry(
+            id = "nightMode",
+            nameResId = R.string.night_mode,
+            value = resources.getStringArray(R.array.night_mode)[settings.nightMode.value],
+            onClick = { _ ->
+                val nightModeTitles = resources.getStringArray(R.array.night_mode)
+                val currentNightModeIndex = settings.nightMode.value
+                
+                AlertDialog.Builder(requireContext())
+                    .setTitle(R.string.night_mode)
+                    .setSingleChoiceItems(nightModeTitles, currentNightModeIndex) { dialog, which ->
+                        val newMode = Settings.NightMode.fromInt(which)!!
+                        settings.nightMode = newMode
+                        dialog.dismiss()
+                        updateSettingsList() // Refresh the list
+                    }
+                    .show()
+            }
+        ))
 
-        btAddressButton.text = getString(R.string.bluetooth_address_s, settings.bluetoothAddress)
-        btAddressButton.setOnClickListener {
-            val editView = EditText(activity)
-            editView.setText(settings.bluetoothAddress)
-            AlertDialog.Builder(activity)
-                .setTitle(R.string.enter_bluetooth_mac)
-                .setView(editView)
-                .setPositiveButton(android.R.string.ok) { dialog, _ ->
-                    settings.bluetoothAddress = editView.text.toString().trim()
-                    dialog.dismiss()
-                }.show()
-        }
+        items.add(SettingItem.SettingEntry(
+            id = "micSampleRate",
+            nameResId = R.string.mic_sample_rate,
+            value = "${settings.micSampleRate / 1000}kHz",
+            onClick = { _ ->
+                val currentSampleRateIndex = Settings.MicSampleRates.indexOf(settings.micSampleRate)
+                val sampleRateNames = Settings.MicSampleRates.map { "${it / 1000}kHz" }.toTypedArray()
 
-        debugModeButton.text = getString(R.string.debug_mode, if (settings.debugMode) getString(R.string.enabled) else getString(R.string.disabled))
-        debugModeButton.tag = settings.debugMode
-        debugModeButton.setOnClickListener {
-            val newValue = !(it.tag as Boolean)
-            it.tag = newValue
-            settings.debugMode = newValue
-            (it as Button).text = getString(R.string.debug_mode, if (newValue) getString(R.string.enabled) else getString(R.string.disabled))
-        }
+                AlertDialog.Builder(requireContext())
+                    .setTitle(R.string.mic_sample_rate)
+                    .setSingleChoiceItems(sampleRateNames, currentSampleRateIndex) { dialog, which ->
+                        val newValue = Settings.MicSampleRates.elementAt(which)
 
-        val resolution = Settings.Resolution.fromId(settings.resolutionId)!!
-        resolutionButton.text = getString(R.string.resolution, resolution.resName)
+                        val recorder: MicRecorder? = try { MicRecorder(newValue, requireContext().applicationContext) } catch (e: Exception) { null }
 
-        resolutionButton.setOnClickListener {
-            AlertDialog.Builder(activity)
-                .setTitle(R.string.change_resolution)
-                .setSingleChoiceItems(Settings.Resolution.allRes, settings.resolutionId) { dialog, which ->
-                    settings.resolutionId = which
-                    val newResolution = Settings.Resolution.fromId(which)!!
-                    resolutionButton.text = getString(R.string.resolution, newResolution.resName)
-                    dialog.dismiss()
+                        if (recorder == null) {
+                            Toast.makeText(activity, "Value not supported: $newValue", Toast.LENGTH_LONG).show()
+                        } else {
+                            settings.micSampleRate = newValue
+                        }
+                        dialog.dismiss()
+                        updateSettingsList() // Refresh the list
+                    }
+                    .show()
+            }
+        ))
+        items.add(SettingItem.Divider) // Divider after General category
+
+        // --- Graphic Settings ---
+        items.add(SettingItem.CategoryHeader(R.string.category_graphic))
+        
+        items.add(SettingItem.SettingEntry(
+            id = "resolution",
+            nameResId = R.string.resolution,
+            value = Settings.Resolution.fromId(settings.resolutionId)?.resName ?: "",
+            onClick = { _ ->
+                AlertDialog.Builder(requireContext())
+                    .setTitle(R.string.change_resolution)
+                    .setSingleChoiceItems(Settings.Resolution.allRes, settings.resolutionId) { dialog, which ->
+                        settings.resolutionId = which
+                        dialog.dismiss()
+                        updateSettingsList() // Refresh the list
+                    }
+                    .show()
+            }
+        ))
+
+        items.add(SettingItem.SettingEntry(
+            id = "dpiPixelDensity",
+            nameResId = R.string.dpi,
+            value = if (settings.dpiPixelDensity == 0) getString(R.string.auto) else settings.dpiPixelDensity.toString(),
+            onClick = { _ ->
+                val editView = EditText(requireContext())
+                editView.inputType = InputType.TYPE_CLASS_NUMBER
+                if (settings.dpiPixelDensity != 0) {
+                    editView.setText(settings.dpiPixelDensity.toString())
                 }
-                .show()
-        }
 
-        val viewMode = settings.viewMode
-        viewModeButton.text = getString(R.string.view_mode, if (viewMode == Settings.ViewMode.SURFACE) getString(R.string.surface_view) else getString(R.string.texture_view))
-        viewModeButton.setOnClickListener {
-            val viewModes = arrayOf(getString(R.string.surface_view), getString(R.string.texture_view))
-            AlertDialog.Builder(activity)
-                .setTitle(R.string.change_view_mode)
-                .setSingleChoiceItems(viewModes, settings.viewMode.value) { dialog, which ->
-                    val newViewMode = Settings.ViewMode.fromInt(which)!!
-                    settings.viewMode = newViewMode
-                    viewModeButton.text = getString(R.string.view_mode, if (newViewMode == Settings.ViewMode.SURFACE) getString(R.string.surface_view) else getString(R.string.texture_view))
-                    dialog.dismiss()
-                }
-                .show()
-        }
+                AlertDialog.Builder(requireContext())
+                    .setTitle(R.string.enter_dpi_value)
+                    .setView(editView)
+                    .setPositiveButton(android.R.string.ok) { dialog, _ ->
+                        val inputText = editView.text.toString().trim()
+                        val newDpi = inputText.toIntOrNull()
+                        if (newDpi != null && newDpi >= 0) {
+                            settings.dpiPixelDensity = newDpi
+                        } else if (inputText.isNotEmpty()) {
+                            Toast.makeText(activity, "Invalid DPI value. Please enter a number or 0 for auto.", Toast.LENGTH_LONG).show()
+                        } else {
+                            settings.dpiPixelDensity = 0 // If empty, set to auto
+                        }
+                        dialog.dismiss()
+                        updateSettingsList() // Refresh the list
+                    }
+                    .setNegativeButton(android.R.string.cancel) { dialog, _ ->
+                        dialog.cancel()
+                    }
+                    .show()
+            }
+        ))
+
+        items.add(SettingItem.SettingEntry(
+            id = "viewMode",
+            nameResId = R.string.view_mode,
+            value = if (settings.viewMode == Settings.ViewMode.SURFACE) getString(R.string.surface_view) else getString(R.string.texture_view),
+            onClick = { _ ->
+                val viewModes = arrayOf(getString(R.string.surface_view), getString(R.string.texture_view))
+                AlertDialog.Builder(requireContext())
+                    .setTitle(R.string.change_view_mode)
+                    .setSingleChoiceItems(viewModes, settings.viewMode.value) { dialog, which ->
+                        val newViewMode = Settings.ViewMode.fromInt(which)!!
+                        settings.viewMode = newViewMode
+                        dialog.dismiss()
+                        updateSettingsList() // Refresh the list
+                    }
+                    .show()
+            }
+        ))
+        items.add(SettingItem.Divider) // Divider after Graphic category
+        
+        // --- Debug Settings ---
+        items.add(SettingItem.CategoryHeader(R.string.category_debug))
+
+        items.add(SettingItem.SettingEntry(
+            id = "debugMode",
+            nameResId = R.string.debug_mode,
+            value = if (settings.debugMode) getString(R.string.enabled) else getString(R.string.disabled),
+            onClick = { _ ->
+                settings.debugMode = !settings.debugMode
+                updateSettingsList() // Refresh the list
+            }
+        ))
+
+        items.add(SettingItem.SettingEntry(
+            id = "bluetoothAddress",
+            nameResId = R.string.bluetooth_address_s,
+            value = settings.bluetoothAddress.ifEmpty { getString(R.string.not_set) },
+            onClick = { _ ->
+                val editView = EditText(requireContext())
+                editView.setText(settings.bluetoothAddress)
+                AlertDialog.Builder(requireContext())
+                    .setTitle(R.string.enter_bluetooth_mac)
+                    .setView(editView)
+                    .setPositiveButton(android.R.string.ok) { dialog, _ ->
+                        settings.bluetoothAddress = editView.text.toString().trim()
+                        dialog.dismiss()
+                        updateSettingsList() // Refresh the list
+                    }
+                    .setNegativeButton(android.R.string.cancel) { dialog, _ ->
+                        dialog.cancel()
+                    }
+                    .show()
+            }
+        ))
+
+        items.add(SettingItem.Divider) // Divider after Debug category
+
+
+        settingsAdapter = SettingsAdapter(items)
+        settingsRecyclerView.adapter = settingsAdapter
     }
 }

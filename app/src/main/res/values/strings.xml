@@ -14,21 +14,25 @@
     <string name="remove">Remove</string>
     <string name="usb">USB</string>
     <string name="wifi">WiFi</string>
-    <string name="mic_sample_rate">"Mic sample rate: %dkHz"</string>
+    <string name="dpi">Pixel density (DPI)</string>
+    <string name="mic_sample_rate">Mic sample rate</string>
     <string name="keymap">Keymap</string>
-    <string name="night_mode">Night mode: %s</string>
-    <string name="bluetooth_address_s">Bluetooth address: %s</string>
+    <string name="night_mode">Night mode</string>
+    <string name="bluetooth_address_s">Bluetooth address</string>
     <string name="enter_bluetooth_mac">Enter bluetooth MAC</string>
     <string name="reset">Reset</string>
-    <string name="gps_for_navigation">Gps for navigation: %s</string>
+    <string name="gps_for_navigation">Gps for navigation</string>
     <string name="enabled">Enabled</string>
     <string name="disabled">Disabled</string>
-    <string name="resolution">Resolution: %s</string>
+    <string name="resolution">Resolution</string>
     <string name="change_resolution">Change resolution</string>
+    <string name="change_dpi">Change Dpi</string>
     <string name="change_view_mode">Change view mode</string>
-    <string name="view_mode">View mode: %s</string>
+    <string name="view_mode">View mode</string>
     <string name="surface_view">SurfaceView</string>
     <string name="texture_view">TextureView</string>
+    <string name="auto">Auto</string>
+    <string name="enter_dpi_value">Enter DPI value (0 for auto)</string>
 
     <string name="usb_status">USB Status: %s</string>
     <string name="projection_status">Projection Status: %s</string>
@@ -40,6 +44,13 @@
     <string name="no_usb_device_connected">No USB device connected to device.</string>
     <string name="press_back_again_to_exit">Press back again to exit</string>
     <string name="back">Back</string>
-    <string name="debug_mode">Debug Mode: %s</string>
+    <string name="debug_mode">Debug Mode</string>
+    <string name="not_set">Not Set</string>
+    <string name="keymap_description">Change the Key-Bindings for your Headunit</string>
+
+    <!-- Categories for SettingsFragment -->
+    <string name="category_general">General</string>
+    <string name="category_graphic">Graphic</string>
+    <string name="category_debug">Debug</string>
 </resources>
 

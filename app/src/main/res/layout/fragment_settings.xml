@@ -1,70 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.recyclerview.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/settingsRecyclerView"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        >
-
-    <Button
-        android:id="@+id/keymapButton"
-        android:layout_width="match_parent"
-        android:layout_height="64dp"
-        android:text="@string/keymap"
-        android:background="@drawable/button_selectable_background"/>
-
-    <Button
-        android:id="@+id/gpsNavigationButton"
-        android:layout_width="match_parent"
-        android:layout_height="64dp"
-        android:text="@string/gps_for_navigation"
-        android:background="@drawable/button_selectable_background"/>
-
-    <Button
-        android:id="@+id/nightModeButton"
-        android:layout_width="match_parent"
-        android:layout_height="64dp"
-        android:text="@string/night_mode"
-        android:background="@drawable/button_selectable_background"/>
-
-    <Button
-        android:id="@+id/micSampleRateButton"
-        android:layout_width="match_parent"
-        android:layout_height="64dp"
-        android:text="@string/mic_sample_rate"
-        android:background="@drawable/button_selectable_background" />
-
-    <Button
-        android:id="@+id/btAddressButton"
-        android:layout_width="match_parent"
-        android:layout_height="64dp"
-        android:text="@string/bluetooth_address_s"
-        android:background="@drawable/button_selectable_background" />
-
-    <Button
-        android:id="@+id/debugModeButton"
-        android:layout_width="match_parent"
-        android:layout_height="64dp"
-        android:text="@string/debug_mode"
-        android:background="@drawable/button_selectable_background" />
-
-    <Button
-        android:id="@+id/resolutionButton"
-        android:layout_width="match_parent"
-        android:layout_height="64dp"
-        android:text="@string/resolution"
-        android:background="@drawable/button_selectable_background" />
-
-    <Button
-        android:id="@+id/viewModeButton"
-        android:layout_width="match_parent"
-        android:layout_height="64dp"
-        android:text="@string/view_mode"
-        android:background="@drawable/button_selectable_background"/>
-
-    </LinearLayout>
-
-</ScrollView>
+    android:layout_height="match_parent"
+    android:background="@color/primary_dark"
+    android:clipToPadding="false"
+    android:paddingTop="0dp"
+    android:paddingBottom="0dp"
+    android:scrollbars="vertical"
+    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />

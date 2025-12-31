@@ -15,6 +15,7 @@ object HeadUnitScreenConfig {
     private var isPortraitScaled: Boolean = false
     private var isInitialized: Boolean = false // New flag
     var negotiatedResolutionType: Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType? = null
+    private lateinit var currentSettings: Settings // Store settings instance
 
     fun init(displayMetrics: DisplayMetrics, settings: Settings) {
         if (isInitialized) {
@@ -22,6 +23,7 @@ object HeadUnitScreenConfig {
             return
         }
         isInitialized = true
+        currentSettings = settings // Store the settings instance
 
         val selectedResolution = Settings.Resolution.fromId(settings.resolutionId)
 
@@ -150,7 +152,11 @@ object HeadUnitScreenConfig {
     }
 
     fun getDensityDpi(): Int {
-        return densityDpi
+        return if (this::currentSettings.isInitialized && currentSettings.dpiPixelDensity != 0) {
+            currentSettings.dpiPixelDensity
+        } else {
+            densityDpi
+        }
     }
 
     /* Not yet build in. Should come later for setting manual margins

@@ -111,6 +111,12 @@ class Settings(context: Context) {
             prefs.edit().putInt("view-mode", viewMode.value).apply()
         }
 
+    var dpiPixelDensity: Int
+        get() = prefs.getInt("dpi-pixel-density", 0) // Default 0 for Auto
+        set(value) {
+            prefs.edit().putInt("dpi-pixel-density", value).apply()
+        }
+
     @SuppressLint("ApplySharedPref")
     fun commit() {
         prefs.edit().commit()
@@ -153,18 +159,18 @@ class Settings(context: Context) {
     }
 
     companion object {
-        val MicSampleRates = hashMapOf(
-            8000 to 16000,
-            16000 to 8000
-        )
+        val MicSampleRates = listOf(8000, 16000, 24000, 32000, 44100, 48000) // Changed to List
 
-        val NightModes = hashMapOf(
-            0 to 1,
-            1 to 2,
-            2 to 3,
-            3 to 4,
-            4 to 0
-        )
+        fun getNextMicSampleRate(currentRate: Int): Int {
+            val currentIndex = MicSampleRates.indexOf(currentRate)
+            return if (currentIndex != -1 && currentIndex < MicSampleRates.size - 1) {
+                MicSampleRates[currentIndex + 1]
+            } else {
+                MicSampleRates.first() // Loop back to first if at end or not found
+            }
+        }
+
+        // NightMode is now an enum, so we can iterate its values directly
     }
 
     enum class ViewMode(val value: Int) {
