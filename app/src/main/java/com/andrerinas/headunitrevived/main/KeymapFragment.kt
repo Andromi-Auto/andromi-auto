@@ -1,6 +1,5 @@
 package com.andrerinas.headunitrevived.main
 
-
 import android.app.Activity
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -21,11 +20,6 @@ import com.andrerinas.headunitrevived.utils.AppLog
 import com.andrerinas.headunitrevived.utils.IntentFilters
 import com.andrerinas.headunitrevived.utils.Settings
 
-
-/**
- * @author algavris
- * @date 13/06/2017
- */
 class KeymapFragment : Fragment(), MainActivity.KeyListener, View.OnClickListener {
 
     private val idToCode = mapOf(

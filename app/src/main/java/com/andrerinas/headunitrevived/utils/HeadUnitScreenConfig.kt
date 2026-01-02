@@ -159,7 +159,6 @@ object HeadUnitScreenConfig {
         }
     }
 
-    /* Not yet build in. Should come later for setting manual margins
     fun getHorizontalCorrection(): Float {
         AppLog.i("CarScreen: Horizontal correction: 0, width ${getNegotiatedWidth()}, marg: ${getWidthMargin()}, width: $screenWidthPx")
         return (getNegotiatedWidth() - getWidthMargin()).toFloat() / screenWidthPx.toFloat()
@@ -170,5 +169,4 @@ object HeadUnitScreenConfig {
         AppLog.i("CarScreen: Vertical correction: $fIntValue, height ${getNegotiatedHeight()}, marg: ${getHeightMargin()}, height: $screenHeightPx")
         return fIntValue
     }
-     */
 }

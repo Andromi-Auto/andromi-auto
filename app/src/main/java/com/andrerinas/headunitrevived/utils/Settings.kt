@@ -60,7 +60,7 @@ class Settings(context: Context) {
         set(value) = prefs.edit().putInt("resolutionId", value).apply()
 
     var micSampleRate: Int
-        get() = prefs.getInt("mic-sample-rate", 8000)
+        get() = prefs.getInt("mic-sample-rate", 16000)
         set(sampleRate) {
             prefs.edit().putInt("mic-sample-rate", sampleRate).apply()
         }
@@ -116,6 +116,26 @@ class Settings(context: Context) {
         set(value) {
             prefs.edit().putInt("dpi-pixel-density", value).apply()
         }
+
+    var marginLeft: Int
+        get() = prefs.getInt("margin-left", 0)
+        set(value) { prefs.edit().putInt("margin-left", value).apply() }
+
+    var marginTop: Int
+        get() = prefs.getInt("margin-top", 0)
+        set(value) { prefs.edit().putInt("margin-top", value).apply() }
+
+    var marginRight: Int
+        get() = prefs.getInt("margin-right", 0)
+        set(value) { prefs.edit().putInt("margin-right", value).apply() }
+
+    var marginBottom: Int
+        get() = prefs.getInt("margin-bottom", 0)
+        set(value) { prefs.edit().putInt("margin-bottom", value).apply() }
+
+    var startInFullscreenMode: Boolean
+        get() = prefs.getBoolean("start-in-fullscreen-mode", false)
+        set(value) { prefs.edit().putBoolean("start-in-fullscreen-mode", value).apply() }
 
     @SuppressLint("ApplySharedPref")
     fun commit() {

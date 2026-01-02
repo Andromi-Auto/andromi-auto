@@ -22,6 +22,7 @@
     <string name="enter_bluetooth_mac">Enter bluetooth MAC</string>
     <string name="reset">Reset</string>
     <string name="gps_for_navigation">Gps for navigation</string>
+    <string name="gps_for_navigation_description">Use Gps for navigation</string>
     <string name="enabled">Enabled</string>
     <string name="disabled">Disabled</string>
     <string name="resolution">Resolution</string>
@@ -33,6 +34,16 @@
     <string name="texture_view">TextureView</string>
     <string name="auto">Auto</string>
     <string name="enter_dpi_value">Enter DPI value (0 for auto)</string>
+    <string name="custom_margin">Custom Margin</string>
+    <string name="custom_margin_description">Set custom display margins (0 for auto)</string>
+    <string name="enter_custom_margins">Enter custom margins (0 for auto)</string>
+    <string name="margin_left">Left</string>
+    <string name="margin_top">Top</string>
+    <string name="margin_right">Right</string>
+    <string name="margin_bottom">Bottom</string>
+
+    <string name="start_in_fullscreen_mode">Start in full screen mode</string>
+    <string name="start_in_fullscreen_mode_description">Toggle to enable or disable the full screen mode</string>
 
     <string name="usb_status">USB Status: %s</string>
     <string name="projection_status">Projection Status: %s</string>
@@ -45,6 +56,7 @@
     <string name="press_back_again_to_exit">Press back again to exit</string>
     <string name="back">Back</string>
     <string name="debug_mode">Debug Mode</string>
+    <string name="debug_mode_description">Toggle more Logging</string>
     <string name="not_set">Not Set</string>
     <string name="keymap_description">Change the Key-Bindings for your Headunit</string>
 

@@ -3,9 +3,6 @@ package com.andrerinas.headunitrevived.main
 import android.Manifest
 import android.content.Context
 import android.content.Intent
-import android.graphics.BitmapFactory
-import android.graphics.Matrix
-import android.graphics.RectF
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
@@ -30,6 +27,8 @@ import com.andrerinas.headunitrevived.aap.AapProjectionActivity
 import com.andrerinas.headunitrevived.utils.AppLog
 import com.andrerinas.headunitrevived.utils.toInetAddress
 import java.net.Inet4Address
+import com.andrerinas.headunitrevived.utils.Settings
+import android.view.WindowManager
 
 class MainActivity : FragmentActivity() {
 
@@ -45,10 +44,10 @@ class MainActivity : FragmentActivity() {
     private lateinit var backButton: Button
     private lateinit var mainButtonsContainer: ConstraintLayout
     private lateinit var mainContentFrame: FrameLayout
-    private lateinit var headerContainer: LinearLayout // Added headerContainer declaration
-    private lateinit var exitButton: Button // Added exitButton declaration
+    private lateinit var headerContainer: LinearLayout
+    private lateinit var exitButton: Button
 
-    private var networkCallback: ConnectivityManager.NetworkCallback? = null // Made nullable
+    private var networkCallback: ConnectivityManager.NetworkCallback? = null
 
     interface KeyListener {
         fun onKeyEvent(event: KeyEvent?): Boolean
@@ -57,6 +56,21 @@ class MainActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setTheme(R.style.AppTheme)
+
+        // Handle fullscreen mode based on settings
+        val appSettings = Settings(this)
+        if (appSettings.startInFullscreenMode) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                window.insetsController?.hide(android.view.WindowInsets.Type.statusBars() or android.view.WindowInsets.Type.navigationBars())
+            } else {
+                @Suppress("DEPRECATION")
+                window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_FULLSCREEN
+                        or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                        or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
+            }
+            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
+
         setContentView(R.layout.activity_main)
 
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
@@ -84,11 +98,11 @@ class MainActivity : FragmentActivity() {
         backButton = findViewById(R.id.back_button)
         mainButtonsContainer = findViewById(R.id.main_buttons_container)
         mainContentFrame = findViewById(R.id.main_content)
-        headerContainer = findViewById(R.id.header_container) // Initialized headerContainer
-        exitButton = findViewById(R.id.exit_button) // Initialized exitButton
+        headerContainer = findViewById(R.id.header_container)
+        exitButton = findViewById(R.id.exit_button)
 
         exitButton.setOnClickListener {
-            finishAffinity() // Close the app
+            finishAffinity()
         }
 
         backButton.setOnClickListener {
@@ -124,7 +138,7 @@ class MainActivity : FragmentActivity() {
             supportFragmentManager
                 .beginTransaction()
                 .replace(R.id.main_content, UsbListFragment())
-                .addToBackStack(null) // Added to back stack
+                .addToBackStack(null)
                 .commit()
         }
 
@@ -132,7 +146,7 @@ class MainActivity : FragmentActivity() {
             supportFragmentManager
                 .beginTransaction()
                 .replace(R.id.main_content, SettingsFragment())
-                .addToBackStack(null) // Added to back stack
+                .addToBackStack(null)
                 .commit()
         }
 
@@ -140,7 +154,7 @@ class MainActivity : FragmentActivity() {
             supportFragmentManager
                 .beginTransaction()
                 .replace(R.id.main_content, NetworkListFragment())
-                .addToBackStack(null) // Added to back stack
+                .addToBackStack(null)
                 .commit()
         }
 
@@ -171,13 +185,13 @@ class MainActivity : FragmentActivity() {
             AppLog.d("MainActivity: onBackStackChanged - backStackEntryCount: ${supportFragmentManager.backStackEntryCount}")
             updateBackButtonVisibility()
         }
-        updateBackButtonVisibility() // Initial check
+        updateBackButtonVisibility()
     }
 
     private fun updateBackButtonVisibility() {
         val isFragmentOnStack = supportFragmentManager.backStackEntryCount > 0
         backButton.visibility = if (isFragmentOnStack) View.VISIBLE else View.GONE
-        ipView.visibility = if (isFragmentOnStack) View.GONE else View.VISIBLE // IP visible only on main screen
+        ipView.visibility = if (isFragmentOnStack) View.GONE else View.VISIBLE
         mainButtonsContainer.visibility = if (isFragmentOnStack) View.GONE else View.VISIBLE
         mainContentFrame.visibility = if (isFragmentOnStack) View.VISIBLE else View.GONE
         exitButton.visibility = if (isFragmentOnStack) View.GONE else View.VISIBLE
@@ -194,7 +208,7 @@ class MainActivity : FragmentActivity() {
                 connectivityManager.registerNetworkCallback(request, it)
             }
         }
-        updateIpAddressView() // Call this regardless of API level
+        updateIpAddressView()
     }
 
     override fun onPause() {
