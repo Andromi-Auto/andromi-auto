@@ -22,6 +22,8 @@ class KeyCodeEvent(timeStamp: Long, keycode: Int, isPress: Boolean)
                     addKeys(Input.Key.newBuilder().also { key ->
                         key.keycode = keycode
                         key.down = isPress
+                        key.longpress = false
+                        key.metastate = 0
                     })
                 }.build()
             }.build()
