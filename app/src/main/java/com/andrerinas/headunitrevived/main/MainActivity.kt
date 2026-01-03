@@ -30,8 +30,16 @@ import com.andrerinas.headunitrevived.utils.toInetAddress
 import java.net.Inet4Address
 import com.andrerinas.headunitrevived.utils.Settings
 import android.view.WindowManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class MainActivity : FragmentActivity() {
+
+    private val activityJob = Job()
+    private val activityScope = CoroutineScope(Dispatchers.Main + activityJob)
 
     private var lastBackPressTime: Long = 0
     var keyListener: KeyListener? = null
@@ -115,16 +123,33 @@ class MainActivity : FragmentActivity() {
         }
 
         self_mode_button.setOnClickListener {
-            if (App.provide(this).transport.isAlive) {
+            if (AapService.isConnected) {
                 val aapIntent = Intent(this@MainActivity, AapProjectionActivity::class.java)
                 aapIntent.putExtra(AapProjectionActivity.EXTRA_FOCUS, true)
                 startActivity(aapIntent)
             } else {
                 AapService.selfMode = true
+                AapService.isConnected = false // Reset flag before starting
                 val intent = Intent(this, AapService::class.java)
                 intent.action = AapService.ACTION_START_SELF_MODE
                 startService(intent)
                 Toast.makeText(this, "Starting Self Mode...", Toast.LENGTH_SHORT).show()
+                
+                activityScope.launch {
+                    var attempts = 0
+                    while (attempts < 15 && !AapService.isConnected) {
+                        delay(1000)
+                        attempts++
+                    }
+
+                    if (AapService.isConnected) {
+                        val aapIntent = Intent(this@MainActivity, AapProjectionActivity::class.java)
+                        aapIntent.putExtra(AapProjectionActivity.EXTRA_FOCUS, true)
+                        startActivity(aapIntent)
+                    } else {
+                        Toast.makeText(this@MainActivity, "Self Mode connection failed to establish.", Toast.LENGTH_LONG).show()
+                    }
+                }
             }
         }
 
@@ -245,6 +270,11 @@ class MainActivity : FragmentActivity() {
                 connectivityManager.unregisterNetworkCallback(it)
             }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        activityJob.cancel()
     }
 
     private fun updateIpAddressView() {

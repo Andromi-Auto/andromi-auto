@@ -223,6 +223,7 @@ class AapService : Service(), UsbReceiver.Listener {
             }
 
             if (transportStarted) {
+                isConnected = true
                 sendBroadcast(ConnectedIntent())
             } else {
                 AppLog.e("Transport start failed")
@@ -237,6 +238,7 @@ class AapService : Service(), UsbReceiver.Listener {
     }
 
     private fun onDisconnect() {
+        isConnected = false
         sendBroadcast(DisconnectIntent())
         reset()
         accessoryConnection?.disconnect()
@@ -291,6 +293,7 @@ class AapService : Service(), UsbReceiver.Listener {
     }
 
     companion object {
+        var isConnected = false
         var selfMode = false
         const val ACTION_START_SELF_MODE = "com.andrerinas.headunitrevived.ACTION_START_SELF_MODE"
         const val ACTION_START_FROM_PROXY = "com.andrerinas.headunitrevived.ACTION_START_FROM_PROXY"
