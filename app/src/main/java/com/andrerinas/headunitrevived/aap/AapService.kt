@@ -10,6 +10,7 @@ import android.content.IntentFilter
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import android.os.IBinder
+import android.os.Parcelable
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import com.andrerinas.headunitrevived.App
@@ -163,32 +164,54 @@ class AapService : Service(), UsbReceiver.Listener {
     }
 
     private fun startSelfMode() {
-        serviceScope.launch {
-            withContext(Dispatchers.IO) {
-                try {
-                    val serverSocket = ServerSocket(5288)
-                    AppLog.i("Self-mode: Server listening on port 5288")
-                    val clientSocket = serverSocket.accept()
-                    AppLog.i("Self-mode: Client connected from ${clientSocket.inetAddress}")
-                    serverSocket.close() // No need to accept more connections
+        // First, launch a background task to listen for the incoming connection
+        serviceScope.launch(Dispatchers.IO) {
+            try {
+                val serverSocket = ServerSocket(5288)
+                AppLog.i("Self-mode: Server listening on port 5288")
+                
+                // This will block until the client (AA) connects
+                val clientSocket = serverSocket.accept()
+                AppLog.i("Self-mode: Client connected from ${clientSocket.inetAddress}")
+                serverSocket.close() // We only need one connection
 
-                    accessoryConnection = SocketAccessoryConnection(clientSocket)
+                accessoryConnection = SocketAccessoryConnection(clientSocket)
 
-                    val connectionResult = accessoryConnection!!.connect()
-                    withContext(Dispatchers.Main) {
-                        onConnectionResult(connectionResult)
-                    }
+                val connectionResult = accessoryConnection!!.connect()
+                withContext(Dispatchers.Main) {
+                    onConnectionResult(connectionResult)
+                }
 
-                } catch (e: Exception) {
-                    AppLog.e("Self-mode failed: ${e.message}", e)
-                    withContext(Dispatchers.Main) {
-                        Toast.makeText(applicationContext, "Self-mode failed: ${e.message}", Toast.LENGTH_LONG).show()
-                        stopSelf()
-                    }
+            } catch (e: Exception) {
+                AppLog.e("Self-mode server socket failed: ${e.message}", e)
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(applicationContext, "Self-mode server failed: ${e.message}", Toast.LENGTH_LONG).show()
+                    stopSelf()
                 }
             }
         }
+
+        // Now, trigger the AA wireless setup activity
+        serviceScope.launch(Dispatchers.Main) {
+            delay(500) // Give the server socket a moment to start listening, just in case
+            val magicalIntent = Intent().apply {
+                setClassName("com.google.android.projection.gearhead", "com.google.android.apps.auto.wireless.setup.service.impl.WirelessStartupActivity")
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                putExtra("PARAM_HOST_ADDRESS", "127.0.0.1")
+                putExtra("PARAM_SERVICE_PORT", 5288)
+            }
+
+            try {
+                AppLog.i("Launching official Android Auto wireless setup for self-mode...")
+                startActivity(magicalIntent)
+            } catch (e: Exception) {
+                AppLog.e("Failed to launch magical intent: ${e.message}", e)
+                Toast.makeText(applicationContext, "Failed to start Android Auto. Is it installed?", Toast.LENGTH_LONG).show()
+                stopSelf()
+            }
+        }
     }
+
 
     private suspend fun onConnectionResult(success: Boolean) {
         if (success) {
