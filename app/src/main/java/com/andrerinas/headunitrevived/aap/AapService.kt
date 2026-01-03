@@ -33,6 +33,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.net.ServerSocket
 
 /**
  * @author algavris
@@ -93,65 +94,100 @@ class AapService : Service(), UsbReceiver.Listener {
             return START_NOT_STICKY
         }
 
-        val localProxyPort = intent?.getIntExtra(EXTRA_LOCAL_PROXY_PORT, -1) ?: -1
-
-        if (localProxyPort != -1) {
-            AppLog.i("AapService started from WifiProxyService, connecting to local proxy on port $localProxyPort.")
-            accessoryConnection = SocketAccessoryConnection("127.0.0.1", localProxyPort)
+        if (intent?.action == ACTION_START_SELF_MODE) {
+            startSelfMode()
         } else {
-            // Original logic for USB or direct Wi-Fi connection (if not using proxy)
-            val connectionType = intent?.getIntExtra(EXTRA_CONNECTION_TYPE, 0) ?: 0
-            if (connectionType == TYPE_WIFI) {
-                val ip = intent?.getStringExtra(EXTRA_IP) ?: ""
-                accessoryConnection = SocketAccessoryConnection(ip, 5277) // Direct Wi-Fi connection to 5277
+            val localProxyPort = intent?.getIntExtra(EXTRA_LOCAL_PROXY_PORT, -1) ?: -1
+
+            if (localProxyPort != -1) {
+                AppLog.i("AapService started from WifiProxyService, connecting to local proxy on port $localProxyPort.")
+                accessoryConnection = SocketAccessoryConnection("127.0.0.1", localProxyPort)
             } else {
-                accessoryConnection = connectionFactory(intent, this) // USB connection
+                // Original logic for USB or direct Wi-Fi connection (if not using proxy)
+                val connectionType = intent?.getIntExtra(EXTRA_CONNECTION_TYPE, 0) ?: 0
+                if (connectionType == TYPE_WIFI) {
+                    val ip = intent?.getStringExtra(EXTRA_IP) ?: ""
+                    accessoryConnection = SocketAccessoryConnection(ip, 5277) // Direct Wi-Fi connection to 5277
+                } else {
+                    accessoryConnection = connectionFactory(intent, this) // USB connection
+                }
+            }
+
+            if (accessoryConnection == null) {
+                AppLog.e("Cannot create connection $intent")
+                stopSelf()
+                return START_NOT_STICKY
             }
         }
 
-        if (accessoryConnection == null) {
-            AppLog.e("Cannot create connection $intent")
-            stopSelf()
-            return START_NOT_STICKY
-        }
 
         uiModeManager.enableCarMode(0)
 
         val noty = NotificationCompat.Builder(this, App.defaultChannel)
-                .setSmallIcon(R.drawable.ic_stat_aa)
-                .setTicker("Headunit Revived is running")
-                .setWhen(System.currentTimeMillis())
-                .setContentTitle("Headunit Revived is running")
-                .setContentText("...")
-                .setAutoCancel(false)
-                .setOngoing(true)
-                .setContentIntent(PendingIntent.getActivity(this, 0, AapProjectionActivity.intent(this), PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)) // Added FLAG_IMMUTABLE
-                .build()
+            .setSmallIcon(R.drawable.ic_stat_aa)
+            .setTicker("Headunit Revived is running")
+            .setWhen(System.currentTimeMillis())
+            .setContentTitle("Headunit Revived is running")
+            .setContentText("...")
+            .setAutoCancel(false)
+            .setOngoing(true)
+            .setContentIntent(PendingIntent.getActivity(this, 0, AapProjectionActivity.intent(this), PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)) // Added FLAG_IMMUTABLE
+            .build()
 
         startService(GpsLocationService.intent(this))
 
         startForeground(1, noty)
 
-        serviceScope.launch {
-            var connectionResult = false
-            val maxRetries = 3
-            var currentTry = 0
+        if (intent?.action != ACTION_START_SELF_MODE) {
+            serviceScope.launch {
+                var connectionResult = false
+                val maxRetries = 3
+                var currentTry = 0
 
-            withContext(Dispatchers.IO) {
-                while (currentTry < maxRetries && !connectionResult) {
-                    currentTry++
-                    AppLog.i("Connection attempt $currentTry of $maxRetries...")
-                    connectionResult = accessoryConnection!!.connect()
-                    if (!connectionResult && currentTry < maxRetries) {
-                        AppLog.i("Connection failed, retrying in 2 seconds...")
-                        delay(2000) // Wait 2 seconds before retrying
+                withContext(Dispatchers.IO) {
+                    while (currentTry < maxRetries && !connectionResult) {
+                        currentTry++
+                        AppLog.i("Connection attempt $currentTry of $maxRetries...")
+                        connectionResult = accessoryConnection!!.connect()
+                        if (!connectionResult && currentTry < maxRetries) {
+                            AppLog.i("Connection failed, retrying in 2 seconds...")
+                            delay(2000) // Wait 2 seconds before retrying
+                        }
                     }
                 }
+                onConnectionResult(connectionResult)
             }
-            onConnectionResult(connectionResult)
         }
 
         return START_STICKY
+    }
+
+    private fun startSelfMode() {
+        serviceScope.launch {
+            withContext(Dispatchers.IO) {
+                try {
+                    val serverSocket = ServerSocket(5288)
+                    AppLog.i("Self-mode: Server listening on port 5288")
+                    val clientSocket = serverSocket.accept()
+                    AppLog.i("Self-mode: Client connected from ${clientSocket.inetAddress}")
+                    serverSocket.close() // No need to accept more connections
+
+                    accessoryConnection = SocketAccessoryConnection(clientSocket)
+
+                    val connectionResult = accessoryConnection!!.connect()
+                    withContext(Dispatchers.Main) {
+                        onConnectionResult(connectionResult)
+                    }
+
+                } catch (e: Exception) {
+                    AppLog.e("Self-mode failed: ${e.message}", e)
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(applicationContext, "Self-mode failed: ${e.message}", Toast.LENGTH_LONG).show()
+                        stopSelf()
+                    }
+                }
+            }
+        }
     }
 
     private suspend fun onConnectionResult(success: Boolean) {
@@ -232,6 +268,8 @@ class AapService : Service(), UsbReceiver.Listener {
     }
 
     companion object {
+        var selfMode = false
+        const val ACTION_START_SELF_MODE = "com.andrerinas.headunitrevived.ACTION_START_SELF_MODE"
         const val ACTION_START_FROM_PROXY = "com.andrerinas.headunitrevived.ACTION_START_FROM_PROXY"
         const val EXTRA_LOCAL_PROXY_PORT = "local_proxy_port"
         private const val ACTION_STOP_SERVICE = "com.andrerinas.headunitrevived.ACTION_STOP_SERVICE"

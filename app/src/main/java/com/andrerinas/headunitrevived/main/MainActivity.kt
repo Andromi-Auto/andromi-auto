@@ -24,6 +24,7 @@ import androidx.fragment.app.FragmentActivity
 import com.andrerinas.headunitrevived.App
 import com.andrerinas.headunitrevived.R
 import com.andrerinas.headunitrevived.aap.AapProjectionActivity
+import com.andrerinas.headunitrevived.aap.AapService
 import com.andrerinas.headunitrevived.utils.AppLog
 import com.andrerinas.headunitrevived.utils.toInetAddress
 import java.net.Inet4Address
@@ -36,7 +37,7 @@ class MainActivity : FragmentActivity() {
     var keyListener: KeyListener? = null
     private val viewModel: MainViewModel by viewModels()
 
-    private lateinit var video_button: Button
+    private lateinit var self_mode_button: Button
     private lateinit var usb: Button
     private lateinit var settings: Button
     private lateinit var wifi: Button
@@ -79,7 +80,7 @@ class MainActivity : FragmentActivity() {
             }
         })
 
-        video_button = findViewById(R.id.video_button)
+        self_mode_button = findViewById(R.id.self_mode_button)
         usb = findViewById(R.id.usb_button)
         settings = findViewById(R.id.settings_button)
         wifi = findViewById(R.id.wifi_button)
@@ -113,13 +114,17 @@ class MainActivity : FragmentActivity() {
             }
         }
 
-        video_button.setOnClickListener {
+        self_mode_button.setOnClickListener {
             if (App.provide(this).transport.isAlive) {
                 val aapIntent = Intent(this@MainActivity, AapProjectionActivity::class.java)
                 aapIntent.putExtra(AapProjectionActivity.EXTRA_FOCUS, true)
                 startActivity(aapIntent)
             } else {
-                Toast.makeText(this, getString(R.string.no_android_auto_device_connected), Toast.LENGTH_LONG).show()
+                AapService.selfMode = true
+                val intent = Intent(this, AapService::class.java)
+                intent.action = AapService.ACTION_START_SELF_MODE
+                startService(intent)
+                Toast.makeText(this, "Starting Self Mode...", Toast.LENGTH_SHORT).show()
             }
         }
 

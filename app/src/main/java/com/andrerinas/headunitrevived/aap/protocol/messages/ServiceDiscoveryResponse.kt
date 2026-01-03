@@ -3,6 +3,7 @@ package com.andrerinas.headunitrevived.aap.protocol.messages
 import android.content.Context
 import com.andrerinas.headunitrevived.App
 import com.andrerinas.headunitrevived.aap.AapMessage
+import com.andrerinas.headunitrevived.aap.AapService
 import com.andrerinas.headunitrevived.aap.KeyCode
 import com.andrerinas.headunitrevived.aap.protocol.AudioConfigs
 import com.andrerinas.headunitrevived.aap.protocol.Channel
@@ -84,15 +85,17 @@ class ServiceDiscoveryResponse(private val context: Context)
 
             services.add(input)
 
-            val audio1 = Control.Service.newBuilder().also { service ->
-                service.id = Channel.ID_AU1
-                service.mediaSinkService = Control.Service.MediaSinkService.newBuilder().also {
-                    it.availableType = Media.MediaCodecType.AUDIO
-                    it.audioType = Media.AudioStreamType.SPEECH
-                    it.addAudioConfigs(AudioConfigs.get(Channel.ID_AU1))
+            if (!AapService.selfMode) {
+                val audio1 = Control.Service.newBuilder().also { service ->
+                    service.id = Channel.ID_AU1
+                    service.mediaSinkService = Control.Service.MediaSinkService.newBuilder().also {
+                        it.availableType = Media.MediaCodecType.AUDIO
+                        it.audioType = Media.AudioStreamType.SPEECH
+                        it.addAudioConfigs(AudioConfigs.get(Channel.ID_AU1))
+                    }.build()
                 }.build()
-            }.build()
-            services.add(audio1)
+                services.add(audio1)
+            }
 
             val audio2 = Control.Service.newBuilder().also { service ->
                 service.id = Channel.ID_AU2
@@ -104,15 +107,17 @@ class ServiceDiscoveryResponse(private val context: Context)
             }.build()
             services.add(audio2)
 
-            val audio0 = Control.Service.newBuilder().also { service ->
-                service.id = Channel.ID_AUD
-                service.mediaSinkService = Control.Service.MediaSinkService.newBuilder().also {
-                    it.availableType = Media.MediaCodecType.AUDIO
-                    it.audioType = Media.AudioStreamType.MEDIA
-                    it.addAudioConfigs(AudioConfigs.get(Channel.ID_AUD))
+            if (!AapService.selfMode) {
+                val audio0 = Control.Service.newBuilder().also { service ->
+                    service.id = Channel.ID_AUD
+                    service.mediaSinkService = Control.Service.MediaSinkService.newBuilder().also {
+                        it.availableType = Media.MediaCodecType.AUDIO
+                        it.audioType = Media.AudioStreamType.MEDIA
+                        it.addAudioConfigs(AudioConfigs.get(Channel.ID_AUD))
+                    }.build()
                 }.build()
-            }.build()
-            services.add(audio0)
+                services.add(audio0)
+            }
 
             val mic = Control.Service.newBuilder().also { service ->
                 service.id = Channel.ID_MIC

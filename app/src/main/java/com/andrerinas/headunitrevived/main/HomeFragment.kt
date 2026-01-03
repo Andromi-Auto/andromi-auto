@@ -12,6 +12,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.andrerinas.headunitrevived.R
+import com.andrerinas.headunitrevived.aap.AapProjectionActivity
 import com.andrerinas.headunitrevived.contract.ConnectedIntent
 import com.andrerinas.headunitrevived.contract.DisconnectIntent
 
@@ -32,6 +33,9 @@ class HomeFragment : Fragment() {
                 }
                 ConnectedIntent.action -> {
                     projectionStatusTextView.text = getString(R.string.projection_status, getString(R.string.running))
+                    val aapIntent = Intent(requireContext(), AapProjectionActivity::class.java)
+                    aapIntent.putExtra(AapProjectionActivity.EXTRA_FOCUS, true)
+                    startActivity(aapIntent)
                 }
                 DisconnectIntent.action -> {
                     projectionStatusTextView.text = getString(R.string.projection_status, getString(R.string.not_running))
