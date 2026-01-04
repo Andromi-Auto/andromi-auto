@@ -7,18 +7,12 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.multidex.MultiDex
-import com.andrerinas.headunitrevived.connection.WifiProxyService
+//import com.andrerinas.headunitrevived.connection.WifiProxyService
 import com.andrerinas.headunitrevived.main.BackgroundNotification
 import com.andrerinas.headunitrevived.utils.AppLog
 import com.andrerinas.headunitrevived.utils.FileLog
 import com.andrerinas.headunitrevived.utils.Settings
 import java.io.File
-
-/**
- * @author algavris
- * *
- * @date 30/05/2016.
- */
 
 class App : Application() {
 
@@ -55,9 +49,9 @@ class App : Application() {
         }
 
         // Start the WifiProxyService immediately
-        AppLog.d("App.onCreate: Attempting to start WifiProxyService.") // NEW LOG
-        startService(Intent(this, WifiProxyService::class.java))
-        AppLog.d("App.onCreate: WifiProxyService startService call completed.") // NEW LOG
+//        AppLog.d("App.onCreate: Attempting to start WifiProxyService.") // NEW LOG
+//        startService(Intent(this, WifiProxyService::class.java))
+//        AppLog.d("App.onCreate: WifiProxyService startService call completed.") // NEW LOG
     }
 
     companion object {

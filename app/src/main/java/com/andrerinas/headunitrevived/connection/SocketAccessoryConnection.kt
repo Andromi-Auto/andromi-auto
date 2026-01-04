@@ -18,7 +18,16 @@ import java.net.Socket
 class SocketAccessoryConnection(private val ip: String, private val port: Int) : AccessoryConnection {
     private var output: OutputStream? = null
     private var input: DataInputStream? = null
-    private var transport = Socket()
+    private var transport: Socket
+
+    init {
+        transport = Socket()
+    }
+
+    constructor(socket: Socket) : this(socket.inetAddress.hostAddress ?: "", socket.port) {
+        this.transport = socket
+    }
+
 
     override val isSingleMessage: Boolean
         get() = true
@@ -52,9 +61,14 @@ class SocketAccessoryConnection(private val ip: String, private val port: Int) :
 
     override suspend fun connect(): Boolean = withContext(Dispatchers.IO) {
         try {
-            transport.soTimeout = 15000
-            transport.connect(InetSocketAddress(ip, port), 5000)
+            if (!transport.isConnected) {
+                transport.soTimeout = 15000
+                transport.connect(InetSocketAddress(ip, port), 5000)
+            }
             transport.tcpNoDelay = true
+            transport.keepAlive = true // Added
+            transport.reuseAddress = true // Added
+            transport.trafficClass = 16 // Added (IPTOS_LOWDELAY)
             input = DataInputStream(transport.getInputStream())
             output = transport.getOutputStream()
             return@withContext true

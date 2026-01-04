@@ -10,6 +10,7 @@ import android.content.IntentFilter
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import android.os.IBinder
+import android.os.Parcelable
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import com.andrerinas.headunitrevived.App
@@ -33,6 +34,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.net.ServerSocket
 
 /**
  * @author algavris
@@ -79,6 +81,7 @@ class AapService : Service(), UsbReceiver.Listener {
 
     override fun onDestroy() {
         super.onDestroy()
+        stopForeground(true) // Stop the foreground notification
         serviceJob.cancel()
         onDisconnect()
         unregisterReceiver(nightModeReceiver)
@@ -93,66 +96,123 @@ class AapService : Service(), UsbReceiver.Listener {
             return START_NOT_STICKY
         }
 
-        val localProxyPort = intent?.getIntExtra(EXTRA_LOCAL_PROXY_PORT, -1) ?: -1
-
-        if (localProxyPort != -1) {
-            AppLog.i("AapService started from WifiProxyService, connecting to local proxy on port $localProxyPort.")
-            accessoryConnection = SocketAccessoryConnection("127.0.0.1", localProxyPort)
+        if (intent?.action == ACTION_START_SELF_MODE) {
+            startSelfMode()
         } else {
-            // Original logic for USB or direct Wi-Fi connection (if not using proxy)
-            val connectionType = intent?.getIntExtra(EXTRA_CONNECTION_TYPE, 0) ?: 0
-            if (connectionType == TYPE_WIFI) {
-                val ip = intent?.getStringExtra(EXTRA_IP) ?: ""
-                accessoryConnection = SocketAccessoryConnection(ip, 5277) // Direct Wi-Fi connection to 5277
+            val localProxyPort = intent?.getIntExtra(EXTRA_LOCAL_PROXY_PORT, -1) ?: -1
+
+            if (localProxyPort != -1) {
+                AppLog.i("AapService started from WifiProxyService, connecting to local proxy on port $localProxyPort.")
+                accessoryConnection = SocketAccessoryConnection("127.0.0.1", localProxyPort)
             } else {
-                accessoryConnection = connectionFactory(intent, this) // USB connection
+                // Original logic for USB or direct Wi-Fi connection (if not using proxy)
+                val connectionType = intent?.getIntExtra(EXTRA_CONNECTION_TYPE, 0) ?: 0
+                if (connectionType == TYPE_WIFI) {
+                    val ip = intent?.getStringExtra(EXTRA_IP) ?: ""
+                    accessoryConnection = SocketAccessoryConnection(ip, 5277) // Direct Wi-Fi connection to 5277
+                } else {
+                    accessoryConnection = connectionFactory(intent, this) // USB connection
+                }
+            }
+
+            if (accessoryConnection == null) {
+                AppLog.e("Cannot create connection $intent")
+                stopSelf()
+                return START_NOT_STICKY
             }
         }
 
-        if (accessoryConnection == null) {
-            AppLog.e("Cannot create connection $intent")
-            stopSelf()
-            return START_NOT_STICKY
-        }
 
         uiModeManager.enableCarMode(0)
 
         val noty = NotificationCompat.Builder(this, App.defaultChannel)
-                .setSmallIcon(R.drawable.ic_stat_aa)
-                .setTicker("Headunit Revived is running")
-                .setWhen(System.currentTimeMillis())
-                .setContentTitle("Headunit Revived is running")
-                .setContentText("...")
-                .setAutoCancel(false)
-                .setOngoing(true)
-                .setContentIntent(PendingIntent.getActivity(this, 0, AapProjectionActivity.intent(this), PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)) // Added FLAG_IMMUTABLE
-                .build()
+            .setSmallIcon(R.drawable.ic_stat_aa)
+            .setTicker("Headunit Revived is running")
+            .setWhen(System.currentTimeMillis())
+            .setContentTitle("Headunit Revived is running")
+            .setContentText("...")
+            .setAutoCancel(false)
+            .setOngoing(true)
+            .setContentIntent(PendingIntent.getActivity(this, 0, AapProjectionActivity.intent(this), PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)) // Added FLAG_IMMUTABLE
+            .build()
 
         startService(GpsLocationService.intent(this))
 
         startForeground(1, noty)
 
-        serviceScope.launch {
-            var connectionResult = false
-            val maxRetries = 3
-            var currentTry = 0
+        if (intent?.action != ACTION_START_SELF_MODE) {
+            serviceScope.launch {
+                var connectionResult = false
+                val maxRetries = 3
+                var currentTry = 0
 
-            withContext(Dispatchers.IO) {
-                while (currentTry < maxRetries && !connectionResult) {
-                    currentTry++
-                    AppLog.i("Connection attempt $currentTry of $maxRetries...")
-                    connectionResult = accessoryConnection!!.connect()
-                    if (!connectionResult && currentTry < maxRetries) {
-                        AppLog.i("Connection failed, retrying in 2 seconds...")
-                        delay(2000) // Wait 2 seconds before retrying
+                withContext(Dispatchers.IO) {
+                    while (currentTry < maxRetries && !connectionResult) {
+                        currentTry++
+                        AppLog.i("Connection attempt $currentTry of $maxRetries...")
+                        connectionResult = accessoryConnection!!.connect()
+                        if (!connectionResult && currentTry < maxRetries) {
+                            AppLog.i("Connection failed, retrying in 2 seconds...")
+                            delay(2000) // Wait 2 seconds before retrying
+                        }
                     }
                 }
+                onConnectionResult(connectionResult)
             }
-            onConnectionResult(connectionResult)
         }
 
         return START_STICKY
     }
+
+    private fun startSelfMode() {
+        // First, launch a background task to listen for the incoming connection
+        serviceScope.launch(Dispatchers.IO) {
+            try {
+                val serverSocket = ServerSocket(5288)
+                AppLog.i("Self-mode: Server listening on port 5288")
+                
+                // This will block until the client (AA) connects
+                val clientSocket = serverSocket.accept()
+                AppLog.i("Self-mode: Client connected from ${clientSocket.inetAddress}")
+                serverSocket.close() // We only need one connection
+
+                accessoryConnection = SocketAccessoryConnection(clientSocket)
+
+                val connectionResult = accessoryConnection!!.connect()
+                withContext(Dispatchers.Main) {
+                    onConnectionResult(connectionResult)
+                }
+
+            } catch (e: Exception) {
+                AppLog.e("Self-mode server socket failed: ${e.message}", e)
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(applicationContext, "Self-mode server failed: ${e.message}", Toast.LENGTH_LONG).show()
+                    stopSelf()
+                }
+            }
+        }
+
+        // Now, trigger the AA wireless setup activity
+        serviceScope.launch(Dispatchers.Main) {
+            delay(500) // Give the server socket a moment to start listening, just in case
+            val magicalIntent = Intent().apply {
+                setClassName("com.google.android.projection.gearhead", "com.google.android.apps.auto.wireless.setup.service.impl.WirelessStartupActivity")
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                putExtra("PARAM_HOST_ADDRESS", "127.0.0.1")
+                putExtra("PARAM_SERVICE_PORT", 5288)
+            }
+
+            try {
+                AppLog.i("Launching official Android Auto wireless setup for self-mode...")
+                startActivity(magicalIntent)
+            } catch (e: Exception) {
+                AppLog.e("Failed to launch magical intent: ${e.message}", e)
+                Toast.makeText(applicationContext, "Failed to start Android Auto. Is it installed?", Toast.LENGTH_LONG).show()
+                stopSelf()
+            }
+        }
+    }
+
 
     private suspend fun onConnectionResult(success: Boolean) {
         if (success) {
@@ -164,6 +224,7 @@ class AapService : Service(), UsbReceiver.Listener {
             }
 
             if (transportStarted) {
+                isConnected = true
                 sendBroadcast(ConnectedIntent())
             } else {
                 AppLog.e("Transport start failed")
@@ -178,6 +239,7 @@ class AapService : Service(), UsbReceiver.Listener {
     }
 
     private fun onDisconnect() {
+        isConnected = false
         sendBroadcast(DisconnectIntent())
         reset()
         accessoryConnection?.disconnect()
@@ -232,9 +294,12 @@ class AapService : Service(), UsbReceiver.Listener {
     }
 
     companion object {
+        var isConnected = false
+        var selfMode = false
+        const val ACTION_START_SELF_MODE = "com.andrerinas.headunitrevived.ACTION_START_SELF_MODE"
         const val ACTION_START_FROM_PROXY = "com.andrerinas.headunitrevived.ACTION_START_FROM_PROXY"
         const val EXTRA_LOCAL_PROXY_PORT = "local_proxy_port"
-        private const val ACTION_STOP_SERVICE = "com.andrerinas.headunitrevived.ACTION_STOP_SERVICE"
+        const val ACTION_STOP_SERVICE = "com.andrerinas.headunitrevived.ACTION_STOP_SERVICE"
         private const val TYPE_USB = 1
         private const val TYPE_WIFI = 2
         private const val EXTRA_CONNECTION_TYPE = "extra_connection_type"

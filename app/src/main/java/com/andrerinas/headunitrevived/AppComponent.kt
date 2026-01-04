@@ -11,10 +11,6 @@ import com.andrerinas.headunitrevived.decoder.VideoDecoder
 import com.andrerinas.headunitrevived.main.BackgroundNotification
 import com.andrerinas.headunitrevived.utils.Settings
 
-/**
- * @author algavris
- * @date 23/06/2017
- */
 class AppComponent(private val app: App) {
 
     private var _transport: AapTransport? = null

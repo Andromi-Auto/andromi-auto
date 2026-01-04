@@ -216,16 +216,12 @@ internal class AapControlService(
     }
 
     private fun pingRequest(request: Control.PingRequest, channel: Int): Int {
-        AppLog.i("Ping Request: %d", request.timestamp)
-
         // Channel Open Response
         val response = Control.PingResponse.newBuilder()
                 .setTimestamp(System.nanoTime())
                 .build()
 
         val msg = AapMessage(channel, Control.ControlMsgType.PINGRESPONSE_VALUE, response)
-        AppLog.i(msg.toString())
-
         aapTransport.send(msg)
         return 0
     }

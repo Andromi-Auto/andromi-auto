@@ -1,8 +1,10 @@
 package com.andrerinas.headunitrevived.main
 
 import android.Manifest
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
@@ -24,19 +26,31 @@ import androidx.fragment.app.FragmentActivity
 import com.andrerinas.headunitrevived.App
 import com.andrerinas.headunitrevived.R
 import com.andrerinas.headunitrevived.aap.AapProjectionActivity
+import com.andrerinas.headunitrevived.aap.AapService
+import com.andrerinas.headunitrevived.contract.ConnectedIntent
+import com.andrerinas.headunitrevived.contract.DisconnectIntent
 import com.andrerinas.headunitrevived.utils.AppLog
 import com.andrerinas.headunitrevived.utils.toInetAddress
 import java.net.Inet4Address
 import com.andrerinas.headunitrevived.utils.Settings
 import android.view.WindowManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class MainActivity : FragmentActivity() {
+
+    private val activityJob = Job()
+    private val activityScope = CoroutineScope(Dispatchers.Main + activityJob)
 
     private var lastBackPressTime: Long = 0
     var keyListener: KeyListener? = null
     private val viewModel: MainViewModel by viewModels()
 
-    private lateinit var video_button: Button
+    private lateinit var self_mode_button: Button
+    private lateinit var self_mode_button_text: TextView
     private lateinit var usb: Button
     private lateinit var settings: Button
     private lateinit var wifi: Button
@@ -48,6 +62,13 @@ class MainActivity : FragmentActivity() {
     private lateinit var exitButton: Button
 
     private var networkCallback: ConnectivityManager.NetworkCallback? = null
+
+    private val connectionStatusReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            AppLog.i("MainActivity received ${intent?.action}")
+            updateProjectionButtonText()
+        }
+    }
 
     interface KeyListener {
         fun onKeyEvent(event: KeyEvent?): Boolean
@@ -79,7 +100,8 @@ class MainActivity : FragmentActivity() {
             }
         })
 
-        video_button = findViewById(R.id.video_button)
+        self_mode_button = findViewById(R.id.self_mode_button)
+        self_mode_button_text = findViewById(R.id.self_mode_text)
         usb = findViewById(R.id.usb_button)
         settings = findViewById(R.id.settings_button)
         wifi = findViewById(R.id.wifi_button)
@@ -91,6 +113,11 @@ class MainActivity : FragmentActivity() {
         exitButton = findViewById(R.id.exit_button)
 
         exitButton.setOnClickListener {
+            // Explicitly stop the AapService
+            val stopServiceIntent = Intent(this, AapService::class.java).apply {
+                action = AapService.ACTION_STOP_SERVICE
+            }
+            startService(stopServiceIntent)
             finishAffinity()
         }
 
@@ -113,13 +140,34 @@ class MainActivity : FragmentActivity() {
             }
         }
 
-        video_button.setOnClickListener {
-            if (App.provide(this).transport.isAlive) {
+        self_mode_button.setOnClickListener {
+            if (AapService.isConnected) {
                 val aapIntent = Intent(this@MainActivity, AapProjectionActivity::class.java)
                 aapIntent.putExtra(AapProjectionActivity.EXTRA_FOCUS, true)
                 startActivity(aapIntent)
             } else {
-                Toast.makeText(this, getString(R.string.no_android_auto_device_connected), Toast.LENGTH_LONG).show()
+                AapService.selfMode = true
+                AapService.isConnected = false // Reset flag before starting
+                val intent = Intent(this, AapService::class.java)
+                intent.action = AapService.ACTION_START_SELF_MODE
+                startService(intent)
+                Toast.makeText(this, "Starting Self Mode...", Toast.LENGTH_SHORT).show()
+                
+                activityScope.launch {
+                    var attempts = 0
+                    while (attempts < 15 && !AapService.isConnected) {
+                        delay(1000)
+                        attempts++
+                    }
+
+                    if (AapService.isConnected) {
+                        val aapIntent = Intent(this@MainActivity, AapProjectionActivity::class.java)
+                        aapIntent.putExtra(AapProjectionActivity.EXTRA_FOCUS, true)
+                        startActivity(aapIntent)
+                    } else {
+                        Toast.makeText(this@MainActivity, "Self Mode connection failed to establish.", Toast.LENGTH_LONG).show()
+                    }
+                }
             }
         }
 
@@ -213,6 +261,17 @@ class MainActivity : FragmentActivity() {
     override fun onResume() {
         super.onResume()
         setFullscreen() // Call setFullscreen here as well
+
+        val filter = IntentFilter().apply {
+            addAction(ConnectedIntent.action)
+            addAction(DisconnectIntent.action)
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(connectionStatusReceiver, filter, RECEIVER_NOT_EXPORTED)
+        } else {
+            registerReceiver(connectionStatusReceiver, filter)
+        }
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
             val request = NetworkRequest.Builder()
@@ -223,6 +282,7 @@ class MainActivity : FragmentActivity() {
             }
         }
         updateIpAddressView()
+        updateProjectionButtonText() // Update button text on resume
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
@@ -234,12 +294,18 @@ class MainActivity : FragmentActivity() {
 
     override fun onPause() {
         super.onPause()
+        unregisterReceiver(connectionStatusReceiver)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
             networkCallback?.let {
                 connectivityManager.unregisterNetworkCallback(it)
             }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        activityJob.cancel()
     }
 
     private fun updateIpAddressView() {
@@ -262,6 +328,15 @@ class MainActivity : FragmentActivity() {
 
         runOnUiThread {
             ipView.text = ipAddress ?: ""
+        }
+    }
+
+    private fun updateProjectionButtonText() {
+        val selfModeTextView = findViewById<TextView>(R.id.self_mode_text)
+        if (AapService.isConnected) {
+            selfModeTextView.text = getString(R.string.to_android_auto)
+        } else {
+            selfModeTextView.text = getString(R.string.self_mode)
         }
     }
 
