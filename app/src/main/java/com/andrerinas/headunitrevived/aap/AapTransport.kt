@@ -266,9 +266,9 @@ class AapTransport(
             true
         } else {
             if (!isAlive) {
-                AppLog.w("AapTransport not alive, ignoring sensor event for sensor ${sensor.sensorType}")
+                //AppLog.w("AapTransport not alive, ignoring sensor event for sensor ${sensor.sensorType}")
             } else {
-                AppLog.e("Sensor " + sensor.sensorType + " is not started yet")
+                //AppLog.e("Sensor " + sensor.sensorType + " is not started yet")
             }
             false
         }
