@@ -24,12 +24,19 @@ object AppLog {
         }
     }
 
+    private var settings: Settings? = null
+
+    fun init(settings: Settings) {
+        this.settings = settings
+    }
+
     var LOGGER: Logger = Logger.Android()
     private const val LOG_LEVEL = Log.DEBUG
 
     const val TAG = "CAR.HU.J"
-    const val LOG_VERBOSE = LOG_LEVEL <= Log.VERBOSE
-    const val LOG_DEBUG = LOG_LEVEL <= Log.DEBUG
+    // LOG_LEVEL constants are no longer needed as we check the setting directly.
+    val LOG_VERBOSE get() = LOG_LEVEL <= Log.VERBOSE
+    val LOG_DEBUG = settings?.debugMode ?: false
 
     fun i(msg: String) {
         log(Log.INFO, format(msg))

@@ -189,18 +189,19 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         val action = TouchEvent.motionEventToAction(event) ?: return
         val ts = SystemClock.elapsedRealtime()
 
+        val horizontalCorrection = HeadUnitScreenConfig.getHorizontalCorrection()
+        val verticalCorrection = HeadUnitScreenConfig.getVerticalCorrection()
+
         val pointerData = mutableListOf<Triple<Int, Int, Int>>()
         repeat(event.pointerCount) { pointerIndex ->
             val pointerId = event.getPointerId(pointerIndex)
             val x = event.getX(pointerIndex)
             val y = event.getY(pointerIndex)
 
-            // Boundary check against the negotiated screen size
-//            if (x < 0 || x >= screenSpec.width || y < 0 || y >= screenSpec.height) {
-//                AppLog.w("Touch event out of bounds of negotiated screen spec, skipping. x=$x, y=$y, spec=$screenSpec")
-//                return
-//            }
-            pointerData.add(Triple(pointerId, x.toInt(), y.toInt()))
+            val correctedX = (x * horizontalCorrection).toInt()
+            val correctedY = (y * verticalCorrection).toInt()
+
+            pointerData.add(Triple(pointerId, correctedX, correctedY))
         }
 
         transport.send(TouchEvent(ts, action, event.actionIndex, pointerData))

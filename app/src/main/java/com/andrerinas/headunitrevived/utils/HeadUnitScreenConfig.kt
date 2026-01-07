@@ -24,7 +24,7 @@ object HeadUnitScreenConfig {
             return
         }
         isInitialized = true
-        currentSettings = settings // Store the settings instance
+        currentSettings = settings
 
         val selectedResolution = Settings.Resolution.fromId(settings.resolutionId)
         val screenWidth: Int
@@ -37,10 +37,11 @@ object HeadUnitScreenConfig {
             screenHeight = bounds.height()
         } else { // Older APIs
             @Suppress("DEPRECATION")
-            val display = context.getSystemService(android.view.WindowManager::class.java).defaultDisplay
+            val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as android.view.WindowManager
+            val display = windowManager.defaultDisplay
             val size = android.graphics.Point()
             @Suppress("DEPRECATION")
-            display.getRealSize(size) // getRealSize gives the full, physical screen size
+            display.getRealSize(size)
             screenWidth = size.x
             screenHeight = size.y
         }
@@ -125,19 +126,16 @@ object HeadUnitScreenConfig {
 
     fun getNegotiatedWidth(): Int {
         val resString = negotiatedResolutionType.toString().replace("_", "")
-        AppLog.i(resString)
         return resString.split("x")[0].toInt()
     }
 
     fun getHeightMargin(): Int {
-        AppLog.i("CarScreen: Zoom is: $scaleFactor, adjusted height: ${getAdjustedHeight()}")
         val margin = ((getAdjustedHeight() - screenHeightPx) / scaleFactor).roundToInt()
         return margin.coerceAtLeast(0)
     }
 
     fun getWidthMargin(): Int {
         val margin = ((getAdjustedWidth() - screenWidthPx) / scaleFactor).roundToInt()
-        AppLog.i("CarScreen: Zoom is: $scaleFactor, adjusted width: ${getAdjustedWidth()}")
         return margin.coerceAtLeast(0)
     }
 
@@ -146,7 +144,6 @@ object HeadUnitScreenConfig {
     }
 
     fun getScaleX(): Float {
-        AppLog.i("GetScaleX: getNegotiatedWidth: ${getNegotiatedWidth()}, screenWidthPx: $screenWidthPx")
         if (getNegotiatedWidth() > screenWidthPx) {
             return divideOrOne(getNegotiatedWidth().toFloat(), screenWidthPx.toFloat())
         }
@@ -183,13 +180,11 @@ object HeadUnitScreenConfig {
     }
 
     fun getHorizontalCorrection(): Float {
-        AppLog.i("CarScreen: Horizontal correction: 0, width ${getNegotiatedWidth()}, marg: ${getWidthMargin()}, width: $screenWidthPx")
         return (getNegotiatedWidth() - getWidthMargin()).toFloat() / screenWidthPx.toFloat()
     }
 
     fun getVerticalCorrection(): Float {
         val fIntValue = (getNegotiatedHeight() - getHeightMargin()).toFloat() / screenHeightPx.toFloat()
-        AppLog.i("CarScreen: Vertical correction: $fIntValue, height ${getNegotiatedHeight()}, marg: ${getHeightMargin()}, height: $screenHeightPx")
         return fIntValue
     }
 }

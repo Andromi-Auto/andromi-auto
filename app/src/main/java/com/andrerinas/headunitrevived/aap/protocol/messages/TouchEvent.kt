@@ -6,10 +6,6 @@ import com.andrerinas.headunitrevived.aap.protocol.Channel
 import com.andrerinas.headunitrevived.aap.protocol.proto.Input
 import com.google.protobuf.Message
 
-/**
- * @author algavris
- * @date 13/02/2017.
- */
 class TouchEvent(timeStamp: Long, action: Input.TouchEvent.PointerAction, actionIndex: Int, pointerData: Iterable<Triple<Int, Int, Int>>)
     : AapMessage(Channel.ID_INP, Input.MsgType.EVENT_VALUE, makeProto(timeStamp, action, actionIndex, pointerData)) {
 
