@@ -17,7 +17,7 @@ object ProjectionViewScaler {
         val contentWidth = displayMetrics.widthPixels
         val contentHeight = displayMetrics.heightPixels
 
-        HeadUnitScreenConfig.init(displayMetrics, App.provide(view.context).settings)
+        HeadUnitScreenConfig.init(view.context, displayMetrics, App.provide(view.context).settings)
 
         // The dimensions of the content area we want to display
         val finalScaleX = HeadUnitScreenConfig.getScaleX()

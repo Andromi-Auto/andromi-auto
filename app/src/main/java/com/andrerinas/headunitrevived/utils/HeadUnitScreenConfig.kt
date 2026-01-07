@@ -1,5 +1,7 @@
 package com.andrerinas.headunitrevived.utils
 
+import android.content.Context
+import android.os.Build
 import android.util.DisplayMetrics
 import com.andrerinas.headunitrevived.aap.protocol.proto.Control
 import kotlin.math.roundToInt
@@ -17,18 +19,34 @@ object HeadUnitScreenConfig {
     var negotiatedResolutionType: Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType? = null
     private lateinit var currentSettings: Settings // Store settings instance
 
-    fun init(displayMetrics: DisplayMetrics, settings: Settings) {
+    fun init(context: Context, displayMetrics: DisplayMetrics, settings: Settings) {
         if (isInitialized) {
-            AppLog.i("HeadUnitScreenConfig already initialized. Skipping subsequent calls.")
             return
         }
         isInitialized = true
         currentSettings = settings // Store the settings instance
 
         val selectedResolution = Settings.Resolution.fromId(settings.resolutionId)
+        val screenWidth: Int
+        val screenHeight: Int
 
-        screenWidthPx = displayMetrics.widthPixels
-        screenHeightPx = displayMetrics.heightPixels
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) { // API 30+
+            val windowManager = context.getSystemService(android.view.WindowManager::class.java)
+            val bounds = windowManager.currentWindowMetrics.bounds
+            screenWidth = bounds.width()
+            screenHeight = bounds.height()
+        } else { // Older APIs
+            @Suppress("DEPRECATION")
+            val display = context.getSystemService(android.view.WindowManager::class.java).defaultDisplay
+            val size = android.graphics.Point()
+            @Suppress("DEPRECATION")
+            display.getRealSize(size) // getRealSize gives the full, physical screen size
+            screenWidth = size.x
+            screenHeight = size.y
+        }
+
+        screenWidthPx = screenWidth
+        screenHeightPx = screenHeight
         density = displayMetrics.density
         densityDpi = displayMetrics.densityDpi
 
@@ -72,12 +90,16 @@ object HeadUnitScreenConfig {
         if (!isSmallScreen) {
             val sWidth = screenWidthPx.toFloat()
             val sHeight = screenHeightPx.toFloat()
-            if (sWidth / sHeight < getAspectRatio()) {
-                isPortraitScaled = true
-                scaleFactor = (sHeight * 1.0f) / getNegotiatedHeight().toFloat()
+            if (getNegotiatedWidth() > 0 && getNegotiatedHeight() > 0) { // Ensure division by zero is avoided
+                 if (sWidth / sHeight < getAspectRatio()) {
+                    isPortraitScaled = true
+                    scaleFactor = (sHeight * 1.0f) / getNegotiatedHeight().toFloat()
+                } else {
+                    isPortraitScaled = false
+                    scaleFactor = (sWidth * 1.0f) / getNegotiatedWidth().toFloat()
+                }
             } else {
-                isPortraitScaled = false
-                scaleFactor = (sWidth * 1.0f) / getNegotiatedWidth().toFloat()
+                scaleFactor = 1.0f // Default if negotiated resolution is not valid
             }
         }
         AppLog.i("CarScreen isSmallScreen: $isSmallScreen, scaleFactor: ${scaleFactor}")
@@ -103,6 +125,7 @@ object HeadUnitScreenConfig {
 
     fun getNegotiatedWidth(): Int {
         val resString = negotiatedResolutionType.toString().replace("_", "")
+        AppLog.i(resString)
         return resString.split("x")[0].toInt()
     }
 

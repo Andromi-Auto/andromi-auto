@@ -118,6 +118,7 @@ class VideoDecoder {
         AppLog.i("VideoDecoder: configureDecoder with actual video width=$mWidth, height=$mHeight")
         try {
             mCodec!!.configure(format, mSurface, null, 0)
+            mCodec!!.setVideoScalingMode(MediaCodec.VIDEO_SCALING_MODE_SCALE_TO_FIT)
             mCodec!!.start()
             mInputBuffers = mCodec!!.inputBuffers
             mCodecBufferInfo = MediaCodec.BufferInfo()

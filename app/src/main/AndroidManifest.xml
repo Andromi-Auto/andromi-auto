@@ -49,6 +49,7 @@
             android:name=".aap.AapProjectionActivity"
             android:hardwareAccelerated="true"
             android:launchMode="singleTop"
+            android:screenOrientation="sensorLandscape"
             android:theme="@style/AppTheme" />
 
         <activity
@@ -68,6 +69,7 @@
             android:name=".main.MainActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:launchMode="singleTask"
+            android:screenOrientation="sensorLandscape"
             android:theme="@style/SplashTheme"
             android:exported="true">
 

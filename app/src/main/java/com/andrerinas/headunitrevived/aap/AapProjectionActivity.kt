@@ -77,7 +77,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
             projectionView = ProjectionView(this)
         }
         // Use the same screen conf for both views for negotiation
-        HeadUnitScreenConfig.init(displayMetrics, settings)
+        HeadUnitScreenConfig.init(this, displayMetrics, settings)
 
         val view = projectionView as android.view.View
         container.addView(view)
@@ -96,6 +96,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
             }
 
         container.addView(overlayView)
+        setFullscreen() // Call setFullscreen here as well
     }
 
     override fun onPause() {
@@ -112,6 +113,37 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         } else {
             registerReceiver(disconnectReceiver, IntentFilters.disconnect)
             registerReceiver(keyCodeReceiver, IntentFilters.keyEvent)
+        }
+        setFullscreen() // Call setFullscreen here as well
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (hasFocus) {
+            setFullscreen() // Reapply fullscreen mode if window gains focus
+        }
+    }
+
+    private fun setFullscreen() {
+        if (settings.startInFullscreenMode) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                window.insetsController?.hide(android.view.WindowInsets.Type.statusBars() or android.view.WindowInsets.Type.navigationBars())
+            } else {
+                @Suppress("DEPRECATION")
+                window.decorView.systemUiVisibility = (android.view.View.SYSTEM_UI_FLAG_FULLSCREEN
+                        or android.view.View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                        or android.view.View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
+            }
+            window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        } else {
+            // If not in fullscreen, ensure system UI is visible
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                window.insetsController?.show(android.view.WindowInsets.Type.statusBars() or android.view.WindowInsets.Type.navigationBars())
+            } else {
+                @Suppress("DEPRECATION")
+                window.decorView.systemUiVisibility = android.view.View.SYSTEM_UI_FLAG_VISIBLE
+            }
+            window.clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         }
     }
 
