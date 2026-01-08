@@ -27,7 +27,33 @@ class AapSslContext(keyManger: SingleKeyKeyManager): AapSsl {
                 rxBuffer = ByteBuffer.allocateDirect(Messages.DEF_BUFFER_LENGTH.coerceAtLeast(appBufferMax + 50))
             }
         }
+        sslEngine.beginHandshake()
         return 0
+    }
+
+    override fun postHandshakeReset() {
+        // Clear buffers. In this implementation, the buffers are re-created for each wrap/unwrap
+        // operation (implicitly by ByteBuffer.wrap), but clearing them ensures no stale data.
+        txBuffer.clear()
+        rxBuffer.clear()
+    }
+
+    override fun getHandshakeStatus(): SSLEngineResult.HandshakeStatus {
+        return sslEngine.handshakeStatus
+    }
+
+    override fun runDelegatedTasks() {
+        if (sslEngine.handshakeStatus === SSLEngineResult.HandshakeStatus.NEED_TASK) {
+            var runnable: Runnable? = sslEngine.delegatedTask
+            while (runnable != null) {
+                runnable.run()
+                runnable = sslEngine.delegatedTask
+            }
+            val hsStatus = sslEngine.handshakeStatus
+            if (hsStatus === SSLEngineResult.HandshakeStatus.NEED_TASK) {
+                throw Exception("handshake shouldn't need additional tasks")
+            }
+        }
     }
 
     override fun handshakeRead(): ByteArray {
@@ -46,8 +72,10 @@ class AapSslContext(keyManger: SingleKeyKeyManager): AapSsl {
         System.arraycopy(buffer, start, receivedHandshakeData, 0, length)
 
         val data = ByteBuffer.wrap(receivedHandshakeData)
-        val result = sslEngine.unwrap(data, rxBuffer)
-        runDelegatedTasks(result, sslEngine)
+        while (data.hasRemaining()) {
+            val result = sslEngine.unwrap(data, rxBuffer)
+            runDelegatedTasks(result, sslEngine)
+        }
         return receivedHandshakeData.size
     }
 
