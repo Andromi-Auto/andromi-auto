@@ -69,7 +69,17 @@ class ServiceDiscoveryResponse(private val context: Context)
                         setDensity(HeadUnitScreenConfig.getDensityDpi()) // Use actual densityDpi
                         setMarginWidth(phoneWidthMargin)
                         setMarginHeight(phoneHeightMargin)
-                        setVideoCodecType(if (settings.videoCodec == "H.265") Media.MediaCodecType.MEDIA_CODEC_VIDEO_H265 else Media.MediaCodecType.MEDIA_CODEC_VIDEO_H264_BP)
+                        
+                        val codecToRequest = when (settings.videoCodec) {
+                            "H.265" -> Media.MediaCodecType.MEDIA_CODEC_VIDEO_H265
+                            "Auto" -> if (com.andrerinas.headunitrevived.decoder.VideoDecoder.isHevcSupported()) {
+                                Media.MediaCodecType.MEDIA_CODEC_VIDEO_H265
+                            } else {
+                                Media.MediaCodecType.MEDIA_CODEC_VIDEO_H264_BP
+                            }
+                            else -> Media.MediaCodecType.MEDIA_CODEC_VIDEO_H264_BP
+                        }
+                        setVideoCodecType(codecToRequest)
                     }.build())
                 }.build()
             }.build()

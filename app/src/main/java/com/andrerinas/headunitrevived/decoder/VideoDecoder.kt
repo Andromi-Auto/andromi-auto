@@ -4,6 +4,7 @@ import android.media.MediaCodec
 import android.media.MediaCodecInfo
 import android.media.MediaCodecList
 import android.media.MediaFormat
+import android.os.Build
 import android.os.Handler
 import android.os.HandlerThread
 import android.view.Surface
@@ -24,13 +25,15 @@ interface VideoDimensionsListener {
 class VideoDecoder(private val settings: Settings) {
     private var mCodec: MediaCodec? = null
     private var mCodecBufferInfo: MediaCodec.BufferInfo? = null
+    // Only used for synchronous mode (API < 21)
+    private var mInputBuffers: Array<ByteBuffer>? = null
 
     private var mHeight: Int = 0
     private var mWidth: Int = 0
     private var mSurface: Surface? = null
     private var mCodecConfigured: Boolean = false
 
-    // For asynchronous decoding
+    // For asynchronous decoding (API >= 21)
     private val freeInputBuffers: BlockingQueue<Int> = ArrayBlockingQueue(1024)
     private var callbackThread: HandlerThread? = null
 
@@ -42,35 +45,46 @@ class VideoDecoder(private val settings: Settings) {
     val videoHeight: Int
         get() = mHeight
 
-    private val mCallback = object : MediaCodec.Callback() {
-        override fun onInputBufferAvailable(codec: MediaCodec, index: Int) {
-            freeInputBuffers.offer(index)
-        }
+    // Callback only used on API 21+
+    private val mCallback = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+        object : MediaCodec.Callback() {
+            override fun onInputBufferAvailable(codec: MediaCodec, index: Int) {
+                freeInputBuffers.offer(index)
+            }
 
-        override fun onOutputBufferAvailable(codec: MediaCodec, index: Int, info: MediaCodec.BufferInfo) {
-            try {
-                codec.releaseOutputBuffer(index, true)
-            } catch (e: Exception) {
-                AppLog.e("Error releasing output buffer: ${e.message}")
+            override fun onOutputBufferAvailable(codec: MediaCodec, index: Int, info: MediaCodec.BufferInfo) {
+                try {
+                    codec.releaseOutputBuffer(index, true)
+                } catch (e: Exception) {
+                    AppLog.e("Error releasing output buffer: ${e.message}")
+                }
+            }
+
+            override fun onError(codec: MediaCodec, e: MediaCodec.CodecException) {
+                AppLog.e("MediaCodec error: ${e.message}")
+            }
+
+            override fun onOutputFormatChanged(codec: MediaCodec, format: MediaFormat) {
+                handleOutputFormatChange(format)
             }
         }
+    } else null
 
-        override fun onError(codec: MediaCodec, e: MediaCodec.CodecException) {
-            AppLog.e("MediaCodec error: ${e.message}")
+    private fun handleOutputFormatChange(format: MediaFormat) {
+        AppLog.i("--- DECODER OUTPUT FORMAT CHANGED ---")
+        AppLog.i("New video format: $format")
+        val newWidth = try { format.getInteger(MediaFormat.KEY_WIDTH) } catch (e: Exception) { mWidth }
+        val newHeight = try { format.getInteger(MediaFormat.KEY_HEIGHT) } catch (e: Exception) { mHeight }
+        if (mWidth != newWidth || mHeight != newHeight) {
+            AppLog.i("Video dimensions changed via format. New: ${newWidth}x$newHeight")
+            mWidth = newWidth
+            mHeight = newHeight
+            dimensionsListener?.onVideoDimensionsChanged(mWidth, mHeight)
         }
-
-        override fun onOutputFormatChanged(codec: MediaCodec, format: MediaFormat) {
-            AppLog.i("--- DECODER OUTPUT FORMAT CHANGED ---")
-            AppLog.i("New video format: $format")
-            val newWidth = try { format.getInteger(MediaFormat.KEY_WIDTH) } catch (e: Exception) { mWidth }
-            val newHeight = try { format.getInteger(MediaFormat.KEY_HEIGHT) } catch (e: Exception) { mHeight }
-            if (mWidth != newWidth || mHeight != newHeight) {
-                AppLog.i("Video dimensions changed via format. New: ${newWidth}x$newHeight")
-                mWidth = newWidth
-                mHeight = newHeight
-                dimensionsListener?.onVideoDimensionsChanged(mWidth, mHeight)
-            }
-            codec.setVideoScalingMode(MediaCodec.VIDEO_SCALING_MODE_SCALE_TO_FIT)
+        try {
+            mCodec?.setVideoScalingMode(MediaCodec.VIDEO_SCALING_MODE_SCALE_TO_FIT)
+        } catch (e: Exception) {
+            // Ignore if scaling mode not supported on very old devices
         }
     }
 
@@ -108,11 +122,19 @@ class VideoDecoder(private val settings: Settings) {
                 }
             }
             
+            // Only tracking presentation time for internal logic if needed, removed logging
             val presentationTimeUs = System.nanoTime() / 1000
+
             val content = ByteBuffer.wrap(buffer, offset, size)
             while (content.hasRemaining()) {
                 if (!codec_input_provide(content, presentationTimeUs)) {
+                    // If buffer providing failed/timed out, drop the rest of this packet
                     return
+                }
+                
+                // For synchronous mode (API < 21), we must manually drain output
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+                    codecOutputConsumeSync()
                 }
             }
         }
@@ -140,23 +162,38 @@ class VideoDecoder(private val settings: Settings) {
         val height = if (mHeight > 0) mHeight else 1080
         
         val format = MediaFormat.createVideoFormat(mime, width, height)
-        format.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, 10485760)
-        format.setInteger(MediaFormat.KEY_PRIORITY, 0)
-        format.setFloat(MediaFormat.KEY_OPERATING_RATE, 120.0f)
+        // Only set these keys if SDK is new enough or if they are generally safe
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+             format.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, 10485760)
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+             format.setInteger(MediaFormat.KEY_PRIORITY, 0)
+             format.setFloat(MediaFormat.KEY_OPERATING_RATE, 120.0f)
+        }
         
         AppLog.i("VideoDecoder: configureDecoder with mime=$mime, target dimensions=${width}x${height}")
         try {
-            if (callbackThread == null || !callbackThread!!.isAlive) {
-                callbackThread = HandlerThread("VideoDecoderCallbackThread")
-                callbackThread!!.start()
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                if (callbackThread == null || !callbackThread!!.isAlive) {
+                    callbackThread = HandlerThread("VideoDecoderCallbackThread")
+                    callbackThread!!.start()
+                }
+                val handler = Handler(callbackThread!!.looper)
+                // mCallback is non-null because of the SDK check above
+                mCodec!!.setCallback(mCallback!!, handler)
             }
-            val handler = Handler(callbackThread!!.looper)
             
-            mCodec!!.setCallback(mCallback, handler)
             mCodec!!.configure(format, mSurface, null, 0)
             mCodec!!.setVideoScalingMode(MediaCodec.VIDEO_SCALING_MODE_SCALE_TO_FIT)
             mCodec!!.start()
-            mCodecBufferInfo = MediaCodec.BufferInfo()
+            
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+                mInputBuffers = mCodec!!.inputBuffers
+                mCodecBufferInfo = MediaCodec.BufferInfo()
+            } else {
+                mCodecBufferInfo = MediaCodec.BufferInfo() // Still needed for some internal tracking if any
+            }
+            
             AppLog.i("Codec configured and started. Selected codec: ${mCodec?.name}")
         } catch (e: Exception) {
             AppLog.e("Codec configuration failed", e)
@@ -177,10 +214,13 @@ class VideoDecoder(private val settings: Settings) {
             mCodec = null
             mCodecBufferInfo = null
             mCodecConfigured = false
-            frameStartTimes.clear()
             freeInputBuffers.clear()
             
-            callbackThread?.quitSafely()
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+                callbackThread?.quitSafely()
+            } else {
+                callbackThread?.quit()
+            }
             callbackThread = null
             
             AppLog.i("Reason: $reason")
@@ -188,29 +228,69 @@ class VideoDecoder(private val settings: Settings) {
     }
 
     private fun codec_input_provide(content: ByteBuffer, presentationTimeUs: Long): Boolean {
-        try {
-            // Wait up to 100ms for an input buffer. 
-            // If the decoder is healthy, this should be almost instant.
-            val inputBufIndex = freeInputBuffers.poll(100, TimeUnit.MILLISECONDS)
-            
-            if (inputBufIndex != null && inputBufIndex >= 0) {
-                val buffer = mCodec!!.getInputBuffer(inputBufIndex)
-                if (buffer == null) {
-                    AppLog.e("Input buffer is null for index $inputBufIndex")
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            // Asynchronous Mode (API 21+)
+            try {
+                val inputBufIndex = freeInputBuffers.poll(100, TimeUnit.MILLISECONDS) ?: -1
+                if (inputBufIndex >= 0) {
+                    val buffer = mCodec!!.getInputBuffer(inputBufIndex)
+                    if (buffer == null) return false
+
+                    buffer.clear()
+                    buffer.put(content)
+                    mCodec!!.queueInputBuffer(inputBufIndex, 0, buffer.limit(), presentationTimeUs, 0)
+                    return true
+                } else {
+                    AppLog.e("dequeueInputBuffer timed out (queue empty). Frame will be dropped.")
                     return false
                 }
-
-                buffer.clear()
-                buffer.put(content)
-                mCodec!!.queueInputBuffer(inputBufIndex, 0, buffer.limit(), presentationTimeUs, 0)
-                return true
-            } else {
-                AppLog.e("dequeueInputBuffer timed out (queue empty). Frame will be dropped.")
+            } catch (t: Throwable) {
+                AppLog.e("Error providing codec input (Async)", t)
                 return false
             }
-        } catch (t: Throwable) {
-            AppLog.e("Error providing codec input", t)
-            return false
+        } else {
+            // Synchronous Mode (API < 21)
+            try {
+                val inputBufIndex = mCodec!!.dequeueInputBuffer(10000)
+                if (inputBufIndex >= 0) {
+                    val buffer = mInputBuffers!![inputBufIndex]
+                    buffer.clear()
+                    buffer.put(content)
+                    mCodec!!.queueInputBuffer(inputBufIndex, 0, buffer.limit(), presentationTimeUs, 0)
+                    return true
+                } else {
+                    // Try to drain output to free up input
+                    codecOutputConsumeSync()
+                    return false
+                }
+            } catch (t: Throwable) {
+                AppLog.e("Error providing codec input (Sync)", t)
+                return false
+            }
+        }
+    }
+
+    // Only for API < 21
+    private fun codecOutputConsumeSync() {
+        var index: Int
+        while (true) {
+            index = try {
+                mCodec!!.dequeueOutputBuffer(mCodecBufferInfo!!, 0)
+            } catch (e: Exception) {
+                -1
+            }
+
+            if (index >= 0) {
+                mCodec!!.releaseOutputBuffer(index, true)
+            } else if (index == MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED) {
+                mInputBuffers = mCodec!!.inputBuffers
+            } else if (index == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
+                handleOutputFormatChange(mCodec!!.outputFormat)
+            } else if (index == MediaCodec.INFO_TRY_AGAIN_LATER) {
+                break
+            } else {
+                break
+            }
         }
     }
 
@@ -259,35 +339,71 @@ class VideoDecoder(private val settings: Settings) {
             return null
         }
 
-        private fun findBestCodec(mimeType: String, preferHardware: Boolean): String? {
-            val codecList = MediaCodecList(MediaCodecList.ALL_CODECS)
-            var hardwareCodec: String? = null
-            var softwareCodec: String? = null
+        fun isHevcSupported(): Boolean {
+            return findBestCodec("video/hevc", true) != null
+        }
 
-            for (codecInfo in codecList.codecInfos) {
-                if (codecInfo.isEncoder) continue
-                if (codecInfo.supportedTypes.any { it.equals(mimeType, ignoreCase = true) }) {
-                    if (isHardwareAccelerated(codecInfo)) {
-                        if (hardwareCodec == null) hardwareCodec = codecInfo.name
-                    } else {
-                        if (softwareCodec == null) softwareCodec = codecInfo.name
+        fun findBestCodec(mimeType: String, preferHardware: Boolean): String? {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                val codecList = MediaCodecList(MediaCodecList.ALL_CODECS)
+                var hardwareCodec: String? = null
+                var softwareCodec: String? = null
+
+                for (codecInfo in codecList.codecInfos) {
+                    if (codecInfo.isEncoder) continue
+                    if (codecInfo.supportedTypes.any { it.equals(mimeType, ignoreCase = true) }) {
+                        if (isHardwareAccelerated(codecInfo)) {
+                            if (hardwareCodec == null) hardwareCodec = codecInfo.name
+                        } else {
+                            if (softwareCodec == null) softwareCodec = codecInfo.name
+                        }
                     }
                 }
-            }
 
-            if (preferHardware && hardwareCodec != null) {
-                AppLog.i("Selected hardware decoder: $hardwareCodec for $mimeType")
-                return hardwareCodec
+                if (preferHardware && hardwareCodec != null) {
+                    AppLog.i("Selected hardware decoder: $hardwareCodec for $mimeType")
+                    return hardwareCodec
+                }
+                if (softwareCodec != null) {
+                    AppLog.i("Selected software decoder: $softwareCodec for $mimeType")
+                    return softwareCodec
+                }
+                if (hardwareCodec != null) {
+                    AppLog.i("Selected hardware decoder as fallback: $hardwareCodec for $mimeType")
+                    return hardwareCodec
+                }
+                return null
+            } else {
+                // API < 21 Implementation
+                var hardwareCodec: String? = null
+                var softwareCodec: String? = null
+                val count = MediaCodecList.getCodecCount()
+                for (i in 0 until count) {
+                    val codecInfo = MediaCodecList.getCodecInfoAt(i)
+                    if (codecInfo.isEncoder) continue
+                    if (codecInfo.supportedTypes.any { it.equals(mimeType, ignoreCase = true) }) {
+                         if (isHardwareAccelerated(codecInfo)) {
+                            if (hardwareCodec == null) hardwareCodec = codecInfo.name
+                        } else {
+                            if (softwareCodec == null) softwareCodec = codecInfo.name
+                        }
+                    }
+                }
+                
+                if (preferHardware && hardwareCodec != null) {
+                    AppLog.i("Selected hardware decoder: $hardwareCodec for $mimeType")
+                    return hardwareCodec
+                }
+                if (softwareCodec != null) {
+                    AppLog.i("Selected software decoder: $softwareCodec for $mimeType")
+                    return softwareCodec
+                }
+                if (hardwareCodec != null) {
+                    AppLog.i("Selected hardware decoder as fallback: $hardwareCodec for $mimeType")
+                    return hardwareCodec
+                }
+                return null
             }
-            if (softwareCodec != null) {
-                AppLog.i("Selected software decoder: $softwareCodec for $mimeType")
-                return softwareCodec
-            }
-            if (hardwareCodec != null) {
-                AppLog.i("Selected hardware decoder as fallback: $hardwareCodec for $mimeType")
-                return hardwareCodec
-            }
-            return null
         }
 
         private fun isHardwareAccelerated(codecInfo: MediaCodecInfo): Boolean {

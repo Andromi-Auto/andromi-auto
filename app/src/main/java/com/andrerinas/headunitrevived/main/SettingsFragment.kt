@@ -265,7 +265,7 @@ class SettingsFragment : Fragment() {
             nameResId = R.string.video_codec,
             value = settings.videoCodec,
             onClick = { _ ->
-                val codecs = arrayOf("H.264", "H.265")
+                val codecs = arrayOf("Auto", "H.264", "H.265")
                 val currentCodecIndex = codecs.indexOf(settings.videoCodec)
                 AlertDialog.Builder(requireContext())
                     .setTitle(R.string.video_codec)
