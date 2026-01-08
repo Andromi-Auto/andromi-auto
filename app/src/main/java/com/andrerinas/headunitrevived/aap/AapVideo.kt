@@ -3,6 +3,7 @@ package com.andrerinas.headunitrevived.aap
 import com.andrerinas.headunitrevived.aap.protocol.messages.Messages
 import com.andrerinas.headunitrevived.decoder.VideoDecoder
 import com.andrerinas.headunitrevived.utils.AppLog
+import com.andrerinas.headunitrevived.utils.Settings
 import java.nio.ByteBuffer
 
 /**
@@ -10,7 +11,7 @@ import java.nio.ByteBuffer
  * *
  * @date 01/10/2016.
  */
-internal class AapVideo(private val videoDecoder: VideoDecoder) {
+internal class AapVideo(private val videoDecoder: VideoDecoder, private val settings: Settings) {
 
     private val messageBuffer = ByteBuffer.allocate(Messages.DEF_BUFFER_LENGTH * 8)
 
@@ -26,12 +27,12 @@ internal class AapVideo(private val videoDecoder: VideoDecoder) {
                 if ((msg_type == 0 || msg_type == 1)
                         && buf[10].toInt() == 0 && buf[11].toInt() == 0 && buf[12].toInt() == 0 && buf[13].toInt() == 1) {
                     // If Not fragmented Video // Decode H264 video
-                    videoDecoder.decode(buf, 10, len - 10)
+                    videoDecoder.decode(buf, 10, len - 10, settings.forceSoftwareDecoding, settings.videoCodec)
                     return true
                 } else if (msg_type == 1 &&
                         buf[2].toInt() == 0 && buf[3].toInt() == 0 && buf[4].toInt() == 0 && buf[5].toInt() == 1) {
                     // If Not fragmented First video config packet // Decode H264 video
-                    videoDecoder.decode(message.data, message.dataOffset, message.size - message.dataOffset)
+                    videoDecoder.decode(message.data, message.dataOffset, message.size - message.dataOffset, settings.forceSoftwareDecoding, settings.videoCodec)
                     return true
                 }
             }
@@ -52,7 +53,7 @@ internal class AapVideo(private val videoDecoder: VideoDecoder) {
                 messageBuffer.put(message.data, 0, message.size)
                 messageBuffer.flip()
                 // Decode H264 video fully re-assembled
-                videoDecoder.decode(messageBuffer.array(), 0, messageBuffer.limit())
+                videoDecoder.decode(messageBuffer.array(), 0, messageBuffer.limit(), settings.forceSoftwareDecoding, settings.videoCodec)
                 messageBuffer.clear()
                 return true
             }

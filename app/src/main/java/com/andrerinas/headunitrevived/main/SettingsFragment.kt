@@ -245,6 +245,58 @@ class SettingsFragment : Fragment() {
             }
         ))
         items.add(SettingItem.Divider) // Divider after Graphic category
+
+        // --- Video Settings ---
+        items.add(SettingItem.CategoryHeader("video", R.string.category_video))
+
+        items.add(SettingItem.ToggleSettingEntry(
+            stableId = "forceSoftwareDecoding",
+            nameResId = R.string.force_software_decoding,
+            descriptionResId = R.string.force_software_decoding_description,
+            isChecked = settings.forceSoftwareDecoding,
+            onCheckedChanged = { isChecked ->
+                settings.forceSoftwareDecoding = isChecked
+                updateSettingsList() // Refresh the list
+            }
+        ))
+
+        items.add(SettingItem.SettingEntry(
+            stableId = "videoCodec",
+            nameResId = R.string.video_codec,
+            value = settings.videoCodec,
+            onClick = { _ ->
+                val codecs = arrayOf("H.264", "H.265")
+                val currentCodecIndex = codecs.indexOf(settings.videoCodec)
+                AlertDialog.Builder(requireContext())
+                    .setTitle(R.string.video_codec)
+                    .setSingleChoiceItems(codecs, currentCodecIndex) { dialog, which ->
+                        settings.videoCodec = codecs[which]
+                        dialog.dismiss()
+                        updateSettingsList() // Refresh the list
+                    }
+                    .show()
+            }
+        ))
+
+        items.add(SettingItem.SettingEntry(
+            stableId = "fpsLimit",
+            nameResId = R.string.fps_limit,
+            value = "${settings.fpsLimit} FPS",
+            onClick = { _ ->
+                val fpsOptions = arrayOf("30", "60")
+                val currentFpsIndex = fpsOptions.indexOf(settings.fpsLimit.toString())
+                AlertDialog.Builder(requireContext())
+                    .setTitle(R.string.fps_limit)
+                    .setSingleChoiceItems(fpsOptions, currentFpsIndex) { dialog, which ->
+                        settings.fpsLimit = fpsOptions[which].toInt()
+                        dialog.dismiss()
+                        updateSettingsList() // Refresh the list
+                    }
+                    .show()
+            }
+        ))
+
+        items.add(SettingItem.Divider) // Divider after Video category
         
         // --- Debug Settings ---
         items.add(SettingItem.CategoryHeader("debug", R.string.category_debug))

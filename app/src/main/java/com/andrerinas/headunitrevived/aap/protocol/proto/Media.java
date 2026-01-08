@@ -180,23 +180,63 @@ public final class Media {
   public enum MediaCodecType
       implements com.google.protobuf.ProtocolMessageEnum {
     /**
-     * <code>AUDIO = 1;</code>
+     * <code>MEDIA_CODEC_AUDIO_PCM = 1;</code>
      */
-    AUDIO(1),
+    MEDIA_CODEC_AUDIO_PCM(1),
     /**
-     * <code>VIDEO = 3;</code>
+     * <code>MEDIA_CODEC_AUDIO_AAC_LC = 2;</code>
      */
-    VIDEO(3),
+    MEDIA_CODEC_AUDIO_AAC_LC(2),
+    /**
+     * <code>MEDIA_CODEC_VIDEO_H264_BP = 3;</code>
+     */
+    MEDIA_CODEC_VIDEO_H264_BP(3),
+    /**
+     * <code>MEDIA_CODEC_AUDIO_AAC_LC_ADTS = 4;</code>
+     */
+    MEDIA_CODEC_AUDIO_AAC_LC_ADTS(4),
+    /**
+     * <code>MEDIA_CODEC_VIDEO_VP9 = 5;</code>
+     */
+    MEDIA_CODEC_VIDEO_VP9(5),
+    /**
+     * <code>MEDIA_CODEC_VIDEO_AV1 = 6;</code>
+     */
+    MEDIA_CODEC_VIDEO_AV1(6),
+    /**
+     * <code>MEDIA_CODEC_VIDEO_H265 = 7;</code>
+     */
+    MEDIA_CODEC_VIDEO_H265(7),
     ;
 
     /**
-     * <code>AUDIO = 1;</code>
+     * <code>MEDIA_CODEC_AUDIO_PCM = 1;</code>
      */
-    public static final int AUDIO_VALUE = 1;
+    public static final int MEDIA_CODEC_AUDIO_PCM_VALUE = 1;
     /**
-     * <code>VIDEO = 3;</code>
+     * <code>MEDIA_CODEC_AUDIO_AAC_LC = 2;</code>
      */
-    public static final int VIDEO_VALUE = 3;
+    public static final int MEDIA_CODEC_AUDIO_AAC_LC_VALUE = 2;
+    /**
+     * <code>MEDIA_CODEC_VIDEO_H264_BP = 3;</code>
+     */
+    public static final int MEDIA_CODEC_VIDEO_H264_BP_VALUE = 3;
+    /**
+     * <code>MEDIA_CODEC_AUDIO_AAC_LC_ADTS = 4;</code>
+     */
+    public static final int MEDIA_CODEC_AUDIO_AAC_LC_ADTS_VALUE = 4;
+    /**
+     * <code>MEDIA_CODEC_VIDEO_VP9 = 5;</code>
+     */
+    public static final int MEDIA_CODEC_VIDEO_VP9_VALUE = 5;
+    /**
+     * <code>MEDIA_CODEC_VIDEO_AV1 = 6;</code>
+     */
+    public static final int MEDIA_CODEC_VIDEO_AV1_VALUE = 6;
+    /**
+     * <code>MEDIA_CODEC_VIDEO_H265 = 7;</code>
+     */
+    public static final int MEDIA_CODEC_VIDEO_H265_VALUE = 7;
 
 
     public final int getNumber() {
@@ -219,8 +259,13 @@ public final class Media {
      */
     public static MediaCodecType forNumber(int value) {
       switch (value) {
-        case 1: return AUDIO;
-        case 3: return VIDEO;
+        case 1: return MEDIA_CODEC_AUDIO_PCM;
+        case 2: return MEDIA_CODEC_AUDIO_AAC_LC;
+        case 3: return MEDIA_CODEC_VIDEO_H264_BP;
+        case 4: return MEDIA_CODEC_AUDIO_AAC_LC_ADTS;
+        case 5: return MEDIA_CODEC_VIDEO_VP9;
+        case 6: return MEDIA_CODEC_VIDEO_AV1;
+        case 7: return MEDIA_CODEC_VIDEO_H265;
         default: return null;
       }
     }
@@ -6838,11 +6883,15 @@ public final class Media {
       "\020\203\200\002\022\t\n\003ACK\020\204\200\002\022\020\n\nMICREQUEST\020\205\200\002\022\021\n\013MIC" +
       "RESPONSE\020\206\200\002\022#\n\035VIDEOFOCUSREQUESTNOTIFIC" +
       "ATION\020\207\200\002\022\034\n\026VIDEOFOCUSNOTIFICATION\020\210\200\002*" +
-      "&\n\016MediaCodecType\022\t\n\005AUDIO\020\001\022\t\n\005VIDEO\020\003*" +
-      "I\n\017AudioStreamType\022\010\n\004NONE\020\000\022\n\n\006SPEECH\020\001" +
-      "\022\n\n\006SYSTEM\020\002\022\t\n\005MEDIA\020\003\022\t\n\005ALARM\020\004*,\n\016Vi" +
-      "deoFocusMode\022\013\n\007FOCUSED\020\001\022\r\n\tUNFOCUSED\020\002" +
-      "B\007B\005Media"
+      "\335\001\n\016MediaCodecType\022\031\n\025MEDIA_CODEC_AUDIO_" +
+      "PCM\020\001\022\034\n\030MEDIA_CODEC_AUDIO_AAC_LC\020\002\022\035\n\031M" +
+      "EDIA_CODEC_VIDEO_H264_BP\020\003\022!\n\035MEDIA_CODE" +
+      "C_AUDIO_AAC_LC_ADTS\020\004\022\031\n\025MEDIA_CODEC_VID" +
+      "EO_VP9\020\005\022\031\n\025MEDIA_CODEC_VIDEO_AV1\020\006\022\032\n\026M" +
+      "EDIA_CODEC_VIDEO_H265\020\007*I\n\017AudioStreamTy" +
+      "pe\022\010\n\004NONE\020\000\022\n\n\006SPEECH\020\001\022\n\n\006SYSTEM\020\002\022\t\n\005" +
+      "MEDIA\020\003\022\t\n\005ALARM\020\004*,\n\016VideoFocusMode\022\013\n\007" +
+      "FOCUSED\020\001\022\r\n\tUNFOCUSED\020\002B\007B\005Media"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,

@@ -45,7 +45,7 @@ class ServiceDiscoveryResponse(private val context: Context)
             val video = Control.Service.newBuilder().also { service ->
                 service.id = Channel.ID_VID
                 service.mediaSinkService = Control.Service.MediaSinkService.newBuilder().also { mediaSinkServiceBuilder ->
-                    mediaSinkServiceBuilder.availableType = Media.MediaCodecType.VIDEO
+                    mediaSinkServiceBuilder.availableType = Media.MediaCodecType.MEDIA_CODEC_VIDEO_H264_BP
                     mediaSinkServiceBuilder.audioType = Media.AudioStreamType.NONE
                     mediaSinkServiceBuilder.availableWhileInCall = true
 
@@ -62,10 +62,14 @@ class ServiceDiscoveryResponse(private val context: Context)
 
                     mediaSinkServiceBuilder.addVideoConfigs(Control.Service.MediaSinkService.VideoConfiguration.newBuilder().apply {
                         codecResolution = negotiatedResolution
-                        frameRate = Control.Service.MediaSinkService.VideoConfiguration.VideoFrameRateType._60
+                        frameRate = when (settings.fpsLimit) {
+                            30 -> Control.Service.MediaSinkService.VideoConfiguration.VideoFrameRateType._30
+                            else -> Control.Service.MediaSinkService.VideoConfiguration.VideoFrameRateType._60
+                        }
                         setDensity(HeadUnitScreenConfig.getDensityDpi()) // Use actual densityDpi
                         setMarginWidth(phoneWidthMargin)
                         setMarginHeight(phoneHeightMargin)
+                        setVideoCodecType(if (settings.videoCodec == "H.265") Media.MediaCodecType.MEDIA_CODEC_VIDEO_H265 else Media.MediaCodecType.MEDIA_CODEC_VIDEO_H264_BP)
                     }.build())
                 }.build()
             }.build()
@@ -89,7 +93,7 @@ class ServiceDiscoveryResponse(private val context: Context)
                 val audio1 = Control.Service.newBuilder().also { service ->
                     service.id = Channel.ID_AU1
                     service.mediaSinkService = Control.Service.MediaSinkService.newBuilder().also {
-                        it.availableType = Media.MediaCodecType.AUDIO
+                        it.availableType = Media.MediaCodecType.MEDIA_CODEC_AUDIO_PCM
                         it.audioType = Media.AudioStreamType.SPEECH
                         it.addAudioConfigs(AudioConfigs.get(Channel.ID_AU1))
                     }.build()
@@ -100,7 +104,7 @@ class ServiceDiscoveryResponse(private val context: Context)
             val audio2 = Control.Service.newBuilder().also { service ->
                 service.id = Channel.ID_AU2
                 service.mediaSinkService = Control.Service.MediaSinkService.newBuilder().also {
-                    it.availableType = Media.MediaCodecType.AUDIO
+                    it.availableType = Media.MediaCodecType.MEDIA_CODEC_AUDIO_PCM
                     it.audioType = Media.AudioStreamType.SYSTEM
                     it.addAudioConfigs(AudioConfigs.get(Channel.ID_AU2))
                 }.build()
@@ -111,7 +115,7 @@ class ServiceDiscoveryResponse(private val context: Context)
                 val audio0 = Control.Service.newBuilder().also { service ->
                     service.id = Channel.ID_AUD
                     service.mediaSinkService = Control.Service.MediaSinkService.newBuilder().also {
-                        it.availableType = Media.MediaCodecType.AUDIO
+                        it.availableType = Media.MediaCodecType.MEDIA_CODEC_AUDIO_PCM
                         it.audioType = Media.AudioStreamType.MEDIA
                         it.addAudioConfigs(AudioConfigs.get(Channel.ID_AUD))
                     }.build()
@@ -122,7 +126,7 @@ class ServiceDiscoveryResponse(private val context: Context)
             val mic = Control.Service.newBuilder().also { service ->
                 service.id = Channel.ID_MIC
                 service.mediaSourceService = Control.Service.MediaSourceService.newBuilder().also {
-                    it.type = Media.MediaCodecType.AUDIO
+                    it.type = Media.MediaCodecType.MEDIA_CODEC_AUDIO_PCM
                     it.audioConfig = Media.AudioConfiguration.newBuilder().apply {
                         sampleRate = 16000
                         numberOfBits = 16

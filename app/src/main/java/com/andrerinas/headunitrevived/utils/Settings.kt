@@ -137,6 +137,20 @@ class Settings(context: Context) {
         get() = prefs.getBoolean("start-in-fullscreen-mode", true)
         set(value) { prefs.edit().putBoolean("start-in-fullscreen-mode", value).apply() }
 
+    var forceSoftwareDecoding: Boolean
+        get() = prefs.getBoolean("force-software-decoding", false)
+        set(value) { prefs.edit().putBoolean("force-software-decoding", value).apply() }
+
+    var videoCodec: String
+        get() = prefs.getString("video-codec", "H.264")!!
+        set(value) { prefs.edit().putString("video-codec", value).apply() }
+
+    var fpsLimit: Int
+        get() = prefs.getInt("fps-limit", 60)
+        set(value) { prefs.edit().putInt("fps-limit", value).apply() }
+
+
+
     @SuppressLint("ApplySharedPref")
     fun commit() {
         prefs.edit().commit()
