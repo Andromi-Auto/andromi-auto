@@ -226,6 +226,17 @@ class AapService : Service(), UsbReceiver.Listener {
             if (transportStarted) {
                 isConnected = true
                 sendBroadcast(ConnectedIntent())
+                
+                // If in self-mode, launch the projection activity now that connection is established.
+                if (selfMode) {
+                    serviceScope.launch {
+                        delay(1500) // Wait for AA Wireless Activity to initialize
+                        val aapIntent = AapProjectionActivity.intent(this@AapService)
+                        aapIntent.putExtra(AapProjectionActivity.EXTRA_FOCUS, true)
+                        aapIntent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+                        startActivity(aapIntent)
+                    }
+                }
             } else {
                 AppLog.e("Transport start failed")
                 Toast.makeText(applicationContext, "Could not start transport", Toast.LENGTH_SHORT).show()

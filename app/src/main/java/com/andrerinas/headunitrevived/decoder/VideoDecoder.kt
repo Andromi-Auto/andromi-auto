@@ -66,60 +66,19 @@ class VideoDecoder(private val settings: Settings) {
             }
 
             if (!mCodecConfigured) {
-                var currentOffset = offset
-                while (currentOffset < offset + size) {
-                    val nalUnitSize = findNalUnitSize(buffer, currentOffset, offset + size)
-                    if (nalUnitSize == -1) {
-                        break // No more NAL units found
-                    }
-
-                    val nalUnitType = getNalType(buffer, currentOffset)
-                    // Note: NAL types differ between H.264 and H.265. 
-                    // This parser is currently H.264 specific for SPS(7)/PPS(8).
-                    // For H.265, SPS is 33, PPS is 34.
-                    if (nalUnitType == 7 || nalUnitType == 33) { // SPS
-                        sps = buffer.copyOfRange(currentOffset, currentOffset + nalUnitSize)
-                        AppLog.i("Got SPS sequence (type $nalUnitType)...")
-                        // Try to parse dimensions from SPS (currently only supports H.264)
-                        if (nalUnitType == 7) {
-                            try {
-                                val spsData = SpsParser.parse(sps!!)
-                                if (spsData != null && (mWidth != spsData.width || mHeight != spsData.height)) {
-                                    AppLog.i("SPS parsed. Video dimensions: ${spsData.width}x${spsData.height}")
-                                    mWidth = spsData.width
-                                    mHeight = spsData.height
-                                    dimensionsListener?.onVideoDimensionsChanged(mWidth, mHeight)
-                                }
-                            } catch (e: Exception) {
-                                AppLog.e("Failed to parse SPS data", e)
-                            }
-                        } else {
-                            AppLog.i("H.265 SPS detected. Dimensions will be updated via INFO_OUTPUT_FORMAT_CHANGED.")
-                            // We need a dummy width/height to start the decoder if SPS parsing is skipped
-                            if (mWidth == 0) mWidth = 1920
-                            if (mHeight == 0) mHeight = 1080
-                        }
-
-                    } else if (nalUnitType == 8 || nalUnitType == 34) { // PPS
-                        pps = buffer.copyOfRange(currentOffset, currentOffset + nalUnitSize)
-                        AppLog.i("Got PPS sequence (type $nalUnitType)...")
-                    }
-                    currentOffset += nalUnitSize
+                try {
+                    // Fix: Don't access mCodec.outputFormat here as codec might not be configured yet.
+                    // Rely on the detected/preferred codec name.
+                    val mime = if (codecName == "H.265" || codecName == "H.265") "video/hevc" else "video/avc"
+                    configureDecoder(mime)
+                    mCodecConfigured = true
+                    AppLog.i("VideoDecoder: Initial configuration complete, proceeding to feed first buffer.")
+                } catch (e: Exception) {
+                    AppLog.e("Failed to configure decoder", e)
+                    codec_stop("Configuration failed") // Ensure clean state for retry
+                    return
                 }
-
-
-                if (sps != null && pps != null) {
-                    try {
-                        // Fix: Don't access mCodec.outputFormat here as codec might not be configured yet.
-                        // Rely on the detected/preferred codec name.
-                        val mime = if (codecName == "H.265") "video/hevc" else "video/avc"
-                        configureDecoder(sps!!, pps!!, mime)
-                        mCodecConfigured = true
-                    } catch (e: Exception) {
-                        AppLog.e("Failed to configure decoder", e)
-                    }
-                }
-                return
+                // Note: No return here! We proceed to feed this first buffer (containing VPS/SPS/PPS) into the codec.
             }
             
             val presentationTimeUs = System.nanoTime() / 1000
@@ -153,21 +112,22 @@ class VideoDecoder(private val settings: Settings) {
     }
 
     @Throws(IOException::class)
-    private fun configureDecoder(sps: ByteArray, pps: ByteArray, mime: String) {
-        // Now, mWidth and mHeight should be correctly set from SPS parsing
-        if (mWidth == 0 || mHeight == 0) {
-            AppLog.e("Cannot configure decoder, dimensions are zero.")
-            return
-        }
-        val format = MediaFormat.createVideoFormat(mime, mWidth, mHeight)
-        format.setByteBuffer("csd-0", ByteBuffer.wrap(sps))
-        format.setByteBuffer("csd-1", ByteBuffer.wrap(pps))
-        AppLog.i("VideoDecoder: configureDecoder with actual video width=$mWidth, height=$mHeight, mime=$mime")
+    private fun configureDecoder(mime: String) {
+        // Use standard dimensions if not known yet; MediaCodec will update on format change
+        val width = if (mWidth > 0) mWidth else 1920
+        val height = if (mHeight > 0) mHeight else 1080
+        
+        val format = MediaFormat.createVideoFormat(mime, width, height)
+        format.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, 10485760) // Set max input size to ~10MB
+        format.setInteger(MediaFormat.KEY_PRIORITY, 0) // Real-time priority
+        format.setFloat(MediaFormat.KEY_OPERATING_RATE, 120.0f) // Request high operating rate (120fps)
+        
+        AppLog.i("VideoDecoder: configureDecoder with mime=$mime, target dimensions=${width}x${height}")
         try {
             mCodec!!.configure(format, mSurface, null, 0)
-            mCodec!!.setVideoScalingMode(MediaCodec.VIDEO_SCALING_MODE_SCALE_TO_FIT) // IMPORTANT: Add scaling mode
+            mCodec!!.setVideoScalingMode(MediaCodec.VIDEO_SCALING_MODE_SCALE_TO_FIT)
             mCodec!!.start()
-            mInputBuffers = mCodec!!.inputBuffers // Note: inputBuffers can be null after API 21, should use getInputBuffer(int)
+            mInputBuffers = mCodec!!.inputBuffers
             mCodecBufferInfo = MediaCodec.BufferInfo()
             AppLog.i("Codec configured and started. Selected codec: ${mCodec?.name}")
         } catch (e: Exception) {
@@ -198,30 +158,43 @@ class VideoDecoder(private val settings: Settings) {
     }
 
     private fun codec_input_provide(content: ByteBuffer, presentationTimeUs: Long): Boolean {
-        try {
-            val inputBufIndex = mCodec!!.dequeueInputBuffer(10000)
-            if (inputBufIndex < 0) {
-                AppLog.e("dequeueInputBuffer: $inputBufIndex")
+        var retryCount = 0
+        val maxRetries = 20 // Be more patient
+        
+        while (retryCount < maxRetries) {
+            try {
+                val inputBufIndex = mCodec!!.dequeueInputBuffer(10000)
+                if (inputBufIndex >= 0) {
+                    val buffer = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                        mCodec!!.getInputBuffer(inputBufIndex)
+                    } else {
+                        mInputBuffers!![inputBufIndex]
+                    }
+                    if (buffer == null) {
+                        AppLog.e("Input buffer is null for index $inputBufIndex")
+                        return false
+                    }
+
+                    buffer.clear()
+                    buffer.put(content)
+                    mCodec!!.queueInputBuffer(inputBufIndex, 0, buffer.limit(), presentationTimeUs, 0)
+                    return true
+                } else if (inputBufIndex == MediaCodec.INFO_TRY_AGAIN_LATER) {
+                    // Decoder is busy. Try to free up output buffers and then retry.
+                    codecOutputConsume()
+                    retryCount++
+                    Thread.sleep(5) // Wait a bit for the hardware to catch up
+                } else {
+                    AppLog.e("Unexpected dequeueInputBuffer result: $inputBufIndex")
+                    return false
+                }
+            } catch (t: Throwable) {
+                AppLog.e("Error providing codec input", t)
                 return false
             }
-
-            val buffer = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-                mCodec!!.getInputBuffer(inputBufIndex)
-            } else {
-                mInputBuffers!![inputBufIndex]
-            }
-            if (buffer == null) {
-                AppLog.e("Input buffer is null for index $inputBufIndex")
-                return false
-            }
-
-            buffer.clear()
-            buffer.put(content)
-            mCodec!!.queueInputBuffer(inputBufIndex, 0, buffer.limit(), presentationTimeUs, 0)
-            return true
-        } catch (t: Throwable) {
-            AppLog.e(t)
         }
+        
+        AppLog.e("dequeueInputBuffer timed out after $maxRetries retries. Frame will be dropped.")
         return false
     }
 
