@@ -69,6 +69,6 @@ todos.txt
 openauto/
 bug/
 WirelessAndroidAutoDongle/
-TestImported
-test_files
+#TestImported
+#test_files
 headunit-revived/
