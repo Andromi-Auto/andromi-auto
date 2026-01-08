@@ -4,11 +4,6 @@ import android.hardware.usb.UsbDevice
 import com.andrerinas.headunitrevived.aap.Utils
 import java.util.Locale
 
-/**
- * @author algavris
- * *
- * @date 12/05/2016.
- */
 class UsbDeviceCompat(val wrappedDevice: UsbDevice) {
 
     val deviceName: String

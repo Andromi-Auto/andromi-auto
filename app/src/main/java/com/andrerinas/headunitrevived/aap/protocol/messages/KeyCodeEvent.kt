@@ -5,12 +5,6 @@ import com.andrerinas.headunitrevived.aap.protocol.Channel
 import com.andrerinas.headunitrevived.aap.protocol.proto.Input
 import com.google.protobuf.Message
 
-/**
- * @author algavris
- * *
- * @date 13/02/2017.
- */
-
 class KeyCodeEvent(timeStamp: Long, keycode: Int, isPress: Boolean)
     : AapMessage(Channel.ID_INP, Input.MsgType.EVENT_VALUE, makeProto(timeStamp, keycode, isPress)) {
 

@@ -9,12 +9,6 @@ import java.io.IOException
 import java.nio.ByteBuffer
 import java.security.InvalidParameterException
 
-
-/**
- * @author algavris
- * *
- * @date 30/04/2016.
- */
 class StreamVideoExtractor : MediaExtractorInterface {
 
     private var mFormat: MediaFormat? = null

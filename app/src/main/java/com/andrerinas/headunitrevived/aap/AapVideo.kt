@@ -6,11 +6,6 @@ import com.andrerinas.headunitrevived.utils.AppLog
 import com.andrerinas.headunitrevived.utils.Settings
 import java.nio.ByteBuffer
 
-/**
- * @author algavris
- * *
- * @date 01/10/2016.
- */
 internal class AapVideo(private val videoDecoder: VideoDecoder, private val settings: Settings) {
 
     private val messageBuffer = ByteBuffer.allocate(Messages.DEF_BUFFER_LENGTH * 8)

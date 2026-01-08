@@ -10,11 +10,6 @@ import java.io.OutputStream
 import java.net.InetSocketAddress
 import java.net.Socket
 
-/**
- * @author algavris
- * *
- * @date 05/11/2016.
- */
 class SocketAccessoryConnection(private val ip: String, private val port: Int) : AccessoryConnection {
     private var output: OutputStream? = null
     private var input: DataInputStream? = null

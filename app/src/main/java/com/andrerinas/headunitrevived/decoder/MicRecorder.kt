@@ -9,11 +9,6 @@ import android.media.MediaRecorder
 import androidx.core.content.PermissionChecker
 import com.andrerinas.headunitrevived.utils.AppLog
 
-/**
- * @author algavris
- * *
- * @date 12/05/2016.
- */
 class MicRecorder(private val micSampleRate: Int, private val context: Context) {
 
     private var audioRecord: AudioRecord? = null

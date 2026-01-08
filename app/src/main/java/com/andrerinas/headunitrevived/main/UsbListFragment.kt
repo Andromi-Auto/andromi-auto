@@ -30,12 +30,6 @@ import com.andrerinas.headunitrevived.connection.UsbAccessoryMode
 import com.andrerinas.headunitrevived.connection.UsbDeviceCompat
 import com.andrerinas.headunitrevived.utils.Settings
 
-/**
- * @author algavris
- * *
- * @date 05/11/2016.
- */
-
 class UsbListFragment : Fragment() {
     private lateinit var adapter: DeviceAdapter
     private lateinit var settings: Settings

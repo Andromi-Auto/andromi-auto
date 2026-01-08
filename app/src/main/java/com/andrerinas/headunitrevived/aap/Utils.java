@@ -6,11 +6,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-/**
- * @author algavris
- * @date 16/10/2016.
- */
-
 public class Utils {
 
     public static long ms_sleep(long ms) {

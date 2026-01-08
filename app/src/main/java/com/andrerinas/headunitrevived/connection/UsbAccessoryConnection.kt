@@ -11,11 +11,6 @@ import com.andrerinas.headunitrevived.utils.AppLog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-/**
- * @author algavris
- * *
- * @date 29/05/2016.
- */
 class UsbAccessoryConnection(private val usbMgr: UsbManager, private val device: UsbDevice) : AccessoryConnection {
     private var usbDeviceConnected: UsbDeviceCompat? = null
     private var usbDeviceConnection: UsbDeviceConnection? = null                   // USB Device connection

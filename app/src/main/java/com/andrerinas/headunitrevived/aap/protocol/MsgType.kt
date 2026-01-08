@@ -3,12 +3,6 @@ package com.andrerinas.headunitrevived.aap.protocol
 import com.andrerinas.headunitrevived.aap.protocol.proto.Control
 import com.andrerinas.headunitrevived.aap.protocol.proto.Media
 
-/**
- * @author algavris
- * *
- * @date 30/11/2016.
- */
-
 object MsgType {
 
     const val SIZE = 2

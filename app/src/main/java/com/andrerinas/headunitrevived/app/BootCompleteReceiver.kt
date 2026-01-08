@@ -9,11 +9,6 @@ import com.andrerinas.headunitrevived.App
 
 import com.andrerinas.headunitrevived.location.GpsLocationService
 
-/**
- * @author algavris
- * *
- * @date 18/12/2016.
- */
 class BootCompleteReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
 

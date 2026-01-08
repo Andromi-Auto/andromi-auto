@@ -2,11 +2,6 @@ package com.andrerinas.headunitrevived.decoder
 
 import android.util.SparseArray
 
-/**
- * @author algavris
- * *
- * @date 28/04/2016.
- */
 class AudioDecoder {
 
     private val audioTracks = SparseArray<AudioTrackWrapper>(3)

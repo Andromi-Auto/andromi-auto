@@ -8,11 +8,6 @@ import android.net.Uri
 import java.io.IOException
 import java.nio.ByteBuffer
 
-/**
- * @author algavris
- * *
- * @date 30/04/2016.
- */
 interface MediaExtractorInterface {
     fun readSampleData(buffer: ByteBuffer, offset: Int): Int
 

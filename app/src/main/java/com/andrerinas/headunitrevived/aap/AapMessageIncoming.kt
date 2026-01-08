@@ -4,12 +4,6 @@ import com.andrerinas.headunitrevived.aap.protocol.Channel
 import com.andrerinas.headunitrevived.aap.protocol.MsgType
 import com.andrerinas.headunitrevived.utils.AppLog
 
-/**
- * @author algavris
- * *
- * @date 13/02/2017.
- */
-
 internal class AapMessageIncoming(header: EncryptedHeader, ba: ByteArrayWithLimit)
     : AapMessage(header.chan, header.flags.toByte(), Utils.bytesToInt(ba.data, 0, true), calcOffset(header), ba.limit, ba.data) {
 

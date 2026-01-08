@@ -6,11 +6,6 @@ import com.andrerinas.headunitrevived.main.BackgroundNotification
 import com.andrerinas.headunitrevived.utils.AppLog
 import java.nio.ByteBuffer
 
-/**
- * @author algavris
- * @date 08/07/2017
- */
-
 class AapMediaPlayback(private val notification: BackgroundNotification) {
     private val messageBuffer = ByteBuffer.allocate(Messages.DEF_BUFFER_LENGTH * 2)
     private var started = false

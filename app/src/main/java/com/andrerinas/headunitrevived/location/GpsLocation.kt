@@ -12,12 +12,6 @@ import androidx.core.app.ActivityCompat
 import com.andrerinas.headunitrevived.contract.LocationUpdateIntent
 import com.andrerinas.headunitrevived.utils.AppLog
 
-/**
- * @author algavris
- * *
- * @date 06/12/2016.
- */
-
 class GpsLocation constructor(private val context: Context): LocationListener {
     private val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
     private var requested: Boolean = false

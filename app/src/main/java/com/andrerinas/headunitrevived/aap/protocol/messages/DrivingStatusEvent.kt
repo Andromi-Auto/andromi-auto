@@ -5,14 +5,6 @@ import com.andrerinas.headunitrevived.aap.protocol.Channel
 import com.andrerinas.headunitrevived.aap.protocol.proto.Sensors
 import com.google.protobuf.Message
 
-/**
- * @author algavris
- * *
- * @date 13/02/2017.
- * *
- * * Driving status doesn't receive sensor start request
- */
-
 class DrivingStatusEvent(status: Sensors.SensorBatch.DrivingStatusData.Status)
     : AapMessage(Channel.ID_SEN, Sensors.SensorsMsgType.SENSOR_EVENT_VALUE, makeProto(status)) {
 

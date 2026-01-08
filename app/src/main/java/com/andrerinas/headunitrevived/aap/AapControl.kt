@@ -15,12 +15,6 @@ import com.andrerinas.headunitrevived.decoder.MicRecorder
 import com.andrerinas.headunitrevived.utils.AppLog
 import com.andrerinas.headunitrevived.utils.Settings
 
-/**
- * @author algavris
- * *
- * @date 01/10/2016.
- */
-
 interface AapControl {
     fun execute(message: AapMessage): Int
 }

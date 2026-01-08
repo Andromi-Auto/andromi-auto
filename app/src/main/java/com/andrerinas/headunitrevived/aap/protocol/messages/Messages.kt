@@ -2,13 +2,6 @@ package com.andrerinas.headunitrevived.aap.protocol.messages
 
 import com.andrerinas.headunitrevived.aap.Utils
 
-
-/**
- * @author algavris
- * *
- * @date 08/06/2016.
- */
-
 object Messages {
     const val DEF_BUFFER_LENGTH = 131080
 

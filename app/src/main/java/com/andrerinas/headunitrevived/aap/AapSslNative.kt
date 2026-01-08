@@ -3,12 +3,6 @@ package com.andrerinas.headunitrevived.aap
 import com.andrerinas.headunitrevived.aap.protocol.messages.Messages
 import com.andrerinas.headunitrevived.utils.AppLog
 
-/**
- * @author algavris
- * *
- * @date 20/10/2016.
- */
-
 internal class AapSslNative : AapSsl {
 
     companion object {

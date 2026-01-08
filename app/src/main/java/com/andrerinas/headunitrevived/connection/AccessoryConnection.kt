@@ -1,11 +1,5 @@
 package com.andrerinas.headunitrevived.connection
 
-/**
- * @author algavris
- * *
- * @date 05/11/2016.
- */
-
 interface AccessoryConnection {
     val isSingleMessage: Boolean
     fun sendBlocking(buf: ByteArray, length: Int, timeout: Int): Int

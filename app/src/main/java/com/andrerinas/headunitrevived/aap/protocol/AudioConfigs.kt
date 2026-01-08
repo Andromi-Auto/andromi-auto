@@ -6,12 +6,6 @@ import com.andrerinas.headunitrevived.aap.protocol.proto.Media
 
 import com.andrerinas.headunitrevived.decoder.AudioDecoder
 
-/**
- * @author algavris
- * *
- * @date 25/11/2016.
- */
-
 object AudioConfigs {
     private val audioTracks = SparseArray<Media.AudioConfiguration>(3)
 

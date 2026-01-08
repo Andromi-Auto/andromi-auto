@@ -4,11 +4,7 @@ import com.andrerinas.headunitrevived.aap.AapMessage
 import com.andrerinas.headunitrevived.aap.protocol.proto.Media
 import com.google.protobuf.Message
 
-/**
- * @author algavris
- * *
- * @date 13/02/2017.
- */
+
 
 class MediaAck(channel: Int, sessionId: Int)
     : AapMessage(channel, Media.MsgType.ACK_VALUE, makeProto(sessionId), ackBuf) {

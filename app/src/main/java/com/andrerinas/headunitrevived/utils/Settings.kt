@@ -7,12 +7,6 @@ import android.location.Location
 import com.andrerinas.headunitrevived.aap.protocol.proto.Control
 import com.andrerinas.headunitrevived.connection.UsbDeviceCompat
 
-/**
- * @author algavris
- * *
- * @date 21/05/2016.
- */
-
 class Settings(context: Context) {
 
     private val prefs: SharedPreferences = context.getSharedPreferences("settings", Context.MODE_PRIVATE)

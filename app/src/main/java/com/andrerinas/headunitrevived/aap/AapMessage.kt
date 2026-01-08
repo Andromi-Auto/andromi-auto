@@ -6,11 +6,6 @@ import com.andrerinas.headunitrevived.aap.protocol.MsgType
 import com.google.protobuf.CodedOutputStream
 import com.google.protobuf.Message
 
-/**
- * @author algavris
- * *
- * @date 04/10/2016.
- */
 open class AapMessage(
         internal val channel: Int,
         internal val flags: Byte,

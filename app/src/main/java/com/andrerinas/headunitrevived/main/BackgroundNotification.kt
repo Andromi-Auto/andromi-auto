@@ -12,10 +12,6 @@ import com.andrerinas.headunitrevived.aap.AapProjectionActivity
 import com.andrerinas.headunitrevived.aap.protocol.proto.MediaPlayback
 import com.andrerinas.headunitrevived.contract.MediaKeyIntent
 
-/**
- * @author algavris
- * @date 17/07/2017
- */
 class BackgroundNotification(private val context: Context) {
 
     companion object {

@@ -36,12 +36,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.net.ServerSocket
 
-/**
- * @author algavris
- * *
- * @date 03/06/2016.
- */
-
 class AapService : Service(), UsbReceiver.Listener {
     private val serviceJob = Job()
     private val serviceScope = CoroutineScope(Dispatchers.Main + serviceJob)

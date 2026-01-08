@@ -2,10 +2,6 @@ package com.andrerinas.headunitrevived.utils;
 
 import android.view.View;
 
-/**
- * @author algavris
- * @date 28/04/2016.
- */
 public class SystemUI {
 
     public static void hide(View content) {
