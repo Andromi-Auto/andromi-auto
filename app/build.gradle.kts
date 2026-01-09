@@ -32,6 +32,10 @@ dependencies {
 
     // Multidex
     implementation("androidx.multidex:multidex:2.0.1")
+
+    // Navigation Component
+    implementation("androidx.navigation:navigation-fragment-ktx:2.3.5")
+    implementation("androidx.navigation:navigation-ui-ktx:2.3.5")
 }
 
 android {
@@ -43,9 +47,9 @@ android {
         minSdk = 19
         targetSdk = 34
         versionCode = 22
-        versionName = "1.5.0"
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner" // Added for multidex
-        multiDexEnabled = true // Enabled Multidex
+        versionName = "1.6.0"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        multiDexEnabled = true
     }
 
     signingConfigs {

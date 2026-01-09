@@ -40,13 +40,18 @@ https://github.com/mikereidis/headunit
 - Bugfixing, Layout Fixes etc.
 
 ## Changelog
+### v.1.6.0
+- Fixed the selfmode not working outside the wifi bug
+- Redesign of App, Look and feel with modern Material 3
+- Better Settings
+
 ### v.1.5.0
-- Complete Rewrite of the Videodecoder for better Video-Performance
+- Complete Rewrite of the Video decoder for better Video-Performance
 - Updated Android-Auto Protocol with the latest available codecs (h265 for example)
 - Added 1440p Video-Option(Note this only works with h265!)
 - Added FPS-Setting
 - Added Codec-Setting
-- Added Force to Use Software Decoder Setting
+- Added Force to Use Software decoder Setting
 - Merged the Android Native SSL Library and get rid of the old jni files
 
 ### v.1.4.1

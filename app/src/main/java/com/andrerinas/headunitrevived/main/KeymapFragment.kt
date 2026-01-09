@@ -14,13 +14,19 @@ import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.andrerinas.headunitrevived.R
 import com.andrerinas.headunitrevived.contract.KeyIntent
 import com.andrerinas.headunitrevived.utils.AppLog
 import com.andrerinas.headunitrevived.utils.IntentFilters
 import com.andrerinas.headunitrevived.utils.Settings
+import com.google.android.material.appbar.MaterialToolbar
+import com.google.android.material.button.MaterialButton
 
 class KeymapFragment : Fragment(), MainActivity.KeyListener, View.OnClickListener {
+
+    private lateinit var toolbar: MaterialToolbar
+    private val RESET_ITEM_ID = 1003
 
     private val idToCode = mapOf(
         R.id.keycode_soft_left to KeyEvent.KEYCODE_SOFT_LEFT,
@@ -49,10 +55,10 @@ class KeymapFragment : Fragment(), MainActivity.KeyListener, View.OnClickListene
         KeyEvent.KEYCODE_SOFT_RIGHT to R.id.keycode_soft_right,
 
         KeyEvent.KEYCODE_DPAD_UP to R.id.keycode_dpad_up,
-        KeyEvent.KEYCODE_DPAD_DOWN to KeyEvent.KEYCODE_DPAD_DOWN,
+        KeyEvent.KEYCODE_DPAD_DOWN to R.id.keycode_dpad_down,
         KeyEvent.KEYCODE_DPAD_LEFT to R.id.keycode_dpad_left,
-        KeyEvent.KEYCODE_DPAD_RIGHT to KeyEvent.KEYCODE_DPAD_RIGHT,
-        KeyEvent.KEYCODE_DPAD_CENTER to KeyEvent.KEYCODE_DPAD_CENTER,
+        KeyEvent.KEYCODE_DPAD_RIGHT to R.id.keycode_dpad_right,
+        KeyEvent.KEYCODE_DPAD_CENTER to R.id.keycode_dpad_center,
 
         KeyEvent.KEYCODE_MEDIA_PLAY to R.id.keycode_media_play,
         KeyEvent.KEYCODE_MEDIA_PAUSE to R.id.keycode_media_pause,
@@ -71,25 +77,42 @@ class KeymapFragment : Fragment(), MainActivity.KeyListener, View.OnClickListene
     private var codesMap = mutableMapOf<Int, Int>()
     private lateinit var keypressDebuggerTextView: TextView
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): android.view.View {
-        val view = inflater.inflate(R.layout.fragment_keymap, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        return inflater.inflate(R.layout.fragment_keymap, container, false)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        
         keypressDebuggerTextView = view.findViewById(R.id.keypress_debugger_text)
+        toolbar = view.findViewById(R.id.toolbar)
         settings = Settings(requireContext())
         codesMap = settings.keyCodes
 
-        idToCode.forEach {
-            (resId, keyCode) ->
+        idToCode.forEach { (resId, keyCode) ->
             val button = view.findViewById<Button>(resId)
             button.tag = keyCode
             button.setOnClickListener(this)
         }
 
-        view.findViewById<Button>(R.id.reset_codes).setOnClickListener {
+        setupToolbar()
+    }
+
+    private fun setupToolbar() {
+        toolbar.setNavigationOnClickListener {
+            findNavController().popBackStack()
+        }
+        
+        val resetItem = toolbar.menu.add(0, RESET_ITEM_ID, 0, getString(R.string.reset))
+        resetItem.setShowAsAction(android.view.MenuItem.SHOW_AS_ACTION_ALWAYS)
+        resetItem.setActionView(R.layout.layout_reset_button)
+        
+        val resetButton = resetItem.actionView?.findViewById<MaterialButton>(R.id.reset_button_widget)
+        resetButton?.setOnClickListener {
             codesMap = mutableMapOf()
             settings.keyCodes = codesMap
+            Toast.makeText(requireContext(), "Key mappings reset", Toast.LENGTH_SHORT).show()
         }
-
-        return view
     }
 
     private val keyCodeReceiver = object : BroadcastReceiver() {

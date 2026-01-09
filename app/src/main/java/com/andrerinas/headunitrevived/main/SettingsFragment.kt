@@ -1,27 +1,52 @@
 package com.andrerinas.headunitrevived.main
 
 import android.app.AlertDialog
+import android.content.Intent
 import android.os.Bundle
 import android.text.InputType
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.andrerinas.headunitrevived.App
 import com.andrerinas.headunitrevived.R
-import com.andrerinas.headunitrevived.decoder.MicRecorder
+import com.andrerinas.headunitrevived.aap.AapService
 import com.andrerinas.headunitrevived.main.settings.SettingItem
 import com.andrerinas.headunitrevived.main.settings.SettingsAdapter
 import com.andrerinas.headunitrevived.utils.Settings
+import com.google.android.material.appbar.MaterialToolbar
+import com.google.android.material.button.MaterialButton
 
 class SettingsFragment : Fragment() {
     private lateinit var settings: Settings
     private lateinit var settingsRecyclerView: RecyclerView
     private lateinit var settingsAdapter: SettingsAdapter
+    private lateinit var toolbar: MaterialToolbar
+    private var saveButton: MaterialButton? = null
+
+    // Local state to hold changes before saving
+    private var pendingNightMode: Settings.NightMode? = null
+    private var pendingMicSampleRate: Int? = null
+    private var pendingUseGps: Boolean? = null
+    private var pendingResolution: Int? = null
+    private var pendingDpi: Int? = null
+    private var pendingFullscreen: Boolean? = null
+    private var pendingViewMode: Settings.ViewMode? = null
+    private var pendingForceSoftware: Boolean? = null
+    private var pendingVideoCodec: String? = null
+    private var pendingFpsLimit: Int? = null
+    private var pendingDebugMode: Boolean? = null
+    private var pendingBluetoothAddress: String? = null
+
+    private var requiresRestart = false
+    private var hasChanges = false
+    private val SAVE_ITEM_ID = 1001
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.fragment_settings, container, false)
@@ -32,13 +57,117 @@ class SettingsFragment : Fragment() {
 
         settings = App.provide(requireContext()).settings
 
-        // Initialize adapter once and set it to the RecyclerView
+        // Initialize local state with current values
+        pendingNightMode = settings.nightMode
+        pendingMicSampleRate = settings.micSampleRate
+        pendingUseGps = settings.useGpsForNavigation
+        pendingResolution = settings.resolutionId
+        pendingDpi = settings.dpiPixelDensity
+        pendingFullscreen = settings.startInFullscreenMode
+        pendingViewMode = settings.viewMode
+        pendingForceSoftware = settings.forceSoftwareDecoding
+        pendingVideoCodec = settings.videoCodec
+        pendingFpsLimit = settings.fpsLimit
+        pendingDebugMode = settings.debugMode
+        pendingBluetoothAddress = settings.bluetoothAddress
+
+        toolbar = view.findViewById(R.id.toolbar)
         settingsAdapter = SettingsAdapter()
         settingsRecyclerView = view.findViewById(R.id.settingsRecyclerView)
         settingsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         settingsRecyclerView.adapter = settingsAdapter
 
         updateSettingsList()
+        setupToolbar()
+    }
+
+    private fun setupToolbar() {
+        toolbar.setNavigationOnClickListener {
+            findNavController().popBackStack()
+        }
+        
+        // Add the Save item with custom layout
+        val saveItem = toolbar.menu.add(0, SAVE_ITEM_ID, 0, getString(R.string.save))
+        saveItem.setShowAsAction(android.view.MenuItem.SHOW_AS_ACTION_ALWAYS)
+        saveItem.setActionView(R.layout.layout_save_button)
+
+        // Get the button from the action view
+        saveButton = saveItem.actionView?.findViewById(R.id.save_button_widget)
+        saveButton?.setOnClickListener {
+            saveSettings()
+        }
+
+        updateSaveButtonState()
+    }
+
+    private fun updateSaveButtonState() {
+        saveButton?.isEnabled = hasChanges
+        saveButton?.text = if (requiresRestart) getString(R.string.save_and_restart) else getString(R.string.save)
+        
+        // Ensure background tint is correct (Teal when enabled, Grey when disabled) is handled by MaterialButton automatically 
+        // if using correct style, but we set tint in XML.
+        // MaterialButton automatically handles disabled state color if using default styles, 
+        // but since we set backgroundTint in XML, we might need to rely on selector or just alpha.
+        // Actually, MaterialButton with backgroundTint will just alpha-blend it when disabled.
+    }
+
+    private fun saveSettings() {
+        pendingNightMode?.let { settings.nightMode = it }
+        pendingMicSampleRate?.let { settings.micSampleRate = it }
+        pendingUseGps?.let { settings.useGpsForNavigation = it }
+        pendingResolution?.let { settings.resolutionId = it }
+        pendingDpi?.let { settings.dpiPixelDensity = it }
+        pendingFullscreen?.let { settings.startInFullscreenMode = it }
+        pendingViewMode?.let { settings.viewMode = it }
+        pendingForceSoftware?.let { settings.forceSoftwareDecoding = it }
+        pendingVideoCodec?.let { settings.videoCodec = it }
+        pendingFpsLimit?.let { settings.fpsLimit = it }
+        pendingDebugMode?.let { settings.debugMode = it }
+        pendingBluetoothAddress?.let { settings.bluetoothAddress = it }
+
+        if (requiresRestart) {
+            if (AapService.isConnected) {
+                Toast.makeText(context, "Restarting connection...", Toast.LENGTH_SHORT).show()
+                val stopServiceIntent = Intent(requireContext(), AapService::class.java).apply {
+                    action = AapService.ACTION_STOP_SERVICE
+                }
+                requireContext().startService(stopServiceIntent)
+            }
+        }
+        
+        // Reset change tracking
+        hasChanges = false
+        requiresRestart = false
+        updateSaveButtonState()
+        
+        Toast.makeText(context, "Settings saved", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun checkChanges() {
+        // Check for any changes
+        val anyChange = pendingNightMode != settings.nightMode ||
+                        pendingMicSampleRate != settings.micSampleRate ||
+                        pendingUseGps != settings.useGpsForNavigation ||
+                        pendingResolution != settings.resolutionId ||
+                        pendingDpi != settings.dpiPixelDensity ||
+                        pendingFullscreen != settings.startInFullscreenMode ||
+                        pendingViewMode != settings.viewMode ||
+                        pendingForceSoftware != settings.forceSoftwareDecoding ||
+                        pendingVideoCodec != settings.videoCodec ||
+                        pendingFpsLimit != settings.fpsLimit ||
+                        pendingDebugMode != settings.debugMode ||
+                        pendingBluetoothAddress != settings.bluetoothAddress
+
+        hasChanges = anyChange
+
+        // Check for restart requirement
+        requiresRestart = pendingResolution != settings.resolutionId ||
+                          pendingVideoCodec != settings.videoCodec ||
+                          pendingFpsLimit != settings.fpsLimit ||
+                          pendingDpi != settings.dpiPixelDensity ||
+                          pendingForceSoftware != settings.forceSoftwareDecoding
+
+        updateSaveButtonState()
     }
 
     private fun updateSettingsList() {
@@ -50,18 +179,17 @@ class SettingsFragment : Fragment() {
         items.add(SettingItem.SettingEntry(
             stableId = "nightMode",
             nameResId = R.string.night_mode,
-            value = resources.getStringArray(R.array.night_mode)[settings.nightMode.value],
+            value = resources.getStringArray(R.array.night_mode)[pendingNightMode!!.value],
             onClick = { _ ->
                 val nightModeTitles = resources.getStringArray(R.array.night_mode)
-                val currentNightModeIndex = settings.nightMode.value
                 
                 AlertDialog.Builder(requireContext())
                     .setTitle(R.string.night_mode)
-                    .setSingleChoiceItems(nightModeTitles, currentNightModeIndex) { dialog, which ->
-                        val newMode = Settings.NightMode.fromInt(which)!!
-                        settings.nightMode = newMode
+                    .setSingleChoiceItems(nightModeTitles, pendingNightMode!!.value) { dialog, which ->
+                        pendingNightMode = Settings.NightMode.fromInt(which)!!
+                        checkChanges()
                         dialog.dismiss()
-                        updateSettingsList() // Refresh the list
+                        updateSettingsList()
                     }
                     .show()
             }
@@ -70,25 +198,19 @@ class SettingsFragment : Fragment() {
         items.add(SettingItem.SettingEntry(
             stableId = "micSampleRate",
             nameResId = R.string.mic_sample_rate,
-            value = "${settings.micSampleRate / 1000}kHz",
+            value = "${pendingMicSampleRate!! / 1000}kHz",
             onClick = { _ ->
-                val currentSampleRateIndex = Settings.MicSampleRates.indexOf(settings.micSampleRate)
+                val currentSampleRateIndex = Settings.MicSampleRates.indexOf(pendingMicSampleRate!!)
                 val sampleRateNames = Settings.MicSampleRates.map { "${it / 1000}kHz" }.toTypedArray()
 
                 AlertDialog.Builder(requireContext())
                     .setTitle(R.string.mic_sample_rate)
                     .setSingleChoiceItems(sampleRateNames, currentSampleRateIndex) { dialog, which ->
                         val newValue = Settings.MicSampleRates.elementAt(which)
-
-                        val recorder: MicRecorder? = try { MicRecorder(newValue, requireContext().applicationContext) } catch (e: Exception) { null }
-
-                        if (recorder == null) {
-                            Toast.makeText(activity, "Value not supported: $newValue", Toast.LENGTH_LONG).show()
-                        } else {
-                            settings.micSampleRate = newValue
-                        }
+                        pendingMicSampleRate = newValue
+                        checkChanges()
                         dialog.dismiss()
-                        updateSettingsList() // Refresh the list
+                        updateSettingsList()
                     }
                     .show()
             }
@@ -97,12 +219,9 @@ class SettingsFragment : Fragment() {
         items.add(SettingItem.SettingEntry(
             stableId = "keymap",
             nameResId = R.string.keymap,
-            value = getString(R.string.keymap_description), // Use new string resource
+            value = getString(R.string.keymap_description),
             onClick = { _ ->
-                parentFragmentManager.beginTransaction()
-                    .replace(R.id.main_content, KeymapFragment())
-                    .addToBackStack(null)
-                    .commit()
+                findNavController().navigate(R.id.action_settingsFragment_to_keymapFragment)
             }
         ))
 
@@ -110,14 +229,13 @@ class SettingsFragment : Fragment() {
             stableId = "gpsNavigation",
             nameResId = R.string.gps_for_navigation,
             descriptionResId = R.string.gps_for_navigation_description,
-            isChecked = settings.useGpsForNavigation,
+            isChecked = pendingUseGps!!,
             onCheckedChanged = { isChecked ->
-                settings.useGpsForNavigation = isChecked
-                updateSettingsList() // Refresh the list to show the change
+                pendingUseGps = isChecked
+                checkChanges()
+                updateSettingsList()
             }
         ))
-
-        items.add(SettingItem.Divider) // Divider after General category
 
         // --- Graphic Settings ---
         items.add(SettingItem.CategoryHeader("graphic", R.string.category_graphic))
@@ -125,14 +243,15 @@ class SettingsFragment : Fragment() {
         items.add(SettingItem.SettingEntry(
             stableId = "resolution",
             nameResId = R.string.resolution,
-            value = Settings.Resolution.fromId(settings.resolutionId)?.resName ?: "",
+            value = Settings.Resolution.fromId(pendingResolution!!)?.resName ?: "",
             onClick = { _ ->
                 AlertDialog.Builder(requireContext())
                     .setTitle(R.string.change_resolution)
-                    .setSingleChoiceItems(Settings.Resolution.allRes, settings.resolutionId) { dialog, which ->
-                        settings.resolutionId = which
+                    .setSingleChoiceItems(Settings.Resolution.allRes, pendingResolution!!) { dialog, which ->
+                        pendingResolution = which
+                        checkChanges()
                         dialog.dismiss()
-                        updateSettingsList() // Refresh the list
+                        updateSettingsList()
                     }
                     .show()
             }
@@ -141,12 +260,12 @@ class SettingsFragment : Fragment() {
         items.add(SettingItem.SettingEntry(
             stableId = "dpiPixelDensity",
             nameResId = R.string.dpi,
-            value = if (settings.dpiPixelDensity == 0) getString(R.string.auto) else settings.dpiPixelDensity.toString(),
+            value = if (pendingDpi == 0) getString(R.string.auto) else pendingDpi.toString(),
             onClick = { _ ->
                 val editView = EditText(requireContext())
                 editView.inputType = InputType.TYPE_CLASS_NUMBER
-                if (settings.dpiPixelDensity != 0) {
-                    editView.setText(settings.dpiPixelDensity.toString())
+                if (pendingDpi != 0) {
+                    editView.setText(pendingDpi.toString())
                 }
 
                 AlertDialog.Builder(requireContext())
@@ -156,14 +275,13 @@ class SettingsFragment : Fragment() {
                         val inputText = editView.text.toString().trim()
                         val newDpi = inputText.toIntOrNull()
                         if (newDpi != null && newDpi >= 0) {
-                            settings.dpiPixelDensity = newDpi
-                        } else if (inputText.isNotEmpty()) {
-                            Toast.makeText(activity, "Invalid DPI value. Please enter a number or 0 for auto.", Toast.LENGTH_LONG).show()
+                            pendingDpi = newDpi
                         } else {
-                            settings.dpiPixelDensity = 0 // If empty, set to auto
+                            pendingDpi = 0
                         }
+                        checkChanges()
                         dialog.dismiss()
-                        updateSettingsList() // Refresh the list
+                        updateSettingsList()
                     }
                     .setNegativeButton(android.R.string.cancel) { dialog, _ ->
                         dialog.cancel()
@@ -176,75 +294,32 @@ class SettingsFragment : Fragment() {
             stableId = "startInFullscreenMode",
             nameResId = R.string.start_in_fullscreen_mode,
             descriptionResId = R.string.start_in_fullscreen_mode_description,
-            isChecked = settings.startInFullscreenMode,
+            isChecked = pendingFullscreen!!,
             onCheckedChanged = { isChecked ->
-                settings.startInFullscreenMode = isChecked
-                updateSettingsList() // Refresh the list to show the change
+                pendingFullscreen = isChecked
+                checkChanges()
+                updateSettingsList()
             }
         ))
-
-//        items.add(SettingItem.SettingEntry(                                                                                                                                                                                                   │
-//            id = "customMargin",                                                                                                                                                                                                              │
-//            nameResId = R.string.custom_margin,                                                                                                                                                                                               │
-//            value = getString(R.string.custom_margin_description),                                                                                                                                                                            │
-//            onClick = { _ ->                                                                                                                                                                                                                  │
-//                val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.layout_custom_margin_dialog, null)                                                                                                                    │
-//                val etLeft = dialogView.findViewById<EditText>(R.id.editTextLeft)                                                                                                                                                             │
-//                val etTop = dialogView.findViewById<EditText>(R.id.editTextTop)                                                                                                                                                               │
-//                val etRight = dialogView.findViewById<EditText>(R.id.editTextRight)                                                                                                                                                           │
-//                val etBottom = dialogView.findViewById<EditText>(R.id.editTextBottom)                                                                                                                                                         │
-//                                                                                                                                                                                                                                              │
-//                // Set current values                                                                                                                                                                                                         │
-//                etLeft.setText(settings.marginLeft.toString())                                                                                                                                                                                │
-//                etTop.setText(settings.marginTop.toString())                                                                                                                                                                                  │
-//                etRight.setText(settings.marginRight.toString())                                                                                                                                                                              │
-//                etBottom.setText(settings.marginBottom.toString())                                                                                                                                                                            │
-//                                                                                                                                                                                                                                              │
-//                AlertDialog.Builder(requireContext())                                                                                                                                                                                         │
-//                    .setTitle(R.string.enter_custom_margins)                                                                                                                                                                                  │
-//                    .setView(dialogView)                                                                                                                                                                                                      │
-//                    .setPositiveButton(android.R.string.ok) { dialog, _ ->                                                                                                                                                                    │
-//                        val newLeft = etLeft.text.toString().toIntOrNull() ?: 0                                                                                                                                                               │
-//                        val newTop = etTop.text.toString().toIntOrNull() ?: 0                                                                                                                                                                 │
-//                        val newRight = etRight.text.toString().toIntOrNull() ?: 0                                                                                                                                                             │
-//                        val newBottom = etBottom.text.toString().toIntOrNull() ?: 0                                                                                                                                                           │
-//                                                                                                                                                                                                                                              │
-//                        if (newLeft >= 0 && newTop >= 0 && newRight >= 0 && newBottom >= 0) {                                                                                                                                                 │
-//                            settings.marginLeft = newLeft                                                                                                                                                                                     │
-//                            settings.marginTop = newTop                                                                                                                                                                                       │
-//                            settings.marginRight = newRight                                                                                                                                                                                   │
-//                            settings.marginBottom = newBottom                                                                                                                                                                                 │
-//                        } else {                                                                                                                                                                                                              │
-//                            Toast.makeText(activity, "Invalid margin value. Please enter a non-negative number.", Toast.LENGTH_LONG).show()                                                                                                   │
-//                        }                                                                                                                                                                                                                     │
-//                        dialog.dismiss()                                                                                                                                                                                                      │
-//                        updateSettingsList() // Refresh the list                                                                                                                                                                              │
-//                    }                                                                                                                                                                                                                         │
-//                    .setNegativeButton(android.R.string.cancel) { dialog, _ ->                                                                                                                                                                │
-//                        dialog.cancel()                                                                                                                                                                                                       │
-//                    }                                                                                                                                                                                                                         │
-//                    .show()                                                                                                                                                                                                                   │
-//            }                                                                                                                                                                                                                                 │
-//        ))
 
         items.add(SettingItem.SettingEntry(
             stableId = "viewMode",
             nameResId = R.string.view_mode,
-            value = if (settings.viewMode == Settings.ViewMode.SURFACE) getString(R.string.surface_view) else getString(R.string.texture_view),
+            value = if (pendingViewMode == Settings.ViewMode.SURFACE) getString(R.string.surface_view) else getString(R.string.texture_view),
             onClick = { _ ->
                 val viewModes = arrayOf(getString(R.string.surface_view), getString(R.string.texture_view))
+                val currentIdx = pendingViewMode!!.value
                 AlertDialog.Builder(requireContext())
                     .setTitle(R.string.change_view_mode)
-                    .setSingleChoiceItems(viewModes, settings.viewMode.value) { dialog, which ->
-                        val newViewMode = Settings.ViewMode.fromInt(which)!!
-                        settings.viewMode = newViewMode
+                    .setSingleChoiceItems(viewModes, currentIdx) { dialog, which ->
+                        pendingViewMode = Settings.ViewMode.fromInt(which)!!
+                        checkChanges()
                         dialog.dismiss()
-                        updateSettingsList() // Refresh the list
+                        updateSettingsList()
                     }
                     .show()
             }
         ))
-        items.add(SettingItem.Divider) // Divider after Graphic category
 
         // --- Video Settings ---
         items.add(SettingItem.CategoryHeader("video", R.string.category_video))
@@ -253,26 +328,28 @@ class SettingsFragment : Fragment() {
             stableId = "forceSoftwareDecoding",
             nameResId = R.string.force_software_decoding,
             descriptionResId = R.string.force_software_decoding_description,
-            isChecked = settings.forceSoftwareDecoding,
+            isChecked = pendingForceSoftware!!,
             onCheckedChanged = { isChecked ->
-                settings.forceSoftwareDecoding = isChecked
-                updateSettingsList() // Refresh the list
+                pendingForceSoftware = isChecked
+                checkChanges()
+                updateSettingsList()
             }
         ))
 
         items.add(SettingItem.SettingEntry(
             stableId = "videoCodec",
             nameResId = R.string.video_codec,
-            value = settings.videoCodec,
+            value = pendingVideoCodec!!,
             onClick = { _ ->
                 val codecs = arrayOf("Auto", "H.264", "H.265")
-                val currentCodecIndex = codecs.indexOf(settings.videoCodec)
+                val currentCodecIndex = codecs.indexOf(pendingVideoCodec)
                 AlertDialog.Builder(requireContext())
                     .setTitle(R.string.video_codec)
                     .setSingleChoiceItems(codecs, currentCodecIndex) { dialog, which ->
-                        settings.videoCodec = codecs[which]
+                        pendingVideoCodec = codecs[which]
+                        checkChanges()
                         dialog.dismiss()
-                        updateSettingsList() // Refresh the list
+                        updateSettingsList()
                     }
                     .show()
             }
@@ -281,23 +358,22 @@ class SettingsFragment : Fragment() {
         items.add(SettingItem.SettingEntry(
             stableId = "fpsLimit",
             nameResId = R.string.fps_limit,
-            value = "${settings.fpsLimit} FPS",
+            value = "${pendingFpsLimit} FPS",
             onClick = { _ ->
                 val fpsOptions = arrayOf("30", "60")
-                val currentFpsIndex = fpsOptions.indexOf(settings.fpsLimit.toString())
+                val currentFpsIndex = fpsOptions.indexOf(pendingFpsLimit.toString())
                 AlertDialog.Builder(requireContext())
                     .setTitle(R.string.fps_limit)
                     .setSingleChoiceItems(fpsOptions, currentFpsIndex) { dialog, which ->
-                        settings.fpsLimit = fpsOptions[which].toInt()
+                        pendingFpsLimit = fpsOptions[which].toInt()
+                        checkChanges()
                         dialog.dismiss()
-                        updateSettingsList() // Refresh the list
+                        updateSettingsList()
                     }
                     .show()
             }
         ))
 
-        items.add(SettingItem.Divider) // Divider after Video category
-        
         // --- Debug Settings ---
         items.add(SettingItem.CategoryHeader("debug", R.string.category_debug))
 
@@ -305,27 +381,29 @@ class SettingsFragment : Fragment() {
             stableId = "debugMode",
             nameResId = R.string.debug_mode,
             descriptionResId = R.string.debug_mode_description,
-            isChecked = settings.debugMode,
+            isChecked = pendingDebugMode!!,
             onCheckedChanged = { isChecked ->
-                settings.debugMode = isChecked
-                updateSettingsList() // Refresh the list to show the change
+                pendingDebugMode = isChecked
+                checkChanges()
+                updateSettingsList()
             }
         ))
 
         items.add(SettingItem.SettingEntry(
             stableId = "bluetoothAddress",
             nameResId = R.string.bluetooth_address_s,
-            value = settings.bluetoothAddress.ifEmpty { getString(R.string.not_set) },
+            value = pendingBluetoothAddress!!.ifEmpty { getString(R.string.not_set) },
             onClick = { _ ->
                 val editView = EditText(requireContext())
-                editView.setText(settings.bluetoothAddress)
+                editView.setText(pendingBluetoothAddress)
                 AlertDialog.Builder(requireContext())
                     .setTitle(R.string.enter_bluetooth_mac)
                     .setView(editView)
                     .setPositiveButton(android.R.string.ok) { dialog, _ ->
-                        settings.bluetoothAddress = editView.text.toString().trim()
+                        pendingBluetoothAddress = editView.text.toString().trim()
+                        checkChanges()
                         dialog.dismiss()
-                        updateSettingsList() // Refresh the list
+                        updateSettingsList()
                     }
                     .setNegativeButton(android.R.string.cancel) { dialog, _ ->
                         dialog.cancel()
@@ -334,6 +412,6 @@ class SettingsFragment : Fragment() {
             }
         ))
 
-        settingsAdapter.submitList(items) // Submit the new list to ListAdapter
+        settingsAdapter.submitList(items)
     }
 }

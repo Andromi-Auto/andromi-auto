@@ -4,6 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="80dp"
     android:orientation="horizontal"
+    android:layout_marginBottom="2dp"
 >
     <Button
         android:id="@android:id/button2"
@@ -15,8 +16,8 @@
         tools:text="Device name Device unique id"
         android:gravity="center_vertical"
         style="?android:attr/buttonBarButtonStyle"
-        android:background="@drawable/button_selectable_background"
-        android:textColor="@color/text_primary"
+        android:background="?android:attr/selectableItemBackground"
+        android:textColor="?android:attr/textColorPrimary"
         />
 
     <Button
@@ -25,8 +26,8 @@
         android:layout_height="match_parent"
         android:layout_gravity="right"
         style="?android:attr/buttonBarButtonStyle"
-        android:background="@drawable/button_selectable_background"
+        android:background="?android:attr/selectableItemBackground"
         android:text="@string/allowed"
-        android:textColor="@color/text_primary" />
+        android:textColor="?android:attr/textColorPrimary" />
 
 </LinearLayout>
