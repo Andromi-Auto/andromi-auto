@@ -38,37 +38,14 @@ android {
     compileSdk = 34
     namespace = "com.andrerinas.headunitrevived"
 
-    ndkVersion = "21.4.7075529" // Added NDK Version
-
     defaultConfig {
         applicationId = "com.andrerinas.headunitrevived"
         minSdk = 19
         targetSdk = 34
-
         versionCode = 22
-        versionName = "1.4.1"
-
+        versionName = "1.5.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner" // Added for multidex
-
-        ndk {
-            moduleName = "hu_jni"
-            abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a", "x86_64"))
-        }
-
-        externalNativeBuild {
-            cmake {
-                version = "3.22.1"
-                arguments += "-DANDROID_TOOLCHAIN=clang"
-            }
-        }
-
         multiDexEnabled = true // Enabled Multidex
-    }
-
-    externalNativeBuild {
-        cmake {
-            path = file("CMakeLists.txt")
-        }
     }
 
     signingConfigs {

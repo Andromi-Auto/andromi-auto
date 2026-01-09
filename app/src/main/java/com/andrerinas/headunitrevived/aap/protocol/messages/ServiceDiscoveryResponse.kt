@@ -49,9 +49,6 @@ class ServiceDiscoveryResponse(private val context: Context)
                     mediaSinkServiceBuilder.audioType = Media.AudioStreamType.NONE
                     mediaSinkServiceBuilder.availableWhileInCall = true
 
-                    // Get the actual Screen Dimensions:
-                    //AppLog.i("[ServiceDiscovery] Actual screen dimensions: ${actualScreenWidth}x${actualScreenHeight}")
-
                     // Use HeadUnitScreenConfig for negotiated resolution and margins
                     val negotiatedResolution = HeadUnitScreenConfig.negotiatedResolutionType
                     val phoneWidthMargin = HeadUnitScreenConfig.getWidthMargin()
@@ -69,7 +66,7 @@ class ServiceDiscoveryResponse(private val context: Context)
                         setDensity(HeadUnitScreenConfig.getDensityDpi()) // Use actual densityDpi
                         setMarginWidth(phoneWidthMargin)
                         setMarginHeight(phoneHeightMargin)
-                        
+
                         val codecToRequest = when (settings.videoCodec) {
                             "H.265" -> Media.MediaCodecType.MEDIA_CODEC_VIDEO_H265
                             "Auto" -> if (com.andrerinas.headunitrevived.decoder.VideoDecoder.isHevcSupported()) {
