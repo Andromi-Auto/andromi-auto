@@ -1,10 +1,5 @@
 package com.andrerinas.headunitrevived.aap
 
-/**
- * @author algavris
- * *
- * @date 14/02/2017.
- */
 interface AapSsl {
     fun prepare(): Int
     fun handshakeRead(): ByteArray?

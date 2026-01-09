@@ -8,11 +8,6 @@ import com.andrerinas.headunitrevived.App
 
 import com.andrerinas.headunitrevived.utils.AppLog
 
-/**
- * @author algavris
- * *
- * @date 03/06/2016.
- */
 class RemoteControlReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {

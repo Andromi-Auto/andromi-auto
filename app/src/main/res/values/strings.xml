@@ -66,5 +66,12 @@
     <string name="category_general">General</string>
     <string name="category_graphic">Graphic</string>
     <string name="category_debug">Debug</string>
+
+    <!-- Video Settings -->
+    <string name="category_video">Video</string>
+    <string name="force_software_decoding">Force Software Decoding</string>
+    <string name="force_software_decoding_description">May fix issues on some devices, but is less performant</string>
+    <string name="video_codec">Video Codec</string>
+    <string name="fps_limit">FPS Limit</string>
 </resources>
 

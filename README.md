@@ -42,6 +42,15 @@ https://github.com/mikereidis/headunit
 - Change the whole ssl engine and working, because this often keeps the device from connecting
 
 ## Changelog
+### v.1.5.0
+- Complete Rewrite of the Videodecoder for better Video-Performance
+- Updated Android-Auto Protocol with the latest available codecs (h265 for example)
+- Added 1440p Video-Option(Note this only works with h265!)
+- Added FPS-Setting
+- Added Codec-Setting
+- Added Force to Use Software Decoder Setting
+- Merged the Android Native SSL Library and get rid of the old jni files
+
 ### v.1.4.1
 - Fixing Touch-Events for devices with higher resolutions
 - Removing file-log and logging is only enabled if debug is on

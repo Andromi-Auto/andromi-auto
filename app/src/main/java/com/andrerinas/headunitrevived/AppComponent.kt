@@ -23,7 +23,7 @@ class AppComponent(private val app: App) {
         }
 
     val settings = Settings(app)
-    val videoDecoder = VideoDecoder()
+    val videoDecoder = VideoDecoder(settings)
     val audioDecoder = AudioDecoder()
 
     fun resetTransport() {

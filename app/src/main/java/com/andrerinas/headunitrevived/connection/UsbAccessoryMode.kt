@@ -7,11 +7,6 @@ import android.hardware.usb.UsbManager
 import com.andrerinas.headunitrevived.aap.Utils
 import com.andrerinas.headunitrevived.utils.AppLog
 
-/**
- * @author algavris
- * *
- * @date 29/05/2016.
- */
 class UsbAccessoryMode(private val usbMgr: UsbManager) {
 
     fun connectAndSwitch(device: UsbDevice): Boolean {

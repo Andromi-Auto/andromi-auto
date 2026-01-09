@@ -13,10 +13,6 @@ import com.andrerinas.headunitrevived.contract.LocationUpdateIntent
 import com.andrerinas.headunitrevived.contract.MediaKeyIntent
 import com.andrerinas.headunitrevived.contract.ProjectionActivityRequest
 
-/**
- * @author algavris
- * @date 22/12/2017
- */
 class AapBroadcastReceiver : BroadcastReceiver() {
 
     companion object {

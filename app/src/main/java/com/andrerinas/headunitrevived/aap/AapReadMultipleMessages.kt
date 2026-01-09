@@ -7,12 +7,6 @@ import com.andrerinas.headunitrevived.utils.AppLog
 import java.nio.BufferUnderflowException
 import java.nio.ByteBuffer
 
-/**
- * @author algavris
- * *
- * @date 13/02/2017.
- */
-
 internal class AapReadMultipleMessages(
         connection: AccessoryConnection,
         ssl: AapSsl,

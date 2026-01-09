@@ -4,12 +4,6 @@ import android.location.Location
 import com.andrerinas.headunitrevived.aap.protocol.proto.Sensors
 import com.google.protobuf.Message
 
-/**
- * @author algavris
- * *
- * @date 15/02/2017.
- */
-
 class LocationUpdateEvent(location: Location)
     : SensorEvent(Sensors.SensorType.LOCATION_VALUE, makeProto(location)) {
 

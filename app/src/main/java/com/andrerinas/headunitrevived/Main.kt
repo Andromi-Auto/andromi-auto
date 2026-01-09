@@ -2,11 +2,6 @@ package com.andrerinas.headunitrevived
 
 import java.util.Locale
 
-/**
- * @author algavris
- * *
- * @date 26/11/2016.
- */
 object Main {
 
     @JvmStatic fun main(args: Array<String>) {

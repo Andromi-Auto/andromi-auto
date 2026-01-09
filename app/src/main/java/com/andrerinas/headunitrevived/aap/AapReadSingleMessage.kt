@@ -4,12 +4,6 @@ import com.andrerinas.headunitrevived.aap.protocol.Channel
 import com.andrerinas.headunitrevived.connection.AccessoryConnection
 import com.andrerinas.headunitrevived.utils.AppLog
 
-/**
- * @author algavris
- * *
- * @date 13/02/2017.
- */
-
 internal class AapReadSingleMessage(connection: AccessoryConnection, ssl: AapSsl, handler: AapMessageHandler)
     : AapRead.Base(connection, ssl, handler) {
 

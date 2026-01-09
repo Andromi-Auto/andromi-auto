@@ -75,6 +75,7 @@ message Service
             required uint32 margin_height = 4;
             required uint32 density = 5;
             optional uint32 decoder_additional_depth = 6;
+            optional MediaCodecType video_codec_type = 10;
         }
 
         required MediaCodecType available_type = 1;

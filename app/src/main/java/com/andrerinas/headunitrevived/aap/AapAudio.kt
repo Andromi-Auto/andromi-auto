@@ -12,14 +12,6 @@ import com.andrerinas.headunitrevived.aap.protocol.proto.Control
 import com.andrerinas.headunitrevived.decoder.AudioDecoder
 import com.andrerinas.headunitrevived.utils.AppLog
 
-/**
- * @author algavris
- * *
- * @date 01/10/2016.
- * *
- * *
- * @link https://github.com/google/ExoPlayer/blob/release-v2/library/src/main/java/com/google/android/exoplayer2/audio/AudioTrack.java
- */
 internal class AapAudio(
         private val audioDecoder: AudioDecoder,
         private val audioManager: AudioManager) {

@@ -10,11 +10,6 @@ import java.io.OutputStream
 import java.net.InetSocketAddress
 import java.net.Socket
 
-/**
- * @author algavris
- * *
- * @date 05/11/2016.
- */
 class SocketAccessoryConnection(private val ip: String, private val port: Int) : AccessoryConnection {
     private var output: OutputStream? = null
     private var input: DataInputStream? = null
@@ -69,8 +64,8 @@ class SocketAccessoryConnection(private val ip: String, private val port: Int) :
             transport.keepAlive = true // Added
             transport.reuseAddress = true // Added
             transport.trafficClass = 16 // Added (IPTOS_LOWDELAY)
-            input = DataInputStream(transport.getInputStream())
-            output = transport.getOutputStream()
+            input = DataInputStream(transport.getInputStream().buffered(65536))
+            output = transport.getOutputStream().buffered(65536)
             return@withContext true
         } catch (e: IOException) {
             AppLog.e(e)

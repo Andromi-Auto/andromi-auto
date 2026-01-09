@@ -14,11 +14,7 @@ import com.andrerinas.headunitrevived.utils.AppLog
 import com.andrerinas.headunitrevived.utils.DeviceIntent
 import com.andrerinas.headunitrevived.utils.Settings
 
-/**
- * @author algavris
- * *
- * @date 30/05/2016.
- */
+
 class UsbAttachedActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -152,22 +152,6 @@ class MainActivity : FragmentActivity() {
                 intent.action = AapService.ACTION_START_SELF_MODE
                 startService(intent)
                 Toast.makeText(this, "Starting Self Mode...", Toast.LENGTH_SHORT).show()
-                
-                activityScope.launch {
-                    var attempts = 0
-                    while (attempts < 15 && !AapService.isConnected) {
-                        delay(1000)
-                        attempts++
-                    }
-
-                    if (AapService.isConnected) {
-                        val aapIntent = Intent(this@MainActivity, AapProjectionActivity::class.java)
-                        aapIntent.putExtra(AapProjectionActivity.EXTRA_FOCUS, true)
-                        startActivity(aapIntent)
-                    } else {
-                        Toast.makeText(this@MainActivity, "Self Mode connection failed to establish.", Toast.LENGTH_LONG).show()
-                    }
-                }
             }
         }
 

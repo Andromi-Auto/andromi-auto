@@ -5,12 +5,6 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
-/**
- * @author algavris
- * *
- * @date 01/12/2016.
- */
-
 class NightMode(private val settings: Settings, val hasGPSLocation: Boolean) {
     private val calculator = NightModeCalculator(settings)
 

@@ -88,7 +88,7 @@ class AapTransport(
     init {
         micRecorder.listener = this
         aapAudio = AapAudio(audioDecoder, audioManager)
-        aapVideo = AapVideo(videoDecoder)
+        aapVideo = AapVideo(videoDecoder, settings)
     }
 
     internal fun startSensor(type: Int) {

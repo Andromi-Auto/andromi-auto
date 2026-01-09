@@ -7,12 +7,6 @@ import com.andrerinas.headunitrevived.main.BackgroundNotification
 import com.andrerinas.headunitrevived.utils.AppLog
 import com.andrerinas.headunitrevived.utils.Settings
 
-/**
- * @author algavris
- * *
- * @date 13/02/2017.
- */
-
 internal class AapMessageHandlerType(
         private val transport: AapTransport,
         recorder: MicRecorder,

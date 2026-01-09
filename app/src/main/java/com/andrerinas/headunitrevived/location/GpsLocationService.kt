@@ -5,10 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.IBinder
 
-/**
- * @author algavris
- * @date 18/12/2016.
- */
 class GpsLocationService : Service() {
     private var gpsLocation: GpsLocation? = null
 
