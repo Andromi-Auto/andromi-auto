@@ -70,7 +70,7 @@ android {
     buildTypes {
         getByName("release") {
             isMinifyEnabled = true
-            proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.txt")
+            proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-project.txt")
             signingConfig = signingConfigs.getByName("release")
             multiDexKeepProguard = file("multidex-config.pro")
         }
