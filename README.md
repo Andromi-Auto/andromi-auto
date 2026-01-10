@@ -46,7 +46,7 @@ https://github.com/mikereidis/headunit
   - Auto-Connect last session (if possible)
 
 ## Changelog
-### v.1.6.0
+### v.1.6.0-alpha
 - Fixed the selfmode not working outside the wifi bug
 - Redesign of App, Look and feel with modern Material 3
 - Better Settings
