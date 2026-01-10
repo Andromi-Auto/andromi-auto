@@ -37,7 +37,13 @@ https://github.com/mikereidis/headunit
 - Handshake failed sometimes and the devices won't connect. You need to try again, restart phone or clear caches
 
 ## Next Steps:
-- Bugfixing, Layout Fixes etc.
+- Bugfixing
+- Better Wifi Mode (Autodetection, Scan for device) (https://github.com/andreknieriem/headunit-revived/issues/26)
+- Intent for tasker apps (https://github.com/andreknieriem/headunit-revived/issues/25)
+- Maybe:
+  - Android SKD 17
+  - Wifi-Launcher Support
+  - Auto-Connect last session (if possible)
 
 ## Changelog
 ### v.1.6.0
