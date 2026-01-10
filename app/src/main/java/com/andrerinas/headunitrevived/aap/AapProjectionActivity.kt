@@ -163,7 +163,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
 
     override fun onSurfaceChanged(surface: android.view.Surface, width: Int, height: Int) {
         AppLog.i("[AapProjectionActivity] onSurfaceChanged. Actual surface dimensions: width=$width, height=$height")
-        videoDecoder.onSurfaceAvailable(surface)
+        videoDecoder.setSurface(surface)
         transport.send(VideoFocusEvent(gain = true, unsolicited = false))
 
         // Explicitly check and set video dimensions if already known by the decoder

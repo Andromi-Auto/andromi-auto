@@ -105,14 +105,16 @@ class VideoDecoder(private val settings: Settings) {
             }
 
             if (mCodec == null) {
-                AppLog.e("Codec could not be initialized.")
                 return
             }
 
             if (!mCodecConfigured) {
                 try {
                     val mime = if (codecName == "H.265" || codecName == "H.265") "video/hevc" else "video/avc"
-                    configureDecoder(mime)
+                    if (!configureDecoder(mime)) {
+                        // Surface not ready, return silently without error
+                        return
+                    }
                     mCodecConfigured = true
                     AppLog.i("VideoDecoder: Initial configuration complete, proceeding to feed first buffer.")
                 } catch (e: Exception) {
@@ -122,17 +124,14 @@ class VideoDecoder(private val settings: Settings) {
                 }
             }
             
-            // Only tracking presentation time for internal logic if needed, removed logging
             val presentationTimeUs = System.nanoTime() / 1000
 
             val content = ByteBuffer.wrap(buffer, offset, size)
             while (content.hasRemaining()) {
                 if (!codec_input_provide(content, presentationTimeUs)) {
-                    // If buffer providing failed/timed out, drop the rest of this packet
                     return
                 }
                 
-                // For synchronous mode (API < 21), we must manually drain output
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
                     codecOutputConsumeSync()
                 }
@@ -156,13 +155,18 @@ class VideoDecoder(private val settings: Settings) {
         }
     }
 
-    @Throws(IOException::class)
-    private fun configureDecoder(mime: String) {
+    private fun configureDecoder(mime: String): Boolean {
+        // Robust check: if surface is null or invalid, don't try to configure.
+        // This prevents crashes on devices where surface release happens quickly.
+        if (mSurface == null || !mSurface!!.isValid) {
+             AppLog.w("Surface is not valid, skipping configuration")
+             return false
+        }
+
         val width = if (mWidth > 0) mWidth else 1920
         val height = if (mHeight > 0) mHeight else 1080
         
         val format = MediaFormat.createVideoFormat(mime, width, height)
-        // Only set these keys if SDK is new enough or if they are generally safe
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
              format.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, 10485760)
         }
@@ -179,7 +183,6 @@ class VideoDecoder(private val settings: Settings) {
                     callbackThread!!.start()
                 }
                 val handler = Handler(callbackThread!!.looper)
-                // mCallback is non-null because of the SDK check above
                 mCodec!!.setCallback(mCallback!!, handler)
             }
             
@@ -191,10 +194,11 @@ class VideoDecoder(private val settings: Settings) {
                 mInputBuffers = mCodec!!.inputBuffers
                 mCodecBufferInfo = MediaCodec.BufferInfo()
             } else {
-                mCodecBufferInfo = MediaCodec.BufferInfo() // Still needed for some internal tracking if any
+                mCodecBufferInfo = MediaCodec.BufferInfo()
             }
             
             AppLog.i("Codec configured and started. Selected codec: ${mCodec?.name}")
+            return true
         } catch (e: Exception) {
             AppLog.e("Codec configuration failed", e)
             throw e
@@ -229,7 +233,6 @@ class VideoDecoder(private val settings: Settings) {
 
     private fun codec_input_provide(content: ByteBuffer, presentationTimeUs: Long): Boolean {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            // Asynchronous Mode (API 21+)
             try {
                 val inputBufIndex = freeInputBuffers.poll(100, TimeUnit.MILLISECONDS) ?: -1
                 if (inputBufIndex >= 0) {
@@ -249,7 +252,6 @@ class VideoDecoder(private val settings: Settings) {
                 return false
             }
         } else {
-            // Synchronous Mode (API < 21)
             try {
                 val inputBufIndex = mCodec!!.dequeueInputBuffer(10000)
                 if (inputBufIndex >= 0) {
@@ -259,7 +261,6 @@ class VideoDecoder(private val settings: Settings) {
                     mCodec!!.queueInputBuffer(inputBufIndex, 0, buffer.limit(), presentationTimeUs, 0)
                     return true
                 } else {
-                    // Try to drain output to free up input
                     codecOutputConsumeSync()
                     return false
                 }
@@ -270,7 +271,6 @@ class VideoDecoder(private val settings: Settings) {
         }
     }
 
-    // Only for API < 21
     private fun codecOutputConsumeSync() {
         var index: Int
         while (true) {
@@ -294,8 +294,18 @@ class VideoDecoder(private val settings: Settings) {
         }
     }
 
-    fun onSurfaceAvailable(surface: Surface) {
+    fun setSurface(surface: Surface?) {
         synchronized(sLock) {
+            if (mSurface === surface) {
+                // Surface object identical, skipping restart to prevent crashes on sensitive devices (Mediatek)
+                // Try to update scaling mode just in case
+                if (mCodec != null) {
+                     try {
+                         mCodec!!.setVideoScalingMode(MediaCodec.VIDEO_SCALING_MODE_SCALE_TO_FIT)
+                     } catch (e: Exception) {}
+                }
+                return
+            }
             if (mCodec != null) {
                 AppLog.i("Codec is running, stopping for new surface")
                 codec_stop("New surface")
