@@ -31,10 +31,6 @@ sealed class SettingItem {
     ) : SettingItem()
 
     data class CategoryHeader(override val stableId: String, @StringRes val titleResId: Int) : SettingItem()
-
-    object Divider : SettingItem() {
-        override val stableId: String = "Divider" // Static ID for the divider
-    }
 }
 
 class SettingsAdapter : ListAdapter<SettingItem, RecyclerView.ViewHolder>(SettingsDiffCallback()) { // Inherit from ListAdapter
@@ -43,7 +39,6 @@ class SettingsAdapter : ListAdapter<SettingItem, RecyclerView.ViewHolder>(Settin
     companion object {
         private const val VIEW_TYPE_HEADER = 0
         private const val VIEW_TYPE_SETTING = 1
-        private const val VIEW_TYPE_DIVIDER = 2
         private const val VIEW_TYPE_TOGGLE = 3
     }
 
@@ -51,7 +46,6 @@ class SettingsAdapter : ListAdapter<SettingItem, RecyclerView.ViewHolder>(Settin
         return when (getItem(position)) { // Use getItem() from ListAdapter
             is SettingItem.CategoryHeader -> VIEW_TYPE_HEADER
             is SettingItem.SettingEntry -> VIEW_TYPE_SETTING
-            is SettingItem.Divider -> VIEW_TYPE_DIVIDER
             is SettingItem.ToggleSettingEntry -> VIEW_TYPE_TOGGLE
         }
     }
@@ -61,19 +55,39 @@ class SettingsAdapter : ListAdapter<SettingItem, RecyclerView.ViewHolder>(Settin
         return when (viewType) {
             VIEW_TYPE_HEADER -> HeaderViewHolder(inflater.inflate(R.layout.layout_category_header, parent, false))
             VIEW_TYPE_SETTING -> SettingViewHolder(inflater.inflate(R.layout.layout_setting_item, parent, false))
-            VIEW_TYPE_DIVIDER -> DividerViewHolder(inflater.inflate(R.layout.layout_divider, parent, false))
             VIEW_TYPE_TOGGLE -> ToggleSettingViewHolder(inflater.inflate(R.layout.layout_setting_item_toggle, parent, false))
             else -> throw IllegalArgumentException("Unknown view type: $viewType")
         }
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        when (val item = getItem(position)) { // Use getItem() from ListAdapter
+        val item = getItem(position)
+        
+        if (holder is SettingViewHolder || holder is ToggleSettingViewHolder) {
+            updateItemVisuals(holder.itemView, position)
+        }
+
+        when (item) {
             is SettingItem.CategoryHeader -> (holder as HeaderViewHolder).bind(item)
             is SettingItem.SettingEntry -> (holder as SettingViewHolder).bind(item)
-            is SettingItem.Divider -> { /* Nothing to bind for a simple divider */ }
             is SettingItem.ToggleSettingEntry -> (holder as ToggleSettingViewHolder).bind(item)
         }
+    }
+
+    private fun updateItemVisuals(view: View, position: Int) {
+        val prev = if (position > 0) getItem(position - 1) else null
+        val next = if (position < itemCount - 1) getItem(position + 1) else null
+
+        val isTop = prev is SettingItem.CategoryHeader || prev == null
+        val isBottom = next is SettingItem.CategoryHeader || next == null
+
+        val bgRes = when {
+            isTop && isBottom -> R.drawable.bg_setting_single
+            isTop -> R.drawable.bg_setting_top
+            isBottom -> R.drawable.bg_setting_bottom
+            else -> R.drawable.bg_setting_middle
+        }
+        view.setBackgroundResource(bgRes)
     }
 
     // --- ViewHolder implementations ---
@@ -104,21 +118,15 @@ class SettingsAdapter : ListAdapter<SettingItem, RecyclerView.ViewHolder>(Settin
         fun bind(setting: SettingItem.ToggleSettingEntry) {
             settingName.setText(setting.nameResId)
             settingDescription.setText(setting.descriptionResId)
-            // Ensure listener is set BEFORE setting checked state to avoid unwanted triggers
             settingSwitch.setOnCheckedChangeListener(null) 
             settingSwitch.isChecked = setting.isChecked
             settingSwitch.setOnCheckedChangeListener { _, isChecked ->
                 setting.onCheckedChanged(isChecked)
             }
-            // Allow clicking on the whole item to toggle the switch
             itemView.setOnClickListener {
                 settingSwitch.toggle()
             }
         }
-    }
-
-    class DividerViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        // No specific binding needed for a simple divider
     }
 
     // DiffUtil.ItemCallback implementation
@@ -135,7 +143,6 @@ class SettingsAdapter : ListAdapter<SettingItem, RecyclerView.ViewHolder>(Settin
                     oldItem.nameResId == newItem.nameResId && oldItem.descriptionResId == newItem.descriptionResId && oldItem.isChecked == newItem.isChecked
                 oldItem is SettingItem.CategoryHeader && newItem is SettingItem.CategoryHeader ->
                     oldItem.titleResId == newItem.titleResId
-                oldItem is SettingItem.Divider && newItem is SettingItem.Divider -> true
                 else -> false
             }
         }

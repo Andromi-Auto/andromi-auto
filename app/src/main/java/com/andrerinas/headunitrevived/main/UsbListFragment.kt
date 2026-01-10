@@ -19,6 +19,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.andrerinas.headunitrevived.App
@@ -29,12 +30,14 @@ import com.andrerinas.headunitrevived.app.UsbAttachedActivity
 import com.andrerinas.headunitrevived.connection.UsbAccessoryMode
 import com.andrerinas.headunitrevived.connection.UsbDeviceCompat
 import com.andrerinas.headunitrevived.utils.Settings
+import com.google.android.material.appbar.MaterialToolbar
 
 class UsbListFragment : Fragment() {
     private lateinit var adapter: DeviceAdapter
     private lateinit var settings: Settings
     private lateinit var noUsbDeviceTextView: TextView
     private lateinit var recyclerView: RecyclerView
+    private lateinit var toolbar: MaterialToolbar
 
     private val mainViewModel: MainViewModel by activityViewModels()
 
@@ -42,17 +45,28 @@ class UsbListFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_list, container, false)
         recyclerView = view.findViewById(android.R.id.list)
         noUsbDeviceTextView = view.findViewById(R.id.no_usb_device_text)
+        toolbar = view.findViewById(R.id.toolbar)
 
         settings = Settings(requireContext())
         adapter = DeviceAdapter(requireContext(), settings)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         recyclerView.adapter = adapter
+        
+        // Add padding
+        val padding = resources.getDimensionPixelSize(R.dimen.list_padding)
+        recyclerView.setPadding(padding, padding, padding, padding)
+        recyclerView.clipToPadding = false
 
         return view
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        toolbar.title = getString(R.string.usb)
+        toolbar.setNavigationOnClickListener {
+            findNavController().popBackStack()
+        }
 
         mainViewModel.usbDevices.observe(viewLifecycleOwner, Observer {
             val allowDevices = settings.allowedDevices
@@ -89,6 +103,17 @@ class UsbListFragment : Fragment() {
 
         override fun onBindViewHolder(holder: DeviceViewHolder, position: Int) {
             val device = deviceList[position]
+            
+            // Background styling logic (same as NetworkListFragment)
+            val isTop = position == 0
+            val isBottom = position == itemCount - 1
+            val bgRes = when {
+                isTop && isBottom -> R.drawable.bg_setting_single
+                isTop -> R.drawable.bg_setting_top
+                isBottom -> R.drawable.bg_setting_bottom
+                else -> R.drawable.bg_setting_middle
+            }
+            holder.itemView.setBackgroundResource(bgRes)
 
             holder.startButton.text = Html.fromHtml(String.format(
                     java.util.Locale.US, "<b>%1\$s</b><br/>%2\$s",
@@ -131,7 +156,6 @@ class UsbListFragment : Fragment() {
                 notifyDataSetChanged()
             } else {
                 if (App.provide(mContext).transport.isAlive) {
-                    // If transport is already running, just go to projection
                     val aapIntent = Intent(mContext, AapProjectionActivity::class.java)
                     aapIntent.putExtra(AapProjectionActivity.EXTRA_FOCUS, true)
                     mContext.startActivity(aapIntent)

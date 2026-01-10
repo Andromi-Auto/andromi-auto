@@ -9,7 +9,10 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
+import android.net.ConnectivityManager
+import android.os.Build
 import android.os.IBinder
+import android.os.Parcel
 import android.os.Parcelable
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
@@ -42,6 +45,7 @@ class AapService : Service(), UsbReceiver.Listener {
 
     private lateinit var uiModeManager: UiModeManager
     private var accessoryConnection: AccessoryConnection? = null
+    private var selfModeServerSocket: ServerSocket? = null
     private lateinit var usbReceiver: UsbReceiver
     private lateinit var nightModeReceiver: BroadcastReceiver
 
@@ -64,7 +68,7 @@ class AapService : Service(), UsbReceiver.Listener {
         val nightModeFilter = IntentFilter()
         nightModeFilter.addAction(Intent.ACTION_TIME_TICK)
         nightModeFilter.addAction(LocationUpdateIntent.action)
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             registerReceiver(nightModeReceiver, nightModeFilter, RECEIVER_NOT_EXPORTED)
             registerReceiver(usbReceiver, UsbReceiver.createFilter(), RECEIVER_NOT_EXPORTED)
         } else {
@@ -77,6 +81,14 @@ class AapService : Service(), UsbReceiver.Listener {
         super.onDestroy()
         stopForeground(true) // Stop the foreground notification
         serviceJob.cancel()
+        
+        try {
+            selfModeServerSocket?.close()
+        } catch (e: Exception) {
+            // Ignored
+        }
+        selfModeServerSocket = null
+        
         onDisconnect()
         unregisterReceiver(nightModeReceiver)
         unregisterReceiver(usbReceiver)
@@ -159,22 +171,33 @@ class AapService : Service(), UsbReceiver.Listener {
     }
 
     private fun startSelfMode() {
-        // First, launch a background task to listen for the incoming connection
+        // Launch background task to listen for the incoming connection
         serviceScope.launch(Dispatchers.IO) {
             try {
-                val serverSocket = ServerSocket(5288)
+                // Close any existing socket first
+                try { selfModeServerSocket?.close() } catch (e: Exception) {}
+                
+                selfModeServerSocket = ServerSocket()
+                selfModeServerSocket?.reuseAddress = true
+                selfModeServerSocket?.bind(java.net.InetSocketAddress(5288))
+                
                 AppLog.i("Self-mode: Server listening on port 5288")
                 
                 // This will block until the client (AA) connects
-                val clientSocket = serverSocket.accept()
-                AppLog.i("Self-mode: Client connected from ${clientSocket.inetAddress}")
-                serverSocket.close() // We only need one connection
+                val clientSocket = selfModeServerSocket?.accept()
+                if (clientSocket != null) {
+                    AppLog.i("Self-mode: Client connected from ${clientSocket.inetAddress}")
+                    
+                    // Close the server socket as we only accept one connection per session
+                    try { selfModeServerSocket?.close() } catch (e: Exception) {}
+                    selfModeServerSocket = null
 
-                accessoryConnection = SocketAccessoryConnection(clientSocket)
+                    accessoryConnection = SocketAccessoryConnection(clientSocket)
 
-                val connectionResult = accessoryConnection!!.connect()
-                withContext(Dispatchers.Main) {
-                    onConnectionResult(connectionResult)
+                    val connectionResult = accessoryConnection!!.connect()
+                    withContext(Dispatchers.Main) {
+                        onConnectionResult(connectionResult)
+                    }
                 }
 
             } catch (e: Exception) {
@@ -186,23 +209,90 @@ class AapService : Service(), UsbReceiver.Listener {
             }
         }
 
-        // Now, trigger the AA wireless setup activity
+        // Try to get actual active network
+        val connectivityManager = getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
+        val activeNetwork = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            connectivityManager.activeNetwork
+        } else {
+            null
+        }
+        
+        val networkToUse = activeNetwork ?: createFakeNetwork(99999)
+        val fakeWifiInfo = createFakeWifiInfo()
+
         serviceScope.launch(Dispatchers.Main) {
-            delay(500) // Give the server socket a moment to start listening, just in case
             val magicalIntent = Intent().apply {
                 setClassName("com.google.android.projection.gearhead", "com.google.android.apps.auto.wireless.setup.service.impl.WirelessStartupActivity")
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 putExtra("PARAM_HOST_ADDRESS", "127.0.0.1")
                 putExtra("PARAM_SERVICE_PORT", 5288)
+                
+                if (networkToUse != null) {
+                    AppLog.i("Adding network to intent: $networkToUse")
+                    putExtra("PARAM_SERVICE_WIFI_NETWORK", networkToUse)
+                }
+                if (fakeWifiInfo != null) {
+                    AppLog.i("Adding wifi info to intent")
+                    putExtra("wifi_info", fakeWifiInfo)
+                }
             }
 
             try {
-                AppLog.i("Launching official Android Auto wireless setup for self-mode...")
+                AppLog.i("Launching official Android Auto wireless setup...")
                 startActivity(magicalIntent)
             } catch (e: Exception) {
                 AppLog.e("Failed to launch magical intent: ${e.message}", e)
                 Toast.makeText(applicationContext, "Failed to start Android Auto. Is it installed?", Toast.LENGTH_LONG).show()
                 stopSelf()
+            }
+        }
+    }
+
+    private fun createFakeNetwork(netId: Int): Parcelable? {
+        val parcel = Parcel.obtain()
+        return try {
+            parcel.writeInt(netId)
+            parcel.setDataPosition(0)
+            val networkClass = Class.forName("android.net.Network")
+            val creatorField = networkClass.getField("CREATOR")
+            val creator = creatorField.get(null) as Parcelable.Creator<*>
+            val network = creator.createFromParcel(parcel) as Parcelable
+            AppLog.i("Successfully created fake Network with ID $netId via Parcel")
+            network
+        } catch (e: Exception) {
+            AppLog.e("Failed to create fake Network via Parcel: ${e.message}")
+            null
+        } finally {
+            parcel.recycle()
+        }
+    }
+
+    private fun createFakeWifiInfo(): Parcelable? {
+        return try {
+            val wifiInfoClass = Class.forName("android.net.wifi.WifiInfo")
+            val constructor = wifiInfoClass.getDeclaredConstructor()
+            constructor.isAccessible = true
+            val wifiInfo = constructor.newInstance() as Parcelable
+            
+            // Try to set some basic fields to make it look active (without crashing)
+            // Just SSID might be enough
+            try {
+                val ssidField = wifiInfoClass.getDeclaredField("mSSID")
+                ssidField.isAccessible = true
+                ssidField.set(wifiInfo, "\"Headunit-Fake-Wifi\"")
+            } catch (e: Exception) { /* Ignored */ }
+            
+            AppLog.i("Successfully created fake WifiInfo")
+            wifiInfo
+        } catch (e: Exception) {
+            try {
+                // Fallback: Class.newInstance()
+                val wifiInfo = Class.forName("android.net.wifi.WifiInfo").newInstance() as Parcelable
+                AppLog.i("Successfully created fake WifiInfo via newInstance (Fallback)")
+                wifiInfo
+            } catch (e2: Exception) {
+                AppLog.e("Failed to create fake WifiInfo: ${e2.message}")
+                null
             }
         }
     }
@@ -252,6 +342,13 @@ class AapService : Service(), UsbReceiver.Listener {
     }
 
     private fun reset() {
+        try {
+            selfModeServerSocket?.close()
+        } catch (e: Exception) {
+            AppLog.e("Error closing server socket", e)
+        }
+        selfModeServerSocket = null
+        
         App.provide(this).resetTransport()
         App.provide(this).audioDecoder.stop()
         App.provide(this).videoDecoder.stop("AapService::reset")

@@ -21,143 +21,223 @@ public final class Control {
   public enum ControlMsgType
       implements com.google.protobuf.ProtocolMessageEnum {
     /**
-     * <code>MEDIADATA = 0;</code>
+     * <code>MESSAGE_VERSION_REQUEST = 1;</code>
      */
-    MEDIADATA(0),
+    MESSAGE_VERSION_REQUEST(1),
     /**
-     * <code>CODECDATA = 1;</code>
+     * <code>MESSAGE_VERSION_RESPONSE = 2;</code>
      */
-    CODECDATA(1),
+    MESSAGE_VERSION_RESPONSE(2),
     /**
-     * <code>VERSIONRESPONSE = 2;</code>
+     * <code>MESSAGE_ENCAPSULATED_SSL = 3;</code>
      */
-    VERSIONRESPONSE(2),
+    MESSAGE_ENCAPSULATED_SSL(3),
     /**
-     * <code>HANDSHAKE = 3;</code>
+     * <code>MESSAGE_AUTH_COMPLETE = 4;</code>
      */
-    HANDSHAKE(3),
+    MESSAGE_AUTH_COMPLETE(4),
     /**
-     * <code>SERVICEDISCOVERYREQUEST = 5;</code>
+     * <code>MESSAGE_SERVICE_DISCOVERY_REQUEST = 5;</code>
      */
-    SERVICEDISCOVERYREQUEST(5),
+    MESSAGE_SERVICE_DISCOVERY_REQUEST(5),
     /**
-     * <code>SERVICEDISCOVERYRESPONSE = 6;</code>
+     * <code>MESSAGE_SERVICE_DISCOVERY_RESPONSE = 6;</code>
      */
-    SERVICEDISCOVERYRESPONSE(6),
+    MESSAGE_SERVICE_DISCOVERY_RESPONSE(6),
     /**
-     * <code>CHANNELOPENREQUEST = 7;</code>
+     * <code>MESSAGE_CHANNEL_OPEN_REQUEST = 7;</code>
      */
-    CHANNELOPENREQUEST(7),
+    MESSAGE_CHANNEL_OPEN_REQUEST(7),
     /**
-     * <code>CHANNELOPENRESPONSE = 8;</code>
+     * <code>MESSAGE_CHANNEL_OPEN_RESPONSE = 8;</code>
      */
-    CHANNELOPENRESPONSE(8),
+    MESSAGE_CHANNEL_OPEN_RESPONSE(8),
     /**
-     * <code>PINGREQUEST = 11;</code>
+     * <code>MESSAGE_CHANNEL_CLOSE_NOTIFICATION = 9;</code>
      */
-    PINGREQUEST(11),
+    MESSAGE_CHANNEL_CLOSE_NOTIFICATION(9),
     /**
-     * <code>PINGRESPONSE = 12;</code>
+     * <code>MESSAGE_PING_REQUEST = 11;</code>
      */
-    PINGRESPONSE(12),
+    MESSAGE_PING_REQUEST(11),
     /**
-     * <code>NAVFOCUSREQUESTNOTIFICATION = 13;</code>
+     * <code>MESSAGE_PING_RESPONSE = 12;</code>
      */
-    NAVFOCUSREQUESTNOTIFICATION(13),
+    MESSAGE_PING_RESPONSE(12),
     /**
-     * <code>NAVFOCUSRNOTIFICATION = 14;</code>
+     * <code>MESSAGE_NAV_FOCUS_REQUEST = 13;</code>
      */
-    NAVFOCUSRNOTIFICATION(14),
+    MESSAGE_NAV_FOCUS_REQUEST(13),
     /**
-     * <code>BYEYEREQUEST = 15;</code>
+     * <code>MESSAGE_NAV_FOCUS_NOTIFICATION = 14;</code>
      */
-    BYEYEREQUEST(15),
+    MESSAGE_NAV_FOCUS_NOTIFICATION(14),
     /**
-     * <code>BYEYERESPONSE = 16;</code>
+     * <code>MESSAGE_BYEBYE_REQUEST = 15;</code>
      */
-    BYEYERESPONSE(16),
+    MESSAGE_BYEBYE_REQUEST(15),
     /**
-     * <code>VOICESESSIONNOTIFICATION = 17;</code>
+     * <code>MESSAGE_BYEBYE_RESPONSE = 16;</code>
      */
-    VOICESESSIONNOTIFICATION(17),
+    MESSAGE_BYEBYE_RESPONSE(16),
     /**
-     * <code>AUDIOFOCUSREQUESTNOTFICATION = 18;</code>
+     * <code>MESSAGE_VOICE_SESSION_NOTIFICATION = 17;</code>
      */
-    AUDIOFOCUSREQUESTNOTFICATION(18),
+    MESSAGE_VOICE_SESSION_NOTIFICATION(17),
     /**
-     * <code>AUDIOFOCUSNOTFICATION = 19;</code>
+     * <code>MESSAGE_AUDIO_FOCUS_REQUEST = 18;</code>
      */
-    AUDIOFOCUSNOTFICATION(19),
+    MESSAGE_AUDIO_FOCUS_REQUEST(18),
+    /**
+     * <code>MESSAGE_AUDIO_FOCUS_NOTIFICATION = 19;</code>
+     */
+    MESSAGE_AUDIO_FOCUS_NOTIFICATION(19),
+    /**
+     * <code>MESSAGE_CAR_CONNECTED_DEVICES_REQUEST = 20;</code>
+     */
+    MESSAGE_CAR_CONNECTED_DEVICES_REQUEST(20),
+    /**
+     * <code>MESSAGE_CAR_CONNECTED_DEVICES_RESPONSE = 21;</code>
+     */
+    MESSAGE_CAR_CONNECTED_DEVICES_RESPONSE(21),
+    /**
+     * <code>MESSAGE_USER_SWITCH_REQUEST = 22;</code>
+     */
+    MESSAGE_USER_SWITCH_REQUEST(22),
+    /**
+     * <code>MESSAGE_BATTERY_STATUS_NOTIFICATION = 23;</code>
+     */
+    MESSAGE_BATTERY_STATUS_NOTIFICATION(23),
+    /**
+     * <code>MESSAGE_CALL_AVAILABILITY_STATUS = 24;</code>
+     */
+    MESSAGE_CALL_AVAILABILITY_STATUS(24),
+    /**
+     * <code>MESSAGE_USER_SWITCH_RESPONSE = 25;</code>
+     */
+    MESSAGE_USER_SWITCH_RESPONSE(25),
+    /**
+     * <code>MESSAGE_SERVICE_DISCOVERY_UPDATE = 26;</code>
+     */
+    MESSAGE_SERVICE_DISCOVERY_UPDATE(26),
+    /**
+     * <code>MESSAGE_UNEXPECTED_MESSAGE = 255;</code>
+     */
+    MESSAGE_UNEXPECTED_MESSAGE(255),
+    /**
+     * <code>MESSAGE_FRAMING_ERROR = 65535;</code>
+     */
+    MESSAGE_FRAMING_ERROR(65535),
     ;
 
     /**
-     * <code>MEDIADATA = 0;</code>
+     * <code>MESSAGE_VERSION_REQUEST = 1;</code>
      */
-    public static final int MEDIADATA_VALUE = 0;
+    public static final int MESSAGE_VERSION_REQUEST_VALUE = 1;
     /**
-     * <code>CODECDATA = 1;</code>
+     * <code>MESSAGE_VERSION_RESPONSE = 2;</code>
      */
-    public static final int CODECDATA_VALUE = 1;
+    public static final int MESSAGE_VERSION_RESPONSE_VALUE = 2;
     /**
-     * <code>VERSIONRESPONSE = 2;</code>
+     * <code>MESSAGE_ENCAPSULATED_SSL = 3;</code>
      */
-    public static final int VERSIONRESPONSE_VALUE = 2;
+    public static final int MESSAGE_ENCAPSULATED_SSL_VALUE = 3;
     /**
-     * <code>HANDSHAKE = 3;</code>
+     * <code>MESSAGE_AUTH_COMPLETE = 4;</code>
      */
-    public static final int HANDSHAKE_VALUE = 3;
+    public static final int MESSAGE_AUTH_COMPLETE_VALUE = 4;
     /**
-     * <code>SERVICEDISCOVERYREQUEST = 5;</code>
+     * <code>MESSAGE_SERVICE_DISCOVERY_REQUEST = 5;</code>
      */
-    public static final int SERVICEDISCOVERYREQUEST_VALUE = 5;
+    public static final int MESSAGE_SERVICE_DISCOVERY_REQUEST_VALUE = 5;
     /**
-     * <code>SERVICEDISCOVERYRESPONSE = 6;</code>
+     * <code>MESSAGE_SERVICE_DISCOVERY_RESPONSE = 6;</code>
      */
-    public static final int SERVICEDISCOVERYRESPONSE_VALUE = 6;
+    public static final int MESSAGE_SERVICE_DISCOVERY_RESPONSE_VALUE = 6;
     /**
-     * <code>CHANNELOPENREQUEST = 7;</code>
+     * <code>MESSAGE_CHANNEL_OPEN_REQUEST = 7;</code>
      */
-    public static final int CHANNELOPENREQUEST_VALUE = 7;
+    public static final int MESSAGE_CHANNEL_OPEN_REQUEST_VALUE = 7;
     /**
-     * <code>CHANNELOPENRESPONSE = 8;</code>
+     * <code>MESSAGE_CHANNEL_OPEN_RESPONSE = 8;</code>
      */
-    public static final int CHANNELOPENRESPONSE_VALUE = 8;
+    public static final int MESSAGE_CHANNEL_OPEN_RESPONSE_VALUE = 8;
     /**
-     * <code>PINGREQUEST = 11;</code>
+     * <code>MESSAGE_CHANNEL_CLOSE_NOTIFICATION = 9;</code>
      */
-    public static final int PINGREQUEST_VALUE = 11;
+    public static final int MESSAGE_CHANNEL_CLOSE_NOTIFICATION_VALUE = 9;
     /**
-     * <code>PINGRESPONSE = 12;</code>
+     * <code>MESSAGE_PING_REQUEST = 11;</code>
      */
-    public static final int PINGRESPONSE_VALUE = 12;
+    public static final int MESSAGE_PING_REQUEST_VALUE = 11;
     /**
-     * <code>NAVFOCUSREQUESTNOTIFICATION = 13;</code>
+     * <code>MESSAGE_PING_RESPONSE = 12;</code>
      */
-    public static final int NAVFOCUSREQUESTNOTIFICATION_VALUE = 13;
+    public static final int MESSAGE_PING_RESPONSE_VALUE = 12;
     /**
-     * <code>NAVFOCUSRNOTIFICATION = 14;</code>
+     * <code>MESSAGE_NAV_FOCUS_REQUEST = 13;</code>
      */
-    public static final int NAVFOCUSRNOTIFICATION_VALUE = 14;
+    public static final int MESSAGE_NAV_FOCUS_REQUEST_VALUE = 13;
     /**
-     * <code>BYEYEREQUEST = 15;</code>
+     * <code>MESSAGE_NAV_FOCUS_NOTIFICATION = 14;</code>
      */
-    public static final int BYEYEREQUEST_VALUE = 15;
+    public static final int MESSAGE_NAV_FOCUS_NOTIFICATION_VALUE = 14;
     /**
-     * <code>BYEYERESPONSE = 16;</code>
+     * <code>MESSAGE_BYEBYE_REQUEST = 15;</code>
      */
-    public static final int BYEYERESPONSE_VALUE = 16;
+    public static final int MESSAGE_BYEBYE_REQUEST_VALUE = 15;
     /**
-     * <code>VOICESESSIONNOTIFICATION = 17;</code>
+     * <code>MESSAGE_BYEBYE_RESPONSE = 16;</code>
      */
-    public static final int VOICESESSIONNOTIFICATION_VALUE = 17;
+    public static final int MESSAGE_BYEBYE_RESPONSE_VALUE = 16;
     /**
-     * <code>AUDIOFOCUSREQUESTNOTFICATION = 18;</code>
+     * <code>MESSAGE_VOICE_SESSION_NOTIFICATION = 17;</code>
      */
-    public static final int AUDIOFOCUSREQUESTNOTFICATION_VALUE = 18;
+    public static final int MESSAGE_VOICE_SESSION_NOTIFICATION_VALUE = 17;
     /**
-     * <code>AUDIOFOCUSNOTFICATION = 19;</code>
+     * <code>MESSAGE_AUDIO_FOCUS_REQUEST = 18;</code>
      */
-    public static final int AUDIOFOCUSNOTFICATION_VALUE = 19;
+    public static final int MESSAGE_AUDIO_FOCUS_REQUEST_VALUE = 18;
+    /**
+     * <code>MESSAGE_AUDIO_FOCUS_NOTIFICATION = 19;</code>
+     */
+    public static final int MESSAGE_AUDIO_FOCUS_NOTIFICATION_VALUE = 19;
+    /**
+     * <code>MESSAGE_CAR_CONNECTED_DEVICES_REQUEST = 20;</code>
+     */
+    public static final int MESSAGE_CAR_CONNECTED_DEVICES_REQUEST_VALUE = 20;
+    /**
+     * <code>MESSAGE_CAR_CONNECTED_DEVICES_RESPONSE = 21;</code>
+     */
+    public static final int MESSAGE_CAR_CONNECTED_DEVICES_RESPONSE_VALUE = 21;
+    /**
+     * <code>MESSAGE_USER_SWITCH_REQUEST = 22;</code>
+     */
+    public static final int MESSAGE_USER_SWITCH_REQUEST_VALUE = 22;
+    /**
+     * <code>MESSAGE_BATTERY_STATUS_NOTIFICATION = 23;</code>
+     */
+    public static final int MESSAGE_BATTERY_STATUS_NOTIFICATION_VALUE = 23;
+    /**
+     * <code>MESSAGE_CALL_AVAILABILITY_STATUS = 24;</code>
+     */
+    public static final int MESSAGE_CALL_AVAILABILITY_STATUS_VALUE = 24;
+    /**
+     * <code>MESSAGE_USER_SWITCH_RESPONSE = 25;</code>
+     */
+    public static final int MESSAGE_USER_SWITCH_RESPONSE_VALUE = 25;
+    /**
+     * <code>MESSAGE_SERVICE_DISCOVERY_UPDATE = 26;</code>
+     */
+    public static final int MESSAGE_SERVICE_DISCOVERY_UPDATE_VALUE = 26;
+    /**
+     * <code>MESSAGE_UNEXPECTED_MESSAGE = 255;</code>
+     */
+    public static final int MESSAGE_UNEXPECTED_MESSAGE_VALUE = 255;
+    /**
+     * <code>MESSAGE_FRAMING_ERROR = 65535;</code>
+     */
+    public static final int MESSAGE_FRAMING_ERROR_VALUE = 65535;
 
 
     public final int getNumber() {
@@ -180,23 +260,33 @@ public final class Control {
      */
     public static ControlMsgType forNumber(int value) {
       switch (value) {
-        case 0: return MEDIADATA;
-        case 1: return CODECDATA;
-        case 2: return VERSIONRESPONSE;
-        case 3: return HANDSHAKE;
-        case 5: return SERVICEDISCOVERYREQUEST;
-        case 6: return SERVICEDISCOVERYRESPONSE;
-        case 7: return CHANNELOPENREQUEST;
-        case 8: return CHANNELOPENRESPONSE;
-        case 11: return PINGREQUEST;
-        case 12: return PINGRESPONSE;
-        case 13: return NAVFOCUSREQUESTNOTIFICATION;
-        case 14: return NAVFOCUSRNOTIFICATION;
-        case 15: return BYEYEREQUEST;
-        case 16: return BYEYERESPONSE;
-        case 17: return VOICESESSIONNOTIFICATION;
-        case 18: return AUDIOFOCUSREQUESTNOTFICATION;
-        case 19: return AUDIOFOCUSNOTFICATION;
+        case 1: return MESSAGE_VERSION_REQUEST;
+        case 2: return MESSAGE_VERSION_RESPONSE;
+        case 3: return MESSAGE_ENCAPSULATED_SSL;
+        case 4: return MESSAGE_AUTH_COMPLETE;
+        case 5: return MESSAGE_SERVICE_DISCOVERY_REQUEST;
+        case 6: return MESSAGE_SERVICE_DISCOVERY_RESPONSE;
+        case 7: return MESSAGE_CHANNEL_OPEN_REQUEST;
+        case 8: return MESSAGE_CHANNEL_OPEN_RESPONSE;
+        case 9: return MESSAGE_CHANNEL_CLOSE_NOTIFICATION;
+        case 11: return MESSAGE_PING_REQUEST;
+        case 12: return MESSAGE_PING_RESPONSE;
+        case 13: return MESSAGE_NAV_FOCUS_REQUEST;
+        case 14: return MESSAGE_NAV_FOCUS_NOTIFICATION;
+        case 15: return MESSAGE_BYEBYE_REQUEST;
+        case 16: return MESSAGE_BYEBYE_RESPONSE;
+        case 17: return MESSAGE_VOICE_SESSION_NOTIFICATION;
+        case 18: return MESSAGE_AUDIO_FOCUS_REQUEST;
+        case 19: return MESSAGE_AUDIO_FOCUS_NOTIFICATION;
+        case 20: return MESSAGE_CAR_CONNECTED_DEVICES_REQUEST;
+        case 21: return MESSAGE_CAR_CONNECTED_DEVICES_RESPONSE;
+        case 22: return MESSAGE_USER_SWITCH_REQUEST;
+        case 23: return MESSAGE_BATTERY_STATUS_NOTIFICATION;
+        case 24: return MESSAGE_CALL_AVAILABILITY_STATUS;
+        case 25: return MESSAGE_USER_SWITCH_RESPONSE;
+        case 26: return MESSAGE_SERVICE_DISCOVERY_UPDATE;
+        case 255: return MESSAGE_UNEXPECTED_MESSAGE;
+        case 65535: return MESSAGE_FRAMING_ERROR;
         default: return null;
       }
     }
@@ -361,6 +451,129 @@ public final class Control {
   }
 
   /**
+   * Protobuf enum {@code com.andrerinas.headunitrevived.aap.protocol.proto.ByeByeReason}
+   */
+  public enum ByeByeReason
+      implements com.google.protobuf.ProtocolMessageEnum {
+    /**
+     * <code>USER_SELECTION = 1;</code>
+     */
+    USER_SELECTION(1),
+    /**
+     * <code>DEVICE_SWITCH = 2;</code>
+     */
+    DEVICE_SWITCH(2),
+    /**
+     * <code>NOT_SUPPORTED = 3;</code>
+     */
+    NOT_SUPPORTED(3),
+    /**
+     * <code>NOT_CURRENTLY_SUPPORTED = 4;</code>
+     */
+    NOT_CURRENTLY_SUPPORTED(4),
+    /**
+     * <code>PROBE_SUPPORTED = 5;</code>
+     */
+    PROBE_SUPPORTED(5),
+    ;
+
+    /**
+     * <code>USER_SELECTION = 1;</code>
+     */
+    public static final int USER_SELECTION_VALUE = 1;
+    /**
+     * <code>DEVICE_SWITCH = 2;</code>
+     */
+    public static final int DEVICE_SWITCH_VALUE = 2;
+    /**
+     * <code>NOT_SUPPORTED = 3;</code>
+     */
+    public static final int NOT_SUPPORTED_VALUE = 3;
+    /**
+     * <code>NOT_CURRENTLY_SUPPORTED = 4;</code>
+     */
+    public static final int NOT_CURRENTLY_SUPPORTED_VALUE = 4;
+    /**
+     * <code>PROBE_SUPPORTED = 5;</code>
+     */
+    public static final int PROBE_SUPPORTED_VALUE = 5;
+
+
+    public final int getNumber() {
+      return value;
+    }
+
+    /**
+     * @param value The numeric wire value of the corresponding enum entry.
+     * @return The enum associated with the given numeric wire value.
+     * @deprecated Use {@link #forNumber(int)} instead.
+     */
+    @java.lang.Deprecated
+    public static ByeByeReason valueOf(int value) {
+      return forNumber(value);
+    }
+
+    /**
+     * @param value The numeric wire value of the corresponding enum entry.
+     * @return The enum associated with the given numeric wire value.
+     */
+    public static ByeByeReason forNumber(int value) {
+      switch (value) {
+        case 1: return USER_SELECTION;
+        case 2: return DEVICE_SWITCH;
+        case 3: return NOT_SUPPORTED;
+        case 4: return NOT_CURRENTLY_SUPPORTED;
+        case 5: return PROBE_SUPPORTED;
+        default: return null;
+      }
+    }
+
+    public static com.google.protobuf.Internal.EnumLiteMap<ByeByeReason>
+        internalGetValueMap() {
+      return internalValueMap;
+    }
+    private static final com.google.protobuf.Internal.EnumLiteMap<
+        ByeByeReason> internalValueMap =
+          new com.google.protobuf.Internal.EnumLiteMap<ByeByeReason>() {
+            public ByeByeReason findValueByNumber(int number) {
+              return ByeByeReason.forNumber(number);
+            }
+          };
+
+    public final com.google.protobuf.Descriptors.EnumValueDescriptor
+        getValueDescriptor() {
+      return getDescriptor().getValues().get(ordinal());
+    }
+    public final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptorForType() {
+      return getDescriptor();
+    }
+    public static final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptor() {
+      return com.andrerinas.headunitrevived.aap.protocol.proto.Control.getDescriptor().getEnumTypes().get(2);
+    }
+
+    private static final ByeByeReason[] VALUES = values();
+
+    public static ByeByeReason valueOf(
+        com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+      if (desc.getType() != getDescriptor()) {
+        throw new java.lang.IllegalArgumentException(
+          "EnumValueDescriptor is not for this type.");
+      }
+      return VALUES[desc.getIndex()];
+    }
+
+    private final int value;
+
+    private ByeByeReason(int value) {
+      this.value = value;
+    }
+
+    // @@protoc_insertion_point(enum_scope:com.andrerinas.headunitrevived.aap.protocol.proto.ByeByeReason)
+  }
+
+  /**
    * Protobuf enum {@code com.andrerinas.headunitrevived.aap.protocol.proto.NavFocusType}
    */
   public enum NavFocusType
@@ -433,7 +646,7 @@ public final class Control {
     }
     public static final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptor() {
-      return com.andrerinas.headunitrevived.aap.protocol.proto.Control.getDescriptor().getEnumTypes().get(2);
+      return com.andrerinas.headunitrevived.aap.protocol.proto.Control.getDescriptor().getEnumTypes().get(3);
     }
 
     private static final NavFocusType[] VALUES = values();
@@ -607,34 +820,34 @@ public final class Control {
     com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.VendorExtensionServiceOrBuilder getVendorExtensionServiceOrBuilder();
 
     /**
-     * <pre>
-     *radio_service = 7
-     *media_browser_service=11
-     * </pre>
-     *
      * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.Service.GenericNotificationService generic_notification_service = 13;</code>
      * @return Whether the genericNotificationService field is set.
      */
     boolean hasGenericNotificationService();
     /**
-     * <pre>
-     *radio_service = 7
-     *media_browser_service=11
-     * </pre>
-     *
      * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.Service.GenericNotificationService generic_notification_service = 13;</code>
      * @return The genericNotificationService.
      */
     com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.GenericNotificationService getGenericNotificationService();
     /**
-     * <pre>
-     *radio_service = 7
-     *media_browser_service=11
-     * </pre>
-     *
      * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.Service.GenericNotificationService generic_notification_service = 13;</code>
      */
     com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.GenericNotificationServiceOrBuilder getGenericNotificationServiceOrBuilder();
+
+    /**
+     * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.Service.WifiProjectionService wifi_projection_service = 14;</code>
+     * @return Whether the wifiProjectionService field is set.
+     */
+    boolean hasWifiProjectionService();
+    /**
+     * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.Service.WifiProjectionService wifi_projection_service = 14;</code>
+     * @return The wifiProjectionService.
+     */
+    com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionService getWifiProjectionService();
+    /**
+     * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.Service.WifiProjectionService wifi_projection_service = 14;</code>
+     */
+    com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionServiceOrBuilder getWifiProjectionServiceOrBuilder();
   }
   /**
    * Protobuf type {@code com.andrerinas.headunitrevived.aap.protocol.proto.Service}
@@ -14584,6 +14797,590 @@ public final class Control {
 
     }
 
+    public interface WifiProjectionServiceOrBuilder extends
+        // @@protoc_insertion_point(interface_extends:com.andrerinas.headunitrevived.aap.protocol.proto.Service.WifiProjectionService)
+        com.google.protobuf.MessageOrBuilder {
+
+      /**
+       * <code>optional string car_wifi_bssid = 1;</code>
+       * @return Whether the carWifiBssid field is set.
+       */
+      boolean hasCarWifiBssid();
+      /**
+       * <code>optional string car_wifi_bssid = 1;</code>
+       * @return The carWifiBssid.
+       */
+      java.lang.String getCarWifiBssid();
+      /**
+       * <code>optional string car_wifi_bssid = 1;</code>
+       * @return The bytes for carWifiBssid.
+       */
+      com.google.protobuf.ByteString
+          getCarWifiBssidBytes();
+    }
+    /**
+     * Protobuf type {@code com.andrerinas.headunitrevived.aap.protocol.proto.Service.WifiProjectionService}
+     */
+    public static final class WifiProjectionService extends
+        com.google.protobuf.GeneratedMessageV3 implements
+        // @@protoc_insertion_point(message_implements:com.andrerinas.headunitrevived.aap.protocol.proto.Service.WifiProjectionService)
+        WifiProjectionServiceOrBuilder {
+    private static final long serialVersionUID = 0L;
+      // Use WifiProjectionService.newBuilder() to construct.
+      private WifiProjectionService(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+        super(builder);
+      }
+      private WifiProjectionService() {
+        carWifiBssid_ = "";
+      }
+
+      @java.lang.Override
+      @SuppressWarnings({"unused"})
+      protected java.lang.Object newInstance(
+          UnusedPrivateParameter unused) {
+        return new WifiProjectionService();
+      }
+
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_Service_WifiProjectionService_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_Service_WifiProjectionService_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionService.class, com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionService.Builder.class);
+      }
+
+      private int bitField0_;
+      public static final int CAR_WIFI_BSSID_FIELD_NUMBER = 1;
+      @SuppressWarnings("serial")
+      private volatile java.lang.Object carWifiBssid_ = "";
+      /**
+       * <code>optional string car_wifi_bssid = 1;</code>
+       * @return Whether the carWifiBssid field is set.
+       */
+      @java.lang.Override
+      public boolean hasCarWifiBssid() {
+        return ((bitField0_ & 0x00000001) != 0);
+      }
+      /**
+       * <code>optional string car_wifi_bssid = 1;</code>
+       * @return The carWifiBssid.
+       */
+      @java.lang.Override
+      public java.lang.String getCarWifiBssid() {
+        java.lang.Object ref = carWifiBssid_;
+        if (ref instanceof java.lang.String) {
+          return (java.lang.String) ref;
+        } else {
+          com.google.protobuf.ByteString bs = 
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            carWifiBssid_ = s;
+          }
+          return s;
+        }
+      }
+      /**
+       * <code>optional string car_wifi_bssid = 1;</code>
+       * @return The bytes for carWifiBssid.
+       */
+      @java.lang.Override
+      public com.google.protobuf.ByteString
+          getCarWifiBssidBytes() {
+        java.lang.Object ref = carWifiBssid_;
+        if (ref instanceof java.lang.String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          carWifiBssid_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+
+      private byte memoizedIsInitialized = -1;
+      @java.lang.Override
+      public final boolean isInitialized() {
+        byte isInitialized = memoizedIsInitialized;
+        if (isInitialized == 1) return true;
+        if (isInitialized == 0) return false;
+
+        memoizedIsInitialized = 1;
+        return true;
+      }
+
+      @java.lang.Override
+      public void writeTo(com.google.protobuf.CodedOutputStream output)
+                          throws java.io.IOException {
+        if (((bitField0_ & 0x00000001) != 0)) {
+          com.google.protobuf.GeneratedMessageV3.writeString(output, 1, carWifiBssid_);
+        }
+        getUnknownFields().writeTo(output);
+      }
+
+      @java.lang.Override
+      public int getSerializedSize() {
+        int size = memoizedSize;
+        if (size != -1) return size;
+
+        size = 0;
+        if (((bitField0_ & 0x00000001) != 0)) {
+          size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, carWifiBssid_);
+        }
+        size += getUnknownFields().getSerializedSize();
+        memoizedSize = size;
+        return size;
+      }
+
+      @java.lang.Override
+      public boolean equals(final java.lang.Object obj) {
+        if (obj == this) {
+         return true;
+        }
+        if (!(obj instanceof com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionService)) {
+          return super.equals(obj);
+        }
+        com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionService other = (com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionService) obj;
+
+        if (hasCarWifiBssid() != other.hasCarWifiBssid()) return false;
+        if (hasCarWifiBssid()) {
+          if (!getCarWifiBssid()
+              .equals(other.getCarWifiBssid())) return false;
+        }
+        if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+        return true;
+      }
+
+      @java.lang.Override
+      public int hashCode() {
+        if (memoizedHashCode != 0) {
+          return memoizedHashCode;
+        }
+        int hash = 41;
+        hash = (19 * hash) + getDescriptor().hashCode();
+        if (hasCarWifiBssid()) {
+          hash = (37 * hash) + CAR_WIFI_BSSID_FIELD_NUMBER;
+          hash = (53 * hash) + getCarWifiBssid().hashCode();
+        }
+        hash = (29 * hash) + getUnknownFields().hashCode();
+        memoizedHashCode = hash;
+        return hash;
+      }
+
+      public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionService parseFrom(
+          java.nio.ByteBuffer data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionService parseFrom(
+          java.nio.ByteBuffer data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionService parseFrom(
+          com.google.protobuf.ByteString data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionService parseFrom(
+          com.google.protobuf.ByteString data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionService parseFrom(byte[] data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionService parseFrom(
+          byte[] data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionService parseFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input);
+      }
+      public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionService parseFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input, extensionRegistry);
+      }
+
+      public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionService parseDelimitedFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseDelimitedWithIOException(PARSER, input);
+      }
+
+      public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionService parseDelimitedFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+      }
+      public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionService parseFrom(
+          com.google.protobuf.CodedInputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input);
+      }
+      public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionService parseFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input, extensionRegistry);
+      }
+
+      @java.lang.Override
+      public Builder newBuilderForType() { return newBuilder(); }
+      public static Builder newBuilder() {
+        return DEFAULT_INSTANCE.toBuilder();
+      }
+      public static Builder newBuilder(com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionService prototype) {
+        return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+      }
+      @java.lang.Override
+      public Builder toBuilder() {
+        return this == DEFAULT_INSTANCE
+            ? new Builder() : new Builder().mergeFrom(this);
+      }
+
+      @java.lang.Override
+      protected Builder newBuilderForType(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        Builder builder = new Builder(parent);
+        return builder;
+      }
+      /**
+       * Protobuf type {@code com.andrerinas.headunitrevived.aap.protocol.proto.Service.WifiProjectionService}
+       */
+      public static final class Builder extends
+          com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+          // @@protoc_insertion_point(builder_implements:com.andrerinas.headunitrevived.aap.protocol.proto.Service.WifiProjectionService)
+          com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionServiceOrBuilder {
+        public static final com.google.protobuf.Descriptors.Descriptor
+            getDescriptor() {
+          return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_Service_WifiProjectionService_descriptor;
+        }
+
+        @java.lang.Override
+        protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+            internalGetFieldAccessorTable() {
+          return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_Service_WifiProjectionService_fieldAccessorTable
+              .ensureFieldAccessorsInitialized(
+                  com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionService.class, com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionService.Builder.class);
+        }
+
+        // Construct using com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionService.newBuilder()
+        private Builder() {
+
+        }
+
+        private Builder(
+            com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+          super(parent);
+
+        }
+        @java.lang.Override
+        public Builder clear() {
+          super.clear();
+          bitField0_ = 0;
+          carWifiBssid_ = "";
+          return this;
+        }
+
+        @java.lang.Override
+        public com.google.protobuf.Descriptors.Descriptor
+            getDescriptorForType() {
+          return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_Service_WifiProjectionService_descriptor;
+        }
+
+        @java.lang.Override
+        public com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionService getDefaultInstanceForType() {
+          return com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionService.getDefaultInstance();
+        }
+
+        @java.lang.Override
+        public com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionService build() {
+          com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionService result = buildPartial();
+          if (!result.isInitialized()) {
+            throw newUninitializedMessageException(result);
+          }
+          return result;
+        }
+
+        @java.lang.Override
+        public com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionService buildPartial() {
+          com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionService result = new com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionService(this);
+          if (bitField0_ != 0) { buildPartial0(result); }
+          onBuilt();
+          return result;
+        }
+
+        private void buildPartial0(com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionService result) {
+          int from_bitField0_ = bitField0_;
+          int to_bitField0_ = 0;
+          if (((from_bitField0_ & 0x00000001) != 0)) {
+            result.carWifiBssid_ = carWifiBssid_;
+            to_bitField0_ |= 0x00000001;
+          }
+          result.bitField0_ |= to_bitField0_;
+        }
+
+        @java.lang.Override
+        public Builder clone() {
+          return super.clone();
+        }
+        @java.lang.Override
+        public Builder setField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            java.lang.Object value) {
+          return super.setField(field, value);
+        }
+        @java.lang.Override
+        public Builder clearField(
+            com.google.protobuf.Descriptors.FieldDescriptor field) {
+          return super.clearField(field);
+        }
+        @java.lang.Override
+        public Builder clearOneof(
+            com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+          return super.clearOneof(oneof);
+        }
+        @java.lang.Override
+        public Builder setRepeatedField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            int index, java.lang.Object value) {
+          return super.setRepeatedField(field, index, value);
+        }
+        @java.lang.Override
+        public Builder addRepeatedField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            java.lang.Object value) {
+          return super.addRepeatedField(field, value);
+        }
+        @java.lang.Override
+        public Builder mergeFrom(com.google.protobuf.Message other) {
+          if (other instanceof com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionService) {
+            return mergeFrom((com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionService)other);
+          } else {
+            super.mergeFrom(other);
+            return this;
+          }
+        }
+
+        public Builder mergeFrom(com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionService other) {
+          if (other == com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionService.getDefaultInstance()) return this;
+          if (other.hasCarWifiBssid()) {
+            carWifiBssid_ = other.carWifiBssid_;
+            bitField0_ |= 0x00000001;
+            onChanged();
+          }
+          this.mergeUnknownFields(other.getUnknownFields());
+          onChanged();
+          return this;
+        }
+
+        @java.lang.Override
+        public final boolean isInitialized() {
+          return true;
+        }
+
+        @java.lang.Override
+        public Builder mergeFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws java.io.IOException {
+          if (extensionRegistry == null) {
+            throw new java.lang.NullPointerException();
+          }
+          try {
+            boolean done = false;
+            while (!done) {
+              int tag = input.readTag();
+              switch (tag) {
+                case 0:
+                  done = true;
+                  break;
+                case 10: {
+                  carWifiBssid_ = input.readBytes();
+                  bitField0_ |= 0x00000001;
+                  break;
+                } // case 10
+                default: {
+                  if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                    done = true; // was an endgroup tag
+                  }
+                  break;
+                } // default:
+              } // switch (tag)
+            } // while (!done)
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            throw e.unwrapIOException();
+          } finally {
+            onChanged();
+          } // finally
+          return this;
+        }
+        private int bitField0_;
+
+        private java.lang.Object carWifiBssid_ = "";
+        /**
+         * <code>optional string car_wifi_bssid = 1;</code>
+         * @return Whether the carWifiBssid field is set.
+         */
+        public boolean hasCarWifiBssid() {
+          return ((bitField0_ & 0x00000001) != 0);
+        }
+        /**
+         * <code>optional string car_wifi_bssid = 1;</code>
+         * @return The carWifiBssid.
+         */
+        public java.lang.String getCarWifiBssid() {
+          java.lang.Object ref = carWifiBssid_;
+          if (!(ref instanceof java.lang.String)) {
+            com.google.protobuf.ByteString bs =
+                (com.google.protobuf.ByteString) ref;
+            java.lang.String s = bs.toStringUtf8();
+            if (bs.isValidUtf8()) {
+              carWifiBssid_ = s;
+            }
+            return s;
+          } else {
+            return (java.lang.String) ref;
+          }
+        }
+        /**
+         * <code>optional string car_wifi_bssid = 1;</code>
+         * @return The bytes for carWifiBssid.
+         */
+        public com.google.protobuf.ByteString
+            getCarWifiBssidBytes() {
+          java.lang.Object ref = carWifiBssid_;
+          if (ref instanceof String) {
+            com.google.protobuf.ByteString b = 
+                com.google.protobuf.ByteString.copyFromUtf8(
+                    (java.lang.String) ref);
+            carWifiBssid_ = b;
+            return b;
+          } else {
+            return (com.google.protobuf.ByteString) ref;
+          }
+        }
+        /**
+         * <code>optional string car_wifi_bssid = 1;</code>
+         * @param value The carWifiBssid to set.
+         * @return This builder for chaining.
+         */
+        public Builder setCarWifiBssid(
+            java.lang.String value) {
+          if (value == null) { throw new NullPointerException(); }
+          carWifiBssid_ = value;
+          bitField0_ |= 0x00000001;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional string car_wifi_bssid = 1;</code>
+         * @return This builder for chaining.
+         */
+        public Builder clearCarWifiBssid() {
+          carWifiBssid_ = getDefaultInstance().getCarWifiBssid();
+          bitField0_ = (bitField0_ & ~0x00000001);
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional string car_wifi_bssid = 1;</code>
+         * @param value The bytes for carWifiBssid to set.
+         * @return This builder for chaining.
+         */
+        public Builder setCarWifiBssidBytes(
+            com.google.protobuf.ByteString value) {
+          if (value == null) { throw new NullPointerException(); }
+          carWifiBssid_ = value;
+          bitField0_ |= 0x00000001;
+          onChanged();
+          return this;
+        }
+        @java.lang.Override
+        public final Builder setUnknownFields(
+            final com.google.protobuf.UnknownFieldSet unknownFields) {
+          return super.setUnknownFields(unknownFields);
+        }
+
+        @java.lang.Override
+        public final Builder mergeUnknownFields(
+            final com.google.protobuf.UnknownFieldSet unknownFields) {
+          return super.mergeUnknownFields(unknownFields);
+        }
+
+
+        // @@protoc_insertion_point(builder_scope:com.andrerinas.headunitrevived.aap.protocol.proto.Service.WifiProjectionService)
+      }
+
+      // @@protoc_insertion_point(class_scope:com.andrerinas.headunitrevived.aap.protocol.proto.Service.WifiProjectionService)
+      private static final com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionService DEFAULT_INSTANCE;
+      static {
+        DEFAULT_INSTANCE = new com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionService();
+      }
+
+      public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionService getDefaultInstance() {
+        return DEFAULT_INSTANCE;
+      }
+
+      @java.lang.Deprecated public static final com.google.protobuf.Parser<WifiProjectionService>
+          PARSER = new com.google.protobuf.AbstractParser<WifiProjectionService>() {
+        @java.lang.Override
+        public WifiProjectionService parsePartialFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+          Builder builder = newBuilder();
+          try {
+            builder.mergeFrom(input, extensionRegistry);
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            throw e.setUnfinishedMessage(builder.buildPartial());
+          } catch (com.google.protobuf.UninitializedMessageException e) {
+            throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+          } catch (java.io.IOException e) {
+            throw new com.google.protobuf.InvalidProtocolBufferException(e)
+                .setUnfinishedMessage(builder.buildPartial());
+          }
+          return builder.buildPartial();
+        }
+      };
+
+      public static com.google.protobuf.Parser<WifiProjectionService> parser() {
+        return PARSER;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Parser<WifiProjectionService> getParserForType() {
+        return PARSER;
+      }
+
+      @java.lang.Override
+      public com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionService getDefaultInstanceForType() {
+        return DEFAULT_INSTANCE;
+      }
+
+    }
+
     private int bitField0_;
     public static final int PHONE_STATUS_SERVICE_FIELD_NUMBER = 10;
     private com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.PhoneStatusService phoneStatusService_;
@@ -14841,11 +15638,6 @@ public final class Control {
     public static final int GENERIC_NOTIFICATION_SERVICE_FIELD_NUMBER = 13;
     private com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.GenericNotificationService genericNotificationService_;
     /**
-     * <pre>
-     *radio_service = 7
-     *media_browser_service=11
-     * </pre>
-     *
      * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.Service.GenericNotificationService generic_notification_service = 13;</code>
      * @return Whether the genericNotificationService field is set.
      */
@@ -14854,11 +15646,6 @@ public final class Control {
       return ((bitField0_ & 0x00000400) != 0);
     }
     /**
-     * <pre>
-     *radio_service = 7
-     *media_browser_service=11
-     * </pre>
-     *
      * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.Service.GenericNotificationService generic_notification_service = 13;</code>
      * @return The genericNotificationService.
      */
@@ -14867,16 +15654,37 @@ public final class Control {
       return genericNotificationService_ == null ? com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.GenericNotificationService.getDefaultInstance() : genericNotificationService_;
     }
     /**
-     * <pre>
-     *radio_service = 7
-     *media_browser_service=11
-     * </pre>
-     *
      * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.Service.GenericNotificationService generic_notification_service = 13;</code>
      */
     @java.lang.Override
     public com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.GenericNotificationServiceOrBuilder getGenericNotificationServiceOrBuilder() {
       return genericNotificationService_ == null ? com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.GenericNotificationService.getDefaultInstance() : genericNotificationService_;
+    }
+
+    public static final int WIFI_PROJECTION_SERVICE_FIELD_NUMBER = 14;
+    private com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionService wifiProjectionService_;
+    /**
+     * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.Service.WifiProjectionService wifi_projection_service = 14;</code>
+     * @return Whether the wifiProjectionService field is set.
+     */
+    @java.lang.Override
+    public boolean hasWifiProjectionService() {
+      return ((bitField0_ & 0x00000800) != 0);
+    }
+    /**
+     * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.Service.WifiProjectionService wifi_projection_service = 14;</code>
+     * @return The wifiProjectionService.
+     */
+    @java.lang.Override
+    public com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionService getWifiProjectionService() {
+      return wifiProjectionService_ == null ? com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionService.getDefaultInstance() : wifiProjectionService_;
+    }
+    /**
+     * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.Service.WifiProjectionService wifi_projection_service = 14;</code>
+     */
+    @java.lang.Override
+    public com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionServiceOrBuilder getWifiProjectionServiceOrBuilder() {
+      return wifiProjectionService_ == null ? com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionService.getDefaultInstance() : wifiProjectionService_;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -14966,6 +15774,9 @@ public final class Control {
       if (((bitField0_ & 0x00000400) != 0)) {
         output.writeMessage(13, getGenericNotificationService());
       }
+      if (((bitField0_ & 0x00000800) != 0)) {
+        output.writeMessage(14, getWifiProjectionService());
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -15018,6 +15829,10 @@ public final class Control {
       if (((bitField0_ & 0x00000400) != 0)) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(13, getGenericNotificationService());
+      }
+      if (((bitField0_ & 0x00000800) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(14, getWifiProjectionService());
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
@@ -15089,6 +15904,11 @@ public final class Control {
         if (!getGenericNotificationService()
             .equals(other.getGenericNotificationService())) return false;
       }
+      if (hasWifiProjectionService() != other.hasWifiProjectionService()) return false;
+      if (hasWifiProjectionService()) {
+        if (!getWifiProjectionService()
+            .equals(other.getWifiProjectionService())) return false;
+      }
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -15143,6 +15963,10 @@ public final class Control {
       if (hasGenericNotificationService()) {
         hash = (37 * hash) + GENERIC_NOTIFICATION_SERVICE_FIELD_NUMBER;
         hash = (53 * hash) + getGenericNotificationService().hashCode();
+      }
+      if (hasWifiProjectionService()) {
+        hash = (37 * hash) + WIFI_PROJECTION_SERVICE_FIELD_NUMBER;
+        hash = (53 * hash) + getWifiProjectionService().hashCode();
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
@@ -15284,6 +16108,7 @@ public final class Control {
           getMediaPlaybackServiceFieldBuilder();
           getVendorExtensionServiceFieldBuilder();
           getGenericNotificationServiceFieldBuilder();
+          getWifiProjectionServiceFieldBuilder();
         }
       }
       @java.lang.Override
@@ -15340,6 +16165,11 @@ public final class Control {
         if (genericNotificationServiceBuilder_ != null) {
           genericNotificationServiceBuilder_.dispose();
           genericNotificationServiceBuilder_ = null;
+        }
+        wifiProjectionService_ = null;
+        if (wifiProjectionServiceBuilder_ != null) {
+          wifiProjectionServiceBuilder_.dispose();
+          wifiProjectionServiceBuilder_ = null;
         }
         return this;
       }
@@ -15439,6 +16269,12 @@ public final class Control {
               : genericNotificationServiceBuilder_.build();
           to_bitField0_ |= 0x00000400;
         }
+        if (((from_bitField0_ & 0x00000800) != 0)) {
+          result.wifiProjectionService_ = wifiProjectionServiceBuilder_ == null
+              ? wifiProjectionService_
+              : wifiProjectionServiceBuilder_.build();
+          to_bitField0_ |= 0x00000800;
+        }
         result.bitField0_ |= to_bitField0_;
       }
 
@@ -15518,6 +16354,9 @@ public final class Control {
         }
         if (other.hasGenericNotificationService()) {
           mergeGenericNotificationService(other.getGenericNotificationService());
+        }
+        if (other.hasWifiProjectionService()) {
+          mergeWifiProjectionService(other.getWifiProjectionService());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
@@ -15653,6 +16492,13 @@ public final class Control {
                 bitField0_ |= 0x00000400;
                 break;
               } // case 106
+              case 114: {
+                input.readMessage(
+                    getWifiProjectionServiceFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x00000800;
+                break;
+              } // case 114
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -16803,11 +17649,6 @@ public final class Control {
       private com.google.protobuf.SingleFieldBuilderV3<
           com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.GenericNotificationService, com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.GenericNotificationService.Builder, com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.GenericNotificationServiceOrBuilder> genericNotificationServiceBuilder_;
       /**
-       * <pre>
-       *radio_service = 7
-       *media_browser_service=11
-       * </pre>
-       *
        * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.Service.GenericNotificationService generic_notification_service = 13;</code>
        * @return Whether the genericNotificationService field is set.
        */
@@ -16815,11 +17656,6 @@ public final class Control {
         return ((bitField0_ & 0x00000400) != 0);
       }
       /**
-       * <pre>
-       *radio_service = 7
-       *media_browser_service=11
-       * </pre>
-       *
        * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.Service.GenericNotificationService generic_notification_service = 13;</code>
        * @return The genericNotificationService.
        */
@@ -16831,11 +17667,6 @@ public final class Control {
         }
       }
       /**
-       * <pre>
-       *radio_service = 7
-       *media_browser_service=11
-       * </pre>
-       *
        * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.Service.GenericNotificationService generic_notification_service = 13;</code>
        */
       public Builder setGenericNotificationService(com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.GenericNotificationService value) {
@@ -16852,11 +17683,6 @@ public final class Control {
         return this;
       }
       /**
-       * <pre>
-       *radio_service = 7
-       *media_browser_service=11
-       * </pre>
-       *
        * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.Service.GenericNotificationService generic_notification_service = 13;</code>
        */
       public Builder setGenericNotificationService(
@@ -16871,11 +17697,6 @@ public final class Control {
         return this;
       }
       /**
-       * <pre>
-       *radio_service = 7
-       *media_browser_service=11
-       * </pre>
-       *
        * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.Service.GenericNotificationService generic_notification_service = 13;</code>
        */
       public Builder mergeGenericNotificationService(com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.GenericNotificationService value) {
@@ -16897,11 +17718,6 @@ public final class Control {
         return this;
       }
       /**
-       * <pre>
-       *radio_service = 7
-       *media_browser_service=11
-       * </pre>
-       *
        * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.Service.GenericNotificationService generic_notification_service = 13;</code>
        */
       public Builder clearGenericNotificationService() {
@@ -16915,11 +17731,6 @@ public final class Control {
         return this;
       }
       /**
-       * <pre>
-       *radio_service = 7
-       *media_browser_service=11
-       * </pre>
-       *
        * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.Service.GenericNotificationService generic_notification_service = 13;</code>
        */
       public com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.GenericNotificationService.Builder getGenericNotificationServiceBuilder() {
@@ -16928,11 +17739,6 @@ public final class Control {
         return getGenericNotificationServiceFieldBuilder().getBuilder();
       }
       /**
-       * <pre>
-       *radio_service = 7
-       *media_browser_service=11
-       * </pre>
-       *
        * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.Service.GenericNotificationService generic_notification_service = 13;</code>
        */
       public com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.GenericNotificationServiceOrBuilder getGenericNotificationServiceOrBuilder() {
@@ -16944,11 +17750,6 @@ public final class Control {
         }
       }
       /**
-       * <pre>
-       *radio_service = 7
-       *media_browser_service=11
-       * </pre>
-       *
        * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.Service.GenericNotificationService generic_notification_service = 13;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
@@ -16963,6 +17764,127 @@ public final class Control {
           genericNotificationService_ = null;
         }
         return genericNotificationServiceBuilder_;
+      }
+
+      private com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionService wifiProjectionService_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionService, com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionService.Builder, com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionServiceOrBuilder> wifiProjectionServiceBuilder_;
+      /**
+       * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.Service.WifiProjectionService wifi_projection_service = 14;</code>
+       * @return Whether the wifiProjectionService field is set.
+       */
+      public boolean hasWifiProjectionService() {
+        return ((bitField0_ & 0x00000800) != 0);
+      }
+      /**
+       * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.Service.WifiProjectionService wifi_projection_service = 14;</code>
+       * @return The wifiProjectionService.
+       */
+      public com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionService getWifiProjectionService() {
+        if (wifiProjectionServiceBuilder_ == null) {
+          return wifiProjectionService_ == null ? com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionService.getDefaultInstance() : wifiProjectionService_;
+        } else {
+          return wifiProjectionServiceBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.Service.WifiProjectionService wifi_projection_service = 14;</code>
+       */
+      public Builder setWifiProjectionService(com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionService value) {
+        if (wifiProjectionServiceBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          wifiProjectionService_ = value;
+        } else {
+          wifiProjectionServiceBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00000800;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.Service.WifiProjectionService wifi_projection_service = 14;</code>
+       */
+      public Builder setWifiProjectionService(
+          com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionService.Builder builderForValue) {
+        if (wifiProjectionServiceBuilder_ == null) {
+          wifiProjectionService_ = builderForValue.build();
+        } else {
+          wifiProjectionServiceBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000800;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.Service.WifiProjectionService wifi_projection_service = 14;</code>
+       */
+      public Builder mergeWifiProjectionService(com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionService value) {
+        if (wifiProjectionServiceBuilder_ == null) {
+          if (((bitField0_ & 0x00000800) != 0) &&
+            wifiProjectionService_ != null &&
+            wifiProjectionService_ != com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionService.getDefaultInstance()) {
+            getWifiProjectionServiceBuilder().mergeFrom(value);
+          } else {
+            wifiProjectionService_ = value;
+          }
+        } else {
+          wifiProjectionServiceBuilder_.mergeFrom(value);
+        }
+        if (wifiProjectionService_ != null) {
+          bitField0_ |= 0x00000800;
+          onChanged();
+        }
+        return this;
+      }
+      /**
+       * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.Service.WifiProjectionService wifi_projection_service = 14;</code>
+       */
+      public Builder clearWifiProjectionService() {
+        bitField0_ = (bitField0_ & ~0x00000800);
+        wifiProjectionService_ = null;
+        if (wifiProjectionServiceBuilder_ != null) {
+          wifiProjectionServiceBuilder_.dispose();
+          wifiProjectionServiceBuilder_ = null;
+        }
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.Service.WifiProjectionService wifi_projection_service = 14;</code>
+       */
+      public com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionService.Builder getWifiProjectionServiceBuilder() {
+        bitField0_ |= 0x00000800;
+        onChanged();
+        return getWifiProjectionServiceFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.Service.WifiProjectionService wifi_projection_service = 14;</code>
+       */
+      public com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionServiceOrBuilder getWifiProjectionServiceOrBuilder() {
+        if (wifiProjectionServiceBuilder_ != null) {
+          return wifiProjectionServiceBuilder_.getMessageOrBuilder();
+        } else {
+          return wifiProjectionService_ == null ?
+              com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionService.getDefaultInstance() : wifiProjectionService_;
+        }
+      }
+      /**
+       * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.Service.WifiProjectionService wifi_projection_service = 14;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionService, com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionService.Builder, com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionServiceOrBuilder> 
+          getWifiProjectionServiceFieldBuilder() {
+        if (wifiProjectionServiceBuilder_ == null) {
+          wifiProjectionServiceBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionService, com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionService.Builder, com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.WifiProjectionServiceOrBuilder>(
+                  getWifiProjectionService(),
+                  getParentForChildren(),
+                  isClean());
+          wifiProjectionService_ = null;
+        }
+        return wifiProjectionServiceBuilder_;
       }
       @java.lang.Override
       public final Builder setUnknownFields(
@@ -21071,7 +21993,7 @@ public final class Control {
      */
     @java.lang.Override public com.andrerinas.headunitrevived.aap.protocol.proto.Common.MessageStatus getStatus() {
       com.andrerinas.headunitrevived.aap.protocol.proto.Common.MessageStatus result = com.andrerinas.headunitrevived.aap.protocol.proto.Common.MessageStatus.forNumber(status_);
-      return result == null ? com.andrerinas.headunitrevived.aap.protocol.proto.Common.MessageStatus.STATUS_OK : result;
+      return result == null ? com.andrerinas.headunitrevived.aap.protocol.proto.Common.MessageStatus.STATUS_SUCCESS : result;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -21435,7 +22357,7 @@ public final class Control {
       @java.lang.Override
       public com.andrerinas.headunitrevived.aap.protocol.proto.Common.MessageStatus getStatus() {
         com.andrerinas.headunitrevived.aap.protocol.proto.Common.MessageStatus result = com.andrerinas.headunitrevived.aap.protocol.proto.Common.MessageStatus.forNumber(status_);
-        return result == null ? com.andrerinas.headunitrevived.aap.protocol.proto.Common.MessageStatus.STATUS_OK : result;
+        return result == null ? com.andrerinas.headunitrevived.aap.protocol.proto.Common.MessageStatus.STATUS_SUCCESS : result;
       }
       /**
        * <code>required .com.andrerinas.headunitrevived.aap.protocol.proto.MessageStatus status = 1;</code>
@@ -22657,15 +23579,15 @@ public final class Control {
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>required .com.andrerinas.headunitrevived.aap.protocol.proto.ByeByeRequest.ByeByeReason reason = 1;</code>
+     * <code>required .com.andrerinas.headunitrevived.aap.protocol.proto.ByeByeReason reason = 1;</code>
      * @return Whether the reason field is set.
      */
     boolean hasReason();
     /**
-     * <code>required .com.andrerinas.headunitrevived.aap.protocol.proto.ByeByeRequest.ByeByeReason reason = 1;</code>
+     * <code>required .com.andrerinas.headunitrevived.aap.protocol.proto.ByeByeReason reason = 1;</code>
      * @return The reason.
      */
-    com.andrerinas.headunitrevived.aap.protocol.proto.Control.ByeByeRequest.ByeByeReason getReason();
+    com.andrerinas.headunitrevived.aap.protocol.proto.Control.ByeByeReason getReason();
   }
   /**
    * Protobuf type {@code com.andrerinas.headunitrevived.aap.protocol.proto.ByeByeRequest}
@@ -22703,110 +23625,23 @@ public final class Control {
               com.andrerinas.headunitrevived.aap.protocol.proto.Control.ByeByeRequest.class, com.andrerinas.headunitrevived.aap.protocol.proto.Control.ByeByeRequest.Builder.class);
     }
 
-    /**
-     * Protobuf enum {@code com.andrerinas.headunitrevived.aap.protocol.proto.ByeByeRequest.ByeByeReason}
-     */
-    public enum ByeByeReason
-        implements com.google.protobuf.ProtocolMessageEnum {
-      /**
-       * <code>QUIT = 1;</code>
-       */
-      QUIT(1),
-      ;
-
-      /**
-       * <code>QUIT = 1;</code>
-       */
-      public static final int QUIT_VALUE = 1;
-
-
-      public final int getNumber() {
-        return value;
-      }
-
-      /**
-       * @param value The numeric wire value of the corresponding enum entry.
-       * @return The enum associated with the given numeric wire value.
-       * @deprecated Use {@link #forNumber(int)} instead.
-       */
-      @java.lang.Deprecated
-      public static ByeByeReason valueOf(int value) {
-        return forNumber(value);
-      }
-
-      /**
-       * @param value The numeric wire value of the corresponding enum entry.
-       * @return The enum associated with the given numeric wire value.
-       */
-      public static ByeByeReason forNumber(int value) {
-        switch (value) {
-          case 1: return QUIT;
-          default: return null;
-        }
-      }
-
-      public static com.google.protobuf.Internal.EnumLiteMap<ByeByeReason>
-          internalGetValueMap() {
-        return internalValueMap;
-      }
-      private static final com.google.protobuf.Internal.EnumLiteMap<
-          ByeByeReason> internalValueMap =
-            new com.google.protobuf.Internal.EnumLiteMap<ByeByeReason>() {
-              public ByeByeReason findValueByNumber(int number) {
-                return ByeByeReason.forNumber(number);
-              }
-            };
-
-      public final com.google.protobuf.Descriptors.EnumValueDescriptor
-          getValueDescriptor() {
-        return getDescriptor().getValues().get(ordinal());
-      }
-      public final com.google.protobuf.Descriptors.EnumDescriptor
-          getDescriptorForType() {
-        return getDescriptor();
-      }
-      public static final com.google.protobuf.Descriptors.EnumDescriptor
-          getDescriptor() {
-        return com.andrerinas.headunitrevived.aap.protocol.proto.Control.ByeByeRequest.getDescriptor().getEnumTypes().get(0);
-      }
-
-      private static final ByeByeReason[] VALUES = values();
-
-      public static ByeByeReason valueOf(
-          com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
-        if (desc.getType() != getDescriptor()) {
-          throw new java.lang.IllegalArgumentException(
-            "EnumValueDescriptor is not for this type.");
-        }
-        return VALUES[desc.getIndex()];
-      }
-
-      private final int value;
-
-      private ByeByeReason(int value) {
-        this.value = value;
-      }
-
-      // @@protoc_insertion_point(enum_scope:com.andrerinas.headunitrevived.aap.protocol.proto.ByeByeRequest.ByeByeReason)
-    }
-
     private int bitField0_;
     public static final int REASON_FIELD_NUMBER = 1;
     private int reason_ = 1;
     /**
-     * <code>required .com.andrerinas.headunitrevived.aap.protocol.proto.ByeByeRequest.ByeByeReason reason = 1;</code>
+     * <code>required .com.andrerinas.headunitrevived.aap.protocol.proto.ByeByeReason reason = 1;</code>
      * @return Whether the reason field is set.
      */
     @java.lang.Override public boolean hasReason() {
       return ((bitField0_ & 0x00000001) != 0);
     }
     /**
-     * <code>required .com.andrerinas.headunitrevived.aap.protocol.proto.ByeByeRequest.ByeByeReason reason = 1;</code>
+     * <code>required .com.andrerinas.headunitrevived.aap.protocol.proto.ByeByeReason reason = 1;</code>
      * @return The reason.
      */
-    @java.lang.Override public com.andrerinas.headunitrevived.aap.protocol.proto.Control.ByeByeRequest.ByeByeReason getReason() {
-      com.andrerinas.headunitrevived.aap.protocol.proto.Control.ByeByeRequest.ByeByeReason result = com.andrerinas.headunitrevived.aap.protocol.proto.Control.ByeByeRequest.ByeByeReason.forNumber(reason_);
-      return result == null ? com.andrerinas.headunitrevived.aap.protocol.proto.Control.ByeByeRequest.ByeByeReason.QUIT : result;
+    @java.lang.Override public com.andrerinas.headunitrevived.aap.protocol.proto.Control.ByeByeReason getReason() {
+      com.andrerinas.headunitrevived.aap.protocol.proto.Control.ByeByeReason result = com.andrerinas.headunitrevived.aap.protocol.proto.Control.ByeByeReason.forNumber(reason_);
+      return result == null ? com.andrerinas.headunitrevived.aap.protocol.proto.Control.ByeByeReason.USER_SELECTION : result;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -23128,8 +23963,8 @@ public final class Control {
                 break;
               case 8: {
                 int tmpRaw = input.readEnum();
-                com.andrerinas.headunitrevived.aap.protocol.proto.Control.ByeByeRequest.ByeByeReason tmpValue =
-                    com.andrerinas.headunitrevived.aap.protocol.proto.Control.ByeByeRequest.ByeByeReason.forNumber(tmpRaw);
+                com.andrerinas.headunitrevived.aap.protocol.proto.Control.ByeByeReason tmpValue =
+                    com.andrerinas.headunitrevived.aap.protocol.proto.Control.ByeByeReason.forNumber(tmpRaw);
                 if (tmpValue == null) {
                   mergeUnknownVarintField(1, tmpRaw);
                 } else {
@@ -23157,27 +23992,27 @@ public final class Control {
 
       private int reason_ = 1;
       /**
-       * <code>required .com.andrerinas.headunitrevived.aap.protocol.proto.ByeByeRequest.ByeByeReason reason = 1;</code>
+       * <code>required .com.andrerinas.headunitrevived.aap.protocol.proto.ByeByeReason reason = 1;</code>
        * @return Whether the reason field is set.
        */
       @java.lang.Override public boolean hasReason() {
         return ((bitField0_ & 0x00000001) != 0);
       }
       /**
-       * <code>required .com.andrerinas.headunitrevived.aap.protocol.proto.ByeByeRequest.ByeByeReason reason = 1;</code>
+       * <code>required .com.andrerinas.headunitrevived.aap.protocol.proto.ByeByeReason reason = 1;</code>
        * @return The reason.
        */
       @java.lang.Override
-      public com.andrerinas.headunitrevived.aap.protocol.proto.Control.ByeByeRequest.ByeByeReason getReason() {
-        com.andrerinas.headunitrevived.aap.protocol.proto.Control.ByeByeRequest.ByeByeReason result = com.andrerinas.headunitrevived.aap.protocol.proto.Control.ByeByeRequest.ByeByeReason.forNumber(reason_);
-        return result == null ? com.andrerinas.headunitrevived.aap.protocol.proto.Control.ByeByeRequest.ByeByeReason.QUIT : result;
+      public com.andrerinas.headunitrevived.aap.protocol.proto.Control.ByeByeReason getReason() {
+        com.andrerinas.headunitrevived.aap.protocol.proto.Control.ByeByeReason result = com.andrerinas.headunitrevived.aap.protocol.proto.Control.ByeByeReason.forNumber(reason_);
+        return result == null ? com.andrerinas.headunitrevived.aap.protocol.proto.Control.ByeByeReason.USER_SELECTION : result;
       }
       /**
-       * <code>required .com.andrerinas.headunitrevived.aap.protocol.proto.ByeByeRequest.ByeByeReason reason = 1;</code>
+       * <code>required .com.andrerinas.headunitrevived.aap.protocol.proto.ByeByeReason reason = 1;</code>
        * @param value The reason to set.
        * @return This builder for chaining.
        */
-      public Builder setReason(com.andrerinas.headunitrevived.aap.protocol.proto.Control.ByeByeRequest.ByeByeReason value) {
+      public Builder setReason(com.andrerinas.headunitrevived.aap.protocol.proto.Control.ByeByeReason value) {
         if (value == null) {
           throw new NullPointerException();
         }
@@ -23187,7 +24022,7 @@ public final class Control {
         return this;
       }
       /**
-       * <code>required .com.andrerinas.headunitrevived.aap.protocol.proto.ByeByeRequest.ByeByeReason reason = 1;</code>
+       * <code>required .com.andrerinas.headunitrevived.aap.protocol.proto.ByeByeReason reason = 1;</code>
        * @return This builder for chaining.
        */
       public Builder clearReason() {
@@ -26708,245 +27543,134 @@ public final class Control {
 
   }
 
-  public interface GenericNotificationRequestOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:com.andrerinas.headunitrevived.aap.protocol.proto.GenericNotificationRequest)
+  public interface BatteryStatusNotificationOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:com.andrerinas.headunitrevived.aap.protocol.proto.BatteryStatusNotification)
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>required string id = 1;</code>
-     * @return Whether the id field is set.
+     * <code>required uint32 battery_level = 1;</code>
+     * @return Whether the batteryLevel field is set.
      */
-    boolean hasId();
+    boolean hasBatteryLevel();
     /**
-     * <code>required string id = 1;</code>
-     * @return The id.
+     * <code>required uint32 battery_level = 1;</code>
+     * @return The batteryLevel.
      */
-    java.lang.String getId();
-    /**
-     * <code>required string id = 1;</code>
-     * @return The bytes for id.
-     */
-    com.google.protobuf.ByteString
-        getIdBytes();
+    int getBatteryLevel();
 
     /**
-     * <code>optional string text = 2;</code>
-     * @return Whether the text field is set.
+     * <code>optional uint32 time_remaining_s = 2;</code>
+     * @return Whether the timeRemainingS field is set.
      */
-    boolean hasText();
+    boolean hasTimeRemainingS();
     /**
-     * <code>optional string text = 2;</code>
-     * @return The text.
+     * <code>optional uint32 time_remaining_s = 2;</code>
+     * @return The timeRemainingS.
      */
-    java.lang.String getText();
-    /**
-     * <code>optional string text = 2;</code>
-     * @return The bytes for text.
-     */
-    com.google.protobuf.ByteString
-        getTextBytes();
+    int getTimeRemainingS();
 
     /**
-     * <code>optional string icon = 3;</code>
-     * @return Whether the icon field is set.
+     * <code>optional bool critical_battery = 3;</code>
+     * @return Whether the criticalBattery field is set.
      */
-    boolean hasIcon();
+    boolean hasCriticalBattery();
     /**
-     * <code>optional string icon = 3;</code>
-     * @return The icon.
+     * <code>optional bool critical_battery = 3;</code>
+     * @return The criticalBattery.
      */
-    java.lang.String getIcon();
-    /**
-     * <code>optional string icon = 3;</code>
-     * @return The bytes for icon.
-     */
-    com.google.protobuf.ByteString
-        getIconBytes();
+    boolean getCriticalBattery();
   }
   /**
-   * Protobuf type {@code com.andrerinas.headunitrevived.aap.protocol.proto.GenericNotificationRequest}
+   * Protobuf type {@code com.andrerinas.headunitrevived.aap.protocol.proto.BatteryStatusNotification}
    */
-  public static final class GenericNotificationRequest extends
+  public static final class BatteryStatusNotification extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:com.andrerinas.headunitrevived.aap.protocol.proto.GenericNotificationRequest)
-      GenericNotificationRequestOrBuilder {
+      // @@protoc_insertion_point(message_implements:com.andrerinas.headunitrevived.aap.protocol.proto.BatteryStatusNotification)
+      BatteryStatusNotificationOrBuilder {
   private static final long serialVersionUID = 0L;
-    // Use GenericNotificationRequest.newBuilder() to construct.
-    private GenericNotificationRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+    // Use BatteryStatusNotification.newBuilder() to construct.
+    private BatteryStatusNotification(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
     }
-    private GenericNotificationRequest() {
-      id_ = "";
-      text_ = "";
-      icon_ = "";
+    private BatteryStatusNotification() {
     }
 
     @java.lang.Override
     @SuppressWarnings({"unused"})
     protected java.lang.Object newInstance(
         UnusedPrivateParameter unused) {
-      return new GenericNotificationRequest();
+      return new BatteryStatusNotification();
     }
 
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_GenericNotificationRequest_descriptor;
+      return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_BatteryStatusNotification_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_GenericNotificationRequest_fieldAccessorTable
+      return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_BatteryStatusNotification_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationRequest.class, com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationRequest.Builder.class);
+              com.andrerinas.headunitrevived.aap.protocol.proto.Control.BatteryStatusNotification.class, com.andrerinas.headunitrevived.aap.protocol.proto.Control.BatteryStatusNotification.Builder.class);
     }
 
     private int bitField0_;
-    public static final int ID_FIELD_NUMBER = 1;
-    @SuppressWarnings("serial")
-    private volatile java.lang.Object id_ = "";
+    public static final int BATTERY_LEVEL_FIELD_NUMBER = 1;
+    private int batteryLevel_ = 0;
     /**
-     * <code>required string id = 1;</code>
-     * @return Whether the id field is set.
+     * <code>required uint32 battery_level = 1;</code>
+     * @return Whether the batteryLevel field is set.
      */
     @java.lang.Override
-    public boolean hasId() {
+    public boolean hasBatteryLevel() {
       return ((bitField0_ & 0x00000001) != 0);
     }
     /**
-     * <code>required string id = 1;</code>
-     * @return The id.
+     * <code>required uint32 battery_level = 1;</code>
+     * @return The batteryLevel.
      */
     @java.lang.Override
-    public java.lang.String getId() {
-      java.lang.Object ref = id_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        if (bs.isValidUtf8()) {
-          id_ = s;
-        }
-        return s;
-      }
-    }
-    /**
-     * <code>required string id = 1;</code>
-     * @return The bytes for id.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getIdBytes() {
-      java.lang.Object ref = id_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        id_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
+    public int getBatteryLevel() {
+      return batteryLevel_;
     }
 
-    public static final int TEXT_FIELD_NUMBER = 2;
-    @SuppressWarnings("serial")
-    private volatile java.lang.Object text_ = "";
+    public static final int TIME_REMAINING_S_FIELD_NUMBER = 2;
+    private int timeRemainingS_ = 0;
     /**
-     * <code>optional string text = 2;</code>
-     * @return Whether the text field is set.
+     * <code>optional uint32 time_remaining_s = 2;</code>
+     * @return Whether the timeRemainingS field is set.
      */
     @java.lang.Override
-    public boolean hasText() {
+    public boolean hasTimeRemainingS() {
       return ((bitField0_ & 0x00000002) != 0);
     }
     /**
-     * <code>optional string text = 2;</code>
-     * @return The text.
+     * <code>optional uint32 time_remaining_s = 2;</code>
+     * @return The timeRemainingS.
      */
     @java.lang.Override
-    public java.lang.String getText() {
-      java.lang.Object ref = text_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        if (bs.isValidUtf8()) {
-          text_ = s;
-        }
-        return s;
-      }
-    }
-    /**
-     * <code>optional string text = 2;</code>
-     * @return The bytes for text.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getTextBytes() {
-      java.lang.Object ref = text_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        text_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
+    public int getTimeRemainingS() {
+      return timeRemainingS_;
     }
 
-    public static final int ICON_FIELD_NUMBER = 3;
-    @SuppressWarnings("serial")
-    private volatile java.lang.Object icon_ = "";
+    public static final int CRITICAL_BATTERY_FIELD_NUMBER = 3;
+    private boolean criticalBattery_ = false;
     /**
-     * <code>optional string icon = 3;</code>
-     * @return Whether the icon field is set.
+     * <code>optional bool critical_battery = 3;</code>
+     * @return Whether the criticalBattery field is set.
      */
     @java.lang.Override
-    public boolean hasIcon() {
+    public boolean hasCriticalBattery() {
       return ((bitField0_ & 0x00000004) != 0);
     }
     /**
-     * <code>optional string icon = 3;</code>
-     * @return The icon.
+     * <code>optional bool critical_battery = 3;</code>
+     * @return The criticalBattery.
      */
     @java.lang.Override
-    public java.lang.String getIcon() {
-      java.lang.Object ref = icon_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        if (bs.isValidUtf8()) {
-          icon_ = s;
-        }
-        return s;
-      }
-    }
-    /**
-     * <code>optional string icon = 3;</code>
-     * @return The bytes for icon.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getIconBytes() {
-      java.lang.Object ref = icon_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        icon_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
+    public boolean getCriticalBattery() {
+      return criticalBattery_;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -26956,7 +27680,7 @@ public final class Control {
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
-      if (!hasId()) {
+      if (!hasBatteryLevel()) {
         memoizedIsInitialized = 0;
         return false;
       }
@@ -26968,13 +27692,13 @@ public final class Control {
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       if (((bitField0_ & 0x00000001) != 0)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, id_);
+        output.writeUInt32(1, batteryLevel_);
       }
       if (((bitField0_ & 0x00000002) != 0)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, text_);
+        output.writeUInt32(2, timeRemainingS_);
       }
       if (((bitField0_ & 0x00000004) != 0)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, icon_);
+        output.writeBool(3, criticalBattery_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -26986,13 +27710,16 @@ public final class Control {
 
       size = 0;
       if (((bitField0_ & 0x00000001) != 0)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, id_);
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt32Size(1, batteryLevel_);
       }
       if (((bitField0_ & 0x00000002) != 0)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, text_);
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt32Size(2, timeRemainingS_);
       }
       if (((bitField0_ & 0x00000004) != 0)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, icon_);
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(3, criticalBattery_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
@@ -27004,25 +27731,25 @@ public final class Control {
       if (obj == this) {
        return true;
       }
-      if (!(obj instanceof com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationRequest)) {
+      if (!(obj instanceof com.andrerinas.headunitrevived.aap.protocol.proto.Control.BatteryStatusNotification)) {
         return super.equals(obj);
       }
-      com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationRequest other = (com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationRequest) obj;
+      com.andrerinas.headunitrevived.aap.protocol.proto.Control.BatteryStatusNotification other = (com.andrerinas.headunitrevived.aap.protocol.proto.Control.BatteryStatusNotification) obj;
 
-      if (hasId() != other.hasId()) return false;
-      if (hasId()) {
-        if (!getId()
-            .equals(other.getId())) return false;
+      if (hasBatteryLevel() != other.hasBatteryLevel()) return false;
+      if (hasBatteryLevel()) {
+        if (getBatteryLevel()
+            != other.getBatteryLevel()) return false;
       }
-      if (hasText() != other.hasText()) return false;
-      if (hasText()) {
-        if (!getText()
-            .equals(other.getText())) return false;
+      if (hasTimeRemainingS() != other.hasTimeRemainingS()) return false;
+      if (hasTimeRemainingS()) {
+        if (getTimeRemainingS()
+            != other.getTimeRemainingS()) return false;
       }
-      if (hasIcon() != other.hasIcon()) return false;
-      if (hasIcon()) {
-        if (!getIcon()
-            .equals(other.getIcon())) return false;
+      if (hasCriticalBattery() != other.hasCriticalBattery()) return false;
+      if (hasCriticalBattery()) {
+        if (getCriticalBattery()
+            != other.getCriticalBattery()) return false;
       }
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
@@ -27035,61 +27762,62 @@ public final class Control {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
-      if (hasId()) {
-        hash = (37 * hash) + ID_FIELD_NUMBER;
-        hash = (53 * hash) + getId().hashCode();
+      if (hasBatteryLevel()) {
+        hash = (37 * hash) + BATTERY_LEVEL_FIELD_NUMBER;
+        hash = (53 * hash) + getBatteryLevel();
       }
-      if (hasText()) {
-        hash = (37 * hash) + TEXT_FIELD_NUMBER;
-        hash = (53 * hash) + getText().hashCode();
+      if (hasTimeRemainingS()) {
+        hash = (37 * hash) + TIME_REMAINING_S_FIELD_NUMBER;
+        hash = (53 * hash) + getTimeRemainingS();
       }
-      if (hasIcon()) {
-        hash = (37 * hash) + ICON_FIELD_NUMBER;
-        hash = (53 * hash) + getIcon().hashCode();
+      if (hasCriticalBattery()) {
+        hash = (37 * hash) + CRITICAL_BATTERY_FIELD_NUMBER;
+        hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+            getCriticalBattery());
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
 
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationRequest parseFrom(
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.BatteryStatusNotification parseFrom(
         java.nio.ByteBuffer data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationRequest parseFrom(
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.BatteryStatusNotification parseFrom(
         java.nio.ByteBuffer data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationRequest parseFrom(
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.BatteryStatusNotification parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationRequest parseFrom(
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.BatteryStatusNotification parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationRequest parseFrom(byte[] data)
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.BatteryStatusNotification parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationRequest parseFrom(
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.BatteryStatusNotification parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationRequest parseFrom(java.io.InputStream input)
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.BatteryStatusNotification parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationRequest parseFrom(
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.BatteryStatusNotification parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -27097,26 +27825,26 @@ public final class Control {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationRequest parseDelimitedFrom(java.io.InputStream input)
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.BatteryStatusNotification parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
 
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationRequest parseDelimitedFrom(
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.BatteryStatusNotification parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationRequest parseFrom(
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.BatteryStatusNotification parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationRequest parseFrom(
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.BatteryStatusNotification parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -27129,7 +27857,7 @@ public final class Control {
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationRequest prototype) {
+    public static Builder newBuilder(com.andrerinas.headunitrevived.aap.protocol.proto.Control.BatteryStatusNotification prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
     @java.lang.Override
@@ -27145,26 +27873,26 @@ public final class Control {
       return builder;
     }
     /**
-     * Protobuf type {@code com.andrerinas.headunitrevived.aap.protocol.proto.GenericNotificationRequest}
+     * Protobuf type {@code com.andrerinas.headunitrevived.aap.protocol.proto.BatteryStatusNotification}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:com.andrerinas.headunitrevived.aap.protocol.proto.GenericNotificationRequest)
-        com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationRequestOrBuilder {
+        // @@protoc_insertion_point(builder_implements:com.andrerinas.headunitrevived.aap.protocol.proto.BatteryStatusNotification)
+        com.andrerinas.headunitrevived.aap.protocol.proto.Control.BatteryStatusNotificationOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_GenericNotificationRequest_descriptor;
+        return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_BatteryStatusNotification_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_GenericNotificationRequest_fieldAccessorTable
+        return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_BatteryStatusNotification_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationRequest.class, com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationRequest.Builder.class);
+                com.andrerinas.headunitrevived.aap.protocol.proto.Control.BatteryStatusNotification.class, com.andrerinas.headunitrevived.aap.protocol.proto.Control.BatteryStatusNotification.Builder.class);
       }
 
-      // Construct using com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationRequest.newBuilder()
+      // Construct using com.andrerinas.headunitrevived.aap.protocol.proto.Control.BatteryStatusNotification.newBuilder()
       private Builder() {
 
       }
@@ -27178,26 +27906,26 @@ public final class Control {
       public Builder clear() {
         super.clear();
         bitField0_ = 0;
-        id_ = "";
-        text_ = "";
-        icon_ = "";
+        batteryLevel_ = 0;
+        timeRemainingS_ = 0;
+        criticalBattery_ = false;
         return this;
       }
 
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_GenericNotificationRequest_descriptor;
+        return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_BatteryStatusNotification_descriptor;
       }
 
       @java.lang.Override
-      public com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationRequest getDefaultInstanceForType() {
-        return com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationRequest.getDefaultInstance();
+      public com.andrerinas.headunitrevived.aap.protocol.proto.Control.BatteryStatusNotification getDefaultInstanceForType() {
+        return com.andrerinas.headunitrevived.aap.protocol.proto.Control.BatteryStatusNotification.getDefaultInstance();
       }
 
       @java.lang.Override
-      public com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationRequest build() {
-        com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationRequest result = buildPartial();
+      public com.andrerinas.headunitrevived.aap.protocol.proto.Control.BatteryStatusNotification build() {
+        com.andrerinas.headunitrevived.aap.protocol.proto.Control.BatteryStatusNotification result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
@@ -27205,26 +27933,26 @@ public final class Control {
       }
 
       @java.lang.Override
-      public com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationRequest buildPartial() {
-        com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationRequest result = new com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationRequest(this);
+      public com.andrerinas.headunitrevived.aap.protocol.proto.Control.BatteryStatusNotification buildPartial() {
+        com.andrerinas.headunitrevived.aap.protocol.proto.Control.BatteryStatusNotification result = new com.andrerinas.headunitrevived.aap.protocol.proto.Control.BatteryStatusNotification(this);
         if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
       }
 
-      private void buildPartial0(com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationRequest result) {
+      private void buildPartial0(com.andrerinas.headunitrevived.aap.protocol.proto.Control.BatteryStatusNotification result) {
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
         if (((from_bitField0_ & 0x00000001) != 0)) {
-          result.id_ = id_;
+          result.batteryLevel_ = batteryLevel_;
           to_bitField0_ |= 0x00000001;
         }
         if (((from_bitField0_ & 0x00000002) != 0)) {
-          result.text_ = text_;
+          result.timeRemainingS_ = timeRemainingS_;
           to_bitField0_ |= 0x00000002;
         }
         if (((from_bitField0_ & 0x00000004) != 0)) {
-          result.icon_ = icon_;
+          result.criticalBattery_ = criticalBattery_;
           to_bitField0_ |= 0x00000004;
         }
         result.bitField0_ |= to_bitField0_;
@@ -27264,30 +27992,24 @@ public final class Control {
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationRequest) {
-          return mergeFrom((com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationRequest)other);
+        if (other instanceof com.andrerinas.headunitrevived.aap.protocol.proto.Control.BatteryStatusNotification) {
+          return mergeFrom((com.andrerinas.headunitrevived.aap.protocol.proto.Control.BatteryStatusNotification)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationRequest other) {
-        if (other == com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationRequest.getDefaultInstance()) return this;
-        if (other.hasId()) {
-          id_ = other.id_;
-          bitField0_ |= 0x00000001;
-          onChanged();
+      public Builder mergeFrom(com.andrerinas.headunitrevived.aap.protocol.proto.Control.BatteryStatusNotification other) {
+        if (other == com.andrerinas.headunitrevived.aap.protocol.proto.Control.BatteryStatusNotification.getDefaultInstance()) return this;
+        if (other.hasBatteryLevel()) {
+          setBatteryLevel(other.getBatteryLevel());
         }
-        if (other.hasText()) {
-          text_ = other.text_;
-          bitField0_ |= 0x00000002;
-          onChanged();
+        if (other.hasTimeRemainingS()) {
+          setTimeRemainingS(other.getTimeRemainingS());
         }
-        if (other.hasIcon()) {
-          icon_ = other.icon_;
-          bitField0_ |= 0x00000004;
-          onChanged();
+        if (other.hasCriticalBattery()) {
+          setCriticalBattery(other.getCriticalBattery());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
@@ -27296,7 +28018,7 @@ public final class Control {
 
       @java.lang.Override
       public final boolean isInitialized() {
-        if (!hasId()) {
+        if (!hasBatteryLevel()) {
           return false;
         }
         return true;
@@ -27318,21 +28040,21 @@ public final class Control {
               case 0:
                 done = true;
                 break;
-              case 10: {
-                id_ = input.readBytes();
+              case 8: {
+                batteryLevel_ = input.readUInt32();
                 bitField0_ |= 0x00000001;
                 break;
-              } // case 10
-              case 18: {
-                text_ = input.readBytes();
+              } // case 8
+              case 16: {
+                timeRemainingS_ = input.readUInt32();
                 bitField0_ |= 0x00000002;
                 break;
-              } // case 18
-              case 26: {
-                icon_ = input.readBytes();
+              } // case 16
+              case 24: {
+                criticalBattery_ = input.readBool();
                 bitField0_ |= 0x00000004;
                 break;
-              } // case 26
+              } // case 24
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -27350,242 +28072,122 @@ public final class Control {
       }
       private int bitField0_;
 
-      private java.lang.Object id_ = "";
+      private int batteryLevel_ ;
       /**
-       * <code>required string id = 1;</code>
-       * @return Whether the id field is set.
+       * <code>required uint32 battery_level = 1;</code>
+       * @return Whether the batteryLevel field is set.
        */
-      public boolean hasId() {
+      @java.lang.Override
+      public boolean hasBatteryLevel() {
         return ((bitField0_ & 0x00000001) != 0);
       }
       /**
-       * <code>required string id = 1;</code>
-       * @return The id.
+       * <code>required uint32 battery_level = 1;</code>
+       * @return The batteryLevel.
        */
-      public java.lang.String getId() {
-        java.lang.Object ref = id_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          if (bs.isValidUtf8()) {
-            id_ = s;
-          }
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
+      @java.lang.Override
+      public int getBatteryLevel() {
+        return batteryLevel_;
       }
       /**
-       * <code>required string id = 1;</code>
-       * @return The bytes for id.
-       */
-      public com.google.protobuf.ByteString
-          getIdBytes() {
-        java.lang.Object ref = id_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          id_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>required string id = 1;</code>
-       * @param value The id to set.
+       * <code>required uint32 battery_level = 1;</code>
+       * @param value The batteryLevel to set.
        * @return This builder for chaining.
        */
-      public Builder setId(
-          java.lang.String value) {
-        if (value == null) { throw new NullPointerException(); }
-        id_ = value;
+      public Builder setBatteryLevel(int value) {
+
+        batteryLevel_ = value;
         bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
       /**
-       * <code>required string id = 1;</code>
+       * <code>required uint32 battery_level = 1;</code>
        * @return This builder for chaining.
        */
-      public Builder clearId() {
-        id_ = getDefaultInstance().getId();
+      public Builder clearBatteryLevel() {
         bitField0_ = (bitField0_ & ~0x00000001);
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>required string id = 1;</code>
-       * @param value The bytes for id to set.
-       * @return This builder for chaining.
-       */
-      public Builder setIdBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) { throw new NullPointerException(); }
-        id_ = value;
-        bitField0_ |= 0x00000001;
+        batteryLevel_ = 0;
         onChanged();
         return this;
       }
 
-      private java.lang.Object text_ = "";
+      private int timeRemainingS_ ;
       /**
-       * <code>optional string text = 2;</code>
-       * @return Whether the text field is set.
+       * <code>optional uint32 time_remaining_s = 2;</code>
+       * @return Whether the timeRemainingS field is set.
        */
-      public boolean hasText() {
+      @java.lang.Override
+      public boolean hasTimeRemainingS() {
         return ((bitField0_ & 0x00000002) != 0);
       }
       /**
-       * <code>optional string text = 2;</code>
-       * @return The text.
+       * <code>optional uint32 time_remaining_s = 2;</code>
+       * @return The timeRemainingS.
        */
-      public java.lang.String getText() {
-        java.lang.Object ref = text_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          if (bs.isValidUtf8()) {
-            text_ = s;
-          }
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
+      @java.lang.Override
+      public int getTimeRemainingS() {
+        return timeRemainingS_;
       }
       /**
-       * <code>optional string text = 2;</code>
-       * @return The bytes for text.
-       */
-      public com.google.protobuf.ByteString
-          getTextBytes() {
-        java.lang.Object ref = text_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          text_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>optional string text = 2;</code>
-       * @param value The text to set.
+       * <code>optional uint32 time_remaining_s = 2;</code>
+       * @param value The timeRemainingS to set.
        * @return This builder for chaining.
        */
-      public Builder setText(
-          java.lang.String value) {
-        if (value == null) { throw new NullPointerException(); }
-        text_ = value;
+      public Builder setTimeRemainingS(int value) {
+
+        timeRemainingS_ = value;
         bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
       /**
-       * <code>optional string text = 2;</code>
+       * <code>optional uint32 time_remaining_s = 2;</code>
        * @return This builder for chaining.
        */
-      public Builder clearText() {
-        text_ = getDefaultInstance().getText();
+      public Builder clearTimeRemainingS() {
         bitField0_ = (bitField0_ & ~0x00000002);
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>optional string text = 2;</code>
-       * @param value The bytes for text to set.
-       * @return This builder for chaining.
-       */
-      public Builder setTextBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) { throw new NullPointerException(); }
-        text_ = value;
-        bitField0_ |= 0x00000002;
+        timeRemainingS_ = 0;
         onChanged();
         return this;
       }
 
-      private java.lang.Object icon_ = "";
+      private boolean criticalBattery_ ;
       /**
-       * <code>optional string icon = 3;</code>
-       * @return Whether the icon field is set.
+       * <code>optional bool critical_battery = 3;</code>
+       * @return Whether the criticalBattery field is set.
        */
-      public boolean hasIcon() {
+      @java.lang.Override
+      public boolean hasCriticalBattery() {
         return ((bitField0_ & 0x00000004) != 0);
       }
       /**
-       * <code>optional string icon = 3;</code>
-       * @return The icon.
+       * <code>optional bool critical_battery = 3;</code>
+       * @return The criticalBattery.
        */
-      public java.lang.String getIcon() {
-        java.lang.Object ref = icon_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          if (bs.isValidUtf8()) {
-            icon_ = s;
-          }
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
+      @java.lang.Override
+      public boolean getCriticalBattery() {
+        return criticalBattery_;
       }
       /**
-       * <code>optional string icon = 3;</code>
-       * @return The bytes for icon.
-       */
-      public com.google.protobuf.ByteString
-          getIconBytes() {
-        java.lang.Object ref = icon_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          icon_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>optional string icon = 3;</code>
-       * @param value The icon to set.
+       * <code>optional bool critical_battery = 3;</code>
+       * @param value The criticalBattery to set.
        * @return This builder for chaining.
        */
-      public Builder setIcon(
-          java.lang.String value) {
-        if (value == null) { throw new NullPointerException(); }
-        icon_ = value;
+      public Builder setCriticalBattery(boolean value) {
+
+        criticalBattery_ = value;
         bitField0_ |= 0x00000004;
         onChanged();
         return this;
       }
       /**
-       * <code>optional string icon = 3;</code>
+       * <code>optional bool critical_battery = 3;</code>
        * @return This builder for chaining.
        */
-      public Builder clearIcon() {
-        icon_ = getDefaultInstance().getIcon();
+      public Builder clearCriticalBattery() {
         bitField0_ = (bitField0_ & ~0x00000004);
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>optional string icon = 3;</code>
-       * @param value The bytes for icon to set.
-       * @return This builder for chaining.
-       */
-      public Builder setIconBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) { throw new NullPointerException(); }
-        icon_ = value;
-        bitField0_ |= 0x00000004;
+        criticalBattery_ = false;
         onChanged();
         return this;
       }
@@ -27602,23 +28204,23 @@ public final class Control {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:com.andrerinas.headunitrevived.aap.protocol.proto.GenericNotificationRequest)
+      // @@protoc_insertion_point(builder_scope:com.andrerinas.headunitrevived.aap.protocol.proto.BatteryStatusNotification)
     }
 
-    // @@protoc_insertion_point(class_scope:com.andrerinas.headunitrevived.aap.protocol.proto.GenericNotificationRequest)
-    private static final com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationRequest DEFAULT_INSTANCE;
+    // @@protoc_insertion_point(class_scope:com.andrerinas.headunitrevived.aap.protocol.proto.BatteryStatusNotification)
+    private static final com.andrerinas.headunitrevived.aap.protocol.proto.Control.BatteryStatusNotification DEFAULT_INSTANCE;
     static {
-      DEFAULT_INSTANCE = new com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationRequest();
+      DEFAULT_INSTANCE = new com.andrerinas.headunitrevived.aap.protocol.proto.Control.BatteryStatusNotification();
     }
 
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationRequest getDefaultInstance() {
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.BatteryStatusNotification getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
-    @java.lang.Deprecated public static final com.google.protobuf.Parser<GenericNotificationRequest>
-        PARSER = new com.google.protobuf.AbstractParser<GenericNotificationRequest>() {
+    @java.lang.Deprecated public static final com.google.protobuf.Parser<BatteryStatusNotification>
+        PARSER = new com.google.protobuf.AbstractParser<BatteryStatusNotification>() {
       @java.lang.Override
-      public GenericNotificationRequest parsePartialFrom(
+      public BatteryStatusNotification parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -27637,109 +28239,109 @@ public final class Control {
       }
     };
 
-    public static com.google.protobuf.Parser<GenericNotificationRequest> parser() {
+    public static com.google.protobuf.Parser<BatteryStatusNotification> parser() {
       return PARSER;
     }
 
     @java.lang.Override
-    public com.google.protobuf.Parser<GenericNotificationRequest> getParserForType() {
+    public com.google.protobuf.Parser<BatteryStatusNotification> getParserForType() {
       return PARSER;
     }
 
     @java.lang.Override
-    public com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationRequest getDefaultInstanceForType() {
+    public com.andrerinas.headunitrevived.aap.protocol.proto.Control.BatteryStatusNotification getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
   }
 
-  public interface GenericNotificationOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:com.andrerinas.headunitrevived.aap.protocol.proto.GenericNotification)
+  public interface ConnectedDeviceOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:com.andrerinas.headunitrevived.aap.protocol.proto.ConnectedDevice)
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>required string id = 1;</code>
-     * @return Whether the id field is set.
+     * <code>optional string device_name = 1;</code>
+     * @return Whether the deviceName field is set.
      */
-    boolean hasId();
+    boolean hasDeviceName();
     /**
-     * <code>required string id = 1;</code>
-     * @return The id.
+     * <code>optional string device_name = 1;</code>
+     * @return The deviceName.
      */
-    java.lang.String getId();
+    java.lang.String getDeviceName();
     /**
-     * <code>required string id = 1;</code>
-     * @return The bytes for id.
+     * <code>optional string device_name = 1;</code>
+     * @return The bytes for deviceName.
      */
     com.google.protobuf.ByteString
-        getIdBytes();
+        getDeviceNameBytes();
 
     /**
-     * <code>required bool handled = 2;</code>
-     * @return Whether the handled field is set.
+     * <code>optional int32 device_id = 2;</code>
+     * @return Whether the deviceId field is set.
      */
-    boolean hasHandled();
+    boolean hasDeviceId();
     /**
-     * <code>required bool handled = 2;</code>
-     * @return The handled.
+     * <code>optional int32 device_id = 2;</code>
+     * @return The deviceId.
      */
-    boolean getHandled();
+    int getDeviceId();
   }
   /**
-   * Protobuf type {@code com.andrerinas.headunitrevived.aap.protocol.proto.GenericNotification}
+   * Protobuf type {@code com.andrerinas.headunitrevived.aap.protocol.proto.ConnectedDevice}
    */
-  public static final class GenericNotification extends
+  public static final class ConnectedDevice extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:com.andrerinas.headunitrevived.aap.protocol.proto.GenericNotification)
-      GenericNotificationOrBuilder {
+      // @@protoc_insertion_point(message_implements:com.andrerinas.headunitrevived.aap.protocol.proto.ConnectedDevice)
+      ConnectedDeviceOrBuilder {
   private static final long serialVersionUID = 0L;
-    // Use GenericNotification.newBuilder() to construct.
-    private GenericNotification(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+    // Use ConnectedDevice.newBuilder() to construct.
+    private ConnectedDevice(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
     }
-    private GenericNotification() {
-      id_ = "";
+    private ConnectedDevice() {
+      deviceName_ = "";
     }
 
     @java.lang.Override
     @SuppressWarnings({"unused"})
     protected java.lang.Object newInstance(
         UnusedPrivateParameter unused) {
-      return new GenericNotification();
+      return new ConnectedDevice();
     }
 
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_GenericNotification_descriptor;
+      return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_ConnectedDevice_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_GenericNotification_fieldAccessorTable
+      return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_ConnectedDevice_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotification.class, com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotification.Builder.class);
+              com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice.class, com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice.Builder.class);
     }
 
     private int bitField0_;
-    public static final int ID_FIELD_NUMBER = 1;
+    public static final int DEVICE_NAME_FIELD_NUMBER = 1;
     @SuppressWarnings("serial")
-    private volatile java.lang.Object id_ = "";
+    private volatile java.lang.Object deviceName_ = "";
     /**
-     * <code>required string id = 1;</code>
-     * @return Whether the id field is set.
+     * <code>optional string device_name = 1;</code>
+     * @return Whether the deviceName field is set.
      */
     @java.lang.Override
-    public boolean hasId() {
+    public boolean hasDeviceName() {
       return ((bitField0_ & 0x00000001) != 0);
     }
     /**
-     * <code>required string id = 1;</code>
-     * @return The id.
+     * <code>optional string device_name = 1;</code>
+     * @return The deviceName.
      */
     @java.lang.Override
-    public java.lang.String getId() {
-      java.lang.Object ref = id_;
+    public java.lang.String getDeviceName() {
+      java.lang.Object ref = deviceName_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
@@ -27747,47 +28349,47 @@ public final class Control {
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
-          id_ = s;
+          deviceName_ = s;
         }
         return s;
       }
     }
     /**
-     * <code>required string id = 1;</code>
-     * @return The bytes for id.
+     * <code>optional string device_name = 1;</code>
+     * @return The bytes for deviceName.
      */
     @java.lang.Override
     public com.google.protobuf.ByteString
-        getIdBytes() {
-      java.lang.Object ref = id_;
+        getDeviceNameBytes() {
+      java.lang.Object ref = deviceName_;
       if (ref instanceof java.lang.String) {
         com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
-        id_ = b;
+        deviceName_ = b;
         return b;
       } else {
         return (com.google.protobuf.ByteString) ref;
       }
     }
 
-    public static final int HANDLED_FIELD_NUMBER = 2;
-    private boolean handled_ = false;
+    public static final int DEVICE_ID_FIELD_NUMBER = 2;
+    private int deviceId_ = 0;
     /**
-     * <code>required bool handled = 2;</code>
-     * @return Whether the handled field is set.
+     * <code>optional int32 device_id = 2;</code>
+     * @return Whether the deviceId field is set.
      */
     @java.lang.Override
-    public boolean hasHandled() {
+    public boolean hasDeviceId() {
       return ((bitField0_ & 0x00000002) != 0);
     }
     /**
-     * <code>required bool handled = 2;</code>
-     * @return The handled.
+     * <code>optional int32 device_id = 2;</code>
+     * @return The deviceId.
      */
     @java.lang.Override
-    public boolean getHandled() {
-      return handled_;
+    public int getDeviceId() {
+      return deviceId_;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -27797,14 +28399,6 @@ public final class Control {
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
-      if (!hasId()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
-      if (!hasHandled()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
       memoizedIsInitialized = 1;
       return true;
     }
@@ -27813,10 +28407,10 @@ public final class Control {
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       if (((bitField0_ & 0x00000001) != 0)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, id_);
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, deviceName_);
       }
       if (((bitField0_ & 0x00000002) != 0)) {
-        output.writeBool(2, handled_);
+        output.writeInt32(2, deviceId_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -27828,11 +28422,11 @@ public final class Control {
 
       size = 0;
       if (((bitField0_ & 0x00000001) != 0)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, id_);
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, deviceName_);
       }
       if (((bitField0_ & 0x00000002) != 0)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBoolSize(2, handled_);
+          .computeInt32Size(2, deviceId_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
@@ -27844,20 +28438,20 @@ public final class Control {
       if (obj == this) {
        return true;
       }
-      if (!(obj instanceof com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotification)) {
+      if (!(obj instanceof com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice)) {
         return super.equals(obj);
       }
-      com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotification other = (com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotification) obj;
+      com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice other = (com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice) obj;
 
-      if (hasId() != other.hasId()) return false;
-      if (hasId()) {
-        if (!getId()
-            .equals(other.getId())) return false;
+      if (hasDeviceName() != other.hasDeviceName()) return false;
+      if (hasDeviceName()) {
+        if (!getDeviceName()
+            .equals(other.getDeviceName())) return false;
       }
-      if (hasHandled() != other.hasHandled()) return false;
-      if (hasHandled()) {
-        if (getHandled()
-            != other.getHandled()) return false;
+      if (hasDeviceId() != other.hasDeviceId()) return false;
+      if (hasDeviceId()) {
+        if (getDeviceId()
+            != other.getDeviceId()) return false;
       }
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
@@ -27870,58 +28464,57 @@ public final class Control {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
-      if (hasId()) {
-        hash = (37 * hash) + ID_FIELD_NUMBER;
-        hash = (53 * hash) + getId().hashCode();
+      if (hasDeviceName()) {
+        hash = (37 * hash) + DEVICE_NAME_FIELD_NUMBER;
+        hash = (53 * hash) + getDeviceName().hashCode();
       }
-      if (hasHandled()) {
-        hash = (37 * hash) + HANDLED_FIELD_NUMBER;
-        hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
-            getHandled());
+      if (hasDeviceId()) {
+        hash = (37 * hash) + DEVICE_ID_FIELD_NUMBER;
+        hash = (53 * hash) + getDeviceId();
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
 
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotification parseFrom(
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice parseFrom(
         java.nio.ByteBuffer data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotification parseFrom(
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice parseFrom(
         java.nio.ByteBuffer data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotification parseFrom(
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotification parseFrom(
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotification parseFrom(byte[] data)
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotification parseFrom(
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotification parseFrom(java.io.InputStream input)
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotification parseFrom(
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -27929,26 +28522,26 @@ public final class Control {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotification parseDelimitedFrom(java.io.InputStream input)
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
 
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotification parseDelimitedFrom(
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotification parseFrom(
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotification parseFrom(
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -27961,7 +28554,7 @@ public final class Control {
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotification prototype) {
+    public static Builder newBuilder(com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
     @java.lang.Override
@@ -27977,26 +28570,26 @@ public final class Control {
       return builder;
     }
     /**
-     * Protobuf type {@code com.andrerinas.headunitrevived.aap.protocol.proto.GenericNotification}
+     * Protobuf type {@code com.andrerinas.headunitrevived.aap.protocol.proto.ConnectedDevice}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:com.andrerinas.headunitrevived.aap.protocol.proto.GenericNotification)
-        com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationOrBuilder {
+        // @@protoc_insertion_point(builder_implements:com.andrerinas.headunitrevived.aap.protocol.proto.ConnectedDevice)
+        com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDeviceOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_GenericNotification_descriptor;
+        return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_ConnectedDevice_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_GenericNotification_fieldAccessorTable
+        return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_ConnectedDevice_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotification.class, com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotification.Builder.class);
+                com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice.class, com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice.Builder.class);
       }
 
-      // Construct using com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotification.newBuilder()
+      // Construct using com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice.newBuilder()
       private Builder() {
 
       }
@@ -28010,25 +28603,25 @@ public final class Control {
       public Builder clear() {
         super.clear();
         bitField0_ = 0;
-        id_ = "";
-        handled_ = false;
+        deviceName_ = "";
+        deviceId_ = 0;
         return this;
       }
 
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_GenericNotification_descriptor;
+        return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_ConnectedDevice_descriptor;
       }
 
       @java.lang.Override
-      public com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotification getDefaultInstanceForType() {
-        return com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotification.getDefaultInstance();
+      public com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice getDefaultInstanceForType() {
+        return com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice.getDefaultInstance();
       }
 
       @java.lang.Override
-      public com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotification build() {
-        com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotification result = buildPartial();
+      public com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice build() {
+        com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
@@ -28036,22 +28629,22 @@ public final class Control {
       }
 
       @java.lang.Override
-      public com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotification buildPartial() {
-        com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotification result = new com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotification(this);
+      public com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice buildPartial() {
+        com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice result = new com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice(this);
         if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
       }
 
-      private void buildPartial0(com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotification result) {
+      private void buildPartial0(com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice result) {
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
         if (((from_bitField0_ & 0x00000001) != 0)) {
-          result.id_ = id_;
+          result.deviceName_ = deviceName_;
           to_bitField0_ |= 0x00000001;
         }
         if (((from_bitField0_ & 0x00000002) != 0)) {
-          result.handled_ = handled_;
+          result.deviceId_ = deviceId_;
           to_bitField0_ |= 0x00000002;
         }
         result.bitField0_ |= to_bitField0_;
@@ -28091,23 +28684,23 @@ public final class Control {
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotification) {
-          return mergeFrom((com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotification)other);
+        if (other instanceof com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice) {
+          return mergeFrom((com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotification other) {
-        if (other == com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotification.getDefaultInstance()) return this;
-        if (other.hasId()) {
-          id_ = other.id_;
+      public Builder mergeFrom(com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice other) {
+        if (other == com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice.getDefaultInstance()) return this;
+        if (other.hasDeviceName()) {
+          deviceName_ = other.deviceName_;
           bitField0_ |= 0x00000001;
           onChanged();
         }
-        if (other.hasHandled()) {
-          setHandled(other.getHandled());
+        if (other.hasDeviceId()) {
+          setDeviceId(other.getDeviceId());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
@@ -28116,12 +28709,6 @@ public final class Control {
 
       @java.lang.Override
       public final boolean isInitialized() {
-        if (!hasId()) {
-          return false;
-        }
-        if (!hasHandled()) {
-          return false;
-        }
         return true;
       }
 
@@ -28142,12 +28729,12 @@ public final class Control {
                 done = true;
                 break;
               case 10: {
-                id_ = input.readBytes();
+                deviceName_ = input.readBytes();
                 bitField0_ |= 0x00000001;
                 break;
               } // case 10
               case 16: {
-                handled_ = input.readBool();
+                deviceId_ = input.readInt32();
                 bitField0_ |= 0x00000002;
                 break;
               } // case 16
@@ -28168,26 +28755,26 @@ public final class Control {
       }
       private int bitField0_;
 
-      private java.lang.Object id_ = "";
+      private java.lang.Object deviceName_ = "";
       /**
-       * <code>required string id = 1;</code>
-       * @return Whether the id field is set.
+       * <code>optional string device_name = 1;</code>
+       * @return Whether the deviceName field is set.
        */
-      public boolean hasId() {
+      public boolean hasDeviceName() {
         return ((bitField0_ & 0x00000001) != 0);
       }
       /**
-       * <code>required string id = 1;</code>
-       * @return The id.
+       * <code>optional string device_name = 1;</code>
+       * @return The deviceName.
        */
-      public java.lang.String getId() {
-        java.lang.Object ref = id_;
+      public java.lang.String getDeviceName() {
+        java.lang.Object ref = deviceName_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
           java.lang.String s = bs.toStringUtf8();
           if (bs.isValidUtf8()) {
-            id_ = s;
+            deviceName_ = s;
           }
           return s;
         } else {
@@ -28195,95 +28782,95 @@ public final class Control {
         }
       }
       /**
-       * <code>required string id = 1;</code>
-       * @return The bytes for id.
+       * <code>optional string device_name = 1;</code>
+       * @return The bytes for deviceName.
        */
       public com.google.protobuf.ByteString
-          getIdBytes() {
-        java.lang.Object ref = id_;
+          getDeviceNameBytes() {
+        java.lang.Object ref = deviceName_;
         if (ref instanceof String) {
           com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
-          id_ = b;
+          deviceName_ = b;
           return b;
         } else {
           return (com.google.protobuf.ByteString) ref;
         }
       }
       /**
-       * <code>required string id = 1;</code>
-       * @param value The id to set.
+       * <code>optional string device_name = 1;</code>
+       * @param value The deviceName to set.
        * @return This builder for chaining.
        */
-      public Builder setId(
+      public Builder setDeviceName(
           java.lang.String value) {
         if (value == null) { throw new NullPointerException(); }
-        id_ = value;
+        deviceName_ = value;
         bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
       /**
-       * <code>required string id = 1;</code>
+       * <code>optional string device_name = 1;</code>
        * @return This builder for chaining.
        */
-      public Builder clearId() {
-        id_ = getDefaultInstance().getId();
+      public Builder clearDeviceName() {
+        deviceName_ = getDefaultInstance().getDeviceName();
         bitField0_ = (bitField0_ & ~0x00000001);
         onChanged();
         return this;
       }
       /**
-       * <code>required string id = 1;</code>
-       * @param value The bytes for id to set.
+       * <code>optional string device_name = 1;</code>
+       * @param value The bytes for deviceName to set.
        * @return This builder for chaining.
        */
-      public Builder setIdBytes(
+      public Builder setDeviceNameBytes(
           com.google.protobuf.ByteString value) {
         if (value == null) { throw new NullPointerException(); }
-        id_ = value;
+        deviceName_ = value;
         bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
 
-      private boolean handled_ ;
+      private int deviceId_ ;
       /**
-       * <code>required bool handled = 2;</code>
-       * @return Whether the handled field is set.
+       * <code>optional int32 device_id = 2;</code>
+       * @return Whether the deviceId field is set.
        */
       @java.lang.Override
-      public boolean hasHandled() {
+      public boolean hasDeviceId() {
         return ((bitField0_ & 0x00000002) != 0);
       }
       /**
-       * <code>required bool handled = 2;</code>
-       * @return The handled.
+       * <code>optional int32 device_id = 2;</code>
+       * @return The deviceId.
        */
       @java.lang.Override
-      public boolean getHandled() {
-        return handled_;
+      public int getDeviceId() {
+        return deviceId_;
       }
       /**
-       * <code>required bool handled = 2;</code>
-       * @param value The handled to set.
+       * <code>optional int32 device_id = 2;</code>
+       * @param value The deviceId to set.
        * @return This builder for chaining.
        */
-      public Builder setHandled(boolean value) {
+      public Builder setDeviceId(int value) {
 
-        handled_ = value;
+        deviceId_ = value;
         bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
       /**
-       * <code>required bool handled = 2;</code>
+       * <code>optional int32 device_id = 2;</code>
        * @return This builder for chaining.
        */
-      public Builder clearHandled() {
+      public Builder clearDeviceId() {
         bitField0_ = (bitField0_ & ~0x00000002);
-        handled_ = false;
+        deviceId_ = 0;
         onChanged();
         return this;
       }
@@ -28300,23 +28887,23 @@ public final class Control {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:com.andrerinas.headunitrevived.aap.protocol.proto.GenericNotification)
+      // @@protoc_insertion_point(builder_scope:com.andrerinas.headunitrevived.aap.protocol.proto.ConnectedDevice)
     }
 
-    // @@protoc_insertion_point(class_scope:com.andrerinas.headunitrevived.aap.protocol.proto.GenericNotification)
-    private static final com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotification DEFAULT_INSTANCE;
+    // @@protoc_insertion_point(class_scope:com.andrerinas.headunitrevived.aap.protocol.proto.ConnectedDevice)
+    private static final com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice DEFAULT_INSTANCE;
     static {
-      DEFAULT_INSTANCE = new com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotification();
+      DEFAULT_INSTANCE = new com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice();
     }
 
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotification getDefaultInstance() {
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
-    @java.lang.Deprecated public static final com.google.protobuf.Parser<GenericNotification>
-        PARSER = new com.google.protobuf.AbstractParser<GenericNotification>() {
+    @java.lang.Deprecated public static final com.google.protobuf.Parser<ConnectedDevice>
+        PARSER = new com.google.protobuf.AbstractParser<ConnectedDevice>() {
       @java.lang.Override
-      public GenericNotification parsePartialFrom(
+      public ConnectedDevice parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -28335,951 +28922,187 @@ public final class Control {
       }
     };
 
-    public static com.google.protobuf.Parser<GenericNotification> parser() {
+    public static com.google.protobuf.Parser<ConnectedDevice> parser() {
       return PARSER;
     }
 
     @java.lang.Override
-    public com.google.protobuf.Parser<GenericNotification> getParserForType() {
+    public com.google.protobuf.Parser<ConnectedDevice> getParserForType() {
       return PARSER;
     }
 
     @java.lang.Override
-    public com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotification getDefaultInstanceForType() {
+    public com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
   }
 
-  public interface GenericNotificationsStartOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:com.andrerinas.headunitrevived.aap.protocol.proto.GenericNotificationsStart)
+  public interface CarConnectedDevicesOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:com.andrerinas.headunitrevived.aap.protocol.proto.CarConnectedDevices)
       com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>repeated .com.andrerinas.headunitrevived.aap.protocol.proto.ConnectedDevice connected_devices = 1;</code>
+     */
+    java.util.List<com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice> 
+        getConnectedDevicesList();
+    /**
+     * <code>repeated .com.andrerinas.headunitrevived.aap.protocol.proto.ConnectedDevice connected_devices = 1;</code>
+     */
+    com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice getConnectedDevices(int index);
+    /**
+     * <code>repeated .com.andrerinas.headunitrevived.aap.protocol.proto.ConnectedDevice connected_devices = 1;</code>
+     */
+    int getConnectedDevicesCount();
+    /**
+     * <code>repeated .com.andrerinas.headunitrevived.aap.protocol.proto.ConnectedDevice connected_devices = 1;</code>
+     */
+    java.util.List<? extends com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDeviceOrBuilder> 
+        getConnectedDevicesOrBuilderList();
+    /**
+     * <code>repeated .com.andrerinas.headunitrevived.aap.protocol.proto.ConnectedDevice connected_devices = 1;</code>
+     */
+    com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDeviceOrBuilder getConnectedDevicesOrBuilder(
+        int index);
+
+    /**
+     * <code>optional bool unsolicited = 2;</code>
+     * @return Whether the unsolicited field is set.
+     */
+    boolean hasUnsolicited();
+    /**
+     * <code>optional bool unsolicited = 2;</code>
+     * @return The unsolicited.
+     */
+    boolean getUnsolicited();
+
+    /**
+     * <code>optional bool final_list = 3 [default = true];</code>
+     * @return Whether the finalList field is set.
+     */
+    boolean hasFinalList();
+    /**
+     * <code>optional bool final_list = 3 [default = true];</code>
+     * @return The finalList.
+     */
+    boolean getFinalList();
   }
   /**
-   * Protobuf type {@code com.andrerinas.headunitrevived.aap.protocol.proto.GenericNotificationsStart}
+   * Protobuf type {@code com.andrerinas.headunitrevived.aap.protocol.proto.CarConnectedDevices}
    */
-  public static final class GenericNotificationsStart extends
+  public static final class CarConnectedDevices extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:com.andrerinas.headunitrevived.aap.protocol.proto.GenericNotificationsStart)
-      GenericNotificationsStartOrBuilder {
+      // @@protoc_insertion_point(message_implements:com.andrerinas.headunitrevived.aap.protocol.proto.CarConnectedDevices)
+      CarConnectedDevicesOrBuilder {
   private static final long serialVersionUID = 0L;
-    // Use GenericNotificationsStart.newBuilder() to construct.
-    private GenericNotificationsStart(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+    // Use CarConnectedDevices.newBuilder() to construct.
+    private CarConnectedDevices(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
     }
-    private GenericNotificationsStart() {
+    private CarConnectedDevices() {
+      connectedDevices_ = java.util.Collections.emptyList();
+      finalList_ = true;
     }
 
     @java.lang.Override
     @SuppressWarnings({"unused"})
     protected java.lang.Object newInstance(
         UnusedPrivateParameter unused) {
-      return new GenericNotificationsStart();
+      return new CarConnectedDevices();
     }
 
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_GenericNotificationsStart_descriptor;
+      return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_CarConnectedDevices_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_GenericNotificationsStart_fieldAccessorTable
+      return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_CarConnectedDevices_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStart.class, com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStart.Builder.class);
-    }
-
-    private byte memoizedIsInitialized = -1;
-    @java.lang.Override
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
-
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    @java.lang.Override
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      getUnknownFields().writeTo(output);
-    }
-
-    @java.lang.Override
-    public int getSerializedSize() {
-      int size = memoizedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      size += getUnknownFields().getSerializedSize();
-      memoizedSize = size;
-      return size;
-    }
-
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStart)) {
-        return super.equals(obj);
-      }
-      com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStart other = (com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStart) obj;
-
-      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
-      return true;
-    }
-
-    @java.lang.Override
-    public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
-      int hash = 41;
-      hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (29 * hash) + getUnknownFields().hashCode();
-      memoizedHashCode = hash;
-      return hash;
-    }
-
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStart parseFrom(
-        java.nio.ByteBuffer data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStart parseFrom(
-        java.nio.ByteBuffer data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStart parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStart parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStart parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStart parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStart parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStart parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStart parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
-    }
-
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStart parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStart parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStart parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    @java.lang.Override
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder() {
-      return DEFAULT_INSTANCE.toBuilder();
-    }
-    public static Builder newBuilder(com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStart prototype) {
-      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
-    }
-    @java.lang.Override
-    public Builder toBuilder() {
-      return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
-    }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * Protobuf type {@code com.andrerinas.headunitrevived.aap.protocol.proto.GenericNotificationsStart}
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:com.andrerinas.headunitrevived.aap.protocol.proto.GenericNotificationsStart)
-        com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStartOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_GenericNotificationsStart_descriptor;
-      }
-
-      @java.lang.Override
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_GenericNotificationsStart_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStart.class, com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStart.Builder.class);
-      }
-
-      // Construct using com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStart.newBuilder()
-      private Builder() {
-
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-        super(parent);
-
-      }
-      @java.lang.Override
-      public Builder clear() {
-        super.clear();
-        return this;
-      }
-
-      @java.lang.Override
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_GenericNotificationsStart_descriptor;
-      }
-
-      @java.lang.Override
-      public com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStart getDefaultInstanceForType() {
-        return com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStart.getDefaultInstance();
-      }
-
-      @java.lang.Override
-      public com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStart build() {
-        com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStart result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return result;
-      }
-
-      @java.lang.Override
-      public com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStart buildPartial() {
-        com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStart result = new com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStart(this);
-        onBuilt();
-        return result;
-      }
-
-      @java.lang.Override
-      public Builder clone() {
-        return super.clone();
-      }
-      @java.lang.Override
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.setField(field, value);
-      }
-      @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
-      }
-      @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
-      }
-      @java.lang.Override
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
-      }
-      @java.lang.Override
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.addRepeatedField(field, value);
-      }
-      @java.lang.Override
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStart) {
-          return mergeFrom((com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStart)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-
-      public Builder mergeFrom(com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStart other) {
-        if (other == com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStart.getDefaultInstance()) return this;
-        this.mergeUnknownFields(other.getUnknownFields());
-        onChanged();
-        return this;
-      }
-
-      @java.lang.Override
-      public final boolean isInitialized() {
-        return true;
-      }
-
-      @java.lang.Override
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        if (extensionRegistry == null) {
-          throw new java.lang.NullPointerException();
-        }
-        try {
-          boolean done = false;
-          while (!done) {
-            int tag = input.readTag();
-            switch (tag) {
-              case 0:
-                done = true;
-                break;
-              default: {
-                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
-                  done = true; // was an endgroup tag
-                }
-                break;
-              } // default:
-            } // switch (tag)
-          } // while (!done)
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          throw e.unwrapIOException();
-        } finally {
-          onChanged();
-        } // finally
-        return this;
-      }
-      @java.lang.Override
-      public final Builder setUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFields(unknownFields);
-      }
-
-      @java.lang.Override
-      public final Builder mergeUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.mergeUnknownFields(unknownFields);
-      }
-
-
-      // @@protoc_insertion_point(builder_scope:com.andrerinas.headunitrevived.aap.protocol.proto.GenericNotificationsStart)
-    }
-
-    // @@protoc_insertion_point(class_scope:com.andrerinas.headunitrevived.aap.protocol.proto.GenericNotificationsStart)
-    private static final com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStart DEFAULT_INSTANCE;
-    static {
-      DEFAULT_INSTANCE = new com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStart();
-    }
-
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStart getDefaultInstance() {
-      return DEFAULT_INSTANCE;
-    }
-
-    @java.lang.Deprecated public static final com.google.protobuf.Parser<GenericNotificationsStart>
-        PARSER = new com.google.protobuf.AbstractParser<GenericNotificationsStart>() {
-      @java.lang.Override
-      public GenericNotificationsStart parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        Builder builder = newBuilder();
-        try {
-          builder.mergeFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          throw e.setUnfinishedMessage(builder.buildPartial());
-        } catch (com.google.protobuf.UninitializedMessageException e) {
-          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
-        } catch (java.io.IOException e) {
-          throw new com.google.protobuf.InvalidProtocolBufferException(e)
-              .setUnfinishedMessage(builder.buildPartial());
-        }
-        return builder.buildPartial();
-      }
-    };
-
-    public static com.google.protobuf.Parser<GenericNotificationsStart> parser() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<GenericNotificationsStart> getParserForType() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStart getDefaultInstanceForType() {
-      return DEFAULT_INSTANCE;
-    }
-
-  }
-
-  public interface GenericNotificationsStopOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:com.andrerinas.headunitrevived.aap.protocol.proto.GenericNotificationsStop)
-      com.google.protobuf.MessageOrBuilder {
-  }
-  /**
-   * Protobuf type {@code com.andrerinas.headunitrevived.aap.protocol.proto.GenericNotificationsStop}
-   */
-  public static final class GenericNotificationsStop extends
-      com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:com.andrerinas.headunitrevived.aap.protocol.proto.GenericNotificationsStop)
-      GenericNotificationsStopOrBuilder {
-  private static final long serialVersionUID = 0L;
-    // Use GenericNotificationsStop.newBuilder() to construct.
-    private GenericNotificationsStop(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
-      super(builder);
-    }
-    private GenericNotificationsStop() {
-    }
-
-    @java.lang.Override
-    @SuppressWarnings({"unused"})
-    protected java.lang.Object newInstance(
-        UnusedPrivateParameter unused) {
-      return new GenericNotificationsStop();
-    }
-
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_GenericNotificationsStop_descriptor;
-    }
-
-    @java.lang.Override
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_GenericNotificationsStop_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStop.class, com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStop.Builder.class);
-    }
-
-    private byte memoizedIsInitialized = -1;
-    @java.lang.Override
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
-
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    @java.lang.Override
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      getUnknownFields().writeTo(output);
-    }
-
-    @java.lang.Override
-    public int getSerializedSize() {
-      int size = memoizedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      size += getUnknownFields().getSerializedSize();
-      memoizedSize = size;
-      return size;
-    }
-
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStop)) {
-        return super.equals(obj);
-      }
-      com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStop other = (com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStop) obj;
-
-      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
-      return true;
-    }
-
-    @java.lang.Override
-    public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
-      int hash = 41;
-      hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (29 * hash) + getUnknownFields().hashCode();
-      memoizedHashCode = hash;
-      return hash;
-    }
-
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStop parseFrom(
-        java.nio.ByteBuffer data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStop parseFrom(
-        java.nio.ByteBuffer data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStop parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStop parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStop parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStop parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStop parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStop parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStop parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
-    }
-
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStop parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStop parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStop parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    @java.lang.Override
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder() {
-      return DEFAULT_INSTANCE.toBuilder();
-    }
-    public static Builder newBuilder(com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStop prototype) {
-      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
-    }
-    @java.lang.Override
-    public Builder toBuilder() {
-      return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
-    }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * Protobuf type {@code com.andrerinas.headunitrevived.aap.protocol.proto.GenericNotificationsStop}
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:com.andrerinas.headunitrevived.aap.protocol.proto.GenericNotificationsStop)
-        com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStopOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_GenericNotificationsStop_descriptor;
-      }
-
-      @java.lang.Override
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_GenericNotificationsStop_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStop.class, com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStop.Builder.class);
-      }
-
-      // Construct using com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStop.newBuilder()
-      private Builder() {
-
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-        super(parent);
-
-      }
-      @java.lang.Override
-      public Builder clear() {
-        super.clear();
-        return this;
-      }
-
-      @java.lang.Override
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_GenericNotificationsStop_descriptor;
-      }
-
-      @java.lang.Override
-      public com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStop getDefaultInstanceForType() {
-        return com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStop.getDefaultInstance();
-      }
-
-      @java.lang.Override
-      public com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStop build() {
-        com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStop result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return result;
-      }
-
-      @java.lang.Override
-      public com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStop buildPartial() {
-        com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStop result = new com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStop(this);
-        onBuilt();
-        return result;
-      }
-
-      @java.lang.Override
-      public Builder clone() {
-        return super.clone();
-      }
-      @java.lang.Override
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.setField(field, value);
-      }
-      @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
-      }
-      @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
-      }
-      @java.lang.Override
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
-      }
-      @java.lang.Override
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.addRepeatedField(field, value);
-      }
-      @java.lang.Override
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStop) {
-          return mergeFrom((com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStop)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-
-      public Builder mergeFrom(com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStop other) {
-        if (other == com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStop.getDefaultInstance()) return this;
-        this.mergeUnknownFields(other.getUnknownFields());
-        onChanged();
-        return this;
-      }
-
-      @java.lang.Override
-      public final boolean isInitialized() {
-        return true;
-      }
-
-      @java.lang.Override
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        if (extensionRegistry == null) {
-          throw new java.lang.NullPointerException();
-        }
-        try {
-          boolean done = false;
-          while (!done) {
-            int tag = input.readTag();
-            switch (tag) {
-              case 0:
-                done = true;
-                break;
-              default: {
-                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
-                  done = true; // was an endgroup tag
-                }
-                break;
-              } // default:
-            } // switch (tag)
-          } // while (!done)
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          throw e.unwrapIOException();
-        } finally {
-          onChanged();
-        } // finally
-        return this;
-      }
-      @java.lang.Override
-      public final Builder setUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFields(unknownFields);
-      }
-
-      @java.lang.Override
-      public final Builder mergeUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.mergeUnknownFields(unknownFields);
-      }
-
-
-      // @@protoc_insertion_point(builder_scope:com.andrerinas.headunitrevived.aap.protocol.proto.GenericNotificationsStop)
-    }
-
-    // @@protoc_insertion_point(class_scope:com.andrerinas.headunitrevived.aap.protocol.proto.GenericNotificationsStop)
-    private static final com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStop DEFAULT_INSTANCE;
-    static {
-      DEFAULT_INSTANCE = new com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStop();
-    }
-
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStop getDefaultInstance() {
-      return DEFAULT_INSTANCE;
-    }
-
-    @java.lang.Deprecated public static final com.google.protobuf.Parser<GenericNotificationsStop>
-        PARSER = new com.google.protobuf.AbstractParser<GenericNotificationsStop>() {
-      @java.lang.Override
-      public GenericNotificationsStop parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        Builder builder = newBuilder();
-        try {
-          builder.mergeFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          throw e.setUnfinishedMessage(builder.buildPartial());
-        } catch (com.google.protobuf.UninitializedMessageException e) {
-          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
-        } catch (java.io.IOException e) {
-          throw new com.google.protobuf.InvalidProtocolBufferException(e)
-              .setUnfinishedMessage(builder.buildPartial());
-        }
-        return builder.buildPartial();
-      }
-    };
-
-    public static com.google.protobuf.Parser<GenericNotificationsStop> parser() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<GenericNotificationsStop> getParserForType() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.andrerinas.headunitrevived.aap.protocol.proto.Control.GenericNotificationsStop getDefaultInstanceForType() {
-      return DEFAULT_INSTANCE;
-    }
-
-  }
-
-  public interface BluetoothPairingRequestOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:com.andrerinas.headunitrevived.aap.protocol.proto.BluetoothPairingRequest)
-      com.google.protobuf.MessageOrBuilder {
-
-    /**
-     * <code>required string phone_address = 1;</code>
-     * @return Whether the phoneAddress field is set.
-     */
-    boolean hasPhoneAddress();
-    /**
-     * <code>required string phone_address = 1;</code>
-     * @return The phoneAddress.
-     */
-    java.lang.String getPhoneAddress();
-    /**
-     * <code>required string phone_address = 1;</code>
-     * @return The bytes for phoneAddress.
-     */
-    com.google.protobuf.ByteString
-        getPhoneAddressBytes();
-
-    /**
-     * <code>required .com.andrerinas.headunitrevived.aap.protocol.proto.BluetoothPairingMethod pairing_method = 2;</code>
-     * @return Whether the pairingMethod field is set.
-     */
-    boolean hasPairingMethod();
-    /**
-     * <code>required .com.andrerinas.headunitrevived.aap.protocol.proto.BluetoothPairingMethod pairing_method = 2;</code>
-     * @return The pairingMethod.
-     */
-    com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingMethod getPairingMethod();
-  }
-  /**
-   * Protobuf type {@code com.andrerinas.headunitrevived.aap.protocol.proto.BluetoothPairingRequest}
-   */
-  public static final class BluetoothPairingRequest extends
-      com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:com.andrerinas.headunitrevived.aap.protocol.proto.BluetoothPairingRequest)
-      BluetoothPairingRequestOrBuilder {
-  private static final long serialVersionUID = 0L;
-    // Use BluetoothPairingRequest.newBuilder() to construct.
-    private BluetoothPairingRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
-      super(builder);
-    }
-    private BluetoothPairingRequest() {
-      phoneAddress_ = "";
-      pairingMethod_ = 1;
-    }
-
-    @java.lang.Override
-    @SuppressWarnings({"unused"})
-    protected java.lang.Object newInstance(
-        UnusedPrivateParameter unused) {
-      return new BluetoothPairingRequest();
-    }
-
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_BluetoothPairingRequest_descriptor;
-    }
-
-    @java.lang.Override
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_BluetoothPairingRequest_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingRequest.class, com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingRequest.Builder.class);
+              com.andrerinas.headunitrevived.aap.protocol.proto.Control.CarConnectedDevices.class, com.andrerinas.headunitrevived.aap.protocol.proto.Control.CarConnectedDevices.Builder.class);
     }
 
     private int bitField0_;
-    public static final int PHONE_ADDRESS_FIELD_NUMBER = 1;
+    public static final int CONNECTED_DEVICES_FIELD_NUMBER = 1;
     @SuppressWarnings("serial")
-    private volatile java.lang.Object phoneAddress_ = "";
+    private java.util.List<com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice> connectedDevices_;
     /**
-     * <code>required string phone_address = 1;</code>
-     * @return Whether the phoneAddress field is set.
+     * <code>repeated .com.andrerinas.headunitrevived.aap.protocol.proto.ConnectedDevice connected_devices = 1;</code>
      */
     @java.lang.Override
-    public boolean hasPhoneAddress() {
+    public java.util.List<com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice> getConnectedDevicesList() {
+      return connectedDevices_;
+    }
+    /**
+     * <code>repeated .com.andrerinas.headunitrevived.aap.protocol.proto.ConnectedDevice connected_devices = 1;</code>
+     */
+    @java.lang.Override
+    public java.util.List<? extends com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDeviceOrBuilder> 
+        getConnectedDevicesOrBuilderList() {
+      return connectedDevices_;
+    }
+    /**
+     * <code>repeated .com.andrerinas.headunitrevived.aap.protocol.proto.ConnectedDevice connected_devices = 1;</code>
+     */
+    @java.lang.Override
+    public int getConnectedDevicesCount() {
+      return connectedDevices_.size();
+    }
+    /**
+     * <code>repeated .com.andrerinas.headunitrevived.aap.protocol.proto.ConnectedDevice connected_devices = 1;</code>
+     */
+    @java.lang.Override
+    public com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice getConnectedDevices(int index) {
+      return connectedDevices_.get(index);
+    }
+    /**
+     * <code>repeated .com.andrerinas.headunitrevived.aap.protocol.proto.ConnectedDevice connected_devices = 1;</code>
+     */
+    @java.lang.Override
+    public com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDeviceOrBuilder getConnectedDevicesOrBuilder(
+        int index) {
+      return connectedDevices_.get(index);
+    }
+
+    public static final int UNSOLICITED_FIELD_NUMBER = 2;
+    private boolean unsolicited_ = false;
+    /**
+     * <code>optional bool unsolicited = 2;</code>
+     * @return Whether the unsolicited field is set.
+     */
+    @java.lang.Override
+    public boolean hasUnsolicited() {
       return ((bitField0_ & 0x00000001) != 0);
     }
     /**
-     * <code>required string phone_address = 1;</code>
-     * @return The phoneAddress.
+     * <code>optional bool unsolicited = 2;</code>
+     * @return The unsolicited.
      */
     @java.lang.Override
-    public java.lang.String getPhoneAddress() {
-      java.lang.Object ref = phoneAddress_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        if (bs.isValidUtf8()) {
-          phoneAddress_ = s;
-        }
-        return s;
-      }
-    }
-    /**
-     * <code>required string phone_address = 1;</code>
-     * @return The bytes for phoneAddress.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getPhoneAddressBytes() {
-      java.lang.Object ref = phoneAddress_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        phoneAddress_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
+    public boolean getUnsolicited() {
+      return unsolicited_;
     }
 
-    public static final int PAIRING_METHOD_FIELD_NUMBER = 2;
-    private int pairingMethod_ = 1;
+    public static final int FINAL_LIST_FIELD_NUMBER = 3;
+    private boolean finalList_ = true;
     /**
-     * <code>required .com.andrerinas.headunitrevived.aap.protocol.proto.BluetoothPairingMethod pairing_method = 2;</code>
-     * @return Whether the pairingMethod field is set.
+     * <code>optional bool final_list = 3 [default = true];</code>
+     * @return Whether the finalList field is set.
      */
-    @java.lang.Override public boolean hasPairingMethod() {
+    @java.lang.Override
+    public boolean hasFinalList() {
       return ((bitField0_ & 0x00000002) != 0);
     }
     /**
-     * <code>required .com.andrerinas.headunitrevived.aap.protocol.proto.BluetoothPairingMethod pairing_method = 2;</code>
-     * @return The pairingMethod.
+     * <code>optional bool final_list = 3 [default = true];</code>
+     * @return The finalList.
      */
-    @java.lang.Override public com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingMethod getPairingMethod() {
-      com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingMethod result = com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingMethod.forNumber(pairingMethod_);
-      return result == null ? com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingMethod.METHOD_1 : result;
+    @java.lang.Override
+    public boolean getFinalList() {
+      return finalList_;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -29289,14 +29112,6 @@ public final class Control {
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
-      if (!hasPhoneAddress()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
-      if (!hasPairingMethod()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
       memoizedIsInitialized = 1;
       return true;
     }
@@ -29304,11 +29119,14 @@ public final class Control {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
+      for (int i = 0; i < connectedDevices_.size(); i++) {
+        output.writeMessage(1, connectedDevices_.get(i));
+      }
       if (((bitField0_ & 0x00000001) != 0)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, phoneAddress_);
+        output.writeBool(2, unsolicited_);
       }
       if (((bitField0_ & 0x00000002) != 0)) {
-        output.writeEnum(2, pairingMethod_);
+        output.writeBool(3, finalList_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -29319,12 +29137,17 @@ public final class Control {
       if (size != -1) return size;
 
       size = 0;
+      for (int i = 0; i < connectedDevices_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, connectedDevices_.get(i));
+      }
       if (((bitField0_ & 0x00000001) != 0)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, phoneAddress_);
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(2, unsolicited_);
       }
       if (((bitField0_ & 0x00000002) != 0)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeEnumSize(2, pairingMethod_);
+          .computeBoolSize(3, finalList_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
@@ -29336,19 +29159,22 @@ public final class Control {
       if (obj == this) {
        return true;
       }
-      if (!(obj instanceof com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingRequest)) {
+      if (!(obj instanceof com.andrerinas.headunitrevived.aap.protocol.proto.Control.CarConnectedDevices)) {
         return super.equals(obj);
       }
-      com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingRequest other = (com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingRequest) obj;
+      com.andrerinas.headunitrevived.aap.protocol.proto.Control.CarConnectedDevices other = (com.andrerinas.headunitrevived.aap.protocol.proto.Control.CarConnectedDevices) obj;
 
-      if (hasPhoneAddress() != other.hasPhoneAddress()) return false;
-      if (hasPhoneAddress()) {
-        if (!getPhoneAddress()
-            .equals(other.getPhoneAddress())) return false;
+      if (!getConnectedDevicesList()
+          .equals(other.getConnectedDevicesList())) return false;
+      if (hasUnsolicited() != other.hasUnsolicited()) return false;
+      if (hasUnsolicited()) {
+        if (getUnsolicited()
+            != other.getUnsolicited()) return false;
       }
-      if (hasPairingMethod() != other.hasPairingMethod()) return false;
-      if (hasPairingMethod()) {
-        if (pairingMethod_ != other.pairingMethod_) return false;
+      if (hasFinalList() != other.hasFinalList()) return false;
+      if (hasFinalList()) {
+        if (getFinalList()
+            != other.getFinalList()) return false;
       }
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
@@ -29361,57 +29187,63 @@ public final class Control {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
-      if (hasPhoneAddress()) {
-        hash = (37 * hash) + PHONE_ADDRESS_FIELD_NUMBER;
-        hash = (53 * hash) + getPhoneAddress().hashCode();
+      if (getConnectedDevicesCount() > 0) {
+        hash = (37 * hash) + CONNECTED_DEVICES_FIELD_NUMBER;
+        hash = (53 * hash) + getConnectedDevicesList().hashCode();
       }
-      if (hasPairingMethod()) {
-        hash = (37 * hash) + PAIRING_METHOD_FIELD_NUMBER;
-        hash = (53 * hash) + pairingMethod_;
+      if (hasUnsolicited()) {
+        hash = (37 * hash) + UNSOLICITED_FIELD_NUMBER;
+        hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+            getUnsolicited());
+      }
+      if (hasFinalList()) {
+        hash = (37 * hash) + FINAL_LIST_FIELD_NUMBER;
+        hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+            getFinalList());
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
 
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingRequest parseFrom(
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.CarConnectedDevices parseFrom(
         java.nio.ByteBuffer data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingRequest parseFrom(
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.CarConnectedDevices parseFrom(
         java.nio.ByteBuffer data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingRequest parseFrom(
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.CarConnectedDevices parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingRequest parseFrom(
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.CarConnectedDevices parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingRequest parseFrom(byte[] data)
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.CarConnectedDevices parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingRequest parseFrom(
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.CarConnectedDevices parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingRequest parseFrom(java.io.InputStream input)
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.CarConnectedDevices parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingRequest parseFrom(
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.CarConnectedDevices parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -29419,26 +29251,26 @@ public final class Control {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingRequest parseDelimitedFrom(java.io.InputStream input)
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.CarConnectedDevices parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
 
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingRequest parseDelimitedFrom(
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.CarConnectedDevices parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingRequest parseFrom(
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.CarConnectedDevices parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingRequest parseFrom(
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.CarConnectedDevices parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -29451,7 +29283,7 @@ public final class Control {
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingRequest prototype) {
+    public static Builder newBuilder(com.andrerinas.headunitrevived.aap.protocol.proto.Control.CarConnectedDevices prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
     @java.lang.Override
@@ -29467,26 +29299,26 @@ public final class Control {
       return builder;
     }
     /**
-     * Protobuf type {@code com.andrerinas.headunitrevived.aap.protocol.proto.BluetoothPairingRequest}
+     * Protobuf type {@code com.andrerinas.headunitrevived.aap.protocol.proto.CarConnectedDevices}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:com.andrerinas.headunitrevived.aap.protocol.proto.BluetoothPairingRequest)
-        com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingRequestOrBuilder {
+        // @@protoc_insertion_point(builder_implements:com.andrerinas.headunitrevived.aap.protocol.proto.CarConnectedDevices)
+        com.andrerinas.headunitrevived.aap.protocol.proto.Control.CarConnectedDevicesOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_BluetoothPairingRequest_descriptor;
+        return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_CarConnectedDevices_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_BluetoothPairingRequest_fieldAccessorTable
+        return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_CarConnectedDevices_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingRequest.class, com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingRequest.Builder.class);
+                com.andrerinas.headunitrevived.aap.protocol.proto.Control.CarConnectedDevices.class, com.andrerinas.headunitrevived.aap.protocol.proto.Control.CarConnectedDevices.Builder.class);
       }
 
-      // Construct using com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingRequest.newBuilder()
+      // Construct using com.andrerinas.headunitrevived.aap.protocol.proto.Control.CarConnectedDevices.newBuilder()
       private Builder() {
 
       }
@@ -29500,25 +29332,32 @@ public final class Control {
       public Builder clear() {
         super.clear();
         bitField0_ = 0;
-        phoneAddress_ = "";
-        pairingMethod_ = 1;
+        if (connectedDevicesBuilder_ == null) {
+          connectedDevices_ = java.util.Collections.emptyList();
+        } else {
+          connectedDevices_ = null;
+          connectedDevicesBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000001);
+        unsolicited_ = false;
+        finalList_ = true;
         return this;
       }
 
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_BluetoothPairingRequest_descriptor;
+        return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_CarConnectedDevices_descriptor;
       }
 
       @java.lang.Override
-      public com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingRequest getDefaultInstanceForType() {
-        return com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingRequest.getDefaultInstance();
+      public com.andrerinas.headunitrevived.aap.protocol.proto.Control.CarConnectedDevices getDefaultInstanceForType() {
+        return com.andrerinas.headunitrevived.aap.protocol.proto.Control.CarConnectedDevices.getDefaultInstance();
       }
 
       @java.lang.Override
-      public com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingRequest build() {
-        com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingRequest result = buildPartial();
+      public com.andrerinas.headunitrevived.aap.protocol.proto.Control.CarConnectedDevices build() {
+        com.andrerinas.headunitrevived.aap.protocol.proto.Control.CarConnectedDevices result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
@@ -29526,22 +29365,35 @@ public final class Control {
       }
 
       @java.lang.Override
-      public com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingRequest buildPartial() {
-        com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingRequest result = new com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingRequest(this);
+      public com.andrerinas.headunitrevived.aap.protocol.proto.Control.CarConnectedDevices buildPartial() {
+        com.andrerinas.headunitrevived.aap.protocol.proto.Control.CarConnectedDevices result = new com.andrerinas.headunitrevived.aap.protocol.proto.Control.CarConnectedDevices(this);
+        buildPartialRepeatedFields(result);
         if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
       }
 
-      private void buildPartial0(com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingRequest result) {
+      private void buildPartialRepeatedFields(com.andrerinas.headunitrevived.aap.protocol.proto.Control.CarConnectedDevices result) {
+        if (connectedDevicesBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) != 0)) {
+            connectedDevices_ = java.util.Collections.unmodifiableList(connectedDevices_);
+            bitField0_ = (bitField0_ & ~0x00000001);
+          }
+          result.connectedDevices_ = connectedDevices_;
+        } else {
+          result.connectedDevices_ = connectedDevicesBuilder_.build();
+        }
+      }
+
+      private void buildPartial0(com.andrerinas.headunitrevived.aap.protocol.proto.Control.CarConnectedDevices result) {
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
-        if (((from_bitField0_ & 0x00000001) != 0)) {
-          result.phoneAddress_ = phoneAddress_;
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.unsolicited_ = unsolicited_;
           to_bitField0_ |= 0x00000001;
         }
-        if (((from_bitField0_ & 0x00000002) != 0)) {
-          result.pairingMethod_ = pairingMethod_;
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.finalList_ = finalList_;
           to_bitField0_ |= 0x00000002;
         }
         result.bitField0_ |= to_bitField0_;
@@ -29581,23 +29433,47 @@ public final class Control {
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingRequest) {
-          return mergeFrom((com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingRequest)other);
+        if (other instanceof com.andrerinas.headunitrevived.aap.protocol.proto.Control.CarConnectedDevices) {
+          return mergeFrom((com.andrerinas.headunitrevived.aap.protocol.proto.Control.CarConnectedDevices)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingRequest other) {
-        if (other == com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingRequest.getDefaultInstance()) return this;
-        if (other.hasPhoneAddress()) {
-          phoneAddress_ = other.phoneAddress_;
-          bitField0_ |= 0x00000001;
-          onChanged();
+      public Builder mergeFrom(com.andrerinas.headunitrevived.aap.protocol.proto.Control.CarConnectedDevices other) {
+        if (other == com.andrerinas.headunitrevived.aap.protocol.proto.Control.CarConnectedDevices.getDefaultInstance()) return this;
+        if (connectedDevicesBuilder_ == null) {
+          if (!other.connectedDevices_.isEmpty()) {
+            if (connectedDevices_.isEmpty()) {
+              connectedDevices_ = other.connectedDevices_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+            } else {
+              ensureConnectedDevicesIsMutable();
+              connectedDevices_.addAll(other.connectedDevices_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.connectedDevices_.isEmpty()) {
+            if (connectedDevicesBuilder_.isEmpty()) {
+              connectedDevicesBuilder_.dispose();
+              connectedDevicesBuilder_ = null;
+              connectedDevices_ = other.connectedDevices_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+              connectedDevicesBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getConnectedDevicesFieldBuilder() : null;
+            } else {
+              connectedDevicesBuilder_.addAllMessages(other.connectedDevices_);
+            }
+          }
         }
-        if (other.hasPairingMethod()) {
-          setPairingMethod(other.getPairingMethod());
+        if (other.hasUnsolicited()) {
+          setUnsolicited(other.getUnsolicited());
+        }
+        if (other.hasFinalList()) {
+          setFinalList(other.getFinalList());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
@@ -29606,12 +29482,6 @@ public final class Control {
 
       @java.lang.Override
       public final boolean isInitialized() {
-        if (!hasPhoneAddress()) {
-          return false;
-        }
-        if (!hasPairingMethod()) {
-          return false;
-        }
         return true;
       }
 
@@ -29632,22 +29502,28 @@ public final class Control {
                 done = true;
                 break;
               case 10: {
-                phoneAddress_ = input.readBytes();
-                bitField0_ |= 0x00000001;
+                com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice m =
+                    input.readMessage(
+                        com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice.PARSER,
+                        extensionRegistry);
+                if (connectedDevicesBuilder_ == null) {
+                  ensureConnectedDevicesIsMutable();
+                  connectedDevices_.add(m);
+                } else {
+                  connectedDevicesBuilder_.addMessage(m);
+                }
                 break;
               } // case 10
               case 16: {
-                int tmpRaw = input.readEnum();
-                com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingMethod tmpValue =
-                    com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingMethod.forNumber(tmpRaw);
-                if (tmpValue == null) {
-                  mergeUnknownVarintField(2, tmpRaw);
-                } else {
-                  pairingMethod_ = tmpRaw;
-                  bitField0_ |= 0x00000002;
-                }
+                unsolicited_ = input.readBool();
+                bitField0_ |= 0x00000002;
                 break;
               } // case 16
+              case 24: {
+                finalList_ = input.readBool();
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 24
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -29665,124 +29541,322 @@ public final class Control {
       }
       private int bitField0_;
 
-      private java.lang.Object phoneAddress_ = "";
+      private java.util.List<com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice> connectedDevices_ =
+        java.util.Collections.emptyList();
+      private void ensureConnectedDevicesIsMutable() {
+        if (!((bitField0_ & 0x00000001) != 0)) {
+          connectedDevices_ = new java.util.ArrayList<com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice>(connectedDevices_);
+          bitField0_ |= 0x00000001;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice, com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice.Builder, com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDeviceOrBuilder> connectedDevicesBuilder_;
+
       /**
-       * <code>required string phone_address = 1;</code>
-       * @return Whether the phoneAddress field is set.
+       * <code>repeated .com.andrerinas.headunitrevived.aap.protocol.proto.ConnectedDevice connected_devices = 1;</code>
        */
-      public boolean hasPhoneAddress() {
-        return ((bitField0_ & 0x00000001) != 0);
+      public java.util.List<com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice> getConnectedDevicesList() {
+        if (connectedDevicesBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(connectedDevices_);
+        } else {
+          return connectedDevicesBuilder_.getMessageList();
+        }
       }
       /**
-       * <code>required string phone_address = 1;</code>
-       * @return The phoneAddress.
+       * <code>repeated .com.andrerinas.headunitrevived.aap.protocol.proto.ConnectedDevice connected_devices = 1;</code>
        */
-      public java.lang.String getPhoneAddress() {
-        java.lang.Object ref = phoneAddress_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          if (bs.isValidUtf8()) {
-            phoneAddress_ = s;
+      public int getConnectedDevicesCount() {
+        if (connectedDevicesBuilder_ == null) {
+          return connectedDevices_.size();
+        } else {
+          return connectedDevicesBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .com.andrerinas.headunitrevived.aap.protocol.proto.ConnectedDevice connected_devices = 1;</code>
+       */
+      public com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice getConnectedDevices(int index) {
+        if (connectedDevicesBuilder_ == null) {
+          return connectedDevices_.get(index);
+        } else {
+          return connectedDevicesBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .com.andrerinas.headunitrevived.aap.protocol.proto.ConnectedDevice connected_devices = 1;</code>
+       */
+      public Builder setConnectedDevices(
+          int index, com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice value) {
+        if (connectedDevicesBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
           }
-          return s;
+          ensureConnectedDevicesIsMutable();
+          connectedDevices_.set(index, value);
+          onChanged();
         } else {
-          return (java.lang.String) ref;
+          connectedDevicesBuilder_.setMessage(index, value);
         }
+        return this;
       }
       /**
-       * <code>required string phone_address = 1;</code>
-       * @return The bytes for phoneAddress.
+       * <code>repeated .com.andrerinas.headunitrevived.aap.protocol.proto.ConnectedDevice connected_devices = 1;</code>
        */
-      public com.google.protobuf.ByteString
-          getPhoneAddressBytes() {
-        java.lang.Object ref = phoneAddress_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          phoneAddress_ = b;
-          return b;
+      public Builder setConnectedDevices(
+          int index, com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice.Builder builderForValue) {
+        if (connectedDevicesBuilder_ == null) {
+          ensureConnectedDevicesIsMutable();
+          connectedDevices_.set(index, builderForValue.build());
+          onChanged();
         } else {
-          return (com.google.protobuf.ByteString) ref;
+          connectedDevicesBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .com.andrerinas.headunitrevived.aap.protocol.proto.ConnectedDevice connected_devices = 1;</code>
+       */
+      public Builder addConnectedDevices(com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice value) {
+        if (connectedDevicesBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureConnectedDevicesIsMutable();
+          connectedDevices_.add(value);
+          onChanged();
+        } else {
+          connectedDevicesBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .com.andrerinas.headunitrevived.aap.protocol.proto.ConnectedDevice connected_devices = 1;</code>
+       */
+      public Builder addConnectedDevices(
+          int index, com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice value) {
+        if (connectedDevicesBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureConnectedDevicesIsMutable();
+          connectedDevices_.add(index, value);
+          onChanged();
+        } else {
+          connectedDevicesBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .com.andrerinas.headunitrevived.aap.protocol.proto.ConnectedDevice connected_devices = 1;</code>
+       */
+      public Builder addConnectedDevices(
+          com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice.Builder builderForValue) {
+        if (connectedDevicesBuilder_ == null) {
+          ensureConnectedDevicesIsMutable();
+          connectedDevices_.add(builderForValue.build());
+          onChanged();
+        } else {
+          connectedDevicesBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .com.andrerinas.headunitrevived.aap.protocol.proto.ConnectedDevice connected_devices = 1;</code>
+       */
+      public Builder addConnectedDevices(
+          int index, com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice.Builder builderForValue) {
+        if (connectedDevicesBuilder_ == null) {
+          ensureConnectedDevicesIsMutable();
+          connectedDevices_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          connectedDevicesBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .com.andrerinas.headunitrevived.aap.protocol.proto.ConnectedDevice connected_devices = 1;</code>
+       */
+      public Builder addAllConnectedDevices(
+          java.lang.Iterable<? extends com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice> values) {
+        if (connectedDevicesBuilder_ == null) {
+          ensureConnectedDevicesIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, connectedDevices_);
+          onChanged();
+        } else {
+          connectedDevicesBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .com.andrerinas.headunitrevived.aap.protocol.proto.ConnectedDevice connected_devices = 1;</code>
+       */
+      public Builder clearConnectedDevices() {
+        if (connectedDevicesBuilder_ == null) {
+          connectedDevices_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+          onChanged();
+        } else {
+          connectedDevicesBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .com.andrerinas.headunitrevived.aap.protocol.proto.ConnectedDevice connected_devices = 1;</code>
+       */
+      public Builder removeConnectedDevices(int index) {
+        if (connectedDevicesBuilder_ == null) {
+          ensureConnectedDevicesIsMutable();
+          connectedDevices_.remove(index);
+          onChanged();
+        } else {
+          connectedDevicesBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .com.andrerinas.headunitrevived.aap.protocol.proto.ConnectedDevice connected_devices = 1;</code>
+       */
+      public com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice.Builder getConnectedDevicesBuilder(
+          int index) {
+        return getConnectedDevicesFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .com.andrerinas.headunitrevived.aap.protocol.proto.ConnectedDevice connected_devices = 1;</code>
+       */
+      public com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDeviceOrBuilder getConnectedDevicesOrBuilder(
+          int index) {
+        if (connectedDevicesBuilder_ == null) {
+          return connectedDevices_.get(index);  } else {
+          return connectedDevicesBuilder_.getMessageOrBuilder(index);
         }
       }
       /**
-       * <code>required string phone_address = 1;</code>
-       * @param value The phoneAddress to set.
+       * <code>repeated .com.andrerinas.headunitrevived.aap.protocol.proto.ConnectedDevice connected_devices = 1;</code>
+       */
+      public java.util.List<? extends com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDeviceOrBuilder> 
+           getConnectedDevicesOrBuilderList() {
+        if (connectedDevicesBuilder_ != null) {
+          return connectedDevicesBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(connectedDevices_);
+        }
+      }
+      /**
+       * <code>repeated .com.andrerinas.headunitrevived.aap.protocol.proto.ConnectedDevice connected_devices = 1;</code>
+       */
+      public com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice.Builder addConnectedDevicesBuilder() {
+        return getConnectedDevicesFieldBuilder().addBuilder(
+            com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .com.andrerinas.headunitrevived.aap.protocol.proto.ConnectedDevice connected_devices = 1;</code>
+       */
+      public com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice.Builder addConnectedDevicesBuilder(
+          int index) {
+        return getConnectedDevicesFieldBuilder().addBuilder(
+            index, com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .com.andrerinas.headunitrevived.aap.protocol.proto.ConnectedDevice connected_devices = 1;</code>
+       */
+      public java.util.List<com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice.Builder> 
+           getConnectedDevicesBuilderList() {
+        return getConnectedDevicesFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice, com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice.Builder, com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDeviceOrBuilder> 
+          getConnectedDevicesFieldBuilder() {
+        if (connectedDevicesBuilder_ == null) {
+          connectedDevicesBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice, com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice.Builder, com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDeviceOrBuilder>(
+                  connectedDevices_,
+                  ((bitField0_ & 0x00000001) != 0),
+                  getParentForChildren(),
+                  isClean());
+          connectedDevices_ = null;
+        }
+        return connectedDevicesBuilder_;
+      }
+
+      private boolean unsolicited_ ;
+      /**
+       * <code>optional bool unsolicited = 2;</code>
+       * @return Whether the unsolicited field is set.
+       */
+      @java.lang.Override
+      public boolean hasUnsolicited() {
+        return ((bitField0_ & 0x00000002) != 0);
+      }
+      /**
+       * <code>optional bool unsolicited = 2;</code>
+       * @return The unsolicited.
+       */
+      @java.lang.Override
+      public boolean getUnsolicited() {
+        return unsolicited_;
+      }
+      /**
+       * <code>optional bool unsolicited = 2;</code>
+       * @param value The unsolicited to set.
        * @return This builder for chaining.
        */
-      public Builder setPhoneAddress(
-          java.lang.String value) {
-        if (value == null) { throw new NullPointerException(); }
-        phoneAddress_ = value;
-        bitField0_ |= 0x00000001;
+      public Builder setUnsolicited(boolean value) {
+
+        unsolicited_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
       /**
-       * <code>required string phone_address = 1;</code>
+       * <code>optional bool unsolicited = 2;</code>
        * @return This builder for chaining.
        */
-      public Builder clearPhoneAddress() {
-        phoneAddress_ = getDefaultInstance().getPhoneAddress();
-        bitField0_ = (bitField0_ & ~0x00000001);
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>required string phone_address = 1;</code>
-       * @param value The bytes for phoneAddress to set.
-       * @return This builder for chaining.
-       */
-      public Builder setPhoneAddressBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) { throw new NullPointerException(); }
-        phoneAddress_ = value;
-        bitField0_ |= 0x00000001;
+      public Builder clearUnsolicited() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        unsolicited_ = false;
         onChanged();
         return this;
       }
 
-      private int pairingMethod_ = 1;
+      private boolean finalList_ = true;
       /**
-       * <code>required .com.andrerinas.headunitrevived.aap.protocol.proto.BluetoothPairingMethod pairing_method = 2;</code>
-       * @return Whether the pairingMethod field is set.
-       */
-      @java.lang.Override public boolean hasPairingMethod() {
-        return ((bitField0_ & 0x00000002) != 0);
-      }
-      /**
-       * <code>required .com.andrerinas.headunitrevived.aap.protocol.proto.BluetoothPairingMethod pairing_method = 2;</code>
-       * @return The pairingMethod.
+       * <code>optional bool final_list = 3 [default = true];</code>
+       * @return Whether the finalList field is set.
        */
       @java.lang.Override
-      public com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingMethod getPairingMethod() {
-        com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingMethod result = com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingMethod.forNumber(pairingMethod_);
-        return result == null ? com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingMethod.METHOD_1 : result;
+      public boolean hasFinalList() {
+        return ((bitField0_ & 0x00000004) != 0);
       }
       /**
-       * <code>required .com.andrerinas.headunitrevived.aap.protocol.proto.BluetoothPairingMethod pairing_method = 2;</code>
-       * @param value The pairingMethod to set.
+       * <code>optional bool final_list = 3 [default = true];</code>
+       * @return The finalList.
+       */
+      @java.lang.Override
+      public boolean getFinalList() {
+        return finalList_;
+      }
+      /**
+       * <code>optional bool final_list = 3 [default = true];</code>
+       * @param value The finalList to set.
        * @return This builder for chaining.
        */
-      public Builder setPairingMethod(com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingMethod value) {
-        if (value == null) {
-          throw new NullPointerException();
-        }
-        bitField0_ |= 0x00000002;
-        pairingMethod_ = value.getNumber();
+      public Builder setFinalList(boolean value) {
+
+        finalList_ = value;
+        bitField0_ |= 0x00000004;
         onChanged();
         return this;
       }
       /**
-       * <code>required .com.andrerinas.headunitrevived.aap.protocol.proto.BluetoothPairingMethod pairing_method = 2;</code>
+       * <code>optional bool final_list = 3 [default = true];</code>
        * @return This builder for chaining.
        */
-      public Builder clearPairingMethod() {
-        bitField0_ = (bitField0_ & ~0x00000002);
-        pairingMethod_ = 1;
+      public Builder clearFinalList() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        finalList_ = true;
         onChanged();
         return this;
       }
@@ -29799,23 +29873,23 @@ public final class Control {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:com.andrerinas.headunitrevived.aap.protocol.proto.BluetoothPairingRequest)
+      // @@protoc_insertion_point(builder_scope:com.andrerinas.headunitrevived.aap.protocol.proto.CarConnectedDevices)
     }
 
-    // @@protoc_insertion_point(class_scope:com.andrerinas.headunitrevived.aap.protocol.proto.BluetoothPairingRequest)
-    private static final com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingRequest DEFAULT_INSTANCE;
+    // @@protoc_insertion_point(class_scope:com.andrerinas.headunitrevived.aap.protocol.proto.CarConnectedDevices)
+    private static final com.andrerinas.headunitrevived.aap.protocol.proto.Control.CarConnectedDevices DEFAULT_INSTANCE;
     static {
-      DEFAULT_INSTANCE = new com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingRequest();
+      DEFAULT_INSTANCE = new com.andrerinas.headunitrevived.aap.protocol.proto.Control.CarConnectedDevices();
     }
 
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingRequest getDefaultInstance() {
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.CarConnectedDevices getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
-    @java.lang.Deprecated public static final com.google.protobuf.Parser<BluetoothPairingRequest>
-        PARSER = new com.google.protobuf.AbstractParser<BluetoothPairingRequest>() {
+    @java.lang.Deprecated public static final com.google.protobuf.Parser<CarConnectedDevices>
+        PARSER = new com.google.protobuf.AbstractParser<CarConnectedDevices>() {
       @java.lang.Override
-      public BluetoothPairingRequest parsePartialFrom(
+      public CarConnectedDevices parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -29834,61 +29908,65 @@ public final class Control {
       }
     };
 
-    public static com.google.protobuf.Parser<BluetoothPairingRequest> parser() {
+    public static com.google.protobuf.Parser<CarConnectedDevices> parser() {
       return PARSER;
     }
 
     @java.lang.Override
-    public com.google.protobuf.Parser<BluetoothPairingRequest> getParserForType() {
+    public com.google.protobuf.Parser<CarConnectedDevices> getParserForType() {
       return PARSER;
     }
 
     @java.lang.Override
-    public com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingRequest getDefaultInstanceForType() {
+    public com.andrerinas.headunitrevived.aap.protocol.proto.Control.CarConnectedDevices getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
   }
 
-  public interface BluetoothPairingResponseOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:com.andrerinas.headunitrevived.aap.protocol.proto.BluetoothPairingResponse)
+  public interface UserSwitchResponseOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:com.andrerinas.headunitrevived.aap.protocol.proto.UserSwitchResponse)
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>optional bool already_paired = 1;</code>
-     * @return Whether the alreadyPaired field is set.
-     */
-    boolean hasAlreadyPaired();
-    /**
-     * <code>optional bool already_paired = 1;</code>
-     * @return The alreadyPaired.
-     */
-    boolean getAlreadyPaired();
-
-    /**
-     * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.BluetoothPairingResponse.BluetoothPairingStatus status = 2;</code>
+     * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.UserSwitchResponse.UserSwitchStatus status = 1;</code>
      * @return Whether the status field is set.
      */
     boolean hasStatus();
     /**
-     * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.BluetoothPairingResponse.BluetoothPairingStatus status = 2;</code>
+     * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.UserSwitchResponse.UserSwitchStatus status = 1;</code>
      * @return The status.
      */
-    com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingResponse.BluetoothPairingStatus getStatus();
+    com.andrerinas.headunitrevived.aap.protocol.proto.Control.UserSwitchResponse.UserSwitchStatus getStatus();
+
+    /**
+     * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.ConnectedDevice selected_device = 2;</code>
+     * @return Whether the selectedDevice field is set.
+     */
+    boolean hasSelectedDevice();
+    /**
+     * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.ConnectedDevice selected_device = 2;</code>
+     * @return The selectedDevice.
+     */
+    com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice getSelectedDevice();
+    /**
+     * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.ConnectedDevice selected_device = 2;</code>
+     */
+    com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDeviceOrBuilder getSelectedDeviceOrBuilder();
   }
   /**
-   * Protobuf type {@code com.andrerinas.headunitrevived.aap.protocol.proto.BluetoothPairingResponse}
+   * Protobuf type {@code com.andrerinas.headunitrevived.aap.protocol.proto.UserSwitchResponse}
    */
-  public static final class BluetoothPairingResponse extends
+  public static final class UserSwitchResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:com.andrerinas.headunitrevived.aap.protocol.proto.BluetoothPairingResponse)
-      BluetoothPairingResponseOrBuilder {
+      // @@protoc_insertion_point(message_implements:com.andrerinas.headunitrevived.aap.protocol.proto.UserSwitchResponse)
+      UserSwitchResponseOrBuilder {
   private static final long serialVersionUID = 0L;
-    // Use BluetoothPairingResponse.newBuilder() to construct.
-    private BluetoothPairingResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+    // Use UserSwitchResponse.newBuilder() to construct.
+    private UserSwitchResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
     }
-    private BluetoothPairingResponse() {
+    private UserSwitchResponse() {
       status_ = 0;
     }
 
@@ -29896,53 +29974,37 @@ public final class Control {
     @SuppressWarnings({"unused"})
     protected java.lang.Object newInstance(
         UnusedPrivateParameter unused) {
-      return new BluetoothPairingResponse();
+      return new UserSwitchResponse();
     }
 
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_BluetoothPairingResponse_descriptor;
+      return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_UserSwitchResponse_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_BluetoothPairingResponse_fieldAccessorTable
+      return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_UserSwitchResponse_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingResponse.class, com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingResponse.Builder.class);
+              com.andrerinas.headunitrevived.aap.protocol.proto.Control.UserSwitchResponse.class, com.andrerinas.headunitrevived.aap.protocol.proto.Control.UserSwitchResponse.Builder.class);
     }
 
     /**
-     * Protobuf enum {@code com.andrerinas.headunitrevived.aap.protocol.proto.BluetoothPairingResponse.BluetoothPairingStatus}
+     * Protobuf enum {@code com.andrerinas.headunitrevived.aap.protocol.proto.UserSwitchResponse.UserSwitchStatus}
      */
-    public enum BluetoothPairingStatus
+    public enum UserSwitchStatus
         implements com.google.protobuf.ProtocolMessageEnum {
       /**
-       * <code>NONE = 0;</code>
+       * <code>STATUS_OK = 0;</code>
        */
-      NONE(0),
-      /**
-       * <code>OK = 1;</code>
-       */
-      OK(1),
-      /**
-       * <code>FAIL = 2;</code>
-       */
-      FAIL(2),
+      STATUS_OK(0),
       ;
 
       /**
-       * <code>NONE = 0;</code>
+       * <code>STATUS_OK = 0;</code>
        */
-      public static final int NONE_VALUE = 0;
-      /**
-       * <code>OK = 1;</code>
-       */
-      public static final int OK_VALUE = 1;
-      /**
-       * <code>FAIL = 2;</code>
-       */
-      public static final int FAIL_VALUE = 2;
+      public static final int STATUS_OK_VALUE = 0;
 
 
       public final int getNumber() {
@@ -29955,7 +30017,7 @@ public final class Control {
        * @deprecated Use {@link #forNumber(int)} instead.
        */
       @java.lang.Deprecated
-      public static BluetoothPairingStatus valueOf(int value) {
+      public static UserSwitchStatus valueOf(int value) {
         return forNumber(value);
       }
 
@@ -29963,24 +30025,22 @@ public final class Control {
        * @param value The numeric wire value of the corresponding enum entry.
        * @return The enum associated with the given numeric wire value.
        */
-      public static BluetoothPairingStatus forNumber(int value) {
+      public static UserSwitchStatus forNumber(int value) {
         switch (value) {
-          case 0: return NONE;
-          case 1: return OK;
-          case 2: return FAIL;
+          case 0: return STATUS_OK;
           default: return null;
         }
       }
 
-      public static com.google.protobuf.Internal.EnumLiteMap<BluetoothPairingStatus>
+      public static com.google.protobuf.Internal.EnumLiteMap<UserSwitchStatus>
           internalGetValueMap() {
         return internalValueMap;
       }
       private static final com.google.protobuf.Internal.EnumLiteMap<
-          BluetoothPairingStatus> internalValueMap =
-            new com.google.protobuf.Internal.EnumLiteMap<BluetoothPairingStatus>() {
-              public BluetoothPairingStatus findValueByNumber(int number) {
-                return BluetoothPairingStatus.forNumber(number);
+          UserSwitchStatus> internalValueMap =
+            new com.google.protobuf.Internal.EnumLiteMap<UserSwitchStatus>() {
+              public UserSwitchStatus findValueByNumber(int number) {
+                return UserSwitchStatus.forNumber(number);
               }
             };
 
@@ -29994,12 +30054,12 @@ public final class Control {
       }
       public static final com.google.protobuf.Descriptors.EnumDescriptor
           getDescriptor() {
-        return com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingResponse.getDescriptor().getEnumTypes().get(0);
+        return com.andrerinas.headunitrevived.aap.protocol.proto.Control.UserSwitchResponse.getDescriptor().getEnumTypes().get(0);
       }
 
-      private static final BluetoothPairingStatus[] VALUES = values();
+      private static final UserSwitchStatus[] VALUES = values();
 
-      public static BluetoothPairingStatus valueOf(
+      public static UserSwitchStatus valueOf(
           com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
         if (desc.getType() != getDescriptor()) {
           throw new java.lang.IllegalArgumentException(
@@ -30010,49 +30070,56 @@ public final class Control {
 
       private final int value;
 
-      private BluetoothPairingStatus(int value) {
+      private UserSwitchStatus(int value) {
         this.value = value;
       }
 
-      // @@protoc_insertion_point(enum_scope:com.andrerinas.headunitrevived.aap.protocol.proto.BluetoothPairingResponse.BluetoothPairingStatus)
+      // @@protoc_insertion_point(enum_scope:com.andrerinas.headunitrevived.aap.protocol.proto.UserSwitchResponse.UserSwitchStatus)
     }
 
     private int bitField0_;
-    public static final int ALREADY_PAIRED_FIELD_NUMBER = 1;
-    private boolean alreadyPaired_ = false;
-    /**
-     * <code>optional bool already_paired = 1;</code>
-     * @return Whether the alreadyPaired field is set.
-     */
-    @java.lang.Override
-    public boolean hasAlreadyPaired() {
-      return ((bitField0_ & 0x00000001) != 0);
-    }
-    /**
-     * <code>optional bool already_paired = 1;</code>
-     * @return The alreadyPaired.
-     */
-    @java.lang.Override
-    public boolean getAlreadyPaired() {
-      return alreadyPaired_;
-    }
-
-    public static final int STATUS_FIELD_NUMBER = 2;
+    public static final int STATUS_FIELD_NUMBER = 1;
     private int status_ = 0;
     /**
-     * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.BluetoothPairingResponse.BluetoothPairingStatus status = 2;</code>
+     * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.UserSwitchResponse.UserSwitchStatus status = 1;</code>
      * @return Whether the status field is set.
      */
     @java.lang.Override public boolean hasStatus() {
+      return ((bitField0_ & 0x00000001) != 0);
+    }
+    /**
+     * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.UserSwitchResponse.UserSwitchStatus status = 1;</code>
+     * @return The status.
+     */
+    @java.lang.Override public com.andrerinas.headunitrevived.aap.protocol.proto.Control.UserSwitchResponse.UserSwitchStatus getStatus() {
+      com.andrerinas.headunitrevived.aap.protocol.proto.Control.UserSwitchResponse.UserSwitchStatus result = com.andrerinas.headunitrevived.aap.protocol.proto.Control.UserSwitchResponse.UserSwitchStatus.forNumber(status_);
+      return result == null ? com.andrerinas.headunitrevived.aap.protocol.proto.Control.UserSwitchResponse.UserSwitchStatus.STATUS_OK : result;
+    }
+
+    public static final int SELECTED_DEVICE_FIELD_NUMBER = 2;
+    private com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice selectedDevice_;
+    /**
+     * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.ConnectedDevice selected_device = 2;</code>
+     * @return Whether the selectedDevice field is set.
+     */
+    @java.lang.Override
+    public boolean hasSelectedDevice() {
       return ((bitField0_ & 0x00000002) != 0);
     }
     /**
-     * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.BluetoothPairingResponse.BluetoothPairingStatus status = 2;</code>
-     * @return The status.
+     * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.ConnectedDevice selected_device = 2;</code>
+     * @return The selectedDevice.
      */
-    @java.lang.Override public com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingResponse.BluetoothPairingStatus getStatus() {
-      com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingResponse.BluetoothPairingStatus result = com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingResponse.BluetoothPairingStatus.forNumber(status_);
-      return result == null ? com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingResponse.BluetoothPairingStatus.NONE : result;
+    @java.lang.Override
+    public com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice getSelectedDevice() {
+      return selectedDevice_ == null ? com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice.getDefaultInstance() : selectedDevice_;
+    }
+    /**
+     * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.ConnectedDevice selected_device = 2;</code>
+     */
+    @java.lang.Override
+    public com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDeviceOrBuilder getSelectedDeviceOrBuilder() {
+      return selectedDevice_ == null ? com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice.getDefaultInstance() : selectedDevice_;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -30070,10 +30137,10 @@ public final class Control {
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       if (((bitField0_ & 0x00000001) != 0)) {
-        output.writeBool(1, alreadyPaired_);
+        output.writeEnum(1, status_);
       }
       if (((bitField0_ & 0x00000002) != 0)) {
-        output.writeEnum(2, status_);
+        output.writeMessage(2, getSelectedDevice());
       }
       getUnknownFields().writeTo(output);
     }
@@ -30086,11 +30153,11 @@ public final class Control {
       size = 0;
       if (((bitField0_ & 0x00000001) != 0)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBoolSize(1, alreadyPaired_);
+          .computeEnumSize(1, status_);
       }
       if (((bitField0_ & 0x00000002) != 0)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeEnumSize(2, status_);
+          .computeMessageSize(2, getSelectedDevice());
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
@@ -30102,19 +30169,19 @@ public final class Control {
       if (obj == this) {
        return true;
       }
-      if (!(obj instanceof com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingResponse)) {
+      if (!(obj instanceof com.andrerinas.headunitrevived.aap.protocol.proto.Control.UserSwitchResponse)) {
         return super.equals(obj);
       }
-      com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingResponse other = (com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingResponse) obj;
+      com.andrerinas.headunitrevived.aap.protocol.proto.Control.UserSwitchResponse other = (com.andrerinas.headunitrevived.aap.protocol.proto.Control.UserSwitchResponse) obj;
 
-      if (hasAlreadyPaired() != other.hasAlreadyPaired()) return false;
-      if (hasAlreadyPaired()) {
-        if (getAlreadyPaired()
-            != other.getAlreadyPaired()) return false;
-      }
       if (hasStatus() != other.hasStatus()) return false;
       if (hasStatus()) {
         if (status_ != other.status_) return false;
+      }
+      if (hasSelectedDevice() != other.hasSelectedDevice()) return false;
+      if (hasSelectedDevice()) {
+        if (!getSelectedDevice()
+            .equals(other.getSelectedDevice())) return false;
       }
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
@@ -30127,58 +30194,57 @@ public final class Control {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
-      if (hasAlreadyPaired()) {
-        hash = (37 * hash) + ALREADY_PAIRED_FIELD_NUMBER;
-        hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
-            getAlreadyPaired());
-      }
       if (hasStatus()) {
         hash = (37 * hash) + STATUS_FIELD_NUMBER;
         hash = (53 * hash) + status_;
+      }
+      if (hasSelectedDevice()) {
+        hash = (37 * hash) + SELECTED_DEVICE_FIELD_NUMBER;
+        hash = (53 * hash) + getSelectedDevice().hashCode();
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
 
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingResponse parseFrom(
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.UserSwitchResponse parseFrom(
         java.nio.ByteBuffer data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingResponse parseFrom(
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.UserSwitchResponse parseFrom(
         java.nio.ByteBuffer data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingResponse parseFrom(
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.UserSwitchResponse parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingResponse parseFrom(
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.UserSwitchResponse parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingResponse parseFrom(byte[] data)
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.UserSwitchResponse parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingResponse parseFrom(
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.UserSwitchResponse parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingResponse parseFrom(java.io.InputStream input)
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.UserSwitchResponse parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingResponse parseFrom(
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.UserSwitchResponse parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -30186,26 +30252,26 @@ public final class Control {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingResponse parseDelimitedFrom(java.io.InputStream input)
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.UserSwitchResponse parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
 
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingResponse parseDelimitedFrom(
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.UserSwitchResponse parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingResponse parseFrom(
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.UserSwitchResponse parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingResponse parseFrom(
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.UserSwitchResponse parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -30218,7 +30284,7 @@ public final class Control {
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingResponse prototype) {
+    public static Builder newBuilder(com.andrerinas.headunitrevived.aap.protocol.proto.Control.UserSwitchResponse prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
     @java.lang.Override
@@ -30234,58 +30300,68 @@ public final class Control {
       return builder;
     }
     /**
-     * Protobuf type {@code com.andrerinas.headunitrevived.aap.protocol.proto.BluetoothPairingResponse}
+     * Protobuf type {@code com.andrerinas.headunitrevived.aap.protocol.proto.UserSwitchResponse}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:com.andrerinas.headunitrevived.aap.protocol.proto.BluetoothPairingResponse)
-        com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingResponseOrBuilder {
+        // @@protoc_insertion_point(builder_implements:com.andrerinas.headunitrevived.aap.protocol.proto.UserSwitchResponse)
+        com.andrerinas.headunitrevived.aap.protocol.proto.Control.UserSwitchResponseOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_BluetoothPairingResponse_descriptor;
+        return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_UserSwitchResponse_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_BluetoothPairingResponse_fieldAccessorTable
+        return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_UserSwitchResponse_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingResponse.class, com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingResponse.Builder.class);
+                com.andrerinas.headunitrevived.aap.protocol.proto.Control.UserSwitchResponse.class, com.andrerinas.headunitrevived.aap.protocol.proto.Control.UserSwitchResponse.Builder.class);
       }
 
-      // Construct using com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingResponse.newBuilder()
+      // Construct using com.andrerinas.headunitrevived.aap.protocol.proto.Control.UserSwitchResponse.newBuilder()
       private Builder() {
-
+        maybeForceBuilderInitialization();
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+          getSelectedDeviceFieldBuilder();
+        }
       }
       @java.lang.Override
       public Builder clear() {
         super.clear();
         bitField0_ = 0;
-        alreadyPaired_ = false;
         status_ = 0;
+        selectedDevice_ = null;
+        if (selectedDeviceBuilder_ != null) {
+          selectedDeviceBuilder_.dispose();
+          selectedDeviceBuilder_ = null;
+        }
         return this;
       }
 
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_BluetoothPairingResponse_descriptor;
+        return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_UserSwitchResponse_descriptor;
       }
 
       @java.lang.Override
-      public com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingResponse getDefaultInstanceForType() {
-        return com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingResponse.getDefaultInstance();
+      public com.andrerinas.headunitrevived.aap.protocol.proto.Control.UserSwitchResponse getDefaultInstanceForType() {
+        return com.andrerinas.headunitrevived.aap.protocol.proto.Control.UserSwitchResponse.getDefaultInstance();
       }
 
       @java.lang.Override
-      public com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingResponse build() {
-        com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingResponse result = buildPartial();
+      public com.andrerinas.headunitrevived.aap.protocol.proto.Control.UserSwitchResponse build() {
+        com.andrerinas.headunitrevived.aap.protocol.proto.Control.UserSwitchResponse result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
@@ -30293,22 +30369,24 @@ public final class Control {
       }
 
       @java.lang.Override
-      public com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingResponse buildPartial() {
-        com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingResponse result = new com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingResponse(this);
+      public com.andrerinas.headunitrevived.aap.protocol.proto.Control.UserSwitchResponse buildPartial() {
+        com.andrerinas.headunitrevived.aap.protocol.proto.Control.UserSwitchResponse result = new com.andrerinas.headunitrevived.aap.protocol.proto.Control.UserSwitchResponse(this);
         if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
       }
 
-      private void buildPartial0(com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingResponse result) {
+      private void buildPartial0(com.andrerinas.headunitrevived.aap.protocol.proto.Control.UserSwitchResponse result) {
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
         if (((from_bitField0_ & 0x00000001) != 0)) {
-          result.alreadyPaired_ = alreadyPaired_;
+          result.status_ = status_;
           to_bitField0_ |= 0x00000001;
         }
         if (((from_bitField0_ & 0x00000002) != 0)) {
-          result.status_ = status_;
+          result.selectedDevice_ = selectedDeviceBuilder_ == null
+              ? selectedDevice_
+              : selectedDeviceBuilder_.build();
           to_bitField0_ |= 0x00000002;
         }
         result.bitField0_ |= to_bitField0_;
@@ -30348,21 +30426,21 @@ public final class Control {
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingResponse) {
-          return mergeFrom((com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingResponse)other);
+        if (other instanceof com.andrerinas.headunitrevived.aap.protocol.proto.Control.UserSwitchResponse) {
+          return mergeFrom((com.andrerinas.headunitrevived.aap.protocol.proto.Control.UserSwitchResponse)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingResponse other) {
-        if (other == com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingResponse.getDefaultInstance()) return this;
-        if (other.hasAlreadyPaired()) {
-          setAlreadyPaired(other.getAlreadyPaired());
-        }
+      public Builder mergeFrom(com.andrerinas.headunitrevived.aap.protocol.proto.Control.UserSwitchResponse other) {
+        if (other == com.andrerinas.headunitrevived.aap.protocol.proto.Control.UserSwitchResponse.getDefaultInstance()) return this;
         if (other.hasStatus()) {
           setStatus(other.getStatus());
+        }
+        if (other.hasSelectedDevice()) {
+          mergeSelectedDevice(other.getSelectedDevice());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
@@ -30391,22 +30469,24 @@ public final class Control {
                 done = true;
                 break;
               case 8: {
-                alreadyPaired_ = input.readBool();
-                bitField0_ |= 0x00000001;
-                break;
-              } // case 8
-              case 16: {
                 int tmpRaw = input.readEnum();
-                com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingResponse.BluetoothPairingStatus tmpValue =
-                    com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingResponse.BluetoothPairingStatus.forNumber(tmpRaw);
+                com.andrerinas.headunitrevived.aap.protocol.proto.Control.UserSwitchResponse.UserSwitchStatus tmpValue =
+                    com.andrerinas.headunitrevived.aap.protocol.proto.Control.UserSwitchResponse.UserSwitchStatus.forNumber(tmpRaw);
                 if (tmpValue == null) {
-                  mergeUnknownVarintField(2, tmpRaw);
+                  mergeUnknownVarintField(1, tmpRaw);
                 } else {
                   status_ = tmpRaw;
-                  bitField0_ |= 0x00000002;
+                  bitField0_ |= 0x00000001;
                 }
                 break;
-              } // case 16
+              } // case 8
+              case 18: {
+                input.readMessage(
+                    getSelectedDeviceFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 18
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -30424,86 +30504,167 @@ public final class Control {
       }
       private int bitField0_;
 
-      private boolean alreadyPaired_ ;
-      /**
-       * <code>optional bool already_paired = 1;</code>
-       * @return Whether the alreadyPaired field is set.
-       */
-      @java.lang.Override
-      public boolean hasAlreadyPaired() {
-        return ((bitField0_ & 0x00000001) != 0);
-      }
-      /**
-       * <code>optional bool already_paired = 1;</code>
-       * @return The alreadyPaired.
-       */
-      @java.lang.Override
-      public boolean getAlreadyPaired() {
-        return alreadyPaired_;
-      }
-      /**
-       * <code>optional bool already_paired = 1;</code>
-       * @param value The alreadyPaired to set.
-       * @return This builder for chaining.
-       */
-      public Builder setAlreadyPaired(boolean value) {
-
-        alreadyPaired_ = value;
-        bitField0_ |= 0x00000001;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>optional bool already_paired = 1;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearAlreadyPaired() {
-        bitField0_ = (bitField0_ & ~0x00000001);
-        alreadyPaired_ = false;
-        onChanged();
-        return this;
-      }
-
       private int status_ = 0;
       /**
-       * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.BluetoothPairingResponse.BluetoothPairingStatus status = 2;</code>
+       * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.UserSwitchResponse.UserSwitchStatus status = 1;</code>
        * @return Whether the status field is set.
        */
       @java.lang.Override public boolean hasStatus() {
-        return ((bitField0_ & 0x00000002) != 0);
+        return ((bitField0_ & 0x00000001) != 0);
       }
       /**
-       * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.BluetoothPairingResponse.BluetoothPairingStatus status = 2;</code>
+       * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.UserSwitchResponse.UserSwitchStatus status = 1;</code>
        * @return The status.
        */
       @java.lang.Override
-      public com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingResponse.BluetoothPairingStatus getStatus() {
-        com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingResponse.BluetoothPairingStatus result = com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingResponse.BluetoothPairingStatus.forNumber(status_);
-        return result == null ? com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingResponse.BluetoothPairingStatus.NONE : result;
+      public com.andrerinas.headunitrevived.aap.protocol.proto.Control.UserSwitchResponse.UserSwitchStatus getStatus() {
+        com.andrerinas.headunitrevived.aap.protocol.proto.Control.UserSwitchResponse.UserSwitchStatus result = com.andrerinas.headunitrevived.aap.protocol.proto.Control.UserSwitchResponse.UserSwitchStatus.forNumber(status_);
+        return result == null ? com.andrerinas.headunitrevived.aap.protocol.proto.Control.UserSwitchResponse.UserSwitchStatus.STATUS_OK : result;
       }
       /**
-       * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.BluetoothPairingResponse.BluetoothPairingStatus status = 2;</code>
+       * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.UserSwitchResponse.UserSwitchStatus status = 1;</code>
        * @param value The status to set.
        * @return This builder for chaining.
        */
-      public Builder setStatus(com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingResponse.BluetoothPairingStatus value) {
+      public Builder setStatus(com.andrerinas.headunitrevived.aap.protocol.proto.Control.UserSwitchResponse.UserSwitchStatus value) {
         if (value == null) {
           throw new NullPointerException();
         }
-        bitField0_ |= 0x00000002;
+        bitField0_ |= 0x00000001;
         status_ = value.getNumber();
         onChanged();
         return this;
       }
       /**
-       * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.BluetoothPairingResponse.BluetoothPairingStatus status = 2;</code>
+       * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.UserSwitchResponse.UserSwitchStatus status = 1;</code>
        * @return This builder for chaining.
        */
       public Builder clearStatus() {
-        bitField0_ = (bitField0_ & ~0x00000002);
+        bitField0_ = (bitField0_ & ~0x00000001);
         status_ = 0;
         onChanged();
         return this;
+      }
+
+      private com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice selectedDevice_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice, com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice.Builder, com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDeviceOrBuilder> selectedDeviceBuilder_;
+      /**
+       * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.ConnectedDevice selected_device = 2;</code>
+       * @return Whether the selectedDevice field is set.
+       */
+      public boolean hasSelectedDevice() {
+        return ((bitField0_ & 0x00000002) != 0);
+      }
+      /**
+       * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.ConnectedDevice selected_device = 2;</code>
+       * @return The selectedDevice.
+       */
+      public com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice getSelectedDevice() {
+        if (selectedDeviceBuilder_ == null) {
+          return selectedDevice_ == null ? com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice.getDefaultInstance() : selectedDevice_;
+        } else {
+          return selectedDeviceBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.ConnectedDevice selected_device = 2;</code>
+       */
+      public Builder setSelectedDevice(com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice value) {
+        if (selectedDeviceBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          selectedDevice_ = value;
+        } else {
+          selectedDeviceBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.ConnectedDevice selected_device = 2;</code>
+       */
+      public Builder setSelectedDevice(
+          com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice.Builder builderForValue) {
+        if (selectedDeviceBuilder_ == null) {
+          selectedDevice_ = builderForValue.build();
+        } else {
+          selectedDeviceBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.ConnectedDevice selected_device = 2;</code>
+       */
+      public Builder mergeSelectedDevice(com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice value) {
+        if (selectedDeviceBuilder_ == null) {
+          if (((bitField0_ & 0x00000002) != 0) &&
+            selectedDevice_ != null &&
+            selectedDevice_ != com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice.getDefaultInstance()) {
+            getSelectedDeviceBuilder().mergeFrom(value);
+          } else {
+            selectedDevice_ = value;
+          }
+        } else {
+          selectedDeviceBuilder_.mergeFrom(value);
+        }
+        if (selectedDevice_ != null) {
+          bitField0_ |= 0x00000002;
+          onChanged();
+        }
+        return this;
+      }
+      /**
+       * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.ConnectedDevice selected_device = 2;</code>
+       */
+      public Builder clearSelectedDevice() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        selectedDevice_ = null;
+        if (selectedDeviceBuilder_ != null) {
+          selectedDeviceBuilder_.dispose();
+          selectedDeviceBuilder_ = null;
+        }
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.ConnectedDevice selected_device = 2;</code>
+       */
+      public com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice.Builder getSelectedDeviceBuilder() {
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return getSelectedDeviceFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.ConnectedDevice selected_device = 2;</code>
+       */
+      public com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDeviceOrBuilder getSelectedDeviceOrBuilder() {
+        if (selectedDeviceBuilder_ != null) {
+          return selectedDeviceBuilder_.getMessageOrBuilder();
+        } else {
+          return selectedDevice_ == null ?
+              com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice.getDefaultInstance() : selectedDevice_;
+        }
+      }
+      /**
+       * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.ConnectedDevice selected_device = 2;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice, com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice.Builder, com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDeviceOrBuilder> 
+          getSelectedDeviceFieldBuilder() {
+        if (selectedDeviceBuilder_ == null) {
+          selectedDeviceBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice, com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDevice.Builder, com.andrerinas.headunitrevived.aap.protocol.proto.Control.ConnectedDeviceOrBuilder>(
+                  getSelectedDevice(),
+                  getParentForChildren(),
+                  isClean());
+          selectedDevice_ = null;
+        }
+        return selectedDeviceBuilder_;
       }
       @java.lang.Override
       public final Builder setUnknownFields(
@@ -30518,23 +30679,23 @@ public final class Control {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:com.andrerinas.headunitrevived.aap.protocol.proto.BluetoothPairingResponse)
+      // @@protoc_insertion_point(builder_scope:com.andrerinas.headunitrevived.aap.protocol.proto.UserSwitchResponse)
     }
 
-    // @@protoc_insertion_point(class_scope:com.andrerinas.headunitrevived.aap.protocol.proto.BluetoothPairingResponse)
-    private static final com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingResponse DEFAULT_INSTANCE;
+    // @@protoc_insertion_point(class_scope:com.andrerinas.headunitrevived.aap.protocol.proto.UserSwitchResponse)
+    private static final com.andrerinas.headunitrevived.aap.protocol.proto.Control.UserSwitchResponse DEFAULT_INSTANCE;
     static {
-      DEFAULT_INSTANCE = new com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingResponse();
+      DEFAULT_INSTANCE = new com.andrerinas.headunitrevived.aap.protocol.proto.Control.UserSwitchResponse();
     }
 
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingResponse getDefaultInstance() {
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.UserSwitchResponse getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
-    @java.lang.Deprecated public static final com.google.protobuf.Parser<BluetoothPairingResponse>
-        PARSER = new com.google.protobuf.AbstractParser<BluetoothPairingResponse>() {
+    @java.lang.Deprecated public static final com.google.protobuf.Parser<UserSwitchResponse>
+        PARSER = new com.google.protobuf.AbstractParser<UserSwitchResponse>() {
       @java.lang.Override
-      public BluetoothPairingResponse parsePartialFrom(
+      public UserSwitchResponse parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -30553,127 +30714,90 @@ public final class Control {
       }
     };
 
-    public static com.google.protobuf.Parser<BluetoothPairingResponse> parser() {
+    public static com.google.protobuf.Parser<UserSwitchResponse> parser() {
       return PARSER;
     }
 
     @java.lang.Override
-    public com.google.protobuf.Parser<BluetoothPairingResponse> getParserForType() {
+    public com.google.protobuf.Parser<UserSwitchResponse> getParserForType() {
       return PARSER;
     }
 
     @java.lang.Override
-    public com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothPairingResponse getDefaultInstanceForType() {
+    public com.andrerinas.headunitrevived.aap.protocol.proto.Control.UserSwitchResponse getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
   }
 
-  public interface BluetoothAuthDataOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:com.andrerinas.headunitrevived.aap.protocol.proto.BluetoothAuthData)
+  public interface CallAvailabilityStatusOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:com.andrerinas.headunitrevived.aap.protocol.proto.CallAvailabilityStatus)
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>optional string data = 1;</code>
-     * @return Whether the data field is set.
+     * <code>optional bool call_available = 1;</code>
+     * @return Whether the callAvailable field is set.
      */
-    boolean hasData();
+    boolean hasCallAvailable();
     /**
-     * <code>optional string data = 1;</code>
-     * @return The data.
+     * <code>optional bool call_available = 1;</code>
+     * @return The callAvailable.
      */
-    java.lang.String getData();
-    /**
-     * <code>optional string data = 1;</code>
-     * @return The bytes for data.
-     */
-    com.google.protobuf.ByteString
-        getDataBytes();
+    boolean getCallAvailable();
   }
   /**
-   * Protobuf type {@code com.andrerinas.headunitrevived.aap.protocol.proto.BluetoothAuthData}
+   * Protobuf type {@code com.andrerinas.headunitrevived.aap.protocol.proto.CallAvailabilityStatus}
    */
-  public static final class BluetoothAuthData extends
+  public static final class CallAvailabilityStatus extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:com.andrerinas.headunitrevived.aap.protocol.proto.BluetoothAuthData)
-      BluetoothAuthDataOrBuilder {
+      // @@protoc_insertion_point(message_implements:com.andrerinas.headunitrevived.aap.protocol.proto.CallAvailabilityStatus)
+      CallAvailabilityStatusOrBuilder {
   private static final long serialVersionUID = 0L;
-    // Use BluetoothAuthData.newBuilder() to construct.
-    private BluetoothAuthData(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+    // Use CallAvailabilityStatus.newBuilder() to construct.
+    private CallAvailabilityStatus(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
     }
-    private BluetoothAuthData() {
-      data_ = "";
+    private CallAvailabilityStatus() {
     }
 
     @java.lang.Override
     @SuppressWarnings({"unused"})
     protected java.lang.Object newInstance(
         UnusedPrivateParameter unused) {
-      return new BluetoothAuthData();
+      return new CallAvailabilityStatus();
     }
 
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_BluetoothAuthData_descriptor;
+      return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_CallAvailabilityStatus_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_BluetoothAuthData_fieldAccessorTable
+      return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_CallAvailabilityStatus_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothAuthData.class, com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothAuthData.Builder.class);
+              com.andrerinas.headunitrevived.aap.protocol.proto.Control.CallAvailabilityStatus.class, com.andrerinas.headunitrevived.aap.protocol.proto.Control.CallAvailabilityStatus.Builder.class);
     }
 
     private int bitField0_;
-    public static final int DATA_FIELD_NUMBER = 1;
-    @SuppressWarnings("serial")
-    private volatile java.lang.Object data_ = "";
+    public static final int CALL_AVAILABLE_FIELD_NUMBER = 1;
+    private boolean callAvailable_ = false;
     /**
-     * <code>optional string data = 1;</code>
-     * @return Whether the data field is set.
+     * <code>optional bool call_available = 1;</code>
+     * @return Whether the callAvailable field is set.
      */
     @java.lang.Override
-    public boolean hasData() {
+    public boolean hasCallAvailable() {
       return ((bitField0_ & 0x00000001) != 0);
     }
     /**
-     * <code>optional string data = 1;</code>
-     * @return The data.
+     * <code>optional bool call_available = 1;</code>
+     * @return The callAvailable.
      */
     @java.lang.Override
-    public java.lang.String getData() {
-      java.lang.Object ref = data_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        if (bs.isValidUtf8()) {
-          data_ = s;
-        }
-        return s;
-      }
-    }
-    /**
-     * <code>optional string data = 1;</code>
-     * @return The bytes for data.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getDataBytes() {
-      java.lang.Object ref = data_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        data_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
+    public boolean getCallAvailable() {
+      return callAvailable_;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -30691,7 +30815,7 @@ public final class Control {
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       if (((bitField0_ & 0x00000001) != 0)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, data_);
+        output.writeBool(1, callAvailable_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -30703,7 +30827,8 @@ public final class Control {
 
       size = 0;
       if (((bitField0_ & 0x00000001) != 0)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, data_);
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(1, callAvailable_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
@@ -30715,15 +30840,15 @@ public final class Control {
       if (obj == this) {
        return true;
       }
-      if (!(obj instanceof com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothAuthData)) {
+      if (!(obj instanceof com.andrerinas.headunitrevived.aap.protocol.proto.Control.CallAvailabilityStatus)) {
         return super.equals(obj);
       }
-      com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothAuthData other = (com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothAuthData) obj;
+      com.andrerinas.headunitrevived.aap.protocol.proto.Control.CallAvailabilityStatus other = (com.andrerinas.headunitrevived.aap.protocol.proto.Control.CallAvailabilityStatus) obj;
 
-      if (hasData() != other.hasData()) return false;
-      if (hasData()) {
-        if (!getData()
-            .equals(other.getData())) return false;
+      if (hasCallAvailable() != other.hasCallAvailable()) return false;
+      if (hasCallAvailable()) {
+        if (getCallAvailable()
+            != other.getCallAvailable()) return false;
       }
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
@@ -30736,53 +30861,54 @@ public final class Control {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
-      if (hasData()) {
-        hash = (37 * hash) + DATA_FIELD_NUMBER;
-        hash = (53 * hash) + getData().hashCode();
+      if (hasCallAvailable()) {
+        hash = (37 * hash) + CALL_AVAILABLE_FIELD_NUMBER;
+        hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+            getCallAvailable());
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
 
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothAuthData parseFrom(
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.CallAvailabilityStatus parseFrom(
         java.nio.ByteBuffer data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothAuthData parseFrom(
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.CallAvailabilityStatus parseFrom(
         java.nio.ByteBuffer data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothAuthData parseFrom(
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.CallAvailabilityStatus parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothAuthData parseFrom(
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.CallAvailabilityStatus parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothAuthData parseFrom(byte[] data)
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.CallAvailabilityStatus parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothAuthData parseFrom(
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.CallAvailabilityStatus parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothAuthData parseFrom(java.io.InputStream input)
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.CallAvailabilityStatus parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothAuthData parseFrom(
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.CallAvailabilityStatus parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -30790,26 +30916,26 @@ public final class Control {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothAuthData parseDelimitedFrom(java.io.InputStream input)
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.CallAvailabilityStatus parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
 
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothAuthData parseDelimitedFrom(
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.CallAvailabilityStatus parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothAuthData parseFrom(
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.CallAvailabilityStatus parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothAuthData parseFrom(
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.CallAvailabilityStatus parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -30822,7 +30948,7 @@ public final class Control {
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothAuthData prototype) {
+    public static Builder newBuilder(com.andrerinas.headunitrevived.aap.protocol.proto.Control.CallAvailabilityStatus prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
     @java.lang.Override
@@ -30838,26 +30964,26 @@ public final class Control {
       return builder;
     }
     /**
-     * Protobuf type {@code com.andrerinas.headunitrevived.aap.protocol.proto.BluetoothAuthData}
+     * Protobuf type {@code com.andrerinas.headunitrevived.aap.protocol.proto.CallAvailabilityStatus}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:com.andrerinas.headunitrevived.aap.protocol.proto.BluetoothAuthData)
-        com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothAuthDataOrBuilder {
+        // @@protoc_insertion_point(builder_implements:com.andrerinas.headunitrevived.aap.protocol.proto.CallAvailabilityStatus)
+        com.andrerinas.headunitrevived.aap.protocol.proto.Control.CallAvailabilityStatusOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_BluetoothAuthData_descriptor;
+        return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_CallAvailabilityStatus_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_BluetoothAuthData_fieldAccessorTable
+        return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_CallAvailabilityStatus_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothAuthData.class, com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothAuthData.Builder.class);
+                com.andrerinas.headunitrevived.aap.protocol.proto.Control.CallAvailabilityStatus.class, com.andrerinas.headunitrevived.aap.protocol.proto.Control.CallAvailabilityStatus.Builder.class);
       }
 
-      // Construct using com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothAuthData.newBuilder()
+      // Construct using com.andrerinas.headunitrevived.aap.protocol.proto.Control.CallAvailabilityStatus.newBuilder()
       private Builder() {
 
       }
@@ -30871,24 +30997,24 @@ public final class Control {
       public Builder clear() {
         super.clear();
         bitField0_ = 0;
-        data_ = "";
+        callAvailable_ = false;
         return this;
       }
 
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_BluetoothAuthData_descriptor;
+        return com.andrerinas.headunitrevived.aap.protocol.proto.Control.internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_CallAvailabilityStatus_descriptor;
       }
 
       @java.lang.Override
-      public com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothAuthData getDefaultInstanceForType() {
-        return com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothAuthData.getDefaultInstance();
+      public com.andrerinas.headunitrevived.aap.protocol.proto.Control.CallAvailabilityStatus getDefaultInstanceForType() {
+        return com.andrerinas.headunitrevived.aap.protocol.proto.Control.CallAvailabilityStatus.getDefaultInstance();
       }
 
       @java.lang.Override
-      public com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothAuthData build() {
-        com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothAuthData result = buildPartial();
+      public com.andrerinas.headunitrevived.aap.protocol.proto.Control.CallAvailabilityStatus build() {
+        com.andrerinas.headunitrevived.aap.protocol.proto.Control.CallAvailabilityStatus result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
@@ -30896,18 +31022,18 @@ public final class Control {
       }
 
       @java.lang.Override
-      public com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothAuthData buildPartial() {
-        com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothAuthData result = new com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothAuthData(this);
+      public com.andrerinas.headunitrevived.aap.protocol.proto.Control.CallAvailabilityStatus buildPartial() {
+        com.andrerinas.headunitrevived.aap.protocol.proto.Control.CallAvailabilityStatus result = new com.andrerinas.headunitrevived.aap.protocol.proto.Control.CallAvailabilityStatus(this);
         if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
       }
 
-      private void buildPartial0(com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothAuthData result) {
+      private void buildPartial0(com.andrerinas.headunitrevived.aap.protocol.proto.Control.CallAvailabilityStatus result) {
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
         if (((from_bitField0_ & 0x00000001) != 0)) {
-          result.data_ = data_;
+          result.callAvailable_ = callAvailable_;
           to_bitField0_ |= 0x00000001;
         }
         result.bitField0_ |= to_bitField0_;
@@ -30947,20 +31073,18 @@ public final class Control {
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothAuthData) {
-          return mergeFrom((com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothAuthData)other);
+        if (other instanceof com.andrerinas.headunitrevived.aap.protocol.proto.Control.CallAvailabilityStatus) {
+          return mergeFrom((com.andrerinas.headunitrevived.aap.protocol.proto.Control.CallAvailabilityStatus)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothAuthData other) {
-        if (other == com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothAuthData.getDefaultInstance()) return this;
-        if (other.hasData()) {
-          data_ = other.data_;
-          bitField0_ |= 0x00000001;
-          onChanged();
+      public Builder mergeFrom(com.andrerinas.headunitrevived.aap.protocol.proto.Control.CallAvailabilityStatus other) {
+        if (other == com.andrerinas.headunitrevived.aap.protocol.proto.Control.CallAvailabilityStatus.getDefaultInstance()) return this;
+        if (other.hasCallAvailable()) {
+          setCallAvailable(other.getCallAvailable());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
@@ -30988,11 +31112,11 @@ public final class Control {
               case 0:
                 done = true;
                 break;
-              case 10: {
-                data_ = input.readBytes();
+              case 8: {
+                callAvailable_ = input.readBool();
                 bitField0_ |= 0x00000001;
                 break;
-              } // case 10
+              } // case 8
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -31010,82 +31134,42 @@ public final class Control {
       }
       private int bitField0_;
 
-      private java.lang.Object data_ = "";
+      private boolean callAvailable_ ;
       /**
-       * <code>optional string data = 1;</code>
-       * @return Whether the data field is set.
+       * <code>optional bool call_available = 1;</code>
+       * @return Whether the callAvailable field is set.
        */
-      public boolean hasData() {
+      @java.lang.Override
+      public boolean hasCallAvailable() {
         return ((bitField0_ & 0x00000001) != 0);
       }
       /**
-       * <code>optional string data = 1;</code>
-       * @return The data.
+       * <code>optional bool call_available = 1;</code>
+       * @return The callAvailable.
        */
-      public java.lang.String getData() {
-        java.lang.Object ref = data_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          if (bs.isValidUtf8()) {
-            data_ = s;
-          }
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
+      @java.lang.Override
+      public boolean getCallAvailable() {
+        return callAvailable_;
       }
       /**
-       * <code>optional string data = 1;</code>
-       * @return The bytes for data.
-       */
-      public com.google.protobuf.ByteString
-          getDataBytes() {
-        java.lang.Object ref = data_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          data_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>optional string data = 1;</code>
-       * @param value The data to set.
+       * <code>optional bool call_available = 1;</code>
+       * @param value The callAvailable to set.
        * @return This builder for chaining.
        */
-      public Builder setData(
-          java.lang.String value) {
-        if (value == null) { throw new NullPointerException(); }
-        data_ = value;
+      public Builder setCallAvailable(boolean value) {
+
+        callAvailable_ = value;
         bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
       /**
-       * <code>optional string data = 1;</code>
+       * <code>optional bool call_available = 1;</code>
        * @return This builder for chaining.
        */
-      public Builder clearData() {
-        data_ = getDefaultInstance().getData();
+      public Builder clearCallAvailable() {
         bitField0_ = (bitField0_ & ~0x00000001);
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>optional string data = 1;</code>
-       * @param value The bytes for data to set.
-       * @return This builder for chaining.
-       */
-      public Builder setDataBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) { throw new NullPointerException(); }
-        data_ = value;
-        bitField0_ |= 0x00000001;
+        callAvailable_ = false;
         onChanged();
         return this;
       }
@@ -31102,23 +31186,23 @@ public final class Control {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:com.andrerinas.headunitrevived.aap.protocol.proto.BluetoothAuthData)
+      // @@protoc_insertion_point(builder_scope:com.andrerinas.headunitrevived.aap.protocol.proto.CallAvailabilityStatus)
     }
 
-    // @@protoc_insertion_point(class_scope:com.andrerinas.headunitrevived.aap.protocol.proto.BluetoothAuthData)
-    private static final com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothAuthData DEFAULT_INSTANCE;
+    // @@protoc_insertion_point(class_scope:com.andrerinas.headunitrevived.aap.protocol.proto.CallAvailabilityStatus)
+    private static final com.andrerinas.headunitrevived.aap.protocol.proto.Control.CallAvailabilityStatus DEFAULT_INSTANCE;
     static {
-      DEFAULT_INSTANCE = new com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothAuthData();
+      DEFAULT_INSTANCE = new com.andrerinas.headunitrevived.aap.protocol.proto.Control.CallAvailabilityStatus();
     }
 
-    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothAuthData getDefaultInstance() {
+    public static com.andrerinas.headunitrevived.aap.protocol.proto.Control.CallAvailabilityStatus getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
-    @java.lang.Deprecated public static final com.google.protobuf.Parser<BluetoothAuthData>
-        PARSER = new com.google.protobuf.AbstractParser<BluetoothAuthData>() {
+    @java.lang.Deprecated public static final com.google.protobuf.Parser<CallAvailabilityStatus>
+        PARSER = new com.google.protobuf.AbstractParser<CallAvailabilityStatus>() {
       @java.lang.Override
-      public BluetoothAuthData parsePartialFrom(
+      public CallAvailabilityStatus parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -31137,17 +31221,17 @@ public final class Control {
       }
     };
 
-    public static com.google.protobuf.Parser<BluetoothAuthData> parser() {
+    public static com.google.protobuf.Parser<CallAvailabilityStatus> parser() {
       return PARSER;
     }
 
     @java.lang.Override
-    public com.google.protobuf.Parser<BluetoothAuthData> getParserForType() {
+    public com.google.protobuf.Parser<CallAvailabilityStatus> getParserForType() {
       return PARSER;
     }
 
     @java.lang.Override
-    public com.andrerinas.headunitrevived.aap.protocol.proto.Control.BluetoothAuthData getDefaultInstanceForType() {
+    public com.andrerinas.headunitrevived.aap.protocol.proto.Control.CallAvailabilityStatus getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -31239,6 +31323,11 @@ public final class Control {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_Service_GenericNotificationService_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_Service_WifiProjectionService_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_Service_WifiProjectionService_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_ServiceDiscoveryRequest_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -31304,40 +31393,30 @@ public final class Control {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_NavFocusNotification_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_GenericNotificationRequest_descriptor;
+    internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_BatteryStatusNotification_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_GenericNotificationRequest_fieldAccessorTable;
+      internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_BatteryStatusNotification_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_GenericNotification_descriptor;
+    internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_ConnectedDevice_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_GenericNotification_fieldAccessorTable;
+      internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_ConnectedDevice_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_GenericNotificationsStart_descriptor;
+    internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_CarConnectedDevices_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_GenericNotificationsStart_fieldAccessorTable;
+      internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_CarConnectedDevices_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_GenericNotificationsStop_descriptor;
+    internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_UserSwitchResponse_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_GenericNotificationsStop_fieldAccessorTable;
+      internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_UserSwitchResponse_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_BluetoothPairingRequest_descriptor;
+    internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_CallAvailabilityStatus_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_BluetoothPairingRequest_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_BluetoothPairingResponse_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_BluetoothPairingResponse_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_BluetoothAuthData_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_BluetoothAuthData_fieldAccessorTable;
+      internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_CallAvailabilityStatus_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -31349,7 +31428,7 @@ public final class Control {
     java.lang.String[] descriptorData = {
       "\n\rcontrol.proto\0221com.andrerinas.headunit" +
       "revived.aap.protocol.proto\032\014common.proto" +
-      "\032\013media.proto\032\rsensors.proto\"\334!\n\007Service" +
+      "\032\013media.proto\032\rsensors.proto\"\200#\n\007Service" +
       "\022k\n\024phone_status_service\030\n \001(\0132M.com.and" +
       "rerinas.headunitrevived.aap.protocol.pro" +
       "to.Service.PhoneStatusService\022\n\n\002id\030\001 \002(" +
@@ -31378,163 +31457,184 @@ public final class Control {
       "tensionService\022{\n\034generic_notification_s" +
       "ervice\030\r \001(\0132U.com.andrerinas.headunitre" +
       "vived.aap.protocol.proto.Service.Generic" +
-      "NotificationService\032\324\001\n\023SensorSourceServ" +
-      "ice\022f\n\007sensors\030\001 \003(\0132U.com.andrerinas.he" +
-      "adunitrevived.aap.protocol.proto.Service" +
-      ".SensorSourceService.Sensor\032U\n\006Sensor\022K\n" +
-      "\004type\030\001 \002(\0162=.com.andrerinas.headunitrev" +
-      "ived.aap.protocol.proto.SensorType\032\374\010\n\020M" +
-      "ediaSinkService\022Y\n\016available_type\030\001 \002(\0162" +
-      "A.com.andrerinas.headunitrevived.aap.pro" +
-      "tocol.proto.MediaCodecType\022V\n\naudio_type" +
-      "\030\002 \001(\0162B.com.andrerinas.headunitrevived." +
-      "aap.protocol.proto.AudioStreamType\022\\\n\rau" +
-      "dio_configs\030\003 \003(\0132E.com.andrerinas.headu" +
-      "nitrevived.aap.protocol.proto.AudioConfi" +
-      "guration\022u\n\rvideo_configs\030\004 \003(\0132^.com.an" +
+      "NotificationService\022q\n\027wifi_projection_s" +
+      "ervice\030\016 \001(\0132P.com.andrerinas.headunitre" +
+      "vived.aap.protocol.proto.Service.WifiPro" +
+      "jectionService\032\324\001\n\023SensorSourceService\022f" +
+      "\n\007sensors\030\001 \003(\0132U.com.andrerinas.headuni" +
+      "trevived.aap.protocol.proto.Service.Sens" +
+      "orSourceService.Sensor\032U\n\006Sensor\022K\n\004type" +
+      "\030\001 \002(\0162=.com.andrerinas.headunitrevived." +
+      "aap.protocol.proto.SensorType\032\374\010\n\020MediaS" +
+      "inkService\022Y\n\016available_type\030\001 \002(\0162A.com" +
+      ".andrerinas.headunitrevived.aap.protocol" +
+      ".proto.MediaCodecType\022V\n\naudio_type\030\002 \001(" +
+      "\0162B.com.andrerinas.headunitrevived.aap.p" +
+      "rotocol.proto.AudioStreamType\022\\\n\raudio_c" +
+      "onfigs\030\003 \003(\0132E.com.andrerinas.headunitre" +
+      "vived.aap.protocol.proto.AudioConfigurat" +
+      "ion\022u\n\rvideo_configs\030\004 \003(\0132^.com.andreri" +
+      "nas.headunitrevived.aap.protocol.proto.S" +
+      "ervice.MediaSinkService.VideoConfigurati" +
+      "on\022\037\n\027available_while_in_call\030\005 \001(\010\032\276\005\n\022" +
+      "VideoConfiguration\022\221\001\n\020codec_resolution\030" +
+      "\001 \002(\0162w.com.andrerinas.headunitrevived.a" +
+      "ap.protocol.proto.Service.MediaSinkServi" +
+      "ce.VideoConfiguration.VideoCodecResoluti" +
+      "onType\022\205\001\n\nframe_rate\030\002 \002(\0162q.com.andrer" +
+      "inas.headunitrevived.aap.protocol.proto." +
+      "Service.MediaSinkService.VideoConfigurat" +
+      "ion.VideoFrameRateType\022\024\n\014margin_width\030\003" +
+      " \002(\r\022\025\n\rmargin_height\030\004 \002(\r\022\017\n\007density\030\005" +
+      " \002(\r\022 \n\030decoder_additional_depth\030\006 \001(\r\022[" +
+      "\n\020video_codec_type\030\n \001(\0162A.com.andrerina" +
+      "s.headunitrevived.aap.protocol.proto.Med" +
+      "iaCodecType\"\246\001\n\030VideoCodecResolutionType" +
+      "\022\014\n\010_800x480\020\001\022\r\n\t_1280x720\020\002\022\016\n\n_1920x1" +
+      "080\020\003\022\016\n\n_2560x1440\020\004\022\016\n\n_3840x2160\020\005\022\r\n" +
+      "\t_720x1280\020\006\022\016\n\n_1080x1920\020\007\022\016\n\n_1440x25" +
+      "60\020\010\022\016\n\n_2160x3840\020\t\"&\n\022VideoFrameRateTy" +
+      "pe\022\007\n\003_30\020\001\022\007\n\003_60\020\002\032\273\002\n\022InputSourceServ" +
+      "ice\022\032\n\022keycodes_supported\030\001 \003(\r\022n\n\013touch" +
+      "screen\030\002 \001(\0132Y.com.andrerinas.headunitre" +
+      "vived.aap.protocol.proto.Service.InputSo" +
+      "urceService.TouchConfig\022k\n\010touchpad\030\003 \001(" +
+      "\0132Y.com.andrerinas.headunitrevived.aap.p" +
+      "rotocol.proto.Service.InputSourceService" +
+      ".TouchConfig\032,\n\013TouchConfig\022\r\n\005width\030\001 \002" +
+      "(\r\022\016\n\006height\030\002 \002(\r\032\343\001\n\022MediaSourceServic" +
+      "e\022O\n\004type\030\001 \002(\0162A.com.andrerinas.headuni" +
+      "trevived.aap.protocol.proto.MediaCodecTy" +
+      "pe\022[\n\014audio_config\030\002 \002(\0132E.com.andrerina" +
+      "s.headunitrevived.aap.protocol.proto.Aud" +
+      "ioConfiguration\022\037\n\027available_while_in_ca" +
+      "ll\030\003 \001(\010\032\225\001\n\020BluetoothService\022\023\n\013car_add" +
+      "ress\030\001 \002(\t\022l\n\031supported_pairing_methods\030" +
+      "\002 \003(\0162I.com.andrerinas.headunitrevived.a" +
+      "ap.protocol.proto.BluetoothPairingMethod" +
+      "\032\242\003\n\027NavigationStatusService\022\033\n\023minimum_" +
+      "interval_ms\030\001 \002(\r\022l\n\004type\030\002 \002(\0162^.com.an" +
       "drerinas.headunitrevived.aap.protocol.pr" +
-      "oto.Service.MediaSinkService.VideoConfig" +
-      "uration\022\037\n\027available_while_in_call\030\005 \001(\010" +
-      "\032\276\005\n\022VideoConfiguration\022\221\001\n\020codec_resolu" +
-      "tion\030\001 \002(\0162w.com.andrerinas.headunitrevi" +
-      "ved.aap.protocol.proto.Service.MediaSink" +
-      "Service.VideoConfiguration.VideoCodecRes" +
-      "olutionType\022\205\001\n\nframe_rate\030\002 \002(\0162q.com.a" +
-      "ndrerinas.headunitrevived.aap.protocol.p" +
-      "roto.Service.MediaSinkService.VideoConfi" +
-      "guration.VideoFrameRateType\022\024\n\014margin_wi" +
-      "dth\030\003 \002(\r\022\025\n\rmargin_height\030\004 \002(\r\022\017\n\007dens" +
-      "ity\030\005 \002(\r\022 \n\030decoder_additional_depth\030\006 " +
-      "\001(\r\022[\n\020video_codec_type\030\n \001(\0162A.com.andr" +
-      "erinas.headunitrevived.aap.protocol.prot" +
-      "o.MediaCodecType\"\246\001\n\030VideoCodecResolutio" +
-      "nType\022\014\n\010_800x480\020\001\022\r\n\t_1280x720\020\002\022\016\n\n_1" +
-      "920x1080\020\003\022\016\n\n_2560x1440\020\004\022\016\n\n_3840x2160" +
-      "\020\005\022\r\n\t_720x1280\020\006\022\016\n\n_1080x1920\020\007\022\016\n\n_14" +
-      "40x2560\020\010\022\016\n\n_2160x3840\020\t\"&\n\022VideoFrameR" +
-      "ateType\022\007\n\003_30\020\001\022\007\n\003_60\020\002\032\273\002\n\022InputSourc" +
-      "eService\022\032\n\022keycodes_supported\030\001 \003(\r\022n\n\013" +
-      "touchscreen\030\002 \001(\0132Y.com.andrerinas.headu" +
-      "nitrevived.aap.protocol.proto.Service.In" +
-      "putSourceService.TouchConfig\022k\n\010touchpad" +
-      "\030\003 \001(\0132Y.com.andrerinas.headunitrevived." +
-      "aap.protocol.proto.Service.InputSourceSe" +
-      "rvice.TouchConfig\032,\n\013TouchConfig\022\r\n\005widt" +
-      "h\030\001 \002(\r\022\016\n\006height\030\002 \002(\r\032\343\001\n\022MediaSourceS" +
-      "ervice\022O\n\004type\030\001 \002(\0162A.com.andrerinas.he" +
-      "adunitrevived.aap.protocol.proto.MediaCo" +
-      "decType\022[\n\014audio_config\030\002 \002(\0132E.com.andr" +
-      "erinas.headunitrevived.aap.protocol.prot" +
-      "o.AudioConfiguration\022\037\n\027available_while_" +
-      "in_call\030\003 \001(\010\032\225\001\n\020BluetoothService\022\023\n\013ca" +
-      "r_address\030\001 \002(\t\022l\n\031supported_pairing_met" +
-      "hods\030\002 \003(\0162I.com.andrerinas.headunitrevi" +
-      "ved.aap.protocol.proto.BluetoothPairingM" +
-      "ethod\032\242\003\n\027NavigationStatusService\022\033\n\023min" +
-      "imum_interval_ms\030\001 \002(\r\022l\n\004type\030\002 \002(\0162^.c" +
-      "om.andrerinas.headunitrevived.aap.protoc" +
-      "ol.proto.Service.NavigationStatusService" +
-      ".ClusterType\022v\n\rimage_options\030\003 \001(\0132_.co" +
+      "oto.Service.NavigationStatusService.Clus" +
+      "terType\022v\n\rimage_options\030\003 \001(\0132_.com.and" +
+      "rerinas.headunitrevived.aap.protocol.pro" +
+      "to.Service.NavigationStatusService.Image" +
+      "Options\032G\n\014ImageOptions\022\r\n\005width\030\001 \002(\005\022\016" +
+      "\n\006height\030\002 \002(\005\022\030\n\020colour_deth_bits\030\003 \002(\005" +
+      "\";\n\013ClusterType\022\030\n\024CustomImageSupported\020" +
+      "\001\022\022\n\016ImageCodesOnly\020\002\032\034\n\032MediaPlaybackSt" +
+      "atusService\032\347\001\n\020PhoneStatus_Call\022[\n\005stat" +
+      "e\030\001 \001(\0162L.com.andrerinas.headunitrevived" +
+      ".aap.protocol.proto.Service.PhoneStatus_" +
+      "State\022\035\n\025call_duration_seconds\030\002 \001(\r\022\025\n\r" +
+      "caller_number\030\003 \001(\t\022\021\n\tcaller_id\030\004 \001(\t\022\032" +
+      "\n\022caller_number_type\030\005 \001(\t\022\021\n\tthumbnail\030" +
+      "\006 \001(\014\032=\n\021PhoneStatus_Input\022\025\n\rcaller_num" +
+      "ber\030\001 \001(\t\022\021\n\tcaller_id\030\002 \001(\t\032\211\001\n\022PhoneSt" +
+      "atusService\022Z\n\005calls\030\001 \003(\0132K.com.andreri" +
+      "nas.headunitrevived.aap.protocol.proto.S" +
+      "ervice.PhoneStatus_Call\022\027\n\017signal_streng" +
+      "th\030\002 \001(\r\032P\n\026VendorExtensionService\022\014\n\004na" +
+      "me\030\001 \001(\t\022\032\n\022package_white_list\030\002 \003(\t\022\014\n\004" +
+      "data\030\003 \001(\014\032\034\n\032GenericNotificationService" +
+      "\032/\n\025WifiProjectionService\022\026\n\016car_wifi_bs" +
+      "sid\030\001 \001(\t\"d\n\021PhoneStatus_State\022\n\n\006InCall" +
+      "\020\001\022\n\n\006OnHold\020\002\022\r\n\tHangingUp\020\003\022\014\n\010Incomin" +
+      "g\020\004\022\t\n\005Muted\020\005\022\017\n\013Conferenced\020\006\"B\n\027Servi" +
+      "ceDiscoveryRequest\022\022\n\nphone_name\030\004 \002(\t\022\023" +
+      "\n\013phone_brand\030\005 \002(\t\"\376\002\n\030ServiceDiscovery" +
+      "Response\022L\n\010services\030\001 \003(\0132:.com.andreri" +
+      "nas.headunitrevived.aap.protocol.proto.S" +
+      "ervice\022\014\n\004make\030\002 \002(\t\022\r\n\005model\030\003 \002(\t\022\014\n\004y" +
+      "ear\030\004 \002(\t\022\022\n\nvehicle_id\030\005 \002(\t\022\027\n\017driver_" +
+      "position\030\006 \002(\010\022\026\n\016head_unit_make\030\007 \002(\t\022\027" +
+      "\n\017head_unit_model\030\010 \002(\t\022 \n\030head_unit_sof" +
+      "tware_build\030\t \002(\t\022\"\n\032head_unit_software_" +
+      "version\030\n \002(\t\022\'\n\037can_play_native_media_d" +
+      "uring_vr\030\013 \002(\010\022\034\n\024hide_projected_clock\030\014" +
+      " \001(\010\":\n\022ChannelOpenRequest\022\020\n\010priority\030\001" +
+      " \002(\005\022\022\n\nservice_id\030\002 \002(\005\"g\n\023ChannelOpenR" +
+      "esponse\022P\n\006status\030\001 \002(\0162@.com.andrerinas" +
+      ".headunitrevived.aap.protocol.proto.Mess" +
+      "ageStatus\"4\n\013PingRequest\022\021\n\ttimestamp\030\001 " +
+      "\002(\003\022\022\n\nbug_report\030\002 \001(\005\"!\n\014PingResponse\022" +
+      "\021\n\ttimestamp\030\001 \002(\003\"`\n\rByeByeRequest\022O\n\006r" +
+      "eason\030\001 \002(\0162?.com.andrerinas.headunitrev" +
+      "ived.aap.protocol.proto.ByeByeReason\"\020\n\016" +
+      "ByeByeResponse\"\317\001\n\030VoiceSessionNotificat" +
+      "ion\022n\n\006status\030\001 \002(\0162^.com.andrerinas.hea" +
+      "dunitrevived.aap.protocol.proto.VoiceSes" +
+      "sionNotification.VoiceSessionStatus\"C\n\022V" +
+      "oiceSessionStatus\022\026\n\022VOICE_STATUS_START\020" +
+      "\001\022\025\n\021VOICE_STATUS_STOP\020\002\"\203\002\n\035AudioFocusR" +
+      "equestNotification\022w\n\007request\030\001 \001(\0162f.co" +
       "m.andrerinas.headunitrevived.aap.protoco" +
-      "l.proto.Service.NavigationStatusService." +
-      "ImageOptions\032G\n\014ImageOptions\022\r\n\005width\030\001 " +
-      "\002(\005\022\016\n\006height\030\002 \002(\005\022\030\n\020colour_deth_bits\030" +
-      "\003 \002(\005\";\n\013ClusterType\022\030\n\024CustomImageSuppo" +
-      "rted\020\001\022\022\n\016ImageCodesOnly\020\002\032\034\n\032MediaPlayb" +
-      "ackStatusService\032\347\001\n\020PhoneStatus_Call\022[\n" +
-      "\005state\030\001 \001(\0162L.com.andrerinas.headunitre" +
-      "vived.aap.protocol.proto.Service.PhoneSt" +
-      "atus_State\022\035\n\025call_duration_seconds\030\002 \001(" +
-      "\r\022\025\n\rcaller_number\030\003 \001(\t\022\021\n\tcaller_id\030\004 " +
-      "\001(\t\022\032\n\022caller_number_type\030\005 \001(\t\022\021\n\tthumb" +
-      "nail\030\006 \001(\014\032=\n\021PhoneStatus_Input\022\025\n\rcalle" +
-      "r_number\030\001 \001(\t\022\021\n\tcaller_id\030\002 \001(\t\032\211\001\n\022Ph" +
-      "oneStatusService\022Z\n\005calls\030\001 \003(\0132K.com.an" +
+      "l.proto.AudioFocusRequestNotification.Au" +
+      "dioFocusRequestType\"i\n\025AudioFocusRequest" +
+      "Type\022\010\n\004NONE\020\000\022\010\n\004GAIN\020\001\022\022\n\016GAIN_TRANSIE" +
+      "NT\020\002\022\033\n\027GAIN_TRANSIENT_MAY_DUCK\020\003\022\013\n\007REL" +
+      "EASE\020\004\"\363\002\n\026AudioFocusNotification\022r\n\013foc" +
+      "us_state\030\001 \002(\0162].com.andrerinas.headunit" +
+      "revived.aap.protocol.proto.AudioFocusNot" +
+      "ification.AudioFocusStateType\022\023\n\013unsolic" +
+      "ited\030\002 \001(\010\"\317\001\n\023AudioFocusStateType\022\016\n\nST" +
+      "ATE_GAIN\020\001\022\030\n\024STATE_GAIN_TRANSIENT\020\002\022\016\n\n" +
+      "STATE_LOSS\020\003\022!\n\035STATE_LOSS_TRANSIENT_CAN" +
+      "_DUCK\020\004\022\030\n\024STATE_LOSS_TRANSIENT\020\005\022\031\n\025STA" +
+      "TE_GAIN_MEDIA_ONLY\020\006\022&\n\"STATE_GAIN_TRANS" +
+      "IENT_GUIDANCE_ONLY\020\007\"r\n\033NavFocusRequestN" +
+      "otification\022S\n\nfocus_type\030\001 \001(\0162?.com.an" +
       "drerinas.headunitrevived.aap.protocol.pr" +
-      "oto.Service.PhoneStatus_Call\022\027\n\017signal_s" +
-      "trength\030\002 \001(\r\032P\n\026VendorExtensionService\022" +
-      "\014\n\004name\030\001 \001(\t\022\032\n\022package_white_list\030\002 \003(" +
-      "\t\022\014\n\004data\030\003 \001(\014\032\034\n\032GenericNotificationSe" +
-      "rvice\"d\n\021PhoneStatus_State\022\n\n\006InCall\020\001\022\n" +
-      "\n\006OnHold\020\002\022\r\n\tHangingUp\020\003\022\014\n\010Incoming\020\004\022" +
-      "\t\n\005Muted\020\005\022\017\n\013Conferenced\020\006\"B\n\027ServiceDi" +
-      "scoveryRequest\022\022\n\nphone_name\030\004 \002(\t\022\023\n\013ph" +
-      "one_brand\030\005 \002(\t\"\376\002\n\030ServiceDiscoveryResp" +
-      "onse\022L\n\010services\030\001 \003(\0132:.com.andrerinas." +
-      "headunitrevived.aap.protocol.proto.Servi" +
-      "ce\022\014\n\004make\030\002 \002(\t\022\r\n\005model\030\003 \002(\t\022\014\n\004year\030" +
-      "\004 \002(\t\022\022\n\nvehicle_id\030\005 \002(\t\022\027\n\017driver_posi" +
-      "tion\030\006 \002(\010\022\026\n\016head_unit_make\030\007 \002(\t\022\027\n\017he" +
-      "ad_unit_model\030\010 \002(\t\022 \n\030head_unit_softwar" +
-      "e_build\030\t \002(\t\022\"\n\032head_unit_software_vers" +
-      "ion\030\n \002(\t\022\'\n\037can_play_native_media_durin" +
-      "g_vr\030\013 \002(\010\022\034\n\024hide_projected_clock\030\014 \001(\010" +
-      "\":\n\022ChannelOpenRequest\022\020\n\010priority\030\001 \002(\005" +
-      "\022\022\n\nservice_id\030\002 \002(\005\"g\n\023ChannelOpenRespo" +
-      "nse\022P\n\006status\030\001 \002(\0162@.com.andrerinas.hea" +
-      "dunitrevived.aap.protocol.proto.MessageS" +
-      "tatus\"4\n\013PingRequest\022\021\n\ttimestamp\030\001 \002(\003\022" +
-      "\022\n\nbug_report\030\002 \001(\005\"!\n\014PingResponse\022\021\n\tt" +
-      "imestamp\030\001 \002(\003\"\210\001\n\rByeByeRequest\022]\n\006reas" +
-      "on\030\001 \002(\0162M.com.andrerinas.headunitrevive" +
-      "d.aap.protocol.proto.ByeByeRequest.ByeBy" +
-      "eReason\"\030\n\014ByeByeReason\022\010\n\004QUIT\020\001\"\020\n\016Bye" +
-      "ByeResponse\"\317\001\n\030VoiceSessionNotification" +
-      "\022n\n\006status\030\001 \002(\0162^.com.andrerinas.headun" +
-      "itrevived.aap.protocol.proto.VoiceSessio" +
-      "nNotification.VoiceSessionStatus\"C\n\022Voic" +
-      "eSessionStatus\022\026\n\022VOICE_STATUS_START\020\001\022\025" +
-      "\n\021VOICE_STATUS_STOP\020\002\"\203\002\n\035AudioFocusRequ" +
-      "estNotification\022w\n\007request\030\001 \001(\0162f.com.a" +
-      "ndrerinas.headunitrevived.aap.protocol.p" +
-      "roto.AudioFocusRequestNotification.Audio" +
-      "FocusRequestType\"i\n\025AudioFocusRequestTyp" +
-      "e\022\010\n\004NONE\020\000\022\010\n\004GAIN\020\001\022\022\n\016GAIN_TRANSIENT\020" +
-      "\002\022\033\n\027GAIN_TRANSIENT_MAY_DUCK\020\003\022\013\n\007RELEAS" +
-      "E\020\004\"\363\002\n\026AudioFocusNotification\022r\n\013focus_" +
-      "state\030\001 \002(\0162].com.andrerinas.headunitrev" +
-      "ived.aap.protocol.proto.AudioFocusNotifi" +
-      "cation.AudioFocusStateType\022\023\n\013unsolicite" +
-      "d\030\002 \001(\010\"\317\001\n\023AudioFocusStateType\022\016\n\nSTATE" +
-      "_GAIN\020\001\022\030\n\024STATE_GAIN_TRANSIENT\020\002\022\016\n\nSTA" +
-      "TE_LOSS\020\003\022!\n\035STATE_LOSS_TRANSIENT_CAN_DU" +
-      "CK\020\004\022\030\n\024STATE_LOSS_TRANSIENT\020\005\022\031\n\025STATE_" +
-      "GAIN_MEDIA_ONLY\020\006\022&\n\"STATE_GAIN_TRANSIEN" +
-      "T_GUIDANCE_ONLY\020\007\"r\n\033NavFocusRequestNoti" +
-      "fication\022S\n\nfocus_type\030\001 \001(\0162?.com.andre" +
-      "rinas.headunitrevived.aap.protocol.proto" +
-      ".NavFocusType\"k\n\024NavFocusNotification\022S\n" +
-      "\nfocus_type\030\001 \002(\0162?.com.andrerinas.headu" +
-      "nitrevived.aap.protocol.proto.NavFocusTy" +
-      "pe\"D\n\032GenericNotificationRequest\022\n\n\002id\030\001" +
-      " \002(\t\022\014\n\004text\030\002 \001(\t\022\014\n\004icon\030\003 \001(\t\"2\n\023Gene" +
-      "ricNotification\022\n\n\002id\030\001 \002(\t\022\017\n\007handled\030\002" +
-      " \002(\010\"\033\n\031GenericNotificationsStart\"\032\n\030Gen" +
-      "ericNotificationsStop\"\223\001\n\027BluetoothPairi" +
-      "ngRequest\022\025\n\rphone_address\030\001 \002(\t\022a\n\016pair" +
-      "ing_method\030\002 \002(\0162I.com.andrerinas.headun" +
-      "itrevived.aap.protocol.proto.BluetoothPa" +
-      "iringMethod\"\334\001\n\030BluetoothPairingResponse" +
-      "\022\026\n\016already_paired\030\001 \001(\010\022r\n\006status\030\002 \001(\016" +
-      "2b.com.andrerinas.headunitrevived.aap.pr" +
-      "otocol.proto.BluetoothPairingResponse.Bl" +
-      "uetoothPairingStatus\"4\n\026BluetoothPairing" +
-      "Status\022\010\n\004NONE\020\000\022\006\n\002OK\020\001\022\010\n\004FAIL\020\002\"!\n\021Bl" +
-      "uetoothAuthData\022\014\n\004data\030\001 \001(\t*\235\003\n\016Contro" +
-      "lMsgType\022\r\n\tMEDIADATA\020\000\022\r\n\tCODECDATA\020\001\022\023" +
-      "\n\017VERSIONRESPONSE\020\002\022\r\n\tHANDSHAKE\020\003\022\033\n\027SE" +
-      "RVICEDISCOVERYREQUEST\020\005\022\034\n\030SERVICEDISCOV" +
-      "ERYRESPONSE\020\006\022\026\n\022CHANNELOPENREQUEST\020\007\022\027\n" +
-      "\023CHANNELOPENRESPONSE\020\010\022\017\n\013PINGREQUEST\020\013\022" +
-      "\020\n\014PINGRESPONSE\020\014\022\037\n\033NAVFOCUSREQUESTNOTI" +
-      "FICATION\020\r\022\031\n\025NAVFOCUSRNOTIFICATION\020\016\022\020\n" +
-      "\014BYEYEREQUEST\020\017\022\021\n\rBYEYERESPONSE\020\020\022\034\n\030VO" +
-      "ICESESSIONNOTIFICATION\020\021\022 \n\034AUDIOFOCUSRE" +
-      "QUESTNOTFICATION\020\022\022\031\n\025AUDIOFOCUSNOTFICAT" +
-      "ION\020\023*G\n\026BluetoothPairingMethod\022\014\n\010METHO" +
-      "D_1\020\001\022\010\n\004A2DP\020\002\022\014\n\010METHOD_3\020\003\022\007\n\003HFP\020\004*0" +
-      "\n\014NavFocusType\022\017\n\013NAV_FOCUS_1\020\001\022\017\n\013NAV_F" +
-      "OCUS_2\020\002B\tB\007Control"
+      "oto.NavFocusType\"k\n\024NavFocusNotification" +
+      "\022S\n\nfocus_type\030\001 \002(\0162?.com.andrerinas.he" +
+      "adunitrevived.aap.protocol.proto.NavFocu" +
+      "sType\"f\n\031BatteryStatusNotification\022\025\n\rba" +
+      "ttery_level\030\001 \002(\r\022\030\n\020time_remaining_s\030\002 " +
+      "\001(\r\022\030\n\020critical_battery\030\003 \001(\010\"9\n\017Connect" +
+      "edDevice\022\023\n\013device_name\030\001 \001(\t\022\021\n\tdevice_" +
+      "id\030\002 \001(\005\"\243\001\n\023CarConnectedDevices\022]\n\021conn" +
+      "ected_devices\030\001 \003(\0132B.com.andrerinas.hea" +
+      "dunitrevived.aap.protocol.proto.Connecte" +
+      "dDevice\022\023\n\013unsolicited\030\002 \001(\010\022\030\n\nfinal_li" +
+      "st\030\003 \001(\010:\004true\"\374\001\n\022UserSwitchResponse\022f\n" +
+      "\006status\030\001 \001(\0162V.com.andrerinas.headunitr" +
+      "evived.aap.protocol.proto.UserSwitchResp" +
+      "onse.UserSwitchStatus\022[\n\017selected_device" +
+      "\030\002 \001(\0132B.com.andrerinas.headunitrevived." +
+      "aap.protocol.proto.ConnectedDevice\"!\n\020Us" +
+      "erSwitchStatus\022\r\n\tSTATUS_OK\020\000\"0\n\026CallAva" +
+      "ilabilityStatus\022\026\n\016call_available\030\001 \001(\010*" +
+      "\255\007\n\016ControlMsgType\022\033\n\027MESSAGE_VERSION_RE" +
+      "QUEST\020\001\022\034\n\030MESSAGE_VERSION_RESPONSE\020\002\022\034\n" +
+      "\030MESSAGE_ENCAPSULATED_SSL\020\003\022\031\n\025MESSAGE_A" +
+      "UTH_COMPLETE\020\004\022%\n!MESSAGE_SERVICE_DISCOV" +
+      "ERY_REQUEST\020\005\022&\n\"MESSAGE_SERVICE_DISCOVE" +
+      "RY_RESPONSE\020\006\022 \n\034MESSAGE_CHANNEL_OPEN_RE" +
+      "QUEST\020\007\022!\n\035MESSAGE_CHANNEL_OPEN_RESPONSE" +
+      "\020\010\022&\n\"MESSAGE_CHANNEL_CLOSE_NOTIFICATION" +
+      "\020\t\022\030\n\024MESSAGE_PING_REQUEST\020\013\022\031\n\025MESSAGE_" +
+      "PING_RESPONSE\020\014\022\035\n\031MESSAGE_NAV_FOCUS_REQ" +
+      "UEST\020\r\022\"\n\036MESSAGE_NAV_FOCUS_NOTIFICATION" +
+      "\020\016\022\032\n\026MESSAGE_BYEBYE_REQUEST\020\017\022\033\n\027MESSAG" +
+      "E_BYEBYE_RESPONSE\020\020\022&\n\"MESSAGE_VOICE_SES" +
+      "SION_NOTIFICATION\020\021\022\037\n\033MESSAGE_AUDIO_FOC" +
+      "US_REQUEST\020\022\022$\n MESSAGE_AUDIO_FOCUS_NOTI" +
+      "FICATION\020\023\022)\n%MESSAGE_CAR_CONNECTED_DEVI" +
+      "CES_REQUEST\020\024\022*\n&MESSAGE_CAR_CONNECTED_D" +
+      "EVICES_RESPONSE\020\025\022\037\n\033MESSAGE_USER_SWITCH" +
+      "_REQUEST\020\026\022\'\n#MESSAGE_BATTERY_STATUS_NOT" +
+      "IFICATION\020\027\022$\n MESSAGE_CALL_AVAILABILITY" +
+      "_STATUS\020\030\022 \n\034MESSAGE_USER_SWITCH_RESPONS" +
+      "E\020\031\022$\n MESSAGE_SERVICE_DISCOVERY_UPDATE\020" +
+      "\032\022\037\n\032MESSAGE_UNEXPECTED_MESSAGE\020\377\001\022\033\n\025ME" +
+      "SSAGE_FRAMING_ERROR\020\377\377\003*G\n\026BluetoothPair" +
+      "ingMethod\022\014\n\010METHOD_1\020\001\022\010\n\004A2DP\020\002\022\014\n\010MET" +
+      "HOD_3\020\003\022\007\n\003HFP\020\004*z\n\014ByeByeReason\022\022\n\016USER" +
+      "_SELECTION\020\001\022\021\n\rDEVICE_SWITCH\020\002\022\021\n\rNOT_S" +
+      "UPPORTED\020\003\022\033\n\027NOT_CURRENTLY_SUPPORTED\020\004\022" +
+      "\023\n\017PROBE_SUPPORTED\020\005*0\n\014NavFocusType\022\017\n\013" +
+      "NAV_FOCUS_1\020\001\022\017\n\013NAV_FOCUS_2\020\002B\tB\007Contro" +
+      "l"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -31548,7 +31648,7 @@ public final class Control {
     internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_Service_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_Service_descriptor,
-        new java.lang.String[] { "PhoneStatusService", "Id", "SensorSourceService", "MediaSinkService", "InputSourceService", "MediaSourceService", "BluetoothService", "NavigationStatusService", "MediaPlaybackService", "VendorExtensionService", "GenericNotificationService", });
+        new java.lang.String[] { "PhoneStatusService", "Id", "SensorSourceService", "MediaSinkService", "InputSourceService", "MediaSourceService", "BluetoothService", "NavigationStatusService", "MediaPlaybackService", "VendorExtensionService", "GenericNotificationService", "WifiProjectionService", });
     internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_Service_SensorSourceService_descriptor =
       internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_Service_descriptor.getNestedTypes().get(0);
     internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_Service_SensorSourceService_fieldAccessorTable = new
@@ -31645,6 +31745,12 @@ public final class Control {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_Service_GenericNotificationService_descriptor,
         new java.lang.String[] { });
+    internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_Service_WifiProjectionService_descriptor =
+      internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_Service_descriptor.getNestedTypes().get(12);
+    internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_Service_WifiProjectionService_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_Service_WifiProjectionService_descriptor,
+        new java.lang.String[] { "CarWifiBssid", });
     internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_ServiceDiscoveryRequest_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_ServiceDiscoveryRequest_fieldAccessorTable = new
@@ -31723,48 +31829,36 @@ public final class Control {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_NavFocusNotification_descriptor,
         new java.lang.String[] { "FocusType", });
-    internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_GenericNotificationRequest_descriptor =
+    internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_BatteryStatusNotification_descriptor =
       getDescriptor().getMessageTypes().get(14);
-    internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_GenericNotificationRequest_fieldAccessorTable = new
+    internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_BatteryStatusNotification_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_GenericNotificationRequest_descriptor,
-        new java.lang.String[] { "Id", "Text", "Icon", });
-    internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_GenericNotification_descriptor =
+        internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_BatteryStatusNotification_descriptor,
+        new java.lang.String[] { "BatteryLevel", "TimeRemainingS", "CriticalBattery", });
+    internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_ConnectedDevice_descriptor =
       getDescriptor().getMessageTypes().get(15);
-    internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_GenericNotification_fieldAccessorTable = new
+    internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_ConnectedDevice_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_GenericNotification_descriptor,
-        new java.lang.String[] { "Id", "Handled", });
-    internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_GenericNotificationsStart_descriptor =
+        internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_ConnectedDevice_descriptor,
+        new java.lang.String[] { "DeviceName", "DeviceId", });
+    internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_CarConnectedDevices_descriptor =
       getDescriptor().getMessageTypes().get(16);
-    internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_GenericNotificationsStart_fieldAccessorTable = new
+    internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_CarConnectedDevices_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_GenericNotificationsStart_descriptor,
-        new java.lang.String[] { });
-    internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_GenericNotificationsStop_descriptor =
+        internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_CarConnectedDevices_descriptor,
+        new java.lang.String[] { "ConnectedDevices", "Unsolicited", "FinalList", });
+    internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_UserSwitchResponse_descriptor =
       getDescriptor().getMessageTypes().get(17);
-    internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_GenericNotificationsStop_fieldAccessorTable = new
+    internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_UserSwitchResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_GenericNotificationsStop_descriptor,
-        new java.lang.String[] { });
-    internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_BluetoothPairingRequest_descriptor =
+        internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_UserSwitchResponse_descriptor,
+        new java.lang.String[] { "Status", "SelectedDevice", });
+    internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_CallAvailabilityStatus_descriptor =
       getDescriptor().getMessageTypes().get(18);
-    internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_BluetoothPairingRequest_fieldAccessorTable = new
+    internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_CallAvailabilityStatus_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_BluetoothPairingRequest_descriptor,
-        new java.lang.String[] { "PhoneAddress", "PairingMethod", });
-    internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_BluetoothPairingResponse_descriptor =
-      getDescriptor().getMessageTypes().get(19);
-    internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_BluetoothPairingResponse_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_BluetoothPairingResponse_descriptor,
-        new java.lang.String[] { "AlreadyPaired", "Status", });
-    internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_BluetoothAuthData_descriptor =
-      getDescriptor().getMessageTypes().get(20);
-    internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_BluetoothAuthData_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_BluetoothAuthData_descriptor,
-        new java.lang.String[] { "Data", });
+        internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_CallAvailabilityStatus_descriptor,
+        new java.lang.String[] { "CallAvailable", });
     com.andrerinas.headunitrevived.aap.protocol.proto.Common.getDescriptor();
     com.andrerinas.headunitrevived.aap.protocol.proto.Media.getDescriptor();
     com.andrerinas.headunitrevived.aap.protocol.proto.Sensors.getDescriptor();

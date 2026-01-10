@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.widget.Button
 import android.widget.EditText
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentManager
@@ -22,6 +23,8 @@ class AddNetworkAddressDialog : DialogFragment() {
         val second = content.findViewById<EditText>(R.id.second)
         val third = content.findViewById<EditText>(R.id.third)
         val fourth = content.findViewById<EditText>(R.id.fourth)
+        val btnAdd = content.findViewById<Button>(R.id.btn_add)
+        val btnCancel = content.findViewById<Button>(R.id.btn_cancel)
 
         val ip = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             arguments?.getSerializable("ip", InetAddress::class.java)
@@ -38,26 +41,35 @@ class AddNetworkAddressDialog : DialogFragment() {
 
         fourth.requestFocus()
 
-        builder.setView(content)
+        // Create the dialog without default buttons
+        val dialog = builder.setView(content)
                 .setTitle("Enter ip address")
-                .setPositiveButton("Add") { _, _ ->
-                    val newAddr = ByteArray(4)
-                    try {
-                        newAddr[0] = strToByte(first.text.toString())
-                        newAddr[1] = strToByte(second.text.toString())
-                        newAddr[2] = strToByte(third.text.toString())
-                        newAddr[3] = strToByte(fourth.text.toString())
+                .create()
 
-                        val f = parentFragment as? NetworkListFragment
-                        f?.addAddress(InetAddress.getByAddress(newAddr))
-                    } catch (e: java.net.UnknownHostException) {
-                        AppLog.e(e)
-                    } catch (e: NumberFormatException) {
-                        AppLog.e(e)
-                    }
-                }
-                .setNegativeButton(android.R.string.cancel) { dialog, _ -> dialog.cancel() }
-        return builder.create()
+        // Set listeners on our custom buttons
+        btnAdd.setOnClickListener {
+            val newAddr = ByteArray(4)
+            try {
+                newAddr[0] = strToByte(first.text.toString())
+                newAddr[1] = strToByte(second.text.toString())
+                newAddr[2] = strToByte(third.text.toString())
+                newAddr[3] = strToByte(fourth.text.toString())
+
+                val f = parentFragment as? NetworkListFragment
+                f?.addAddress(InetAddress.getByAddress(newAddr))
+                dialog.dismiss()
+            } catch (e: java.net.UnknownHostException) {
+                AppLog.e(e)
+            } catch (e: NumberFormatException) {
+                AppLog.e(e)
+            }
+        }
+
+        btnCancel.setOnClickListener {
+            dialog.cancel()
+        }
+
+        return dialog
     }
 
     companion object {

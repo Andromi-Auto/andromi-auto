@@ -25,13 +25,16 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
 
     testImplementation("junit:junit:4.13.2")
-    testImplementation("org.mockito:mockito-core:5.9.0")
 
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.0")
     implementation(project(":contract"))
 
     // Multidex
     implementation("androidx.multidex:multidex:2.0.1")
+
+    // Navigation Component
+    implementation("androidx.navigation:navigation-fragment-ktx:2.3.5")
+    implementation("androidx.navigation:navigation-ui-ktx:2.3.5")
 }
 
 android {
@@ -43,9 +46,9 @@ android {
         minSdk = 19
         targetSdk = 34
         versionCode = 22
-        versionName = "1.5.0"
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner" // Added for multidex
-        multiDexEnabled = true // Enabled Multidex
+        versionName = "1.6.0"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        multiDexEnabled = true
     }
 
     signingConfigs {
