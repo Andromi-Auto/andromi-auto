@@ -16,6 +16,7 @@ object Channel {
     const val ID_NOT = 11
     const val ID_NOTI = 11
     const val ID_PHONE = 12
+    const val ID_WIFI = 13
 
     fun name(channel: Int): String {
         when (channel) {

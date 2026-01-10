@@ -184,6 +184,11 @@ message Service
     {
     }
 
+    message WifiProjectionService
+    {
+        optional string car_wifi_bssid = 1;
+    }
+
     required uint32 id = 1;
     optional SensorSourceService sensor_source_service = 2;
     optional MediaSinkService media_sink_service = 3;
@@ -194,6 +199,7 @@ message Service
     optional MediaPlaybackStatusService media_playback_service = 9;
     optional VendorExtensionService vendor_extension_service = 12;
     optional GenericNotificationService generic_notification_service = 13;
+    optional WifiProjectionService wifi_projection_service = 14;
     //radio_service = 7
     //media_browser_service=11
 }
