@@ -76,5 +76,6 @@
     <string name="save">Save</string>
     <string name="save_and_restart">Save &amp; Restart</string>
     <string name="add_new">Add new</string>
+    <string name="cancel">Cancel</string>
 </resources>
 

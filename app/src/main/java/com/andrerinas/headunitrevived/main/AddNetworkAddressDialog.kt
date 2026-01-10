@@ -16,7 +16,7 @@ class AddNetworkAddressDialog : DialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): android.app.Dialog {
         val builder = AlertDialog.Builder(activity, R.style.DarkAlertDialog)
-        val content = LayoutInflater.from(activity)
+        val content = LayoutInflater.from(builder.context)
                 .inflate(R.layout.fragment_add_network_address, null, false)
 
         val first = content.findViewById<EditText>(R.id.first)
@@ -43,7 +43,7 @@ class AddNetworkAddressDialog : DialogFragment() {
 
         // Create the dialog without default buttons
         val dialog = builder.setView(content)
-                .setTitle("Enter ip address")
+                .setTitle("Enter IP Address")
                 .create()
 
         // Set listeners on our custom buttons

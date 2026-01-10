@@ -283,10 +283,9 @@ class SettingsFragment : Fragment() {
                         dialog.dismiss()
                         updateSettingsList()
                     }
-                    .setNegativeButton(android.R.string.cancel) { dialog, _ ->
-                        dialog.cancel()
-                    }
-                    .show()
+                                    .setNegativeButton(R.string.cancel) { dialog, _ ->
+                                        dialog.cancel()
+                                    }                    .show()
             }
         ))
 
@@ -405,10 +404,9 @@ class SettingsFragment : Fragment() {
                         dialog.dismiss()
                         updateSettingsList()
                     }
-                    .setNegativeButton(android.R.string.cancel) { dialog, _ ->
-                        dialog.cancel()
-                    }
-                    .show()
+                                    .setNegativeButton(R.string.cancel) { dialog, _ ->
+                                        dialog.cancel()
+                                    }                    .show()
             }
         ))
 
