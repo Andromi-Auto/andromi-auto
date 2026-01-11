@@ -46,6 +46,11 @@ https://github.com/mikereidis/headunit
   - Auto-Connect last session (if possible)
 
 ## Changelog
+### v.1.6.2
+- Fixed critical screen flickering during startup and fullscreen transitions
+- Resolved video decoder freezing issues on tablets and older devices
+- Improved system bar handling for a more stable projection experience
+
 ### v.1.6.1
 - Added "About" page with version info, changelog, and license
 - Added "Force Legacy Decoder" (synchronous mode) setting to fix issues on some devices (e.g., Mediatek)

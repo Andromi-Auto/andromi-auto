@@ -148,7 +148,7 @@ class SettingsFragment : Fragment() {
 
         if (requiresRestart) {
             if (AapService.isConnected) {
-                Toast.makeText(context, "Restarting connection...", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Stopping service to apply changes...", Toast.LENGTH_SHORT).show()
                 val stopServiceIntent = Intent(requireContext(), AapService::class.java).apply {
                     action = AapService.ACTION_STOP_SERVICE
                 }
