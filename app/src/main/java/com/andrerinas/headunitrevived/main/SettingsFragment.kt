@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -20,6 +21,7 @@ import com.andrerinas.headunitrevived.aap.AapService
 import com.andrerinas.headunitrevived.main.settings.SettingItem
 import com.andrerinas.headunitrevived.main.settings.SettingsAdapter
 import com.andrerinas.headunitrevived.utils.Settings
+import com.andrerinas.headunitrevived.BuildConfig
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
 
@@ -39,6 +41,7 @@ class SettingsFragment : Fragment() {
     private var pendingFullscreen: Boolean? = null
     private var pendingViewMode: Settings.ViewMode? = null
     private var pendingForceSoftware: Boolean? = null
+    private var pendingLegacyDecoder: Boolean? = null
     private var pendingVideoCodec: String? = null
     private var pendingFpsLimit: Int? = null
     private var pendingDebugMode: Boolean? = null
@@ -66,10 +69,18 @@ class SettingsFragment : Fragment() {
         pendingFullscreen = settings.startInFullscreenMode
         pendingViewMode = settings.viewMode
         pendingForceSoftware = settings.forceSoftwareDecoding
+        pendingLegacyDecoder = settings.forceLegacyDecoder
         pendingVideoCodec = settings.videoCodec
         pendingFpsLimit = settings.fpsLimit
         pendingDebugMode = settings.debugMode
         pendingBluetoothAddress = settings.bluetoothAddress
+
+        // Intercept system back button
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                handleBackPress()
+            }
+        })
 
         toolbar = view.findViewById(R.id.toolbar)
         settingsAdapter = SettingsAdapter()
@@ -83,7 +94,7 @@ class SettingsFragment : Fragment() {
 
     private fun setupToolbar() {
         toolbar.setNavigationOnClickListener {
-            findNavController().popBackStack()
+            handleBackPress()
         }
         
         // Add the Save item with custom layout
@@ -100,15 +111,24 @@ class SettingsFragment : Fragment() {
         updateSaveButtonState()
     }
 
+    private fun handleBackPress() {
+        if (hasChanges) {
+            AlertDialog.Builder(requireContext())
+                .setTitle("Unsaved Changes")
+                .setMessage("You have unsaved changes. Do you want to discard them?")
+                .setPositiveButton("Discard") { _, _ ->
+                    findNavController().popBackStack()
+                }
+                .setNegativeButton(R.string.cancel, null)
+                .show()
+        } else {
+            findNavController().popBackStack()
+        }
+    }
+
     private fun updateSaveButtonState() {
         saveButton?.isEnabled = hasChanges
         saveButton?.text = if (requiresRestart) getString(R.string.save_and_restart) else getString(R.string.save)
-        
-        // Ensure background tint is correct (Teal when enabled, Grey when disabled) is handled by MaterialButton automatically 
-        // if using correct style, but we set tint in XML.
-        // MaterialButton automatically handles disabled state color if using default styles, 
-        // but since we set backgroundTint in XML, we might need to rely on selector or just alpha.
-        // Actually, MaterialButton with backgroundTint will just alpha-blend it when disabled.
     }
 
     private fun saveSettings() {
@@ -120,6 +140,7 @@ class SettingsFragment : Fragment() {
         pendingFullscreen?.let { settings.startInFullscreenMode = it }
         pendingViewMode?.let { settings.viewMode = it }
         pendingForceSoftware?.let { settings.forceSoftwareDecoding = it }
+        pendingLegacyDecoder?.let { settings.forceLegacyDecoder = it }
         pendingVideoCodec?.let { settings.videoCodec = it }
         pendingFpsLimit?.let { settings.fpsLimit = it }
         pendingDebugMode?.let { settings.debugMode = it }
@@ -153,6 +174,7 @@ class SettingsFragment : Fragment() {
                         pendingFullscreen != settings.startInFullscreenMode ||
                         pendingViewMode != settings.viewMode ||
                         pendingForceSoftware != settings.forceSoftwareDecoding ||
+                        pendingLegacyDecoder != settings.forceLegacyDecoder ||
                         pendingVideoCodec != settings.videoCodec ||
                         pendingFpsLimit != settings.fpsLimit ||
                         pendingDebugMode != settings.debugMode ||
@@ -165,7 +187,8 @@ class SettingsFragment : Fragment() {
                           pendingVideoCodec != settings.videoCodec ||
                           pendingFpsLimit != settings.fpsLimit ||
                           pendingDpi != settings.dpiPixelDensity ||
-                          pendingForceSoftware != settings.forceSoftwareDecoding
+                          pendingForceSoftware != settings.forceSoftwareDecoding ||
+                          pendingLegacyDecoder != settings.forceLegacyDecoder
 
         updateSaveButtonState()
     }
@@ -335,6 +358,18 @@ class SettingsFragment : Fragment() {
             }
         ))
 
+        items.add(SettingItem.ToggleSettingEntry(
+            stableId = "forceLegacyDecoder",
+            nameResId = R.string.force_legacy_decoder,
+            descriptionResId = R.string.force_legacy_decoder_description,
+            isChecked = pendingLegacyDecoder!!,
+            onCheckedChanged = { isChecked ->
+                pendingLegacyDecoder = isChecked
+                checkChanges()
+                updateSettingsList()
+            }
+        ))
+
         items.add(SettingItem.SettingEntry(
             stableId = "videoCodec",
             nameResId = R.string.video_codec,
@@ -407,6 +442,25 @@ class SettingsFragment : Fragment() {
                                     .setNegativeButton(R.string.cancel) { dialog, _ ->
                                         dialog.cancel()
                                     }                    .show()
+            }
+        ))
+
+        // --- Info Settings ---
+        items.add(SettingItem.CategoryHeader("info", R.string.category_info))
+
+        items.add(SettingItem.SettingEntry(
+            stableId = "version",
+            nameResId = R.string.version,
+            value = BuildConfig.VERSION_NAME,
+            onClick = { /* Read only */ }
+        ))
+
+        items.add(SettingItem.SettingEntry(
+            stableId = "about",
+            nameResId = R.string.about,
+            value = getString(R.string.about_description),
+            onClick = {
+                findNavController().navigate(R.id.action_settingsFragment_to_aboutFragment)
             }
         ))
 

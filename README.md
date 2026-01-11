@@ -46,6 +46,14 @@ https://github.com/mikereidis/headunit
   - Auto-Connect last session (if possible)
 
 ## Changelog
+### v.1.6.1
+- Added "About" page with version info, changelog, and license
+- Added "Force Legacy Decoder" (synchronous mode) setting to fix issues on some devices (e.g., Mediatek)
+- Improved surface handling to prevent crashes on decoder reconfiguration
+- Fixed "Unsaved changes" dialog in settings
+- Updated UI with consistent back arrows and theming
+- Fixed black screen issues on some devices by optimizing decoder initialization
+
 ### v.1.6.0
 - Fixed the selfmode not working outside the wifi bug
 - Redesign of App, Look and feel with modern Material 3
