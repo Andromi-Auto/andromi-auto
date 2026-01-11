@@ -135,6 +135,10 @@ class Settings(context: Context) {
         get() = prefs.getBoolean("force-software-decoding", false)
         set(value) { prefs.edit().putBoolean("force-software-decoding", value).apply() }
 
+    var forceLegacyDecoder: Boolean
+        get() = prefs.getBoolean("force-legacy-decoder", false)
+        set(value) { prefs.edit().putBoolean("force-legacy-decoder", value).apply() }
+
     var videoCodec: String
         get() = prefs.getString("video-codec", "Auto")!!
         set(value) { prefs.edit().putString("video-codec", value).apply() }

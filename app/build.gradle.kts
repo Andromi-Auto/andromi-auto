@@ -41,12 +41,16 @@ android {
     compileSdk = 34
     namespace = "com.andrerinas.headunitrevived"
 
+    buildFeatures {
+        buildConfig = true
+    }
+
     defaultConfig {
         applicationId = "com.andrerinas.headunitrevived"
         minSdk = 19
         targetSdk = 34
         versionCode = 22
-        versionName = "1.6.0"
+        versionName = "1.6.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
     }

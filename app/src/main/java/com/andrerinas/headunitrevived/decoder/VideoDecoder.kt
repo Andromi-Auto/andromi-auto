@@ -25,7 +25,7 @@ interface VideoDimensionsListener {
 class VideoDecoder(private val settings: Settings) {
     private var mCodec: MediaCodec? = null
     private var mCodecBufferInfo: MediaCodec.BufferInfo? = null
-    // Only used for synchronous mode (API < 21)
+    // Only used for synchronous mode (API < 21 or forced legacy)
     private var mInputBuffers: Array<ByteBuffer>? = null
 
     private var mHeight: Int = 0
@@ -45,7 +45,7 @@ class VideoDecoder(private val settings: Settings) {
     val videoHeight: Int
         get() = mHeight
 
-    // Callback only used on API 21+
+    // Callback only used on API 21+ and if legacy mode is NOT forced
     private val mCallback = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
         object : MediaCodec.Callback() {
             override fun onInputBufferAvailable(codec: MediaCodec, index: Int) {
@@ -110,7 +110,7 @@ class VideoDecoder(private val settings: Settings) {
 
             if (!mCodecConfigured) {
                 try {
-                    val mime = if (codecName == "H.265" || codecName == "H.265") "video/hevc" else "video/avc"
+                    val mime = if (codecName == "H265" || codecName == "H.265") "video/hevc" else "video/avc"
                     if (!configureDecoder(mime)) {
                         // Surface not ready, return silently without error
                         return
@@ -132,7 +132,8 @@ class VideoDecoder(private val settings: Settings) {
                     return
                 }
                 
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+                // For synchronous mode (API < 21 or forced legacy), we must manually drain output
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP || settings.forceLegacyDecoder) {
                     codecOutputConsumeSync()
                 }
             }
@@ -175,9 +176,9 @@ class VideoDecoder(private val settings: Settings) {
              format.setFloat(MediaFormat.KEY_OPERATING_RATE, 120.0f)
         }
         
-        AppLog.i("VideoDecoder: configureDecoder with mime=$mime, target dimensions=${width}x${height}")
+        AppLog.i("VideoDecoder: configureDecoder with mime=$mime, target dimensions=${width}x${height} (Legacy: ${settings.forceLegacyDecoder})")
         try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && !settings.forceLegacyDecoder) {
                 if (callbackThread == null || !callbackThread!!.isAlive) {
                     callbackThread = HandlerThread("VideoDecoderCallbackThread")
                     callbackThread!!.start()
@@ -190,7 +191,7 @@ class VideoDecoder(private val settings: Settings) {
             mCodec!!.setVideoScalingMode(MediaCodec.VIDEO_SCALING_MODE_SCALE_TO_FIT)
             mCodec!!.start()
             
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP || settings.forceLegacyDecoder) {
                 mInputBuffers = mCodec!!.inputBuffers
                 mCodecBufferInfo = MediaCodec.BufferInfo()
             } else {
@@ -232,7 +233,8 @@ class VideoDecoder(private val settings: Settings) {
     }
 
     private fun codec_input_provide(content: ByteBuffer, presentationTimeUs: Long): Boolean {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && !settings.forceLegacyDecoder) {
+            // Asynchronous Mode (API 21+)
             try {
                 val inputBufIndex = freeInputBuffers.poll(100, TimeUnit.MILLISECONDS) ?: -1
                 if (inputBufIndex >= 0) {
@@ -252,6 +254,7 @@ class VideoDecoder(private val settings: Settings) {
                 return false
             }
         } else {
+            // Synchronous Mode (API < 21 or forced legacy)
             try {
                 val inputBufIndex = mCodec!!.dequeueInputBuffer(10000)
                 if (inputBufIndex >= 0) {
@@ -261,6 +264,7 @@ class VideoDecoder(private val settings: Settings) {
                     mCodec!!.queueInputBuffer(inputBufIndex, 0, buffer.limit(), presentationTimeUs, 0)
                     return true
                 } else {
+                    // Try to drain output to free up input
                     codecOutputConsumeSync()
                     return false
                 }
@@ -350,7 +354,19 @@ class VideoDecoder(private val settings: Settings) {
         }
 
         fun isHevcSupported(): Boolean {
-            return findBestCodec("video/hevc", true) != null
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                val codecList = MediaCodecList(MediaCodecList.ALL_CODECS)
+                for (codecInfo in codecList.codecInfos) {
+                    if (codecInfo.isEncoder) continue
+                    if (codecInfo.supportedTypes.any { it.equals("video/hevc", ignoreCase = true) }) {
+                        if (isHardwareAccelerated(codecInfo)) {
+                            return true
+                        }
+                    }
+                }
+                return false
+            }
+            return false
         }
 
         fun findBestCodec(mimeType: String, preferHardware: Boolean): String? {
@@ -418,6 +434,12 @@ class VideoDecoder(private val settings: Settings) {
 
         private fun isHardwareAccelerated(codecInfo: MediaCodecInfo): Boolean {
             val name = codecInfo.name.lowercase(Locale.ROOT)
+            
+            // Blacklist known broken MTK HEVC decoder to prevent crashes in Auto mode
+            if (name.contains("mtk") && name.contains("hevc")) {
+                return false
+            }
+
             return !name.startsWith("omx.google.") &&
                     !name.startsWith("c2.android.") &&
                     !name.contains(".sw.")
