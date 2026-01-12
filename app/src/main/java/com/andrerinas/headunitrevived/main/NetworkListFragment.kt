@@ -1,5 +1,6 @@
 package com.andrerinas.headunitrevived.main
 
+import android.app.AlertDialog
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.Network
@@ -11,6 +12,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ProgressBar
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.navigation.fragment.findNavController
@@ -19,6 +22,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.andrerinas.headunitrevived.App
 import com.andrerinas.headunitrevived.R
 import com.andrerinas.headunitrevived.aap.AapService
+import com.andrerinas.headunitrevived.connection.NetworkDiscovery
+import com.andrerinas.headunitrevived.utils.AppLog
 import com.andrerinas.headunitrevived.utils.Settings
 import com.andrerinas.headunitrevived.utils.changeLastBit
 import com.andrerinas.headunitrevived.utils.toInetAddress
@@ -27,13 +32,21 @@ import com.google.android.material.button.MaterialButton
 import java.net.Inet4Address
 import java.net.InetAddress
 
-class NetworkListFragment : Fragment() {
+class NetworkListFragment : Fragment(), NetworkDiscovery.Listener {
     private lateinit var adapter: AddressAdapter
     private lateinit var connectivityManager: ConnectivityManager
     private lateinit var toolbar: MaterialToolbar
+    private lateinit var networkDiscovery: NetworkDiscovery
 
-    private var networkCallback: ConnectivityManager.NetworkCallback? = null // Made nullable
+    private var networkCallback: ConnectivityManager.NetworkCallback? = null 
     private val ADD_ITEM_ID = 1002
+    private val SCAN_ITEM_ID = 1003
+    private var scanDialog: AlertDialog? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        networkDiscovery = NetworkDiscovery(requireContext(), this)
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val view = inflater.inflate(R.layout.fragment_list, container, false)
@@ -42,7 +55,6 @@ class NetworkListFragment : Fragment() {
         
         connectivityManager = requireContext().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
-        // Initialize networkCallback conditionally
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             networkCallback = object : ConnectivityManager.NetworkCallback() {
                 override fun onAvailable(network: Network) {
@@ -59,7 +71,6 @@ class NetworkListFragment : Fragment() {
         recyclerView.layoutManager = LinearLayoutManager(context)
         recyclerView.adapter = adapter
         
-        // Add padding to RecyclerView to match Settings
         recyclerView.setPadding(
             resources.getDimensionPixelSize(R.dimen.list_padding),
             resources.getDimensionPixelSize(R.dimen.list_padding),
@@ -77,11 +88,23 @@ class NetworkListFragment : Fragment() {
         toolbar.setNavigationOnClickListener {
             findNavController().popBackStack()
         }
+        toolbar.navigationIcon = androidx.core.content.ContextCompat.getDrawable(requireContext(), R.drawable.ic_arrow_back_white)
         
         setupToolbarMenu()
     }
     
     private fun setupToolbarMenu() {
+        // Scan Button (Custom Layout)
+        val scanItem = toolbar.menu.add(0, SCAN_ITEM_ID, 0, "Scan")
+        scanItem.setShowAsAction(android.view.MenuItem.SHOW_AS_ACTION_ALWAYS)
+        scanItem.setActionView(R.layout.layout_scan_button)
+        
+        val scanButton = scanItem.actionView?.findViewById<MaterialButton>(R.id.scan_button_widget)
+        scanButton?.setOnClickListener {
+            startScan()
+        }
+
+        // Add Button (Custom Layout)
         val addItem = toolbar.menu.add(0, ADD_ITEM_ID, 0, getString(R.string.add_new))
         addItem.setShowAsAction(android.view.MenuItem.SHOW_AS_ACTION_ALWAYS)
         addItem.setActionView(R.layout.layout_add_button)
@@ -89,6 +112,54 @@ class NetworkListFragment : Fragment() {
         val addButton = addItem.actionView?.findViewById<MaterialButton>(R.id.add_button_widget)
         addButton?.setOnClickListener {
             showAddAddressDialog()
+        }
+    }
+    
+    private fun startScan() {
+        showScanDialog()
+        networkDiscovery.startScan()
+    }
+
+    private fun showScanDialog() {
+        val builder = AlertDialog.Builder(requireContext(), R.style.DarkAlertDialog)
+        val progressBar = ProgressBar(requireContext())
+        progressBar.setPadding(32, 32, 32, 32)
+        builder.setView(progressBar)
+        builder.setTitle("Scanning Network...")
+        builder.setNegativeButton(R.string.cancel) { _, _ -> 
+            // networkDiscovery.stop()
+        }
+        builder.setCancelable(false)
+        scanDialog = builder.show()
+    }
+
+    override fun onServiceFound(ip: String) {
+        activity?.runOnUiThread {
+            // Save immediately so it stays in the list permanently
+            try {
+                AppLog.i("Found Infotainment Device. Try to connect to $ip")
+                adapter.addNewAddress(InetAddress.getByName(ip))
+            } catch (e: Exception) {
+                AppLog.e("Failed to add discovered address", e)
+            }
+
+            // Auto-connect to the first found device during a manual scan
+            if (scanDialog?.isShowing == true) {
+                scanDialog?.dismiss()
+                Toast.makeText(context, "Found $ip, connecting...", Toast.LENGTH_SHORT).show()
+                context?.startService(AapService.createIntent(ip, requireContext()))
+            }
+        }
+    }
+
+    override fun onScanFinished() {
+        activity?.runOnUiThread {
+            if (scanDialog?.isShowing == true) {
+                scanDialog?.dismiss()
+                if (adapter.addressList.size <= 2) { // Only localhost and current IP
+                    Toast.makeText(context, "No devices found", Toast.LENGTH_SHORT).show()
+                }
+            }
         }
     }
     
@@ -146,7 +217,6 @@ class NetworkListFragment : Fragment() {
             }
         }
 
-        // Ensure UI updates are on the main thread
         activity?.runOnUiThread {
             adapter.currentAddress = ipAddress?.changeLastBit(1)?.hostAddress ?: ""
             adapter.loadAddresses()
@@ -167,7 +237,7 @@ class NetworkListFragment : Fragment() {
         private val fragmentManager: FragmentManager
     ) : RecyclerView.Adapter<DeviceViewHolder>(), View.OnClickListener {
 
-        private val addressList = ArrayList<String>()
+        val addressList = ArrayList<String>()
         var currentAddress: String = ""
         private val settings: Settings = Settings(context)
 
@@ -184,11 +254,6 @@ class NetworkListFragment : Fragment() {
         override fun onBindViewHolder(holder: DeviceViewHolder, position: Int) {
             val ipAddress = addressList[position]
             
-            // Apply background styling
-            val prev = if (position > 0) addressList[position - 1] else null // Just check existence
-            val next = if (position < itemCount - 1) addressList[position + 1] else null
-            
-            // In a simple list like this, we treat the whole list as one group.
             val isTop = position == 0
             val isBottom = position == itemCount - 1
 
@@ -216,19 +281,18 @@ class NetworkListFragment : Fragment() {
 
         override fun onClick(v: View) {
             if (v.id == android.R.id.button2) {
-                // Click on address -> Connect
                 context.startService(AapService.createIntent(v.getTag(R.integer.key_data) as String, context))
             } else {
-                // Click on remove
                 this.removeAddress(v.getTag(R.integer.key_data) as String)
             }
         }
 
         internal fun addNewAddress(ip: InetAddress) {
             val newAddrs = HashSet(settings.networkAddresses)
-            newAddrs.add(ip.hostAddress)
-            settings.networkAddresses = newAddrs
-            set(newAddrs)
+            if (newAddrs.add(ip.hostAddress)) {
+                settings.networkAddresses = newAddrs
+                loadAddresses()
+            }
         }
 
         internal fun loadAddresses() {
@@ -237,19 +301,27 @@ class NetworkListFragment : Fragment() {
 
         private fun set(addrs: Collection<String>) {
             addressList.clear()
-            // Removed "Add a new address" item
             addressList.add("127.0.0.1")
             if (currentAddress.isNotEmpty()) {
-                addressList.add(currentAddress)
+                if (!addressList.contains(currentAddress)) {
+                    addressList.add(currentAddress)
+                }
             }
-            addressList.addAll(addrs.filterNotNull()) // Filter out any nulls
+            addressList.addAll(addrs.filterNotNull())
+            
+            // Deduplicate
+            val uniqueList = addressList.distinct()
+            addressList.clear()
+            addressList.addAll(uniqueList)
+            
             notifyDataSetChanged()
         }
 
         private fun removeAddress(ipAddress: String) {
             val newAddrs = HashSet(settings.networkAddresses)
-            newAddrs.remove(ipAddress)
-            settings.networkAddresses = newAddrs
+            if (newAddrs.remove(ipAddress)) {
+                settings.networkAddresses = newAddrs
+            }
             set(newAddrs)
         }
     }
