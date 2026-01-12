@@ -147,7 +147,9 @@ class Settings(context: Context) {
         get() = prefs.getInt("fps-limit", 60)
         set(value) { prefs.edit().putInt("fps-limit", value).apply() }
 
-
+    var hasAcceptedDisclaimer: Boolean
+        get() = prefs.getBoolean("has-accepted-disclaimer", false)
+        set(value) { prefs.edit().putBoolean("has-accepted-disclaimer", value).apply() }
 
     @SuppressLint("ApplySharedPref")
     fun commit() {

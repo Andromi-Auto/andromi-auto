@@ -1,5 +1,8 @@
 # Changelog
 
+### v.1.6.3
+- Added mandatory Safety Disclaimer on first start
+
 ### v.1.6.2
 - Fixed critical screen flickering during startup and fullscreen transitions
 - Resolved video decoder freezing issues on tablets and older devices

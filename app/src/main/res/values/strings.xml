@@ -87,5 +87,18 @@
     <string name="version">Version</string>
     <string name="about_title">About Headunit Revived</string>
     <string name="copyright">© 2025-%d André Rinas</string>
+
+    <!-- Safety Disclaimer -->
+    <string name="disclaimer_title">Safety &amp; Liability</string>
+    <string name="disclaimer_header">Important Warning</string>
+    <string name="disclaimer_accept">I Understand and Agree</string>
+    <string name="disclaimer_text"><![CDATA[
+        <b>1. Focus on the Road</b><br/>
+        Operating this software while driving can be distracting and dangerous. Always prioritize safe driving and adhere to all local traffic regulations. Use this application only when it is safe to do so.<br/><br/>
+        <b>2. Limitation of Liability</b><br/>
+        Headunit Revived is provided "as is" without warranty of any kind. The developers assume no liability for any accidents, damage to your vehicle/device, or legal consequences arising from the use of this software.<br/><br/>
+        <b>3. No Affiliation</b><br/>
+        This project is an independent open-source initiative and is not affiliated with, endorsed by, or connected to Google LLC or the Android Auto brand.
+    ]]></string>
 </resources>
 
