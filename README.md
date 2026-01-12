@@ -32,7 +32,17 @@ https://github.com/mikereidis/headunit
 - Add the IP-Address of your phone and click on it to start Android Auto
 - IMPORTANT: In my tests it only works, if your phone is unlocked AND shows the Android Auto settings page! Otherwise it won't connect
 
-### Known Issues
+### Connect Wirelessly via Intent (Power Users)
+You can trigger a wireless connection attempt using an Android Intent. This is useful for automation tools like **Tasker**, **MacroDroid**, or via **ADB**.
+
+**URI Scheme:** `headunit://connect?ip=<PHONE_IP>`
+
+**Example ADB Command:**
+```bash
+adb shell am start -a android.intent.action.VIEW -d "headunit://connect?ip=192.168.1.25"
+```
+
+## Known Issues
 - Often the wireless connection won't start. I need more debugging why
 - Handshake failed sometimes and the devices won't connect. You need to try again, restart phone or clear caches
 

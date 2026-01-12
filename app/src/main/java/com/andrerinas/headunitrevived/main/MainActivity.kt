@@ -1,6 +1,7 @@
 package com.andrerinas.headunitrevived.main
 
 import android.Manifest
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.view.KeyEvent
@@ -55,6 +56,25 @@ class MainActivity : AppCompatActivity() {
 
         requestPermissions()
         viewModel.register()
+        handleIntent(intent)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        handleIntent(intent)
+    }
+
+    private fun handleIntent(intent: Intent?) {
+        if (intent?.action == android.content.Intent.ACTION_VIEW) {
+            val data = intent.data
+            if (data?.scheme == "headunit" && data.host == "connect") {
+                val ip = data.getQueryParameter("ip")
+                if (!ip.isNullOrEmpty()) {
+                    AppLog.i("Received connect intent for IP: $ip")
+                    startService(AapService.createIntent(ip, this))
+                }
+            }
+        }
     }
 
     private fun requestPermissions() {
