@@ -5,6 +5,10 @@
         <item name="android:windowFullscreen">true</item>
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:windowBackground">@drawable/bg</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowTranslucentNavigation">true</item>
+        <item name="android:windowTranslucentStatus">true</item>
         <item name="colorPrimary">@color/brand_teal</item>
         <item name="colorSecondary">@color/brand_teal</item>
         <item name="colorAccent">@color/brand_teal</item>
