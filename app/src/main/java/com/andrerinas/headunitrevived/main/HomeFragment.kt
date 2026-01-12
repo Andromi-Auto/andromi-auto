@@ -13,6 +13,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.andrerinas.headunitrevived.App
 import com.andrerinas.headunitrevived.R
 import com.andrerinas.headunitrevived.aap.AapProjectionActivity
 import com.andrerinas.headunitrevived.aap.AapService
@@ -42,6 +43,11 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        // Check Safety Disclaimer
+        if (!App.provide(requireContext()).settings.hasAcceptedDisclaimer) {
+            SafetyDisclaimerDialog.show(childFragmentManager)
+        }
 
         self_mode_button = view.findViewById(R.id.self_mode_button)
         usb = view.findViewById(R.id.usb_button)

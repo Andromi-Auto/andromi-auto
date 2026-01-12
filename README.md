@@ -40,12 +40,20 @@ https://github.com/mikereidis/headunit
 - Bugfixing
 - Better Wifi Mode (Autodetection, Scan for device) (https://github.com/andreknieriem/headunit-revived/issues/26)
 - Intent for tasker apps (https://github.com/andreknieriem/headunit-revived/issues/25)
+- Portrait Mode (https://github.com/andreknieriem/headunit-revived/issues/38)
 - Maybe:
   - Android SKD 17
   - Wifi-Launcher Support
   - Auto-Connect last session (if possible)
 
 ## Changelog
+### v.1.6.3
+- Added mandatory Safety Disclaimer on first start
+- Improved audio stability and fixed stuttering issues
+- Enhanced full-screen stability with transparent system bars
+- Fixed WiFi disconnection synchronization issues (ByeBye request)
+- General UI and stability improvements
+
 ### v.1.6.2
 - Fixed critical screen flickering during startup and fullscreen transitions
 - Resolved video decoder freezing issues on tablets and older devices

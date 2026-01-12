@@ -11,6 +11,9 @@ import javax.net.ssl.SSLEngineResult
 class AapSslContext(keyManger: SingleKeyKeyManager): AapSsl {
     private val sslContext: SSLContext = SSLContext.getInstance("TLSv1.2").apply {
         init(arrayOf(keyManger), arrayOf(NoCheckTrustManager()), null)
+        // Disable session caching to prevent stale states across connection attempts
+        clientSessionContext.sessionCacheSize = 0
+        clientSessionContext.sessionTimeout = 1
     }
     private lateinit var sslEngine: SSLEngine
     private lateinit var txBuffer: ByteBuffer

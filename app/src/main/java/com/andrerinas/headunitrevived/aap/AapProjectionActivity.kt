@@ -25,6 +25,7 @@ import com.andrerinas.headunitrevived.view.TextureProjectionView
 import com.andrerinas.headunitrevived.utils.Settings
 import com.andrerinas.headunitrevived.view.OverlayTouchView
 import com.andrerinas.headunitrevived.utils.HeadUnitScreenConfig
+import com.andrerinas.headunitrevived.aap.AapService
 
 class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, VideoDimensionsListener {
 
@@ -129,6 +130,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
+
         if (hasFocus) {
             setFullscreen() // Reapply fullscreen mode if window gains focus
         }
@@ -136,6 +138,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
 
     private fun setFullscreen() {
         if (settings.startInFullscreenMode) {
+            AppLog.i("setFullscreen in AapProjection")
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 window.insetsController?.hide(android.view.WindowInsets.Type.statusBars() or android.view.WindowInsets.Type.navigationBars())
             } else {
@@ -242,6 +245,10 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         super.onDestroy()
         unregisterReceiver(disconnectReceiver)
         videoDecoder.dimensionsListener = null
+
+        if (isFinishing && AapService.isConnected) {
+            transport.stop()
+        }
     }
 
     companion object {

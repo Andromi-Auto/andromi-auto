@@ -12,7 +12,7 @@ class AudioDecoder {
 
     fun decode(channel: Int, buffer: ByteArray, offset: Int, size: Int) {
         val audioTrack = audioTracks.get(channel)
-        audioTrack.write(buffer, offset, size)
+        audioTrack?.write(buffer, offset, size)
     }
 
     fun stop() {
