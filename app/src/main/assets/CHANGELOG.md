@@ -2,6 +2,10 @@
 
 ### v.1.6.3
 - Added mandatory Safety Disclaimer on first start
+- Improved audio stability and fixed stuttering issues
+- Enhanced full-screen stability with transparent system bars
+- Fixed WiFi disconnection synchronization issues (ByeBye request)
+- General UI and stability improvements
 
 ### v.1.6.2
 - Fixed critical screen flickering during startup and fullscreen transitions
