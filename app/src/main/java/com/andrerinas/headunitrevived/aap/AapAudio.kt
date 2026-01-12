@@ -25,8 +25,8 @@ internal class AapAudio(
                 audioFocusRequest = null
             } else {
                 val audioAttributes = AudioAttributes.Builder()
-                        .setUsage(AudioAttributes.USAGE_MEDIA) // Use USAGE_MEDIA
-                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC) // Use CONTENT_TYPE_MUSIC
+                        .setUsage(AudioAttributes.USAGE_MEDIA)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
                         .build()
 
                 audioFocusRequest = AudioFocusRequest.Builder(focusRequest)
@@ -55,8 +55,6 @@ internal class AapAudio(
     }
 
     private fun decode(channel: Int, start: Int, buf: ByteArray, len: Int) {
-        val timestamp = SystemClock.elapsedRealtime()
-        AppLog.d("AapAudio: decode - channel=%d, len=%d, ts=%d", channel, len, timestamp)
         var length = len
         if (length > AUDIO_BUFS_SIZE) {
             AppLog.e("Error audio len: %d  aud_buf_BUFS_SIZE: %d", length, AUDIO_BUFS_SIZE)
@@ -82,4 +80,3 @@ internal class AapAudio(
         private const val AUDIO_BUFS_SIZE = 65536 * 4  // Up to 256 Kbytes
     }
 }
-

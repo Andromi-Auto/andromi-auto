@@ -25,6 +25,7 @@ import com.andrerinas.headunitrevived.view.TextureProjectionView
 import com.andrerinas.headunitrevived.utils.Settings
 import com.andrerinas.headunitrevived.view.OverlayTouchView
 import com.andrerinas.headunitrevived.utils.HeadUnitScreenConfig
+import com.andrerinas.headunitrevived.aap.AapService
 
 class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, VideoDimensionsListener {
 
@@ -242,6 +243,10 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         super.onDestroy()
         unregisterReceiver(disconnectReceiver)
         videoDecoder.dimensionsListener = null
+
+        if (isFinishing && AapService.isConnected) {
+            transport.stop()
+        }
     }
 
     companion object {
