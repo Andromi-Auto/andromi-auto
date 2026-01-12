@@ -40,6 +40,7 @@ https://github.com/mikereidis/headunit
 - Bugfixing
 - Better Wifi Mode (Autodetection, Scan for device) (https://github.com/andreknieriem/headunit-revived/issues/26)
 - Intent for tasker apps (https://github.com/andreknieriem/headunit-revived/issues/25)
+- Portrait Mode (https://github.com/andreknieriem/headunit-revived/issues/38)
 - Maybe:
   - Android SKD 17
   - Wifi-Launcher Support
