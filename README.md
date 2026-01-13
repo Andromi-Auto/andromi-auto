@@ -27,10 +27,20 @@ https://github.com/mikereidis/headunit
 - Click on Version and then on version and permission and click several to enable developer settings
 - Go back to Android Auto, click the three dots on the top right and start the infotainment server
 - Now you need to bring your phone and headunit(tablet) into the same network (WiFi). You can use mobile hotspot from phone, or from the headunit or use wifi direct. That doesn't matter
-- Go to your phones wifi settings and search for your IP-Address eg: 192.168.1.25
-- Open Headunit Revived and click on the wireless button
-- Add the IP-Address of your phone and click on it to start Android Auto
-- IMPORTANT: In my tests it only works, if your phone is unlocked AND shows the Android Auto settings page! Otherwise it won't connect
+- Go to the WiFi Menu in the Headunit Revive App
+- Now you can make 2 things
+- First: click on the scan button in the top right corner and let the app find your phone by itslef
+- Or: manually add your phones ip address via "Add new" button
+  - Go to your phones wifi settings and search for your IP-Address eg: 192.168.1.25
+  - Add the IP-Address of your phone and click on it to start Android Auto
+  - IMPORTANT: In my tests it only works, if your phone is unlocked AND shows the Android Auto settings page! Otherwise it won't connect
+
+### Wireless Launcher
+The app even works with wireless launcher (https://play.google.com/store/apps/details?id=com.borconi.emil.wifilauncherforhur&hl=de)
+- Go to settings and enable Wireless Headunit Server
+- Both devices have to be in the same network (WiFi). You can use mobile hotspot from phone, or from the headunit or use wifi direct. That doesn't matter
+- Open Wireless Launcher on your phone and start it manually (or select your cars BT connection for example as a starter)
+- The Launcher App will find your headunit a send a connection request to your headunit and start the connection (my headunit in my car has very bad wifi and needs 5 minutes to connect to a hotspot. So wireless in not always a good decision)
 
 ### Connect Wirelessly via Intent (Power Users)
 You can trigger a wireless connection attempt using an Android Intent. This is useful for automation tools like **Tasker**, **MacroDroid**, or via **ADB**.
@@ -47,11 +57,11 @@ adb shell am start -a android.intent.action.VIEW -d "headunit://connect?ip=192.1
 - Handshake failed sometimes and the devices won't connect. You need to try again, restart phone or clear caches
 
 ## Next Steps:
-- Bugfixing
+- Bugfixing (very important are the connection issues!)
 - Portrait Mode (https://github.com/andreknieriem/headunit-revived/issues/38)
+- Audio-Sink
 - Maybe:
   - Android SKD 17
-  - Wifi-Launcher Support
   - Auto-Connect last session (if possible)
 
 ## Changelog
