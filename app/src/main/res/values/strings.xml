@@ -84,7 +84,7 @@
 
     <!-- Info Settings -->
     <string name="category_info">Info</string>
-    <string name="about">About</string>
+    <string name="about">About &amp; Support</string>
     <string name="about_description">Get more information about Headunit Revived</string>
     <string name="version">Version</string>
     <string name="about_title">About Headunit Revived</string>

@@ -271,6 +271,18 @@ class SettingsFragment : Fragment() {
             }
         ))
 
+        items.add(SettingItem.ToggleSettingEntry(
+            stableId = "wifiLauncherMode",
+            nameResId = R.string.wifi_launcher_mode,
+            descriptionResId = R.string.wifi_launcher_mode_description,
+            isChecked = pendingWifiLauncherMode!!,
+            onCheckedChanged = { isChecked ->
+                pendingWifiLauncherMode = isChecked
+                checkChanges()
+                updateSettingsList()
+            }
+        ))
+
         // --- Graphic Settings ---
         items.add(SettingItem.CategoryHeader("graphic", R.string.category_graphic))
         
@@ -376,18 +388,6 @@ class SettingsFragment : Fragment() {
             isChecked = pendingLegacyDecoder!!,
             onCheckedChanged = { isChecked ->
                 pendingLegacyDecoder = isChecked
-                checkChanges()
-                updateSettingsList()
-            }
-        ))
-
-        items.add(SettingItem.ToggleSettingEntry(
-            stableId = "wifiLauncherMode",
-            nameResId = R.string.wifi_launcher_mode,
-            descriptionResId = R.string.wifi_launcher_mode_description,
-            isChecked = pendingWifiLauncherMode!!,
-            onCheckedChanged = { isChecked ->
-                pendingWifiLauncherMode = isChecked
                 checkChanges()
                 updateSettingsList()
             }
