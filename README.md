@@ -68,6 +68,8 @@ adb shell am start -a android.intent.action.VIEW -d "headunit://connect?ip=192.1
 ### v.1.7.0
 - Added WiFi Network Discovery (Port Scan) with Auto-Connect
 - Added Intent Support (`headunit://connect?ip=...`) for automation
+- Added Wifi-Launcher Support with new setting
+- Updated README
 
 ### v.1.6.3
 - Added mandatory Safety Disclaimer on first start
