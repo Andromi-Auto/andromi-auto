@@ -60,6 +60,7 @@ adb shell am start -a android.intent.action.VIEW -d "headunit://connect?ip=192.1
 - Bugfixing (very important are the connection issues!)
 - Portrait Mode (https://github.com/andreknieriem/headunit-revived/issues/38)
 - Audio-Sink
+- AAC Audio Decoder Option (compressed Audio should help devices with bad wifi)
 - Maybe:
   - Android SKD 17
   - Auto-Connect last session (if possible)
