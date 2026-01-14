@@ -10,7 +10,6 @@ import android.os.HandlerThread
 import android.view.Surface
 import com.andrerinas.headunitrevived.utils.AppLog
 import com.andrerinas.headunitrevived.utils.Settings
-import java.io.IOException
 import java.nio.ByteBuffer
 import java.util.Locale
 import java.util.concurrent.ArrayBlockingQueue
@@ -91,59 +90,87 @@ class VideoDecoder(private val settings: Settings) {
         }
     }
 
-    fun decode(buffer: ByteArray, offset: Int, size: Int, forceSoftware: Boolean, codecName: String) {
-        synchronized(sLock) {
-            if (mCodec == null) {
+        fun decode(buffer: ByteArray, offset: Int, size: Int, forceSoftware: Boolean, codecName: String) {
+            synchronized(sLock) {
+                // 1. Detect actual codec type from stream header
                 val detectedType = Companion.detectCodecType(buffer, offset, size)
-                val finalCodecName = if (detectedType != null) {
-                    AppLog.i("VideoDecoder: Detected $detectedType in stream, using it instead of preference $codecName")
-                    detectedType.name
-                } else {
-                    codecName
-                }
-
-                AppLog.i("Codec is not initialized, attempting to init with codec: $finalCodecName, forceSoftware: $forceSoftware")
-                val mime = if (finalCodecName == "H265" || finalCodecName == "H.265") "video/hevc" else "video/avc"
-                codec_init(mime, forceSoftware)
-            }
-
-            if (mCodec == null) {
-                return
-            }
-
-            if (!mCodecConfigured) {
-                // Scan for SPS/PPS
-                var currentOffset = offset
-                while (currentOffset < offset + size) {
-                    val nalUnitSize = Companion.findNalUnitSize(buffer, currentOffset, offset + size)
-                    if (nalUnitSize == -1) break
-
-                    val nalUnitType = Companion.getNalType(buffer, currentOffset)
-                    if (nalUnitType == 7) { // SPS
-                        sps = buffer.copyOfRange(currentOffset, currentOffset + nalUnitSize)
-                        AppLog.i("Got SPS sequence...")
-                        try {
-                            val spsData = SpsParser.parse(sps!!)
-                            if (spsData != null && (mWidth != spsData.width || mHeight != spsData.height)) {
-                                AppLog.i("SPS parsed. Video dimensions: ${spsData.width}x${spsData.height}")
-                                mWidth = spsData.width
-                                mHeight = spsData.height
-                                dimensionsListener?.onVideoDimensionsChanged(mWidth, mHeight)
-                            }
-                        } catch (e: Exception) { AppLog.e("Failed to parse SPS", e) }
-                    } else if (nalUnitType == 8) { // PPS
-                        pps = buffer.copyOfRange(currentOffset, currentOffset + nalUnitSize)
-                        AppLog.i("Got PPS sequence...")
+    
+                // 2. If codec is running, check if it matches the detected type
+                if (mCodec != null && detectedType != null) {
+                    val isCurrentHevc = mCodec!!.name.lowercase(Locale.ROOT).contains("hevc") ||
+                            mCodec!!.name.lowercase(Locale.ROOT).contains("mtk") && codecName.contains("H.265") // Fallback check
+                    val isNewHevc = (detectedType == CodecType.H265)
+    
+                    // Only restart if we are sure there is a mismatch
+                    if (isCurrentHevc != isNewHevc) {
+                        AppLog.w("VideoDecoder: Codec mismatch detected! Restarting.")
+                        codec_stop("Codec mismatch")
                     }
-                    currentOffset += nalUnitSize
+                }
+    
+            // 3. Initialize if not running (or stopped above)
+            if (mCodec == null) {
+                if (mSurface == null || !mSurface!!.isValid) {
+                    return
                 }
 
-                val isH265 = codecName.contains("H265") || codecName.contains("H.265") || (mCodec?.name?.lowercase(Locale.ROOT)?.contains("hevc") == true)
-
-                if (!isH265) {
-                    if (sps != null && pps != null) {
+                val finalCodecName = detectedType?.name ?: codecName
+                AppLog.i("VideoDecoder: Init codec for $finalCodecName (ForceSW: $forceSoftware)")
+                    val mime = if (finalCodecName == "H265" || finalCodecName == "H.265") "video/hevc" else "video/avc"
+                    codec_init(mime, forceSoftware)
+                }
+    
+                if (mCodec == null) {
+                    return
+                }
+    
+                if (!mCodecConfigured) {
+                    // Scan for SPS/PPS
+                    var currentOffset = offset
+                    while (currentOffset < offset + size) {
+                        val nalUnitSize = findNalUnitSize(buffer, currentOffset, offset + size)
+                        if (nalUnitSize == -1) break
+    
+                        val nalUnitType = getNalType(buffer, currentOffset)
+                        if (nalUnitType == 7) { // SPS
+                            sps = buffer.copyOfRange(currentOffset, currentOffset + nalUnitSize)
+                            AppLog.i("Got SPS sequence...")
+                            try {
+                                val spsData = SpsParser.parse(sps!!)
+                                if (spsData != null && (mWidth != spsData.width || mHeight != spsData.height)) {
+                                    AppLog.i("SPS parsed. Video dimensions: ${spsData.width}x${spsData.height}")
+                                    mWidth = spsData.width
+                                    mHeight = spsData.height
+                                    dimensionsListener?.onVideoDimensionsChanged(mWidth, mHeight)
+                                }
+                            } catch (e: Exception) { AppLog.e("Failed to parse SPS", e) }
+                        } else if (nalUnitType == 8) { // PPS
+                            pps = buffer.copyOfRange(currentOffset, currentOffset + nalUnitSize)
+                            AppLog.i("Got PPS sequence...")
+                        }
+                        currentOffset += nalUnitSize
+                    }
+    
+                    val isH265 = codecName.contains("H265") || codecName.contains("H.265") || (mCodec?.name?.lowercase(Locale.ROOT)?.contains("hevc") == true)
+    
+                    if (!isH265) {
+                        if (sps != null && pps != null) {
+                            try {
+                                if (!configureDecoder("video/avc")) return
+                                mCodecConfigured = true
+                            } catch (e: Exception) {
+                                AppLog.e("Failed to configure decoder", e)
+                                codec_stop("Configuration failed")
+                                return
+                            }
+                        }
+                        // For H264, if configured (or not), we return here if we processed config data.
+                        // If not configured (no SPS/PPS), we return to wait for more data.
+                        return
+                    } else {
+                        // H265 path (legacy behavior, or if we want to support it without SPS parsing)
                         try {
-                            if (!configureDecoder("video/avc")) return
+                            if (!configureDecoder("video/hevc")) return
                             mCodecConfigured = true
                         } catch (e: Exception) {
                             AppLog.e("Failed to configure decoder", e)
@@ -151,38 +178,23 @@ class VideoDecoder(private val settings: Settings) {
                             return
                         }
                     }
-                    // For H264, if configured (or not), we return here if we processed config data.
-                    // If not configured (no SPS/PPS), we return to wait for more data.
-                    return
-                } else {
-                    // H265 path (legacy behavior, or if we want to support it without SPS parsing)
-                    try {
-                        if (!configureDecoder("video/hevc")) return
-                        mCodecConfigured = true
-                    } catch (e: Exception) {
-                        AppLog.e("Failed to configure decoder", e)
-                        codec_stop("Configuration failed")
+                }
+    
+                val presentationTimeUs = System.nanoTime() / 1000
+    
+                val content = ByteBuffer.wrap(buffer, offset, size)
+                while (content.hasRemaining()) {
+                    if (!codec_input_provide(content, presentationTimeUs)) {
                         return
+                    }
+    
+                    // For synchronous mode (API < 21 or forced legacy), we must manually drain output
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP || settings.forceLegacyDecoder) {
+                        codecOutputConsumeSync()
                     }
                 }
             }
-
-            val presentationTimeUs = System.nanoTime() / 1000
-
-            val content = ByteBuffer.wrap(buffer, offset, size)
-            while (content.hasRemaining()) {
-                if (!codec_input_provide(content, presentationTimeUs)) {
-                    return
-                }
-
-                // For synchronous mode (API < 21 or forced legacy), we must manually drain output
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP || settings.forceLegacyDecoder) {
-                    codecOutputConsumeSync()
-                }
-            }
         }
-    }
-
     private fun codec_init(mime: String, forceSoftware: Boolean) {
         synchronized(sLock) {
             try {
@@ -368,8 +380,18 @@ class VideoDecoder(private val settings: Settings) {
                 AppLog.i("Codec is running, stopping for new surface")
                 codec_stop("New surface")
             }
+            mSurface = surface
+
+            if (mSurface != null) {
+                val mime = when (settings.videoCodec) {
+                    "H.265" -> "video/hevc"
+                    "Auto" -> if (Companion.isHevcSupported()) "video/hevc" else "video/avc"
+                    else -> "video/avc"
+                }
+                AppLog.i("VideoDecoder.setSurface | Pre-initializing codec: $mime")
+                codec_init(mime, false)
+            }
         }
-        mSurface = surface
     }
 
     fun stop(reason: String) {
