@@ -21,7 +21,7 @@ object SslContextFactory {
         val keyManager = SingleKeyKeyManager(context)
 
         // Create an SSLContext that uses our KeyManager and the trust-all TrustManager
-        val sslContext = SSLContext.getInstance("TLSv1.2")
+        val sslContext = SSLContext.getInstance("TLS")
         sslContext.init(arrayOf(keyManager), trustAllCerts, SecureRandom())
 
         return sslContext
