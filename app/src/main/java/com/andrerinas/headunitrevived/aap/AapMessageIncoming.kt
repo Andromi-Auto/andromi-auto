@@ -40,6 +40,11 @@ internal class AapMessageIncoming(header: EncryptedHeader, ba: ByteArrayWithLimi
 
             val ba = ssl.decrypt(offset, header.enc_len, buf) ?: return null
 
+            if (ba.data.size < 2) {
+                AppLog.e("Decrypted payload too short: " + ba.data.size)
+                return null
+            }
+
             val msg = AapMessageIncoming(header, ba)
 
             if (AppLog.LOG_VERBOSE) {

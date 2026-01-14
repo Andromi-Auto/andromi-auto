@@ -10,12 +10,12 @@ import android.os.HandlerThread
 import android.view.Surface
 import com.andrerinas.headunitrevived.utils.AppLog
 import com.andrerinas.headunitrevived.utils.Settings
-import java.io.IOException
 import java.nio.ByteBuffer
 import java.util.Locale
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.TimeUnit
+import kotlin.math.pow
 
 // Listener to notify about video dimension changes
 interface VideoDimensionsListener {
@@ -32,6 +32,8 @@ class VideoDecoder(private val settings: Settings) {
     private var mWidth: Int = 0
     private var mSurface: Surface? = null
     private var mCodecConfigured: Boolean = false
+    private var sps: ByteArray? = null
+    private var pps: ByteArray? = null
 
     // For asynchronous decoding (API >= 21)
     private val freeInputBuffers: BlockingQueue<Int> = ArrayBlockingQueue(1024)
@@ -88,58 +90,111 @@ class VideoDecoder(private val settings: Settings) {
         }
     }
 
-    fun decode(buffer: ByteArray, offset: Int, size: Int, forceSoftware: Boolean, codecName: String) {
-        synchronized(sLock) {
-            if (mCodec == null) {
+        fun decode(buffer: ByteArray, offset: Int, size: Int, forceSoftware: Boolean, codecName: String) {
+            synchronized(sLock) {
+                // 1. Detect actual codec type from stream header
                 val detectedType = Companion.detectCodecType(buffer, offset, size)
-                val finalCodecName = if (detectedType != null) {
-                    AppLog.i("VideoDecoder: Detected $detectedType in stream, using it instead of preference $codecName")
-                    detectedType.name
-                } else {
-                    codecName
+    
+                // 2. If codec is running, check if it matches the detected type
+                if (mCodec != null && detectedType != null) {
+                    val isCurrentHevc = mCodec!!.name.lowercase(Locale.ROOT).contains("hevc") ||
+                            mCodec!!.name.lowercase(Locale.ROOT).contains("mtk") && codecName.contains("H.265") // Fallback check
+                    val isNewHevc = (detectedType == CodecType.H265)
+    
+                    // Only restart if we are sure there is a mismatch
+                    if (isCurrentHevc != isNewHevc) {
+                        AppLog.w("VideoDecoder: Codec mismatch detected! Restarting.")
+                        codec_stop("Codec mismatch")
+                    }
+                }
+    
+            // 3. Initialize if not running (or stopped above)
+            if (mCodec == null) {
+                if (mSurface == null || !mSurface!!.isValid) {
+                    return
                 }
 
-                AppLog.i("Codec is not initialized, attempting to init with codec: $finalCodecName, forceSoftware: $forceSoftware")
-                val mime = if (finalCodecName == "H265" || finalCodecName == "H.265") "video/hevc" else "video/avc"
-                codec_init(mime, forceSoftware)
-            }
-
-            if (mCodec == null) {
-                return
-            }
-
-            if (!mCodecConfigured) {
-                try {
-                    val mime = if (codecName == "H265" || codecName == "H.265") "video/hevc" else "video/avc"
-                    if (!configureDecoder(mime)) {
-                        // Surface not ready, return silently without error
+                val finalCodecName = detectedType?.name ?: codecName
+                AppLog.i("VideoDecoder: Init codec for $finalCodecName (ForceSW: $forceSoftware)")
+                    val mime = if (finalCodecName == "H265" || finalCodecName == "H.265") "video/hevc" else "video/avc"
+                    codec_init(mime, forceSoftware)
+                }
+    
+                if (mCodec == null) {
+                    return
+                }
+    
+                if (!mCodecConfigured) {
+                    // Scan for SPS/PPS
+                    var currentOffset = offset
+                    while (currentOffset < offset + size) {
+                        val nalUnitSize = findNalUnitSize(buffer, currentOffset, offset + size)
+                        if (nalUnitSize == -1) break
+    
+                        val nalUnitType = getNalType(buffer, currentOffset)
+                        if (nalUnitType == 7) { // SPS
+                            sps = buffer.copyOfRange(currentOffset, currentOffset + nalUnitSize)
+                            AppLog.i("Got SPS sequence...")
+                            try {
+                                val spsData = SpsParser.parse(sps!!)
+                                if (spsData != null && (mWidth != spsData.width || mHeight != spsData.height)) {
+                                    AppLog.i("SPS parsed. Video dimensions: ${spsData.width}x${spsData.height}")
+                                    mWidth = spsData.width
+                                    mHeight = spsData.height
+                                    dimensionsListener?.onVideoDimensionsChanged(mWidth, mHeight)
+                                }
+                            } catch (e: Exception) { AppLog.e("Failed to parse SPS", e) }
+                        } else if (nalUnitType == 8) { // PPS
+                            pps = buffer.copyOfRange(currentOffset, currentOffset + nalUnitSize)
+                            AppLog.i("Got PPS sequence...")
+                        }
+                        currentOffset += nalUnitSize
+                    }
+    
+                    val isH265 = codecName.contains("H265") || codecName.contains("H.265") || (mCodec?.name?.lowercase(Locale.ROOT)?.contains("hevc") == true)
+    
+                    if (!isH265) {
+                        if (sps != null && pps != null) {
+                            try {
+                                if (!configureDecoder("video/avc")) return
+                                mCodecConfigured = true
+                            } catch (e: Exception) {
+                                AppLog.e("Failed to configure decoder", e)
+                                codec_stop("Configuration failed")
+                                return
+                            }
+                        }
+                        // For H264, if configured (or not), we return here if we processed config data.
+                        // If not configured (no SPS/PPS), we return to wait for more data.
+                        return
+                    } else {
+                        // H265 path (legacy behavior, or if we want to support it without SPS parsing)
+                        try {
+                            if (!configureDecoder("video/hevc")) return
+                            mCodecConfigured = true
+                        } catch (e: Exception) {
+                            AppLog.e("Failed to configure decoder", e)
+                            codec_stop("Configuration failed")
+                            return
+                        }
+                    }
+                }
+    
+                val presentationTimeUs = System.nanoTime() / 1000
+    
+                val content = ByteBuffer.wrap(buffer, offset, size)
+                while (content.hasRemaining()) {
+                    if (!codec_input_provide(content, presentationTimeUs)) {
                         return
                     }
-                    mCodecConfigured = true
-                    AppLog.i("VideoDecoder: Initial configuration complete, proceeding to feed first buffer.")
-                } catch (e: Exception) {
-                    AppLog.e("Failed to configure decoder", e)
-                    codec_stop("Configuration failed")
-                    return
-                }
-            }
-            
-            val presentationTimeUs = System.nanoTime() / 1000
-
-            val content = ByteBuffer.wrap(buffer, offset, size)
-            while (content.hasRemaining()) {
-                if (!codec_input_provide(content, presentationTimeUs)) {
-                    return
-                }
-                
-                // For synchronous mode (API < 21 or forced legacy), we must manually drain output
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP || settings.forceLegacyDecoder) {
-                    codecOutputConsumeSync()
+    
+                    // For synchronous mode (API < 21 or forced legacy), we must manually drain output
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP || settings.forceLegacyDecoder) {
+                        codecOutputConsumeSync()
+                    }
                 }
             }
         }
-    }
-
     private fun codec_init(mime: String, forceSoftware: Boolean) {
         synchronized(sLock) {
             try {
@@ -160,22 +215,29 @@ class VideoDecoder(private val settings: Settings) {
         // Robust check: if surface is null or invalid, don't try to configure.
         // This prevents crashes on devices where surface release happens quickly.
         if (mSurface == null || !mSurface!!.isValid) {
-             AppLog.w("Surface is not valid, skipping configuration")
-             return false
+            AppLog.w("Surface is not valid, skipping configuration")
+            return false
         }
 
         val width = if (mWidth > 0) mWidth else 1920
         val height = if (mHeight > 0) mHeight else 1080
-        
+
         val format = MediaFormat.createVideoFormat(mime, width, height)
+        if (sps != null) {
+            format.setByteBuffer("csd-0", ByteBuffer.wrap(sps))
+        }
+        if (pps != null) {
+            format.setByteBuffer("csd-1", ByteBuffer.wrap(pps))
+        }
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-             format.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, 10485760)
+            format.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, 10485760)
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-             format.setInteger(MediaFormat.KEY_PRIORITY, 0)
-             format.setFloat(MediaFormat.KEY_OPERATING_RATE, 120.0f)
+            format.setInteger(MediaFormat.KEY_PRIORITY, 0)
+            format.setFloat(MediaFormat.KEY_OPERATING_RATE, 120.0f)
         }
-        
+
         AppLog.i("VideoDecoder: configureDecoder with mime=$mime, target dimensions=${width}x${height} (Legacy: ${settings.forceLegacyDecoder})")
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && !settings.forceLegacyDecoder) {
@@ -186,18 +248,18 @@ class VideoDecoder(private val settings: Settings) {
                 val handler = Handler(callbackThread!!.looper)
                 mCodec!!.setCallback(mCallback!!, handler)
             }
-            
+
             mCodec!!.configure(format, mSurface, null, 0)
             mCodec!!.setVideoScalingMode(MediaCodec.VIDEO_SCALING_MODE_SCALE_TO_FIT)
             mCodec!!.start()
-            
+
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP || settings.forceLegacyDecoder) {
                 mInputBuffers = mCodec!!.inputBuffers
                 mCodecBufferInfo = MediaCodec.BufferInfo()
             } else {
                 mCodecBufferInfo = MediaCodec.BufferInfo()
             }
-            
+
             AppLog.i("Codec configured and started. Selected codec: ${mCodec?.name}")
             return true
         } catch (e: Exception) {
@@ -220,14 +282,14 @@ class VideoDecoder(private val settings: Settings) {
             mCodecBufferInfo = null
             mCodecConfigured = false
             freeInputBuffers.clear()
-            
+
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
                 callbackThread?.quitSafely()
             } else {
                 callbackThread?.quit()
             }
             callbackThread = null
-            
+
             AppLog.i("Reason: $reason")
         }
     }
@@ -300,13 +362,17 @@ class VideoDecoder(private val settings: Settings) {
 
     fun setSurface(surface: Surface?) {
         synchronized(sLock) {
+            val oldHash = mSurface?.hashCode() ?: 0
+            val newHash = surface?.hashCode() ?: 0
+            AppLog.i("VideoDecoder.setSurface | Old: $oldHash, New: $newHash")
+
             if (mSurface === surface) {
                 // Surface object identical, skipping restart to prevent crashes on sensitive devices (Mediatek)
                 // Try to update scaling mode just in case
                 if (mCodec != null) {
-                     try {
-                         mCodec!!.setVideoScalingMode(MediaCodec.VIDEO_SCALING_MODE_SCALE_TO_FIT)
-                     } catch (e: Exception) {}
+                    try {
+                        mCodec!!.setVideoScalingMode(MediaCodec.VIDEO_SCALING_MODE_SCALE_TO_FIT)
+                    } catch (e: Exception) {}
                 }
                 return
             }
@@ -314,8 +380,18 @@ class VideoDecoder(private val settings: Settings) {
                 AppLog.i("Codec is running, stopping for new surface")
                 codec_stop("New surface")
             }
+            mSurface = surface
+
+            if (mSurface != null) {
+                val mime = when (settings.videoCodec) {
+                    "H.265" -> "video/hevc"
+                    "Auto" -> if (Companion.isHevcSupported()) "video/hevc" else "video/avc"
+                    else -> "video/avc"
+                }
+                AppLog.i("VideoDecoder.setSurface | Pre-initializing codec: $mime")
+                codec_init(mime, false)
+            }
         }
-        mSurface = surface
     }
 
     fun stop(reason: String) {
@@ -338,6 +414,23 @@ class VideoDecoder(private val settings: Settings) {
 
     companion object {
         private val sLock = Object()
+
+        private fun findNalUnitSize(buffer: ByteArray, offset: Int, limit: Int): Int {
+            var i = offset + 4 // Start after the 0x00 00 00 01 start code
+            while (i < limit - 3) {
+                if (buffer[i].toInt() == 0 && buffer[i + 1].toInt() == 0 && buffer[i + 2].toInt() == 0 && buffer[i + 3].toInt() == 1) {
+                    return i - offset
+                }
+                i++
+            }
+            return limit - offset // Last NAL unit
+        }
+
+        private fun getNalType(ba: ByteArray, offset: Int): Int {
+            // NAL unit type is in the byte after the start code (0x00 00 00 01)
+            // The NAL unit type is the last 5 bits of that byte
+            return ba[offset + 4].toInt() and 0x1f
+        }
 
         fun detectCodecType(buffer: ByteArray, offset: Int, size: Int): CodecType? {
             var i = offset
@@ -408,14 +501,14 @@ class VideoDecoder(private val settings: Settings) {
                     val codecInfo = MediaCodecList.getCodecInfoAt(i)
                     if (codecInfo.isEncoder) continue
                     if (codecInfo.supportedTypes.any { it.equals(mimeType, ignoreCase = true) }) {
-                         if (isHardwareAccelerated(codecInfo)) {
+                        if (isHardwareAccelerated(codecInfo)) {
                             if (hardwareCodec == null) hardwareCodec = codecInfo.name
                         } else {
                             if (softwareCodec == null) softwareCodec = codecInfo.name
                         }
                     }
                 }
-                
+
                 if (preferHardware && hardwareCodec != null) {
                     AppLog.i("Selected hardware decoder: $hardwareCodec for $mimeType")
                     return hardwareCodec
@@ -434,7 +527,7 @@ class VideoDecoder(private val settings: Settings) {
 
         private fun isHardwareAccelerated(codecInfo: MediaCodecInfo): Boolean {
             val name = codecInfo.name.lowercase(Locale.ROOT)
-            
+
             // Blacklist known broken MTK HEVC decoder to prevent crashes in Auto mode
             if (name.contains("mtk") && name.contains("hevc")) {
                 return false
@@ -443,6 +536,142 @@ class VideoDecoder(private val settings: Settings) {
             return !name.startsWith("omx.google.") &&
                     !name.startsWith("c2.android.") &&
                     !name.contains(".sw.")
+        }
+    }
+}
+
+// Helper class for reading bits from a byte array
+private class BitReader(private val buffer: ByteArray) {
+    private var bitPosition = 0
+
+    fun readBit(): Int {
+        val byteIndex = bitPosition / 8
+        val bitIndex = 7 - (bitPosition % 8)
+        bitPosition++
+        return (buffer[byteIndex].toInt() shr bitIndex) and 1
+    }
+
+    fun readBits(count: Int): Int {
+        var result = 0
+        for (i in 0 until count) {
+            result = (result shl 1) or readBit()
+        }
+        return result
+    }
+
+    // Reads unsigned exponential-golomb coded integer
+    fun readUE(): Int {
+        var leadingZeroBits = 0
+        while (readBit() == 0) {
+            leadingZeroBits++
+        }
+        if (leadingZeroBits == 0) {
+            return 0
+        }
+        val codeNum = (2.0.pow(leadingZeroBits.toDouble()) - 1 + readBits(leadingZeroBits)).toInt()
+        return codeNum
+    }
+}
+
+data class SpsData(val width: Int, val height: Int)
+
+private object SpsParser {
+    fun parse(sps: ByteArray): SpsData? {
+        // We need to skip the NAL unit header (e.g., 00 00 00 01 67 ...)
+        // Let's find the start of the SPS payload
+        var payloadIndex = 4 // Default for 00 00 00 01
+        if (sps.size > 2 && sps[0].toInt() == 0 && sps[1].toInt() == 0 && sps[2].toInt() == 1) {
+            payloadIndex = 3
+        }
+
+        // We only need to parse up to the dimensions, no need for a full SPS parser
+        try {
+            val reader = BitReader(sps.copyOfRange(payloadIndex, sps.size))
+            reader.readBits(8) // NAL unit type, already know it's 7, but read it from payload
+            val profileIdc = reader.readBits(8)
+            reader.readBits(16) // flags and level_idc
+            reader.readUE() // seq_parameter_set_id
+
+            if (profileIdc == 100 || profileIdc == 110 || profileIdc == 122 || profileIdc == 244 || profileIdc == 44 || profileIdc == 83 || profileIdc == 86 || profileIdc == 118 || profileIdc == 128) {
+                val chromaFormatIdc = reader.readUE()
+                if (chromaFormatIdc == 3) {
+                    reader.readBit() // separate_colour_plane_flag
+                }
+                reader.readUE() // bit_depth_luma_minus8
+                reader.readUE() // bit_depth_chroma_minus8
+                reader.readBit() // qpprime_y_zero_transform_bypass_flag
+                val seqScalingMatrixPresentFlag = reader.readBit()
+                if (seqScalingMatrixPresentFlag == 1) {
+                    for (i in 0 until if (chromaFormatIdc != 3) 8 else 12) {
+                        val seqScalingListPresentFlag = reader.readBit()
+                        if (seqScalingListPresentFlag == 1) {
+                            // Skip scaling list data
+                            var lastScale = 8
+                            var nextScale = 8
+                            val sizeOfScalingList = if (i < 6) 16 else 64
+                            for (j in 0 until sizeOfScalingList) {
+                                if (nextScale != 0) {
+                                    val deltaScale = reader.readUE() // Can be signed, but we just skip
+                                    nextScale = (lastScale + deltaScale + 256) % 256
+                                }
+                                if (nextScale != 0) {
+                                    lastScale = nextScale
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            reader.readUE() // log2_max_frame_num_minus4
+            val picOrderCntType = reader.readUE()
+            if (picOrderCntType == 0) {
+                reader.readUE() // log2_max_pic_order_cnt_lsb_minus4
+            } else if (picOrderCntType == 1) {
+                reader.readBit() // delta_pic_order_always_zero_flag
+                reader.readUE() // offset_for_non_ref_pic (signed)
+                reader.readUE() // offset_for_top_to_bottom_field (signed)
+                val numRefFramesInPicOrderCntCycle = reader.readUE()
+                for (i in 0 until numRefFramesInPicOrderCntCycle) {
+                    reader.readUE() // offset_for_ref_frame (signed)
+                }
+            }
+
+            reader.readUE() // max_num_ref_frames
+            reader.readBit() // gaps_in_frame_num_value_allowed_flag
+
+            val picWidthInMbsMinus1 = reader.readUE()
+            val picHeightInMapUnitsMinus1 = reader.readUE()
+            val frameMbsOnlyFlag = reader.readBit()
+
+            val width = (picWidthInMbsMinus1 + 1) * 16
+            var height = (2 - frameMbsOnlyFlag) * (picHeightInMapUnitsMinus1 + 1) * 16
+
+            if (frameMbsOnlyFlag == 0) {
+                reader.readBit() // mb_adaptive_frame_field_flag
+            }
+            reader.readBit() // direct_8x8_inference_flag
+
+            var frameCropLeftOffset = 0
+            var frameCropRightOffset = 0
+            var frameCropTopOffset = 0
+            var frameCropBottomOffset = 0
+
+            val frameCroppingFlag = reader.readBit()
+            if (frameCroppingFlag == 1) {
+                frameCropLeftOffset = reader.readUE()
+                frameCropRightOffset = reader.readUE()
+                frameCropTopOffset = reader.readUE()
+                frameCropBottomOffset = reader.readUE()
+            }
+
+            val finalWidth = width - (frameCropLeftOffset * 2) - (frameCropRightOffset * 2)
+            val finalHeight = height - (frameCropTopOffset * 2) - (frameCropBottomOffset * 2)
+
+            return SpsData(finalWidth, finalHeight)
+        } catch (e: Exception) {
+            AppLog.e("SPS parsing failed: ${e.message}")
+            return null
         }
     }
 }

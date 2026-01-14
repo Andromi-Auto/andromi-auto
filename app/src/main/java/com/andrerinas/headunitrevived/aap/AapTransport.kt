@@ -58,6 +58,8 @@ class AapTransport(
     private val modeManager: UiModeManager =  context.getSystemService(UI_MODE_SERVICE) as UiModeManager
     private var connection: AccessoryConnection? = null
     private var aapRead: AapRead? = null
+    var isQuittingAllowed: Boolean = false
+    var ignoreNextStopRequest: Boolean = false
     private var pollHandler: Handler? = null
     private val pollHandlerCallback = Handler.Callback {
         val ret = aapRead?.read() ?: -1
@@ -170,6 +172,7 @@ class AapTransport(
 
     private fun handshake(connection: AccessoryConnection): Boolean {
         try {
+            SystemClock.sleep(100)
             val buffer = ByteArray(Messages.DEF_BUFFER_LENGTH)
 
             AppLog.d("Handshake: Starting version request. TS: ${SystemClock.elapsedRealtime()}")

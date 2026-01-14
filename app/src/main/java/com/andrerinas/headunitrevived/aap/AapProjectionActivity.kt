@@ -174,7 +174,11 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
     override fun onSurfaceChanged(surface: android.view.Surface, width: Int, height: Int) {
         AppLog.i("[AapProjectionActivity] onSurfaceChanged. Actual surface dimensions: width=$width, height=$height")
         videoDecoder.setSurface(surface)
-        transport.send(VideoFocusEvent(gain = true, unsolicited = false))
+
+        // Force keyframe by toggling focus, prevent quit on resulting stop request
+        transport.ignoreNextStopRequest = true
+        transport.send(VideoFocusEvent(gain = false, unsolicited = true))
+        transport.send(VideoFocusEvent(gain = true, unsolicited = true))
 
         // Explicitly check and set video dimensions if already known by the decoder
         // This handles cases where the activity is recreated but the decoder already has dimensions
@@ -190,8 +194,10 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
     }
 
     override fun onSurfaceDestroyed(surface: android.view.Surface) {
-        transport.send(VideoFocusEvent(gain = false, unsolicited = false))
+        AppLog.i("SurfaceCallback: onSurfaceDestroyed. Surface: $surface")
+//        transport.send(VideoFocusEvent(gain = false, unsolicited = false))
         videoDecoder.stop("surfaceDestroyed")
+        videoDecoder.setSurface(null)
     }
 
     override fun onVideoDimensionsChanged(width: Int, height: Int) {

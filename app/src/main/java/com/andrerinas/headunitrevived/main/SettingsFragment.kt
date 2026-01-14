@@ -42,6 +42,7 @@ class SettingsFragment : Fragment() {
     private var pendingViewMode: Settings.ViewMode? = null
     private var pendingForceSoftware: Boolean? = null
     private var pendingLegacyDecoder: Boolean? = null
+    private var pendingWifiLauncherMode: Boolean? = null
     private var pendingVideoCodec: String? = null
     private var pendingFpsLimit: Int? = null
     private var pendingDebugMode: Boolean? = null
@@ -70,6 +71,7 @@ class SettingsFragment : Fragment() {
         pendingViewMode = settings.viewMode
         pendingForceSoftware = settings.forceSoftwareDecoding
         pendingLegacyDecoder = settings.forceLegacyDecoder
+        pendingWifiLauncherMode = settings.wifiLauncherMode
         pendingVideoCodec = settings.videoCodec
         pendingFpsLimit = settings.fpsLimit
         pendingDebugMode = settings.debugMode
@@ -146,6 +148,14 @@ class SettingsFragment : Fragment() {
         pendingDebugMode?.let { settings.debugMode = it }
         pendingBluetoothAddress?.let { settings.bluetoothAddress = it }
 
+        pendingWifiLauncherMode?.let { enabled ->
+            settings.wifiLauncherMode = enabled
+            val intent = Intent(requireContext(), AapService::class.java).apply {
+                action = if (enabled) AapService.ACTION_START_WIRELESS else AapService.ACTION_STOP_WIRELESS
+            }
+            requireContext().startService(intent)
+        }
+
         if (requiresRestart) {
             if (AapService.isConnected) {
                 Toast.makeText(context, "Stopping service to apply changes...", Toast.LENGTH_SHORT).show()
@@ -175,6 +185,7 @@ class SettingsFragment : Fragment() {
                         pendingViewMode != settings.viewMode ||
                         pendingForceSoftware != settings.forceSoftwareDecoding ||
                         pendingLegacyDecoder != settings.forceLegacyDecoder ||
+                        pendingWifiLauncherMode != settings.wifiLauncherMode ||
                         pendingVideoCodec != settings.videoCodec ||
                         pendingFpsLimit != settings.fpsLimit ||
                         pendingDebugMode != settings.debugMode ||
@@ -255,6 +266,18 @@ class SettingsFragment : Fragment() {
             isChecked = pendingUseGps!!,
             onCheckedChanged = { isChecked ->
                 pendingUseGps = isChecked
+                checkChanges()
+                updateSettingsList()
+            }
+        ))
+
+        items.add(SettingItem.ToggleSettingEntry(
+            stableId = "wifiLauncherMode",
+            nameResId = R.string.wifi_launcher_mode,
+            descriptionResId = R.string.wifi_launcher_mode_description,
+            isChecked = pendingWifiLauncherMode!!,
+            onCheckedChanged = { isChecked ->
+                pendingWifiLauncherMode = isChecked
                 checkChanges()
                 updateSettingsList()
             }

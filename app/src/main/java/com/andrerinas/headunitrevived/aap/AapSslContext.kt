@@ -9,7 +9,7 @@ import javax.net.ssl.SSLEngine
 import javax.net.ssl.SSLEngineResult
 
 class AapSslContext(keyManger: SingleKeyKeyManager): AapSsl {
-    private val sslContext: SSLContext = SSLContext.getInstance("TLSv1.2").apply {
+    private val sslContext: SSLContext = SSLContext.getInstance("TLS").apply {
         init(arrayOf(keyManger), arrayOf(NoCheckTrustManager()), null)
         // Disable session caching to prevent stale states across connection attempts
         clientSessionContext.sessionCacheSize = 0
