@@ -89,8 +89,18 @@ internal class AapControlMedia(
         if (Channel.isAudio(channel)) {
             aapAudio.stopAudio(channel)
         } else if (channel == Channel.ID_VID) {
-            AppLog.i("Video Sink Stopped -> Quitting")
-            aapTransport.quit()
+            if (aapTransport.ignoreNextStopRequest) {
+                AppLog.i("Video Sink Stopped -> Ignored (Forced Keyframe Request)")
+                aapTransport.ignoreNextStopRequest = false
+                return 0
+            }
+
+            if (aapTransport.isQuittingAllowed) {
+                AppLog.i("Video Sink Stopped -> Quitting")
+                aapTransport.quit()
+            } else {
+                AppLog.i("Video Sink Stopped -> Ignored (Background)")
+            }
         }
         return 0
     }
