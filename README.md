@@ -36,7 +36,7 @@ https://github.com/mikereidis/headunit
   - IMPORTANT: In my tests it only works, if your phone is unlocked AND shows the Android Auto settings page! Otherwise it won't connect
 
 ### Wireless Launcher
-The app even works with wireless launcher (https://play.google.com/store/apps/details?id=com.borconi.emil.wifilauncherforhur&hl=de)
+The app even works with wireless launcher (https://play.google.com/store/apps/details?id=com.borconi.emil.wifilauncherforhur)
 - Go to settings and enable Wireless Headunit Server
 - Both devices have to be in the same network (WiFi). You can use mobile hotspot from phone, or from the headunit or use wifi direct. That doesn't matter
 - Open Wireless Launcher on your phone and start it manually (or select your cars BT connection for example as a starter)
