@@ -38,7 +38,7 @@ dependencies {
 }
 
 android {
-    compileSdk = 34
+    compileSdk = 36
     namespace = "com.andrerinas.headunitrevived"
 
     buildFeatures {
@@ -48,7 +48,7 @@ android {
     defaultConfig {
         applicationId = "com.andrerinas.headunitrevived"
         minSdk = 21 // only for google play console. App should work in minSDK 19 or maybe 17
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 25
         versionName = "1.7.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -96,7 +96,7 @@ android {
 
     kotlinOptions {
         (this as KotlinJvmOptions).let {
-           it.jvmTarget = "1.8"
+            it.jvmTarget = "1.8"
         }
     }
 
