@@ -1,5 +1,17 @@
 # Headunit Revived
 
+# Playstore
+I try to bring the app to the playstore! This is my first time and it is very hard to get through all the steps.
+The next step is to get a several amount of testers.
+
+Please go to groups.google.com and join the Group: headlessunit-testers@googlegroups.com
+https://groups.google.com/g/headlessunit-testers
+
+After that you have access to: https://play.google.com/apps/testing/com.andrerinas.headunitrevived
+<p align="center">
+<img width="512" height="512" alt="Image" src="https://github.com/user-attachments/assets/b7a9caad-00b1-4b73-b338-b2970ddcc855" />
+</p>
+
 <p align="center">
     <img src="https://github.com/user-attachments/assets/20c3d622-89dc-4c20-8eae-b43074f3c144"
     alt="Headunit Logo"
