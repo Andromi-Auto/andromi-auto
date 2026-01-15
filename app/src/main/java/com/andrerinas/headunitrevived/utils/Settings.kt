@@ -155,6 +155,14 @@ class Settings(context: Context) {
         get() = prefs.getBoolean("has-accepted-disclaimer", false)
         set(value) { prefs.edit().putBoolean("has-accepted-disclaimer", value).apply() }
 
+    var enableAudioSink: Boolean
+        get() = prefs.getBoolean("enable-audio-sink", true)
+        set(value) { prefs.edit().putBoolean("enable-audio-sink", value).apply() }
+
+    var useAacAudio: Boolean
+        get() = prefs.getBoolean("use-aac-audio", false)
+        set(value) { prefs.edit().putBoolean("use-aac-audio", value).apply() }
+
     @SuppressLint("ApplySharedPref")
     fun commit() {
         prefs.edit().commit()
