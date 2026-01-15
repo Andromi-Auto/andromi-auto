@@ -11,10 +11,12 @@ import com.andrerinas.headunitrevived.aap.protocol.Channel
 import com.andrerinas.headunitrevived.aap.protocol.proto.Control
 import com.andrerinas.headunitrevived.decoder.AudioDecoder
 import com.andrerinas.headunitrevived.utils.AppLog
+import com.andrerinas.headunitrevived.utils.Settings
 
 internal class AapAudio(
         private val audioDecoder: AudioDecoder,
-        private val audioManager: AudioManager) {
+        private val audioManager: AudioManager,
+        private val settings: Settings) {
 
     private var audioFocusRequest: AudioFocusRequest? = null
 
@@ -64,8 +66,8 @@ internal class AapAudio(
         if (audioDecoder.getTrack(channel) == null) {
             val config = AudioConfigs.get(channel)
             val stream = AudioManager.STREAM_MUSIC
-            AppLog.i("AudioDecoder.start: channel=$channel, stream=$stream, sampleRate=${config.sampleRate}, numberOfBits=${config.numberOfBits}, numberOfChannels=${config.numberOfChannels}")
-            audioDecoder.start(channel, stream, config.sampleRate, config.numberOfBits, config.numberOfChannels)
+            AppLog.i("AudioDecoder.start: channel=$channel, stream=$stream, sampleRate=${config.sampleRate}, numberOfBits=${config.numberOfBits}, numberOfChannels=${config.numberOfChannels}, isAac=${settings.useAacAudio}")
+            audioDecoder.start(channel, stream, config.sampleRate, config.numberOfBits, config.numberOfChannels, settings.useAacAudio)
         }
 
         audioDecoder.decode(channel, buf, start, length)

@@ -93,7 +93,7 @@ class AapTransport(
 
     init {
         micRecorder.listener = this
-        aapAudio = AapAudio(audioDecoder, audioManager)
+        aapAudio = AapAudio(audioDecoder, audioManager, settings)
         aapVideo = AapVideo(videoDecoder, settings)
     }
 
