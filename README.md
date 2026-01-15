@@ -9,7 +9,7 @@ https://groups.google.com/g/headlessunit-testers
 
 After that you have access to: https://play.google.com/apps/testing/com.andrerinas.headunitrevived
 <p align="center">
-<img width="512" height="512" alt="Image" src="https://github.com/user-attachments/assets/b7a9caad-00b1-4b73-b338-b2970ddcc855" />
+<img width="200" height="200" alt="Image" src="https://github.com/user-attachments/assets/b7a9caad-00b1-4b73-b338-b2970ddcc855" />
 </p>
 
 <p align="center">
