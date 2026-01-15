@@ -4,8 +4,8 @@
 I try to bring the app to the playstore! This is my first time and it is very hard to get through all the steps.
 The next step is to get a several amount of testers.
 
-Please go to groups.google.com and join the Group: headlessunit-testers@googlegroups.com
-https://groups.google.com/g/headlessunit-testers
+Please go to groups.google.com and join the Group: headunit-revived@googlegroups.com
+https://groups.google.com/g/headunit-revived
 
 After that you have access to: https://play.google.com/apps/testing/com.andrerinas.headunitrevived
 <p align="center">
