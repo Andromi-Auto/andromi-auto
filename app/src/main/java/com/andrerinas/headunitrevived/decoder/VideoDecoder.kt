@@ -393,7 +393,7 @@ class VideoDecoder(private val settings: Settings) {
                     else -> "video/avc"
                 }
                 AppLog.i("VideoDecoder.setSurface | Pre-initializing codec: $mime")
-                codec_init(mime, false)
+                codec_init(mime, settings.forceSoftwareDecoding)
             }
         }
     }
