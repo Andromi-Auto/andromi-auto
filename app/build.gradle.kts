@@ -47,7 +47,8 @@ android {
 
     defaultConfig {
         applicationId = "com.andrerinas.headunitrevived"
-        minSdk = 17 // only for google play console. App should work in minSDK 19 or maybe 17
+        minSdk = 17
+        //minSdk = 21 // 21 only for google play console. App should work in minSDK 19 or maybe 17
         targetSdk = 36
         versionCode = 25
         versionName = "1.8.0"
@@ -96,7 +97,7 @@ android {
 
     kotlinOptions {
         (this as KotlinJvmOptions).let {
-           it.jvmTarget = "1.8"
+            it.jvmTarget = "1.8"
         }
     }
 
