@@ -69,7 +69,9 @@ adb shell am start -a android.intent.action.VIEW -d "headunit://connect?ip=192.1
 - Handshake failed sometimes and the devices won't connect. You need to try again, restart phone or clear caches
 
 ## Next Steps:
-- Bugfixing (very important are the connection issues!)
+- Bugfixing 
+  - very important are the connection issues!
+  - Non-Fullscreen Mode is buggy (https://github.com/andreknieriem/headunit-revived/issues/49)
 - Portrait Mode (https://github.com/andreknieriem/headunit-revived/issues/38)
 - Maybe:
   - Android SKD 17
