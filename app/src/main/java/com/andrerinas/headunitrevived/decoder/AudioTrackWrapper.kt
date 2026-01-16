@@ -38,23 +38,23 @@ class AudioTrackWrapper(stream: Int, sampleRateInHz: Int, bitDepth: Int, channel
 
     private var decoder: MediaCodec? = null
 
-    private var codecHandlerThread: HandlerThread? = null
+        private var codecHandlerThread: HandlerThread? = null
 
-    private val freeInputBuffers = LinkedBlockingQueue<Int>()
+        private val freeInputBuffers = LinkedBlockingQueue<Int>()
 
+    
 
+        // Limit queue capacity to provide backpressure to the network thread if audio playback is slow
 
-    // Limit queue capacity to provide backpressure to the network thread if audio playback is slow
+        private val dataQueue = LinkedBlockingQueue<ByteArray>()
 
-    private val dataQueue = LinkedBlockingQueue<ByteArray>(50)
+        @Volatile private var isRunning = true
 
-    @Volatile private var isRunning = true
+    
 
+        init {
 
-
-    init {
-
-        this.name = "AudioPlaybackThread"
+            this.name = "AudioPlaybackThread"
 
         audioTrack = createAudioTrack(stream, sampleRateInHz, bitDepth, channelCount)
 
@@ -343,7 +343,7 @@ class AudioTrackWrapper(stream: Int, sampleRateInHz: Int, bitDepth: Int, channel
 
         val minBufferSize = AudioTrack.getMinBufferSize(sampleRateInHz, channelConfig, dataFormat)
         // Larger buffer (32x) to prevent stuttering on jittery connections
-        val bufferSize = minBufferSize * 32
+        val bufferSize = minBufferSize * 8
 
         AppLog.i("Audio stream: $stream buffer size: $bufferSize (min: $minBufferSize) sampleRateInHz: $sampleRateInHz channelCount: $channelCount")
 
