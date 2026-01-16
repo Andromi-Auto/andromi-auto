@@ -3,6 +3,7 @@
 ### v.1.8.0
 - Added Audio Sink Setting (Enable/Disable routing audio to HU)
 - Added AAC Audio Support Setting (Experimental)
+- Fixed audio stuttering issues by reverting buffering logic to v.1.4.1 defaults
 - Restored robust video decoder logic (SPS Parsing) to fix black screen/crashes on Mediatek devices
 - Fixed visual glitches on navigation bar and fullscreen transitions
 - Improved list item UI with better click feedback
