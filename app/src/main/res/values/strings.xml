@@ -82,6 +82,13 @@
     <string name="add_new">Add new</string>
     <string name="cancel">Cancel</string>
 
+    <!-- Audio Settings -->
+    <string name="category_audio">Audio</string>
+    <string name="enable_audio_sink">Enable Audio Sink</string>
+    <string name="enable_audio_sink_description">If disabled, the head unit will not act as an audio sink. Audio will play from the phone.</string>
+    <string name="use_aac_audio">Use AAC Audio</string>
+    <string name="use_aac_audio_description">Use AAC codec for audio to save bandwidth (Experimental).</string>
+
     <!-- Info Settings -->
     <string name="category_info">Info</string>
     <string name="about">About &amp; Support</string>

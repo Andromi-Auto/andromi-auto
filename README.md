@@ -71,13 +71,21 @@ adb shell am start -a android.intent.action.VIEW -d "headunit://connect?ip=192.1
 ## Next Steps:
 - Bugfixing (very important are the connection issues!)
 - Portrait Mode (https://github.com/andreknieriem/headunit-revived/issues/38)
-- Audio-Sink
-- AAC Audio Decoder Option (compressed Audio should help devices with bad wifi)
 - Maybe:
   - Android SKD 17
   - Auto-Connect last session (if possible)
 
 ## Changelog
+### v.1.8.0
+- Added Audio Sink Setting (Enable/Disable routing audio to HU)
+- Added AAC Audio Support Setting (Experimental)
+- Fixed audio stuttering issues by reverting buffering logic to v.1.4.1 defaults
+- Restored robust video decoder logic (SPS Parsing) to fix black screen/crashes on Mediatek devices
+- Fixed visual glitches on navigation bar and fullscreen transitions
+- Improved list item UI with better click feedback
+- Fixed SSL decryption crash (ArrayIndexOutOfBoundsException)
+- Updated Wiki documentation
+
 ### v.1.7.0
 - Added WiFi Network Discovery (Port Scan) with Auto-Connect
 - Added Intent Support (`headunit://connect?ip=...`) for automation

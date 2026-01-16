@@ -47,6 +47,8 @@ class SettingsFragment : Fragment() {
     private var pendingFpsLimit: Int? = null
     private var pendingDebugMode: Boolean? = null
     private var pendingBluetoothAddress: String? = null
+    private var pendingEnableAudioSink: Boolean? = null
+    private var pendingUseAacAudio: Boolean? = null
 
     private var requiresRestart = false
     private var hasChanges = false
@@ -76,6 +78,8 @@ class SettingsFragment : Fragment() {
         pendingFpsLimit = settings.fpsLimit
         pendingDebugMode = settings.debugMode
         pendingBluetoothAddress = settings.bluetoothAddress
+        pendingEnableAudioSink = settings.enableAudioSink
+        pendingUseAacAudio = settings.useAacAudio
 
         // Intercept system back button
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
@@ -147,6 +151,8 @@ class SettingsFragment : Fragment() {
         pendingFpsLimit?.let { settings.fpsLimit = it }
         pendingDebugMode?.let { settings.debugMode = it }
         pendingBluetoothAddress?.let { settings.bluetoothAddress = it }
+        pendingEnableAudioSink?.let { settings.enableAudioSink = it }
+        pendingUseAacAudio?.let { settings.useAacAudio = it }
 
         pendingWifiLauncherMode?.let { enabled ->
             settings.wifiLauncherMode = enabled
@@ -189,7 +195,9 @@ class SettingsFragment : Fragment() {
                         pendingVideoCodec != settings.videoCodec ||
                         pendingFpsLimit != settings.fpsLimit ||
                         pendingDebugMode != settings.debugMode ||
-                        pendingBluetoothAddress != settings.bluetoothAddress
+                        pendingBluetoothAddress != settings.bluetoothAddress ||
+                        pendingEnableAudioSink != settings.enableAudioSink ||
+                        pendingUseAacAudio != settings.useAacAudio
 
         hasChanges = anyChange
 
@@ -199,7 +207,9 @@ class SettingsFragment : Fragment() {
                           pendingFpsLimit != settings.fpsLimit ||
                           pendingDpi != settings.dpiPixelDensity ||
                           pendingForceSoftware != settings.forceSoftwareDecoding ||
-                          pendingLegacyDecoder != settings.forceLegacyDecoder
+                          pendingLegacyDecoder != settings.forceLegacyDecoder ||
+                          pendingEnableAudioSink != settings.enableAudioSink ||
+                          pendingUseAacAudio != settings.useAacAudio
 
         updateSaveButtonState()
     }
@@ -428,6 +438,33 @@ class SettingsFragment : Fragment() {
                         updateSettingsList()
                     }
                     .show()
+            }
+        ))
+
+        // --- Audio Settings ---
+        items.add(SettingItem.CategoryHeader("audio", R.string.category_audio))
+
+        items.add(SettingItem.ToggleSettingEntry(
+            stableId = "enableAudioSink",
+            nameResId = R.string.enable_audio_sink,
+            descriptionResId = R.string.enable_audio_sink_description,
+            isChecked = pendingEnableAudioSink!!,
+            onCheckedChanged = { isChecked ->
+                pendingEnableAudioSink = isChecked
+                checkChanges()
+                updateSettingsList()
+            }
+        ))
+
+        items.add(SettingItem.ToggleSettingEntry(
+            stableId = "useAacAudio",
+            nameResId = R.string.use_aac_audio,
+            descriptionResId = R.string.use_aac_audio_description,
+            isChecked = pendingUseAacAudio!!,
+            onCheckedChanged = { isChecked ->
+                pendingUseAacAudio = isChecked
+                checkChanges()
+                updateSettingsList()
             }
         ))
 

@@ -245,8 +245,12 @@ class VideoDecoder(private val settings: Settings) {
                     callbackThread = HandlerThread("VideoDecoderCallbackThread")
                     callbackThread!!.start()
                 }
-                val handler = Handler(callbackThread!!.looper)
-                mCodec!!.setCallback(mCallback!!, handler)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    val handler = Handler(callbackThread!!.looper)
+                    mCodec!!.setCallback(mCallback!!, handler)
+                } else {
+                    mCodec!!.setCallback(mCallback!!)
+                }
             }
 
             mCodec!!.configure(format, mSurface, null, 0)
@@ -389,7 +393,7 @@ class VideoDecoder(private val settings: Settings) {
                     else -> "video/avc"
                 }
                 AppLog.i("VideoDecoder.setSurface | Pre-initializing codec: $mime")
-                codec_init(mime, false)
+                codec_init(mime, settings.forceSoftwareDecoding)
             }
         }
     }

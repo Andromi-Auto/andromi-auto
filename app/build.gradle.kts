@@ -11,7 +11,7 @@ dependencies {
     implementation("com.google.protobuf:protobuf-java:3.25.1")
     implementation("androidx.activity:activity-ktx:1.8.2")
     implementation("androidx.fragment:fragment-ktx:1.6.2")
-    implementation("androidx.media:media:1.7.0")
+    implementation("androidx.media:media:1.6.0")
     implementation("androidx.recyclerview:recyclerview:1.3.2")
     implementation("com.google.android.material:material:1.11.0")
     implementation("androidx.startup:startup-runtime:1.1.1")
@@ -47,10 +47,11 @@ android {
 
     defaultConfig {
         applicationId = "com.andrerinas.headunitrevived"
-        minSdk = 21 // only for google play console. App should work in minSDK 19 or maybe 17
+        minSdk = 17
+        //minSdk = 21 // 21 only for google play console. App should work in minSDK 19 or maybe 17
         targetSdk = 36
-        versionCode = 25
-        versionName = "1.7.0"
+        versionCode = 26
+        versionName = "1.8.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
     }
