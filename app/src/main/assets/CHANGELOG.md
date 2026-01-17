@@ -1,5 +1,8 @@
 # Changelog
 
+### v.1.8.1
+- Fixed Fullscreen/Non-Fullscreen layout issues (black bars, overlapping)
+
 ### v.1.8.0
 - Added Audio Sink Setting (Enable/Disable routing audio to HU)
 - Added AAC Audio Support Setting (Experimental)
