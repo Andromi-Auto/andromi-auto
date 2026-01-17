@@ -222,7 +222,8 @@ class Settings(context: Context) {
 
     enum class ViewMode(val value: Int) {
         SURFACE(0),
-        TEXTURE(1);
+        TEXTURE(1),
+        GLES(2);
 
         companion object {
             private val map = values().associateBy(ViewMode::value)

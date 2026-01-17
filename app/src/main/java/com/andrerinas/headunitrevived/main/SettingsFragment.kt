@@ -360,9 +360,14 @@ class SettingsFragment : Fragment() {
         items.add(SettingItem.SettingEntry(
             stableId = "viewMode",
             nameResId = R.string.view_mode,
-            value = if (pendingViewMode == Settings.ViewMode.SURFACE) getString(R.string.surface_view) else getString(R.string.texture_view),
+            value = when (pendingViewMode) {
+                Settings.ViewMode.SURFACE -> getString(R.string.surface_view)
+                Settings.ViewMode.TEXTURE -> getString(R.string.texture_view)
+                Settings.ViewMode.GLES -> getString(R.string.gles_view)
+                else -> getString(R.string.surface_view)
+            },
             onClick = { _ ->
-                val viewModes = arrayOf(getString(R.string.surface_view), getString(R.string.texture_view))
+                val viewModes = arrayOf(getString(R.string.surface_view), getString(R.string.texture_view), getString(R.string.gles_view))
                 val currentIdx = pendingViewMode!!.value
                 AlertDialog.Builder(requireContext())
                     .setTitle(R.string.change_view_mode)
@@ -480,6 +485,35 @@ class SettingsFragment : Fragment() {
                 pendingDebugMode = isChecked
                 checkChanges()
                 updateSettingsList()
+            }
+        ))
+
+        items.add(SettingItem.SettingEntry(
+            stableId = "exportLogs",
+            nameResId = R.string.export_logs,
+            value = "",
+            onClick = {
+                val context = requireContext()
+                val logFile = com.andrerinas.headunitrevived.utils.LogExporter.saveLogToPublicFile(context)
+
+                if (logFile != null) {
+                    AlertDialog.Builder(context)
+                        .setTitle("Logs Exported")
+                        .setMessage("Log saved to:\n${logFile.absolutePath}\n\nWhat do you want to do?")
+                        .setPositiveButton("Share") { _, _ ->
+                            com.andrerinas.headunitrevived.utils.LogExporter.shareLogFile(context, logFile)
+                        }
+                        .setNeutralButton("Save only") { dialog, _ ->
+                            dialog.dismiss()
+                        }
+                        .setNegativeButton("Cancel") { dialog, _ ->
+                            logFile.delete()
+                            dialog.dismiss()
+                        }
+                        .show()
+                } else {
+                    Toast.makeText(context, "Failed to export logs", Toast.LENGTH_SHORT).show()
+                }
             }
         ))
 

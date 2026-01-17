@@ -24,6 +24,8 @@ import android.os.SystemClock
 
 import com.andrerinas.headunitrevived.utils.AppLog
 
+import java.util.concurrent.Executors
+
 import java.util.concurrent.LinkedBlockingQueue
 
 import java.util.concurrent.TimeUnit
@@ -38,13 +40,15 @@ class AudioTrackWrapper(stream: Int, sampleRateInHz: Int, bitDepth: Int, channel
 
     private var decoder: MediaCodec? = null
 
-        private var codecHandlerThread: HandlerThread? = null
+    private var codecHandlerThread: HandlerThread? = null
 
-        private val freeInputBuffers = LinkedBlockingQueue<Int>()
+    private val freeInputBuffers = LinkedBlockingQueue<Int>()
 
-    
+    private val writeExecutor = Executors.newSingleThreadExecutor()
 
-        // Limit queue capacity to provide backpressure to the network thread if audio playback is slow
+
+
+    // Limit queue capacity to provide backpressure to the network thread if audio playback is slow
 
         private val dataQueue = LinkedBlockingQueue<ByteArray>()
 
@@ -136,13 +140,27 @@ class AudioTrackWrapper(stream: Int, sampleRateInHz: Int, bitDepth: Int, channel
 
                 
 
-                                                // Write to AudioTrack (this might block if track is full, providing backpressure)
+                                                                                // Write to AudioTrack using executor
 
-                                                if (isRunning) {
+                
 
-                                                    audioTrack.write(chunk, 0, chunk.size)
+                                                                                writeExecutor.submit {
 
-                                                }
+                
+
+                                                                                    if (isRunning) {
+
+                
+
+                                                                                        audioTrack.write(chunk, 0, chunk.size)
+
+                
+
+                                                                                    }
+
+                
+
+                                                                                }
 
                                             }
 
@@ -226,13 +244,21 @@ class AudioTrackWrapper(stream: Int, sampleRateInHz: Int, bitDepth: Int, channel
 
                         queueInput(buffer)
 
-                    } else {
+                                        } else {
 
-                        // This blocks if the hardware buffer is full -> regulates speed
+                                            // PCM path - use executor
 
-                        audioTrack.write(buffer, 0, buffer.size)
+                                            writeExecutor.submit {
 
-                    }
+                                                if (isRunning) {
+
+                                                    audioTrack.write(buffer, 0, buffer.size)
+
+                                                }
+
+                                            }
+
+                                        }
 
                 }
 
@@ -389,6 +415,7 @@ class AudioTrackWrapper(stream: Int, sampleRateInHz: Int, bitDepth: Int, channel
     }
 
     private fun cleanup() {
+        writeExecutor.shutdown()
         if (audioTrack.playState == AudioTrack.PLAYSTATE_PLAYING) {
             try {
                 audioTrack.pause()

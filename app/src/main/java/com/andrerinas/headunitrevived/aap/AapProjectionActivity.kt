@@ -83,6 +83,15 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
             )
             projectionView = textureView
             container.setBackgroundColor(android.graphics.Color.BLACK)
+        } else if (settings.viewMode == Settings.ViewMode.GLES) {
+            AppLog.i("Using GlProjectionView")
+            val glView = com.andrerinas.headunitrevived.view.GlProjectionView(this)
+            glView.layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT
+            )
+            projectionView = glView
+            container.setBackgroundColor(android.graphics.Color.BLACK)
         } else {
             AppLog.i("Using SurfaceView")
             projectionView = ProjectionView(this)
