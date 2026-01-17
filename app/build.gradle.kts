@@ -52,6 +52,7 @@ android {
         targetSdk = 36
         versionCode = 27
         versionName = "1.8.1"
+        setProperty("archivesBaseName", "${applicationId}_${versionName}")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
     }
