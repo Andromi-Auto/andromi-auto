@@ -4,6 +4,18 @@
 - Added In-App Log Export feature (Save/Share)
 - Added GLES20 Video Renderer option (fixes black screen/artifacts on older Head Units)
 
+### v.1.8.1
+- Fixed Fullscreen/Non-Fullscreen layout issues (black bars, overlapping)
+
+### v.1.8.0
+- Added Audio Sink Setting (Enable/Disable routing audio to HU)
+- Added AAC Audio Support Setting (Experimental)
+- Fixed audio stuttering issues by reverting buffering logic to v.1.4.1 defaults
+- Restored robust video decoder logic (SPS Parsing) to fix black screen/crashes on Mediatek devices
+- Fixed visual glitches on navigation bar and fullscreen transitions
+- Improved list item UI with better click feedback
+- Fixed SSL decryption crash (ArrayIndexOutOfBoundsException)
+
 ### v.1.7.0
 - Added WiFi Network Discovery (Port Scan) with Auto-Connect
 - Added Intent Support (`headunit://connect?ip=...`) for automation
