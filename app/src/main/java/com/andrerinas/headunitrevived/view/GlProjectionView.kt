@@ -47,6 +47,7 @@ class GlProjectionView(context: Context) : GLSurfaceView(context), IProjectionVi
         // GLES handles scaling via Viewport/Matrix, but layout params handle the view size.
         // We rely on ProjectionViewScaler to set LayoutParams of this View.
         AppLog.i("GlProjectionView setVideoSize: ${width}x$height")
+        renderer.updateBufferSize(width, height)
         ProjectionViewScaler.updateScale(this, width, height)
     }
 
@@ -64,6 +65,10 @@ class GlProjectionView(context: Context) : GLSurfaceView(context), IProjectionVi
         
         private var mVPMatrix = FloatArray(16)
         private var sSTMatrix = FloatArray(16)
+
+        fun updateBufferSize(width: Int, height: Int) {
+            surfaceTexture?.setDefaultBufferSize(width, height)
+        }
 
         private val vertexShaderCode = """
             attribute vec4 aPosition;

@@ -24,6 +24,10 @@ object LogExporter {
             if (logDir != null && !logDir.exists()) {
                 logDir.mkdirs()
             }
+
+            // Clean old logs
+            logDir?.listFiles { _, name -> name.startsWith("HUR_Log_") }?.forEach { it.delete() }
+
             val logFile = File(logDir, fileName)
 
             logFile.bufferedWriter().use { out ->

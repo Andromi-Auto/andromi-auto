@@ -78,6 +78,10 @@ adb shell am start -a android.intent.action.VIEW -d "headunit://connect?ip=192.1
   - Auto-Connect last session (if possible)
 
 ## Changelog
+### v.1.9.0
+- Added In-App Log Export feature (Save/Share)
+- Added GLES20 Video Renderer option (fixes black screen/artifacts on older Head Units)
+
 ### v.1.8.1
 - Fixed Fullscreen/Non-Fullscreen layout issues (black bars, overlapping)
 
@@ -89,7 +93,6 @@ adb shell am start -a android.intent.action.VIEW -d "headunit://connect?ip=192.1
 - Fixed visual glitches on navigation bar and fullscreen transitions
 - Improved list item UI with better click feedback
 - Fixed SSL decryption crash (ArrayIndexOutOfBoundsException)
-- Updated Wiki documentation
 
 ### v.1.7.0
 - Added WiFi Network Discovery (Port Scan) with Auto-Connect

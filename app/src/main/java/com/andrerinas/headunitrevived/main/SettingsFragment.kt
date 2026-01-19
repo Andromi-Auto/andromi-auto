@@ -24,6 +24,7 @@ import com.andrerinas.headunitrevived.utils.Settings
 import com.andrerinas.headunitrevived.BuildConfig
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class SettingsFragment : Fragment() {
     private lateinit var settings: Settings
@@ -491,23 +492,19 @@ class SettingsFragment : Fragment() {
         items.add(SettingItem.SettingEntry(
             stableId = "exportLogs",
             nameResId = R.string.export_logs,
-            value = "",
+            value = getString(R.string.export_logs_description),
             onClick = {
                 val context = requireContext()
                 val logFile = com.andrerinas.headunitrevived.utils.LogExporter.saveLogToPublicFile(context)
 
                 if (logFile != null) {
-                    AlertDialog.Builder(context)
+                    MaterialAlertDialogBuilder(context, R.style.DarkAlertDialog)
                         .setTitle("Logs Exported")
                         .setMessage("Log saved to:\n${logFile.absolutePath}\n\nWhat do you want to do?")
                         .setPositiveButton("Share") { _, _ ->
                             com.andrerinas.headunitrevived.utils.LogExporter.shareLogFile(context, logFile)
                         }
-                        .setNeutralButton("Save only") { dialog, _ ->
-                            dialog.dismiss()
-                        }
-                        .setNegativeButton("Cancel") { dialog, _ ->
-                            logFile.delete()
+                        .setNegativeButton("Close") { dialog, _ ->
                             dialog.dismiss()
                         }
                         .show()
