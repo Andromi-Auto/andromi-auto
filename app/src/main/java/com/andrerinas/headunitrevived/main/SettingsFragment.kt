@@ -500,7 +500,7 @@ class SettingsFragment : Fragment() {
                 if (logFile != null) {
                     MaterialAlertDialogBuilder(context, R.style.DarkAlertDialog)
                         .setTitle("Logs Exported")
-                        .setMessage("Log saved to:\n${logFile.absolutePath}\n\nWhat do you want to do?")
+                        .setMessage("Log saved to:\n${logFile.absolutePath}\n\n")
                         .setPositiveButton("Share") { _, _ ->
                             com.andrerinas.headunitrevived.utils.LogExporter.shareLogFile(context, logFile)
                         }
