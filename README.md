@@ -81,6 +81,7 @@ adb shell am start -a android.intent.action.VIEW -d "headunit://connect?ip=192.1
 ### v.1.9.0
 - Added In-App Log Export feature (Save/Share)
 - Added GLES20 Video Renderer option (fixes black screen/artifacts on older Head Units)
+- Merged PR #56 minSdk 16 + fix Settings crash on older Android + prevent SDK16 crash (mic fix) thanks to @JanRi3D
 
 ### v.1.8.1
 - Fixed Fullscreen/Non-Fullscreen layout issues (black bars, overlapping)
