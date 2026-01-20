@@ -244,21 +244,13 @@ class AudioTrackWrapper(stream: Int, sampleRateInHz: Int, bitDepth: Int, channel
 
                         queueInput(buffer)
 
-                                        } else {
+                                                            } else {
 
-                                            // PCM path - use executor
+                                                                // PCM path - direct write in this high-priority thread
 
-                                            writeExecutor.submit {
+                                                                audioTrack.write(buffer, 0, buffer.size)
 
-                                                if (isRunning) {
-
-                                                    audioTrack.write(buffer, 0, buffer.size)
-
-                                                }
-
-                                            }
-
-                                        }
+                                                            }
 
                 }
 

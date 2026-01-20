@@ -62,6 +62,8 @@
     <string name="debug_mode_description">Toggle more Logging</string>
     <string name="export_logs">Export Logs</string>
     <string name="export_logs_description">Save logs for debugging</string>
+    <string name="use_native_ssl">Use Native SSL</string>
+    <string name="use_native_ssl_description">Use native OpenSSL library (faster on older devices). Requires restart.</string>
     <string name="not_set">Not Set</string>
     <string name="keymap_description">Change the Key-Bindings for your Headunit</string>
 

@@ -50,6 +50,7 @@ class SettingsFragment : Fragment() {
     private var pendingBluetoothAddress: String? = null
     private var pendingEnableAudioSink: Boolean? = null
     private var pendingUseAacAudio: Boolean? = null
+    private var pendingUseNativeSsl: Boolean? = null
 
     private var requiresRestart = false
     private var hasChanges = false
@@ -81,6 +82,7 @@ class SettingsFragment : Fragment() {
         pendingBluetoothAddress = settings.bluetoothAddress
         pendingEnableAudioSink = settings.enableAudioSink
         pendingUseAacAudio = settings.useAacAudio
+        pendingUseNativeSsl = settings.useNativeSsl
 
         // Intercept system back button
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
@@ -154,6 +156,7 @@ class SettingsFragment : Fragment() {
         pendingBluetoothAddress?.let { settings.bluetoothAddress = it }
         pendingEnableAudioSink?.let { settings.enableAudioSink = it }
         pendingUseAacAudio?.let { settings.useAacAudio = it }
+        pendingUseNativeSsl?.let { settings.useNativeSsl = it }
 
         pendingWifiLauncherMode?.let { enabled ->
             settings.wifiLauncherMode = enabled
@@ -198,7 +201,8 @@ class SettingsFragment : Fragment() {
                         pendingDebugMode != settings.debugMode ||
                         pendingBluetoothAddress != settings.bluetoothAddress ||
                         pendingEnableAudioSink != settings.enableAudioSink ||
-                        pendingUseAacAudio != settings.useAacAudio
+                        pendingUseAacAudio != settings.useAacAudio ||
+                        pendingUseNativeSsl != settings.useNativeSsl
 
         hasChanges = anyChange
 
@@ -210,7 +214,8 @@ class SettingsFragment : Fragment() {
                           pendingForceSoftware != settings.forceSoftwareDecoding ||
                           pendingLegacyDecoder != settings.forceLegacyDecoder ||
                           pendingEnableAudioSink != settings.enableAudioSink ||
-                          pendingUseAacAudio != settings.useAacAudio
+                          pendingUseAacAudio != settings.useAacAudio ||
+                          pendingUseNativeSsl != settings.useNativeSsl
 
         updateSaveButtonState()
     }
@@ -511,6 +516,18 @@ class SettingsFragment : Fragment() {
                 } else {
                     Toast.makeText(context, "Failed to export logs", Toast.LENGTH_SHORT).show()
                 }
+            }
+        ))
+
+        items.add(SettingItem.ToggleSettingEntry(
+            stableId = "useNativeSsl",
+            nameResId = R.string.use_native_ssl,
+            descriptionResId = R.string.use_native_ssl_description,
+            isChecked = pendingUseNativeSsl!!,
+            onCheckedChanged = { isChecked ->
+                pendingUseNativeSsl = isChecked
+                checkChanges()
+                updateSettingsList()
             }
         ))
 

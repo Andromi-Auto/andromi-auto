@@ -1,8 +1,10 @@
 package com.andrerinas.headunitrevived.aap
 
 import com.andrerinas.headunitrevived.aap.protocol.messages.Messages
+import com.andrerinas.headunitrevived.connection.AccessoryConnection
 import com.andrerinas.headunitrevived.ssl.NoCheckTrustManager
 import com.andrerinas.headunitrevived.ssl.SingleKeyKeyManager
+import com.andrerinas.headunitrevived.utils.AppLog
 import java.nio.ByteBuffer
 import javax.net.ssl.SSLContext
 import javax.net.ssl.SSLEngine
@@ -18,6 +20,48 @@ class AapSslContext(keyManger: SingleKeyKeyManager): AapSsl {
     private lateinit var sslEngine: SSLEngine
     private lateinit var txBuffer: ByteBuffer
     private lateinit var rxBuffer: ByteBuffer
+
+    override fun performHandshake(connection: AccessoryConnection): Boolean {
+        if (prepare() < 0) return false
+
+        val buffer = ByteArray(Messages.DEF_BUFFER_LENGTH)
+
+        while (getHandshakeStatus() != SSLEngineResult.HandshakeStatus.FINISHED &&
+                getHandshakeStatus() != SSLEngineResult.HandshakeStatus.NOT_HANDSHAKING) {
+
+            when (getHandshakeStatus()) {
+                SSLEngineResult.HandshakeStatus.NEED_UNWRAP -> {
+                    // Recv from connection -> unwrap
+                    val size = connection.recvBlocking(buffer, buffer.size, 5000, false)
+                    if (size <= 6) {
+                        AppLog.e("SSL Handshake: Receive failed or too small ($size)")
+                        return false
+                    }
+                    handshakeWrite(6, size - 6, buffer)
+                }
+
+                SSLEngineResult.HandshakeStatus.NEED_WRAP -> {
+                    // Wrap -> Send to connection
+                    val handshakeData = handshakeRead()
+                    val bio = Messages.createRawMessage(0, 3, 3, handshakeData)
+                    if (connection.sendBlocking(bio, bio.size, 5000) < 0) {
+                        AppLog.e("SSL Handshake: Send failed")
+                        return false
+                    }
+                }
+
+                SSLEngineResult.HandshakeStatus.NEED_TASK -> {
+                    runDelegatedTasks()
+                }
+
+                else -> {
+                    AppLog.e("SSL Handshake: Unexpected status ${getHandshakeStatus()}")
+                    return false
+                }
+            }
+        }
+        return true
+    }
 
     override fun prepare(): Int {
         sslEngine = sslContext.createSSLEngine().apply {
