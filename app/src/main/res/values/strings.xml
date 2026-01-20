@@ -67,6 +67,24 @@
     <string name="not_set">Not Set</string>
     <string name="keymap_description">Change the Key-Bindings for your Headunit</string>
 
+    <string name="key_soft_left">Soft Left</string>
+    <string name="key_soft_right">Soft Right</string>
+    <string name="key_dpad_up">D-Pad Up</string>
+    <string name="key_dpad_down">D-Pad Down</string>
+    <string name="key_dpad_left">D-Pad Left</string>
+    <string name="key_dpad_right">D-Pad Right</string>
+    <string name="key_dpad_center">D-Pad Center (OK)</string>
+    <string name="key_media_play">Media Play</string>
+    <string name="key_media_pause">Media Pause</string>
+    <string name="key_media_play_pause">Media Play/Pause</string>
+    <string name="key_media_next">Next Track</string>
+    <string name="key_media_prev">Previous Track</string>
+    <string name="key_search">Voice Command</string>
+    <string name="key_call">Phone</string>
+    <string name="key_music">Music</string>
+    <string name="key_nav">Navigation</string>
+    <string name="key_night">Toggle Night Mode</string>
+
     <!-- Categories for SettingsFragment -->
     <string name="category_general">General</string>
     <string name="category_graphic">Graphic</string>
