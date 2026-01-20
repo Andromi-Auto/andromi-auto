@@ -1,8 +1,10 @@
 package com.andrerinas.headunitrevived.aap
 
 import com.andrerinas.headunitrevived.aap.protocol.messages.Messages
+import com.andrerinas.headunitrevived.connection.AccessoryConnection
 import com.andrerinas.headunitrevived.ssl.NoCheckTrustManager
 import com.andrerinas.headunitrevived.ssl.SingleKeyKeyManager
+import com.andrerinas.headunitrevived.utils.AppLog
 import java.nio.ByteBuffer
 import javax.net.ssl.SSLContext
 import javax.net.ssl.SSLEngine
@@ -18,6 +20,48 @@ class AapSslContext(keyManger: SingleKeyKeyManager): AapSsl {
     private lateinit var sslEngine: SSLEngine
     private lateinit var txBuffer: ByteBuffer
     private lateinit var rxBuffer: ByteBuffer
+
+    override fun performHandshake(connection: AccessoryConnection): Boolean {
+        if (prepare() < 0) return false
+
+        val buffer = ByteArray(Messages.DEF_BUFFER_LENGTH)
+
+        while (getHandshakeStatus() != SSLEngineResult.HandshakeStatus.FINISHED &&
+                getHandshakeStatus() != SSLEngineResult.HandshakeStatus.NOT_HANDSHAKING) {
+
+            when (getHandshakeStatus()) {
+                SSLEngineResult.HandshakeStatus.NEED_UNWRAP -> {
+                    // Recv from connection -> unwrap
+                    val size = connection.recvBlocking(buffer, buffer.size, 5000, false)
+                    if (size <= 6) {
+                        AppLog.e("SSL Handshake: Receive failed or too small ($size)")
+                        return false
+                    }
+                    handshakeWrite(6, size - 6, buffer)
+                }
+
+                SSLEngineResult.HandshakeStatus.NEED_WRAP -> {
+                    // Wrap -> Send to connection
+                    val handshakeData = handshakeRead()
+                    val bio = Messages.createRawMessage(0, 3, 3, handshakeData)
+                    if (connection.sendBlocking(bio, bio.size, 5000) < 0) {
+                        AppLog.e("SSL Handshake: Send failed")
+                        return false
+                    }
+                }
+
+                SSLEngineResult.HandshakeStatus.NEED_TASK -> {
+                    runDelegatedTasks()
+                }
+
+                else -> {
+                    AppLog.e("SSL Handshake: Unexpected status ${getHandshakeStatus()}")
+                    return false
+                }
+            }
+        }
+        return true
+    }
 
     override fun prepare(): Int {
         sslEngine = sslContext.createSSLEngine().apply {
@@ -83,25 +127,35 @@ class AapSslContext(keyManger: SingleKeyKeyManager): AapSsl {
     }
 
     override fun decrypt(start: Int, length: Int, buffer: ByteArray): ByteArrayWithLimit? {
-        rxBuffer.clear()
-        val encrypted = ByteBuffer.wrap(buffer, start, length)
-        val result = sslEngine.unwrap(encrypted, rxBuffer)
-        runDelegatedTasks(result, sslEngine)
-        val resultBuffer = ByteArray(result.bytesProduced())
-        rxBuffer.flip()
-        rxBuffer.get(resultBuffer)
-        return ByteArrayWithLimit(resultBuffer, resultBuffer.size)
+        try {
+            rxBuffer.clear()
+            val encrypted = ByteBuffer.wrap(buffer, start, length)
+            val result = sslEngine.unwrap(encrypted, rxBuffer)
+            runDelegatedTasks(result, sslEngine)
+            val resultBuffer = ByteArray(result.bytesProduced())
+            rxBuffer.flip()
+            rxBuffer.get(resultBuffer)
+            return ByteArrayWithLimit(resultBuffer, resultBuffer.size)
+        } catch (e: Exception) {
+            AppLog.e("SSL Decrypt failed", e)
+            return null
+        }
     }
 
     override fun encrypt(offset: Int, length: Int, buffer: ByteArray): ByteArrayWithLimit? {
-        txBuffer.clear()
-        val byteBuffer = ByteBuffer.wrap(buffer, offset, length)
-        val result = sslEngine.wrap(byteBuffer, txBuffer)
-        runDelegatedTasks(result, sslEngine)
-        val resultBuffer = ByteArray(result.bytesProduced() + offset)
-        txBuffer.flip()
-        txBuffer.get(resultBuffer, offset, result.bytesProduced())
-        return ByteArrayWithLimit(resultBuffer, resultBuffer.size)
+        try {
+            txBuffer.clear()
+            val byteBuffer = ByteBuffer.wrap(buffer, offset, length)
+            val result = sslEngine.wrap(byteBuffer, txBuffer)
+            runDelegatedTasks(result, sslEngine)
+            val resultBuffer = ByteArray(result.bytesProduced() + offset)
+            txBuffer.flip()
+            txBuffer.get(resultBuffer, offset, result.bytesProduced())
+            return ByteArrayWithLimit(resultBuffer, resultBuffer.size)
+        } catch (e: Exception) {
+            AppLog.e("SSL Encrypt failed", e)
+            return null
+        }
     }
 
     private fun runDelegatedTasks(result: SSLEngineResult, engine: SSLEngine) {

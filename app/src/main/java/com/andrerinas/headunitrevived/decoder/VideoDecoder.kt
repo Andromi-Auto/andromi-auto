@@ -230,15 +230,18 @@ class VideoDecoder(private val settings: Settings) {
             format.setByteBuffer("csd-1", ByteBuffer.wrap(pps))
         }
 
+        val isLegacy = settings.forceLegacyDecoder || Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            format.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, 10485760)
+            val maxInputSize = if (isLegacy) 2097152 else 10485760
+            format.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, maxInputSize)
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        if (!isLegacy && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             format.setInteger(MediaFormat.KEY_PRIORITY, 0)
             format.setFloat(MediaFormat.KEY_OPERATING_RATE, 120.0f)
         }
 
-        AppLog.i("VideoDecoder: configureDecoder with mime=$mime, target dimensions=${width}x${height} (Legacy: ${settings.forceLegacyDecoder})")
+        AppLog.i("VideoDecoder: configureDecoder with mime=$mime, target dimensions=${width}x${height} (Legacy: $isLegacy)")
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && !settings.forceLegacyDecoder) {
                 if (callbackThread == null || !callbackThread!!.isAlive) {
@@ -304,11 +307,14 @@ class VideoDecoder(private val settings: Settings) {
             try {
                 val inputBufIndex = freeInputBuffers.poll(100, TimeUnit.MILLISECONDS) ?: -1
                 if (inputBufIndex >= 0) {
-                    val buffer = mCodec!!.getInputBuffer(inputBufIndex)
-                    if (buffer == null) return false
-
+                    val buffer = mCodec!!.getInputBuffer(inputBufIndex) ?: return false
                     buffer.clear()
-                    buffer.put(content)
+                    try {
+                        buffer.put(content)
+                    } catch (e: java.nio.BufferOverflowException) {
+                        AppLog.e("Input buffer overflow (Async)! Cap: ${buffer.capacity()}, Req: ${content.remaining()}")
+                        return false
+                    }
                     mCodec!!.queueInputBuffer(inputBufIndex, 0, buffer.limit(), presentationTimeUs, 0)
                     return true
                 } else {
@@ -324,9 +330,14 @@ class VideoDecoder(private val settings: Settings) {
             try {
                 val inputBufIndex = mCodec!!.dequeueInputBuffer(10000)
                 if (inputBufIndex >= 0) {
-                    val buffer = mInputBuffers!![inputBufIndex]
+                    val buffer = mInputBuffers!![inputBufIndex] ?: return false
                     buffer.clear()
-                    buffer.put(content)
+                    try {
+                        buffer.put(content)
+                    } catch (e: java.nio.BufferOverflowException) {
+                        AppLog.e("Input buffer overflow (Sync)! Cap: ${buffer.capacity()}, Req: ${content.remaining()}")
+                        return false
+                    }
                     mCodec!!.queueInputBuffer(inputBufIndex, 0, buffer.limit(), presentationTimeUs, 0)
                     return true
                 } else {

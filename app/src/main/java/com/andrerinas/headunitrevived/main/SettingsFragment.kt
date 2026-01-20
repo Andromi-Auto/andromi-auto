@@ -24,6 +24,7 @@ import com.andrerinas.headunitrevived.utils.Settings
 import com.andrerinas.headunitrevived.BuildConfig
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class SettingsFragment : Fragment() {
     private lateinit var settings: Settings
@@ -49,6 +50,7 @@ class SettingsFragment : Fragment() {
     private var pendingBluetoothAddress: String? = null
     private var pendingEnableAudioSink: Boolean? = null
     private var pendingUseAacAudio: Boolean? = null
+    private var pendingUseNativeSsl: Boolean? = null
 
     private var requiresRestart = false
     private var hasChanges = false
@@ -80,6 +82,7 @@ class SettingsFragment : Fragment() {
         pendingBluetoothAddress = settings.bluetoothAddress
         pendingEnableAudioSink = settings.enableAudioSink
         pendingUseAacAudio = settings.useAacAudio
+        pendingUseNativeSsl = settings.useNativeSsl
 
         // Intercept system back button
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
@@ -153,6 +156,7 @@ class SettingsFragment : Fragment() {
         pendingBluetoothAddress?.let { settings.bluetoothAddress = it }
         pendingEnableAudioSink?.let { settings.enableAudioSink = it }
         pendingUseAacAudio?.let { settings.useAacAudio = it }
+        pendingUseNativeSsl?.let { settings.useNativeSsl = it }
 
         pendingWifiLauncherMode?.let { enabled ->
             settings.wifiLauncherMode = enabled
@@ -197,7 +201,8 @@ class SettingsFragment : Fragment() {
                         pendingDebugMode != settings.debugMode ||
                         pendingBluetoothAddress != settings.bluetoothAddress ||
                         pendingEnableAudioSink != settings.enableAudioSink ||
-                        pendingUseAacAudio != settings.useAacAudio
+                        pendingUseAacAudio != settings.useAacAudio ||
+                        pendingUseNativeSsl != settings.useNativeSsl
 
         hasChanges = anyChange
 
@@ -209,7 +214,8 @@ class SettingsFragment : Fragment() {
                           pendingForceSoftware != settings.forceSoftwareDecoding ||
                           pendingLegacyDecoder != settings.forceLegacyDecoder ||
                           pendingEnableAudioSink != settings.enableAudioSink ||
-                          pendingUseAacAudio != settings.useAacAudio
+                          pendingUseAacAudio != settings.useAacAudio ||
+                          pendingUseNativeSsl != settings.useNativeSsl
 
         updateSaveButtonState()
     }
@@ -360,9 +366,14 @@ class SettingsFragment : Fragment() {
         items.add(SettingItem.SettingEntry(
             stableId = "viewMode",
             nameResId = R.string.view_mode,
-            value = if (pendingViewMode == Settings.ViewMode.SURFACE) getString(R.string.surface_view) else getString(R.string.texture_view),
+            value = when (pendingViewMode) {
+                Settings.ViewMode.SURFACE -> getString(R.string.surface_view)
+                Settings.ViewMode.TEXTURE -> getString(R.string.texture_view)
+                Settings.ViewMode.GLES -> getString(R.string.gles_view)
+                else -> getString(R.string.surface_view)
+            },
             onClick = { _ ->
-                val viewModes = arrayOf(getString(R.string.surface_view), getString(R.string.texture_view))
+                val viewModes = arrayOf(getString(R.string.surface_view), getString(R.string.texture_view), getString(R.string.gles_view))
                 val currentIdx = pendingViewMode!!.value
                 AlertDialog.Builder(requireContext())
                     .setTitle(R.string.change_view_mode)
@@ -478,6 +489,43 @@ class SettingsFragment : Fragment() {
             isChecked = pendingDebugMode!!,
             onCheckedChanged = { isChecked ->
                 pendingDebugMode = isChecked
+                checkChanges()
+                updateSettingsList()
+            }
+        ))
+
+        items.add(SettingItem.SettingEntry(
+            stableId = "exportLogs",
+            nameResId = R.string.export_logs,
+            value = getString(R.string.export_logs_description),
+            onClick = {
+                val context = requireContext()
+                val logFile = com.andrerinas.headunitrevived.utils.LogExporter.saveLogToPublicFile(context)
+
+                if (logFile != null) {
+                    MaterialAlertDialogBuilder(context, R.style.DarkAlertDialog)
+                        .setTitle("Logs Exported")
+                        .setMessage("Log saved to:\n${logFile.absolutePath}\n\n")
+                        .setPositiveButton("Share") { _, _ ->
+                            com.andrerinas.headunitrevived.utils.LogExporter.shareLogFile(context, logFile)
+                        }
+                        .setNegativeButton("Close") { dialog, _ ->
+                            dialog.dismiss()
+                        }
+                        .show()
+                } else {
+                    Toast.makeText(context, "Failed to export logs", Toast.LENGTH_SHORT).show()
+                }
+            }
+        ))
+
+        items.add(SettingItem.ToggleSettingEntry(
+            stableId = "useNativeSsl",
+            nameResId = R.string.use_native_ssl,
+            descriptionResId = R.string.use_native_ssl_description,
+            isChecked = pendingUseNativeSsl!!,
+            onCheckedChanged = { isChecked ->
+                pendingUseNativeSsl = isChecked
                 checkChanges()
                 updateSettingsList()
             }

@@ -33,6 +33,11 @@ class TextureProjectionView @JvmOverloads constructor(
         ProjectionViewScaler.updateScale(this, videoWidth, videoHeight)
     }
 
+    override fun setVideoScale(scaleX: Float, scaleY: Float) {
+        this.scaleX = scaleX
+        this.scaleY = scaleY
+    }
+
     // ----------------------------------------------------------------
     // Lifecycle & SurfaceTextureListener
     // ----------------------------------------------------------------

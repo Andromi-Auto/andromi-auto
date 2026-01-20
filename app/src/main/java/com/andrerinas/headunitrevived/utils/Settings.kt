@@ -163,6 +163,10 @@ class Settings(context: Context) {
         get() = prefs.getBoolean("use-aac-audio", false)
         set(value) { prefs.edit().putBoolean("use-aac-audio", value).apply() }
 
+    var useNativeSsl: Boolean
+        get() = prefs.getBoolean("use-native-ssl", false)
+        set(value) { prefs.edit().putBoolean("use-native-ssl", value).apply() }
+
     @SuppressLint("ApplySharedPref")
     fun commit() {
         prefs.edit().commit()
@@ -222,7 +226,8 @@ class Settings(context: Context) {
 
     enum class ViewMode(val value: Int) {
         SURFACE(0),
-        TEXTURE(1);
+        TEXTURE(1),
+        GLES(2);
 
         companion object {
             private val map = values().associateBy(ViewMode::value)

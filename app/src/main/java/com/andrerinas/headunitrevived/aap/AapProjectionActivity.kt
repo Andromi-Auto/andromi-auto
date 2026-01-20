@@ -83,6 +83,15 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
             )
             projectionView = textureView
             container.setBackgroundColor(android.graphics.Color.BLACK)
+        } else if (settings.viewMode == Settings.ViewMode.GLES) {
+            AppLog.i("Using GlProjectionView")
+            val glView = com.andrerinas.headunitrevived.view.GlProjectionView(this)
+            glView.layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT
+            )
+            projectionView = glView
+            container.setBackgroundColor(android.graphics.Color.BLACK)
         } else {
             AppLog.i("Using SurfaceView")
             projectionView = ProjectionView(this)
@@ -169,6 +178,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
             AppLog.i("[AapProjectionActivity] Decoder already has dimensions: ${currentVideoWidth}x$currentVideoHeight. Applying to view.")
             runOnUiThread {
                 projectionView.setVideoSize(currentVideoWidth, currentVideoHeight)
+                projectionView.setVideoScale(HeadUnitScreenConfig.getScaleX(), HeadUnitScreenConfig.getScaleY())
             }
         }
     }
@@ -184,6 +194,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         AppLog.i("[AapProjectionActivity] Received video dimensions: ${width}x$height")
         runOnUiThread {
             projectionView.setVideoSize(width, height)
+            projectionView.setVideoScale(HeadUnitScreenConfig.getScaleX(), HeadUnitScreenConfig.getScaleY())
         }
     }
 

@@ -43,7 +43,18 @@ class AapTransport(
         private val context: Context)
     : MicRecorder.Listener {
 
-    val ssl: AapSsl = AapSslContext(SingleKeyKeyManager(context))
+    val ssl: AapSsl = if (settings.useNativeSsl) {
+        try {
+            AppLog.i("Using Native SSL implementation")
+            AapSslNative()
+        } catch (e: Throwable) {
+            AppLog.e("Failed to instantiate Native SSL, falling back to Java SSL", e)
+            AapSslContext(SingleKeyKeyManager(context))
+        }
+    } else {
+        AppLog.i("Using Java SSL implementation")
+        AapSslContext(SingleKeyKeyManager(context))
+    }
 
     private val aapAudio: AapAudio
     private val aapVideo: AapVideo
@@ -193,70 +204,13 @@ class AapTransport(
             }
             AppLog.i("Handshake: Version response recv ret: %d", ret)
 
-            AppLog.d("Handshake: Starting SSL prepare. TS: ${SystemClock.elapsedRealtime()}")
-            ret = ssl.prepare()
-            AppLog.d("Handshake: SSL prepare finished. ret: $ret. TS: ${SystemClock.elapsedRealtime()}")
-            if (ret < 0) {
-                AppLog.e("Handshake: SSL prepare failed: $ret")
+            AppLog.d("Handshake: Starting SSL handshake via performHandshake(). TS: ${SystemClock.elapsedRealtime()}")
+            if (!ssl.performHandshake(connection)) {
+                AppLog.e("Handshake: SSL performHandshake failed.")
                 return false
             }
 
-            // --- NEW SSL HANDSHAKE LOGIC using AapSslContext ---
-            var handshakeAttempts = 0
-            val MAX_HANDSHAKE_ATTEMPTS = 20 // Prevent infinite loops
-
-            AppLog.d("Handshake: Starting SSL negotiation loop.")
-            AppLog.d("Initial Handshake Status: ${ssl.getHandshakeStatus()}")
-            while (ssl.getHandshakeStatus() != SSLEngineResult.HandshakeStatus.FINISHED &&
-                   ssl.getHandshakeStatus() != SSLEngineResult.HandshakeStatus.NOT_HANDSHAKING &&
-                   handshakeAttempts < MAX_HANDSHAKE_ATTEMPTS) {
-                handshakeAttempts++
-
-                when (ssl.getHandshakeStatus()) {
-                    SSLEngineResult.HandshakeStatus.NEED_WRAP -> {
-                        val handshakeData = ssl.handshakeRead()!! // Non-null assertion, as AapSslContext returns ByteArray
-                        if (handshakeData.isNotEmpty()) {
-                            val bio = Messages.createRawMessage(Channel.ID_CTR, 3, 3, handshakeData)
-                            val size = connection.sendBlocking(bio, bio.size, 5000)
-                            if (size < 0) {
-                                AppLog.e("Handshake: Failed to send wrapped handshake data.")
-                                return false
-                            }
-                            AppLog.d("Handshake: Sent wrapped handshake data. Size: $size")
-                        } else {
-                            AppLog.d("Handshake: NEED_WRAP but no data produced, will try receiving.")
-                        }
-                    }
-                    SSLEngineResult.HandshakeStatus.NEED_UNWRAP -> {
-                        AppLog.d("Handshake: NEED_UNWRAP, attempting to receive data.")
-                        val size = connection.recvBlocking(buffer, buffer.size, 5000, false)
-                        if (size <= 0) {
-                            AppLog.e("Handshake: Failed to receive data for unwrap. Size: $size")
-                            return false
-                        }
-                        val bytesWritten = ssl.handshakeWrite(6, size - 6, buffer)
-                        if (bytesWritten < 0) {
-                            AppLog.e("Handshake: Failed to write received handshake data.")
-                            return false
-                        }
-                        AppLog.d("Handshake: Received and processed unwrapped handshake data. Consumed: $bytesWritten")
-                    }
-                    SSLEngineResult.HandshakeStatus.NEED_TASK -> {
-                        AppLog.d("Handshake: NEED_TASK, running delegated tasks.")
-                        ssl.runDelegatedTasks()
-                    }
-                    SSLEngineResult.HandshakeStatus.FINISHED,
-                    SSLEngineResult.HandshakeStatus.NOT_HANDSHAKING -> {
-                        AppLog.d("Handshake: SSL negotiation finished or not handshaking.")
-                        break
-                    }
-                }
-            }
-            if (handshakeAttempts >= MAX_HANDSHAKE_ATTEMPTS) {
-                AppLog.e("Handshake: Exceeded max handshake attempts.")
-                return false
-            }
-            // --- END NEW SSL HANDSHAKE LOGIC ---
+            ssl.postHandshakeReset()
 
             ssl.postHandshakeReset()
             AppLog.d("Handshake: SSL buffers reset after handshake.")

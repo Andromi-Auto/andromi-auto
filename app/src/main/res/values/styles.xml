@@ -13,13 +13,20 @@
         <item name="colorSecondary">@color/brand_teal</item>
         <item name="colorAccent">@color/brand_teal</item>
         <item name="android:colorAccent">@color/brand_teal</item>
+        <item name="android:dialogTheme">@style/DarkAlertDialog</item>
+        <item name="android:alertDialogTheme">@style/DarkAlertDialog</item>
+        <item name="materialAlertDialogTheme">@style/DarkAlertDialog</item>
     </style>
 
     <style name="AppTheme.Translucent" parent="android:Theme.Translucent.NoTitleBar" />
 
+    <style name="AppTheme.Fullscreen" parent="AppTheme" />
+
     <style name="SplashTheme" parent="AppTheme">
         <item name="android:windowBackground">@drawable/splash_background</item>
     </style>
+
+    <style name="SplashTheme.Fullscreen" parent="SplashTheme" />
 
     <style name="DarkAlertDialog" parent="Theme.Material3.DayNight.Dialog.Alert">
         <item name="colorPrimary">@color/brand_teal</item>

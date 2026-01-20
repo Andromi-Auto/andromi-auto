@@ -1,6 +1,7 @@
 package com.andrerinas.headunitrevived.aap
 
 import javax.net.ssl.SSLEngineResult
+import com.andrerinas.headunitrevived.connection.AccessoryConnection
 
 interface AapSsl {
     fun prepare(): Int
@@ -11,4 +12,5 @@ interface AapSsl {
     fun getHandshakeStatus(): SSLEngineResult.HandshakeStatus
     fun runDelegatedTasks()
     fun postHandshakeReset()
+    fun performHandshake(connection: AccessoryConnection): Boolean
 }
