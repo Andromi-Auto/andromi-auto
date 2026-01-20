@@ -79,9 +79,17 @@ adb shell am start -a android.intent.action.VIEW -d "headunit://connect?ip=192.1
 
 ## Changelog
 ### v.1.9.0
-- Added In-App Log Export feature (Save/Share)
-- Added GLES20 Video Renderer option (fixes black screen/artifacts on older Head Units)
-- Merged PR #56 minSdk 16 + fix Settings crash on older Android + prevent SDK16 crash (mic fix) thanks to @JanRi3D
+- New Feature: GLES20 Video Renderer (Fixes black screen/artifacts/scaling on older Head Units)
+- New Feature: In-App Log Export (Save to file/Share) for easier debugging
+- Improvement: Audio Sink Logic fixed (System Audio always advertised) -> Fixes black screen when Audio Sink is disabled
+- Improvement: Video Decoder optimized for legacy devices (Buffer size adjustments, Overflow handling)
+- Hopefully Fix: Audio Stuttering resolved (Buffer/Queue logic reverted to stable state)
+- Fix: Video Fragmentation on some devices (Support for split frames/Offset 2 headers)
+- Fix: Crash on Android 5.1 (NoSuchMethodError)
+- Fix: Audio-Sink disable not working
+- UI: Consistent Dialog Theme (Teal/Rounded) and improved list buttons
+- Compatibility: Verified support for Android 4.1+ (minSdk 16)
+- Compatibility: Bring back native SSL Support (JNI) for better performance on older devices (Toggle in Debug Settings)
 
 ### v.1.8.1
 - Fixed Fullscreen/Non-Fullscreen layout issues (black bars, overlapping)

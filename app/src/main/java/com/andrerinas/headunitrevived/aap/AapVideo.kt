@@ -19,24 +19,29 @@ internal class AapVideo(private val videoDecoder: VideoDecoder, private val sett
 
         when (flags) {
             11 -> {
-                if ((msg_type == 0 || msg_type == 1)
-                        && buf[10].toInt() == 0 && buf[11].toInt() == 0 && buf[12].toInt() == 0 && buf[13].toInt() == 1) {
-                    // If Not fragmented Video // Decode H264 video
+                messageBuffer.clear()
+                // Timestamp Indication (Offset 10)
+                if (len > 14 && buf[10].toInt() == 0 && buf[11].toInt() == 0 && buf[12].toInt() == 0 && buf[13].toInt() == 1) {
                     videoDecoder.decode(buf, 10, len - 10, settings.forceSoftwareDecoding, settings.videoCodec)
                     return true
-                } else if (msg_type == 1 &&
-                        buf[2].toInt() == 0 && buf[3].toInt() == 0 && buf[4].toInt() == 0 && buf[5].toInt() == 1) {
-                    // If Not fragmented First video config packet // Decode H264 video
-                    videoDecoder.decode(message.data, message.dataOffset, message.size - message.dataOffset, settings.forceSoftwareDecoding, settings.videoCodec)
+                }
+                // Media Indication or Config (Offset 2)
+                if (len > 6 && buf[2].toInt() == 0 && buf[3].toInt() == 0 && buf[4].toInt() == 0 && buf[5].toInt() == 1) {
+                    videoDecoder.decode(buf, 2, len - 2, settings.forceSoftwareDecoding, settings.videoCodec)
                     return true
                 }
             }
             9 -> {
-                if ((msg_type == 0 || msg_type == 1)
-                        && buf[10].toInt() == 0 && buf[11].toInt() == 0 && buf[12].toInt() == 0 && buf[13].toInt() == 1) {
-                    // If First fragment Video
-                    // Len in bytes 2,3 doesn't include total len 4 bytes at 4,5,6,7
+                // Timestamp Indication (Offset 10)
+                if (len > 14 && buf[10].toInt() == 0 && buf[11].toInt() == 0 && buf[12].toInt() == 0 && buf[13].toInt() == 1) {
+                    messageBuffer.clear()
                     messageBuffer.put(message.data, 10, message.size - 10)
+                    return true
+                }
+                // Media Indication (Offset 2)
+                if (len > 6 && buf[2].toInt() == 0 && buf[3].toInt() == 0 && buf[4].toInt() == 0 && buf[5].toInt() == 1) {
+                    messageBuffer.clear()
+                    messageBuffer.put(message.data, 2, message.size - 2)
                     return true
                 }
             }

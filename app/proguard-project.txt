@@ -28,3 +28,6 @@
 # --- App Logic ---
 # Keep specific app classes if needed (e.g. accessed via JNI or reflection)
 # -keep class com.andrerinas.headunitrevived.decoder.** { *; }
+
+# --- JNI ---
+-keep class com.andrerinas.headunitrevived.aap.AapSslNative { *; }

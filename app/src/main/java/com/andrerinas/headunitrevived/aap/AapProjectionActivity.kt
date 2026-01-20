@@ -178,6 +178,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
             AppLog.i("[AapProjectionActivity] Decoder already has dimensions: ${currentVideoWidth}x$currentVideoHeight. Applying to view.")
             runOnUiThread {
                 projectionView.setVideoSize(currentVideoWidth, currentVideoHeight)
+                projectionView.setVideoScale(HeadUnitScreenConfig.getScaleX(), HeadUnitScreenConfig.getScaleY())
             }
         }
     }
@@ -193,6 +194,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         AppLog.i("[AapProjectionActivity] Received video dimensions: ${width}x$height")
         runOnUiThread {
             projectionView.setVideoSize(width, height)
+            projectionView.setVideoScale(HeadUnitScreenConfig.getScaleX(), HeadUnitScreenConfig.getScaleY())
         }
     }
 

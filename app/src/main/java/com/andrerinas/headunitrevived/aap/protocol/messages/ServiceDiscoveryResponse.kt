@@ -98,6 +98,17 @@ class ServiceDiscoveryResponse(private val context: Context)
 
             val audioType = if (settings.useAacAudio) Media.MediaCodecType.MEDIA_CODEC_AUDIO_AAC_LC else Media.MediaCodecType.MEDIA_CODEC_AUDIO_PCM
 
+            // Always add Audio2 (System Sounds) to keep connection alive
+            val audio2 = Control.Service.newBuilder().also { service ->
+                service.id = Channel.ID_AU2
+                service.mediaSinkService = Control.Service.MediaSinkService.newBuilder().also {
+                    it.availableType = audioType
+                    it.audioType = Media.AudioStreamType.SYSTEM
+                    it.addAudioConfigs(AudioConfigs.get(Channel.ID_AU2))
+                }.build()
+            }.build()
+            services.add(audio2)
+
             if (settings.enableAudioSink) {
                 if (!AapService.selfMode) {
                     val audio1 = Control.Service.newBuilder().also { service ->
@@ -110,16 +121,6 @@ class ServiceDiscoveryResponse(private val context: Context)
                     }.build()
                     services.add(audio1)
                 }
-
-                val audio2 = Control.Service.newBuilder().also { service ->
-                    service.id = Channel.ID_AU2
-                    service.mediaSinkService = Control.Service.MediaSinkService.newBuilder().also {
-                        it.availableType = audioType
-                        it.audioType = Media.AudioStreamType.SYSTEM
-                        it.addAudioConfigs(AudioConfigs.get(Channel.ID_AU2))
-                    }.build()
-                }.build()
-                services.add(audio2)
 
                 if (!AapService.selfMode) {
                     val audio0 = Control.Service.newBuilder().also { service ->

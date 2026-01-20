@@ -44,11 +44,13 @@ class GlProjectionView(context: Context) : GLSurfaceView(context), IProjectionVi
     }
 
     override fun setVideoSize(width: Int, height: Int) {
-        // GLES handles scaling via Viewport/Matrix, but layout params handle the view size.
-        // We rely on ProjectionViewScaler to set LayoutParams of this View.
         AppLog.i("GlProjectionView setVideoSize: ${width}x$height")
         renderer.updateBufferSize(width, height)
-        ProjectionViewScaler.updateScale(this, width, height)
+        // ProjectionViewScaler removed, we use setVideoScale via Matrix
+    }
+
+    override fun setVideoScale(scaleX: Float, scaleY: Float) {
+        renderer.setScale(scaleX, scaleY)
     }
 
     override fun onDetachedFromWindow() {
@@ -66,8 +68,16 @@ class GlProjectionView(context: Context) : GLSurfaceView(context), IProjectionVi
         private var mVPMatrix = FloatArray(16)
         private var sSTMatrix = FloatArray(16)
 
+        private var mScaleX = 1.0f
+        private var mScaleY = 1.0f
+
         fun updateBufferSize(width: Int, height: Int) {
             surfaceTexture?.setDefaultBufferSize(width, height)
+        }
+
+        fun setScale(x: Float, y: Float) {
+            mScaleX = x
+            mScaleY = y
         }
 
         private val vertexShaderCode = """
@@ -216,6 +226,7 @@ class GlProjectionView(context: Context) : GLSurfaceView(context), IProjectionVi
             GLES20.glEnableVertexAttribArray(maTextureHandle)
             
             Matrix.setIdentityM(mVPMatrix, 0)
+            Matrix.scaleM(mVPMatrix, 0, mScaleX, mScaleY, 1f)
             GLES20.glUniformMatrix4fv(muMVPMatrixHandle, 1, false, mVPMatrix, 0)
             GLES20.glUniformMatrix4fv(muSTMatrixHandle, 1, false, sSTMatrix, 0)
             

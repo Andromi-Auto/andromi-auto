@@ -12,4 +12,5 @@ interface IProjectionView {
     fun addCallback(callback: Callbacks)
     fun removeCallback(callback: Callbacks)
     fun setVideoSize(width: Int, height: Int)
+    fun setVideoScale(scaleX: Float, scaleY: Float)
 }

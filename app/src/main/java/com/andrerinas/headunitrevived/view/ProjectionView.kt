@@ -68,4 +68,9 @@ class ProjectionView @JvmOverloads constructor(
         videoHeight = height
         ProjectionViewScaler.updateScale(this, videoWidth, videoHeight)
     }
+
+    override fun setVideoScale(scaleX: Float, scaleY: Float) {
+        this.scaleX = scaleX
+        this.scaleY = scaleY
+    }
 }

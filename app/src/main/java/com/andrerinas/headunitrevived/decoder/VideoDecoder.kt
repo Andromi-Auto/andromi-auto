@@ -233,7 +233,7 @@ class VideoDecoder(private val settings: Settings) {
         val isLegacy = settings.forceLegacyDecoder || Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            val maxInputSize = if (isLegacy) 1048576 else 10485760
+            val maxInputSize = if (isLegacy) 2097152 else 10485760
             format.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, maxInputSize)
         }
         if (!isLegacy && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -307,11 +307,14 @@ class VideoDecoder(private val settings: Settings) {
             try {
                 val inputBufIndex = freeInputBuffers.poll(100, TimeUnit.MILLISECONDS) ?: -1
                 if (inputBufIndex >= 0) {
-                    val buffer = mCodec!!.getInputBuffer(inputBufIndex)
-                    if (buffer == null) return false
-
+                    val buffer = mCodec!!.getInputBuffer(inputBufIndex) ?: return false
                     buffer.clear()
-                    buffer.put(content)
+                    try {
+                        buffer.put(content)
+                    } catch (e: java.nio.BufferOverflowException) {
+                        AppLog.e("Input buffer overflow (Async)! Cap: ${buffer.capacity()}, Req: ${content.remaining()}")
+                        return false
+                    }
                     mCodec!!.queueInputBuffer(inputBufIndex, 0, buffer.limit(), presentationTimeUs, 0)
                     return true
                 } else {
@@ -327,9 +330,14 @@ class VideoDecoder(private val settings: Settings) {
             try {
                 val inputBufIndex = mCodec!!.dequeueInputBuffer(10000)
                 if (inputBufIndex >= 0) {
-                    val buffer = mInputBuffers!![inputBufIndex]
+                    val buffer = mInputBuffers!![inputBufIndex] ?: return false
                     buffer.clear()
-                    buffer.put(content)
+                    try {
+                        buffer.put(content)
+                    } catch (e: java.nio.BufferOverflowException) {
+                        AppLog.e("Input buffer overflow (Sync)! Cap: ${buffer.capacity()}, Req: ${content.remaining()}")
+                        return false
+                    }
                     mCodec!!.queueInputBuffer(inputBufIndex, 0, buffer.limit(), presentationTimeUs, 0)
                     return true
                 } else {
