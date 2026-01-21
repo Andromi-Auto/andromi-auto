@@ -58,6 +58,14 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Lock orientation to current state
+//        if (Build.VERSION.SDK_INT >= 18) {
+//            requestedOrientation = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LOCKED
+//        } else {
+//            requestedOrientation = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_NOSENSOR
+//        }
+
         setContentView(R.layout.activity_headunit)
 
         // Register disconnect receiver here to stay active even if activity is paused

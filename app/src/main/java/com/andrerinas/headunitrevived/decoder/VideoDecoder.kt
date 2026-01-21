@@ -107,8 +107,36 @@ class VideoDecoder(private val settings: Settings) {
                         codec_stop("Codec mismatch")
                     }
                 }
+
+            // 3. Scan for SPS/PPS if not configured (to catch them even if surface is not ready)
+            if (!mCodecConfigured) {
+                var currentOffset = offset
+                while (currentOffset < offset + size) {
+                    val nalUnitSize = findNalUnitSize(buffer, currentOffset, offset + size)
+                    if (nalUnitSize == -1) break
+
+                    val nalUnitType = getNalType(buffer, currentOffset)
+                    if (nalUnitType == 7) { // SPS
+                        sps = buffer.copyOfRange(currentOffset, currentOffset + nalUnitSize)
+                        AppLog.i("Got SPS sequence...")
+                        try {
+                            val spsData = SpsParser.parse(sps!!)
+                            if (spsData != null && (mWidth != spsData.width || mHeight != spsData.height)) {
+                                AppLog.i("SPS parsed. Video dimensions: ${spsData.width}x${spsData.height}")
+                                mWidth = spsData.width
+                                mHeight = spsData.height
+                                dimensionsListener?.onVideoDimensionsChanged(mWidth, mHeight)
+                            }
+                        } catch (e: Exception) { AppLog.e("Failed to parse SPS", e) }
+                    } else if (nalUnitType == 8) { // PPS
+                        pps = buffer.copyOfRange(currentOffset, currentOffset + nalUnitSize)
+                        AppLog.i("Got PPS sequence...")
+                    }
+                    currentOffset += nalUnitSize
+                }
+            }
     
-            // 3. Initialize if not running (or stopped above)
+            // 4. Initialize if not running (or stopped above)
             if (mCodec == null) {
                 if (mSurface == null || !mSurface!!.isValid) {
                     return
@@ -125,32 +153,6 @@ class VideoDecoder(private val settings: Settings) {
                 }
     
                 if (!mCodecConfigured) {
-                    // Scan for SPS/PPS
-                    var currentOffset = offset
-                    while (currentOffset < offset + size) {
-                        val nalUnitSize = findNalUnitSize(buffer, currentOffset, offset + size)
-                        if (nalUnitSize == -1) break
-    
-                        val nalUnitType = getNalType(buffer, currentOffset)
-                        if (nalUnitType == 7) { // SPS
-                            sps = buffer.copyOfRange(currentOffset, currentOffset + nalUnitSize)
-                            AppLog.i("Got SPS sequence...")
-                            try {
-                                val spsData = SpsParser.parse(sps!!)
-                                if (spsData != null && (mWidth != spsData.width || mHeight != spsData.height)) {
-                                    AppLog.i("SPS parsed. Video dimensions: ${spsData.width}x${spsData.height}")
-                                    mWidth = spsData.width
-                                    mHeight = spsData.height
-                                    dimensionsListener?.onVideoDimensionsChanged(mWidth, mHeight)
-                                }
-                            } catch (e: Exception) { AppLog.e("Failed to parse SPS", e) }
-                        } else if (nalUnitType == 8) { // PPS
-                            pps = buffer.copyOfRange(currentOffset, currentOffset + nalUnitSize)
-                            AppLog.i("Got PPS sequence...")
-                        }
-                        currentOffset += nalUnitSize
-                    }
-    
                     val isH265 = codecName.contains("H265") || codecName.contains("H.265") || (mCodec?.name?.lowercase(Locale.ROOT)?.contains("hevc") == true)
     
                     if (!isH265) {
