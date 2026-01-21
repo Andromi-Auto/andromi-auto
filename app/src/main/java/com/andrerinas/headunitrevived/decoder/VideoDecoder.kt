@@ -161,6 +161,8 @@ class VideoDecoder(private val settings: Settings) {
                             try {
                                 if (!configureDecoder("video/avc")) return
                                 mCodecConfigured = true
+                                onFirstFrameListener?.invoke()
+                                onFirstFrameListener = null
                             } catch (e: Exception) {
                                 AppLog.e("Failed to configure decoder", e)
                                 codec_stop("Configuration failed")
@@ -175,6 +177,8 @@ class VideoDecoder(private val settings: Settings) {
                         try {
                             if (!configureDecoder("video/hevc")) return
                             mCodecConfigured = true
+                            onFirstFrameListener?.invoke()
+                            onFirstFrameListener = null
                         } catch (e: Exception) {
                             AppLog.e("Failed to configure decoder", e)
                             codec_stop("Configuration failed")

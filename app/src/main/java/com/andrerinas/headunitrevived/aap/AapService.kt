@@ -282,12 +282,13 @@ class AapService : Service(), UsbReceiver.Listener {
             if (transportStarted) {
                 isConnected = true
                 sendBroadcast(ConnectedIntent())
-                
-                serviceScope.launch {
-                    delay(1000)
+
+                val decoder = App.provide(this).videoDecoder
+                decoder.onFirstFrameListener = {
+                    AppLog.i("Video ready, launching AapProjectionActivity")
                     val aapIntent = AapProjectionActivity.intent(this@AapService).apply {
                         putExtra(AapProjectionActivity.EXTRA_FOCUS, true)
-                        addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
                     }
                     startActivity(aapIntent)
                 }
