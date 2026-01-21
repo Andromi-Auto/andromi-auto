@@ -60,11 +60,11 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         super.onCreate(savedInstanceState)
 
         // Lock orientation to current state
-//        if (Build.VERSION.SDK_INT >= 18) {
-//            requestedOrientation = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LOCKED
-//        } else {
-//            requestedOrientation = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_NOSENSOR
-//        }
+        if (Build.VERSION.SDK_INT >= 18) {
+            requestedOrientation = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LOCKED
+        } else {
+            requestedOrientation = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_NOSENSOR
+        }
 
         setContentView(R.layout.activity_headunit)
 

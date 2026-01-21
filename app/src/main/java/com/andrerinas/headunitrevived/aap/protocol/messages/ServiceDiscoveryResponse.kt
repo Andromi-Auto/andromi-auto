@@ -87,8 +87,8 @@ class ServiceDiscoveryResponse(private val context: Context)
                 service.id = Channel.ID_INP
                 service.inputSourceService = Control.Service.InputSourceService.newBuilder().also {
                     it.touchscreen = Control.Service.InputSourceService.TouchConfig.newBuilder().apply {
-                        setWidth(HeadUnitScreenConfig.getAdjustedWidth()) // Use effective width
-                        setHeight(HeadUnitScreenConfig.getAdjustedHeight()) // Use effective height
+                        setWidth(HeadUnitScreenConfig.getNegotiatedWidth()) // Use negotiated width
+                        setHeight(HeadUnitScreenConfig.getNegotiatedHeight()) // Use negotiated height
                     }.build()
                     it.addAllKeycodesSupported(KeyCode.supported)
                 }.build()

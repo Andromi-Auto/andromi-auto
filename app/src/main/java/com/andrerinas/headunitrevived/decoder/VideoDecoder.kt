@@ -40,6 +40,7 @@ class VideoDecoder(private val settings: Settings) {
     private var callbackThread: HandlerThread? = null
 
     var dimensionsListener: VideoDimensionsListener? = null
+    var onFirstFrameListener: (() -> Unit)? = null
 
     val videoWidth: Int
         get() = mWidth

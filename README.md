@@ -77,6 +77,9 @@ adb shell am start -a android.intent.action.VIEW -d "headunit://connect?ip=192.1
   - Android SKD 17
   - Auto-Connect last session (if possible)
 
+## Known Issues
+- **Google Maps in Portrait Mode:** Touch interactions (searching, scrolling) within Google Maps may not work as expected when using Portrait Mode. While visual feedback (like ripple effects) might appear, the map itself may remain unresponsive. This appears to be an internal Android Auto / Google Maps limitation or bug in vertical orientations.
+
 ## Changelog
 ### v.1.10.0
 - **New Feature:** Portrait Mode Support (Dashboard & Projection) with smart resolution scaling
