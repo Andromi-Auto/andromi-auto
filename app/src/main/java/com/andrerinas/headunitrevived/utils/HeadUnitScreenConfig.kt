@@ -20,12 +20,6 @@ object HeadUnitScreenConfig {
     private lateinit var currentSettings: Settings // Store settings instance
 
     fun init(context: Context, displayMetrics: DisplayMetrics, settings: Settings) {
-        if (isInitialized) {
-            return
-        }
-        isInitialized = true
-        currentSettings = settings
-
         val selectedResolution = Settings.Resolution.fromId(settings.resolutionId)
         val screenWidth: Int
         val screenHeight: Int
@@ -45,6 +39,14 @@ object HeadUnitScreenConfig {
             screenWidth = size.x
             screenHeight = size.y
         }
+
+        // Only update if dimensions or settings changed
+        if (isInitialized && screenWidthPx == screenWidth && screenHeightPx == screenHeight && this::currentSettings.isInitialized && currentSettings == settings) {
+            return
+        }
+
+        isInitialized = true
+        currentSettings = settings
 
         screenWidthPx = screenWidth
         screenHeightPx = screenHeight
@@ -78,6 +80,8 @@ object HeadUnitScreenConfig {
             } else { // Landscape mode
                 if (screenWidthPx <= 800 && screenHeightPx <= 480) {
                     negotiatedResolutionType = Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType._800x480
+                } else if (screenWidthPx >= 2560 || screenHeightPx >= 1440) {
+                    negotiatedResolutionType = Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType._2560x1440
                 } else if (screenWidthPx > 1280 || screenHeightPx > 720) {
                     negotiatedResolutionType = Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType._1920x1080
                 } else {
@@ -85,7 +89,18 @@ object HeadUnitScreenConfig {
                 }
             }
         } else {
-            negotiatedResolutionType = selectedResolution?.codec
+            // Manual selection: Adapt to orientation
+            if (screenHeightPx > screenWidthPx) { // Portrait
+                negotiatedResolutionType = when (selectedResolution) {
+                    Settings.Resolution._800x480 -> Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType._720x1280 // Upgrade to 720p Port
+                    Settings.Resolution._1280x720 -> Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType._720x1280
+                    Settings.Resolution._1920x1080 -> Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType._1080x1920
+                    Settings.Resolution._2560x1440 -> Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType._1440x2560
+                    else -> selectedResolution?.codec
+                }
+            } else {
+                negotiatedResolutionType = selectedResolution?.codec
+            }
         }
 
         if (!isSmallScreen) {

@@ -78,6 +78,13 @@ adb shell am start -a android.intent.action.VIEW -d "headunit://connect?ip=192.1
   - Auto-Connect last session (if possible)
 
 ## Changelog
+### v.1.10.0
+- **New Feature:** Portrait Mode Support (Dashboard & Projection) with smart resolution scaling
+- **New Feature:** Redesigned Keymap Screen (easier configuration)
+- **Localization:** Added German Translation 🇩🇪
+- **Improvement:** TextureView is now the default renderer (better compatibility for most devices)
+- **Improvement:** Fixed Dashboard layout rotation
+
 ### v.1.9.0
 - New Feature: GLES20 Video Renderer (Fixes black screen/artifacts/scaling on older Head Units)
 - New Feature: In-App Log Export (Save to file/Share) for easier debugging
