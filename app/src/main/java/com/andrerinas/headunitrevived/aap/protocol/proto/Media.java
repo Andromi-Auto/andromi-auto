@@ -385,6 +385,18 @@ public final class Media {
      * <code>ALARM = 4;</code>
      */
     ALARM(4),
+    /**
+     * <code>GUIDANCE = 5;</code>
+     */
+    GUIDANCE(5),
+    /**
+     * <code>ANNOUNCEMENT = 6;</code>
+     */
+    ANNOUNCEMENT(6),
+    /**
+     * <code>RING = 7;</code>
+     */
+    RING(7),
     ;
 
     /**
@@ -407,6 +419,18 @@ public final class Media {
      * <code>ALARM = 4;</code>
      */
     public static final int ALARM_VALUE = 4;
+    /**
+     * <code>GUIDANCE = 5;</code>
+     */
+    public static final int GUIDANCE_VALUE = 5;
+    /**
+     * <code>ANNOUNCEMENT = 6;</code>
+     */
+    public static final int ANNOUNCEMENT_VALUE = 6;
+    /**
+     * <code>RING = 7;</code>
+     */
+    public static final int RING_VALUE = 7;
 
 
     public final int getNumber() {
@@ -434,6 +458,9 @@ public final class Media {
         case 2: return SYSTEM;
         case 3: return MEDIA;
         case 4: return ALARM;
+        case 5: return GUIDANCE;
+        case 6: return ANNOUNCEMENT;
+        case 7: return RING;
         default: return null;
       }
     }
@@ -6968,13 +6995,14 @@ public final class Media {
       "\020\002\022\035\n\031MEDIA_CODEC_VIDEO_H264_BP\020\003\022!\n\035MED" +
       "IA_CODEC_AUDIO_AAC_LC_ADTS\020\004\022\031\n\025MEDIA_CO" +
       "DEC_VIDEO_VP9\020\005\022\031\n\025MEDIA_CODEC_VIDEO_AV1" +
-      "\020\006\022\032\n\026MEDIA_CODEC_VIDEO_H265\020\007*I\n\017AudioS" +
+      "\020\006\022\032\n\026MEDIA_CODEC_VIDEO_H265\020\007*s\n\017AudioS" +
       "treamType\022\010\n\004NONE\020\000\022\n\n\006SPEECH\020\001\022\n\n\006SYSTE" +
-      "M\020\002\022\t\n\005MEDIA\020\003\022\t\n\005ALARM\020\004*\217\001\n\016VideoFocus" +
-      "Mode\022\031\n\025VIDEO_FOCUS_PROJECTED\020\001\022\026\n\022VIDEO" +
-      "_FOCUS_NATIVE\020\002\022 \n\034VIDEO_FOCUS_NATIVE_TR" +
-      "ANSIENT\020\003\022(\n$VIDEO_FOCUS_PROJECTED_NO_IN" +
-      "PUT_FOCUS\020\004B\007B\005Media"
+      "M\020\002\022\t\n\005MEDIA\020\003\022\t\n\005ALARM\020\004\022\014\n\010GUIDANCE\020\005\022" +
+      "\020\n\014ANNOUNCEMENT\020\006\022\010\n\004RING\020\007*\217\001\n\016VideoFoc" +
+      "usMode\022\031\n\025VIDEO_FOCUS_PROJECTED\020\001\022\026\n\022VID" +
+      "EO_FOCUS_NATIVE\020\002\022 \n\034VIDEO_FOCUS_NATIVE_" +
+      "TRANSIENT\020\003\022(\n$VIDEO_FOCUS_PROJECTED_NO_" +
+      "INPUT_FOCUS\020\004B\007B\005Media"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
