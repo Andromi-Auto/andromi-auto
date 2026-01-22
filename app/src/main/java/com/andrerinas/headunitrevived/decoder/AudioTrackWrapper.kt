@@ -1,65 +1,42 @@
 package com.andrerinas.headunitrevived.decoder
 
 import android.media.AudioAttributes
-
 import android.media.AudioFormat
-
 import android.media.AudioTrack
-
 import android.media.MediaCodec
-
 import android.media.MediaCodecInfo
-
 import android.media.MediaFormat
-
 import android.os.Build
-
 import android.os.Handler
-
 import android.os.HandlerThread
-
 import android.os.Process
-
-import android.os.SystemClock
-
 import com.andrerinas.headunitrevived.utils.AppLog
-
 import java.util.concurrent.Executors
-
 import java.util.concurrent.LinkedBlockingQueue
-
 import java.util.concurrent.TimeUnit
 
-
-
-class AudioTrackWrapper(stream: Int, sampleRateInHz: Int, bitDepth: Int, channelCount: Int, private val isAac: Boolean = false) : Thread() {
-
-
+class AudioTrackWrapper(
+    stream: Int,
+    sampleRateInHz: Int,
+    bitDepth: Int,
+    channelCount: Int,
+    private val isAac: Boolean = false
+) : Thread() {
 
     private val audioTrack: AudioTrack
-
     private var decoder: MediaCodec? = null
-
     private var codecHandlerThread: HandlerThread? = null
-
     private val freeInputBuffers = LinkedBlockingQueue<Int>()
-
     private val writeExecutor = Executors.newSingleThreadExecutor()
 
-
-
     // Limit queue capacity to provide backpressure to the network thread if audio playback is slow
+    private val dataQueue = LinkedBlockingQueue<ByteArray>()
+    @Volatile
+    private var isRunning = true
 
-        private val dataQueue = LinkedBlockingQueue<ByteArray>()
+    init {
 
-        @Volatile private var isRunning = true
-
-    
-
-        init {
-
-            this.name = "AudioPlaybackThread"
-
+        this.name = "AudioPlaybackThread"
         audioTrack = createAudioTrack(stream, sampleRateInHz, bitDepth, channelCount)
 
         audioTrack.play()
@@ -79,30 +56,31 @@ class AudioTrackWrapper(stream: Int, sampleRateInHz: Int, bitDepth: Int, channel
     }
 
 
-
     private fun initDecoder(sampleRate: Int, channels: Int) {
 
         try {
 
-                        val mime = "audio/mp4a-latm"
+            val mime = "audio/mp4a-latm"
 
-                        val format = MediaFormat.createAudioFormat(mime, sampleRate, channels)
+            val format = MediaFormat.createAudioFormat(mime, sampleRate, channels)
 
-                        format.setInteger(MediaFormat.KEY_AAC_PROFILE, MediaCodecInfo.CodecProfileLevel.AACObjectLC)
+            format.setInteger(
+                MediaFormat.KEY_AAC_PROFILE,
+                MediaCodecInfo.CodecProfileLevel.AACObjectLC
+            )
 
-                        format.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, 16384)
+            format.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, 16384)
 
-            
 
-                        // CSD enabled for RAW AAC (MEDIA_CODEC_AUDIO_AAC_LC)
+            // CSD enabled for RAW AAC (MEDIA_CODEC_AUDIO_AAC_LC)
 
-                        val csd = makeAacCsd(sampleRate, channels)
+            val csd = makeAacCsd(sampleRate, channels)
 
-                        format.setByteBuffer("csd-0", java.nio.ByteBuffer.wrap(csd))
+            format.setByteBuffer("csd-0", java.nio.ByteBuffer.wrap(csd))
 
-            
 
-                        decoder = MediaCodec.createDecoderByType(mime)
+
+            decoder = MediaCodec.createDecoderByType(mime)
 
 
 
@@ -112,99 +90,94 @@ class AudioTrackWrapper(stream: Int, sampleRateInHz: Int, bitDepth: Int, channel
 
                 codecHandlerThread!!.start()
 
-                                val callback = object : MediaCodec.Callback() {
+                val callback = object : MediaCodec.Callback() {
 
-                                    override fun onInputBufferAvailable(codec: MediaCodec, index: Int) {
+                    override fun onInputBufferAvailable(codec: MediaCodec, index: Int) {
 
-                                        freeInputBuffers.offer(index)
+                        freeInputBuffers.offer(index)
 
-                                    }
+                    }
 
-                
 
-                                    override fun onOutputBufferAvailable(codec: MediaCodec, index: Int, info: MediaCodec.BufferInfo) {
+                    override fun onOutputBufferAvailable(
+                        codec: MediaCodec,
+                        index: Int,
+                        info: MediaCodec.BufferInfo
+                    ) {
 
-                                        try {
+                        try {
 
-                                            val outputBuffer = codec.getOutputBuffer(index)
+                            val outputBuffer = codec.getOutputBuffer(index)
 
-                                            if (outputBuffer != null) {
+                            if (outputBuffer != null) {
 
-                                                val chunk = ByteArray(info.size)
+                                val chunk = ByteArray(info.size)
 
-                                                outputBuffer.position(info.offset)
+                                outputBuffer.position(info.offset)
 
-                                                outputBuffer.get(chunk)
+                                outputBuffer.get(chunk)
 
-                                                outputBuffer.clear()
+                                outputBuffer.clear()
 
-                
 
-                                                                                // Write to AudioTrack using executor
+                                // Write to AudioTrack using executor
 
-                
 
-                                                                                writeExecutor.submit {
+                                writeExecutor.submit {
 
-                
 
-                                                                                    if (isRunning) {
+                                    if (isRunning) {
 
-                
 
-                                                                                        audioTrack.write(chunk, 0, chunk.size)
+                                        audioTrack.write(chunk, 0, chunk.size)
 
-                
-
-                                                                                    }
-
-                
-
-                                                                                }
-
-                                            }
-
-                                            codec.releaseOutputBuffer(index, false)
-
-                                        } catch (e: Exception) {
-
-                                            AppLog.e("Error processing AAC output", e)
-
-                                        }
 
                                     }
 
-                
-
-                                    override fun onError(codec: MediaCodec, e: MediaCodec.CodecException) {
-
-                                        AppLog.e("AAC Codec Error", e)
-
-                                    }
-
-                
-
-                                    override fun onOutputFormatChanged(codec: MediaCodec, format: MediaFormat) {
-
-                                        AppLog.i("AAC Output Format Changed: $format")
-
-                                    }
 
                                 }
 
-                
+                            }
 
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                            codec.releaseOutputBuffer(index, false)
 
-                                    val handler = Handler(codecHandlerThread!!.looper)
+                        } catch (e: Exception) {
 
-                                    decoder!!.setCallback(callback, handler)
+                            AppLog.e("Error processing AAC output", e)
 
-                                } else {
+                        }
 
-                                    decoder!!.setCallback(callback)
+                    }
 
-                                }
+
+                    override fun onError(codec: MediaCodec, e: MediaCodec.CodecException) {
+
+                        AppLog.e("AAC Codec Error", e)
+
+                    }
+
+
+                    override fun onOutputFormatChanged(codec: MediaCodec, format: MediaFormat) {
+
+                        AppLog.i("AAC Output Format Changed: $format")
+
+                    }
+
+                }
+
+
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+
+                    val handler = Handler(codecHandlerThread!!.looper)
+
+                    decoder!!.setCallback(callback, handler)
+
+                } else {
+
+                    decoder!!.setCallback(callback)
+
+                }
 
             }
 
@@ -225,7 +198,6 @@ class AudioTrackWrapper(stream: Int, sampleRateInHz: Int, bitDepth: Int, channel
     }
 
 
-
     override fun run() {
 
         Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_AUDIO)
@@ -244,13 +216,13 @@ class AudioTrackWrapper(stream: Int, sampleRateInHz: Int, bitDepth: Int, channel
 
                         queueInput(buffer)
 
-                                                            } else {
+                    } else {
 
-                                                                // PCM path - direct write in this high-priority thread
+                        // PCM path - direct write in this high-priority thread
 
-                                                                audioTrack.write(buffer, 0, buffer.size)
+                        audioTrack.write(buffer, 0, buffer.size)
 
-                                                            }
+                    }
 
                 }
 
@@ -275,7 +247,6 @@ class AudioTrackWrapper(stream: Int, sampleRateInHz: Int, bitDepth: Int, channel
     }
 
 
-
     private fun queueInput(inputData: ByteArray) {
 
         try {
@@ -284,7 +255,7 @@ class AudioTrackWrapper(stream: Int, sampleRateInHz: Int, bitDepth: Int, channel
 
             val inputIndex = freeInputBuffers.poll(200, TimeUnit.MILLISECONDS)
 
-            
+
 
             if (inputIndex != null && inputIndex >= 0) {
 
@@ -323,7 +294,6 @@ class AudioTrackWrapper(stream: Int, sampleRateInHz: Int, bitDepth: Int, channel
     }
 
 
-
     private fun makeAacCsd(sampleRate: Int, channelCount: Int): ByteArray {
         val sampleRateIndex = getFrequencyIndex(sampleRate)
         val audioObjectType = 2 // AAC-LC
@@ -355,9 +325,16 @@ class AudioTrackWrapper(stream: Int, sampleRateInHz: Int, bitDepth: Int, channel
         }
     }
 
-    private fun createAudioTrack(stream: Int, sampleRateInHz: Int, bitDepth: Int, channelCount: Int): AudioTrack {
-        val channelConfig = if (channelCount == 2) AudioFormat.CHANNEL_OUT_STEREO else AudioFormat.CHANNEL_OUT_MONO
-        val dataFormat = if (bitDepth == 16) AudioFormat.ENCODING_PCM_16BIT else AudioFormat.ENCODING_PCM_8BIT
+    private fun createAudioTrack(
+        stream: Int,
+        sampleRateInHz: Int,
+        bitDepth: Int,
+        channelCount: Int
+    ): AudioTrack {
+        val channelConfig =
+            if (channelCount == 2) AudioFormat.CHANNEL_OUT_STEREO else AudioFormat.CHANNEL_OUT_MONO
+        val dataFormat =
+            if (bitDepth == 16) AudioFormat.ENCODING_PCM_16BIT else AudioFormat.ENCODING_PCM_8BIT
 
         val minBufferSize = AudioTrack.getMinBufferSize(sampleRateInHz, channelConfig, dataFormat)
         // Larger buffer (32x) to prevent stuttering on jittery connections
@@ -367,24 +344,31 @@ class AudioTrackWrapper(stream: Int, sampleRateInHz: Int, bitDepth: Int, channel
 
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             val audioAttributes = AudioAttributes.Builder()
-                    .setLegacyStreamType(stream)
-                    .build()
+                .setLegacyStreamType(stream)
+                .build()
 
             val audioFormat = AudioFormat.Builder()
-                    .setSampleRate(sampleRateInHz)
-                    .setChannelMask(channelConfig)
-                    .setEncoding(dataFormat)
-                    .build()
+                .setSampleRate(sampleRateInHz)
+                .setChannelMask(channelConfig)
+                .setEncoding(dataFormat)
+                .build()
 
             AudioTrack.Builder()
-                    .setAudioAttributes(audioAttributes)
-                    .setAudioFormat(audioFormat)
-                    .setBufferSizeInBytes(bufferSize)
-                    .setTransferMode(AudioTrack.MODE_STREAM)
-                    .build()
+                .setAudioAttributes(audioAttributes)
+                .setAudioFormat(audioFormat)
+                .setBufferSizeInBytes(bufferSize)
+                .setTransferMode(AudioTrack.MODE_STREAM)
+                .build()
         } else {
             @Suppress("DEPRECATION")
-            AudioTrack(stream, sampleRateInHz, channelConfig, dataFormat, bufferSize, AudioTrack.MODE_STREAM)
+            AudioTrack(
+                stream,
+                sampleRateInHz,
+                channelConfig,
+                dataFormat,
+                bufferSize,
+                AudioTrack.MODE_STREAM
+            )
         }
     }
 
@@ -392,7 +376,7 @@ class AudioTrackWrapper(stream: Int, sampleRateInHz: Int, bitDepth: Int, channel
         if (!isRunning) return
 
         val chunk = buffer.copyOfRange(offset, offset + size)
-        
+
         try {
             // put() blocks if queue is full (Backpressure)
             dataQueue.put(chunk)
@@ -426,7 +410,7 @@ class AudioTrackWrapper(stream: Int, sampleRateInHz: Int, bitDepth: Int, channel
             decoder?.stop()
             decoder?.release()
             decoder = null
-            
+
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
                 codecHandlerThread?.quitSafely()
             } else {
