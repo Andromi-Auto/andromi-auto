@@ -87,6 +87,8 @@
 
     <!-- Categories for SettingsFragment -->
     <string name="category_general">General</string>
+    <string name="auto_start_self_mode">Auto start Self-Mode</string>
+    <string name="auto_start_self_mode_description">Automatically start Self-Mode when the application is opened.</string>
     <string name="category_graphic">Graphic</string>
     <string name="category_debug">Debug</string>
 

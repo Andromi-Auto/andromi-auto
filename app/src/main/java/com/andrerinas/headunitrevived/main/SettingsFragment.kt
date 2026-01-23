@@ -51,6 +51,7 @@ class SettingsFragment : Fragment() {
     private var pendingEnableAudioSink: Boolean? = null
     private var pendingUseAacAudio: Boolean? = null
     private var pendingUseNativeSsl: Boolean? = null
+    private var pendingAutoStartSelfMode: Boolean? = null
 
     private var requiresRestart = false
     private var hasChanges = false
@@ -83,6 +84,7 @@ class SettingsFragment : Fragment() {
         pendingEnableAudioSink = settings.enableAudioSink
         pendingUseAacAudio = settings.useAacAudio
         pendingUseNativeSsl = settings.useNativeSsl
+        pendingAutoStartSelfMode = settings.autoStartSelfMode
 
         // Intercept system back button
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
@@ -157,6 +159,7 @@ class SettingsFragment : Fragment() {
         pendingEnableAudioSink?.let { settings.enableAudioSink = it }
         pendingUseAacAudio?.let { settings.useAacAudio = it }
         pendingUseNativeSsl?.let { settings.useNativeSsl = it }
+        pendingAutoStartSelfMode?.let { settings.autoStartSelfMode = it }
 
         pendingWifiLauncherMode?.let { enabled ->
             settings.wifiLauncherMode = enabled
@@ -202,7 +205,8 @@ class SettingsFragment : Fragment() {
                         pendingBluetoothAddress != settings.bluetoothAddress ||
                         pendingEnableAudioSink != settings.enableAudioSink ||
                         pendingUseAacAudio != settings.useAacAudio ||
-                        pendingUseNativeSsl != settings.useNativeSsl
+                        pendingUseNativeSsl != settings.useNativeSsl ||
+                        pendingAutoStartSelfMode != settings.autoStartSelfMode
 
         hasChanges = anyChange
 
@@ -294,6 +298,18 @@ class SettingsFragment : Fragment() {
             isChecked = pendingWifiLauncherMode!!,
             onCheckedChanged = { isChecked ->
                 pendingWifiLauncherMode = isChecked
+                checkChanges()
+                updateSettingsList()
+            }
+        ))
+
+        items.add(SettingItem.ToggleSettingEntry(
+            stableId = "autoStartSelfMode",
+            nameResId = R.string.auto_start_self_mode,
+            descriptionResId = R.string.auto_start_self_mode_description,
+            isChecked = pendingAutoStartSelfMode!!,
+            onCheckedChanged = { isChecked ->
+                pendingAutoStartSelfMode = isChecked
                 checkChanges()
                 updateSettingsList()
             }
