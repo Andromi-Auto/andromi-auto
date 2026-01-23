@@ -3,6 +3,7 @@ package com.andrerinas.headunitrevived.decoder
 import android.media.MediaCodec
 import android.media.MediaCodecList
 import android.media.MediaFormat
+import android.os.Build
 import android.view.Surface
 import com.andrerinas.headunitrevived.utils.AppLog
 import com.andrerinas.headunitrevived.utils.Settings
@@ -20,6 +21,7 @@ class VideoDecoder(private val settings: Settings) {
         private const val TIMEOUT_US = 10000L
 
         fun isHevcSupported(): Boolean {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) return false
             val codecList = MediaCodecList(MediaCodecList.ALL_CODECS)
             return codecList.codecInfos.any { !it.isEncoder && it.supportedTypes.any { t -> t.equals("video/hevc", true) } }
         }
@@ -38,6 +40,9 @@ class VideoDecoder(private val settings: Settings) {
     private var pps: ByteArray? = null
     private var codecConfigured = false
     private var currentCodecType = CodecType.H264
+
+    // Buffers cache for API < 21
+    private var inputBuffers: Array<ByteBuffer>? = null
 
     var dimensionsListener: VideoDimensionsListener? = null
     var onFirstFrameListener: (() -> Unit)? = null
@@ -92,6 +97,7 @@ class VideoDecoder(private val settings: Settings) {
                 AppLog.e("Error releasing decoder", e)
             }
             codec = null
+            inputBuffers = null
             codecBufferInfo = null
             codecConfigured = false
             AppLog.i("Decoder stopped: $reason")
@@ -113,6 +119,7 @@ class VideoDecoder(private val settings: Settings) {
                 if (typeToUse == CodecType.H264) {
                     scanForSpsPpsH264(frameData)
                 } else if (typeToUse == CodecType.H265) {
+                    // H.265 dimensions are hard to parse, use negotiated fallback if needed
                     if (mWidth == 0) {
                          mWidth = HeadUnitScreenConfig.getNegotiatedWidth()
                          mHeight = HeadUnitScreenConfig.getNegotiatedHeight()
@@ -260,6 +267,12 @@ class VideoDecoder(private val settings: Settings) {
             } catch (e: Exception) {}
 
             codec?.start()
+            
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+                @Suppress("DEPRECATION")
+                inputBuffers = codec?.inputBuffers
+            }
+
             running = true
             codecConfigured = true
 
@@ -288,13 +301,21 @@ class VideoDecoder(private val settings: Settings) {
                 return false
             }
 
-            val inputBuffer = currentCodec.getInputBuffer(inputIndex) ?: return false
+            val inputBuffer = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                currentCodec.getInputBuffer(inputIndex)
+            } else {
+                @Suppress("DEPRECATION")
+                inputBuffers?.get(inputIndex)
+            }
+
+            if (inputBuffer == null) return false
             inputBuffer.clear()
             
             val capacity = inputBuffer.capacity()
             if (buffer.remaining() <= capacity) {
                 inputBuffer.put(buffer)
             } else {
+                AppLog.w("Content (${buffer.remaining()}) > capacity ($capacity)")
                 val limit = buffer.limit()
                 buffer.limit(buffer.position() + capacity)
                 inputBuffer.put(buffer)
@@ -340,23 +361,20 @@ class VideoDecoder(private val settings: Settings) {
     }
 
     private fun findBestCodec(mimeType: String, preferHardware: Boolean): String? {
-        val codecList = MediaCodecList(MediaCodecList.ALL_CODECS)
-        val infos = codecList.codecInfos
-        var hwCodec: String? = null
-        var swCodec: String? = null
-
-        for (info in infos) {
-            if (!info.isEncoder) {
-                val types = info.supportedTypes
-                if (types.any { it.equals(mimeType, ignoreCase = true) }) {
-                    val name = info.name
-                    val isHw = isHardwareAccelerated(name)
-                    if (isHw && hwCodec == null) hwCodec = name
-                    if (!isHw && swCodec == null) swCodec = name
-                }
-            }
+        val codecInfos = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            MediaCodecList(MediaCodecList.ALL_CODECS).codecInfos.toList()
+        } else {
+            @Suppress("DEPRECATION")
+            val count = MediaCodecList.getCodecCount()
+            (0 until count).map { MediaCodecList.getCodecInfoAt(it) }
         }
-        return if (preferHardware && hwCodec != null) hwCodec else swCodec ?: hwCodec
+
+        val infos = codecInfos.filter { !it.isEncoder && it.supportedTypes.any { t -> t.equals(mimeType, true) } }
+        val hw = infos.find { 
+            val n = it.name.lowercase()
+            !n.startsWith("omx.google.") && !n.startsWith("c2.android.") && !n.contains(".sw.") && !n.contains("software")
+        }
+        return if (preferHardware && hw != null) hw.name else (infos.firstOrNull()?.name ?: hw?.name)
     }
 
     private fun isHardwareAccelerated(name: String): Boolean {
@@ -369,7 +387,7 @@ class VideoDecoder(private val settings: Settings) {
     }
 }
 
-// Helpers
+// Helpers (BitReader, SpsParser) same as before...
 private class BitReader(private val buffer: ByteArray) {
     private var bitPosition = 0
     fun readBit(): Int = (buffer[bitPosition / 8].toInt() shr (7 - (bitPosition++ % 8))) and 1
