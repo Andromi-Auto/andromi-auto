@@ -25,6 +25,7 @@ import com.andrerinas.headunitrevived.aap.protocol.messages.NightModeEvent
 import com.andrerinas.headunitrevived.connection.AccessoryConnection
 import com.andrerinas.headunitrevived.connection.SocketAccessoryConnection
 import com.andrerinas.headunitrevived.connection.UsbAccessoryConnection
+import com.andrerinas.headunitrevived.connection.UsbDeviceCompat
 import com.andrerinas.headunitrevived.connection.UsbReceiver
 import com.andrerinas.headunitrevived.contract.ConnectedIntent
 import com.andrerinas.headunitrevived.contract.DisconnectIntent
@@ -46,6 +47,10 @@ class AapService : Service(), UsbReceiver.Listener {
     private lateinit var usbReceiver: UsbReceiver
     private lateinit var nightModeReceiver: BroadcastReceiver
     private var wirelessServer: WirelessServer? = null
+
+    private var pendingConnectionType: String = ""
+    private var pendingConnectionIp: String = ""
+    private var pendingConnectionUsbDevice: String = ""
 
     private val transport: AapTransport
         get() = App.provide(this).transport
@@ -142,6 +147,20 @@ class AapService : Service(), UsbReceiver.Listener {
             return
         }
 
+        when (connectionType) {
+            TYPE_USB -> {
+                val device = DeviceIntent(intent).device
+                pendingConnectionType = Settings.CONNECTION_TYPE_USB
+                pendingConnectionIp = ""
+                pendingConnectionUsbDevice = if (device != null) UsbDeviceCompat.getUniqueName(device) else ""
+            }
+            TYPE_WIFI -> {
+                pendingConnectionType = Settings.CONNECTION_TYPE_WIFI
+                pendingConnectionIp = intent?.getStringExtra(EXTRA_IP) ?: ""
+                pendingConnectionUsbDevice = ""
+            }
+        }
+
         serviceScope.launch {
             var connectionResult = false
             withContext(Dispatchers.IO) {
@@ -185,6 +204,10 @@ class AapService : Service(), UsbReceiver.Listener {
                                 AppLog.w("Already connected, dropping wireless client")
                                 clientSocket.close()
                             } else {
+                                pendingConnectionType = Settings.CONNECTION_TYPE_WIFI
+                                pendingConnectionIp = clientSocket.inetAddress.hostAddress ?: ""
+                                pendingConnectionUsbDevice = ""
+
                                 accessoryConnection = SocketAccessoryConnection(clientSocket)
                                 val success = accessoryConnection!!.connect()
                                 onConnectionResult(success)
@@ -281,9 +304,29 @@ class AapService : Service(), UsbReceiver.Listener {
 
             if (transportStarted) {
                 isConnected = true
-                val intent = ConnectedIntent()
-                intent.setPackage(packageName)
-                sendBroadcast(intent)
+                sendBroadcast(ConnectedIntent())
+                
+                if (pendingConnectionType.isNotEmpty()) {
+                    val settings = App.provide(this).settings
+                    settings.saveLastConnection(
+                        type = pendingConnectionType,
+                        ip = pendingConnectionIp,
+                        usbDevice = pendingConnectionUsbDevice
+                    )
+                    AppLog.i("Saved last connection: type=$pendingConnectionType, ip=$pendingConnectionIp, usb=$pendingConnectionUsbDevice")
+                    pendingConnectionType = ""
+                    pendingConnectionIp = ""
+                    pendingConnectionUsbDevice = ""
+                }
+
+                serviceScope.launch {
+                    delay(1000)
+                    val aapIntent = AapProjectionActivity.intent(this@AapService).apply {
+                        putExtra(AapProjectionActivity.EXTRA_FOCUS, true)
+                        addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+                    }
+                    startActivity(aapIntent)
+                }
             } else {
                 stopSelf()
             }
@@ -292,9 +335,7 @@ class AapService : Service(), UsbReceiver.Listener {
 
     private fun onDisconnect() {
         isConnected = false
-        val intent = DisconnectIntent()
-        intent.setPackage(packageName)
-        sendBroadcast(intent)
+        sendBroadcast(DisconnectIntent())
         reset()
         accessoryConnection?.disconnect()
         accessoryConnection = null

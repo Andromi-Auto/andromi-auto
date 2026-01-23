@@ -44,6 +44,7 @@ class SettingsFragment : Fragment() {
     private var pendingForceSoftware: Boolean? = null
     private var pendingLegacyDecoder: Boolean? = null
     private var pendingWifiLauncherMode: Boolean? = null
+    private var pendingAutoConnectLastSession: Boolean? = null
     private var pendingVideoCodec: String? = null
     private var pendingFpsLimit: Int? = null
     private var pendingDebugMode: Boolean? = null
@@ -77,6 +78,7 @@ class SettingsFragment : Fragment() {
         pendingForceSoftware = settings.forceSoftwareDecoding
         pendingLegacyDecoder = settings.forceLegacyDecoder
         pendingWifiLauncherMode = settings.wifiLauncherMode
+        pendingAutoConnectLastSession = settings.autoConnectLastSession
         pendingVideoCodec = settings.videoCodec
         pendingFpsLimit = settings.fpsLimit
         pendingDebugMode = settings.debugMode
@@ -169,6 +171,8 @@ class SettingsFragment : Fragment() {
             requireContext().startService(intent)
         }
 
+        pendingAutoConnectLastSession?.let { settings.autoConnectLastSession = it }
+
         if (requiresRestart) {
             if (AapService.isConnected) {
                 Toast.makeText(context, "Stopping service to apply changes...", Toast.LENGTH_SHORT).show()
@@ -199,6 +203,7 @@ class SettingsFragment : Fragment() {
                         pendingForceSoftware != settings.forceSoftwareDecoding ||
                         pendingLegacyDecoder != settings.forceLegacyDecoder ||
                         pendingWifiLauncherMode != settings.wifiLauncherMode ||
+                        pendingAutoConnectLastSession != settings.autoConnectLastSession ||
                         pendingVideoCodec != settings.videoCodec ||
                         pendingFpsLimit != settings.fpsLimit ||
                         pendingDebugMode != settings.debugMode ||
@@ -310,6 +315,18 @@ class SettingsFragment : Fragment() {
             isChecked = pendingAutoStartSelfMode!!,
             onCheckedChanged = { isChecked ->
                 pendingAutoStartSelfMode = isChecked
+                checkChanges()
+                updateSettingsList()
+            }
+        ))
+
+        items.add(SettingItem.ToggleSettingEntry(
+            stableId = "autoConnectLastSession",
+            nameResId = R.string.auto_connect_last_session,
+            descriptionResId = R.string.auto_connect_last_session_description,
+            isChecked = pendingAutoConnectLastSession!!,
+            onCheckedChanged = { isChecked ->
+                pendingAutoConnectLastSession = isChecked
                 checkChanges()
                 updateSettingsList()
             }

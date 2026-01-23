@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.hardware.usb.UsbManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -17,9 +18,11 @@ import com.andrerinas.headunitrevived.App
 import com.andrerinas.headunitrevived.R
 import com.andrerinas.headunitrevived.aap.AapProjectionActivity
 import com.andrerinas.headunitrevived.aap.AapService
+import com.andrerinas.headunitrevived.connection.UsbDeviceCompat
 import com.andrerinas.headunitrevived.contract.ConnectedIntent
 import com.andrerinas.headunitrevived.contract.DisconnectIntent
 import com.andrerinas.headunitrevived.utils.AppLog
+import com.andrerinas.headunitrevived.utils.Settings
 
 class HomeFragment : Fragment() {
 
@@ -29,6 +32,7 @@ class HomeFragment : Fragment() {
     private lateinit var wifi: Button
     private lateinit var exitButton: Button
     private lateinit var self_mode_text: TextView
+    private var hasAttemptedAutoConnect = false
 
     private val connectionStatusReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -83,6 +87,54 @@ class HomeFragment : Fragment() {
         intent.action = AapService.ACTION_START_SELF_MODE
         requireContext().startService(intent)
         Toast.makeText(requireContext(), "Starting Self Mode...", Toast.LENGTH_SHORT).show()
+
+        if (!hasAttemptedAutoConnect) {
+            hasAttemptedAutoConnect = true
+            attemptAutoConnect()
+        }
+    }
+
+    private fun attemptAutoConnect() {
+        val appSettings = App.provide(requireContext()).settings
+
+        if (!appSettings.autoConnectLastSession ||
+            !appSettings.hasAcceptedDisclaimer ||
+            AapService.isConnected) {
+            return
+        }
+
+        val connectionType = appSettings.lastConnectionType
+        if (connectionType.isEmpty()) {
+            AppLog.i("Auto-connect: No last session to reconnect to")
+            return
+        }
+
+        when (connectionType) {
+            Settings.CONNECTION_TYPE_WIFI -> {
+                val ip = appSettings.lastConnectionIp
+                if (ip.isNotEmpty()) {
+                    AppLog.i("Auto-connect: Attempting WiFi connection to $ip")
+                    Toast.makeText(requireContext(), "Auto-connecting to $ip...", Toast.LENGTH_SHORT).show()
+                    requireContext().startService(AapService.createIntent(ip, requireContext()))
+                }
+            }
+            Settings.CONNECTION_TYPE_USB -> {
+                val lastUsbDevice = appSettings.lastConnectionUsbDevice
+                if (lastUsbDevice.isNotEmpty()) {
+                    val usbManager = requireContext().getSystemService(Context.USB_SERVICE) as UsbManager
+                    val matchingDevice = usbManager.deviceList.values.find { device ->
+                        UsbDeviceCompat.getUniqueName(device) == lastUsbDevice
+                    }
+                    if (matchingDevice != null && usbManager.hasPermission(matchingDevice)) {
+                        AppLog.i("Auto-connect: Attempting USB connection to $lastUsbDevice")
+                        Toast.makeText(requireContext(), "Auto-connecting to USB device...", Toast.LENGTH_SHORT).show()
+                        requireContext().startService(AapService.createIntent(matchingDevice, requireContext()))
+                    } else {
+                        AppLog.i("Auto-connect: USB device $lastUsbDevice not found or no permission")
+                    }
+                }
+            }
+        }
     }
 
     private fun setupListeners() {

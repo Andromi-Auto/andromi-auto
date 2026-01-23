@@ -155,6 +155,34 @@ class Settings(context: Context) {
         get() = prefs.getBoolean("has-accepted-disclaimer", false)
         set(value) { prefs.edit().putBoolean("has-accepted-disclaimer", value).apply() }
 
+    var autoConnectLastSession: Boolean
+        get() = prefs.getBoolean("auto-connect-last-session", false)
+        set(value) { prefs.edit().putBoolean("auto-connect-last-session", value).apply() }
+
+    var lastConnectionType: String
+        get() = prefs.getString("last-connection-type", "")!!
+        set(value) { prefs.edit().putString("last-connection-type", value).apply() }
+
+    var lastConnectionIp: String
+        get() = prefs.getString("last-connection-ip", "")!!
+        set(value) { prefs.edit().putString("last-connection-ip", value).apply() }
+
+    var lastConnectionUsbDevice: String
+        get() = prefs.getString("last-connection-usb-device", "")!!
+        set(value) { prefs.edit().putString("last-connection-usb-device", value).apply() }
+
+    fun saveLastConnection(type: String, ip: String = "", usbDevice: String = "") {
+        lastConnectionType = type
+        lastConnectionIp = ip
+        lastConnectionUsbDevice = usbDevice
+    }
+
+    fun clearLastConnection() {
+        lastConnectionType = ""
+        lastConnectionIp = ""
+        lastConnectionUsbDevice = ""
+    }
+
     var enableAudioSink: Boolean
         get() = prefs.getBoolean("enable-audio-sink", true)
         set(value) { prefs.edit().putBoolean("enable-audio-sink", value).apply() }
@@ -214,6 +242,9 @@ class Settings(context: Context) {
     }
 
     companion object {
+        const val CONNECTION_TYPE_WIFI = "wifi"
+        const val CONNECTION_TYPE_USB = "usb"
+
         val MicSampleRates = listOf(8000, 16000, 24000, 32000, 44100, 48000) // Changed to List
 
         fun getNextMicSampleRate(currentRate: Int): Int {

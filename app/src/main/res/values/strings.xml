@@ -100,6 +100,8 @@
     <string name="force_legacy_decoder_description">Use legacy decoding method. Try this if video freezes or stutters.</string>
     <string name="wifi_launcher_mode">Wireless Headunit Server</string>
     <string name="wifi_launcher_mode_description">Let the phone connect to this tablet (requires Wireless Launcher app on phone)</string>
+    <string name="auto_connect_last_session">Auto-Connect Last Session</string>
+    <string name="auto_connect_last_session_description">Automatically reconnect to the last used device on app startup</string>
     <string name="video_codec">Video Codec</string>
     <string name="fps_limit">FPS Limit</string>
     <string name="save">Save</string>
