@@ -83,9 +83,9 @@ adb shell am start -a android.intent.action.VIEW -d "headunit://connect?ip=192.1
 ### v.1.10.1
 - Bugfix: Added missing 3 Byte startcode which stops some devices to start the projection
 - Added PR #68 - Fix Wifi Direct detection thanks to @rakshan-kumr
-- Added PR #67 - Brazilian Portuguese translation thanks to @MicaelJarniac
-- Added PR #66 - Add conscrypt to fix error 7 on lower Android versions, thanks to @JanRi3D
-- The old jni files and c code can maybe be removed when PR #66 is performing great. So we can get rid of that again :) 
+- Added PR #67 - Brazilian Portuguese translation 🇧🇷 thanks to @MicaelJarniac
+- Added PR #66 - Add conscrypt to fix error 7 on lower Android versions 🚀, thanks to @JanRi3D
+- The old jni files and c code can maybe be removed when PR #66 is performing great. So we can get rid of that again :)
 
 ### v.1.10.0
 - New Feature: Portrait Mode Support (Dashboard & Projection) with smart resolution scaling Known Bug is, that map is unresponsive to touch. That is in all HU apps
