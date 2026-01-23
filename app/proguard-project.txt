@@ -31,3 +31,8 @@
 
 # --- JNI ---
 -keep class com.andrerinas.headunitrevived.aap.AapSslNative { *; }
+
+# --- Conscrypt Rules ---
+-dontwarn org.conscrypt.**
+-keep class org.conscrypt.Conscrypt { *; }
+-keep class org.conscrypt.OpenSSLProvider { *; }
