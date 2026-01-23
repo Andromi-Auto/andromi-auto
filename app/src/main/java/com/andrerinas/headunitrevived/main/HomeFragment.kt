@@ -4,7 +4,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -63,7 +62,7 @@ class HomeFragment : Fragment() {
 
         setupListeners()
         updateProjectionButtonText()
-        
+
         if (!hasAttemptedAutoConnect) {
             hasAttemptedAutoConnect = true
             attemptAutoConnect()
@@ -72,20 +71,19 @@ class HomeFragment : Fragment() {
 
     private fun attemptAutoConnect() {
         val appSettings = App.provide(requireContext()).settings
-        
-        // Only auto-connect if enabled, disclaimer accepted, and not already connected
-        if (!appSettings.autoConnectLastSession || 
-            !appSettings.hasAcceptedDisclaimer || 
+
+        if (!appSettings.autoConnectLastSession ||
+            !appSettings.hasAcceptedDisclaimer ||
             AapService.isConnected) {
             return
         }
-        
+
         val connectionType = appSettings.lastConnectionType
         if (connectionType.isEmpty()) {
             AppLog.i("Auto-connect: No last session to reconnect to")
             return
         }
-        
+
         when (connectionType) {
             Settings.CONNECTION_TYPE_WIFI -> {
                 val ip = appSettings.lastConnectionIp

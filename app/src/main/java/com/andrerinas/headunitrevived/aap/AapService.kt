@@ -314,6 +314,9 @@ class AapService : Service(), UsbReceiver.Listener {
                         usbDevice = pendingConnectionUsbDevice
                     )
                     AppLog.i("Saved last connection: type=$pendingConnectionType, ip=$pendingConnectionIp, usb=$pendingConnectionUsbDevice")
+                    pendingConnectionType = ""
+                    pendingConnectionIp = ""
+                    pendingConnectionUsbDevice = ""
                 }
                 
                 serviceScope.launch {

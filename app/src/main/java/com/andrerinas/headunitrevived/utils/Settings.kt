@@ -240,7 +240,7 @@ class Settings(context: Context) {
     companion object {
         const val CONNECTION_TYPE_WIFI = "wifi"
         const val CONNECTION_TYPE_USB = "usb"
-        
+
         val MicSampleRates = listOf(8000, 16000, 24000, 32000, 44100, 48000) // Changed to List
 
         fun getNextMicSampleRate(currentRate: Int): Int {
