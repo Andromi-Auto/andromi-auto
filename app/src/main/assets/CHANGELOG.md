@@ -1,11 +1,15 @@
 # Changelog
 
 ### v.1.10.0
-- **New Feature:** Portrait Mode Support (Dashboard & Projection) with smart resolution scaling
-- **New Feature:** Redesigned Keymap Screen (easier configuration)
-- **Localization:** Added German Translation 🇩🇪
-- **Improvement:** TextureView is now the default renderer (better compatibility for most devices)
-- **Improvement:** Fixed Dashboard layout rotation
+- New Feature: Portrait Mode Support (Dashboard & Projection) with smart resolution scaling Known Bug is, that map is unresponsive to touch. That is in all HU apps
+- New Feature: Redesigned Keymap Screen (easier configuration)
+- New Feature: Right Hand side driving setting (#63)
+- New Feature: Auto-Connect last session (Thanks to @JanRi3D) (#21)
+- New Feature: Allow sideloaded apps (#57)
+- Localization: Added German Translation 🇩🇪 Other translations are highly appreciated
+- Improvement: TextureView is now the default renderer (better compatibility for most devices)
+- Improvement: Fixed Dashboard layout rotation
+- Rewrite: Completly Rewrite the Video-Decoder as it was undebuggable. Removed the async mode and more
 
 ### v.1.9.0
 - New Feature: GLES20 Video Renderer (Fixes black screen/artifacts/scaling on older Head Units)

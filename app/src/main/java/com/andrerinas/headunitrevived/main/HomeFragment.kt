@@ -72,8 +72,15 @@ class HomeFragment : Fragment() {
         setupListeners()
         updateProjectionButtonText()
 
-        // Handle Auto Start Self-Mode
         val appSettings = App.provide(requireContext()).settings
+
+        // 1. Priority: Auto-Connect last session (WiFi/USB)
+        if (appSettings.autoConnectLastSession && !hasAttemptedAutoConnect && !AapService.isConnected) {
+            hasAttemptedAutoConnect = true
+            attemptAutoConnect()
+        }
+
+        // 2. Priority: Auto-Start Self Mode
         if (appSettings.autoStartSelfMode && !hasAutoStarted && !AapService.isConnected) {
             hasAutoStarted = true
             startSelfMode()
@@ -87,11 +94,6 @@ class HomeFragment : Fragment() {
         intent.action = AapService.ACTION_START_SELF_MODE
         requireContext().startService(intent)
         Toast.makeText(requireContext(), "Starting Self Mode...", Toast.LENGTH_SHORT).show()
-
-        if (!hasAttemptedAutoConnect) {
-            hasAttemptedAutoConnect = true
-            attemptAutoConnect()
-        }
     }
 
     private fun attemptAutoConnect() {

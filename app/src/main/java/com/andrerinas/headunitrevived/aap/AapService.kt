@@ -319,14 +319,11 @@ class AapService : Service(), UsbReceiver.Listener {
                     pendingConnectionUsbDevice = ""
                 }
 
-                serviceScope.launch {
-                    delay(1000)
-                    val aapIntent = AapProjectionActivity.intent(this@AapService).apply {
-                        putExtra(AapProjectionActivity.EXTRA_FOCUS, true)
-                        addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
-                    }
-                    startActivity(aapIntent)
+                val aapIntent = AapProjectionActivity.intent(this@AapService).apply {
+                    putExtra(AapProjectionActivity.EXTRA_FOCUS, true)
+                    addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
                 }
+                startActivity(aapIntent)
             } else {
                 stopSelf()
             }
