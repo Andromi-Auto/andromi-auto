@@ -37,3 +37,14 @@ enum MessageStatus
     STATUS_BUSY = -254;
     STATUS_OUT_OF_MEMORY = -255;
 }
+
+message HeadUnitInfo {
+    optional string head_unit_make = 1;
+    optional string head_unit_model = 2;
+    optional string make = 3;
+    optional string model = 4;
+    optional string year = 5;
+    optional string head_unit_software_build = 6;
+    optional string vehicle_id = 7;
+    optional string head_unit_software_version = 8;
+}

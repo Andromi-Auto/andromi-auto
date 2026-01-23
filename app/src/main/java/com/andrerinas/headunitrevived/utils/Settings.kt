@@ -98,7 +98,7 @@ class Settings(context: Context) {
 
     var viewMode: ViewMode
         get() {
-            val value = prefs.getInt("view-mode", 0)
+            val value = prefs.getInt("view-mode", 1)
             return ViewMode.fromInt(value)!!
         }
         set(viewMode) {
@@ -135,9 +135,9 @@ class Settings(context: Context) {
         get() = prefs.getBoolean("force-software-decoding", false)
         set(value) { prefs.edit().putBoolean("force-software-decoding", value).apply() }
 
-    var forceLegacyDecoder: Boolean
-        get() = prefs.getBoolean("force-legacy-decoder", false)
-        set(value) { prefs.edit().putBoolean("force-legacy-decoder", value).apply() }
+    var rightHandDrive: Boolean
+        get() = prefs.getBoolean("right-hand-drive", false)
+        set(value) { prefs.edit().putBoolean("right-hand-drive", value).apply() }
 
     var wifiLauncherMode: Boolean
         get() = prefs.getBoolean("wifi-launcher-mode", false)
@@ -194,6 +194,10 @@ class Settings(context: Context) {
     var useNativeSsl: Boolean
         get() = prefs.getBoolean("use-native-ssl", false)
         set(value) { prefs.edit().putBoolean("use-native-ssl", value).apply() }
+
+    var autoStartSelfMode: Boolean
+        get() = prefs.getBoolean("auto-start-self-mode", false)
+        set(value) { prefs.edit().putBoolean("auto-start-self-mode", value).apply() }
 
     @SuppressLint("ApplySharedPref")
     fun commit() {

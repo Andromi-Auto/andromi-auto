@@ -132,7 +132,6 @@ internal class AapControlTouch(private val aapTransport: AapTransport): AapContr
     }
 
     private fun inputBinding(request: Input.KeyBindingRequest, channel: Int): Int {
-        AppLog.i("Input binding request %s", request)
         aapTransport.send(AapMessage(channel, Input.MsgType.BINDINGRESPONSE_VALUE, Input.BindingResponse.newBuilder()
                 .setStatus(Common.MessageStatus.STATUS_SUCCESS)
                 .build()))
@@ -342,17 +341,12 @@ internal class AapControlGateway(
     }
 
     private fun channelOpenRequest(request: Control.ChannelOpenRequest, channel: Int): Int {
-        AppLog.i("Channel Open Request - priority: %d  chan: %d %s", request.priority, request.serviceId, Channel.name(request.serviceId))
-
         val msg = AapMessage(channel, Control.ControlMsgType.MESSAGE_CHANNEL_OPEN_RESPONSE_VALUE, Control.ChannelOpenResponse.newBuilder()
                 .setStatus(Common.MessageStatus.STATUS_SUCCESS)
                 .build())
-        AppLog.i(msg.toString())
-
         aapTransport.send(msg)
 
         if (channel == Channel.ID_SEN) {
-            AppLog.i("Send driving status")
             aapTransport.send(DrivingStatusEvent(Sensors.SensorBatch.DrivingStatusData.Status.UNRESTRICTED))
         }
         return 0

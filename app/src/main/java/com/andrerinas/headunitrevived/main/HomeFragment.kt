@@ -38,6 +38,15 @@ class HomeFragment : Fragment() {
         override fun onReceive(context: Context?, intent: Intent?) {
             AppLog.i("HomeFragment received ${intent?.action}")
             updateProjectionButtonText()
+
+            if (intent?.action == ConnectedIntent.action) {
+                AppLog.i("HomeFragment: Connected broadcast received, launching projection")
+                val aapIntent = AapProjectionActivity.intent(requireContext()).apply {
+                    putExtra(AapProjectionActivity.EXTRA_FOCUS, true)
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                }
+                startActivity(aapIntent)
+            }
         }
     }
 
@@ -63,10 +72,29 @@ class HomeFragment : Fragment() {
         setupListeners()
         updateProjectionButtonText()
 
-        if (!hasAttemptedAutoConnect) {
+        val appSettings = App.provide(requireContext()).settings
+
+        // 1. Priority: Auto-Connect last session (WiFi/USB)
+        if (appSettings.autoConnectLastSession && !hasAttemptedAutoConnect && !AapService.isConnected) {
             hasAttemptedAutoConnect = true
             attemptAutoConnect()
         }
+
+        // 2. Priority: Auto-Start Self Mode
+        if (appSettings.autoStartSelfMode && !hasAutoStarted && !AapService.isConnected) {
+            hasAutoStarted = true
+            startSelfMode()
+        }
+    }
+
+    private fun startSelfMode() {
+        AapService.selfMode = true
+        AapService.isConnected = false
+        val intent = Intent(requireContext(), AapService::class.java)
+        intent.action = AapService.ACTION_START_SELF_MODE
+        requireContext().startService(intent)
+        AppLog.i("Auto start selfmode")
+        //Toast.makeText(requireContext(), "Starting Self Mode...", Toast.LENGTH_SHORT).show()
     }
 
     private fun attemptAutoConnect() {
@@ -127,12 +155,7 @@ class HomeFragment : Fragment() {
                 aapIntent.putExtra(AapProjectionActivity.EXTRA_FOCUS, true)
                 startActivity(aapIntent)
             } else {
-                AapService.selfMode = true
-                AapService.isConnected = false
-                val intent = Intent(requireContext(), AapService::class.java)
-                intent.action = AapService.ACTION_START_SELF_MODE
-                requireContext().startService(intent)
-                Toast.makeText(requireContext(), "Starting Self Mode...", Toast.LENGTH_SHORT).show()
+                startSelfMode()
             }
         }
 
@@ -159,6 +182,7 @@ class HomeFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+        AppLog.i("HomeFragment: onResume. isConnected=${AapService.isConnected}")
         val filter = IntentFilter().apply {
             addAction(ConnectedIntent.action)
             addAction(DisconnectIntent.action)
@@ -174,5 +198,12 @@ class HomeFragment : Fragment() {
     override fun onPause() {
         super.onPause()
         requireContext().unregisterReceiver(connectionStatusReceiver)
+    }
+
+    companion object {
+        private var hasAutoStarted = false
+        fun resetAutoStart() {
+            hasAutoStarted = false
+        }
     }
 }

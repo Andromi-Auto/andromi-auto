@@ -37,7 +37,6 @@ import com.andrerinas.headunitrevived.utils.NightMode
 import com.andrerinas.headunitrevived.utils.Settings
 import kotlinx.coroutines.*
 import java.net.ServerSocket
-import java.net.Socket
 
 class AapService : Service(), UsbReceiver.Listener {
     private val serviceJob = Job()
@@ -48,7 +47,7 @@ class AapService : Service(), UsbReceiver.Listener {
     private lateinit var usbReceiver: UsbReceiver
     private lateinit var nightModeReceiver: BroadcastReceiver
     private var wirelessServer: WirelessServer? = null
-    
+
     private var pendingConnectionType: String = ""
     private var pendingConnectionIp: String = ""
     private var pendingConnectionUsbDevice: String = ""
@@ -65,6 +64,7 @@ class AapService : Service(), UsbReceiver.Listener {
         startForeground(1, createNotification())
 
         uiModeManager = getSystemService(UI_MODE_SERVICE) as UiModeManager
+        uiModeManager.enableCarMode(0)
         uiModeManager.nightMode = UiModeManager.MODE_NIGHT_AUTO
 
         usbReceiver = UsbReceiver(this)
@@ -146,7 +146,7 @@ class AapService : Service(), UsbReceiver.Listener {
             AppLog.e("Cannot create connection from intent")
             return
         }
-        
+
         when (connectionType) {
             TYPE_USB -> {
                 val device = DeviceIntent(intent).device
@@ -207,7 +207,7 @@ class AapService : Service(), UsbReceiver.Listener {
                                 pendingConnectionType = Settings.CONNECTION_TYPE_WIFI
                                 pendingConnectionIp = clientSocket.inetAddress.hostAddress ?: ""
                                 pendingConnectionUsbDevice = ""
-                                
+
                                 accessoryConnection = SocketAccessoryConnection(clientSocket)
                                 val success = accessoryConnection!!.connect()
                                 onConnectionResult(success)
@@ -318,15 +318,12 @@ class AapService : Service(), UsbReceiver.Listener {
                     pendingConnectionIp = ""
                     pendingConnectionUsbDevice = ""
                 }
-                
-                serviceScope.launch {
-                    delay(1000)
-                    val aapIntent = AapProjectionActivity.intent(this@AapService).apply {
-                        putExtra(AapProjectionActivity.EXTRA_FOCUS, true)
-                        addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
-                    }
-                    startActivity(aapIntent)
+
+                val aapIntent = AapProjectionActivity.intent(this@AapService).apply {
+                    putExtra(AapProjectionActivity.EXTRA_FOCUS, true)
+                    addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
                 }
+                startActivity(aapIntent)
             } else {
                 stopSelf()
             }
@@ -384,8 +381,6 @@ class AapService : Service(), UsbReceiver.Listener {
         const val ACTION_START_SELF_MODE = "com.andrerinas.headunitrevived.ACTION_START_SELF_MODE"
         const val ACTION_START_WIRELESS = "com.andrerinas.headunitrevived.ACTION_START_WIRELESS"
         const val ACTION_STOP_WIRELESS = "com.andrerinas.headunitrevived.ACTION_STOP_WIRELESS"
-        const val ACTION_START_FROM_PROXY = "com.andrerinas.headunitrevived.ACTION_START_FROM_PROXY" // Legacy
-        const val EXTRA_LOCAL_PROXY_PORT = "local_proxy_port" // Legacy
         const val ACTION_STOP_SERVICE = "com.andrerinas.headunitrevived.ACTION_STOP_SERVICE"
         private const val TYPE_USB = 1
         private const val TYPE_WIFI = 2

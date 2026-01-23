@@ -574,6 +574,120 @@ public final class Control {
   }
 
   /**
+   * Protobuf enum {@code com.andrerinas.headunitrevived.aap.protocol.proto.DriverPosition}
+   */
+  public enum DriverPosition
+      implements com.google.protobuf.ProtocolMessageEnum {
+    /**
+     * <code>DRIVER_POSITION_LEFT = 0;</code>
+     */
+    DRIVER_POSITION_LEFT(0),
+    /**
+     * <code>DRIVER_POSITION_RIGHT = 1;</code>
+     */
+    DRIVER_POSITION_RIGHT(1),
+    /**
+     * <code>DRIVER_POSITION_CENTER = 2;</code>
+     */
+    DRIVER_POSITION_CENTER(2),
+    /**
+     * <code>DRIVER_POSITION_UNKNOWN = 3;</code>
+     */
+    DRIVER_POSITION_UNKNOWN(3),
+    ;
+
+    /**
+     * <code>DRIVER_POSITION_LEFT = 0;</code>
+     */
+    public static final int DRIVER_POSITION_LEFT_VALUE = 0;
+    /**
+     * <code>DRIVER_POSITION_RIGHT = 1;</code>
+     */
+    public static final int DRIVER_POSITION_RIGHT_VALUE = 1;
+    /**
+     * <code>DRIVER_POSITION_CENTER = 2;</code>
+     */
+    public static final int DRIVER_POSITION_CENTER_VALUE = 2;
+    /**
+     * <code>DRIVER_POSITION_UNKNOWN = 3;</code>
+     */
+    public static final int DRIVER_POSITION_UNKNOWN_VALUE = 3;
+
+
+    public final int getNumber() {
+      return value;
+    }
+
+    /**
+     * @param value The numeric wire value of the corresponding enum entry.
+     * @return The enum associated with the given numeric wire value.
+     * @deprecated Use {@link #forNumber(int)} instead.
+     */
+    @java.lang.Deprecated
+    public static DriverPosition valueOf(int value) {
+      return forNumber(value);
+    }
+
+    /**
+     * @param value The numeric wire value of the corresponding enum entry.
+     * @return The enum associated with the given numeric wire value.
+     */
+    public static DriverPosition forNumber(int value) {
+      switch (value) {
+        case 0: return DRIVER_POSITION_LEFT;
+        case 1: return DRIVER_POSITION_RIGHT;
+        case 2: return DRIVER_POSITION_CENTER;
+        case 3: return DRIVER_POSITION_UNKNOWN;
+        default: return null;
+      }
+    }
+
+    public static com.google.protobuf.Internal.EnumLiteMap<DriverPosition>
+        internalGetValueMap() {
+      return internalValueMap;
+    }
+    private static final com.google.protobuf.Internal.EnumLiteMap<
+        DriverPosition> internalValueMap =
+          new com.google.protobuf.Internal.EnumLiteMap<DriverPosition>() {
+            public DriverPosition findValueByNumber(int number) {
+              return DriverPosition.forNumber(number);
+            }
+          };
+
+    public final com.google.protobuf.Descriptors.EnumValueDescriptor
+        getValueDescriptor() {
+      return getDescriptor().getValues().get(ordinal());
+    }
+    public final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptorForType() {
+      return getDescriptor();
+    }
+    public static final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptor() {
+      return com.andrerinas.headunitrevived.aap.protocol.proto.Control.getDescriptor().getEnumTypes().get(3);
+    }
+
+    private static final DriverPosition[] VALUES = values();
+
+    public static DriverPosition valueOf(
+        com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+      if (desc.getType() != getDescriptor()) {
+        throw new java.lang.IllegalArgumentException(
+          "EnumValueDescriptor is not for this type.");
+      }
+      return VALUES[desc.getIndex()];
+    }
+
+    private final int value;
+
+    private DriverPosition(int value) {
+      this.value = value;
+    }
+
+    // @@protoc_insertion_point(enum_scope:com.andrerinas.headunitrevived.aap.protocol.proto.DriverPosition)
+  }
+
+  /**
    * Protobuf enum {@code com.andrerinas.headunitrevived.aap.protocol.proto.NavFocusType}
    */
   public enum NavFocusType
@@ -646,7 +760,7 @@ public final class Control {
     }
     public static final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptor() {
-      return com.andrerinas.headunitrevived.aap.protocol.proto.Control.getDescriptor().getEnumTypes().get(3);
+      return com.andrerinas.headunitrevived.aap.protocol.proto.Control.getDescriptor().getEnumTypes().get(4);
     }
 
     private static final NavFocusType[] VALUES = values();
@@ -18822,15 +18936,15 @@ public final class Control {
         getVehicleIdBytes();
 
     /**
-     * <code>required bool driver_position = 6;</code>
+     * <code>required .com.andrerinas.headunitrevived.aap.protocol.proto.DriverPosition driver_position = 6;</code>
      * @return Whether the driverPosition field is set.
      */
     boolean hasDriverPosition();
     /**
-     * <code>required bool driver_position = 6;</code>
+     * <code>required .com.andrerinas.headunitrevived.aap.protocol.proto.DriverPosition driver_position = 6;</code>
      * @return The driverPosition.
      */
-    boolean getDriverPosition();
+    com.andrerinas.headunitrevived.aap.protocol.proto.Control.DriverPosition getDriverPosition();
 
     /**
      * <code>required string head_unit_make = 7;</code>
@@ -18921,6 +19035,60 @@ public final class Control {
      * @return The hideProjectedClock.
      */
     boolean getHideProjectedClock();
+
+    /**
+     * <code>optional int32 session_configuration = 13;</code>
+     * @return Whether the sessionConfiguration field is set.
+     */
+    boolean hasSessionConfiguration();
+    /**
+     * <code>optional int32 session_configuration = 13;</code>
+     * @return The sessionConfiguration.
+     */
+    int getSessionConfiguration();
+
+    /**
+     * <code>optional string display_name = 14;</code>
+     * @return Whether the displayName field is set.
+     */
+    boolean hasDisplayName();
+    /**
+     * <code>optional string display_name = 14;</code>
+     * @return The displayName.
+     */
+    java.lang.String getDisplayName();
+    /**
+     * <code>optional string display_name = 14;</code>
+     * @return The bytes for displayName.
+     */
+    com.google.protobuf.ByteString
+        getDisplayNameBytes();
+
+    /**
+     * <code>optional bool probe_for_support = 15;</code>
+     * @return Whether the probeForSupport field is set.
+     */
+    boolean hasProbeForSupport();
+    /**
+     * <code>optional bool probe_for_support = 15;</code>
+     * @return The probeForSupport.
+     */
+    boolean getProbeForSupport();
+
+    /**
+     * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.HeadUnitInfo headunit_info = 17;</code>
+     * @return Whether the headunitInfo field is set.
+     */
+    boolean hasHeadunitInfo();
+    /**
+     * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.HeadUnitInfo headunit_info = 17;</code>
+     * @return The headunitInfo.
+     */
+    com.andrerinas.headunitrevived.aap.protocol.proto.Common.HeadUnitInfo getHeadunitInfo();
+    /**
+     * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.HeadUnitInfo headunit_info = 17;</code>
+     */
+    com.andrerinas.headunitrevived.aap.protocol.proto.Common.HeadUnitInfoOrBuilder getHeadunitInfoOrBuilder();
   }
   /**
    * Protobuf type {@code com.andrerinas.headunitrevived.aap.protocol.proto.ServiceDiscoveryResponse}
@@ -18940,10 +19108,12 @@ public final class Control {
       model_ = "";
       year_ = "";
       vehicleId_ = "";
+      driverPosition_ = 0;
       headUnitMake_ = "";
       headUnitModel_ = "";
       headUnitSoftwareBuild_ = "";
       headUnitSoftwareVersion_ = "";
+      displayName_ = "";
     }
 
     @java.lang.Override
@@ -19205,22 +19375,21 @@ public final class Control {
     }
 
     public static final int DRIVER_POSITION_FIELD_NUMBER = 6;
-    private boolean driverPosition_ = false;
+    private int driverPosition_ = 0;
     /**
-     * <code>required bool driver_position = 6;</code>
+     * <code>required .com.andrerinas.headunitrevived.aap.protocol.proto.DriverPosition driver_position = 6;</code>
      * @return Whether the driverPosition field is set.
      */
-    @java.lang.Override
-    public boolean hasDriverPosition() {
+    @java.lang.Override public boolean hasDriverPosition() {
       return ((bitField0_ & 0x00000010) != 0);
     }
     /**
-     * <code>required bool driver_position = 6;</code>
+     * <code>required .com.andrerinas.headunitrevived.aap.protocol.proto.DriverPosition driver_position = 6;</code>
      * @return The driverPosition.
      */
-    @java.lang.Override
-    public boolean getDriverPosition() {
-      return driverPosition_;
+    @java.lang.Override public com.andrerinas.headunitrevived.aap.protocol.proto.Control.DriverPosition getDriverPosition() {
+      com.andrerinas.headunitrevived.aap.protocol.proto.Control.DriverPosition result = com.andrerinas.headunitrevived.aap.protocol.proto.Control.DriverPosition.forNumber(driverPosition_);
+      return result == null ? com.andrerinas.headunitrevived.aap.protocol.proto.Control.DriverPosition.DRIVER_POSITION_LEFT : result;
     }
 
     public static final int HEAD_UNIT_MAKE_FIELD_NUMBER = 7;
@@ -19457,6 +19626,119 @@ public final class Control {
       return hideProjectedClock_;
     }
 
+    public static final int SESSION_CONFIGURATION_FIELD_NUMBER = 13;
+    private int sessionConfiguration_ = 0;
+    /**
+     * <code>optional int32 session_configuration = 13;</code>
+     * @return Whether the sessionConfiguration field is set.
+     */
+    @java.lang.Override
+    public boolean hasSessionConfiguration() {
+      return ((bitField0_ & 0x00000800) != 0);
+    }
+    /**
+     * <code>optional int32 session_configuration = 13;</code>
+     * @return The sessionConfiguration.
+     */
+    @java.lang.Override
+    public int getSessionConfiguration() {
+      return sessionConfiguration_;
+    }
+
+    public static final int DISPLAY_NAME_FIELD_NUMBER = 14;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object displayName_ = "";
+    /**
+     * <code>optional string display_name = 14;</code>
+     * @return Whether the displayName field is set.
+     */
+    @java.lang.Override
+    public boolean hasDisplayName() {
+      return ((bitField0_ & 0x00001000) != 0);
+    }
+    /**
+     * <code>optional string display_name = 14;</code>
+     * @return The displayName.
+     */
+    @java.lang.Override
+    public java.lang.String getDisplayName() {
+      java.lang.Object ref = displayName_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          displayName_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>optional string display_name = 14;</code>
+     * @return The bytes for displayName.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getDisplayNameBytes() {
+      java.lang.Object ref = displayName_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        displayName_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int PROBE_FOR_SUPPORT_FIELD_NUMBER = 15;
+    private boolean probeForSupport_ = false;
+    /**
+     * <code>optional bool probe_for_support = 15;</code>
+     * @return Whether the probeForSupport field is set.
+     */
+    @java.lang.Override
+    public boolean hasProbeForSupport() {
+      return ((bitField0_ & 0x00002000) != 0);
+    }
+    /**
+     * <code>optional bool probe_for_support = 15;</code>
+     * @return The probeForSupport.
+     */
+    @java.lang.Override
+    public boolean getProbeForSupport() {
+      return probeForSupport_;
+    }
+
+    public static final int HEADUNIT_INFO_FIELD_NUMBER = 17;
+    private com.andrerinas.headunitrevived.aap.protocol.proto.Common.HeadUnitInfo headunitInfo_;
+    /**
+     * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.HeadUnitInfo headunit_info = 17;</code>
+     * @return Whether the headunitInfo field is set.
+     */
+    @java.lang.Override
+    public boolean hasHeadunitInfo() {
+      return ((bitField0_ & 0x00004000) != 0);
+    }
+    /**
+     * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.HeadUnitInfo headunit_info = 17;</code>
+     * @return The headunitInfo.
+     */
+    @java.lang.Override
+    public com.andrerinas.headunitrevived.aap.protocol.proto.Common.HeadUnitInfo getHeadunitInfo() {
+      return headunitInfo_ == null ? com.andrerinas.headunitrevived.aap.protocol.proto.Common.HeadUnitInfo.getDefaultInstance() : headunitInfo_;
+    }
+    /**
+     * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.HeadUnitInfo headunit_info = 17;</code>
+     */
+    @java.lang.Override
+    public com.andrerinas.headunitrevived.aap.protocol.proto.Common.HeadUnitInfoOrBuilder getHeadunitInfoOrBuilder() {
+      return headunitInfo_ == null ? com.andrerinas.headunitrevived.aap.protocol.proto.Common.HeadUnitInfo.getDefaultInstance() : headunitInfo_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -19533,7 +19815,7 @@ public final class Control {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 5, vehicleId_);
       }
       if (((bitField0_ & 0x00000010) != 0)) {
-        output.writeBool(6, driverPosition_);
+        output.writeEnum(6, driverPosition_);
       }
       if (((bitField0_ & 0x00000020) != 0)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 7, headUnitMake_);
@@ -19552,6 +19834,18 @@ public final class Control {
       }
       if (((bitField0_ & 0x00000400) != 0)) {
         output.writeBool(12, hideProjectedClock_);
+      }
+      if (((bitField0_ & 0x00000800) != 0)) {
+        output.writeInt32(13, sessionConfiguration_);
+      }
+      if (((bitField0_ & 0x00001000) != 0)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 14, displayName_);
+      }
+      if (((bitField0_ & 0x00002000) != 0)) {
+        output.writeBool(15, probeForSupport_);
+      }
+      if (((bitField0_ & 0x00004000) != 0)) {
+        output.writeMessage(17, getHeadunitInfo());
       }
       getUnknownFields().writeTo(output);
     }
@@ -19580,7 +19874,7 @@ public final class Control {
       }
       if (((bitField0_ & 0x00000010) != 0)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBoolSize(6, driverPosition_);
+          .computeEnumSize(6, driverPosition_);
       }
       if (((bitField0_ & 0x00000020) != 0)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, headUnitMake_);
@@ -19601,6 +19895,21 @@ public final class Control {
       if (((bitField0_ & 0x00000400) != 0)) {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(12, hideProjectedClock_);
+      }
+      if (((bitField0_ & 0x00000800) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(13, sessionConfiguration_);
+      }
+      if (((bitField0_ & 0x00001000) != 0)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(14, displayName_);
+      }
+      if (((bitField0_ & 0x00002000) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(15, probeForSupport_);
+      }
+      if (((bitField0_ & 0x00004000) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(17, getHeadunitInfo());
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
@@ -19641,8 +19950,7 @@ public final class Control {
       }
       if (hasDriverPosition() != other.hasDriverPosition()) return false;
       if (hasDriverPosition()) {
-        if (getDriverPosition()
-            != other.getDriverPosition()) return false;
+        if (driverPosition_ != other.driverPosition_) return false;
       }
       if (hasHeadUnitMake() != other.hasHeadUnitMake()) return false;
       if (hasHeadUnitMake()) {
@@ -19673,6 +19981,26 @@ public final class Control {
       if (hasHideProjectedClock()) {
         if (getHideProjectedClock()
             != other.getHideProjectedClock()) return false;
+      }
+      if (hasSessionConfiguration() != other.hasSessionConfiguration()) return false;
+      if (hasSessionConfiguration()) {
+        if (getSessionConfiguration()
+            != other.getSessionConfiguration()) return false;
+      }
+      if (hasDisplayName() != other.hasDisplayName()) return false;
+      if (hasDisplayName()) {
+        if (!getDisplayName()
+            .equals(other.getDisplayName())) return false;
+      }
+      if (hasProbeForSupport() != other.hasProbeForSupport()) return false;
+      if (hasProbeForSupport()) {
+        if (getProbeForSupport()
+            != other.getProbeForSupport()) return false;
+      }
+      if (hasHeadunitInfo() != other.hasHeadunitInfo()) return false;
+      if (hasHeadunitInfo()) {
+        if (!getHeadunitInfo()
+            .equals(other.getHeadunitInfo())) return false;
       }
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
@@ -19707,8 +20035,7 @@ public final class Control {
       }
       if (hasDriverPosition()) {
         hash = (37 * hash) + DRIVER_POSITION_FIELD_NUMBER;
-        hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
-            getDriverPosition());
+        hash = (53 * hash) + driverPosition_;
       }
       if (hasHeadUnitMake()) {
         hash = (37 * hash) + HEAD_UNIT_MAKE_FIELD_NUMBER;
@@ -19735,6 +20062,23 @@ public final class Control {
         hash = (37 * hash) + HIDE_PROJECTED_CLOCK_FIELD_NUMBER;
         hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
             getHideProjectedClock());
+      }
+      if (hasSessionConfiguration()) {
+        hash = (37 * hash) + SESSION_CONFIGURATION_FIELD_NUMBER;
+        hash = (53 * hash) + getSessionConfiguration();
+      }
+      if (hasDisplayName()) {
+        hash = (37 * hash) + DISPLAY_NAME_FIELD_NUMBER;
+        hash = (53 * hash) + getDisplayName().hashCode();
+      }
+      if (hasProbeForSupport()) {
+        hash = (37 * hash) + PROBE_FOR_SUPPORT_FIELD_NUMBER;
+        hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+            getProbeForSupport());
+      }
+      if (hasHeadunitInfo()) {
+        hash = (37 * hash) + HEADUNIT_INFO_FIELD_NUMBER;
+        hash = (53 * hash) + getHeadunitInfo().hashCode();
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
@@ -19855,13 +20199,20 @@ public final class Control {
 
       // Construct using com.andrerinas.headunitrevived.aap.protocol.proto.Control.ServiceDiscoveryResponse.newBuilder()
       private Builder() {
-
+        maybeForceBuilderInitialization();
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+          getServicesFieldBuilder();
+          getHeadunitInfoFieldBuilder();
+        }
       }
       @java.lang.Override
       public Builder clear() {
@@ -19878,13 +20229,21 @@ public final class Control {
         model_ = "";
         year_ = "";
         vehicleId_ = "";
-        driverPosition_ = false;
+        driverPosition_ = 0;
         headUnitMake_ = "";
         headUnitModel_ = "";
         headUnitSoftwareBuild_ = "";
         headUnitSoftwareVersion_ = "";
         canPlayNativeMediaDuringVr_ = false;
         hideProjectedClock_ = false;
+        sessionConfiguration_ = 0;
+        displayName_ = "";
+        probeForSupport_ = false;
+        headunitInfo_ = null;
+        if (headunitInfoBuilder_ != null) {
+          headunitInfoBuilder_.dispose();
+          headunitInfoBuilder_ = null;
+        }
         return this;
       }
 
@@ -19975,6 +20334,24 @@ public final class Control {
         if (((from_bitField0_ & 0x00000800) != 0)) {
           result.hideProjectedClock_ = hideProjectedClock_;
           to_bitField0_ |= 0x00000400;
+        }
+        if (((from_bitField0_ & 0x00001000) != 0)) {
+          result.sessionConfiguration_ = sessionConfiguration_;
+          to_bitField0_ |= 0x00000800;
+        }
+        if (((from_bitField0_ & 0x00002000) != 0)) {
+          result.displayName_ = displayName_;
+          to_bitField0_ |= 0x00001000;
+        }
+        if (((from_bitField0_ & 0x00004000) != 0)) {
+          result.probeForSupport_ = probeForSupport_;
+          to_bitField0_ |= 0x00002000;
+        }
+        if (((from_bitField0_ & 0x00008000) != 0)) {
+          result.headunitInfo_ = headunitInfoBuilder_ == null
+              ? headunitInfo_
+              : headunitInfoBuilder_.build();
+          to_bitField0_ |= 0x00004000;
         }
         result.bitField0_ |= to_bitField0_;
       }
@@ -20098,6 +20475,20 @@ public final class Control {
         if (other.hasHideProjectedClock()) {
           setHideProjectedClock(other.getHideProjectedClock());
         }
+        if (other.hasSessionConfiguration()) {
+          setSessionConfiguration(other.getSessionConfiguration());
+        }
+        if (other.hasDisplayName()) {
+          displayName_ = other.displayName_;
+          bitField0_ |= 0x00002000;
+          onChanged();
+        }
+        if (other.hasProbeForSupport()) {
+          setProbeForSupport(other.getProbeForSupport());
+        }
+        if (other.hasHeadunitInfo()) {
+          mergeHeadunitInfo(other.getHeadunitInfo());
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
@@ -20193,8 +20584,15 @@ public final class Control {
                 break;
               } // case 42
               case 48: {
-                driverPosition_ = input.readBool();
-                bitField0_ |= 0x00000020;
+                int tmpRaw = input.readEnum();
+                com.andrerinas.headunitrevived.aap.protocol.proto.Control.DriverPosition tmpValue =
+                    com.andrerinas.headunitrevived.aap.protocol.proto.Control.DriverPosition.forNumber(tmpRaw);
+                if (tmpValue == null) {
+                  mergeUnknownVarintField(6, tmpRaw);
+                } else {
+                  driverPosition_ = tmpRaw;
+                  bitField0_ |= 0x00000020;
+                }
                 break;
               } // case 48
               case 58: {
@@ -20227,6 +20625,28 @@ public final class Control {
                 bitField0_ |= 0x00000800;
                 break;
               } // case 96
+              case 104: {
+                sessionConfiguration_ = input.readInt32();
+                bitField0_ |= 0x00001000;
+                break;
+              } // case 104
+              case 114: {
+                displayName_ = input.readBytes();
+                bitField0_ |= 0x00002000;
+                break;
+              } // case 114
+              case 120: {
+                probeForSupport_ = input.readBool();
+                bitField0_ |= 0x00004000;
+                break;
+              } // case 120
+              case 138: {
+                input.readMessage(
+                    getHeadunitInfoFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x00008000;
+                break;
+              } // case 138
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -20804,42 +21224,44 @@ public final class Control {
         return this;
       }
 
-      private boolean driverPosition_ ;
+      private int driverPosition_ = 0;
       /**
-       * <code>required bool driver_position = 6;</code>
+       * <code>required .com.andrerinas.headunitrevived.aap.protocol.proto.DriverPosition driver_position = 6;</code>
        * @return Whether the driverPosition field is set.
        */
-      @java.lang.Override
-      public boolean hasDriverPosition() {
+      @java.lang.Override public boolean hasDriverPosition() {
         return ((bitField0_ & 0x00000020) != 0);
       }
       /**
-       * <code>required bool driver_position = 6;</code>
+       * <code>required .com.andrerinas.headunitrevived.aap.protocol.proto.DriverPosition driver_position = 6;</code>
        * @return The driverPosition.
        */
       @java.lang.Override
-      public boolean getDriverPosition() {
-        return driverPosition_;
+      public com.andrerinas.headunitrevived.aap.protocol.proto.Control.DriverPosition getDriverPosition() {
+        com.andrerinas.headunitrevived.aap.protocol.proto.Control.DriverPosition result = com.andrerinas.headunitrevived.aap.protocol.proto.Control.DriverPosition.forNumber(driverPosition_);
+        return result == null ? com.andrerinas.headunitrevived.aap.protocol.proto.Control.DriverPosition.DRIVER_POSITION_LEFT : result;
       }
       /**
-       * <code>required bool driver_position = 6;</code>
+       * <code>required .com.andrerinas.headunitrevived.aap.protocol.proto.DriverPosition driver_position = 6;</code>
        * @param value The driverPosition to set.
        * @return This builder for chaining.
        */
-      public Builder setDriverPosition(boolean value) {
-
-        driverPosition_ = value;
+      public Builder setDriverPosition(com.andrerinas.headunitrevived.aap.protocol.proto.Control.DriverPosition value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
         bitField0_ |= 0x00000020;
+        driverPosition_ = value.getNumber();
         onChanged();
         return this;
       }
       /**
-       * <code>required bool driver_position = 6;</code>
+       * <code>required .com.andrerinas.headunitrevived.aap.protocol.proto.DriverPosition driver_position = 6;</code>
        * @return This builder for chaining.
        */
       public Builder clearDriverPosition() {
         bitField0_ = (bitField0_ & ~0x00000020);
-        driverPosition_ = false;
+        driverPosition_ = 0;
         onChanged();
         return this;
       }
@@ -21242,6 +21664,287 @@ public final class Control {
         hideProjectedClock_ = false;
         onChanged();
         return this;
+      }
+
+      private int sessionConfiguration_ ;
+      /**
+       * <code>optional int32 session_configuration = 13;</code>
+       * @return Whether the sessionConfiguration field is set.
+       */
+      @java.lang.Override
+      public boolean hasSessionConfiguration() {
+        return ((bitField0_ & 0x00001000) != 0);
+      }
+      /**
+       * <code>optional int32 session_configuration = 13;</code>
+       * @return The sessionConfiguration.
+       */
+      @java.lang.Override
+      public int getSessionConfiguration() {
+        return sessionConfiguration_;
+      }
+      /**
+       * <code>optional int32 session_configuration = 13;</code>
+       * @param value The sessionConfiguration to set.
+       * @return This builder for chaining.
+       */
+      public Builder setSessionConfiguration(int value) {
+
+        sessionConfiguration_ = value;
+        bitField0_ |= 0x00001000;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int32 session_configuration = 13;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearSessionConfiguration() {
+        bitField0_ = (bitField0_ & ~0x00001000);
+        sessionConfiguration_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object displayName_ = "";
+      /**
+       * <code>optional string display_name = 14;</code>
+       * @return Whether the displayName field is set.
+       */
+      public boolean hasDisplayName() {
+        return ((bitField0_ & 0x00002000) != 0);
+      }
+      /**
+       * <code>optional string display_name = 14;</code>
+       * @return The displayName.
+       */
+      public java.lang.String getDisplayName() {
+        java.lang.Object ref = displayName_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            displayName_ = s;
+          }
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>optional string display_name = 14;</code>
+       * @return The bytes for displayName.
+       */
+      public com.google.protobuf.ByteString
+          getDisplayNameBytes() {
+        java.lang.Object ref = displayName_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          displayName_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>optional string display_name = 14;</code>
+       * @param value The displayName to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDisplayName(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        displayName_ = value;
+        bitField0_ |= 0x00002000;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional string display_name = 14;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearDisplayName() {
+        displayName_ = getDefaultInstance().getDisplayName();
+        bitField0_ = (bitField0_ & ~0x00002000);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional string display_name = 14;</code>
+       * @param value The bytes for displayName to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDisplayNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        displayName_ = value;
+        bitField0_ |= 0x00002000;
+        onChanged();
+        return this;
+      }
+
+      private boolean probeForSupport_ ;
+      /**
+       * <code>optional bool probe_for_support = 15;</code>
+       * @return Whether the probeForSupport field is set.
+       */
+      @java.lang.Override
+      public boolean hasProbeForSupport() {
+        return ((bitField0_ & 0x00004000) != 0);
+      }
+      /**
+       * <code>optional bool probe_for_support = 15;</code>
+       * @return The probeForSupport.
+       */
+      @java.lang.Override
+      public boolean getProbeForSupport() {
+        return probeForSupport_;
+      }
+      /**
+       * <code>optional bool probe_for_support = 15;</code>
+       * @param value The probeForSupport to set.
+       * @return This builder for chaining.
+       */
+      public Builder setProbeForSupport(boolean value) {
+
+        probeForSupport_ = value;
+        bitField0_ |= 0x00004000;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bool probe_for_support = 15;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearProbeForSupport() {
+        bitField0_ = (bitField0_ & ~0x00004000);
+        probeForSupport_ = false;
+        onChanged();
+        return this;
+      }
+
+      private com.andrerinas.headunitrevived.aap.protocol.proto.Common.HeadUnitInfo headunitInfo_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.andrerinas.headunitrevived.aap.protocol.proto.Common.HeadUnitInfo, com.andrerinas.headunitrevived.aap.protocol.proto.Common.HeadUnitInfo.Builder, com.andrerinas.headunitrevived.aap.protocol.proto.Common.HeadUnitInfoOrBuilder> headunitInfoBuilder_;
+      /**
+       * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.HeadUnitInfo headunit_info = 17;</code>
+       * @return Whether the headunitInfo field is set.
+       */
+      public boolean hasHeadunitInfo() {
+        return ((bitField0_ & 0x00008000) != 0);
+      }
+      /**
+       * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.HeadUnitInfo headunit_info = 17;</code>
+       * @return The headunitInfo.
+       */
+      public com.andrerinas.headunitrevived.aap.protocol.proto.Common.HeadUnitInfo getHeadunitInfo() {
+        if (headunitInfoBuilder_ == null) {
+          return headunitInfo_ == null ? com.andrerinas.headunitrevived.aap.protocol.proto.Common.HeadUnitInfo.getDefaultInstance() : headunitInfo_;
+        } else {
+          return headunitInfoBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.HeadUnitInfo headunit_info = 17;</code>
+       */
+      public Builder setHeadunitInfo(com.andrerinas.headunitrevived.aap.protocol.proto.Common.HeadUnitInfo value) {
+        if (headunitInfoBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          headunitInfo_ = value;
+        } else {
+          headunitInfoBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00008000;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.HeadUnitInfo headunit_info = 17;</code>
+       */
+      public Builder setHeadunitInfo(
+          com.andrerinas.headunitrevived.aap.protocol.proto.Common.HeadUnitInfo.Builder builderForValue) {
+        if (headunitInfoBuilder_ == null) {
+          headunitInfo_ = builderForValue.build();
+        } else {
+          headunitInfoBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00008000;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.HeadUnitInfo headunit_info = 17;</code>
+       */
+      public Builder mergeHeadunitInfo(com.andrerinas.headunitrevived.aap.protocol.proto.Common.HeadUnitInfo value) {
+        if (headunitInfoBuilder_ == null) {
+          if (((bitField0_ & 0x00008000) != 0) &&
+            headunitInfo_ != null &&
+            headunitInfo_ != com.andrerinas.headunitrevived.aap.protocol.proto.Common.HeadUnitInfo.getDefaultInstance()) {
+            getHeadunitInfoBuilder().mergeFrom(value);
+          } else {
+            headunitInfo_ = value;
+          }
+        } else {
+          headunitInfoBuilder_.mergeFrom(value);
+        }
+        if (headunitInfo_ != null) {
+          bitField0_ |= 0x00008000;
+          onChanged();
+        }
+        return this;
+      }
+      /**
+       * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.HeadUnitInfo headunit_info = 17;</code>
+       */
+      public Builder clearHeadunitInfo() {
+        bitField0_ = (bitField0_ & ~0x00008000);
+        headunitInfo_ = null;
+        if (headunitInfoBuilder_ != null) {
+          headunitInfoBuilder_.dispose();
+          headunitInfoBuilder_ = null;
+        }
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.HeadUnitInfo headunit_info = 17;</code>
+       */
+      public com.andrerinas.headunitrevived.aap.protocol.proto.Common.HeadUnitInfo.Builder getHeadunitInfoBuilder() {
+        bitField0_ |= 0x00008000;
+        onChanged();
+        return getHeadunitInfoFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.HeadUnitInfo headunit_info = 17;</code>
+       */
+      public com.andrerinas.headunitrevived.aap.protocol.proto.Common.HeadUnitInfoOrBuilder getHeadunitInfoOrBuilder() {
+        if (headunitInfoBuilder_ != null) {
+          return headunitInfoBuilder_.getMessageOrBuilder();
+        } else {
+          return headunitInfo_ == null ?
+              com.andrerinas.headunitrevived.aap.protocol.proto.Common.HeadUnitInfo.getDefaultInstance() : headunitInfo_;
+        }
+      }
+      /**
+       * <code>optional .com.andrerinas.headunitrevived.aap.protocol.proto.HeadUnitInfo headunit_info = 17;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.andrerinas.headunitrevived.aap.protocol.proto.Common.HeadUnitInfo, com.andrerinas.headunitrevived.aap.protocol.proto.Common.HeadUnitInfo.Builder, com.andrerinas.headunitrevived.aap.protocol.proto.Common.HeadUnitInfoOrBuilder> 
+          getHeadunitInfoFieldBuilder() {
+        if (headunitInfoBuilder_ == null) {
+          headunitInfoBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.andrerinas.headunitrevived.aap.protocol.proto.Common.HeadUnitInfo, com.andrerinas.headunitrevived.aap.protocol.proto.Common.HeadUnitInfo.Builder, com.andrerinas.headunitrevived.aap.protocol.proto.Common.HeadUnitInfoOrBuilder>(
+                  getHeadunitInfo(),
+                  getParentForChildren(),
+                  isClean());
+          headunitInfo_ = null;
+        }
+        return headunitInfoBuilder_;
       }
       @java.lang.Override
       public final Builder setUnknownFields(
@@ -31542,99 +32245,108 @@ public final class Control {
       "\020\001\022\n\n\006OnHold\020\002\022\r\n\tHangingUp\020\003\022\014\n\010Incomin" +
       "g\020\004\022\t\n\005Muted\020\005\022\017\n\013Conferenced\020\006\"B\n\027Servi" +
       "ceDiscoveryRequest\022\022\n\nphone_name\030\004 \002(\t\022\023" +
-      "\n\013phone_brand\030\005 \002(\t\"\376\002\n\030ServiceDiscovery" +
+      "\n\013phone_brand\030\005 \002(\t\"\351\004\n\030ServiceDiscovery" +
       "Response\022L\n\010services\030\001 \003(\0132:.com.andreri" +
       "nas.headunitrevived.aap.protocol.proto.S" +
       "ervice\022\014\n\004make\030\002 \002(\t\022\r\n\005model\030\003 \002(\t\022\014\n\004y" +
-      "ear\030\004 \002(\t\022\022\n\nvehicle_id\030\005 \002(\t\022\027\n\017driver_" +
-      "position\030\006 \002(\010\022\026\n\016head_unit_make\030\007 \002(\t\022\027" +
-      "\n\017head_unit_model\030\010 \002(\t\022 \n\030head_unit_sof" +
-      "tware_build\030\t \002(\t\022\"\n\032head_unit_software_" +
-      "version\030\n \002(\t\022\'\n\037can_play_native_media_d" +
-      "uring_vr\030\013 \002(\010\022\034\n\024hide_projected_clock\030\014" +
-      " \001(\010\":\n\022ChannelOpenRequest\022\020\n\010priority\030\001" +
-      " \002(\005\022\022\n\nservice_id\030\002 \002(\005\"g\n\023ChannelOpenR" +
-      "esponse\022P\n\006status\030\001 \002(\0162@.com.andrerinas" +
-      ".headunitrevived.aap.protocol.proto.Mess" +
-      "ageStatus\"4\n\013PingRequest\022\021\n\ttimestamp\030\001 " +
-      "\002(\003\022\022\n\nbug_report\030\002 \001(\005\"!\n\014PingResponse\022" +
-      "\021\n\ttimestamp\030\001 \002(\003\"`\n\rByeByeRequest\022O\n\006r" +
-      "eason\030\001 \002(\0162?.com.andrerinas.headunitrev" +
-      "ived.aap.protocol.proto.ByeByeReason\"\020\n\016" +
-      "ByeByeResponse\"\317\001\n\030VoiceSessionNotificat" +
-      "ion\022n\n\006status\030\001 \002(\0162^.com.andrerinas.hea" +
-      "dunitrevived.aap.protocol.proto.VoiceSes" +
-      "sionNotification.VoiceSessionStatus\"C\n\022V" +
-      "oiceSessionStatus\022\026\n\022VOICE_STATUS_START\020" +
-      "\001\022\025\n\021VOICE_STATUS_STOP\020\002\"\203\002\n\035AudioFocusR" +
-      "equestNotification\022w\n\007request\030\001 \001(\0162f.co" +
-      "m.andrerinas.headunitrevived.aap.protoco" +
-      "l.proto.AudioFocusRequestNotification.Au" +
-      "dioFocusRequestType\"i\n\025AudioFocusRequest" +
-      "Type\022\010\n\004NONE\020\000\022\010\n\004GAIN\020\001\022\022\n\016GAIN_TRANSIE" +
-      "NT\020\002\022\033\n\027GAIN_TRANSIENT_MAY_DUCK\020\003\022\013\n\007REL" +
-      "EASE\020\004\"\363\002\n\026AudioFocusNotification\022r\n\013foc" +
-      "us_state\030\001 \002(\0162].com.andrerinas.headunit" +
-      "revived.aap.protocol.proto.AudioFocusNot" +
-      "ification.AudioFocusStateType\022\023\n\013unsolic" +
-      "ited\030\002 \001(\010\"\317\001\n\023AudioFocusStateType\022\016\n\nST" +
-      "ATE_GAIN\020\001\022\030\n\024STATE_GAIN_TRANSIENT\020\002\022\016\n\n" +
-      "STATE_LOSS\020\003\022!\n\035STATE_LOSS_TRANSIENT_CAN" +
-      "_DUCK\020\004\022\030\n\024STATE_LOSS_TRANSIENT\020\005\022\031\n\025STA" +
-      "TE_GAIN_MEDIA_ONLY\020\006\022&\n\"STATE_GAIN_TRANS" +
-      "IENT_GUIDANCE_ONLY\020\007\"r\n\033NavFocusRequestN" +
-      "otification\022S\n\nfocus_type\030\001 \001(\0162?.com.an" +
-      "drerinas.headunitrevived.aap.protocol.pr" +
-      "oto.NavFocusType\"k\n\024NavFocusNotification" +
-      "\022S\n\nfocus_type\030\001 \002(\0162?.com.andrerinas.he" +
-      "adunitrevived.aap.protocol.proto.NavFocu" +
-      "sType\"f\n\031BatteryStatusNotification\022\025\n\rba" +
-      "ttery_level\030\001 \002(\r\022\030\n\020time_remaining_s\030\002 " +
-      "\001(\r\022\030\n\020critical_battery\030\003 \001(\010\"9\n\017Connect" +
-      "edDevice\022\023\n\013device_name\030\001 \001(\t\022\021\n\tdevice_" +
-      "id\030\002 \001(\005\"\243\001\n\023CarConnectedDevices\022]\n\021conn" +
-      "ected_devices\030\001 \003(\0132B.com.andrerinas.hea" +
-      "dunitrevived.aap.protocol.proto.Connecte" +
-      "dDevice\022\023\n\013unsolicited\030\002 \001(\010\022\030\n\nfinal_li" +
-      "st\030\003 \001(\010:\004true\"\374\001\n\022UserSwitchResponse\022f\n" +
-      "\006status\030\001 \001(\0162V.com.andrerinas.headunitr" +
-      "evived.aap.protocol.proto.UserSwitchResp" +
-      "onse.UserSwitchStatus\022[\n\017selected_device" +
-      "\030\002 \001(\0132B.com.andrerinas.headunitrevived." +
-      "aap.protocol.proto.ConnectedDevice\"!\n\020Us" +
-      "erSwitchStatus\022\r\n\tSTATUS_OK\020\000\"0\n\026CallAva" +
-      "ilabilityStatus\022\026\n\016call_available\030\001 \001(\010*" +
-      "\255\007\n\016ControlMsgType\022\033\n\027MESSAGE_VERSION_RE" +
-      "QUEST\020\001\022\034\n\030MESSAGE_VERSION_RESPONSE\020\002\022\034\n" +
-      "\030MESSAGE_ENCAPSULATED_SSL\020\003\022\031\n\025MESSAGE_A" +
-      "UTH_COMPLETE\020\004\022%\n!MESSAGE_SERVICE_DISCOV" +
-      "ERY_REQUEST\020\005\022&\n\"MESSAGE_SERVICE_DISCOVE" +
-      "RY_RESPONSE\020\006\022 \n\034MESSAGE_CHANNEL_OPEN_RE" +
-      "QUEST\020\007\022!\n\035MESSAGE_CHANNEL_OPEN_RESPONSE" +
-      "\020\010\022&\n\"MESSAGE_CHANNEL_CLOSE_NOTIFICATION" +
-      "\020\t\022\030\n\024MESSAGE_PING_REQUEST\020\013\022\031\n\025MESSAGE_" +
-      "PING_RESPONSE\020\014\022\035\n\031MESSAGE_NAV_FOCUS_REQ" +
-      "UEST\020\r\022\"\n\036MESSAGE_NAV_FOCUS_NOTIFICATION" +
-      "\020\016\022\032\n\026MESSAGE_BYEBYE_REQUEST\020\017\022\033\n\027MESSAG" +
-      "E_BYEBYE_RESPONSE\020\020\022&\n\"MESSAGE_VOICE_SES" +
-      "SION_NOTIFICATION\020\021\022\037\n\033MESSAGE_AUDIO_FOC" +
-      "US_REQUEST\020\022\022$\n MESSAGE_AUDIO_FOCUS_NOTI" +
-      "FICATION\020\023\022)\n%MESSAGE_CAR_CONNECTED_DEVI" +
-      "CES_REQUEST\020\024\022*\n&MESSAGE_CAR_CONNECTED_D" +
-      "EVICES_RESPONSE\020\025\022\037\n\033MESSAGE_USER_SWITCH" +
-      "_REQUEST\020\026\022\'\n#MESSAGE_BATTERY_STATUS_NOT" +
-      "IFICATION\020\027\022$\n MESSAGE_CALL_AVAILABILITY" +
-      "_STATUS\020\030\022 \n\034MESSAGE_USER_SWITCH_RESPONS" +
-      "E\020\031\022$\n MESSAGE_SERVICE_DISCOVERY_UPDATE\020" +
-      "\032\022\037\n\032MESSAGE_UNEXPECTED_MESSAGE\020\377\001\022\033\n\025ME" +
-      "SSAGE_FRAMING_ERROR\020\377\377\003*G\n\026BluetoothPair" +
-      "ingMethod\022\014\n\010METHOD_1\020\001\022\010\n\004A2DP\020\002\022\014\n\010MET" +
-      "HOD_3\020\003\022\007\n\003HFP\020\004*z\n\014ByeByeReason\022\022\n\016USER" +
-      "_SELECTION\020\001\022\021\n\rDEVICE_SWITCH\020\002\022\021\n\rNOT_S" +
-      "UPPORTED\020\003\022\033\n\027NOT_CURRENTLY_SUPPORTED\020\004\022" +
-      "\023\n\017PROBE_SUPPORTED\020\005*0\n\014NavFocusType\022\017\n\013" +
-      "NAV_FOCUS_1\020\001\022\017\n\013NAV_FOCUS_2\020\002B\tB\007Contro" +
-      "l"
+      "ear\030\004 \002(\t\022\022\n\nvehicle_id\030\005 \002(\t\022Z\n\017driver_" +
+      "position\030\006 \002(\0162A.com.andrerinas.headunit" +
+      "revived.aap.protocol.proto.DriverPositio" +
+      "n\022\026\n\016head_unit_make\030\007 \002(\t\022\027\n\017head_unit_m" +
+      "odel\030\010 \002(\t\022 \n\030head_unit_software_build\030\t" +
+      " \002(\t\022\"\n\032head_unit_software_version\030\n \002(\t" +
+      "\022\'\n\037can_play_native_media_during_vr\030\013 \002(" +
+      "\010\022\034\n\024hide_projected_clock\030\014 \001(\010\022\035\n\025sessi" +
+      "on_configuration\030\r \001(\005\022\024\n\014display_name\030\016" +
+      " \001(\t\022\031\n\021probe_for_support\030\017 \001(\010\022V\n\rheadu" +
+      "nit_info\030\021 \001(\0132?.com.andrerinas.headunit" +
+      "revived.aap.protocol.proto.HeadUnitInfo\"" +
+      ":\n\022ChannelOpenRequest\022\020\n\010priority\030\001 \002(\005\022" +
+      "\022\n\nservice_id\030\002 \002(\005\"g\n\023ChannelOpenRespon" +
+      "se\022P\n\006status\030\001 \002(\0162@.com.andrerinas.head" +
+      "unitrevived.aap.protocol.proto.MessageSt" +
+      "atus\"4\n\013PingRequest\022\021\n\ttimestamp\030\001 \002(\003\022\022" +
+      "\n\nbug_report\030\002 \001(\005\"!\n\014PingResponse\022\021\n\tti" +
+      "mestamp\030\001 \002(\003\"`\n\rByeByeRequest\022O\n\006reason" +
+      "\030\001 \002(\0162?.com.andrerinas.headunitrevived." +
+      "aap.protocol.proto.ByeByeReason\"\020\n\016ByeBy" +
+      "eResponse\"\317\001\n\030VoiceSessionNotification\022n" +
+      "\n\006status\030\001 \002(\0162^.com.andrerinas.headunit" +
+      "revived.aap.protocol.proto.VoiceSessionN" +
+      "otification.VoiceSessionStatus\"C\n\022VoiceS" +
+      "essionStatus\022\026\n\022VOICE_STATUS_START\020\001\022\025\n\021" +
+      "VOICE_STATUS_STOP\020\002\"\203\002\n\035AudioFocusReques" +
+      "tNotification\022w\n\007request\030\001 \001(\0162f.com.and" +
+      "rerinas.headunitrevived.aap.protocol.pro" +
+      "to.AudioFocusRequestNotification.AudioFo" +
+      "cusRequestType\"i\n\025AudioFocusRequestType\022" +
+      "\010\n\004NONE\020\000\022\010\n\004GAIN\020\001\022\022\n\016GAIN_TRANSIENT\020\002\022" +
+      "\033\n\027GAIN_TRANSIENT_MAY_DUCK\020\003\022\013\n\007RELEASE\020" +
+      "\004\"\363\002\n\026AudioFocusNotification\022r\n\013focus_st" +
+      "ate\030\001 \002(\0162].com.andrerinas.headunitreviv" +
+      "ed.aap.protocol.proto.AudioFocusNotifica" +
+      "tion.AudioFocusStateType\022\023\n\013unsolicited\030" +
+      "\002 \001(\010\"\317\001\n\023AudioFocusStateType\022\016\n\nSTATE_G" +
+      "AIN\020\001\022\030\n\024STATE_GAIN_TRANSIENT\020\002\022\016\n\nSTATE" +
+      "_LOSS\020\003\022!\n\035STATE_LOSS_TRANSIENT_CAN_DUCK" +
+      "\020\004\022\030\n\024STATE_LOSS_TRANSIENT\020\005\022\031\n\025STATE_GA" +
+      "IN_MEDIA_ONLY\020\006\022&\n\"STATE_GAIN_TRANSIENT_" +
+      "GUIDANCE_ONLY\020\007\"r\n\033NavFocusRequestNotifi" +
+      "cation\022S\n\nfocus_type\030\001 \001(\0162?.com.andreri" +
+      "nas.headunitrevived.aap.protocol.proto.N" +
+      "avFocusType\"k\n\024NavFocusNotification\022S\n\nf" +
+      "ocus_type\030\001 \002(\0162?.com.andrerinas.headuni" +
+      "trevived.aap.protocol.proto.NavFocusType" +
+      "\"f\n\031BatteryStatusNotification\022\025\n\rbattery" +
+      "_level\030\001 \002(\r\022\030\n\020time_remaining_s\030\002 \001(\r\022\030" +
+      "\n\020critical_battery\030\003 \001(\010\"9\n\017ConnectedDev" +
+      "ice\022\023\n\013device_name\030\001 \001(\t\022\021\n\tdevice_id\030\002 " +
+      "\001(\005\"\243\001\n\023CarConnectedDevices\022]\n\021connected" +
+      "_devices\030\001 \003(\0132B.com.andrerinas.headunit" +
+      "revived.aap.protocol.proto.ConnectedDevi" +
+      "ce\022\023\n\013unsolicited\030\002 \001(\010\022\030\n\nfinal_list\030\003 " +
+      "\001(\010:\004true\"\374\001\n\022UserSwitchResponse\022f\n\006stat" +
+      "us\030\001 \001(\0162V.com.andrerinas.headunitrevive" +
+      "d.aap.protocol.proto.UserSwitchResponse." +
+      "UserSwitchStatus\022[\n\017selected_device\030\002 \001(" +
+      "\0132B.com.andrerinas.headunitrevived.aap.p" +
+      "rotocol.proto.ConnectedDevice\"!\n\020UserSwi" +
+      "tchStatus\022\r\n\tSTATUS_OK\020\000\"0\n\026CallAvailabi" +
+      "lityStatus\022\026\n\016call_available\030\001 \001(\010*\255\007\n\016C" +
+      "ontrolMsgType\022\033\n\027MESSAGE_VERSION_REQUEST" +
+      "\020\001\022\034\n\030MESSAGE_VERSION_RESPONSE\020\002\022\034\n\030MESS" +
+      "AGE_ENCAPSULATED_SSL\020\003\022\031\n\025MESSAGE_AUTH_C" +
+      "OMPLETE\020\004\022%\n!MESSAGE_SERVICE_DISCOVERY_R" +
+      "EQUEST\020\005\022&\n\"MESSAGE_SERVICE_DISCOVERY_RE" +
+      "SPONSE\020\006\022 \n\034MESSAGE_CHANNEL_OPEN_REQUEST" +
+      "\020\007\022!\n\035MESSAGE_CHANNEL_OPEN_RESPONSE\020\010\022&\n" +
+      "\"MESSAGE_CHANNEL_CLOSE_NOTIFICATION\020\t\022\030\n" +
+      "\024MESSAGE_PING_REQUEST\020\013\022\031\n\025MESSAGE_PING_" +
+      "RESPONSE\020\014\022\035\n\031MESSAGE_NAV_FOCUS_REQUEST\020" +
+      "\r\022\"\n\036MESSAGE_NAV_FOCUS_NOTIFICATION\020\016\022\032\n" +
+      "\026MESSAGE_BYEBYE_REQUEST\020\017\022\033\n\027MESSAGE_BYE" +
+      "BYE_RESPONSE\020\020\022&\n\"MESSAGE_VOICE_SESSION_" +
+      "NOTIFICATION\020\021\022\037\n\033MESSAGE_AUDIO_FOCUS_RE" +
+      "QUEST\020\022\022$\n MESSAGE_AUDIO_FOCUS_NOTIFICAT" +
+      "ION\020\023\022)\n%MESSAGE_CAR_CONNECTED_DEVICES_R" +
+      "EQUEST\020\024\022*\n&MESSAGE_CAR_CONNECTED_DEVICE" +
+      "S_RESPONSE\020\025\022\037\n\033MESSAGE_USER_SWITCH_REQU" +
+      "EST\020\026\022\'\n#MESSAGE_BATTERY_STATUS_NOTIFICA" +
+      "TION\020\027\022$\n MESSAGE_CALL_AVAILABILITY_STAT" +
+      "US\020\030\022 \n\034MESSAGE_USER_SWITCH_RESPONSE\020\031\022$" +
+      "\n MESSAGE_SERVICE_DISCOVERY_UPDATE\020\032\022\037\n\032" +
+      "MESSAGE_UNEXPECTED_MESSAGE\020\377\001\022\033\n\025MESSAGE" +
+      "_FRAMING_ERROR\020\377\377\003*G\n\026BluetoothPairingMe" +
+      "thod\022\014\n\010METHOD_1\020\001\022\010\n\004A2DP\020\002\022\014\n\010METHOD_3" +
+      "\020\003\022\007\n\003HFP\020\004*z\n\014ByeByeReason\022\022\n\016USER_SELE" +
+      "CTION\020\001\022\021\n\rDEVICE_SWITCH\020\002\022\021\n\rNOT_SUPPOR" +
+      "TED\020\003\022\033\n\027NOT_CURRENTLY_SUPPORTED\020\004\022\023\n\017PR" +
+      "OBE_SUPPORTED\020\005*~\n\016DriverPosition\022\030\n\024DRI" +
+      "VER_POSITION_LEFT\020\000\022\031\n\025DRIVER_POSITION_R" +
+      "IGHT\020\001\022\032\n\026DRIVER_POSITION_CENTER\020\002\022\033\n\027DR" +
+      "IVER_POSITION_UNKNOWN\020\003*0\n\014NavFocusType\022" +
+      "\017\n\013NAV_FOCUS_1\020\001\022\017\n\013NAV_FOCUS_2\020\002B\tB\007Con" +
+      "trol"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -31762,7 +32474,7 @@ public final class Control {
     internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_ServiceDiscoveryResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_ServiceDiscoveryResponse_descriptor,
-        new java.lang.String[] { "Services", "Make", "Model", "Year", "VehicleId", "DriverPosition", "HeadUnitMake", "HeadUnitModel", "HeadUnitSoftwareBuild", "HeadUnitSoftwareVersion", "CanPlayNativeMediaDuringVr", "HideProjectedClock", });
+        new java.lang.String[] { "Services", "Make", "Model", "Year", "VehicleId", "DriverPosition", "HeadUnitMake", "HeadUnitModel", "HeadUnitSoftwareBuild", "HeadUnitSoftwareVersion", "CanPlayNativeMediaDuringVr", "HideProjectedClock", "SessionConfiguration", "DisplayName", "ProbeForSupport", "HeadunitInfo", });
     internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_ChannelOpenRequest_descriptor =
       getDescriptor().getMessageTypes().get(3);
     internal_static_com_andrerinas_headunitrevived_aap_protocol_proto_ChannelOpenRequest_fieldAccessorTable = new

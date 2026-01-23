@@ -75,9 +75,23 @@ adb shell am start -a android.intent.action.VIEW -d "headunit://connect?ip=192.1
 - Portrait Mode (https://github.com/andreknieriem/headunit-revived/issues/38)
 - Maybe:
   - Android SKD 17
-  - Auto-Connect last session (if possible)
+
+## Known Issues
+- **Google Maps in Portrait Mode:** Touch interactions (searching, scrolling) within Google Maps may not work as expected when using Portrait Mode. While visual feedback (like ripple effects) might appear, the map itself may remain unresponsive. This appears to be an internal Android Auto / Google Maps limitation or bug in vertical orientations.
 
 ## Changelog
+### v.1.10.0
+- New Feature: Portrait Mode Support (Dashboard & Projection) with smart resolution scaling Known Bug is, that map is unresponsive to touch. That is in all HU apps
+- New Feature: Redesigned Keymap Screen (easier configuration)
+- New Feature: Right Hand side driving setting (#63)
+- New Feature: Auto-Connect last session (Thanks to @JanRi3D) (#21)
+- New Feature: Auto-Selfmode if enabled in settings
+- New Feature: Allow sideloaded apps (#57)
+- Localization: Added German Translation 🇩🇪 Other translations are highly appreciated
+- Improvement: TextureView is now the default renderer (better compatibility for most devices)
+- Improvement: Fixed Dashboard layout rotation
+- Rewrite: Completly Rewrite the Video-Decoder as it was undebuggable. Removed the async mode and more
+
 ### v.1.9.0
 - New Feature: GLES20 Video Renderer (Fixes black screen/artifacts/scaling on older Head Units)
 - New Feature: In-App Log Export (Save to file/Share) for easier debugging
