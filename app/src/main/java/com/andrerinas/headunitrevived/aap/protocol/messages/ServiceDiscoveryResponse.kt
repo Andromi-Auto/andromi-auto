@@ -87,8 +87,8 @@ class ServiceDiscoveryResponse(private val context: Context)
                 service.id = Channel.ID_INP
                 service.inputSourceService = Control.Service.InputSourceService.newBuilder().also {
                     it.touchscreen = Control.Service.InputSourceService.TouchConfig.newBuilder().apply {
-                        setWidth(HeadUnitScreenConfig.getAdjustedWidth()) // Use effective width
-                        setHeight(HeadUnitScreenConfig.getAdjustedHeight()) // Use effective height
+                        setWidth(HeadUnitScreenConfig.getNegotiatedWidth()) // Use negotiated width
+                        setHeight(HeadUnitScreenConfig.getNegotiatedHeight()) // Use negotiated height
                     }.build()
                     it.addAllKeycodesSupported(KeyCode.supported)
                 }.build()
@@ -172,16 +172,29 @@ class ServiceDiscoveryResponse(private val context: Context)
 
             return Control.ServiceDiscoveryResponse.newBuilder().apply {
                 make = "Google"
-                model = "Android Auto"
-                year = "2023"
-                vehicleId = "Generic"
-                headUnitModel = "Generic Headunit"
-                headUnitMake = "Generic Make"
-                headUnitSoftwareBuild = "1.0"
-                headUnitSoftwareVersion = "1.3.0"
-                driverPosition = true
+                model = "Desktop Head Unit"
+                year = "2025"
+                vehicleId = "headlessunit-001"
+                headUnitModel = "Desktop Head Unit"
+                headUnitMake = "Google"
+                headUnitSoftwareBuild = "1"
+                headUnitSoftwareVersion = "0.1.0"
+                driverPosition = if (settings.rightHandDrive) Control.DriverPosition.DRIVER_POSITION_RIGHT else Control.DriverPosition.DRIVER_POSITION_LEFT
                 canPlayNativeMediaDuringVr = false
                 hideProjectedClock = false
+                setDisplayName("Headunit Revived")
+
+                setHeadunitInfo(com.andrerinas.headunitrevived.aap.protocol.proto.Common.HeadUnitInfo.newBuilder().apply {
+                    setHeadUnitMake("Google")
+                    setHeadUnitModel("Desktop Head Unit")
+                    setMake("Google")
+                    setModel("Desktop Head Unit")
+                    setYear("2025")
+                    setVehicleId("headlessunit-001")
+                    setHeadUnitSoftwareBuild("1")
+                    setHeadUnitSoftwareVersion("0.1.0")
+                }.build())
+
                 addAllServices(services)
             }.build()
         }

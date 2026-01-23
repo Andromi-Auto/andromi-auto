@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.hardware.usb.UsbManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -17,9 +18,11 @@ import com.andrerinas.headunitrevived.App
 import com.andrerinas.headunitrevived.R
 import com.andrerinas.headunitrevived.aap.AapProjectionActivity
 import com.andrerinas.headunitrevived.aap.AapService
+import com.andrerinas.headunitrevived.connection.UsbDeviceCompat
 import com.andrerinas.headunitrevived.contract.ConnectedIntent
 import com.andrerinas.headunitrevived.contract.DisconnectIntent
 import com.andrerinas.headunitrevived.utils.AppLog
+import com.andrerinas.headunitrevived.utils.Settings
 
 class HomeFragment : Fragment() {
 
@@ -29,11 +32,21 @@ class HomeFragment : Fragment() {
     private lateinit var wifi: Button
     private lateinit var exitButton: Button
     private lateinit var self_mode_text: TextView
+    private var hasAttemptedAutoConnect = false
 
     private val connectionStatusReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             AppLog.i("HomeFragment received ${intent?.action}")
             updateProjectionButtonText()
+
+            if (intent?.action == ConnectedIntent.action) {
+                AppLog.i("HomeFragment: Connected broadcast received, launching projection")
+                val aapIntent = AapProjectionActivity.intent(requireContext()).apply {
+                    putExtra(AapProjectionActivity.EXTRA_FOCUS, true)
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                }
+                startActivity(aapIntent)
+            }
         }
     }
 
@@ -58,6 +71,73 @@ class HomeFragment : Fragment() {
 
         setupListeners()
         updateProjectionButtonText()
+
+        val appSettings = App.provide(requireContext()).settings
+
+        // 1. Priority: Auto-Connect last session (WiFi/USB)
+        if (appSettings.autoConnectLastSession && !hasAttemptedAutoConnect && !AapService.isConnected) {
+            hasAttemptedAutoConnect = true
+            attemptAutoConnect()
+        }
+
+        // 2. Priority: Auto-Start Self Mode
+        if (appSettings.autoStartSelfMode && !hasAutoStarted && !AapService.isConnected) {
+            hasAutoStarted = true
+            startSelfMode()
+        }
+    }
+
+    private fun startSelfMode() {
+        AapService.selfMode = true
+        AapService.isConnected = false
+        val intent = Intent(requireContext(), AapService::class.java)
+        intent.action = AapService.ACTION_START_SELF_MODE
+        requireContext().startService(intent)
+        AppLog.i("Auto start selfmode")
+        //Toast.makeText(requireContext(), "Starting Self Mode...", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun attemptAutoConnect() {
+        val appSettings = App.provide(requireContext()).settings
+
+        if (!appSettings.autoConnectLastSession ||
+            !appSettings.hasAcceptedDisclaimer ||
+            AapService.isConnected) {
+            return
+        }
+
+        val connectionType = appSettings.lastConnectionType
+        if (connectionType.isEmpty()) {
+            AppLog.i("Auto-connect: No last session to reconnect to")
+            return
+        }
+
+        when (connectionType) {
+            Settings.CONNECTION_TYPE_WIFI -> {
+                val ip = appSettings.lastConnectionIp
+                if (ip.isNotEmpty()) {
+                    AppLog.i("Auto-connect: Attempting WiFi connection to $ip")
+                    Toast.makeText(requireContext(), "Auto-connecting to $ip...", Toast.LENGTH_SHORT).show()
+                    requireContext().startService(AapService.createIntent(ip, requireContext()))
+                }
+            }
+            Settings.CONNECTION_TYPE_USB -> {
+                val lastUsbDevice = appSettings.lastConnectionUsbDevice
+                if (lastUsbDevice.isNotEmpty()) {
+                    val usbManager = requireContext().getSystemService(Context.USB_SERVICE) as UsbManager
+                    val matchingDevice = usbManager.deviceList.values.find { device ->
+                        UsbDeviceCompat.getUniqueName(device) == lastUsbDevice
+                    }
+                    if (matchingDevice != null && usbManager.hasPermission(matchingDevice)) {
+                        AppLog.i("Auto-connect: Attempting USB connection to $lastUsbDevice")
+                        Toast.makeText(requireContext(), "Auto-connecting to USB device...", Toast.LENGTH_SHORT).show()
+                        requireContext().startService(AapService.createIntent(matchingDevice, requireContext()))
+                    } else {
+                        AppLog.i("Auto-connect: USB device $lastUsbDevice not found or no permission")
+                    }
+                }
+            }
+        }
     }
 
     private fun setupListeners() {
@@ -75,12 +155,7 @@ class HomeFragment : Fragment() {
                 aapIntent.putExtra(AapProjectionActivity.EXTRA_FOCUS, true)
                 startActivity(aapIntent)
             } else {
-                AapService.selfMode = true
-                AapService.isConnected = false
-                val intent = Intent(requireContext(), AapService::class.java)
-                intent.action = AapService.ACTION_START_SELF_MODE
-                requireContext().startService(intent)
-                Toast.makeText(requireContext(), "Starting Self Mode...", Toast.LENGTH_SHORT).show()
+                startSelfMode()
             }
         }
 
@@ -107,6 +182,7 @@ class HomeFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+        AppLog.i("HomeFragment: onResume. isConnected=${AapService.isConnected}")
         val filter = IntentFilter().apply {
             addAction(ConnectedIntent.action)
             addAction(DisconnectIntent.action)
@@ -122,5 +198,12 @@ class HomeFragment : Fragment() {
     override fun onPause() {
         super.onPause()
         requireContext().unregisterReceiver(connectionStatusReceiver)
+    }
+
+    companion object {
+        private var hasAutoStarted = false
+        fun resetAutoStart() {
+            hasAutoStarted = false
+        }
     }
 }

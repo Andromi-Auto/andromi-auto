@@ -26,7 +26,6 @@ import com.andrerinas.headunitrevived.view.TextureProjectionView
 import com.andrerinas.headunitrevived.utils.Settings
 import com.andrerinas.headunitrevived.view.OverlayTouchView
 import com.andrerinas.headunitrevived.utils.HeadUnitScreenConfig
-import com.andrerinas.headunitrevived.aap.AapService
 import com.andrerinas.headunitrevived.utils.SystemUI
 
 class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, VideoDimensionsListener {
@@ -58,6 +57,14 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Lock orientation to current state
+        if (Build.VERSION.SDK_INT >= 18) {
+            requestedOrientation = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LOCKED
+        } else {
+            requestedOrientation = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_NOSENSOR
+        }
+
         setContentView(R.layout.activity_headunit)
 
         // Register disconnect receiver here to stay active even if activity is paused
@@ -162,12 +169,14 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
 
     override fun onSurfaceChanged(surface: android.view.Surface, width: Int, height: Int) {
         AppLog.i("[AapProjectionActivity] onSurfaceChanged. Actual surface dimensions: width=$width, height=$height")
-        videoDecoder.setSurface(surface)
+        
+        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+            AppLog.i("Delayed setting surface to decoder")
+            videoDecoder.setSurface(surface)
 
-        // Force keyframe by toggling focus, prevent quit on resulting stop request
-        transport.ignoreNextStopRequest = true
-        transport.send(VideoFocusEvent(gain = false, unsolicited = true))
-        transport.send(VideoFocusEvent(gain = true, unsolicited = true))
+            // Simply request focus to ensure stream is active
+            transport.send(VideoFocusEvent(gain = true, unsolicited = false))
+        }, 750)
 
         // Explicitly check and set video dimensions if already known by the decoder
         // This handles cases where the activity is recreated but the decoder already has dimensions
@@ -185,9 +194,8 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
 
     override fun onSurfaceDestroyed(surface: android.view.Surface) {
         AppLog.i("SurfaceCallback: onSurfaceDestroyed. Surface: $surface")
-//        transport.send(VideoFocusEvent(gain = false, unsolicited = false))
+        transport.send(VideoFocusEvent(gain = false, unsolicited = false))
         videoDecoder.stop("surfaceDestroyed")
-        videoDecoder.setSurface(null)
     }
 
     override fun onVideoDimensionsChanged(width: Int, height: Int) {
@@ -240,6 +248,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
 
     override fun onDestroy() {
         super.onDestroy()
+        AppLog.i("AapProjectionActivity.onDestroy called. isFinishing=$isFinishing")
         unregisterReceiver(disconnectReceiver)
         videoDecoder.dimensionsListener = null
 

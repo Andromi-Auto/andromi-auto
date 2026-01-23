@@ -39,6 +39,9 @@ enum AudioStreamType
     SYSTEM = 2;
     MEDIA = 3;
     ALARM = 4;
+    GUIDANCE = 5;
+    ANNOUNCEMENT = 6;
+    RING = 7;
 }
 
 message AudioConfiguration

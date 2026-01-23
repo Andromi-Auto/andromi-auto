@@ -10,11 +10,12 @@ import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.andrerinas.headunitrevived.R
 import com.andrerinas.headunitrevived.contract.KeyIntent
 import com.andrerinas.headunitrevived.utils.AppLog
@@ -22,60 +23,41 @@ import com.andrerinas.headunitrevived.utils.IntentFilters
 import com.andrerinas.headunitrevived.utils.Settings
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
-class KeymapFragment : Fragment(), MainActivity.KeyListener, View.OnClickListener {
+class KeymapFragment : Fragment(), MainActivity.KeyListener {
 
     private lateinit var toolbar: MaterialToolbar
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var keypressDebuggerTextView: TextView
+    private lateinit var adapter: KeymapAdapter
+    private lateinit var settings: Settings
     private val RESET_ITEM_ID = 1003
 
-    private val idToCode = mapOf(
-        R.id.keycode_soft_left to KeyEvent.KEYCODE_SOFT_LEFT,
-        R.id.keycode_soft_right to KeyEvent.KEYCODE_SOFT_RIGHT,
+    private var assignTargetCode = KeyEvent.KEYCODE_UNKNOWN
+    private var assignDialog: androidx.appcompat.app.AlertDialog? = null
 
-        R.id.keycode_dpad_up to KeyEvent.KEYCODE_DPAD_UP,
-        R.id.keycode_dpad_down to KeyEvent.KEYCODE_DPAD_DOWN,
-        R.id.keycode_dpad_left to KeyEvent.KEYCODE_DPAD_LEFT,
-        R.id.keycode_dpad_right to KeyEvent.KEYCODE_DPAD_RIGHT,
-        R.id.keycode_dpad_center to KeyEvent.KEYCODE_DPAD_CENTER,
+    data class KeymapItem(val nameResId: Int, val keyCode: Int)
 
-        R.id.keycode_media_play to KeyEvent.KEYCODE_MEDIA_PLAY,
-        R.id.keycode_media_pause to KeyEvent.KEYCODE_MEDIA_PAUSE,
-        R.id.keycode_media_play_pause to KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE,
-        R.id.keycode_media_next to KeyEvent.KEYCODE_MEDIA_NEXT,
-        R.id.keycode_media_previous to KeyEvent.KEYCODE_MEDIA_PREVIOUS,
-
-        R.id.keycode_search to KeyEvent.KEYCODE_SEARCH,
-        R.id.keycode_call to KeyEvent.KEYCODE_CALL,
-        R.id.keycode_music to KeyEvent.KEYCODE_MUSIC,
-        R.id.keycode_nav to KeyEvent.KEYCODE_GUIDE,
-        R.id.keycode_night to KeyEvent.KEYCODE_N)
-
-    private val codeToId = mapOf(
-        KeyEvent.KEYCODE_SOFT_LEFT to R.id.keycode_soft_left,
-        KeyEvent.KEYCODE_SOFT_RIGHT to R.id.keycode_soft_right,
-
-        KeyEvent.KEYCODE_DPAD_UP to R.id.keycode_dpad_up,
-        KeyEvent.KEYCODE_DPAD_DOWN to R.id.keycode_dpad_down,
-        KeyEvent.KEYCODE_DPAD_LEFT to R.id.keycode_dpad_left,
-        KeyEvent.KEYCODE_DPAD_RIGHT to R.id.keycode_dpad_right,
-        KeyEvent.KEYCODE_DPAD_CENTER to R.id.keycode_dpad_center,
-
-        KeyEvent.KEYCODE_MEDIA_PLAY to R.id.keycode_media_play,
-        KeyEvent.KEYCODE_MEDIA_PAUSE to R.id.keycode_media_pause,
-        KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE to R.id.keycode_media_play_pause,
-        KeyEvent.KEYCODE_MEDIA_NEXT to R.id.keycode_media_next,
-        KeyEvent.KEYCODE_MEDIA_PREVIOUS to R.id.keycode_media_previous,
-
-        KeyEvent.KEYCODE_SEARCH to R.id.keycode_search,
-        KeyEvent.KEYCODE_CALL to R.id.keycode_call,
-        KeyEvent.KEYCODE_MUSIC to R.id.keycode_music,
-        KeyEvent.KEYCODE_GUIDE to R.id.keycode_nav,
-        KeyEvent.KEYCODE_N to R.id.keycode_night)
-
-    private var assignCode = KeyEvent.KEYCODE_UNKNOWN
-    private lateinit var settings: Settings
-    private var codesMap = mutableMapOf<Int, Int>()
-    private lateinit var keypressDebuggerTextView: TextView
+    private val keyList = listOf(
+        KeymapItem(R.string.key_soft_left, KeyEvent.KEYCODE_SOFT_LEFT),
+        KeymapItem(R.string.key_soft_right, KeyEvent.KEYCODE_SOFT_RIGHT),
+        KeymapItem(R.string.key_dpad_up, KeyEvent.KEYCODE_DPAD_UP),
+        KeymapItem(R.string.key_dpad_down, KeyEvent.KEYCODE_DPAD_DOWN),
+        KeymapItem(R.string.key_dpad_left, KeyEvent.KEYCODE_DPAD_LEFT),
+        KeymapItem(R.string.key_dpad_right, KeyEvent.KEYCODE_DPAD_RIGHT),
+        KeymapItem(R.string.key_dpad_center, KeyEvent.KEYCODE_DPAD_CENTER),
+        KeymapItem(R.string.key_media_play, KeyEvent.KEYCODE_MEDIA_PLAY),
+        KeymapItem(R.string.key_media_pause, KeyEvent.KEYCODE_MEDIA_PAUSE),
+        KeymapItem(R.string.key_media_play_pause, KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE),
+        KeymapItem(R.string.key_media_next, KeyEvent.KEYCODE_MEDIA_NEXT),
+        KeymapItem(R.string.key_media_prev, KeyEvent.KEYCODE_MEDIA_PREVIOUS),
+        KeymapItem(R.string.key_search, KeyEvent.KEYCODE_SEARCH),
+        KeymapItem(R.string.key_call, KeyEvent.KEYCODE_CALL),
+        KeymapItem(R.string.key_music, KeyEvent.KEYCODE_MUSIC),
+        KeymapItem(R.string.key_nav, KeyEvent.KEYCODE_GUIDE),
+        KeymapItem(R.string.key_night, KeyEvent.KEYCODE_N)
+    )
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_keymap, container, false)
@@ -84,16 +66,17 @@ class KeymapFragment : Fragment(), MainActivity.KeyListener, View.OnClickListene
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
+        settings = Settings(requireContext())
+        
         keypressDebuggerTextView = view.findViewById(R.id.keypress_debugger_text)
         toolbar = view.findViewById(R.id.toolbar)
-        settings = Settings(requireContext())
-        codesMap = settings.keyCodes
-
-        idToCode.forEach { (resId, keyCode) ->
-            val button = view.findViewById<Button>(resId)
-            button.tag = keyCode
-            button.setOnClickListener(this)
+        recyclerView = view.findViewById(R.id.recycler_view)
+        
+        recyclerView.layoutManager = LinearLayoutManager(requireContext())
+        adapter = KeymapAdapter(keyList, settings.keyCodes) { item ->
+            showAssignDialog(item)
         }
+        recyclerView.adapter = adapter
 
         setupToolbar()
     }
@@ -109,10 +92,29 @@ class KeymapFragment : Fragment(), MainActivity.KeyListener, View.OnClickListene
         
         val resetButton = resetItem.actionView?.findViewById<MaterialButton>(R.id.reset_button_widget)
         resetButton?.setOnClickListener {
-            codesMap = mutableMapOf()
-            settings.keyCodes = codesMap
+            settings.keyCodes = mutableMapOf()
+            adapter.updateCodes(settings.keyCodes)
             Toast.makeText(requireContext(), "Key mappings reset", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun showAssignDialog(item: KeymapItem) {
+        assignTargetCode = item.keyCode
+        val name = getString(item.nameResId)
+        
+        assignDialog = MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
+            .setTitle(name)
+            .setMessage("Press a key to assign to '$name'...")
+            .setNegativeButton(R.string.cancel) { dialog, _ ->
+                assignTargetCode = KeyEvent.KEYCODE_UNKNOWN
+                dialog.dismiss()
+            }
+            .setOnDismissListener {
+                assignTargetCode = KeyEvent.KEYCODE_UNKNOWN
+                assignDialog = null
+            }
+            .create()
+        assignDialog?.show()
     }
 
     private val keyCodeReceiver = object : BroadcastReceiver() {
@@ -141,17 +143,8 @@ class KeymapFragment : Fragment(), MainActivity.KeyListener, View.OnClickListene
         context?.unregisterReceiver(keyCodeReceiver)
     }
 
-    override fun onClick(v: View?) {
-        val button = v as? Button ?: return
-        val keyCode = button.tag as Int
-        this.assignCode = keyCode
-        val name = KeyEvent.keyCodeToString(this.assignCode)
-        Toast.makeText(activity, "Press a key to assign to '$name'", Toast.LENGTH_SHORT).show()
-    }
-
     override fun onAttach(context: Context) {
         super.onAttach(context)
-
         (activity as? MainActivity)?.let {
             it.setDefaultKeyMode(Activity.DEFAULT_KEYS_DISABLE)
             it.keyListener = this
@@ -166,44 +159,74 @@ class KeymapFragment : Fragment(), MainActivity.KeyListener, View.OnClickListene
         super.onDetach()
     }
 
-
     override fun onKeyEvent(event: KeyEvent?): Boolean {
-        if (event == null) return false // Handle null event
+        if (event == null) return false
 
-        // debugging keys
         val keyCode = event.keyCode
         val keyName = KeyEvent.keyCodeToString(keyCode)
         keypressDebuggerTextView.text = "Last Key Press: $keyName ($keyCode)"
 
-        // skip assigning for key down and back buttons
         if (event.action == KeyEvent.ACTION_DOWN || keyCode == KeyEvent.KEYCODE_BACK) {
+            return true // Consume down events
+        }
+
+        if (assignTargetCode != KeyEvent.KEYCODE_UNKNOWN) {
+            val codesMap = settings.keyCodes
+            
+            // Map: Logical (AA) -> Physical (HW)
+            codesMap[assignTargetCode] = keyCode
+            
+            settings.keyCodes = codesMap
+            adapter.updateCodes(codesMap)
+            
+            val targetName = getString(keyList.find { it.keyCode == assignTargetCode }?.nameResId ?: R.string.keymap)
+            Toast.makeText(requireContext(), "'$keyName' assigned to '$targetName'", Toast.LENGTH_SHORT).show()
+            
+            assignDialog?.dismiss()
+            // assignTargetCode reset in dismiss listener
             return true
         }
-        if (this.assignCode != KeyEvent.KEYCODE_UNKNOWN)
-        {
-            // clear previous values
-            (codesMap.entries.find {
-                it.value == keyCode
-            })?.let {
-                codesMap.remove(it.key)
-            }
-            codesMap.put(this.assignCode, keyCode)
-            settings.keyCodes = codesMap
 
-            val name = KeyEvent.keyCodeToString(this.assignCode)
-            Toast.makeText(activity, "'$name' has been assigned to $keyName ($keyCode)", Toast.LENGTH_SHORT).show()
-            this.assignCode = KeyEvent.KEYCODE_UNKNOWN
-        }
-
-        buttonForKeyCode(event.keyCode)?.requestFocus()
-        return true
+        return false
     }
 
-    private fun buttonForKeyCode(keyCode: Int): Button? {
-        val mappedCode = (codesMap.entries.find {
-            it.value == keyCode
-        })?.key ?: keyCode
-        val resId = codeToId[mappedCode] ?: return null
-        return view?.findViewById(resId)
+    inner class KeymapAdapter(
+        private val items: List<KeymapItem>,
+        private var codesMap: Map<Int, Int>,
+        private val onClick: (KeymapItem) -> Unit
+    ) : RecyclerView.Adapter<KeymapAdapter.ViewHolder>() {
+
+        inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+            val nameText: TextView = view.findViewById(R.id.key_name)
+            val valueText: TextView = view.findViewById(R.id.key_value)
+        }
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+            val view = LayoutInflater.from(parent.context).inflate(R.layout.item_keymap, parent, false)
+            return ViewHolder(view)
+        }
+
+        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+            val item = items[position]
+            holder.nameText.text = getString(item.nameResId)
+            
+            // Map: Logical -> Physical
+            val physicalKey = codesMap[item.keyCode]
+            
+            if (physicalKey != null) {
+                holder.valueText.text = KeyEvent.keyCodeToString(physicalKey).replace("KEYCODE_", "")
+            } else {
+                holder.valueText.text = getString(R.string.not_set)
+            }
+
+            holder.itemView.setOnClickListener { onClick(item) }
+        }
+
+        override fun getItemCount() = items.size
+        
+        fun updateCodes(newMap: Map<Int, Int>) {
+            codesMap = newMap
+            notifyDataSetChanged()
+        }
     }
 }

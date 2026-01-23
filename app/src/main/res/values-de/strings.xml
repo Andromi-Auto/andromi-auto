@@ -1,0 +1,140 @@
+<resources>
+    <string name="app_name">Headunit Revived</string>
+    <string name="menu">Menü</string>
+    <string name="settings">Einstellungen</string>
+
+    <string name="title_activity_settings">Einstellungen</string>
+    <string name="dummy_button">Test Button</string>
+    <string name="dummy_content">DUMMY
+INHALT</string>
+    <string name="allowed">Erlaubt</string>
+    <string name="ignored">Ignoriert</string>
+    <string name="exit">Beenden</string>
+    <string name="video">Android Auto</string>
+    <string name="self_mode">Self Mode</string>
+    <string name="to_android_auto">Zu Android Auto</string>
+    <string name="title">Headunit Revived</string>
+    <string name="remove">Entfernen</string>
+    <string name="usb">USB</string>
+    <string name="wifi">WLAN</string>
+    <string name="dpi">Pixeldichte (DPI)</string>
+    <string name="mic_sample_rate">Mikrofon-Abtastrate</string>
+    <string name="keymap">Tastenbelegung</string>
+    <string name="night_mode">Nachtmodus</string>
+    <string name="bluetooth_address_s">Bluetooth Adresse</string>
+    <string name="enter_bluetooth_mac">Bluetooth MAC eingeben</string>
+    <string name="reset">Zurücksetzen</string>
+    <string name="gps_for_navigation">GPS für Navigation</string>
+    <string name="gps_for_navigation_description">Nutze Tablet-GPS für Navigation</string>
+    <string name="enabled">Aktiviert</string>
+    <string name="disabled">Deaktiviert</string>
+    <string name="resolution">Auflösung</string>
+    <string name="change_resolution">Auflösung ändern</string>
+    <string name="change_dpi">DPI ändern</string>
+    <string name="change_view_mode">View-Modus ändern</string>
+    <string name="view_mode">View-Modus</string>
+    <string name="surface_view">SurfaceView</string>
+    <string name="texture_view">TextureView</string>
+    <string name="gles_view">GLES20</string>
+    <string name="auto">Automatisch</string>
+    <string name="enter_dpi_value">DPI eingeben (0 für Auto)</string>
+    <string name="custom_margin">Benutzerdefinierte Ränder</string>
+    <string name="custom_margin_description">Ränder manuell setzen (0 für Auto)</string>
+    <string name="enter_custom_margins">Ränder eingeben (0 für Auto)</string>
+    <string name="margin_left">Links</string>
+    <string name="margin_top">Oben</string>
+    <string name="margin_right">Rechts</string>
+    <string name="margin_bottom">Unten</string>
+
+    <string name="start_in_fullscreen_mode">Im Vollbildmodus starten</string>
+    <string name="start_in_fullscreen_mode_description">Vollbildmodus umschalten. Neustart erforderlich.</string>
+
+    <string name="usb_status">USB Status: %s</string>
+    <string name="projection_status">Projektions-Status: %s</string>
+    <string name="connected">Verbunden</string>
+    <string name="disconnected">Getrennt</string>
+    <string name="running">Läuft</string>
+    <string name="not_running">Läuft nicht</string>
+    <string name="no_android_auto_device_connected">Kein Android AutoGerät verbunden. Bitte USB prüfen.</string>
+    <string name="no_usb_device_connected">Kein USB Gerät gefunden.</string>
+    <string name="press_back_again_to_exit">Erneut drücken zum Beenden</string>
+    <string name="back">Zurück</string>
+    <string name="debug_mode">Debug Modus</string>
+    <string name="debug_mode_description">Erweitertes Logging aktivieren</string>
+    <string name="export_logs">Logs exportieren</string>
+    <string name="export_logs_description">Logs speichern für Fehleranalyse</string>
+    <string name="use_native_ssl">Native SSL nutzen</string>
+    <string name="use_native_ssl_description">Nutze native OpenSSL Bibliothek (schneller auf alten Geräten). Neustart erforderlich.</string>
+    <string name="not_set">Nicht gesetzt</string>
+    <string name="keymap_description">Tastenbelegung für Headunit ändern</string>
+
+    <string name="key_soft_left">Soft Links</string>
+    <string name="key_soft_right">Soft Rechts</string>
+    <string name="key_dpad_up">D-Pad Hoch</string>
+    <string name="key_dpad_down">D-Pad Runter</string>
+    <string name="key_dpad_left">D-Pad Links</string>
+    <string name="key_dpad_right">D-Pad Rechts</string>
+    <string name="key_dpad_center">D-Pad OK</string>
+    <string name="key_media_play">Medien Wiedergabe</string>
+    <string name="key_media_pause">Medien Pause</string>
+    <string name="key_media_play_pause">Medien Play/Pause</string>
+    <string name="key_media_next">Nächster Titel</string>
+    <string name="key_media_prev">Vorheriger Titel</string>
+    <string name="key_search">Sprachbefehl</string>
+    <string name="key_call">Telefon</string>
+    <string name="key_music">Musik</string>
+    <string name="key_nav">Navigation</string>
+    <string name="key_night">Nachtmodus umschalten</string>
+
+    <!-- Categories for SettingsFragment -->
+    <string name="category_general">Allgemein</string>
+    <string name="auto_start_self_mode">Auto-Start Self-Mode</string>
+    <string name="auto_start_self_mode_description">Startet den Self-Mode automatisch beim Öffnen der App.</string>
+    <string name="right_hand_drive">Rechtslenker</string>
+    <string name="right_hand_drive_description">Benutzeroberfläche für Rechtsverkehr ausrichten</string>
+    <string name="category_graphic">Grafik</string>
+    <string name="category_debug">Debug</string>
+
+    <!-- Video Settings -->
+    <string name="category_video">Video</string>
+    <string name="force_software_decoding">Software-Decoding erzwingen</string>
+    <string name="force_software_decoding_description">Kann Probleme auf manchen Geräten beheben, verbraucht aber mehr Leistung.</string>
+    <string name="wifi_launcher_mode">Wireless Headunit Server</string>
+    <string name="wifi_launcher_mode_description">Erlaubt dem Handy sich zu verbinden (erfordert Wireless Launcher App auf dem Handy)</string>
+    <string name="auto_connect_last_session">Autom. Verbindung zur letzten Sitzung</string>
+    <string name="auto_connect_last_session_description">Verbindet beim Start automatisch mit dem zuletzt genutzten Gerät</string>
+    <string name="video_codec">Video Codec</string>
+    <string name="fps_limit">FPS Limit</string>
+    <string name="save">Speichern</string>
+    <string name="save_and_restart">Speichern (Neustart)</string>
+    <string name="add_new">Hinzufügen</string>
+    <string name="cancel">Abbrechen</string>
+
+    <!-- Audio Settings -->
+    <string name="category_audio">Audio</string>
+    <string name="enable_audio_sink">Audioausgabe aktivieren</string>
+    <string name="enable_audio_sink_description">Wenn deaktiviert, spielt die Headunit keinen Ton. Audio läuft über das Handy/Bluetooth.</string>
+    <string name="use_aac_audio">AAC Audio nutzen</string>
+    <string name="use_aac_audio_description">AAC Codec nutzen um Bandbreite zu sparen (Experimentell).</string>
+
+    <!-- Info Settings -->
+    <string name="category_info">Info</string>
+    <string name="about">Über &amp; Support</string>
+    <string name="about_description">Mehr Informationen über Headunit Revived</string>
+    <string name="version">Version</string>
+    <string name="about_title">Über Headunit Revived</string>
+    <string name="copyright">© 2025-%d André Rinas</string>
+
+    <!-- Safety Disclaimer -->
+    <string name="disclaimer_title">Sicherheit &amp; Haftung</string>
+    <string name="disclaimer_header">Wichtige Warnung</string>
+    <string name="disclaimer_accept">Ich verstehe und akzeptiere</string>
+    <string name="disclaimer_text"><![CDATA[
+        <b>1. Auf die Straße achten</b><br/>
+        Die Bedienung dieser Software während der Fahrt kann ablenken und gefährlich sein. Priorisieren Sie stets die sichere Fahrt und beachten Sie alle Verkehrsregeln. Nutzen Sie diese Anwendung nur, wenn es sicher ist.<br/><br/>
+        <b>2. Haftungsausschluss</b><br/>
+        Headunit Revived wird "wie besehen" ohne jegliche Gewährleistung bereitgestellt. Die Entwickler übernehmen keine Haftung für Unfälle, Schäden am Fahrzeug/Gerät oder rechtliche Konsequenzen, die aus der Nutzung dieser Software entstehen.<br/><br/>
+        <b>3. Keine Zugehörigkeit</b><br/>
+        Dieses Projekt ist eine unabhängige Open-Source-Initiative und steht in keiner Verbindung zu Google LLC oder der Marke Android Auto.
+    ]]></string>
+</resources>

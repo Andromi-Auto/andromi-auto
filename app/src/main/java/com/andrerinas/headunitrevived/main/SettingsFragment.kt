@@ -7,7 +7,6 @@ import android.text.InputType
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
@@ -42,8 +41,9 @@ class SettingsFragment : Fragment() {
     private var pendingFullscreen: Boolean? = null
     private var pendingViewMode: Settings.ViewMode? = null
     private var pendingForceSoftware: Boolean? = null
-    private var pendingLegacyDecoder: Boolean? = null
+    private var pendingRightHandDrive: Boolean? = null
     private var pendingWifiLauncherMode: Boolean? = null
+    private var pendingAutoConnectLastSession: Boolean? = null
     private var pendingVideoCodec: String? = null
     private var pendingFpsLimit: Int? = null
     private var pendingDebugMode: Boolean? = null
@@ -51,6 +51,7 @@ class SettingsFragment : Fragment() {
     private var pendingEnableAudioSink: Boolean? = null
     private var pendingUseAacAudio: Boolean? = null
     private var pendingUseNativeSsl: Boolean? = null
+    private var pendingAutoStartSelfMode: Boolean? = null
 
     private var requiresRestart = false
     private var hasChanges = false
@@ -74,8 +75,9 @@ class SettingsFragment : Fragment() {
         pendingFullscreen = settings.startInFullscreenMode
         pendingViewMode = settings.viewMode
         pendingForceSoftware = settings.forceSoftwareDecoding
-        pendingLegacyDecoder = settings.forceLegacyDecoder
+        pendingRightHandDrive = settings.rightHandDrive
         pendingWifiLauncherMode = settings.wifiLauncherMode
+        pendingAutoConnectLastSession = settings.autoConnectLastSession
         pendingVideoCodec = settings.videoCodec
         pendingFpsLimit = settings.fpsLimit
         pendingDebugMode = settings.debugMode
@@ -83,6 +85,7 @@ class SettingsFragment : Fragment() {
         pendingEnableAudioSink = settings.enableAudioSink
         pendingUseAacAudio = settings.useAacAudio
         pendingUseNativeSsl = settings.useNativeSsl
+        pendingAutoStartSelfMode = settings.autoStartSelfMode
 
         // Intercept system back button
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
@@ -149,7 +152,7 @@ class SettingsFragment : Fragment() {
         pendingFullscreen?.let { settings.startInFullscreenMode = it }
         pendingViewMode?.let { settings.viewMode = it }
         pendingForceSoftware?.let { settings.forceSoftwareDecoding = it }
-        pendingLegacyDecoder?.let { settings.forceLegacyDecoder = it }
+        pendingRightHandDrive?.let { settings.rightHandDrive = it }
         pendingVideoCodec?.let { settings.videoCodec = it }
         pendingFpsLimit?.let { settings.fpsLimit = it }
         pendingDebugMode?.let { settings.debugMode = it }
@@ -157,6 +160,7 @@ class SettingsFragment : Fragment() {
         pendingEnableAudioSink?.let { settings.enableAudioSink = it }
         pendingUseAacAudio?.let { settings.useAacAudio = it }
         pendingUseNativeSsl?.let { settings.useNativeSsl = it }
+        pendingAutoStartSelfMode?.let { settings.autoStartSelfMode = it }
 
         pendingWifiLauncherMode?.let { enabled ->
             settings.wifiLauncherMode = enabled
@@ -165,6 +169,8 @@ class SettingsFragment : Fragment() {
             }
             requireContext().startService(intent)
         }
+
+        pendingAutoConnectLastSession?.let { settings.autoConnectLastSession = it }
 
         if (requiresRestart) {
             if (AapService.isConnected) {
@@ -194,15 +200,17 @@ class SettingsFragment : Fragment() {
                         pendingFullscreen != settings.startInFullscreenMode ||
                         pendingViewMode != settings.viewMode ||
                         pendingForceSoftware != settings.forceSoftwareDecoding ||
-                        pendingLegacyDecoder != settings.forceLegacyDecoder ||
+                        pendingRightHandDrive != settings.rightHandDrive ||
                         pendingWifiLauncherMode != settings.wifiLauncherMode ||
+                        pendingAutoConnectLastSession != settings.autoConnectLastSession ||
                         pendingVideoCodec != settings.videoCodec ||
                         pendingFpsLimit != settings.fpsLimit ||
                         pendingDebugMode != settings.debugMode ||
                         pendingBluetoothAddress != settings.bluetoothAddress ||
                         pendingEnableAudioSink != settings.enableAudioSink ||
                         pendingUseAacAudio != settings.useAacAudio ||
-                        pendingUseNativeSsl != settings.useNativeSsl
+                        pendingUseNativeSsl != settings.useNativeSsl ||
+                        pendingAutoStartSelfMode != settings.autoStartSelfMode
 
         hasChanges = anyChange
 
@@ -212,7 +220,7 @@ class SettingsFragment : Fragment() {
                           pendingFpsLimit != settings.fpsLimit ||
                           pendingDpi != settings.dpiPixelDensity ||
                           pendingForceSoftware != settings.forceSoftwareDecoding ||
-                          pendingLegacyDecoder != settings.forceLegacyDecoder ||
+                          pendingRightHandDrive != settings.rightHandDrive ||
                           pendingEnableAudioSink != settings.enableAudioSink ||
                           pendingUseAacAudio != settings.useAacAudio ||
                           pendingUseNativeSsl != settings.useNativeSsl
@@ -288,12 +296,48 @@ class SettingsFragment : Fragment() {
         ))
 
         items.add(SettingItem.ToggleSettingEntry(
+            stableId = "rightHandDrive",
+            nameResId = R.string.right_hand_drive,
+            descriptionResId = R.string.right_hand_drive_description,
+            isChecked = pendingRightHandDrive!!,
+            onCheckedChanged = { isChecked ->
+                pendingRightHandDrive = isChecked
+                checkChanges()
+                updateSettingsList()
+            }
+        ))
+
+        items.add(SettingItem.ToggleSettingEntry(
             stableId = "wifiLauncherMode",
             nameResId = R.string.wifi_launcher_mode,
             descriptionResId = R.string.wifi_launcher_mode_description,
             isChecked = pendingWifiLauncherMode!!,
             onCheckedChanged = { isChecked ->
                 pendingWifiLauncherMode = isChecked
+                checkChanges()
+                updateSettingsList()
+            }
+        ))
+
+        items.add(SettingItem.ToggleSettingEntry(
+            stableId = "autoStartSelfMode",
+            nameResId = R.string.auto_start_self_mode,
+            descriptionResId = R.string.auto_start_self_mode_description,
+            isChecked = pendingAutoStartSelfMode!!,
+            onCheckedChanged = { isChecked ->
+                pendingAutoStartSelfMode = isChecked
+                checkChanges()
+                updateSettingsList()
+            }
+        ))
+
+        items.add(SettingItem.ToggleSettingEntry(
+            stableId = "autoConnectLastSession",
+            nameResId = R.string.auto_connect_last_session,
+            descriptionResId = R.string.auto_connect_last_session_description,
+            isChecked = pendingAutoConnectLastSession!!,
+            onCheckedChanged = { isChecked ->
+                pendingAutoConnectLastSession = isChecked
                 checkChanges()
                 updateSettingsList()
             }
@@ -397,18 +441,6 @@ class SettingsFragment : Fragment() {
             isChecked = pendingForceSoftware!!,
             onCheckedChanged = { isChecked ->
                 pendingForceSoftware = isChecked
-                checkChanges()
-                updateSettingsList()
-            }
-        ))
-
-        items.add(SettingItem.ToggleSettingEntry(
-            stableId = "forceLegacyDecoder",
-            nameResId = R.string.force_legacy_decoder,
-            descriptionResId = R.string.force_legacy_decoder_description,
-            isChecked = pendingLegacyDecoder!!,
-            onCheckedChanged = { isChecked ->
-                pendingLegacyDecoder = isChecked
                 checkChanges()
                 updateSettingsList()
             }
