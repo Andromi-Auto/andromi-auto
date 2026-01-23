@@ -2,6 +2,7 @@ package com.andrerinas.headunitrevived.aap
 
 import com.andrerinas.headunitrevived.aap.protocol.messages.Messages
 import com.andrerinas.headunitrevived.connection.AccessoryConnection
+import com.andrerinas.headunitrevived.ssl.ConscryptInitializer
 import com.andrerinas.headunitrevived.ssl.NoCheckTrustManager
 import com.andrerinas.headunitrevived.ssl.SingleKeyKeyManager
 import com.andrerinas.headunitrevived.utils.AppLog
@@ -10,13 +11,8 @@ import javax.net.ssl.SSLContext
 import javax.net.ssl.SSLEngine
 import javax.net.ssl.SSLEngineResult
 
-class AapSslContext(keyManger: SingleKeyKeyManager): AapSsl {
-    private val sslContext: SSLContext = SSLContext.getInstance("TLS").apply {
-        init(arrayOf(keyManger), arrayOf(NoCheckTrustManager()), null)
-        // Disable session caching to prevent stale states across connection attempts
-        clientSessionContext.sessionCacheSize = 0
-        clientSessionContext.sessionTimeout = 1
-    }
+class AapSslContext(keyManager: SingleKeyKeyManager): AapSsl {
+    private val sslContext: SSLContext = createSslContext(keyManager)
     private lateinit var sslEngine: SSLEngine
     private lateinit var txBuffer: ByteBuffer
     private lateinit var rxBuffer: ByteBuffer
@@ -168,6 +164,32 @@ class AapSslContext(keyManger: SingleKeyKeyManager): AapSsl {
             val hsStatus = engine.handshakeStatus
             if (hsStatus === SSLEngineResult.HandshakeStatus.NEED_TASK) {
                 throw Exception("handshake shouldn't need additional tasks")
+            }
+        }
+    }
+
+    companion object {
+        private fun createSslContext(keyManager: SingleKeyKeyManager): SSLContext {
+            val providerName = ConscryptInitializer.getProviderName()
+
+            val sslContext = if (providerName != null) {
+                try {
+                    AppLog.d("Creating SSLContext with Conscrypt provider")
+                    SSLContext.getInstance("TLS", providerName)
+                } catch (e: Exception) {
+                    AppLog.w("Failed to create SSLContext with Conscrypt, using default", e)
+                    SSLContext.getInstance("TLS")
+                }
+            } else {
+                AppLog.d("Creating SSLContext with default provider")
+                SSLContext.getInstance("TLS")
+            }
+
+            return sslContext.apply {
+                init(arrayOf(keyManager), arrayOf(NoCheckTrustManager()), null)
+                // Disable session caching to prevent stale states across connection attempts
+                clientSessionContext.sessionCacheSize = 0
+                clientSessionContext.sessionTimeout = 1
             }
         }
     }
