@@ -7,6 +7,7 @@ import android.content.Context
 import android.os.Build
 import androidx.multidex.MultiDex
 import com.andrerinas.headunitrevived.main.BackgroundNotification
+import com.andrerinas.headunitrevived.ssl.ConscryptInitializer
 import com.andrerinas.headunitrevived.utils.AppLog
 import com.andrerinas.headunitrevived.utils.Settings
 import java.io.File
@@ -25,8 +26,17 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
 
+        ConscryptInitializer.initialize()
+
         val settings = Settings(this) // Create a Settings instance
         AppLog.init(settings) // Initialize AppLog with settings for conditional logging
+
+        if (ConscryptInitializer.isAvailable()) {
+            AppLog.i("Conscrypt security provider is active")
+        } else if (ConscryptInitializer.isNeededForTls12()) {
+            AppLog.w("Conscrypt not available - TLS 1.2 may not work on this device")
+        }
+
         AppLog.d( "native library dir ${applicationInfo.nativeLibraryDir}")
 
         File(applicationInfo.nativeLibraryDir).listFiles()?.forEach { file ->
