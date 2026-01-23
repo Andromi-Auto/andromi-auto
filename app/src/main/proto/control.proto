@@ -234,6 +234,10 @@ message ServiceDiscoveryResponse
     required string head_unit_software_version = 10;
     required bool can_play_native_media_during_vr = 11;
     optional bool hide_projected_clock = 12;
+    optional int32 session_configuration = 13;
+    optional string display_name = 14;
+    optional bool probe_for_support = 15;
+    optional HeadUnitInfo headunit_info = 17;
 }
 
 message ChannelOpenRequest

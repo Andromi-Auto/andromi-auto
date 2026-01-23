@@ -35,7 +35,7 @@ class HomeFragment : Fragment() {
             AppLog.i("HomeFragment received ${intent?.action}")
             updateProjectionButtonText()
 
-            if (intent?.action == com.andrerinas.headunitrevived.contract.ConnectedIntent.action) {
+            if (intent?.action == ConnectedIntent.action) {
                 AppLog.i("HomeFragment: Connected broadcast received, launching projection")
                 val aapIntent = AapProjectionActivity.intent(requireContext()).apply {
                     putExtra(AapProjectionActivity.EXTRA_FOCUS, true)
@@ -127,15 +127,6 @@ class HomeFragment : Fragment() {
             requireContext().registerReceiver(connectionStatusReceiver, filter)
         }
         updateProjectionButtonText()
-
-        if (AapService.isConnected) {
-            AppLog.i("HomeFragment onResume: Connected, launching projection")
-            val aapIntent = AapProjectionActivity.intent(requireContext()).apply {
-                putExtra(AapProjectionActivity.EXTRA_FOCUS, true)
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-            }
-            startActivity(aapIntent)
-        }
     }
 
     override fun onPause() {

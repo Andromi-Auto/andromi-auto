@@ -35,264 +35,141 @@ class AudioTrackWrapper(
     private var isRunning = true
 
     init {
-
         this.name = "AudioPlaybackThread"
         audioTrack = createAudioTrack(stream, sampleRateInHz, bitDepth, channelCount)
-
         audioTrack.play()
 
-
-
         if (isAac) {
-
             initDecoder(sampleRateInHz, channelCount)
-
         }
 
-
-
         this.start()
-
     }
 
-
     private fun initDecoder(sampleRate: Int, channels: Int) {
-
         try {
-
             val mime = "audio/mp4a-latm"
-
             val format = MediaFormat.createAudioFormat(mime, sampleRate, channels)
-
             format.setInteger(
                 MediaFormat.KEY_AAC_PROFILE,
                 MediaCodecInfo.CodecProfileLevel.AACObjectLC
             )
-
             format.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, 16384)
 
-
             // CSD enabled for RAW AAC (MEDIA_CODEC_AUDIO_AAC_LC)
-
             val csd = makeAacCsd(sampleRate, channels)
-
             format.setByteBuffer("csd-0", java.nio.ByteBuffer.wrap(csd))
-
-
 
             decoder = MediaCodec.createDecoderByType(mime)
 
-
-
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-
                 codecHandlerThread = HandlerThread("AacCodecThread")
-
                 codecHandlerThread!!.start()
 
                 val callback = object : MediaCodec.Callback() {
-
                     override fun onInputBufferAvailable(codec: MediaCodec, index: Int) {
-
                         freeInputBuffers.offer(index)
-
                     }
-
 
                     override fun onOutputBufferAvailable(
                         codec: MediaCodec,
                         index: Int,
                         info: MediaCodec.BufferInfo
                     ) {
-
                         try {
-
                             val outputBuffer = codec.getOutputBuffer(index)
-
                             if (outputBuffer != null) {
-
                                 val chunk = ByteArray(info.size)
-
                                 outputBuffer.position(info.offset)
-
                                 outputBuffer.get(chunk)
-
                                 outputBuffer.clear()
 
-
                                 // Write to AudioTrack using executor
-
-
                                 writeExecutor.submit {
-
-
                                     if (isRunning) {
-
-
                                         audioTrack.write(chunk, 0, chunk.size)
-
-
                                     }
-
-
                                 }
-
                             }
-
                             codec.releaseOutputBuffer(index, false)
-
                         } catch (e: Exception) {
-
                             AppLog.e("Error processing AAC output", e)
-
                         }
-
                     }
-
 
                     override fun onError(codec: MediaCodec, e: MediaCodec.CodecException) {
-
                         AppLog.e("AAC Codec Error", e)
-
                     }
-
 
                     override fun onOutputFormatChanged(codec: MediaCodec, format: MediaFormat) {
-
                         AppLog.i("AAC Output Format Changed: $format")
-
                     }
-
                 }
-
-
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-
                     val handler = Handler(codecHandlerThread!!.looper)
-
                     decoder!!.setCallback(callback, handler)
-
                 } else {
-
                     decoder!!.setCallback(callback)
-
                 }
-
             }
-
-
 
             decoder?.configure(format, null, null, 0)
-
             decoder?.start()
-
             AppLog.i("AAC Decoder started for $sampleRate Hz, $channels channels with is-adts (Async)")
-
         } catch (e: Exception) {
-
             AppLog.e("Failed to init AAC decoder", e)
-
         }
-
     }
-
 
     override fun run() {
-
         Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_AUDIO)
 
-
-
         while (isRunning) {
-
             try {
-
                 val buffer = dataQueue.take()
-
                 if (isRunning) {
-
                     if (isAac && decoder != null) {
-
                         queueInput(buffer)
-
                     } else {
-
                         // PCM path - direct write in this high-priority thread
-
                         audioTrack.write(buffer, 0, buffer.size)
-
                     }
-
                 }
-
             } catch (e: InterruptedException) {
-
                 break
-
             } catch (e: Exception) {
-
                 AppLog.e("Error in AudioTrackWrapper run loop", e)
-
                 isRunning = false
-
             }
-
         }
-
         cleanup()
-
         AppLog.i("AudioTrackWrapper thread finished.")
-
     }
-
 
     private fun queueInput(inputData: ByteArray) {
-
         try {
-
             // Wait for input buffer (with timeout to avoid deadlock if codec dies)
-
             val inputIndex = freeInputBuffers.poll(200, TimeUnit.MILLISECONDS)
 
-
-
             if (inputIndex != null && inputIndex >= 0) {
-
                 val inputBuffer = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-
                     decoder?.getInputBuffer(inputIndex)
-
                 } else {
-
                     @Suppress("DEPRECATION")
-
                     decoder?.inputBuffers?.get(inputIndex)
-
                 }
 
-
-
                 inputBuffer?.clear()
-
                 inputBuffer?.put(inputData)
-
                 decoder?.queueInputBuffer(inputIndex, 0, inputData.size, 0, 0)
-
             } else {
-
                 AppLog.w("AAC Input Buffer timeout - dropping frame")
-
             }
-
         } catch (e: Exception) {
-
             AppLog.e("Error queuing AAC input", e)
-
         }
-
     }
-
 
     private fun makeAacCsd(sampleRate: Int, channelCount: Int): ByteArray {
         val sampleRateIndex = getFrequencyIndex(sampleRate)

@@ -71,9 +71,3 @@ class ProjectionActivityRequest: Intent(action) {
         const val action = "${HeadUnit.packageName}.ACTION_REQUEST_PROJECTION"
     }
 }
-
-class VideoReadyIntent: Intent(action) {
-    companion object {
-        const val action = "${HeadUnit.packageName}.ACTION_VIDEO_READY"
-    }
-}
