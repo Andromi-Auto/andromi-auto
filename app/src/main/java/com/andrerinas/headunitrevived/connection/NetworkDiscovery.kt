@@ -14,7 +14,8 @@ import kotlinx.coroutines.withContext
 import java.net.Inet4Address
 import java.net.InetSocketAddress
 import java.net.Socket
-
+import java.net.NetworkInterface
+import java.util.Collections
 class NetworkDiscovery(private val context: Context, private val listener: Listener) {
 
     interface Listener {
@@ -73,22 +74,29 @@ class NetworkDiscovery(private val context: Context, private val listener: Liste
 
     private fun getSubnet(): String? {
         val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        
+
         var linkProperties: LinkProperties? = null
-        
+
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
             val network = connectivityManager.activeNetwork
             if (network != null) {
                 linkProperties = connectivityManager.getLinkProperties(network)
             }
         }
-        
+
         // Fallback or lower API logic could be added if needed, but activeNetwork usually works for WiFi.
         // If linkProperties is null, we might be on Ethernet or old API.
-        
+
         if (linkProperties == null) {
-             // Try getting all networks? Or just return null for now.
-             return null
+            // Try getting all networks? Or just return null for now.
+            val interfaces = Collections.list(NetworkInterface.getNetworkInterfaces())
+            for (networkInterface in interfaces) {
+                // Standard Android P2P interface names
+                if (networkInterface.name.contains("p2p")) {
+                    return "192.168.49"
+                }
+            }
+            return null
         }
 
         for (linkAddress in linkProperties.linkAddresses) {
@@ -104,7 +112,7 @@ class NetworkDiscovery(private val context: Context, private val listener: Liste
         }
         return null
     }
-    
+
     fun stop() {
         // Nothing to stop really, coroutines will finish or timeout.
         isScanning = false
