@@ -296,10 +296,14 @@ class AapService : Service(), UsbReceiver.Listener {
     }
 
     private suspend fun onConnectionResult(success: Boolean) {
-        if (success && accessoryConnection != null) {
+        val connection = accessoryConnection ?: run {
+            AppLog.w("onConnectionResult: accessoryConnection cleared before transport start")
+            return
+        }
+        if (success) {
             reset()
             val transportStarted = withContext(Dispatchers.IO) {
-                transport.start(accessoryConnection!!)
+                transport.start(connection)
             }
 
             if (transportStarted) {
