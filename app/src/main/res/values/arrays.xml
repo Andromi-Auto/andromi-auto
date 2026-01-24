@@ -8,4 +8,13 @@
         <item>None</item>
     </string-array>
 
+    <string-array name="screen_orientation">
+        <item>System Default</item>
+        <item>Auto (Sensor)</item>
+        <item>Landscape (0°)</item>
+        <item>Landscape Reverse (180°)</item>
+        <item>Portrait (90°)</item>
+        <item>Portrait Reverse (270°)</item>
+    </string-array>
+
 </resources>
