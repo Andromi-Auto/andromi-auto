@@ -14,7 +14,11 @@ internal class AapReadSingleMessage(connection: AccessoryConnection, ssl: AapSsl
         // Step 1: Read the encrypted header
         val headerSize = connection.recvBlocking(recvHeader.buf, recvHeader.buf.size, 5000, true) // Increased timeout
         if (headerSize != AapMessageIncoming.EncryptedHeader.SIZE) {
-            AppLog.e("AapRead: Failed to read full header. Expected ${AapMessageIncoming.EncryptedHeader.SIZE}, got $headerSize. Disconnecting.")
+            if (headerSize == -1) {
+                AppLog.i("AapRead: Connection closed (EOF). Disconnecting.")
+            } else {
+                AppLog.e("AapRead: Failed to read full header. Expected ${AapMessageIncoming.EncryptedHeader.SIZE}, got $headerSize. Disconnecting.")
+            }
             return -1
         }
 

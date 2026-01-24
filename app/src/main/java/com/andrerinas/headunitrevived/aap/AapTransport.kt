@@ -299,7 +299,7 @@ class AapTransport(
 
     fun send(message: AapMessage) {
         if (sendHandler == null) {
-            AppLog.e("Handler is null")
+            AppLog.i("Cannot send message, handler is null (quitting?)")
         } else {
             if (AppLog.LOG_VERBOSE) {
                 AppLog.v(message.toString())
