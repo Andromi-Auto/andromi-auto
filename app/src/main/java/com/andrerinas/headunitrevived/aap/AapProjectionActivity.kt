@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.os.SystemClock
 import android.view.KeyEvent
 import android.view.MotionEvent
+import android.view.TextureView
 import android.view.View
 import android.widget.FrameLayout
 import com.andrerinas.headunitrevived.App
@@ -51,6 +52,14 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
             } else {
                 AppLog.e("Watchdog: TextureView NOT available. Vis=${tv.visibility}, W=${tv.width}, H=${tv.height}")
             }
+        } else if (projectionView is com.andrerinas.headunitrevived.view.GlProjectionView) {
+             val gles = projectionView as com.andrerinas.headunitrevived.view.GlProjectionView
+             if (gles.isSurfaceValid()) {
+                 AppLog.w("Watchdog: GlProjectionView IS valid. Forcing onSurfaceChanged.")
+                 onSurfaceChanged(gles.getSurface()!!, gles.width, gles.height)
+             } else {
+                 AppLog.e("Watchdog: GlProjectionView NOT valid.")
+             }
         } else if (projectionView is ProjectionView) {
              val sv = projectionView as ProjectionView
              if (sv.holder.surface.isValid) {

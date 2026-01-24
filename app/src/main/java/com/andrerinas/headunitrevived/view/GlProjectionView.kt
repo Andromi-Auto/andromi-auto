@@ -43,6 +43,9 @@ class GlProjectionView(context: Context) : GLSurfaceView(context), IProjectionVi
         callbacks.remove(callback)
     }
 
+    fun getSurface(): Surface? = renderer.getSurface()
+    fun isSurfaceValid(): Boolean = renderer.getSurface()?.isValid == true
+
     override fun setVideoSize(width: Int, height: Int) {
         AppLog.i("GlProjectionView setVideoSize: ${width}x$height")
         renderer.updateBufferSize(width, height)
