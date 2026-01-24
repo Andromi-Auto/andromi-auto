@@ -66,7 +66,8 @@ class AapTransport(
     private val keyCodes = settings.keyCodes.entries.associateTo(mutableMapOf()) {
         it.value to it.key
     }
-    private val modeManager: UiModeManager =  context.getSystemService(UI_MODE_SERVICE) as UiModeManager
+    private val modeManager: UiModeManager =
+        context.getSystemService(UI_MODE_SERVICE) as UiModeManager
     private var connection: AccessoryConnection? = null
     private var aapRead: AapRead? = null
     var isQuittingAllowed: Boolean = false
@@ -78,8 +79,7 @@ class AapTransport(
             return@Callback false
         }
         pollHandler?.let {
-            if (!it.hasMessages(MSG_POLL))
-            {
+            if (!it.hasMessages(MSG_POLL)) {
                 it.sendEmptyMessage(MSG_POLL)
             }
         }
@@ -93,8 +93,8 @@ class AapTransport(
     private var sendHandler: Handler? = null
     private val sendHandlerCallback = Handler.Callback {
         this.sendEncryptedMessage(
-                data = it.obj as ByteArray,
-                length = it.arg2
+            data = it.obj as ByteArray,
+            length = it.arg2
         )
         return@Callback true
     }
@@ -116,7 +116,8 @@ class AapTransport(
     }
 
     private fun sendEncryptedMessage(data: ByteArray, length: Int): Int {
-        val ba = ssl.encrypt(AapMessage.HEADER_SIZE, length - AapMessage.HEADER_SIZE, data) ?: return -1
+        val ba =
+            ssl.encrypt(AapMessage.HEADER_SIZE, length - AapMessage.HEADER_SIZE, data) ?: return -1
 
         ba.data[0] = data[0]
         ba.data[1] = data[1]
@@ -135,7 +136,8 @@ class AapTransport(
         val byebye = Control.ByeByeRequest.newBuilder()
             .setReason(Control.ByeByeReason.USER_SELECTION)
             .build()
-        val msg = AapMessage(Channel.ID_CTR, Control.ControlMsgType.MESSAGE_BYEBYE_REQUEST_VALUE, byebye)
+        val msg =
+            AapMessage(Channel.ID_CTR, Control.ControlMsgType.MESSAGE_BYEBYE_REQUEST_VALUE, byebye)
         send(msg)
         SystemClock.sleep(150)
         quit()
@@ -175,7 +177,16 @@ class AapTransport(
             return false
         }
 
-        aapRead = AapRead.Factory.create(connection, this, micRecorder, aapAudio, aapVideo, settings, notification, context)
+        aapRead = AapRead.Factory.create(
+            connection,
+            this,
+            micRecorder,
+            aapAudio,
+            aapVideo,
+            settings,
+            notification,
+            context
+        )
         pollHandler!!.sendEmptyMessage(MSG_POLL)
 
         return true
@@ -248,6 +259,7 @@ class AapTransport(
             return false
         }
     }
+
     fun send(keyCode: Int, isPress: Boolean) {
         val mapped = keyCodes[keyCode] ?: keyCode
         val aapKeyCode = KeyCode.convert(mapped)
@@ -263,7 +275,8 @@ class AapTransport(
         if (mapped == KeyEvent.KEYCODE_N) {
             val enabled = modeManager.nightMode != UiModeManager.MODE_NIGHT_YES
             send(NightModeEvent(enabled))
-            modeManager.nightMode = if (enabled) UiModeManager.MODE_NIGHT_YES else UiModeManager.MODE_NIGHT_NO
+            modeManager.nightMode =
+                if (enabled) UiModeManager.MODE_NIGHT_YES else UiModeManager.MODE_NIGHT_NO
             return
         }
 
@@ -272,7 +285,7 @@ class AapTransport(
         }
 
         val ts = SystemClock.elapsedRealtime()
-        if (aapKeyCode == KeyEvent.KEYCODE_SOFT_LEFT|| aapKeyCode == KeyEvent.KEYCODE_SOFT_RIGHT) {
+        if (aapKeyCode == KeyEvent.KEYCODE_SOFT_LEFT || aapKeyCode == KeyEvent.KEYCODE_SOFT_RIGHT) {
             if (isPress) {
                 val delta = if (aapKeyCode == KeyEvent.KEYCODE_SOFT_LEFT) -1 else 1
                 send(ScrollWheelEvent(ts, delta))
@@ -337,4 +350,4 @@ class AapTransport(
         private const val MSG_POLL = 1
         private const val MSG_SEND = 2
     }
-
+}

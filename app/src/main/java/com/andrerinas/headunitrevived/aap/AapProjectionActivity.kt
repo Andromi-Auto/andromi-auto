@@ -33,6 +33,34 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
     private lateinit var projectionView: IProjectionView
     private val videoDecoder: VideoDecoder by lazy { App.provide(this).videoDecoder }
     private val settings: Settings by lazy { Settings(this) }
+    private var isSurfaceSet = false
+    private val watchdogHandler = android.os.Handler(android.os.Looper.getMainLooper())
+    private val watchdogRunnable = Runnable {
+        if (!isSurfaceSet) {
+            AppLog.w("Watchdog: Surface not set after 2s. Checking view state...")
+            checkAndForceSurface()
+        }
+    }
+
+    private fun checkAndForceSurface() {
+        if (projectionView is TextureView) {
+            val tv = projectionView as TextureView
+            if (tv.isAvailable) {
+                AppLog.w("Watchdog: TextureView IS available. Forcing onSurfaceChanged.")
+                onSurfaceChanged(android.view.Surface(tv.surfaceTexture), tv.width, tv.height)
+            } else {
+                AppLog.e("Watchdog: TextureView NOT available. Vis=${tv.visibility}, W=${tv.width}, H=${tv.height}")
+            }
+        } else if (projectionView is ProjectionView) {
+             val sv = projectionView as ProjectionView
+             if (sv.holder.surface.isValid) {
+                 AppLog.w("Watchdog: SurfaceView IS valid. Forcing onSurfaceChanged.")
+                 onSurfaceChanged(sv.holder.surface, sv.width, sv.height)
+             } else {
+                 AppLog.e("Watchdog: SurfaceView NOT valid.")
+             }
+        }
+    }
 
     private val disconnectReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -137,12 +165,14 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
 
     override fun onPause() {
         super.onPause()
+        watchdogHandler.removeCallbacks(watchdogRunnable)
         unregisterReceiver(keyCodeReceiver)
         // Disconnect receiver is unregistered in onDestroy
     }
 
     override fun onResume() {
         super.onResume()
+        watchdogHandler.postDelayed(watchdogRunnable, 2000)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             registerReceiver(keyCodeReceiver, IntentFilters.keyEvent, RECEIVER_NOT_EXPORTED)
         } else {
@@ -174,6 +204,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
 
     override fun onSurfaceChanged(surface: android.view.Surface, width: Int, height: Int) {
         AppLog.i("[AapProjectionActivity] onSurfaceChanged. Actual surface dimensions: width=$width, height=$height")
+        isSurfaceSet = true
         
         android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
             AppLog.i("Delayed setting surface to decoder")
@@ -199,6 +230,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
 
     override fun onSurfaceDestroyed(surface: android.view.Surface) {
         AppLog.i("SurfaceCallback: onSurfaceDestroyed. Surface: $surface")
+        isSurfaceSet = false
         transport.send(VideoFocusEvent(gain = false, unsolicited = false))
         videoDecoder.stop("surfaceDestroyed")
     }

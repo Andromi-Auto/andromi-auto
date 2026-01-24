@@ -5,6 +5,7 @@
 - Enhancement: SSL will now attempt multiple times and not break instantly thanks to @MicaelJarniac
 - Added: Chinese(Tradionnal) translation 🇹🇼 thanks to @GazCore
 - Added: Polish translation 🇵🇱 thanks to @Kacper1263
+- Added: Czech translation 🇨🇿 thanks to @teodortomas
 - Fixed brazilian portuguese folder name
 
 ### v.1.10.1

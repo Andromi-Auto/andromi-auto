@@ -85,6 +85,8 @@ adb shell am start -a android.intent.action.VIEW -d "headunit://connect?ip=192.1
 - New Feature: Screen-Orientation Feature to lock to a certain orientation (Landscape/Portrait) #69 thanks to @JanRi3D
 - Enhancement: SSL will now attempt multiple times and not break instantly thanks to @MicaelJarniac
 - Added: Chinese(Tradionnal) translation 🇹🇼 thanks to @GazCore
+- Added: Czech translation 🇨🇿 thanks to @teodortomas #75
+- Fixed brazilian portuguese folder name
 
 ### v.1.10.1
 - Bugfix: Added missing 3 Byte startcode which stops some devices to start the projection
