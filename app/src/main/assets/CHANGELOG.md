@@ -5,6 +5,7 @@
 - Enhancement: SSL will now attempt multiple times and not break instantly thanks to @MicaelJarniac
 - Added: Chinese(Tradionnal) translation 🇹🇼 thanks to @GazCore
 - Added: Polish translation 🇵🇱 thanks to @Kacper1263
+- Fixed brazilian portuguese folder name
 
 ### v.1.10.1
 - Bugfix: Added missing 3 Byte startcode which stops some devices to start the projection

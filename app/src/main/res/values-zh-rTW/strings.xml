@@ -35,6 +35,14 @@
     <string name="texture_view">TextureView</string>
     <string name="gles_view">GLES20</string>
     <string name="auto">自動</string>
+    <string name="screen_orientation">螢幕方向</string>
+    <string name="change_screen_orientation">變更螢幕方向</string>
+    <string name="orientation_system_default">系統預設</string>
+    <string name="orientation_auto_sensor">自動 (感應器)</string>
+    <string name="orientation_landscape">橫向 (0°)</string>
+    <string name="orientation_landscape_reverse">橫向反轉 (180°)</string>
+    <string name="orientation_portrait">直向 (90°)</string>
+    <string name="orientation_portrait_reverse">直向反轉 (270°)</string>
     <string name="enter_dpi_value">輸入 DPI 值 (0 為自動)</string>
     <string name="custom_margin">自訂邊距</string>
     <string name="custom_margin_description">設定自訂顯示邊距 (0 為自動)</string>

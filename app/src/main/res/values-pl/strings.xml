@@ -36,6 +36,14 @@
     <string name="texture_view">TextureView</string>
     <string name="gles_view">GLES20</string>
     <string name="auto">Auto</string>
+    <string name="screen_orientation">Orientacja ekranu</string>
+    <string name="change_screen_orientation">Zmień orientację ekranu</string>
+    <string name="orientation_system_default">Domyślne systemowe</string>
+    <string name="orientation_auto_sensor">Automatycznie (Czujnik)</string>
+    <string name="orientation_landscape">Poziomo (0°)</string>
+    <string name="orientation_landscape_reverse">Poziomo odwrócone (180°)</string>
+    <string name="orientation_portrait">Pionowo (90°)</string>
+    <string name="orientation_portrait_reverse">Pionowo odwrócone (270°)</string>
     <string name="enter_dpi_value">Wprowadź wartość DPI (0 dla auto)</string>
     <string name="custom_margin">Własne marginesy</string>
     <string name="custom_margin_description">Ustaw własne marginesy ekranu (0 dla auto)</string>
