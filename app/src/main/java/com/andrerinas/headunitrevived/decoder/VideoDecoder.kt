@@ -112,19 +112,26 @@ class VideoDecoder(private val settings: Settings) {
             val typeToUse = detectedType ?: if (codecName.contains("265")) CodecType.H265 else CodecType.H264
             currentCodecType = typeToUse
 
-            if (!codecConfigured && containsCodecConfig(frameData, typeToUse)) {
-                AppLog.i("${typeToUse.displayName} config detected in frame (${frameData.size} bytes)")
-                codecConfigured = true
-                
-                if (typeToUse == CodecType.H264) {
-                    scanForSpsPpsH264(frameData)
-                } else if (typeToUse == CodecType.H265) {
-                    if (mWidth == 0) {
-                         mWidth = HeadUnitScreenConfig.getNegotiatedWidth()
-                         mHeight = HeadUnitScreenConfig.getNegotiatedHeight()
-                         AppLog.i("H.265 detected, using negotiated dimensions: ${mWidth}x${mHeight}")
-                         dimensionsListener?.onVideoDimensionsChanged(mWidth, mHeight)
+            if (!codecConfigured) {
+                if (containsCodecConfig(frameData, typeToUse)) {
+                    AppLog.i("${typeToUse.displayName} config detected in frame (${frameData.size} bytes)")
+                    codecConfigured = true
+                    
+                    if (typeToUse == CodecType.H264) {
+                        scanForSpsPpsH264(frameData)
                     }
+                }
+                
+                // Fallback: If dimensions are still 0 (no SPS parsed or H.265), try negotiated dimensions
+                if (mWidth == 0) {
+                     val negotiatedW = HeadUnitScreenConfig.getNegotiatedWidth()
+                     val negotiatedH = HeadUnitScreenConfig.getNegotiatedHeight()
+                     if (negotiatedW > 0 && negotiatedH > 0) {
+                         AppLog.i("Fallback to negotiated dimensions: ${negotiatedW}x${negotiatedH} (SPS not found/parsed)")
+                         mWidth = negotiatedW
+                         mHeight = negotiatedH
+                         dimensionsListener?.onVideoDimensionsChanged(mWidth, mHeight)
+                     }
                 }
             }
 
@@ -261,7 +268,9 @@ class VideoDecoder(private val settings: Settings) {
             if (sps != null) format.setByteBuffer("csd-0", ByteBuffer.wrap(sps))
             if (pps != null) format.setByteBuffer("csd-1", ByteBuffer.wrap(pps))
             
-            format.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, 10485760)
+            // Reduced max input size to 1MB (was 10MB). 
+            // 1MB is sufficient for 1080p I-Frames and saves memory on older devices.
+            format.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, 1048576)
 
             if (!mSurface!!.isValid) {
                 throw IllegalStateException("Surface is not valid for codec configuration")
@@ -304,8 +313,17 @@ class VideoDecoder(private val settings: Settings) {
     private fun feedInputBuffer(buffer: ByteBuffer): Boolean {
         val currentCodec = codec ?: return false
         try {
-            val inputIndex = currentCodec.dequeueInputBuffer(TIMEOUT_US)
+            var inputIndex = -1
+            var attempts = 0
+            while (attempts < 10) {
+                inputIndex = currentCodec.dequeueInputBuffer(TIMEOUT_US)
+                if (inputIndex >= 0) break
+                attempts++
+                if (attempts == 5) AppLog.w("Decoder input buffer full, retrying...")
+            }
+
             if (inputIndex < 0) {
+                AppLog.e("Input buffer feed failed after $attempts attempts (full)")
                 return false
             }
 
