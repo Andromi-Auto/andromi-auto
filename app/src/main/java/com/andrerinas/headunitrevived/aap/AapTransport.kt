@@ -338,4 +338,3 @@ class AapTransport(
         private const val MSG_SEND = 2
     }
 
-}
