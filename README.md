@@ -27,6 +27,8 @@ https://github.com/mikereidis/headunit
 <img width="1280" height="800" alt="image" src="https://github.com/user-attachments/assets/140bbfdb-5b4f-4d49-a419-85aa91b48371" />
 
 ## How to use
+**Check out the [Wiki](https://github.com/andreknieriem/headunit-revived/wiki) for detailed documentation, setup guides and troubleshooting!**
+
 ### Wired USB Connection
 - Connect your Android device (phone) to the tablet running Headunit Revived via USB cable.
 - Make sure that Android Auto is installed on your phone.
