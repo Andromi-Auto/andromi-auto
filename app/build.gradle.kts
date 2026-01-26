@@ -48,11 +48,19 @@ android {
         buildConfig = true
     }
 
+    val copyRootAssets = tasks.register<Copy>("copyRootAssets") {
+        from("${project.rootDir}/CHANGELOG.md", "${project.rootDir}/LICENSE")
+        into("${project.layout.buildDirectory.get().asFile}/generated/assets/root")
+    }
+
     sourceSets {
         getByName("main") {
-            assets.srcDirs("../")
-            assets.include("CHANGELOG.md", "LICENSE")
+            assets.srcDirs("${project.layout.buildDirectory.get().asFile}/generated/assets/root")
         }
+    }
+
+    tasks.withType<com.android.build.gradle.tasks.MergeSourceSetFolders>().configureEach {
+        dependsOn(copyRootAssets)
     }
 
     defaultConfig {
