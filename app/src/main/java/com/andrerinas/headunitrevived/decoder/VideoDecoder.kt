@@ -1,6 +1,7 @@
 package com.andrerinas.headunitrevived.decoder
 
 import android.media.MediaCodec
+import android.media.MediaCodecInfo
 import android.media.MediaCodecList
 import android.media.MediaFormat
 import android.os.Build
@@ -396,11 +397,11 @@ class VideoDecoder(private val settings: Settings) {
         }
 
         val infos = codecInfos.filter { !it.isEncoder && it.supportedTypes.any { t -> t.equals(mimeType, true) } }
-        val hw = infos.find { 
-            val n = it.name.lowercase()
-            !n.startsWith("omx.google.") && !n.startsWith("c2.android.") && !n.contains(".sw.") && !n.contains("software")
-        }
-        return if (preferHardware && hw != null) hw.name else (infos.firstOrNull()?.name ?: hw?.name)
+        
+        val hw = infos.find { isHardwareAccelerated(it.name) }
+        val sw = infos.find { !isHardwareAccelerated(it.name) }
+
+        return if (preferHardware && hw != null) hw.name else sw?.name ?: hw?.name
     }
 
     private fun isHardwareAccelerated(name: String): Boolean {
@@ -413,7 +414,7 @@ class VideoDecoder(private val settings: Settings) {
     }
 }
 
-// Helpers (BitReader, SpsParser) same as before...
+// Helpers
 private class BitReader(private val buffer: ByteArray) {
     private var bitPosition = 0
     fun readBit(): Int = (buffer[bitPosition / 8].toInt() shr (7 - (bitPosition++ % 8))) and 1
