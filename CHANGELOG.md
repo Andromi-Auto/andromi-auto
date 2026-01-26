@@ -1,4 +1,9 @@
 # Changelog
+### v.1.10.3
+- Bugfix: Force Software Decoder wasn't getting always the sw decoder
+- Added: Russian translation 🇷🇺 thanks to @prostozema
+- Enhancement: Fixing small issues in the video-decoder which should help lower spec devices to render properly (but act a little bit slower perhaps)
+
 ### v.1.10.2
 - Bigfix - Button Mapping ignored #71
 - New Feature: Screen-Orientation Feature to lock to a certain orientation (Landscape/Portrait) #69 thanks to @JanRi3D

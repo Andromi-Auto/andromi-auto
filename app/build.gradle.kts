@@ -48,6 +48,13 @@ android {
         buildConfig = true
     }
 
+    sourceSets {
+        getByName("main") {
+            assets.srcDirs("../")
+            assets.include("CHANGELOG.md", "LICENSE")
+        }
+    }
+
     defaultConfig {
         applicationId = "com.andrerinas.headunitrevived"
         minSdk = 16
