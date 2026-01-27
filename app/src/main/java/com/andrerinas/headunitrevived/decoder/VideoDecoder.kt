@@ -1,7 +1,6 @@
 package com.andrerinas.headunitrevived.decoder
 
 import android.media.MediaCodec
-import android.media.MediaCodecInfo
 import android.media.MediaCodecList
 import android.media.MediaFormat
 import android.os.Build
@@ -75,11 +74,11 @@ class VideoDecoder(private val settings: Settings) {
         synchronized(this) {
             if (mSurface === surface) return
             
+            AppLog.i("New surface set: $surface")
             if (codec != null) {
                 stop("New surface")
             }
             mSurface = surface
-            AppLog.i("New surface set: $surface")
         }
     }
 

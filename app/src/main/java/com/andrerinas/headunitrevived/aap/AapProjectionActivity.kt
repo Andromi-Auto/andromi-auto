@@ -36,7 +36,23 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
     private val settings: Settings by lazy { Settings(this) }
     private var isSurfaceSet = false
     private val watchdogHandler = android.os.Handler(android.os.Looper.getMainLooper())
+    private val videoWatchdogRunnable = object : Runnable {
+        override fun run() {
+            val loadingOverlay = findViewById<View>(R.id.loading_overlay)
+            val isVisible = loadingOverlay?.visibility == View.VISIBLE
+            val isConnected = AapService.isConnected
+            
+            AppLog.i("[DEBUG_TRACE] VideoWatchdog tick: OverlayVisible=$isVisible, Connected=$isConnected")
+
+            if (isVisible && isConnected) {
+                AppLog.w("Watchdog: No video received. Requesting Keyframe (Unsolicited Focus)...")
+                transport.send(VideoFocusEvent(gain = true, unsolicited = true))
+                watchdogHandler.postDelayed(this, 3000)
+            }
+        }
+    }
     private val watchdogRunnable = Runnable {
+        AppLog.i("SurfaceWatchdog tick: isSurfaceSet=$isSurfaceSet")
         if (!isSurfaceSet) {
             AppLog.w("Watchdog: Surface not set after 2s. Checking view state...")
             checkAndForceSurface()
@@ -44,6 +60,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
     }
 
     private fun checkAndForceSurface() {
+        AppLog.i("Watchdog: checkAndForceSurface executing...")
         if (projectionView is TextureView) {
             val tv = projectionView as TextureView
             if (tv.isAvailable) {
@@ -170,18 +187,32 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
 
         container.addView(overlayView)
         setFullscreen() // Call setFullscreen here as well
+
+        val loadingOverlay = findViewById<View>(R.id.loading_overlay)
+        // Ensure loading overlay is on top of everything
+        loadingOverlay?.bringToFront()
+        
+        videoDecoder.onFirstFrameListener = {
+            runOnUiThread {
+                loadingOverlay?.visibility = View.GONE
+            }
+        }
     }
 
     override fun onPause() {
+        AppLog.i("AapProjectionActivity: onPause")
         super.onPause()
         watchdogHandler.removeCallbacks(watchdogRunnable)
+        watchdogHandler.removeCallbacks(videoWatchdogRunnable)
         unregisterReceiver(keyCodeReceiver)
         // Disconnect receiver is unregistered in onDestroy
     }
 
     override fun onResume() {
+        AppLog.i("AapProjectionActivity: onResume")
         super.onResume()
         watchdogHandler.postDelayed(watchdogRunnable, 2000)
+        watchdogHandler.postDelayed(videoWatchdogRunnable, 3000)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             registerReceiver(keyCodeReceiver, IntentFilters.keyEvent, RECEIVER_NOT_EXPORTED)
         } else {
@@ -215,13 +246,15 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         AppLog.i("[AapProjectionActivity] onSurfaceChanged. Actual surface dimensions: width=$width, height=$height")
         isSurfaceSet = true
         
+        // Reduced delay from 750ms to 150ms to catch the first I-Frame
         android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
             AppLog.i("Delayed setting surface to decoder")
             videoDecoder.setSurface(surface)
 
             // Simply request focus to ensure stream is active
             transport.send(VideoFocusEvent(gain = true, unsolicited = false))
-        }, 750)
+            
+        }, 150)
 
         // Explicitly check and set video dimensions if already known by the decoder
         // This handles cases where the activity is recreated but the decoder already has dimensions
