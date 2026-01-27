@@ -43,12 +43,12 @@ internal class AapControlMedia(
                 // If AA relinquishes focus (e.g. user selects "Exit" app), we should quit projection.
                 // Only quit if reason is explicit (LAUNCH_NATIVE), otherwise keep connection (e.g. SCREEN_OFF)
                 if (focusRequest.mode == Media.VideoFocusMode.VIDEO_FOCUS_NATIVE) {
-                    aapTransport.quit()
-                    if (focusRequest.reason == Media.VideoFocusRequestNotification.VideoFocusReason.LAUNCH_NATIVE) {
-                        AppLog.i("Video Focus set to NATIVE (Reason: LAUNCH_NATIVE) -> Quitting projection activity")
-                    } else {
-                        AppLog.i("Video Focus set to NATIVE (Reason: ${focusRequest.reason}) -> Connection kept alive")
-                    }
+                    aapTransport.stop()
+//                    if (focusRequest.reason == Media.VideoFocusRequestNotification.VideoFocusReason.LAUNCH_NATIVE) {
+//                        AppLog.i("Video Focus set to NATIVE (Reason: LAUNCH_NATIVE) -> Quitting projection activity")
+//                    } else {
+//                        AppLog.i("Video Focus set to NATIVE (Reason: ${focusRequest.reason}) -> Connection kept alive")
+//                    }
                 }
                 return 0
             }
@@ -102,7 +102,7 @@ internal class AapControlMedia(
 
             if (aapTransport.isQuittingAllowed) {
                 AppLog.i("Video Sink Stopped -> Quitting")
-                aapTransport.quit()
+                aapTransport.stop()
             } else {
                 AppLog.i("Video Sink Stopped -> Ignored (Background)")
             }

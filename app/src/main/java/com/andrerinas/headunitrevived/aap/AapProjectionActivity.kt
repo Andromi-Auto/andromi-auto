@@ -39,12 +39,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
     private val videoWatchdogRunnable = object : Runnable {
         override fun run() {
             val loadingOverlay = findViewById<View>(R.id.loading_overlay)
-            val isVisible = loadingOverlay?.visibility == View.VISIBLE
-            val isConnected = AapService.isConnected
-            
-            AppLog.i("[DEBUG_TRACE] VideoWatchdog tick: OverlayVisible=$isVisible, Connected=$isConnected")
-
-            if (isVisible && isConnected) {
+            if (loadingOverlay?.visibility == View.VISIBLE && AapService.isConnected) {
                 AppLog.w("Watchdog: No video received. Requesting Keyframe (Unsolicited Focus)...")
                 transport.send(VideoFocusEvent(gain = true, unsolicited = true))
                 watchdogHandler.postDelayed(this, 3000)
@@ -52,7 +47,6 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         }
     }
     private val watchdogRunnable = Runnable {
-        AppLog.i("SurfaceWatchdog tick: isSurfaceSet=$isSurfaceSet")
         if (!isSurfaceSet) {
             AppLog.w("Watchdog: Surface not set after 2s. Checking view state...")
             checkAndForceSurface()
