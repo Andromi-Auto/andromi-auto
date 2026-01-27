@@ -5,7 +5,9 @@ import android.content.Context
 import android.content.Intent
 import android.os.Handler
 import android.os.Looper
+import androidx.core.content.ContextCompat
 import com.andrerinas.headunitrevived.App
+import com.andrerinas.headunitrevived.aap.AapService
 
 import com.andrerinas.headunitrevived.location.GpsLocationService
 
@@ -14,7 +16,8 @@ class BootCompleteReceiver : BroadcastReceiver() {
 
         val h = Handler(Looper.getMainLooper())
         h.postDelayed({
-            App.get(context).startService(GpsLocationService.intent(context))
+            val serviceIntent = Intent(context, AapService::class.java)
+            ContextCompat.startForegroundService(context, serviceIntent)
         }, 10000)
     }
 }

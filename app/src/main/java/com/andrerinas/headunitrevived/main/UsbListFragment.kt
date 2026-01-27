@@ -160,7 +160,7 @@ class UsbListFragment : Fragment() {
                     aapIntent.putExtra(AapProjectionActivity.EXTRA_FOCUS, true)
                     mContext.startActivity(aapIntent)
                 } else if (device.isInAccessoryMode) {
-                    mContext.startService(AapService.createIntent(device.wrappedDevice, mContext))
+                    ContextCompat.startForegroundService(mContext, AapService.createIntent(device.wrappedDevice, mContext))
                 } else {
                     val usbManager = mContext.getSystemService(Context.USB_SERVICE) as UsbManager
                     if (usbManager.hasPermission(device.wrappedDevice)) {

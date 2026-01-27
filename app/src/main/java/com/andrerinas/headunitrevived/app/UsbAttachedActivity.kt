@@ -6,6 +6,7 @@ import android.content.Intent
 import android.hardware.usb.UsbManager
 import android.os.Bundle
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import com.andrerinas.headunitrevived.App
 import com.andrerinas.headunitrevived.aap.AapService
 import com.andrerinas.headunitrevived.connection.UsbAccessoryMode
@@ -37,7 +38,7 @@ class UsbAttachedActivity : Activity() {
 
         if (UsbDeviceCompat.isInAccessoryMode(device)) {
             AppLog.e("Usb in accessory mode")
-            startService(AapService.createIntent(device, this))
+            ContextCompat.startForegroundService(this, AapService.createIntent(device, this))
             finish()
             return
         }
@@ -78,7 +79,7 @@ class UsbAttachedActivity : Activity() {
         if (!App.provide(this).transport.isAlive) {
             if (UsbDeviceCompat.isInAccessoryMode(device)) {
                 AppLog.e("Usb in accessory mode")
-                startService(AapService.createIntent(device, this))
+                ContextCompat.startForegroundService(this, AapService.createIntent(device, this))
             }
         } else {
             AppLog.e("Thread already running")

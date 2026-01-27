@@ -13,6 +13,7 @@ import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.core.content.ContextCompat
 import androidx.navigation.fragment.findNavController
 import com.andrerinas.headunitrevived.App
 import com.andrerinas.headunitrevived.R
@@ -92,7 +93,7 @@ class HomeFragment : Fragment() {
         AapService.isConnected = false
         val intent = Intent(requireContext(), AapService::class.java)
         intent.action = AapService.ACTION_START_SELF_MODE
-        requireContext().startService(intent)
+        ContextCompat.startForegroundService(requireContext(), intent)
         AppLog.i("Auto start selfmode")
         //Toast.makeText(requireContext(), "Starting Self Mode...", Toast.LENGTH_SHORT).show()
     }
@@ -118,7 +119,7 @@ class HomeFragment : Fragment() {
                 if (ip.isNotEmpty()) {
                     AppLog.i("Auto-connect: Attempting WiFi connection to $ip")
                     Toast.makeText(requireContext(), "Auto-connecting to $ip...", Toast.LENGTH_SHORT).show()
-                    requireContext().startService(AapService.createIntent(ip, requireContext()))
+                    ContextCompat.startForegroundService(requireContext(), AapService.createIntent(ip, requireContext()))
                 }
             }
             Settings.CONNECTION_TYPE_USB -> {
@@ -131,7 +132,7 @@ class HomeFragment : Fragment() {
                     if (matchingDevice != null && usbManager.hasPermission(matchingDevice)) {
                         AppLog.i("Auto-connect: Attempting USB connection to $lastUsbDevice")
                         Toast.makeText(requireContext(), "Auto-connecting to USB device...", Toast.LENGTH_SHORT).show()
-                        requireContext().startService(AapService.createIntent(matchingDevice, requireContext()))
+                        ContextCompat.startForegroundService(requireContext(), AapService.createIntent(matchingDevice, requireContext()))
                     } else {
                         AppLog.i("Auto-connect: USB device $lastUsbDevice not found or no permission")
                     }
@@ -145,7 +146,7 @@ class HomeFragment : Fragment() {
             val stopServiceIntent = Intent(requireContext(), AapService::class.java).apply {
                 action = AapService.ACTION_STOP_SERVICE
             }
-            requireContext().startService(stopServiceIntent)
+            ContextCompat.startForegroundService(requireContext(), stopServiceIntent)
             requireActivity().finishAffinity()
         }
 

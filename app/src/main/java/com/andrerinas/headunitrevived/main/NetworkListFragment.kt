@@ -19,6 +19,7 @@ import androidx.fragment.app.FragmentManager
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.core.content.ContextCompat
 import com.andrerinas.headunitrevived.App
 import com.andrerinas.headunitrevived.R
 import com.andrerinas.headunitrevived.aap.AapService
@@ -157,7 +158,7 @@ class NetworkListFragment : Fragment(), NetworkDiscovery.Listener {
             if (scanDialog?.isShowing == true) {
                 scanDialog?.dismiss()
                 Toast.makeText(context, "Found $ip, connecting...", Toast.LENGTH_SHORT).show()
-                context?.startService(AapService.createIntent(ip, requireContext()))
+                context?.let { ctx -> ContextCompat.startForegroundService(ctx, AapService.createIntent(ip, ctx)) }
             }
         }
     }
@@ -291,7 +292,7 @@ class NetworkListFragment : Fragment(), NetworkDiscovery.Listener {
 
         override fun onClick(v: View) {
             if (v.id == android.R.id.button2) {
-                context.startService(AapService.createIntent(v.getTag(R.integer.key_data) as String, context))
+                ContextCompat.startForegroundService(context, AapService.createIntent(v.getTag(R.integer.key_data) as String, context))
             } else {
                 this.removeAddress(v.getTag(R.integer.key_data) as String)
             }

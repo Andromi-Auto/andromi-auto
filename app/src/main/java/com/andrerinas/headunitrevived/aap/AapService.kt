@@ -117,6 +117,7 @@ class AapService : Service(), UsbReceiver.Listener {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        startForeground(1, createNotification());
         when (intent?.action) {
             ACTION_STOP_SERVICE -> {
                 AppLog.i("Stop action received.");
@@ -205,10 +206,12 @@ class AapService : Service(), UsbReceiver.Listener {
                     if (clientSocket != null) {
                         AppLog.i("Wireless client connected: ${clientSocket.inetAddress}");
                         
-                        serviceScope.launch(Dispatchers.Main) {
+                        serviceScope.launch {
                             if (isConnected) {
                                 AppLog.w("Already connected, dropping wireless client");
-                                clientSocket.close();
+                                withContext(Dispatchers.IO) {
+                                    try { clientSocket.close() } catch (e: Exception) {}
+                                }
                             } else {
                                 pendingConnectionType = Settings.CONNECTION_TYPE_WIFI;
                                 pendingConnectionIp = clientSocket.inetAddress.hostAddress ?:"";
@@ -220,7 +223,10 @@ class AapService : Service(), UsbReceiver.Listener {
 
                                 // mark this attempt before starting the blocking connect
                                 val attemptId = connectionAttemptId.incrementAndGet();
-                                val success = conn.connect();
+                                
+                                val success = withContext(Dispatchers.IO) {
+                                    conn.connect()
+                                }
 
                                 onConnectionResult(success, attemptId, conn);
                             }

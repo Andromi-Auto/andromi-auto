@@ -12,6 +12,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.andrerinas.headunitrevived.App
 import com.andrerinas.headunitrevived.R
 import com.andrerinas.headunitrevived.aap.AapProjectionActivity
@@ -41,7 +42,7 @@ class MainActivity : AppCompatActivity() {
 
         // Start main service immediately to handle connections and wireless server
         val serviceIntent = Intent(this, AapService::class.java)
-        startService(serviceIntent)
+        ContextCompat.startForegroundService(this, serviceIntent)
 
         setFullscreen()
 
@@ -78,7 +79,7 @@ class MainActivity : AppCompatActivity() {
                 val ip = data.getQueryParameter("ip")
                 if (!ip.isNullOrEmpty()) {
                     AppLog.i("Received connect intent for IP: $ip")
-                    startService(AapService.createIntent(ip, this))
+                    ContextCompat.startForegroundService(this, AapService.createIntent(ip, this))
                 }
             }
         }
