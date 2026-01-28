@@ -133,6 +133,7 @@ class AapTransport(
     }
 
     internal fun stop() {
+        AppLog.i("AapTransport stopping and sending byebye")
         val byebye = Control.ByeByeRequest.newBuilder()
             .setReason(Control.ByeByeReason.USER_SELECTION)
             .build()

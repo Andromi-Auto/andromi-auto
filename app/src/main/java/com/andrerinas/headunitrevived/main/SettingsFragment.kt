@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -170,7 +171,7 @@ class SettingsFragment : Fragment() {
             val intent = Intent(requireContext(), AapService::class.java).apply {
                 action = if (enabled) AapService.ACTION_START_WIRELESS else AapService.ACTION_STOP_WIRELESS
             }
-            requireContext().startService(intent)
+            ContextCompat.startForegroundService(requireContext(), intent)
         }
 
         pendingAutoConnectLastSession?.let { settings.autoConnectLastSession = it }
@@ -181,7 +182,7 @@ class SettingsFragment : Fragment() {
                 val stopServiceIntent = Intent(requireContext(), AapService::class.java).apply {
                     action = AapService.ACTION_STOP_SERVICE
                 }
-                requireContext().startService(stopServiceIntent)
+                ContextCompat.startForegroundService(requireContext(), stopServiceIntent)
             }
         }
         

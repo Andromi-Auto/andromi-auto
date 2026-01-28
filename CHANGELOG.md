@@ -1,4 +1,9 @@
 # Changelog
+### v.1.10.4
+- Added: Dutch translation 🇳🇱 thanks to safariking
+- Several black screen and connection error enhancements
+- Bugfix: Crash in Background if not started as foreground service
+
 ### v.1.10.3
 - Bugfix: Force Software Decoder wasn't getting always the sw decoder
 - Added: Russian translation 🇷🇺 thanks to @prostozema

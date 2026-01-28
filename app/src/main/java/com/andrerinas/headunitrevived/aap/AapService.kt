@@ -117,6 +117,7 @@ class AapService : Service(), UsbReceiver.Listener {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        startForeground(1, createNotification());
         when (intent?.action) {
             ACTION_STOP_SERVICE -> {
                 AppLog.i("Stop action received.");
@@ -176,12 +177,40 @@ class AapService : Service(), UsbReceiver.Listener {
         }
     }
 
+    private var discoveryJob: Job? = null
+
     private fun startWirelessServer() {
         if (wirelessServer != null) return;
         wirelessServer = WirelessServer().apply { start() };
+        
+        // Recurring scan for Hotspot Gateway (Phone)
+        discoveryJob = serviceScope.launch {
+            while (isActive) {
+                if (!isConnected) {
+                    NetworkDiscovery.scanForGateway(this@AapService) { ip, port ->
+                        if (port == 5277) {
+                            // Headunit Server detected -> We must connect actively
+                            AppLog.i("Auto-connecting to Headunit Server at $ip:$port")
+                            val intent = Intent(this@AapService, AapService::class.java).apply {
+                                putExtra(EXTRA_IP, ip)
+                                putExtra(EXTRA_CONNECTION_TYPE, TYPE_WIFI)
+                            }
+                            handleConnectionIntent(intent)
+                        } else if (port == 5289) {
+                            // Wifi Launcher detected -> The connect() inside scanForGateway already triggered the phone.
+                            // Now we just wait for the phone to connect to our WirelessServer (port 5288).
+                            AppLog.i("Triggered Wifi Launcher at $ip:$port. Waiting for incoming connection...")
+                        }
+                    }
+                }
+                delay(10000)
+            }
+        }
     }
 
     private fun stopWirelessServer() {
+        discoveryJob?.cancel()
+        discoveryJob = null
         wirelessServer?.stopServer();
         wirelessServer = null;
     }
@@ -199,16 +228,34 @@ class AapService : Service(), UsbReceiver.Listener {
             try {
                 serverSocket = ServerSocket(5288).apply { reuseAddress = true };
                 AppLog.i("Wireless Server listening on port 5288");
+                
+                try {
+                    val interfaces = java.net.NetworkInterface.getNetworkInterfaces()
+                    while (interfaces.hasMoreElements()) {
+                        val iface = interfaces.nextElement()
+                        val addresses = iface.inetAddresses
+                        while (addresses.hasMoreElements()) {
+                            val addr = addresses.nextElement()
+                            if (!addr.isLoopbackAddress && addr is java.net.Inet4Address) {
+                                AppLog.i("Interface: ${iface.name}, IP: ${addr.hostAddress}")
+                            }
+                        }
+                    }
+                } catch (e: Exception) {
+                    AppLog.e("Error logging interfaces", e)
+                }
 
                 while (running) {
                     val clientSocket = serverSocket?.accept();
                     if (clientSocket != null) {
                         AppLog.i("Wireless client connected: ${clientSocket.inetAddress}");
                         
-                        serviceScope.launch(Dispatchers.Main) {
+                        serviceScope.launch {
                             if (isConnected) {
                                 AppLog.w("Already connected, dropping wireless client");
-                                clientSocket.close();
+                                withContext(Dispatchers.IO) {
+                                    try { clientSocket.close() } catch (e: Exception) {}
+                                }
                             } else {
                                 pendingConnectionType = Settings.CONNECTION_TYPE_WIFI;
                                 pendingConnectionIp = clientSocket.inetAddress.hostAddress ?:"";
@@ -220,7 +267,10 @@ class AapService : Service(), UsbReceiver.Listener {
 
                                 // mark this attempt before starting the blocking connect
                                 val attemptId = connectionAttemptId.incrementAndGet();
-                                val success = conn.connect();
+                                
+                                val success = withContext(Dispatchers.IO) {
+                                    conn.connect()
+                                }
 
                                 onConnectionResult(success, attemptId, conn);
                             }
