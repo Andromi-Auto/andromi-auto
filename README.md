@@ -67,18 +67,6 @@ adb shell am start -a android.intent.action.VIEW -d "headunit://connect?ip=192.1
 ```
 
 ## Known Issues
-- Often the wireless connection won't start. I need more debugging why
-- Handshake failed sometimes and the devices won't connect. You need to try again, restart phone or clear caches
-
-## Next Steps:
-- Bugfixing 
-  - very important are the connection issues!
-  - Non-Fullscreen Mode is buggy (https://github.com/andreknieriem/headunit-revived/issues/49)
-- Portrait Mode (https://github.com/andreknieriem/headunit-revived/issues/38)
-- Maybe:
-  - Android SKD 17
-
-## Known Issues
 - **Google Maps in Portrait Mode:** Touch interactions (searching, scrolling) within Google Maps may not work as expected when using Portrait Mode. While visual feedback (like ripple effects) might appear, the map itself may remain unresponsive. This appears to be an internal Android Auto / Google Maps limitation or bug in vertical orientations.
 
 ## Changelog
