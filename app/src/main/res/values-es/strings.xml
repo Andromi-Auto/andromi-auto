@@ -24,7 +24,7 @@
     <string name="enter_bluetooth_mac">Ingrese la dirección MAC Bluetooth</string>
     <string name="reset">Restablecer</string>
     <string name="gps_for_navigation">GPS para navegación</string>
-    <string name="gps_for_navigation_description">Usar el GPS de este dispositivo en lugar del dispositivo conectado</string>
+    <string name="gps_for_navigation_description">Usar el GPS de este dispositivo en lugar del GPS del teléfono conectado</string>
     <string name="enabled">Habilitado</string>
     <string name="disabled">Deshabilitado</string>
     <string name="resolution">Resolución</string>
@@ -32,9 +32,9 @@
     <string name="change_dpi">Cambiar DPI</string>
     <string name="change_view_mode">Cambiar modo de vista</string>
     <string name="view_mode">Modo de vista</string>
-    <string name="surface_view">SurfaceView</string>
-    <string name="texture_view">TextureView</string>
-    <string name="gles_view">GLES20</string>
+    <string name="surface_view">SurfaceView (Recomendado)</string>
+    <string name="texture_view">TextureView (Alternativo)</string>
+    <string name="gles_view">GLES20 (Alto rendimiento)</string>
     <string name="auto">Automático</string>
     <string name="screen_orientation">Orientación de pantalla</string>
     <string name="change_screen_orientation">Cambiar orientación de pantalla</string>
