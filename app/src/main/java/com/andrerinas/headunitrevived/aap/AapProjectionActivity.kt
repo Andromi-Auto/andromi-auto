@@ -11,6 +11,7 @@ import android.view.MotionEvent
 import android.view.TextureView
 import android.view.View
 import android.widget.FrameLayout
+import androidx.core.content.ContextCompat
 import com.andrerinas.headunitrevived.App
 import com.andrerinas.headunitrevived.R
 import com.andrerinas.headunitrevived.aap.protocol.messages.TouchEvent
@@ -120,12 +121,8 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
 
         setContentView(R.layout.activity_headunit)
 
-        // Register disconnect receiver here to stay active even if activity is paused
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            registerReceiver(disconnectReceiver, IntentFilters.disconnect, RECEIVER_NOT_EXPORTED)
-        } else {
-            registerReceiver(disconnectReceiver, IntentFilters.disconnect)
-        }
+        // Register disconnect receiver safely for Android 14+
+        ContextCompat.registerReceiver(this, disconnectReceiver, IntentFilters.disconnect, ContextCompat.RECEIVER_NOT_EXPORTED)
 
         videoDecoder.dimensionsListener = this
 
@@ -213,11 +210,10 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         super.onResume()
         watchdogHandler.postDelayed(watchdogRunnable, 2000)
         watchdogHandler.postDelayed(videoWatchdogRunnable, 3000)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            registerReceiver(keyCodeReceiver, IntentFilters.keyEvent, RECEIVER_NOT_EXPORTED)
-        } else {
-            registerReceiver(keyCodeReceiver, IntentFilters.keyEvent)
-        }
+        
+        // Register key event receiver safely for Android 14+
+        ContextCompat.registerReceiver(this, keyCodeReceiver, IntentFilters.keyEvent, ContextCompat.RECEIVER_NOT_EXPORTED)
+        
         setFullscreen() // Call setFullscreen here as well
     }
 

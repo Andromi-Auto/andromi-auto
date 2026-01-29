@@ -5,6 +5,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
+import androidx.core.content.ContextCompat
 import androidx.multidex.MultiDex
 import com.andrerinas.headunitrevived.main.BackgroundNotification
 import com.andrerinas.headunitrevived.ssl.ConscryptInitializer
@@ -56,11 +57,9 @@ class App : Application() {
             mediaChannel.setShowBadge(false)
             component.notificationManager.createNotificationChannel(mediaChannel)
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            registerReceiver(AapBroadcastReceiver(), AapBroadcastReceiver.filter, RECEIVER_NOT_EXPORTED)
-        } else {
-            registerReceiver(AapBroadcastReceiver(), AapBroadcastReceiver.filter)
-        }
+
+        // Register the main broadcast receiver safely for Android 14+ using ContextCompat
+        ContextCompat.registerReceiver(this, AapBroadcastReceiver(), AapBroadcastReceiver.filter, ContextCompat.RECEIVER_NOT_EXPORTED)
     }
 
     companion object {

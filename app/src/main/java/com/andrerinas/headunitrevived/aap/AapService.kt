@@ -19,6 +19,7 @@ import android.os.Parcel
 import android.os.Parcelable
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import com.andrerinas.headunitrevived.App
 import com.andrerinas.headunitrevived.R
 import com.andrerinas.headunitrevived.aap.protocol.messages.NightModeEvent
@@ -91,13 +92,8 @@ class AapService : Service(), UsbReceiver.Listener {
         val nightModeFilter = IntentFilter(ACTION_REQUEST_NIGHT_MODE_UPDATE)
         val usbFilter = UsbReceiver.createFilter()
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            registerReceiver(nightModeUpdateReceiver, nightModeFilter, RECEIVER_NOT_EXPORTED)
-            registerReceiver(usbReceiver, usbFilter, RECEIVER_NOT_EXPORTED)
-        } else {
-            registerReceiver(nightModeUpdateReceiver, nightModeFilter)
-            registerReceiver(usbReceiver, usbFilter)
-        }
+        ContextCompat.registerReceiver(this, nightModeUpdateReceiver, nightModeFilter, ContextCompat.RECEIVER_NOT_EXPORTED)
+        ContextCompat.registerReceiver(this, usbReceiver, usbFilter, ContextCompat.RECEIVER_NOT_EXPORTED)
 
         startService(GpsLocationService.intent(this));
 
