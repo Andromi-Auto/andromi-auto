@@ -32,9 +32,9 @@
     <string name="change_dpi">Cambiar DPI</string>
     <string name="change_view_mode">Cambiar modo de vista</string>
     <string name="view_mode">Modo de vista</string>
-    <string name="surface_view">SurfaceView (Estándar)</string>
-    <string name="texture_view">TextureView (Flexible)</string>
-    <string name="gles_view">GLES20 (Hardware)</string>
+    <string name="surface_view">SurfaceView</string>
+    <string name="texture_view">TextureView</string>
+    <string name="gles_view">GLES20</string>
     <string name="auto">Automático</string>
     <string name="screen_orientation">Orientación de pantalla</string>
     <string name="change_screen_orientation">Cambiar orientación de pantalla</string>
@@ -120,7 +120,7 @@
     <!-- Audio Settings -->
     <string name="category_audio">Audio</string>
     <string name="enable_audio_sink">Activar receptor de audio</string>
-    <string name="enable_audio_sink_description">Si está desactivado, este dispositivo no recibirá audio. El audio se reproducirá en el otro dispositivo.</string>
+    <string name="enable_audio_sink_description">Si está desactivado, este dispositivo no actuará como receptor de audio. El audio se reproducirá en el teléfono conectado.</string>
     <string name="use_aac_audio">Usar audio AAC</string>
     <string name="use_aac_audio_description">Usa el códec AAC para audio para ahorrar ancho de banda (experimental).</string>
 
