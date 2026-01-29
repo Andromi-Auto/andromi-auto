@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="night_mode">
+        <item>自動 (時間)</item>
+        <item>日間</item>
+        <item>夜間</item>
+        <item>自動 (時間 + GPS)</item>
+        <item>光傳感器</item>
+        <item>屏幕亮度</item>
+    </string-array>
+</resources>

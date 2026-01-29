@@ -34,6 +34,7 @@ import com.andrerinas.headunitrevived.location.GpsLocationService
 import com.andrerinas.headunitrevived.utils.AppLog
 import com.andrerinas.headunitrevived.utils.DeviceIntent
 import com.andrerinas.headunitrevived.utils.NightMode
+import com.andrerinas.headunitrevived.utils.NightModeManager
 import com.andrerinas.headunitrevived.utils.Settings
 import kotlinx.coroutines.*
 import java.net.ServerSocket
@@ -46,7 +47,7 @@ class AapService : Service(), UsbReceiver.Listener {
     private lateinit var uiModeManager: UiModeManager
     private var accessoryConnection: AccessoryConnection? = null
     private lateinit var usbReceiver: UsbReceiver
-    private lateinit var nightModeReceiver: BroadcastReceiver
+    private var nightModeManager: NightModeManager? = null
     private var wirelessServer: WirelessServer? = null
 
     private var pendingConnectionType: String = ""
@@ -56,6 +57,15 @@ class AapService : Service(), UsbReceiver.Listener {
 
     private val transport: AapTransport
         get() = App.provide(this).transport
+
+    private val nightModeUpdateReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            if (intent.action == ACTION_REQUEST_NIGHT_MODE_UPDATE) {
+                AppLog.i("Received request to resend night mode state")
+                nightModeManager?.resendCurrentState()
+            }
+        }
+    }
 
     override fun onBind(intent: Intent): IBinder? = null
 
@@ -70,18 +80,20 @@ class AapService : Service(), UsbReceiver.Listener {
         uiModeManager.nightMode = UiModeManager.MODE_NIGHT_AUTO;
 
         usbReceiver = UsbReceiver(this);
-        nightModeReceiver = NightModeReceiver(Settings(this), uiModeManager);
-
-        val nightModeFilter = IntentFilter().apply {
-            addAction(Intent.ACTION_TIME_TICK);
-            addAction(LocationUpdateIntent.action);
-        }
         
+        nightModeManager = NightModeManager(this, App.provide(this).settings) { isNight ->
+            AppLog.i("NightMode update: $isNight")
+            App.provide(this).transport.send(NightModeEvent(isNight))
+            uiModeManager.nightMode = if (isNight) UiModeManager.MODE_NIGHT_YES else UiModeManager.MODE_NIGHT_NO
+        }
+        nightModeManager?.start()
+
+        val filter = IntentFilter(ACTION_REQUEST_NIGHT_MODE_UPDATE)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            registerReceiver(nightModeReceiver, nightModeFilter, RECEIVER_NOT_EXPORTED);
+            registerReceiver(nightModeUpdateReceiver, filter, RECEIVER_NOT_EXPORTED)
             registerReceiver(usbReceiver, UsbReceiver.createFilter(), RECEIVER_NOT_EXPORTED);
         } else {
-            registerReceiver(nightModeReceiver, nightModeFilter);
+            registerReceiver(nightModeUpdateReceiver, filter)
             registerReceiver(usbReceiver, UsbReceiver.createFilter());
         }
 
@@ -110,7 +122,8 @@ class AapService : Service(), UsbReceiver.Listener {
         stopWirelessServer();
         serviceJob.cancel();
         onDisconnect();
-        unregisterReceiver(nightModeReceiver);
+        nightModeManager?.stop()
+        unregisterReceiver(nightModeUpdateReceiver)
         unregisterReceiver(usbReceiver);
         uiModeManager.disableCarMode(0);
         super.onDestroy();
@@ -377,6 +390,9 @@ class AapService : Service(), UsbReceiver.Listener {
                 isConnected = true;
                 sendBroadcast(ConnectedIntent());
                 
+                // Sync current night mode state immediately after connection
+                nightModeManager?.resendCurrentState()
+                
                 if (pendingConnectionType.isNotEmpty()) {
                     val settings = App.provide(this).settings;
                     settings.saveLastConnection(
@@ -428,26 +444,6 @@ class AapService : Service(), UsbReceiver.Listener {
     override fun onUsbAttach(device: UsbDevice) {}
     override fun onUsbPermission(granted: Boolean, connect: Boolean, device: UsbDevice) {}
 
-    private class NightModeReceiver(private val settings: Settings, private val modeManager: UiModeManager) : BroadcastReceiver() {
-        private var nightMode = NightMode(settings, false);
-        private var initialized = false;
-        private var lastValue = false;
-
-        override fun onReceive(context: Context, intent: Intent) {
-            if (!nightMode.hasGPSLocation && intent.action == LocationUpdateIntent.action) {
-                nightMode = NightMode(settings, true);
-            }
-            val isCurrent = nightMode.current;
-            if (!initialized || lastValue != isCurrent) {
-                lastValue = isCurrent;
-                initialized = App.provide(context).transport.send(NightModeEvent(isCurrent));
-                if (initialized) {
-                    modeManager.nightMode = if (isCurrent) UiModeManager.MODE_NIGHT_YES else UiModeManager.MODE_NIGHT_NO;
-                }
-            }
-        }
-    }
-
     companion object {
         var isConnected = false;
         var selfMode = false;
@@ -455,6 +451,7 @@ class AapService : Service(), UsbReceiver.Listener {
         const val ACTION_START_WIRELESS = "com.andrerinas.headunitrevived.ACTION_START_WIRELESS";
         const val ACTION_STOP_WIRELESS = "com.andrerinas.headunitrevived.ACTION_STOP_WIRELESS";
         const val ACTION_STOP_SERVICE = "com.andrerinas.headunitrevived.ACTION_STOP_SERVICE";
+        const val ACTION_REQUEST_NIGHT_MODE_UPDATE = "com.andrerinas.headunitrevived.ACTION_REQUEST_NIGHT_MODE_UPDATE"
         private const val TYPE_USB = 1;
         private const val TYPE_WIFI = 2;
         private const val EXTRA_CONNECTION_TYPE = "extra_connection_type";

@@ -34,9 +34,11 @@ class ServiceDiscoveryResponse(private val context: Context)
                     if (settings.useGpsForNavigation) {
                         sources.addSensors(makeSensorType(Sensors.SensorType.LOCATION))
                     }
-                    if (settings.nightMode != Settings.NightMode.NONE){
-                        sources.addSensors(makeSensorType(Sensors.SensorType.NIGHT))
-                    }
+                    
+                    // Always announce Night sensor, as we control it via NightModeManager
+                    sources.addSensors(makeSensorType(Sensors.SensorType.NIGHT))
+                    AppLog.i("[ServiceDiscovery] Announcing NIGHT sensor support. Strategy: ${settings.nightMode}")
+                    
                 }.build()
             }.build()
 

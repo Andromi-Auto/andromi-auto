@@ -75,6 +75,18 @@ class Settings(context: Context) {
             prefs.edit().putInt("night-mode", nightMode.value).apply()
         }
 
+    var nightModeThresholdLux: Int
+        get() = prefs.getInt("night-mode-threshold-lux", 100)
+        set(value) {
+            prefs.edit().putInt("night-mode-threshold-lux", value).apply()
+        }
+
+    var nightModeThresholdBrightness: Int
+        get() = prefs.getInt("night-mode-threshold-brightness", 40)
+        set(value) {
+            prefs.edit().putInt("night-mode-threshold-brightness", value).apply()
+        }
+
     var keyCodes: MutableMap<Int, Int>
         get() {
             val set = prefs.getStringSet("key-codes", mutableSetOf())!!
@@ -242,7 +254,8 @@ class Settings(context: Context) {
         DAY(1),
         NIGHT(2),
         AUTO_WAIT_GPS(3),
-        NONE(4);
+        LIGHT_SENSOR(4),
+        SCREEN_BRIGHTNESS(5);
 
         companion object {
             private val map = NightMode.values().associateBy(NightMode::value)

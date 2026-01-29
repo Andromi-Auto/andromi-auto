@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="night_mode">
+        <item>Auto (Hora)</item>
+        <item>Dia</item>
+        <item>Noite</item>
+        <item>Auto (Hora + GPS)</item>
+        <item>Sensor de Luz</item>
+        <item>Brilho da Tela</item>
+    </string-array>
+</resources>
