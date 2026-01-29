@@ -1,8 +1,10 @@
 # Changelog
 ### v.1.11.0
-- New Feature: Advanced Night Mode (Light Sensor, Screen Brightness, separate thresholds)
+- New Feature: Advanced Night Mode (Light Sensor, Screen Brightness, separate thresholds, manual time)
 - New Feature: Enhanced Service Notification (Reduced noise, added Exit button)
-
+- Added: Spanish translation 🇪🇸 thanks to @andrecuellar
+- Added: Ukraine translation 🇺🇦 thanks to welshi32
+- 
 ### v.1.10.4
 - Added: Dutch translation 🇳🇱 thanks to safariking
 - Several black screen and connection error enhancements
@@ -14,10 +16,10 @@
 - Enhancement: Fixing small issues in the video-decoder which should help lower spec devices to render properly (but act a little bit slower perhaps)
 
 ### v.1.10.2
-- Bigfix - Button Mapping ignored #71
+- Bugfix - Button Mapping ignored #71
 - New Feature: Screen-Orientation Feature to lock to a certain orientation (Landscape/Portrait) #69 thanks to @JanRi3D
 - Enhancement: SSL will now attempt multiple times and not break instantly thanks to @MicaelJarniac
-- Added: Chinese(Tradionnal) translation 🇹🇼 thanks to @GazCore
+- Added: Chinese(Traditional) translation 🇹🇼 thanks to @GazCore
 - Added: Polish translation 🇵🇱 thanks to @Kacper1263
 - Added: Czech translation 🇨🇿 thanks to @teodortomas
 - Fixed brazilian portuguese folder name

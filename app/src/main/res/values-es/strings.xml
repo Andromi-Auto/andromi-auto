@@ -93,6 +93,13 @@
     <string name="key_nav">Navegación</string>
     <string name="key_night">Alternar modo nocturno</string>
 
+    <string name="night_mode_threshold">Umbral del modo noche</string>
+    <string name="enter_threshold_value">Ingrese el valor del umbral</string>
+    <string name="threshold_lux_desc">Valor de lux (0-10000). Por debajo de esto = Noche.</string>
+    <string name="threshold_brightness_desc">Valor de brillo (0-255). Por debajo de esto = Noche.</string>
+    <string name="night_mode_start">Hora de inicio del modo noche</string>
+    <string name="night_mode_end">Hora de fin del modo noche</string>
+
     <!-- Categories for SettingsFragment -->
     <string name="category_general">General</string>
     <string name="auto_start_self_mode">Iniciar Modo Autónomo automáticamente</string>
