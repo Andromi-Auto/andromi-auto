@@ -46,9 +46,14 @@ class App : Application() {
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            component.notificationManager.createNotificationChannel(NotificationChannel(defaultChannel, "Default", NotificationManager.IMPORTANCE_HIGH))
-            val mediaChannel = NotificationChannel(BackgroundNotification.mediaChannel, "Media channel", NotificationManager.IMPORTANCE_DEFAULT)
+            val serviceChannel = NotificationChannel(defaultChannel, "Headunit Service", NotificationManager.IMPORTANCE_LOW)
+            serviceChannel.description = "Persistent service notification"
+            serviceChannel.setShowBadge(false)
+            component.notificationManager.createNotificationChannel(serviceChannel)
+
+            val mediaChannel = NotificationChannel(BackgroundNotification.mediaChannel, "Media Playback", NotificationManager.IMPORTANCE_LOW)
             mediaChannel.setSound(null, null)
+            mediaChannel.setShowBadge(false)
             component.notificationManager.createNotificationChannel(mediaChannel)
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -59,7 +64,7 @@ class App : Application() {
     }
 
     companion object {
-        const val defaultChannel = " default"
+        const val defaultChannel = "headunit_service_v2"
 
         fun get(context: Context): App {
             return context.applicationContext as App

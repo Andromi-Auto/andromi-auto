@@ -105,6 +105,16 @@ class AapService : Service(), UsbReceiver.Listener {
     }
 
     private fun createNotification(): Notification {
+        val stopIntent = Intent(this, AapService::class.java).apply {
+            action = ACTION_STOP_SERVICE
+        }
+        val stopPendingIntent = PendingIntent.getService(
+            this, 
+            0, 
+            stopIntent, 
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else PendingIntent.FLAG_UPDATE_CURRENT
+        )
+
         return NotificationCompat.Builder(this, App.defaultChannel)
             .setSmallIcon(R.drawable.ic_stat_aa)
             .setPriority(NotificationCompat.PRIORITY_LOW)
@@ -113,7 +123,8 @@ class AapService : Service(), UsbReceiver.Listener {
             .setContentText("Headunit Revived is running")
             .setContentIntent(PendingIntent.getActivity(this, 0, 
                 Intent(this, com.andrerinas.headunitrevived.main.MainActivity::class.java),
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE))
+                PendingIntent.FLAG_UPDATE_CURRENT or (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0)))
+            .addAction(R.drawable.ic_exit_to_app_white_24dp, getString(R.string.exit), stopPendingIntent)
             .build();
     }
 

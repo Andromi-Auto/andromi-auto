@@ -16,7 +16,7 @@ class BackgroundNotification(private val context: Context) {
 
     companion object {
         private const val NOTIFICATION_MEDIA = 1
-        const val mediaChannel = "media"
+        const val mediaChannel = "media_v2"
     }
 
     fun notify(metadata: MediaPlayback.MediaMetaData) {

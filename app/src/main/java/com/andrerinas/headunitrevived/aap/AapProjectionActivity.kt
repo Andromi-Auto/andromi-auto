@@ -173,13 +173,19 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
             FrameLayout.LayoutParams.MATCH_PARENT,
             FrameLayout.LayoutParams.MATCH_PARENT
         )
+        overlayView.isFocusable = true
+        overlayView.isFocusableInTouchMode = true
 
         overlayView.setOnTouchListener { _, event ->
+                if (event.action == MotionEvent.ACTION_DOWN) {
+                    overlayView.requestFocus()
+                }
                 sendTouchEvent(event)
                 true
             }
 
         container.addView(overlayView)
+        overlayView.requestFocus()
         setFullscreen() // Call setFullscreen here as well
 
         val loadingOverlay = findViewById<View>(R.id.loading_overlay)
@@ -302,16 +308,19 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
-        AppLog.i("KeyCode: %d", keyCode)
-        // PRes navigation on the screen
+        if (keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_VOLUME_UP || keyCode == KeyEvent.KEYCODE_VOLUME_DOWN || keyCode == KeyEvent.KEYCODE_VOLUME_MUTE) {
+            return super.onKeyDown(keyCode, event)
+        }
         onKeyEvent(keyCode, true)
-        return super.onKeyDown(keyCode, event)
+        return true
     }
 
     override fun onKeyUp(keyCode: Int, event: KeyEvent): Boolean {
-        AppLog.i("onKeyUp: %d", keyCode)
+        if (keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_VOLUME_UP || keyCode == KeyEvent.KEYCODE_VOLUME_DOWN || keyCode == KeyEvent.KEYCODE_VOLUME_MUTE) {
+            return super.onKeyUp(keyCode, event)
+        }
         onKeyEvent(keyCode, false)
-        return super.onKeyUp(keyCode, event)
+        return true
     }
 
 
