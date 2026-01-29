@@ -37,7 +37,6 @@ class NightModeManager(
     private val debounceRunnable = Runnable {
         pendingValue?.let { newValue ->
             if (lastEmittedValue != newValue) {
-                AppLog.i("NightModeManager: Debounce finished. Switching to $newValue")
                 lastEmittedValue = newValue
                 onUpdate(newValue)
             }
@@ -71,19 +70,13 @@ class NightModeManager(
         }
         context.registerReceiver(receiver, filter)
 
-        AppLog.i("NightModeManager: Starting with mode ${settings.nightMode}")
-
         if (settings.nightMode == Settings.NightMode.LIGHT_SENSOR) {
             if (lightSensor != null) {
-                AppLog.i("NightModeManager: Registering light sensor listener")
                 sensorManager.registerListener(this, lightSensor, SensorManager.SENSOR_DELAY_NORMAL)
-            } else {
-                AppLog.e("NightModeManager: Light sensor not available on this device!")
             }
         }
 
         if (settings.nightMode == Settings.NightMode.SCREEN_BRIGHTNESS) {
-            AppLog.i("NightModeManager: Registering brightness observer")
             context.contentResolver.registerContentObserver(
                 SystemSettings.System.getUriFor(SystemSettings.System.SCREEN_BRIGHTNESS),
                 false,
@@ -104,30 +97,29 @@ class NightModeManager(
 
     fun resendCurrentState() {
         val isNight = nightModeCalculator.current
-        AppLog.i("NightModeManager: Resending current state: $isNight")
         onUpdate(isNight)
     }
 
     private fun update(debounce: Boolean = true) {
         var isNight = false
+        val threshold = settings.nightModeThresholdLux
+        val thresholdBrightness = settings.nightModeThresholdBrightness
 
         when (settings.nightMode) {
             Settings.NightMode.LIGHT_SENSOR -> {
-                val threshold = settings.nightModeThresholdLux
                 if (currentLux >= 0) {
                     // Hysteresis Logic
                     val hyst = 5.0f // 5 Lux buffer
                     val currentIsNight = lastEmittedValue ?: false
                     
                     isNight = if (currentIsNight) {
-                        currentLux < (threshold + hyst) // Stay night until significantly brighter
+                        currentLux < (threshold + hyst)
                     } else {
-                        currentLux < threshold // Become night when darker than threshold
+                        currentLux < threshold
                     }
                 }
             }
             Settings.NightMode.SCREEN_BRIGHTNESS -> {
-                val threshold = settings.nightModeThresholdBrightness
                 try {
                     currentBrightness = SystemSettings.System.getInt(
                         context.contentResolver, 
@@ -138,11 +130,12 @@ class NightModeManager(
                     val currentIsNight = lastEmittedValue ?: false
                     
                     isNight = if (currentIsNight) {
-                        currentBrightness < (threshold + hyst)
+                        currentBrightness < (thresholdBrightness + hyst)
                     } else {
-                        currentBrightness < threshold
+                        currentBrightness < thresholdBrightness
                     }
                 } catch (e: Exception) {
+                    // Keep error log for visibility
                     AppLog.e("NightModeManager: Failed to read brightness", e)
                 }
             }
@@ -155,15 +148,13 @@ class NightModeManager(
         // Apply
         if (debounce) {
             if (pendingValue != isNight) {
-                AppLog.i("NightModeManager: State change detected (pending: $isNight). Starting 2s debounce...")
                 pendingValue = isNight
                 handler.removeCallbacks(debounceRunnable)
                 handler.postDelayed(debounceRunnable, 2000)
             }
         } else {
-            // Immediate update (for start or manual modes if we handled them here)
+            // Immediate update
             if (lastEmittedValue != isNight) {
-                AppLog.i("NightModeManager: Immediate update to $isNight")
                 lastEmittedValue = isNight
                 onUpdate(isNight)
             }
