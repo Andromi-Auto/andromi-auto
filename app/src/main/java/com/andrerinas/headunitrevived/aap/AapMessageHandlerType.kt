@@ -28,17 +28,27 @@ internal class AapMessageHandlerType(
 
         // 1. Try processing as Video stream first (ID_VID)
         if (message.channel == Channel.ID_VID) {
+             // Send ACK IMMEDIATELY before processing to keep the stream flowing
+             // This prevents blocking the message thread if the decoder is slow.
+             if (message.type == 0 || message.type == 1) {
+                 transport.sendMediaAck(message.channel)
+             }
+             
              if (aapVideo.process(message)) {
                  videoPacketCount++
-                 transport.sendMediaAck(message.channel)
+                 // ACK was already sent above if it was a media packet
                  return
              }
         }
 
         // 2. Try processing as Audio stream (Speech, System, Media)
         if (message.isAudio) {
-            if (aapAudio.process(message)) {
+            // Send ACK IMMEDIATELY before processing
+            if (message.type == 0 || message.type == 1) {
                 transport.sendMediaAck(message.channel)
+            }
+
+            if (aapAudio.process(message)) {
                 return
             }
         }
@@ -49,7 +59,7 @@ internal class AapMessageHandlerType(
             return
         }
 
-        // 4. Control Message Fallback (Process if msgType is in any of the AA control ranges)
+        // 4. Control Message Fallback
         if (msgType in 0..31 || msgType in 32768..32799 || msgType in 65504..65535) {
             try {
                 aapControl.execute(message)

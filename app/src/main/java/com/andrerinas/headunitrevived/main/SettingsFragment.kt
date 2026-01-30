@@ -189,6 +189,10 @@ class SettingsFragment : Fragment() {
 
         pendingAutoConnectLastSession?.let { settings.autoConnectLastSession = it }
 
+        // Notify Service about Night Mode changes immediately
+        val nightModeUpdateIntent = Intent(AapService.ACTION_REQUEST_NIGHT_MODE_UPDATE)
+        requireContext().sendBroadcast(nightModeUpdateIntent)
+
         if (requiresRestart) {
             if (AapService.isConnected) {
                 Toast.makeText(context, "Stopping service to apply changes...", Toast.LENGTH_SHORT).show()

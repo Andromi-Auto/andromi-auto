@@ -1,4 +1,4 @@
- package com.andrerinas.headunitrevived.utils
+package com.andrerinas.headunitrevived.utils
 
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -22,12 +22,17 @@ class NightMode(private val settings: Settings, val hasGPSLocation: Boolean) {
                     val start = settings.nightModeManualStart
                     val end = settings.nightModeManualEnd
                     
-                    if (start <= end) {
+                    val isNight = if (start <= end) {
                         currentMinutes in start..end
                     } else {
                         // Rollover (e.g. 22:00 to 06:00)
                         currentMinutes >= start || currentMinutes <= end
                     }
+                    
+                    if (settings.debugMode) {
+                        AppLog.i("NightMode Check: Now=$currentMinutes, Start=$start, End=$end, Result=$isNight")
+                    }
+                    isNight
                 }
                 Settings.NightMode.LIGHT_SENSOR -> {
                     if (currentLux >= 0) currentLux < settings.nightModeThresholdLux else false

@@ -31,6 +31,8 @@ class NightModeManager(
     private var currentLux: Float = -1f
     private var currentBrightness: Int = -1
     private var isFirstSensorReading = true
+    private var isSensorRegistered = false
+    private var isObserverRegistered = false
     
     private val handler = Handler(Looper.getMainLooper())
 
@@ -72,38 +74,70 @@ class NightModeManager(
         }
         
         ContextCompat.registerReceiver(context, receiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED)
-
-        if (settings.nightMode == Settings.NightMode.LIGHT_SENSOR) {
-            if (lightSensor != null) {
-                sensorManager.registerListener(this, lightSensor, SensorManager.SENSOR_DELAY_NORMAL)
-            }
-        }
-
-        if (settings.nightMode == Settings.NightMode.SCREEN_BRIGHTNESS) {
-            context.contentResolver.registerContentObserver(
-                SystemSettings.System.getUriFor(SystemSettings.System.SCREEN_BRIGHTNESS),
-                false,
-                brightnessObserver
-            )
-        }
+        
+        // Initial setup of sensors/observers based on current settings
+        refreshListeners()
 
         // Initial update immediately
+        // Reset lastEmittedValue to ensure initial state is sent
+        lastEmittedValue = null
         update(debounce = false)
     }
 
     fun stop() {
         try { context.unregisterReceiver(receiver) } catch (e: Exception) {}
-        sensorManager.unregisterListener(this)
-        context.contentResolver.unregisterContentObserver(brightnessObserver)
+        if (isSensorRegistered) {
+            sensorManager.unregisterListener(this)
+            isSensorRegistered = false
+        }
+        if (isObserverRegistered) {
+            context.contentResolver.unregisterContentObserver(brightnessObserver)
+            isObserverRegistered = false
+        }
         handler.removeCallbacks(debounceRunnable)
     }
 
     fun resendCurrentState() {
-        val isNight = nightModeCalculator.current
-        onUpdate(isNight)
+        // Force a fresh check and SEND even if value hasn't changed (e.g. new connection)
+        refreshListeners()
+        lastEmittedValue = null // Invalidate cache to force emission
+        update(debounce = false)
     }
 
-    private fun update(debounce: Boolean = true) {
+    private fun refreshListeners() {
+        // 1. Light Sensor
+        if (settings.nightMode == Settings.NightMode.LIGHT_SENSOR) {
+            if (!isSensorRegistered && lightSensor != null) {
+                sensorManager.registerListener(this, lightSensor, SensorManager.SENSOR_DELAY_NORMAL)
+                isSensorRegistered = true
+            }
+        } else {
+            if (isSensorRegistered) {
+                sensorManager.unregisterListener(this)
+                isSensorRegistered = false
+            }
+        }
+
+        // 2. Brightness Observer
+        if (settings.nightMode == Settings.NightMode.SCREEN_BRIGHTNESS) {
+            if (!isObserverRegistered) {
+                context.contentResolver.registerContentObserver(
+                    SystemSettings.System.getUriFor(SystemSettings.System.SCREEN_BRIGHTNESS),
+                    false,
+                    brightnessObserver
+                )
+                isObserverRegistered = true
+            }
+        } else {
+            if (isObserverRegistered) {
+                context.contentResolver.unregisterContentObserver(brightnessObserver)
+                isObserverRegistered = false
+            }
+        }
+    }
+
+    // Made public so Service can force an update
+    fun update(debounce: Boolean = true) {
         var isNight = false
         val threshold = settings.nightModeThresholdLux
         val thresholdBrightness = settings.nightModeThresholdBrightness
@@ -143,6 +177,7 @@ class NightModeManager(
             }
             // Delegate to standard calculator for other modes (Auto, Day, Night, Manual)
             else -> {
+                // Ensure calculator has latest settings reference/values
                 isNight = nightModeCalculator.current
             }
         }
@@ -156,6 +191,7 @@ class NightModeManager(
             }
         } else {
             // Immediate update
+            handler.removeCallbacks(debounceRunnable) // Cancel any pending debounce
             if (lastEmittedValue != isNight) {
                 lastEmittedValue = isNight
                 onUpdate(isNight)
