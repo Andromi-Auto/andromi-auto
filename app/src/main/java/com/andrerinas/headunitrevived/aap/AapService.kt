@@ -68,6 +68,17 @@ class AapService : Service(), UsbReceiver.Listener {
         }
     }
 
+    private val disconnectReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            if (intent.action == DisconnectIntent.action) {
+                if (isConnected) {
+                    AppLog.i("AapService received disconnect intent -> closing connection")
+                    onDisconnect()
+                }
+            }
+        }
+    }
+
     override fun onBind(intent: Intent): IBinder? = null
 
     override fun onCreate() {
@@ -90,9 +101,11 @@ class AapService : Service(), UsbReceiver.Listener {
         nightModeManager?.start()
 
         val nightModeFilter = IntentFilter(ACTION_REQUEST_NIGHT_MODE_UPDATE)
+        val disconnectFilter = IntentFilter(DisconnectIntent.action)
         val usbFilter = UsbReceiver.createFilter()
 
         ContextCompat.registerReceiver(this, nightModeUpdateReceiver, nightModeFilter, ContextCompat.RECEIVER_NOT_EXPORTED)
+        ContextCompat.registerReceiver(this, disconnectReceiver, disconnectFilter, ContextCompat.RECEIVER_NOT_EXPORTED)
         ContextCompat.registerReceiver(this, usbReceiver, usbFilter, ContextCompat.RECEIVER_NOT_EXPORTED)
 
         startService(GpsLocationService.intent(this));
@@ -133,6 +146,7 @@ class AapService : Service(), UsbReceiver.Listener {
         onDisconnect();
         nightModeManager?.stop()
         unregisterReceiver(nightModeUpdateReceiver)
+        unregisterReceiver(disconnectReceiver)
         unregisterReceiver(usbReceiver);
         uiModeManager.disableCarMode(0);
         super.onDestroy();
@@ -166,7 +180,10 @@ class AapService : Service(), UsbReceiver.Listener {
         val connectionType = intent?.getIntExtra(EXTRA_CONNECTION_TYPE, 0) ?: 0;
         if (connectionType == 0) return ;
 
+        // Ensure old connection is closed!
+        accessoryConnection?.disconnect()
         accessoryConnection = connectionFactory(intent, this);
+        
         if (accessoryConnection == null) {
             AppLog.e("Cannot create connection from intent");
             return;

@@ -102,6 +102,9 @@
     <string name="night_mode_start">Starttijd nachtmodus</string>
     <string name="night_mode_end">Eindtijd nachtmodus</string>
 
+    <string name="reconnection_required_title">Opnieuw verbinden vereist</string>
+    <string name="reconnection_required_message">Het apparaat staat in de wachtstand. Koppel de USB-kabel los en sluit deze opnieuw aan om Android Auto opnieuw te starten.</string>
+
     <!-- Categories for SettingsFragment -->
     <string name="category_general">Algemeen</string>
     <string name="auto_start_self_mode">Auto start Self-Mode</string>

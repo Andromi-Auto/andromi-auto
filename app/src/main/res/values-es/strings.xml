@@ -100,6 +100,9 @@
     <string name="night_mode_start">Hora de inicio del modo noche</string>
     <string name="night_mode_end">Hora de fin del modo noche</string>
 
+    <string name="reconnection_required_title">Reconexión necesaria</string>
+    <string name="reconnection_required_message">El dispositivo está en estado de espera. Por favor, desconecte y vuelva a conectar el cable USB para reiniciar Android Auto.</string>
+
     <!-- Categories for SettingsFragment -->
     <string name="category_general">General</string>
     <string name="auto_start_self_mode">Iniciar Modo Autónomo automáticamente</string>

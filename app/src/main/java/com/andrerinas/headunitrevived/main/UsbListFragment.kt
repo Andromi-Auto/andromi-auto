@@ -6,6 +6,7 @@ import android.content.Intent
 import android.hardware.usb.UsbManager
 import android.os.Build
 import android.os.Bundle
+import android.os.SystemClock
 import android.text.Html
 import android.view.LayoutInflater
 import android.view.View
@@ -31,6 +32,7 @@ import com.andrerinas.headunitrevived.connection.UsbAccessoryMode
 import com.andrerinas.headunitrevived.connection.UsbDeviceCompat
 import com.andrerinas.headunitrevived.utils.Settings
 import com.google.android.material.appbar.MaterialToolbar
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class UsbListFragment : Fragment() {
     private lateinit var adapter: DeviceAdapter
@@ -95,6 +97,7 @@ class UsbListFragment : Fragment() {
     private class DeviceAdapter(private val mContext: Context, private val mSettings: Settings) : RecyclerView.Adapter<DeviceViewHolder>(), View.OnClickListener {
         private var allowedDevices: MutableSet<String> = mutableSetOf()
         private var deviceList: List<UsbDeviceCompat> = listOf()
+        private var lastClickTime: Long = 0
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DeviceViewHolder {
             val view = LayoutInflater.from(mContext).inflate(R.layout.list_item_device, parent, false)
@@ -104,7 +107,7 @@ class UsbListFragment : Fragment() {
         override fun onBindViewHolder(holder: DeviceViewHolder, position: Int) {
             val device = deviceList[position]
             
-            // Background styling logic (same as NetworkListFragment)
+            // Background styling logic
             val isTop = position == 0
             val isBottom = position == itemCount - 1
             val bgRes = when {
@@ -145,6 +148,12 @@ class UsbListFragment : Fragment() {
         }
 
         override fun onClick(v: View) {
+            // Debounce clicks (prevent double tap)
+            if (SystemClock.elapsedRealtime() - lastClickTime < 1000) {
+                return
+            }
+            lastClickTime = SystemClock.elapsedRealtime()
+
             val device = deviceList.get(v.tag as Int)
             if (v.id == android.R.id.button1) {
                 if (allowedDevices.contains(device.uniqueName)) {
@@ -155,24 +164,32 @@ class UsbListFragment : Fragment() {
                 mSettings.allowedDevices = allowedDevices
                 notifyDataSetChanged()
             } else {
-                if (App.provide(mContext).transport.isAlive) {
+                if (AapService.isConnected) {
+                    // Already connected -> just open UI
                     val aapIntent = Intent(mContext, AapProjectionActivity::class.java)
                     aapIntent.putExtra(AapProjectionActivity.EXTRA_FOCUS, true)
                     mContext.startActivity(aapIntent)
                 } else if (device.isInAccessoryMode) {
-                    ContextCompat.startForegroundService(mContext, AapService.createIntent(device.wrappedDevice, mContext))
+                    // Device is in Accessory Mode but we are NOT connected.
+                    // This likely means the previous session ended and the phone needs a reset.
+                    MaterialAlertDialogBuilder(mContext, R.style.DarkAlertDialog)
+                        .setTitle("Reconnection Required")
+                        .setMessage("The device is in a waiting state. Please unplug and re-plug the USB cable to start Android Auto again.")
+                        .setPositiveButton(android.R.string.ok, null)
+                        .show()
                 } else {
+                    // Standard connection flow
                     val usbManager = mContext.getSystemService(Context.USB_SERVICE) as UsbManager
                     if (usbManager.hasPermission(device.wrappedDevice)) {
                         val usbMode = UsbAccessoryMode(usbManager)
                         if (usbMode.connectAndSwitch(device.wrappedDevice)) {
-                            Toast.makeText(mContext, "Success", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(mContext, "Switching to Android Auto...", Toast.LENGTH_SHORT).show()
                         } else {
-                            Toast.makeText(mContext, "Failed", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(mContext, "Switch failed", Toast.LENGTH_SHORT).show()
                         }
                         notifyDataSetChanged()
                     } else {
-                        Toast.makeText(mContext, "USB Permission is missing", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(mContext, "Requesting USB Permission...", Toast.LENGTH_SHORT).show()
                         usbManager.requestPermission(device.wrappedDevice, PendingIntent.getActivity(
                             mContext, 500, Intent(mContext, UsbAttachedActivity::class.java),
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE else PendingIntent.FLAG_UPDATE_CURRENT))

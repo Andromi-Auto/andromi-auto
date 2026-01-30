@@ -101,6 +101,9 @@ INHALT</string>
     <string name="night_mode_start">Nachtmodus Startzeit</string>
     <string name="night_mode_end">Nachtmodus Endzeit</string>
 
+    <string name="reconnection_required_title">Neuverbindung erforderlich</string>
+    <string name="reconnection_required_message">Das Gerät befindet sich in einem Wartezustand. Bitte ziehen Sie das USB-Kabel ab und stecken Sie es wieder ein, um Android Auto neu zu starten.</string>
+
     <!-- Categories for SettingsFragment -->
     <string name="category_general">Allgemein</string>
     <string name="auto_start_self_mode">Auto-Start Self-Mode</string>

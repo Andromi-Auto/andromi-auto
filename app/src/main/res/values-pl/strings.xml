@@ -100,6 +100,9 @@
     <string name="night_mode_start">Czas rozpoczęcia trybu nocnego</string>
     <string name="night_mode_end">Czas zakończenia trybu nocnego</string>
 
+    <string name="reconnection_required_title">Wymagane ponowne połączenie</string>
+    <string name="reconnection_required_message">Urządzenie jest w stanie oczekiwania. Odłącz i podłącz ponownie kabel USB, aby zrestartować Android Auto.</string>
+
     <!-- Categories for SettingsFragment -->
 
     <string name="category_general">Ogólne</string>

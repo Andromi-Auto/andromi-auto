@@ -99,6 +99,9 @@
     <string name="night_mode_start">夜間模式開始時間</string>
     <string name="night_mode_end">夜間模式結束時間</string>
 
+    <string name="reconnection_required_title">需要重新連接</string>
+    <string name="reconnection_required_message">設備處於等待狀態。請拔下並重新插入 USB 電纜以重新啟動 Android Auto。</string>
+
     <!-- Categories for SettingsFragment -->
     <string name="category_general">一般</string>
     <string name="auto_start_self_mode">自動開始自我模式</string>

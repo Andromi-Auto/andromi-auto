@@ -26,6 +26,10 @@
     <string name="threshold_brightness_desc">Brightness value (0-255). Below this = Night.</string>
     <string name="night_mode_start">Night Mode Start Time</string>
     <string name="night_mode_end">Night Mode End Time</string>
+
+    <string name="reconnection_required_title">Reconnection Required</string>
+    <string name="reconnection_required_message">The device is in a waiting state. Please unplug and re-plug the USB cable to start Android Auto again.</string>
+
     <string name="bluetooth_address_s">Bluetooth address</string>
     <string name="enter_bluetooth_mac">Enter bluetooth MAC</string>
     <string name="reset">Reset</string>

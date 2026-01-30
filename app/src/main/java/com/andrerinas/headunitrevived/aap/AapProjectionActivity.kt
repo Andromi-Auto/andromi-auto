@@ -17,6 +17,7 @@ import com.andrerinas.headunitrevived.R
 import com.andrerinas.headunitrevived.aap.protocol.messages.TouchEvent
 import com.andrerinas.headunitrevived.aap.protocol.messages.VideoFocusEvent
 import com.andrerinas.headunitrevived.app.SurfaceActivity
+import com.andrerinas.headunitrevived.contract.DisconnectIntent
 import com.andrerinas.headunitrevived.contract.KeyIntent
 import com.andrerinas.headunitrevived.decoder.VideoDecoder
 import com.andrerinas.headunitrevived.decoder.VideoDimensionsListener
@@ -331,7 +332,9 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         videoDecoder.dimensionsListener = null
 
         if (isFinishing && AapService.isConnected) {
+            AppLog.i("AapProjectionActivity closing -> sending stop and disconnect intent to service")
             transport.stop()
+            sendBroadcast(DisconnectIntent())
         }
     }
 

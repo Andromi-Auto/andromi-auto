@@ -100,6 +100,9 @@
     <string name="night_mode_start">Время начала ночного режима</string>
     <string name="night_mode_end">Время окончания ночного режима</string>
 
+    <string name="reconnection_required_title">Требуется переподключение</string>
+    <string name="reconnection_required_message">Устройство находится в режиме ожидания. Отсоедините и снова подключите USB-кабель для перезапуска Android Auto.</string>
+
     <!-- Categories for SettingsFragment -->
     <string name="category_general">Общие</string>
     <string name="auto_start_self_mode">Автоматический автономный режим</string>
