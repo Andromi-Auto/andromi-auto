@@ -28,9 +28,10 @@ class SocketAccessoryConnection(private val ip: String, private val port: Int) :
         get() = true
 
     override fun sendBlocking(buf: ByteArray, length: Int, timeout: Int): Int {
+        val out = output ?: return -1
         return try {
-            output!!.write(buf, 0, length)
-            output!!.flush()
+            out.write(buf, 0, length)
+            out.flush()
             length
         } catch (e: IOException) {
             AppLog.e(e)
@@ -39,12 +40,13 @@ class SocketAccessoryConnection(private val ip: String, private val port: Int) :
     }
 
     override fun recvBlocking(buf: ByteArray, length: Int, timeout: Int, readFully: Boolean): Int {
+        val inp = input ?: return -1
         return try {
             if (readFully) {
-                input!!.readFully(buf,0, length)
+                inp.readFully(buf,0, length)
                 length
             } else {
-                input!!.read(buf, 0, length)
+                inp.read(buf, 0, length)
             }
         } catch (e: IOException) {
             -1
@@ -61,9 +63,9 @@ class SocketAccessoryConnection(private val ip: String, private val port: Int) :
                 transport.connect(InetSocketAddress(ip, port), 5000)
             }
             transport.tcpNoDelay = true
-            transport.keepAlive = true // Added
-            transport.reuseAddress = true // Added
-            transport.trafficClass = 16 // Added (IPTOS_LOWDELAY)
+            transport.keepAlive = true
+            transport.reuseAddress = true
+            transport.trafficClass = 16 // IPTOS_LOWDELAY
             input = DataInputStream(transport.getInputStream().buffered(65536))
             output = transport.getOutputStream().buffered(65536)
             return@withContext true
