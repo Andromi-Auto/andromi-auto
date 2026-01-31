@@ -1,9 +1,9 @@
 package com.andrerinas.headunitrevived.main
 
 import android.app.Application
-import android.content.Context.RECEIVER_NOT_EXPORTED
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import com.andrerinas.headunitrevived.App
@@ -21,11 +21,7 @@ class MainViewModel(application: Application): AndroidViewModel(application), Us
     private val usbReceiver = UsbReceiver(this)
 
     fun register() {
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-            app.registerReceiver(usbReceiver, UsbReceiver.createFilter(), RECEIVER_NOT_EXPORTED)
-        } else {
-            app.registerReceiver(usbReceiver, UsbReceiver.createFilter())
-        }
+        ContextCompat.registerReceiver(app, usbReceiver, UsbReceiver.createFilter(), ContextCompat.RECEIVER_NOT_EXPORTED)
         usbDevices.value = createDeviceList(settings.allowedDevices)
     }
 

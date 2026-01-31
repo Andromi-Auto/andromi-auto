@@ -6,7 +6,7 @@ object Messages {
     const val DEF_BUFFER_LENGTH = 131080
 
     val versionRequest: ByteArray
-        get() = createRawMessage(0, 3, 1, Messages.VERSION_REQUEST, Messages.VERSION_REQUEST.size)
+        get() = createRawMessage(0, 3, 1, VERSION_REQUEST, VERSION_REQUEST.size)
 
     // byte ac_buf [] = {0, 3, 0, 4, 0, 4, 8, 0};
     val statusOk: ByteArray
@@ -15,7 +15,7 @@ object Messages {
     fun createRawMessage(chan: Int, flags: Int, type: Int, data: ByteArray): ByteArray =
             createRawMessage(chan, flags, type, data, data.size)
 
-    private var VERSION_REQUEST = byteArrayOf(0, 1, 0, 1)
+    private var VERSION_REQUEST = byteArrayOf(0, 1, 0, 2)
 
     private fun createRawMessage(chan: Int, flags: Int, type: Int, data: ByteArray, size: Int): ByteArray {
 

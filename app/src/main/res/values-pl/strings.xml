@@ -93,6 +93,18 @@
     <string name="key_nav">Nawigacja</string>
     <string name="key_night">Przełącz tryb nocny</string>
 
+    <string name="night_mode_threshold">Próg trybu nocnego</string>
+    <string name="enter_threshold_value">Wprowadź wartość progu</string>
+    <string name="threshold_lux_desc">Wartość Lux (0-10000). Poniżej = Noc.</string>
+    <string name="threshold_brightness_desc">Jasność (0-255). Poniżej = Noc.</string>
+    <string name="night_mode_start">Czas rozpoczęcia trybu nocnego</string>
+    <string name="night_mode_end">Czas zakończenia trybu nocnego</string>
+
+    <string name="reconnection_required_title">Wymagane ponowne połączenie</string>
+    <string name="reconnection_required_message">Urządzenie jest w stanie oczekiwania. Odłącz i podłącz ponownie kabel USB, aby zrestartować Android Auto.</string>
+
+    <!-- Categories for SettingsFragment -->
+
     <string name="category_general">Ogólne</string>
     <string name="auto_start_self_mode">Autostart trybu samodzielnego</string>
     <string name="auto_start_self_mode_description">Automatycznie uruchom tryb samodzielny po otwarciu aplikacji.</string>

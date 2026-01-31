@@ -144,11 +144,16 @@ class NetworkListFragment : Fragment(), NetworkDiscovery.Listener {
         }
     }
 
-    override fun onServiceFound(ip: String) {
+    override fun onServiceFound(ip: String, port: Int) {
+        if (port != 5277) {
+            // Only interested in Headunit Server (5277) for manual connection list
+            // Ignore WifiLauncher (5289) here as that is for auto-triggering
+            return
+        }
         activity?.runOnUiThread {
             // Save immediately so it stays in the list permanently
             try {
-                AppLog.i("Found Infotainment Device. Try to connect to $ip")
+                AppLog.i("Found Infotainment Device. Try to connect to $ip:$port")
                 adapter.addNewAddress(InetAddress.getByName(ip))
             } catch (e: Exception) {
                 AppLog.e("Failed to add discovered address", e)

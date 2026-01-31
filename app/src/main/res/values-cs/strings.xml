@@ -93,6 +93,16 @@
     <string name="key_nav">Navigace</string>
     <string name="key_night">Přepnout noční režim</string>
 
+    <string name="night_mode_threshold">Práh nočního režimu</string>
+    <string name="enter_threshold_value">Zadejte hodnotu prahu</string>
+    <string name="threshold_lux_desc">Hodnota Lux (0-10000). Pod touto hodnotou = Noc.</string>
+    <string name="threshold_brightness_desc">Hodnota jasu (0-255). Pod touto hodnotou = Noc.</string>
+    <string name="night_mode_start">Čas zahájení nočního režimu</string>
+    <string name="night_mode_end">Čas ukončení nočního režimu</string>
+
+    <string name="reconnection_required_title">Vyžadováno opětovné připojení</string>
+    <string name="reconnection_required_message">Zařízení čeká. Odpojte a znovu připojte kabel USB pro restart Android Auto.</string>
+
     <!-- Categories for SettingsFragment -->
     <string name="category_general">Obecné</string>
     <string name="auto_start_self_mode">Automaticky spustit Self-Mode</string>

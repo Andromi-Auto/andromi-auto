@@ -93,6 +93,16 @@
     <string name="key_nav">Навигация</string>
     <string name="key_night">Переключить ночной режим</string>
 
+    <string name="night_mode_threshold">Порог ночного режима</string>
+    <string name="enter_threshold_value">Введите пороговое значение</string>
+    <string name="threshold_lux_desc">Значение люкс (0-10000). Ниже = Ночь.</string>
+    <string name="threshold_brightness_desc">Значение яркости (0-255). Ниже = Ночь.</string>
+    <string name="night_mode_start">Время начала ночного режима</string>
+    <string name="night_mode_end">Время окончания ночного режима</string>
+
+    <string name="reconnection_required_title">Требуется переподключение</string>
+    <string name="reconnection_required_message">Устройство находится в режиме ожидания. Отсоедините и снова подключите USB-кабель для перезапуска Android Auto.</string>
+
     <!-- Categories for SettingsFragment -->
     <string name="category_general">Общие</string>
     <string name="auto_start_self_mode">Автоматический автономный режим</string>

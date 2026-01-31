@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="night_mode">
+        <item>Auto (Zonsopgang/-ondergang)</item>
+        <item>Dag</item>
+        <item>Nacht</item>
+        <item>Handmatige tijd</item>
+        <item>Lichtsensor</item>
+        <item>Schermhelderheid</item>
+    </string-array>
+</resources>

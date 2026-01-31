@@ -21,5 +21,6 @@ int hu_ssl_bio_read(int offset, int res_max, jbyte *res_buf);
 int hu_ssl_bio_write(int offset, int msg_len, jbyte *msg_buf);
 int hu_ssl_read(int offset, int res_max, jbyte *res_buf);
 int hu_ssl_write(int offset, int msg_len, jbyte *msg_buf);
+void hu_ssl_cleanup();
 
 #endif //HEADUNIT_HU_SSL_H

@@ -1,16 +1,19 @@
 package com.andrerinas.headunitrevived.connection
 
-
+import android.content.Context
+import android.net.ConnectivityManager
+import android.os.Build
 import com.andrerinas.headunitrevived.utils.AppLog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.DataInputStream
 import java.io.IOException
 import java.io.OutputStream
+import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.net.Socket
 
-class SocketAccessoryConnection(private val ip: String, private val port: Int) : AccessoryConnection {
+class SocketAccessoryConnection(private val ip: String, private val port: Int, private val context: Context) : AccessoryConnection {
     private var output: OutputStream? = null
     private var input: DataInputStream? = null
     private var transport: Socket
@@ -19,7 +22,7 @@ class SocketAccessoryConnection(private val ip: String, private val port: Int) :
         transport = Socket()
     }
 
-    constructor(socket: Socket) : this(socket.inetAddress.hostAddress ?: "", socket.port) {
+    constructor(socket: Socket, context: Context) : this(socket.inetAddress.hostAddress ?: "", socket.port, context) {
         this.transport = socket
     }
 
@@ -28,9 +31,10 @@ class SocketAccessoryConnection(private val ip: String, private val port: Int) :
         get() = true
 
     override fun sendBlocking(buf: ByteArray, length: Int, timeout: Int): Int {
+        val out = output ?: return -1
         return try {
-            output!!.write(buf, 0, length)
-            output!!.flush()
+            out.write(buf, 0, length)
+            out.flush()
             length
         } catch (e: IOException) {
             AppLog.e(e)
@@ -39,12 +43,13 @@ class SocketAccessoryConnection(private val ip: String, private val port: Int) :
     }
 
     override fun recvBlocking(buf: ByteArray, length: Int, timeout: Int, readFully: Boolean): Int {
+        val inp = input ?: return -1
         return try {
             if (readFully) {
-                input!!.readFully(buf,0, length)
+                inp.readFully(buf,0, length)
                 length
             } else {
-                input!!.read(buf, 0, length)
+                inp.read(buf, 0, length)
             }
         } catch (e: IOException) {
             -1
@@ -57,13 +62,61 @@ class SocketAccessoryConnection(private val ip: String, private val port: Int) :
     override suspend fun connect(): Boolean = withContext(Dispatchers.IO) {
         try {
             if (!transport.isConnected) {
+                val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    var net: android.net.Network? = null
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        net = cm.activeNetwork
+                    } else {
+                        // API 21-22 fallback
+                        @Suppress("DEPRECATION")
+                        for (n in cm.allNetworks) {
+                            val info = cm.getNetworkInfo(n)
+                            if (info?.type == ConnectivityManager.TYPE_WIFI && info.isConnected) {
+                                net = n
+                                break
+                            }
+                        }
+                    }
+
+                    if (net != null) {
+                        try {
+                            net.bindSocket(transport)
+                            AppLog.i("Bound socket to network: $net")
+                        } catch (e: Exception) {
+                            AppLog.w("Failed to bind socket to network", e)
+                        }
+                    }
+                } else {
+                    // Legacy API < 21
+                    @Suppress("DEPRECATION")
+                    if (cm.getNetworkInfo(ConnectivityManager.TYPE_WIFI)?.isConnected == true) {
+                        try {
+                            val addr = InetAddress.getByName(ip)
+                            val b = addr.address
+                            val ipInt = ((b[3].toInt() and 0xFF) shl 24) or
+                                        ((b[2].toInt() and 0xFF) shl 16) or
+                                        ((b[1].toInt() and 0xFF) shl 8) or
+                                        (b[0].toInt() and 0xFF)
+                            // cm.requestRouteToHost(ConnectivityManager.TYPE_WIFI, ipInt)
+                            // Use reflection because requestRouteToHost is removed in newer SDKs
+                            val m = cm.javaClass.getMethod("requestRouteToHost", Int::class.javaPrimitiveType, Int::class.javaPrimitiveType)
+                            m.invoke(cm, ConnectivityManager.TYPE_WIFI, ipInt)
+                            AppLog.i("Legacy: Requested route to host $ip")
+                        } catch (e: Exception) {
+                            AppLog.w("Legacy: Failed requestRouteToHost", e)
+                        }
+                    }
+                }
+                
                 transport.soTimeout = 15000
                 transport.connect(InetSocketAddress(ip, port), 5000)
             }
             transport.tcpNoDelay = true
-            transport.keepAlive = true // Added
-            transport.reuseAddress = true // Added
-            transport.trafficClass = 16 // Added (IPTOS_LOWDELAY)
+            transport.keepAlive = true
+            transport.reuseAddress = true
+            transport.trafficClass = 16 // IPTOS_LOWDELAY
             input = DataInputStream(transport.getInputStream().buffered(65536))
             output = transport.getOutputStream().buffered(65536)
             return@withContext true

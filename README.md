@@ -36,25 +36,25 @@ https://github.com/mikereidis/headunit
 - Click the USB Button in Headunit Revived, find your phone and click the right button to allow connection
 - Click on your phone in the list and wait for Android Auto to start
 
-### Wireless Connection (Experimental)
+### Wireless Launcher (Recommended)
+This is the most reliable way to connect wirelessly. It uses the "Wifi Launcher" app on your phone to trigger the connection.
+- Download [Wireless Launcher](https://play.google.com/store/apps/details?id=com.borconi.emil.wifilauncherforhur) (or similar) on your phone.
+- In Headunit Revived Settings: Enable **Wireless Headunit Server**.
+- Ensure both devices are in the same network (Hotspot or WiFi).
+- Open Wireless Launcher on your phone and start the service (or trigger it via BT connection).
+- The Launcher App will find your headunit (port 5288) and initiate the connection.
+
+### Wireless Connection (Manual / Native)
+This method uses the native "Headunit Server" built into Android Auto developer settings.
+**Note:** This method may fail on some devices/networks (especially mobile hotspots creating 10.x.x.x networks) due to firewall/routing restrictions on the phone side. If this fails, please use the Wireless Launcher method.
+
 - Open Android Auto Settings on your phone
 - Click on Version and then on version and permission and click several to enable developer settings
 - Go back to Android Auto, click the three dots on the top right and start the infotainment server
-- Now you need to bring your phone and headunit(tablet) into the same network (WiFi). You can use mobile hotspot from phone, or from the headunit or use wifi direct. That doesn't matter
+- Now you need to bring your phone and headunit(tablet) into the same network (WiFi).
 - Go to the WiFi Menu in the Headunit Revive App
-- Now you can make 2 things
-- First: click on the scan button in the top right corner and let the app find your phone by itslef
-- Or: manually add your phones ip address via "Add new" button
-  - Go to your phones wifi settings and search for your IP-Address eg: 192.168.1.25
-  - Add the IP-Address of your phone and click on it to start Android Auto
-  - IMPORTANT: In my tests it only works, if your phone is unlocked AND shows the Android Auto settings page! Otherwise it won't connect
-
-### Wireless Launcher
-The app even works with wireless launcher (https://play.google.com/store/apps/details?id=com.borconi.emil.wifilauncherforhur)
-- Go to settings and enable Wireless Headunit Server
-- Both devices have to be in the same network (WiFi). You can use mobile hotspot from phone, or from the headunit or use wifi direct. That doesn't matter
-- Open Wireless Launcher on your phone and start it manually (or select your cars BT connection for example as a starter)
-- The Launcher App will find your headunit a send a connection request to your headunit and start the connection (my headunit in my car has very bad wifi and needs 5 minutes to connect to a hotspot. So wireless in not always a good decision)
+- Click scan. If your phone is found, click on the IP to connect.
+- Or: manually add your phones ip address via "Add new" button.
 
 ### Connect Wirelessly via Intent (Power Users)
 You can trigger a wireless connection attempt using an Android Intent. This is useful for automation tools like **Tasker**, **MacroDroid**, or via **ADB**.
@@ -68,8 +68,19 @@ adb shell am start -a android.intent.action.VIEW -d "headunit://connect?ip=192.1
 
 ## Known Issues
 - **Google Maps in Portrait Mode:** Touch interactions (searching, scrolling) within Google Maps may not work as expected when using Portrait Mode. While visual feedback (like ripple effects) might appear, the map itself may remain unresponsive. This appears to be an internal Android Auto / Google Maps limitation or bug in vertical orientations.
+- **Native Wireless Connection on Hotspot:** Connecting to the native AA Headunit Server (Port 5277) may fail if the phone creates a mobile hotspot with Carrier-NAT IPs (e.g., 10.x.x.x). Use Wireless Launcher App instead.
 
 ## Changelog
+### v.1.11.0
+- New Feature: Advanced Night Mode (Light Sensor, Screen Brightness, separate thresholds, manual time)
+- Improvement: Audio Stuttering fixed (Optimized ACK handling)
+- Improvement: USB Reconnection stability (Added "Reconnection Required" dialog for stuck sessions)
+- Improvement: WiFi Discovery (Added Multi-Interface Scan and NSD/mDNS support)
+- New Feature: Enhanced Service Notification (Reduced noise, added Exit button)
+- Added: Spanish translation 🇪🇸 thanks to @andrecuellar
+- Added: Ukraine translation 🇺🇦 thanks to welshi32
+- Bugfix: Non-Fullscreen View was stretched, touch could be off
+
 ### v.1.10.4
 - Added: Dutch translation 🇳🇱 thanks to safariking
 - Several black screen and connection error enhancements
@@ -81,10 +92,10 @@ adb shell am start -a android.intent.action.VIEW -d "headunit://connect?ip=192.1
 - Enhancement: Fixing small issues in the video-decoder which should help lower spec devices to render properly (but act a little bit slower perhaps)
 
 ### v.1.10.2
-- Bigfix - Button Mapping ignored #71
+- Bugfix - Button Mapping ignored #71
 - New Feature: Screen-Orientation Feature to lock to a certain orientation (Landscape/Portrait) #69 thanks to @JanRi3D
 - Enhancement: SSL will now attempt multiple times and not break instantly thanks to @MicaelJarniac
-- Added: Chinese(Tradionnal) translation 🇹🇼 thanks to @GazCore
+- Added: Chinese(Traditional) translation 🇹🇼 thanks to @GazCore
 - Added: Czech translation 🇨🇿 thanks to @teodortomas #75
 - Fixed brazilian portuguese folder name
 

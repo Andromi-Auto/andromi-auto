@@ -2,119 +2,199 @@ package com.andrerinas.headunitrevived.connection
 
 import android.content.Context
 import android.net.ConnectivityManager
-import android.net.LinkProperties
+import android.os.Build
 import com.andrerinas.headunitrevived.utils.AppLog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.net.Inet4Address
+import java.net.InetAddress
 import java.net.InetSocketAddress
-import java.net.Socket
 import java.net.NetworkInterface
+import java.net.Socket
 import java.util.Collections
+
 class NetworkDiscovery(private val context: Context, private val listener: Listener) {
 
     interface Listener {
-        fun onServiceFound(ip: String)
+        fun onServiceFound(ip: String, port: Int)
         fun onScanFinished()
     }
 
-    private var isScanning = false
+    private var scanJob: Job? = null
 
     fun startScan() {
-        if (isScanning) return
-        isScanning = true
+        if (scanJob?.isActive == true) return
 
-        val subnet = getSubnet()
-        if (subnet == null) {
-            AppLog.e("Could not determine subnet")
-            listener.onScanFinished()
-            isScanning = false
-            return
-        }
+        AppLog.i("NetworkDiscovery: Starting scan...")
 
-        AppLog.i("Starting scan on subnet: $subnet.*")
-
-        CoroutineScope(Dispatchers.IO).launch {
-            val tasks = mutableListOf<Deferred<Unit>>()
-
-            // Scan range 1..254
-            for (i in 1..254) {
-                val ip = "$subnet.$i"
-                tasks.add(async {
-                    checkPort(ip, 5277)
-                })
+        scanJob = CoroutineScope(Dispatchers.IO).launch {
+            // 1. Quick Scan: Check likely Gateways first
+            AppLog.i("NetworkDiscovery: Step 1 - Quick Gateway Scan")
+            val gatewayFound = scanGateways()
+            
+            if (gatewayFound) {
+                 AppLog.i("NetworkDiscovery: Gateway found service, skipping subnet scan.")
+                 withContext(Dispatchers.Main) {
+                    listener.onScanFinished()
+                }
+                return@launch
             }
 
-            tasks.awaitAll()
+            // 2. Deep Scan: Check entire Subnet
+            AppLog.i("NetworkDiscovery: Step 2 - Full Subnet Scan")
+            scanSubnet()
 
             withContext(Dispatchers.Main) {
-                isScanning = false
                 listener.onScanFinished()
             }
         }
     }
 
-    private fun checkPort(ip: String, port: Int) {
+    private suspend fun scanGateways(): Boolean {
+        var foundAny = false
         try {
-            val socket = Socket()
-            socket.connect(InetSocketAddress(ip, port), 300) // 300ms Timeout
-            socket.close()
-            AppLog.i("Found service at $ip:$port")
-            // Callback on whatever thread we are on, listener must handle UI update
-            listener.onServiceFound(ip)
+            val suspects = mutableSetOf<String>()
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+                val activeNet = cm.activeNetwork
+                if (activeNet != null) {
+                    val lp = cm.getLinkProperties(activeNet)
+                    lp?.routes?.forEach { route ->
+                        if (route.isDefaultRoute && route.gateway is Inet4Address) {
+                            route.gateway?.hostAddress?.let { suspects.add(it) }
+                        }
+                    }
+                }
+            }
+            // Always try heuristics (X.X.X.1) for all interfaces
+            collectInterfaceSuspects(suspects)
+
+            if (suspects.isNotEmpty()) {
+                AppLog.i("NetworkDiscovery: Checking suspects: $suspects")
+                for (ip in suspects) {
+                    if (checkAndReport(ip)) {
+                        foundAny = true
+                    }
+                }
+            }
         } catch (e: Exception) {
-            // Not reachable
+            AppLog.e("NetworkDiscovery: Gateway scan error", e)
+        }
+        return foundAny
+    }
+
+    private suspend fun scanSubnet() {
+        val subnet = getSubnet()
+        if (subnet == null) {
+            AppLog.e("NetworkDiscovery: Could not determine subnet for deep scan")
+            return
+        }
+
+        AppLog.i("NetworkDiscovery: Scanning subnet: $subnet.*")
+
+        val tasks = mutableListOf<Deferred<Boolean>>()
+
+        // Scan range 1..254 (excluding gateway potentially, but checkAndReport handles duplicates if called)
+        for (i in 1..254) {
+            val ip = "$subnet.$i"
+            tasks.add(CoroutineScope(Dispatchers.IO).async {
+                checkAndReport(ip)
+            })
+        }
+
+        tasks.awaitAll()
+    }
+
+    private suspend fun checkAndReport(ip: String): Boolean {
+        // Check Port 5289 (Wifi Launcher) - prioritizing this
+        if (checkPort(ip, 5289, timeout = 300)) {
+            AppLog.i("NetworkDiscovery: Found Wifi Launcher on $ip:5289")
+            withContext(Dispatchers.Main) {
+                listener.onServiceFound(ip, 5289)
+            }
+            return true
+        }
+        
+        // Check Port 5277 (Standard Headunit)
+        if (checkPort(ip, 5277, timeout = 300)) {
+            AppLog.i("NetworkDiscovery: Found Headunit Server on $ip:5277")
+            withContext(Dispatchers.Main) {
+                listener.onServiceFound(ip, 5277)
+            }
+            return true
+        }
+        
+        return false
+    }
+
+    private fun checkPort(ip: String, port: Int, timeout: Int = 500): Boolean {
+        return try {
+            val socket = Socket()
+            socket.connect(InetSocketAddress(ip, port), timeout)
+            socket.close()
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    private fun collectInterfaceSuspects(suspects: MutableSet<String>) {
+        try {
+            val interfaces = NetworkInterface.getNetworkInterfaces() ?: return
+            while (interfaces.hasMoreElements()) {
+                val iface = interfaces.nextElement()
+                if (iface.isLoopback || !iface.isUp) continue
+                
+                val addresses = iface.inetAddresses
+                while (addresses.hasMoreElements()) {
+                    val addr = addresses.nextElement()
+                    if (addr is Inet4Address) {
+                        // Heuristic: Gateway is usually .1 in the same subnet
+                        val ipBytes = addr.address
+                        ipBytes[3] = 1
+                        val suspectIp = InetAddress.getByAddress(ipBytes).hostAddress
+                        // Only add if it's not our own IP (though checking own IP is fast anyway)
+                        suspects.add(suspectIp)
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            AppLog.e("NetworkDiscovery: Interface collection failed", e)
         }
     }
 
     private fun getSubnet(): String? {
-        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-
-        var linkProperties: LinkProperties? = null
-
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-            val network = connectivityManager.activeNetwork
-            if (network != null) {
-                linkProperties = connectivityManager.getLinkProperties(network)
-            }
-        }
-
-        // Fallback or lower API logic could be added if needed, but activeNetwork usually works for WiFi.
-        // If linkProperties is null, we might be on Ethernet or old API.
-
-        if (linkProperties == null) {
-            // Try getting all networks? Or just return null for now.
-            val interfaces = Collections.list(NetworkInterface.getNetworkInterfaces())
-            for (networkInterface in interfaces) {
-                // Standard Android P2P interface names
-                if (networkInterface.name.contains("p2p")) {
-                    return "192.168.49"
-                }
-            }
-            return null
-        }
-
-        for (linkAddress in linkProperties.linkAddresses) {
-            val address = linkAddress.address
-            if (address is Inet4Address && !address.isLoopbackAddress) {
-                val host = address.hostAddress
-                // Simple subnet extraction: first 3 octets
-                val lastDot = host.lastIndexOf('.')
-                if (lastDot > 0) {
-                    return host.substring(0, lastDot)
-                }
-            }
+        // Reuse similar logic to collectInterfaceSuspects but return subnet string
+        try {
+             val interfaces = Collections.list(NetworkInterface.getNetworkInterfaces())
+             for (networkInterface in interfaces) {
+                 if (!networkInterface.isUp || networkInterface.isLoopback) continue
+                 
+                 for (addr in Collections.list(networkInterface.inetAddresses)) {
+                     if (addr is Inet4Address) {
+                         val host = addr.hostAddress
+                         val lastDot = host.lastIndexOf('.')
+                         if (lastDot > 0) {
+                             return host.substring(0, lastDot)
+                         }
+                     }
+                 }
+             }
+        } catch (e: Exception) {
+            AppLog.e("NetworkDiscovery: Failed to get subnet", e)
         }
         return null
     }
 
     fun stop() {
-        // Nothing to stop really, coroutines will finish or timeout.
-        isScanning = false
+        scanJob?.cancel()
+        scanJob = null
     }
 }
