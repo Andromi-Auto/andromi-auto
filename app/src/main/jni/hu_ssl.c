@@ -71,6 +71,9 @@ void hu_ssl_ret_log(int ret) {
 
 int hu_ssl_prepare()
 {
+    if (hu_ssl_ssl != NULL) {
+        hu_ssl_cleanup();
+    }
     int ret;
     BIO * cert_bio = NULL;
     BIO * pkey_bio = NULL;
@@ -236,4 +239,19 @@ int hu_ssl_read(int offset, int res_max, jbyte *res_buf)
 int hu_ssl_write(int offset, int msg_len, jbyte *msg_buf)
 {
     return SSL_write(hu_ssl_ssl, &msg_buf[offset], msg_len);
+}
+
+void hu_ssl_cleanup() {
+    logd("hu_ssl_cleanup");
+    if (hu_ssl_ssl != NULL) {
+        SSL_free(hu_ssl_ssl);
+        hu_ssl_ssl = NULL;
+    }
+    if (hu_ssl_ctx != NULL) {
+        SSL_CTX_free(hu_ssl_ctx);
+        hu_ssl_ctx = NULL;
+    }
+    hu_ssl_rm_bio = NULL;
+    hu_ssl_wm_bio = NULL;
+    hu_ssl_method = NULL;
 }

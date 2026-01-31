@@ -216,42 +216,57 @@ class AapService : Service(), UsbReceiver.Listener {
         }
     }
 
-    private var discoveryJob: Job? = null
+    private var networkDiscovery: com.andrerinas.headunitrevived.connection.NetworkDiscovery? = null
 
     private fun startWirelessServer() {
-        if (wirelessServer != null) return;
-        wirelessServer = WirelessServer().apply { start() };
+        if (wirelessServer != null) return
+        wirelessServer = WirelessServer().apply { start() }
         
-        // Recurring scan for Hotspot Gateway (Phone)
-        discoveryJob = serviceScope.launch {
-            while (isActive) {
-                if (!isConnected) {
-                    NetworkDiscovery.scanForGateway(this@AapService) { ip, port ->
-                        if (port == 5277) {
-                            // Headunit Server detected -> We must connect actively
-                            AppLog.i("Auto-connecting to Headunit Server at $ip:$port")
-                            val intent = Intent(this@AapService, AapService::class.java).apply {
-                                putExtra(EXTRA_IP, ip)
-                                putExtra(EXTRA_CONNECTION_TYPE, TYPE_WIFI)
-                            }
-                            handleConnectionIntent(intent)
-                        } else if (port == 5289) {
-                            // Wifi Launcher detected -> The connect() inside scanForGateway already triggered the phone.
-                            // Now we just wait for the phone to connect to our WirelessServer (port 5288).
-                            AppLog.i("Triggered Wifi Launcher at $ip:$port. Waiting for incoming connection...")
-                        }
+        startDiscovery()
+    }
+
+    private fun startDiscovery() {
+        if (isConnected || wirelessServer == null) return
+
+        // Ensure old discovery is stopped/cleaned
+        networkDiscovery?.stop()
+
+        networkDiscovery = com.andrerinas.headunitrevived.connection.NetworkDiscovery(this, object : com.andrerinas.headunitrevived.connection.NetworkDiscovery.Listener {
+            override fun onServiceFound(ip: String, port: Int) {
+                if (isConnected) return
+
+                if (port == 5277) {
+                    // Headunit Server detected -> We must connect actively
+                    AppLog.i("Auto-connecting to Headunit Server at $ip:$port")
+                    val intent = Intent(this@AapService, AapService::class.java).apply {
+                        putExtra(EXTRA_IP, ip)
+                        putExtra(EXTRA_CONNECTION_TYPE, TYPE_WIFI)
+                    }
+                    handleConnectionIntent(intent)
+                } else if (port == 5289) {
+                    // Wifi Launcher detected -> Triggered
+                    AppLog.i("Triggered Wifi Launcher at $ip:$port.")
+                }
+            }
+
+            override fun onScanFinished() {
+                // Schedule next scan in 10s
+                serviceScope.launch {
+                    delay(10000)
+                    if (wirelessServer != null && !isConnected) {
+                        startDiscovery()
                     }
                 }
-                delay(10000)
             }
-        }
+        })
+        networkDiscovery?.startScan()
     }
 
     private fun stopWirelessServer() {
-        discoveryJob?.cancel()
-        discoveryJob = null
-        wirelessServer?.stopServer();
-        wirelessServer = null;
+        networkDiscovery?.stop()
+        networkDiscovery = null
+        wirelessServer?.stopServer()
+        wirelessServer = null
     }
 
     private inner class WirelessServer : Thread() {
