@@ -24,17 +24,16 @@ import com.andrerinas.headunitrevived.App
 import com.andrerinas.headunitrevived.R
 import com.andrerinas.headunitrevived.aap.protocol.messages.NightModeEvent
 import com.andrerinas.headunitrevived.connection.AccessoryConnection
+import com.andrerinas.headunitrevived.connection.NetworkDiscovery
 import com.andrerinas.headunitrevived.connection.SocketAccessoryConnection
 import com.andrerinas.headunitrevived.connection.UsbAccessoryConnection
 import com.andrerinas.headunitrevived.connection.UsbDeviceCompat
 import com.andrerinas.headunitrevived.connection.UsbReceiver
 import com.andrerinas.headunitrevived.contract.ConnectedIntent
 import com.andrerinas.headunitrevived.contract.DisconnectIntent
-import com.andrerinas.headunitrevived.contract.LocationUpdateIntent
 import com.andrerinas.headunitrevived.location.GpsLocationService
 import com.andrerinas.headunitrevived.utils.AppLog
 import com.andrerinas.headunitrevived.utils.DeviceIntent
-import com.andrerinas.headunitrevived.utils.NightMode
 import com.andrerinas.headunitrevived.utils.NightModeManager
 import com.andrerinas.headunitrevived.utils.Settings
 import kotlinx.coroutines.*
@@ -216,7 +215,7 @@ class AapService : Service(), UsbReceiver.Listener {
         }
     }
 
-    private var networkDiscovery: com.andrerinas.headunitrevived.connection.NetworkDiscovery? = null
+    private var networkDiscovery: NetworkDiscovery? = null
 
     private fun startWirelessServer() {
         if (wirelessServer != null) return
@@ -231,7 +230,7 @@ class AapService : Service(), UsbReceiver.Listener {
         // Ensure old discovery is stopped/cleaned
         networkDiscovery?.stop()
 
-        networkDiscovery = com.andrerinas.headunitrevived.connection.NetworkDiscovery(this, object : com.andrerinas.headunitrevived.connection.NetworkDiscovery.Listener {
+        networkDiscovery = NetworkDiscovery(this, object : NetworkDiscovery.Listener {
             override fun onServiceFound(ip: String, port: Int) {
                 if (isConnected) return
 
@@ -316,7 +315,7 @@ class AapService : Service(), UsbReceiver.Listener {
                                 pendingConnectionUsbDevice = "";
 
                                 // Prepare and capture the connection instance
-                                val conn = SocketAccessoryConnection(clientSocket);
+                                val conn = SocketAccessoryConnection(clientSocket, this@AapService);
                                 accessoryConnection = conn;
 
                                 // mark this attempt before starting the blocking connect
@@ -519,7 +518,7 @@ class AapService : Service(), UsbReceiver.Listener {
                 return UsbAccessoryConnection(context.getSystemService(Context.USB_SERVICE) as UsbManager, device);
             } else if (connectionType == TYPE_WIFI) {
                 val ip = intent?.getStringExtra(EXTRA_IP) ?: "";
-                return SocketAccessoryConnection(ip, 5277);
+                return SocketAccessoryConnection(ip, 5277, context);
             }
             return null;
         }
