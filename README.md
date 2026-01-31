@@ -1,16 +1,6 @@
 # Headunit Revived
 
-# Playstore
-I try to bring the app to the playstore! This is my first time and it is very hard to get through all the steps.
-The next step is to get a several amount of testers.
-
-Please go to groups.google.com and join the Group: headunit-revived@googlegroups.com
-https://groups.google.com/g/headunit-revived
-
-After that you have access to: https://play.google.com/apps/testing/com.andrerinas.headunitrevived
-<p align="center">
-<img width="200" height="200" alt="Image" src="https://github.com/user-attachments/assets/b7a9caad-00b1-4b73-b338-b2970ddcc855" />
-</p>
+<a href='https://play.google.com/store/apps/details?id=com.andrerinas.headunitrevived'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png' width="200"/></a>
 
 <p align="center">
     <img src="https://github.com/user-attachments/assets/20c3d622-89dc-4c20-8eae-b43074f3c144"
@@ -18,7 +8,7 @@ After that you have access to: https://play.google.com/apps/testing/com.andrerin
     height="200">
 </p>
 
-This project is a revived version of the original headunit project by the great Michael Reid. The original project can be found here:
+Headunit Revived is an Android app that allows you to turn your Android tablet or phone into an Android Auto receiver. This project is a revived version of the original headunit project by the great Michael Reid. The original project can be found here:
 https://github.com/mikereidis/headunit
 
 ## Screenshots
