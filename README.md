@@ -80,6 +80,7 @@ adb shell am start -a android.intent.action.VIEW -d "headunit://connect?ip=192.1
 - Added: Spanish translation 🇪🇸 thanks to @andrecuellar
 - Added: Ukraine translation 🇺🇦 thanks to welshi32
 - Bugfix: Non-Fullscreen View was stretched, touch could be off
+- Bugfix: Wifi with Headunit Server now works with hotspot
 
 ### v.1.10.4
 - Added: Dutch translation 🇳🇱 thanks to safariking
