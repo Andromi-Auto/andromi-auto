@@ -19,21 +19,22 @@ import android.os.Parcel
 import android.os.Parcelable
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import com.andrerinas.headunitrevived.App
 import com.andrerinas.headunitrevived.R
 import com.andrerinas.headunitrevived.aap.protocol.messages.NightModeEvent
 import com.andrerinas.headunitrevived.connection.AccessoryConnection
+import com.andrerinas.headunitrevived.connection.NetworkDiscovery
 import com.andrerinas.headunitrevived.connection.SocketAccessoryConnection
 import com.andrerinas.headunitrevived.connection.UsbAccessoryConnection
 import com.andrerinas.headunitrevived.connection.UsbDeviceCompat
 import com.andrerinas.headunitrevived.connection.UsbReceiver
 import com.andrerinas.headunitrevived.contract.ConnectedIntent
 import com.andrerinas.headunitrevived.contract.DisconnectIntent
-import com.andrerinas.headunitrevived.contract.LocationUpdateIntent
 import com.andrerinas.headunitrevived.location.GpsLocationService
 import com.andrerinas.headunitrevived.utils.AppLog
 import com.andrerinas.headunitrevived.utils.DeviceIntent
-import com.andrerinas.headunitrevived.utils.NightMode
+import com.andrerinas.headunitrevived.utils.NightModeManager
 import com.andrerinas.headunitrevived.utils.Settings
 import kotlinx.coroutines.*
 import java.net.ServerSocket
@@ -46,7 +47,7 @@ class AapService : Service(), UsbReceiver.Listener {
     private lateinit var uiModeManager: UiModeManager
     private var accessoryConnection: AccessoryConnection? = null
     private lateinit var usbReceiver: UsbReceiver
-    private lateinit var nightModeReceiver: BroadcastReceiver
+    private var nightModeManager: NightModeManager? = null
     private var wirelessServer: WirelessServer? = null
 
     private var pendingConnectionType: String = ""
@@ -56,6 +57,26 @@ class AapService : Service(), UsbReceiver.Listener {
 
     private val transport: AapTransport
         get() = App.provide(this).transport
+
+    private val nightModeUpdateReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            if (intent.action == ACTION_REQUEST_NIGHT_MODE_UPDATE) {
+                AppLog.i("Received request to resend night mode state")
+                nightModeManager?.resendCurrentState()
+            }
+        }
+    }
+
+    private val disconnectReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            if (intent.action == DisconnectIntent.action) {
+                if (isConnected) {
+                    AppLog.i("AapService received disconnect intent -> closing connection")
+                    onDisconnect()
+                }
+            }
+        }
+    }
 
     override fun onBind(intent: Intent): IBinder? = null
 
@@ -70,20 +91,21 @@ class AapService : Service(), UsbReceiver.Listener {
         uiModeManager.nightMode = UiModeManager.MODE_NIGHT_AUTO;
 
         usbReceiver = UsbReceiver(this);
-        nightModeReceiver = NightModeReceiver(Settings(this), uiModeManager);
-
-        val nightModeFilter = IntentFilter().apply {
-            addAction(Intent.ACTION_TIME_TICK);
-            addAction(LocationUpdateIntent.action);
-        }
         
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            registerReceiver(nightModeReceiver, nightModeFilter, RECEIVER_NOT_EXPORTED);
-            registerReceiver(usbReceiver, UsbReceiver.createFilter(), RECEIVER_NOT_EXPORTED);
-        } else {
-            registerReceiver(nightModeReceiver, nightModeFilter);
-            registerReceiver(usbReceiver, UsbReceiver.createFilter());
+        nightModeManager = NightModeManager(this, App.provide(this).settings) { isNight ->
+            AppLog.i("NightMode update: $isNight")
+            App.provide(this).transport.send(NightModeEvent(isNight))
+            uiModeManager.nightMode = if (isNight) UiModeManager.MODE_NIGHT_YES else UiModeManager.MODE_NIGHT_NO
         }
+        nightModeManager?.start()
+
+        val nightModeFilter = IntentFilter(ACTION_REQUEST_NIGHT_MODE_UPDATE)
+        val disconnectFilter = IntentFilter(DisconnectIntent.action)
+        val usbFilter = UsbReceiver.createFilter()
+
+        ContextCompat.registerReceiver(this, nightModeUpdateReceiver, nightModeFilter, ContextCompat.RECEIVER_NOT_EXPORTED)
+        ContextCompat.registerReceiver(this, disconnectReceiver, disconnectFilter, ContextCompat.RECEIVER_NOT_EXPORTED)
+        ContextCompat.registerReceiver(this, usbReceiver, usbFilter, ContextCompat.RECEIVER_NOT_EXPORTED)
 
         startService(GpsLocationService.intent(this));
 
@@ -93,6 +115,16 @@ class AapService : Service(), UsbReceiver.Listener {
     }
 
     private fun createNotification(): Notification {
+        val stopIntent = Intent(this, AapService::class.java).apply {
+            action = ACTION_STOP_SERVICE
+        }
+        val stopPendingIntent = PendingIntent.getService(
+            this, 
+            0, 
+            stopIntent, 
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else PendingIntent.FLAG_UPDATE_CURRENT
+        )
+
         return NotificationCompat.Builder(this, App.defaultChannel)
             .setSmallIcon(R.drawable.ic_stat_aa)
             .setPriority(NotificationCompat.PRIORITY_LOW)
@@ -101,7 +133,8 @@ class AapService : Service(), UsbReceiver.Listener {
             .setContentText("Headunit Revived is running")
             .setContentIntent(PendingIntent.getActivity(this, 0, 
                 Intent(this, com.andrerinas.headunitrevived.main.MainActivity::class.java),
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE))
+                PendingIntent.FLAG_UPDATE_CURRENT or (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0)))
+            .addAction(R.drawable.ic_exit_to_app_white_24dp, getString(R.string.exit), stopPendingIntent)
             .build();
     }
 
@@ -110,7 +143,9 @@ class AapService : Service(), UsbReceiver.Listener {
         stopWirelessServer();
         serviceJob.cancel();
         onDisconnect();
-        unregisterReceiver(nightModeReceiver);
+        nightModeManager?.stop()
+        unregisterReceiver(nightModeUpdateReceiver)
+        unregisterReceiver(disconnectReceiver)
         unregisterReceiver(usbReceiver);
         uiModeManager.disableCarMode(0);
         super.onDestroy();
@@ -144,7 +179,10 @@ class AapService : Service(), UsbReceiver.Listener {
         val connectionType = intent?.getIntExtra(EXTRA_CONNECTION_TYPE, 0) ?: 0;
         if (connectionType == 0) return ;
 
+        // Ensure old connection is closed!
+        accessoryConnection?.disconnect()
         accessoryConnection = connectionFactory(intent, this);
+        
         if (accessoryConnection == null) {
             AppLog.e("Cannot create connection from intent");
             return;
@@ -177,42 +215,57 @@ class AapService : Service(), UsbReceiver.Listener {
         }
     }
 
-    private var discoveryJob: Job? = null
+    private var networkDiscovery: NetworkDiscovery? = null
 
     private fun startWirelessServer() {
-        if (wirelessServer != null) return;
-        wirelessServer = WirelessServer().apply { start() };
+        if (wirelessServer != null) return
+        wirelessServer = WirelessServer().apply { start() }
         
-        // Recurring scan for Hotspot Gateway (Phone)
-        discoveryJob = serviceScope.launch {
-            while (isActive) {
-                if (!isConnected) {
-                    NetworkDiscovery.scanForGateway(this@AapService) { ip, port ->
-                        if (port == 5277) {
-                            // Headunit Server detected -> We must connect actively
-                            AppLog.i("Auto-connecting to Headunit Server at $ip:$port")
-                            val intent = Intent(this@AapService, AapService::class.java).apply {
-                                putExtra(EXTRA_IP, ip)
-                                putExtra(EXTRA_CONNECTION_TYPE, TYPE_WIFI)
-                            }
-                            handleConnectionIntent(intent)
-                        } else if (port == 5289) {
-                            // Wifi Launcher detected -> The connect() inside scanForGateway already triggered the phone.
-                            // Now we just wait for the phone to connect to our WirelessServer (port 5288).
-                            AppLog.i("Triggered Wifi Launcher at $ip:$port. Waiting for incoming connection...")
-                        }
+        startDiscovery()
+    }
+
+    private fun startDiscovery() {
+        if (isConnected || wirelessServer == null) return
+
+        // Ensure old discovery is stopped/cleaned
+        networkDiscovery?.stop()
+
+        networkDiscovery = NetworkDiscovery(this, object : NetworkDiscovery.Listener {
+            override fun onServiceFound(ip: String, port: Int) {
+                if (isConnected) return
+
+                if (port == 5277) {
+                    // Headunit Server detected -> We must connect actively
+                    AppLog.i("Auto-connecting to Headunit Server at $ip:$port")
+                    val intent = Intent(this@AapService, AapService::class.java).apply {
+                        putExtra(EXTRA_IP, ip)
+                        putExtra(EXTRA_CONNECTION_TYPE, TYPE_WIFI)
+                    }
+                    handleConnectionIntent(intent)
+                } else if (port == 5289) {
+                    // Wifi Launcher detected -> Triggered
+                    AppLog.i("Triggered Wifi Launcher at $ip:$port.")
+                }
+            }
+
+            override fun onScanFinished() {
+                // Schedule next scan in 10s
+                serviceScope.launch {
+                    delay(10000)
+                    if (wirelessServer != null && !isConnected) {
+                        startDiscovery()
                     }
                 }
-                delay(10000)
             }
-        }
+        })
+        networkDiscovery?.startScan()
     }
 
     private fun stopWirelessServer() {
-        discoveryJob?.cancel()
-        discoveryJob = null
-        wirelessServer?.stopServer();
-        wirelessServer = null;
+        networkDiscovery?.stop()
+        networkDiscovery = null
+        wirelessServer?.stopServer()
+        wirelessServer = null
     }
 
     private inner class WirelessServer : Thread() {
@@ -262,7 +315,7 @@ class AapService : Service(), UsbReceiver.Listener {
                                 pendingConnectionUsbDevice = "";
 
                                 // Prepare and capture the connection instance
-                                val conn = SocketAccessoryConnection(clientSocket);
+                                val conn = SocketAccessoryConnection(clientSocket, this@AapService);
                                 accessoryConnection = conn;
 
                                 // mark this attempt before starting the blocking connect
@@ -377,6 +430,9 @@ class AapService : Service(), UsbReceiver.Listener {
                 isConnected = true;
                 sendBroadcast(ConnectedIntent());
                 
+                // Sync current night mode state immediately after connection
+                nightModeManager?.resendCurrentState()
+                
                 if (pendingConnectionType.isNotEmpty()) {
                     val settings = App.provide(this).settings;
                     settings.saveLastConnection(
@@ -428,26 +484,6 @@ class AapService : Service(), UsbReceiver.Listener {
     override fun onUsbAttach(device: UsbDevice) {}
     override fun onUsbPermission(granted: Boolean, connect: Boolean, device: UsbDevice) {}
 
-    private class NightModeReceiver(private val settings: Settings, private val modeManager: UiModeManager) : BroadcastReceiver() {
-        private var nightMode = NightMode(settings, false);
-        private var initialized = false;
-        private var lastValue = false;
-
-        override fun onReceive(context: Context, intent: Intent) {
-            if (!nightMode.hasGPSLocation && intent.action == LocationUpdateIntent.action) {
-                nightMode = NightMode(settings, true);
-            }
-            val isCurrent = nightMode.current;
-            if (!initialized || lastValue != isCurrent) {
-                lastValue = isCurrent;
-                initialized = App.provide(context).transport.send(NightModeEvent(isCurrent));
-                if (initialized) {
-                    modeManager.nightMode = if (isCurrent) UiModeManager.MODE_NIGHT_YES else UiModeManager.MODE_NIGHT_NO;
-                }
-            }
-        }
-    }
-
     companion object {
         var isConnected = false;
         var selfMode = false;
@@ -455,6 +491,7 @@ class AapService : Service(), UsbReceiver.Listener {
         const val ACTION_START_WIRELESS = "com.andrerinas.headunitrevived.ACTION_START_WIRELESS";
         const val ACTION_STOP_WIRELESS = "com.andrerinas.headunitrevived.ACTION_STOP_WIRELESS";
         const val ACTION_STOP_SERVICE = "com.andrerinas.headunitrevived.ACTION_STOP_SERVICE";
+        const val ACTION_REQUEST_NIGHT_MODE_UPDATE = "com.andrerinas.headunitrevived.ACTION_REQUEST_NIGHT_MODE_UPDATE"
         private const val TYPE_USB = 1;
         private const val TYPE_WIFI = 2;
         private const val EXTRA_CONNECTION_TYPE = "extra_connection_type";
@@ -481,7 +518,7 @@ class AapService : Service(), UsbReceiver.Listener {
                 return UsbAccessoryConnection(context.getSystemService(Context.USB_SERVICE) as UsbManager, device);
             } else if (connectionType == TYPE_WIFI) {
                 val ip = intent?.getStringExtra(EXTRA_IP) ?: "";
-                return SocketAccessoryConnection(ip, 5277);
+                return SocketAccessoryConnection(ip, 5277, context);
             }
             return null;
         }

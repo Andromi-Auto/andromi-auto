@@ -1,6 +1,7 @@
 package com.andrerinas.headunitrevived.main
 
 import android.app.AlertDialog
+import android.app.TimePickerDialog
 import android.content.Intent
 import android.os.Bundle
 import android.text.InputType
@@ -54,6 +55,10 @@ class SettingsFragment : Fragment() {
     private var pendingUseNativeSsl: Boolean? = null
     private var pendingAutoStartSelfMode: Boolean? = null
     private var pendingScreenOrientation: Settings.ScreenOrientation? = null
+    private var pendingThresholdLux: Int? = null
+    private var pendingThresholdBrightness: Int? = null
+    private var pendingManualStart: Int? = null
+    private var pendingManualEnd: Int? = null
 
     private var requiresRestart = false
     private var hasChanges = false
@@ -70,6 +75,10 @@ class SettingsFragment : Fragment() {
 
         // Initialize local state with current values
         pendingNightMode = settings.nightMode
+        pendingThresholdLux = settings.nightModeThresholdLux
+        pendingThresholdBrightness = settings.nightModeThresholdBrightness
+        pendingManualStart = settings.nightModeManualStart
+        pendingManualEnd = settings.nightModeManualEnd
         pendingMicSampleRate = settings.micSampleRate
         pendingUseGps = settings.useGpsForNavigation
         pendingResolution = settings.resolutionId
@@ -159,6 +168,10 @@ class SettingsFragment : Fragment() {
 
     private fun saveSettings() {
         pendingNightMode?.let { settings.nightMode = it }
+        pendingThresholdLux?.let { settings.nightModeThresholdLux = it }
+        pendingThresholdBrightness?.let { settings.nightModeThresholdBrightness = it }
+        pendingManualStart?.let { settings.nightModeManualStart = it }
+        pendingManualEnd?.let { settings.nightModeManualEnd = it }
         pendingMicSampleRate?.let { settings.micSampleRate = it }
         pendingUseGps?.let { settings.useGpsForNavigation = it }
         pendingResolution?.let { settings.resolutionId = it }
@@ -187,6 +200,10 @@ class SettingsFragment : Fragment() {
 
         pendingAutoConnectLastSession?.let { settings.autoConnectLastSession = it }
 
+        // Notify Service about Night Mode changes immediately
+        val nightModeUpdateIntent = Intent(AapService.ACTION_REQUEST_NIGHT_MODE_UPDATE)
+        requireContext().sendBroadcast(nightModeUpdateIntent)
+
         if (requiresRestart) {
             if (AapService.isConnected) {
                 Toast.makeText(context, "Stopping service to apply changes...", Toast.LENGTH_SHORT).show()
@@ -208,6 +225,10 @@ class SettingsFragment : Fragment() {
     private fun checkChanges() {
         // Check for any changes
         val anyChange = pendingNightMode != settings.nightMode ||
+                        pendingThresholdLux != settings.nightModeThresholdLux ||
+                        pendingThresholdBrightness != settings.nightModeThresholdBrightness ||
+                        pendingManualStart != settings.nightModeManualStart ||
+                        pendingManualEnd != settings.nightModeManualEnd ||
                         pendingMicSampleRate != settings.micSampleRate ||
                         pendingUseGps != settings.useGpsForNavigation ||
                         pendingResolution != settings.resolutionId ||
@@ -253,7 +274,15 @@ class SettingsFragment : Fragment() {
         items.add(SettingItem.SettingEntry(
             stableId = "nightMode",
             nameResId = R.string.night_mode,
-            value = resources.getStringArray(R.array.night_mode)[pendingNightMode!!.value],
+            value = run {
+                val base = resources.getStringArray(R.array.night_mode)[pendingNightMode!!.value]
+                if (pendingNightMode == Settings.NightMode.AUTO) {
+                    val info = com.andrerinas.headunitrevived.utils.NightMode(settings, true).getCalculationInfo()
+                    "$base ($info)"
+                } else {
+                    base
+                }
+            },
             onClick = { _ ->
                 val nightModeTitles = resources.getStringArray(R.array.night_mode)
                 
@@ -268,6 +297,74 @@ class SettingsFragment : Fragment() {
                     .show()
             }
         ))
+
+        if (pendingNightMode == Settings.NightMode.LIGHT_SENSOR || pendingNightMode == Settings.NightMode.SCREEN_BRIGHTNESS) {
+            val isSensor = pendingNightMode == Settings.NightMode.LIGHT_SENSOR
+            val unit = if (isSensor) "Lux" else "/ 255"
+            val desc = if (isSensor) getString(R.string.threshold_lux_desc) else getString(R.string.threshold_brightness_desc)
+            val currentValue = if (isSensor) pendingThresholdLux else pendingThresholdBrightness
+            
+            items.add(SettingItem.SettingEntry(
+                stableId = "nightModeThreshold",
+                nameResId = R.string.night_mode_threshold,
+                value = "$currentValue $unit",
+                onClick = { _ ->
+                    val editView = EditText(requireContext())
+                    editView.inputType = InputType.TYPE_CLASS_NUMBER
+                    editView.setText(currentValue.toString())
+                    
+                    MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
+                        .setTitle(R.string.enter_threshold_value)
+                        .setMessage(desc)
+                        .setView(editView)
+                        .setPositiveButton(android.R.string.ok) { dialog, _ ->
+                            val newVal = editView.text.toString().toIntOrNull()
+                            if (newVal != null && newVal >= 0) {
+                                if (isSensor) {
+                                    pendingThresholdLux = newVal
+                                } else {
+                                    pendingThresholdBrightness = newVal
+                                }
+                                checkChanges()
+                                updateSettingsList()
+                            }
+                            dialog.dismiss()
+                        }
+                        .setNegativeButton(android.R.string.cancel, null)
+                        .show()
+                }
+            ))
+        }
+
+        if (pendingNightMode == Settings.NightMode.MANUAL_TIME) {
+            val formatTime = { minutes: Int -> "%02d:%02d".format(minutes / 60, minutes % 60) }
+
+            items.add(SettingItem.SettingEntry(
+                stableId = "nightModeStart",
+                nameResId = R.string.night_mode_start,
+                value = formatTime(pendingManualStart!!),
+                onClick = { _ ->
+                    TimePickerDialog(requireContext(), { _, hour, minute ->
+                        pendingManualStart = hour * 60 + minute
+                        checkChanges()
+                        updateSettingsList()
+                    }, pendingManualStart!! / 60, pendingManualStart!! % 60, true).show()
+                }
+            ))
+
+            items.add(SettingItem.SettingEntry(
+                stableId = "nightModeEnd",
+                nameResId = R.string.night_mode_end,
+                value = formatTime(pendingManualEnd!!),
+                onClick = { _ ->
+                    TimePickerDialog(requireContext(), { _, hour, minute ->
+                        pendingManualEnd = hour * 60 + minute
+                        checkChanges()
+                        updateSettingsList()
+                    }, pendingManualEnd!! / 60, pendingManualEnd!! % 60, true).show()
+                }
+            ))
+        }
 
         items.add(SettingItem.SettingEntry(
             stableId = "micSampleRate",
@@ -460,8 +557,8 @@ class SettingsFragment : Fragment() {
                 val currentIdx = pendingScreenOrientation!!.value
                 AlertDialog.Builder(requireContext())
                     .setTitle(R.string.change_screen_orientation)
-                    .setSingleChoiceItems(orientationOptions, currentIdx) { dialog, which ->
-                        pendingScreenOrientation = Settings.ScreenOrientation.fromInt(which)
+                    .setSingleChoiceItems(orientationOptions, currentIdx) { dialog, whiches ->
+                        pendingScreenOrientation = Settings.ScreenOrientation.fromInt(whiches)
                         checkChanges()
                         dialog.dismiss()
                         updateSettingsList()

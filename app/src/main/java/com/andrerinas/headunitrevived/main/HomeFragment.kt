@@ -189,11 +189,9 @@ class HomeFragment : Fragment() {
             addAction(ConnectedIntent.action)
             addAction(DisconnectIntent.action)
         }
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-            requireContext().registerReceiver(connectionStatusReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
-        } else {
-            requireContext().registerReceiver(connectionStatusReceiver, filter)
-        }
+        
+        ContextCompat.registerReceiver(requireContext(), connectionStatusReceiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED)
+        
         updateProjectionButtonText()
     }
 

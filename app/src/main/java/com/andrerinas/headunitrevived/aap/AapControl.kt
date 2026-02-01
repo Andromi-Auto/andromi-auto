@@ -1,6 +1,7 @@
 package com.andrerinas.headunitrevived.aap
 
 import android.content.Context
+import android.content.Intent
 import android.media.AudioManager
 import com.andrerinas.headunitrevived.aap.protocol.AudioConfigs
 import com.andrerinas.headunitrevived.aap.protocol.Channel
@@ -145,7 +146,7 @@ internal class AapControlTouch(private val aapTransport: AapTransport): AapContr
 
 }
 
-internal class AapControlSensor(private val aapTransport: AapTransport): AapControl {
+internal class AapControlSensor(private val aapTransport: AapTransport, private val context: Context): AapControl {
 
     override fun execute(message: AapMessage): Int {
         when (message.type) {
@@ -168,6 +169,11 @@ internal class AapControlSensor(private val aapTransport: AapTransport): AapCont
 
         aapTransport.send(msg)
         aapTransport.startSensor(request.type.number)
+        
+        if (request.type == Sensors.SensorType.NIGHT) {
+            AppLog.i("Night sensor requested. Triggering immediate update.")
+            context.sendBroadcast(Intent(AapService.ACTION_REQUEST_NIGHT_MODE_UPDATE))
+        }
         return 0
     }
 }
@@ -327,7 +333,7 @@ internal class AapControlGateway(
             AapControlService(aapTransport, aapAudio, settings, context),
             AapControlMedia(aapTransport, micRecorder, aapAudio),
             AapControlTouch(aapTransport),
-            AapControlSensor(aapTransport))
+            AapControlSensor(aapTransport, context))
 
     override fun execute(message: AapMessage): Int {
 

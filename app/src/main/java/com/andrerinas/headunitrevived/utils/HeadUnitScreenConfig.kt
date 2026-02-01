@@ -19,8 +19,22 @@ object HeadUnitScreenConfig {
     var negotiatedResolutionType: Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType? = null
     private lateinit var currentSettings: Settings // Store settings instance
 
+    // System Insets (Bars/Cutouts)
+    var systemInsetLeft: Int = 0
+        private set
+    var systemInsetTop: Int = 0
+        private set
+    var systemInsetRight: Int = 0
+        private set
+    var systemInsetBottom: Int = 0
+        private set
+
+    // Raw Screen Dimensions (Full Display)
+    private var realScreenWidthPx: Int = 0
+    private var realScreenHeightPx: Int = 0
+
+
     fun init(context: Context, displayMetrics: DisplayMetrics, settings: Settings) {
-        val selectedResolution = Settings.Resolution.fromId(settings.resolutionId)
         val screenWidth: Int
         val screenHeight: Int
 
@@ -40,23 +54,49 @@ object HeadUnitScreenConfig {
             screenHeight = size.y
         }
 
-        // Only update if dimensions or settings changed
-        if (isInitialized && screenWidthPx == screenWidth && screenHeightPx == screenHeight && this::currentSettings.isInitialized && currentSettings == settings) {
+        // Only update if dimensions or settings changed (and we are already initialized)
+        if (isInitialized && realScreenWidthPx == screenWidth && realScreenHeightPx == screenHeight && this::currentSettings.isInitialized && currentSettings == settings) {
             return
         }
 
         isInitialized = true
         currentSettings = settings
 
-        screenWidthPx = screenWidth
-        screenHeightPx = screenHeight
+        realScreenWidthPx = screenWidth
+        realScreenHeightPx = screenHeight
         density = displayMetrics.density
         densityDpi = displayMetrics.densityDpi
+        
+        recalculate()
+    }
 
-        if (screenWidthPx == 0 || screenHeightPx == 0) {
+    fun updateInsets(left: Int, top: Int, right: Int, bottom: Int) {
+        if (systemInsetLeft == left && systemInsetTop == top && systemInsetRight == right && systemInsetBottom == bottom) {
             return
         }
-        AppLog.i("CarScreen: width: $screenWidthPx height: $screenHeightPx")
+        
+        systemInsetLeft = left
+        systemInsetTop = top
+        systemInsetRight = right
+        systemInsetBottom = bottom
+        
+        if (isInitialized) {
+            recalculate()
+        }
+    }
+
+    private fun recalculate() {
+        // Calculate USABLE area
+        screenWidthPx = realScreenWidthPx - systemInsetLeft - systemInsetRight
+        screenHeightPx = realScreenHeightPx - systemInsetTop - systemInsetBottom
+
+        if (screenWidthPx <= 0 || screenHeightPx <= 0) {
+            // Fallback to raw if calculation fails or leads to 0
+            screenWidthPx = realScreenWidthPx
+            screenHeightPx = realScreenHeightPx
+        }
+        
+        AppLog.i("CarScreen: usable width: $screenWidthPx height: $screenHeightPx (Raw: ${realScreenWidthPx}x${realScreenHeightPx}, Insets: L$systemInsetLeft T$systemInsetTop R$systemInsetRight B$systemInsetBottom)")
 
         // check if small screen
         if (screenHeightPx > screenWidthPx) { // Portrait mode
@@ -68,6 +108,8 @@ object HeadUnitScreenConfig {
                 isSmallScreen = false
             }
         }
+
+        val selectedResolution = Settings.Resolution.fromId(currentSettings.resolutionId)
 
         // Determine negotiatedResolutionType based on physical pixels if AUTO was selected
         if (selectedResolution == Settings.Resolution.AUTO) {

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="night_mode">
+        <item>Auto (Východ/Západ slunce)</item>
+        <item>Den</item>
+        <item>Noc</item>
+        <item>Ruční čas</item>
+        <item>Světelný senzor</item>
+        <item>Jas obrazovky</item>
+    </string-array>
+</resources>

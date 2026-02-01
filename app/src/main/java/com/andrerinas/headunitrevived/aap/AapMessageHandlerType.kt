@@ -26,21 +26,41 @@ internal class AapMessageHandlerType(
         val msgType = message.type
         val flags = message.flags
 
+        // 1. Try processing as Video stream first (ID_VID)
         if (message.channel == Channel.ID_VID) {
-             // Try processing as video stream first
+             // Send ACK IMMEDIATELY before processing to keep the stream flowing
+             // This prevents blocking the message thread if the decoder is slow.
+             if (message.type == 0 || message.type == 1) {
+                 transport.sendMediaAck(message.channel)
+             }
+             
              if (aapVideo.process(message)) {
                  videoPacketCount++
-                 transport.sendMediaAck(message.channel)
+                 // ACK was already sent above if it was a media packet
                  return
              }
         }
 
-        if (message.isAudio && (msgType == 0 || msgType == 1)) {
-            transport.sendMediaAck(message.channel)
-            aapAudio.process(message)
-        } else if (message.channel == Channel.ID_MPB && msgType > 31) {
+        // 2. Try processing as Audio stream (Speech, System, Media)
+        if (message.isAudio) {
+            // Send ACK IMMEDIATELY before processing
+            if (message.type == 0 || message.type == 1) {
+                transport.sendMediaAck(message.channel)
+            }
+
+            if (aapAudio.process(message)) {
+                return
+            }
+        }
+
+        // 3. Media Playback Status (separate channel)
+        if (message.channel == Channel.ID_MPB && msgType > 31) {
             mediaPlayback.process(message)
-        } else if (msgType in 0..31 || msgType in 32768..32799 || msgType in 65504..65535) {
+            return
+        }
+
+        // 4. Control Message Fallback
+        if (msgType in 0..31 || msgType in 32768..32799 || msgType in 65504..65535) {
             try {
                 aapControl.execute(message)
             } catch (e: Exception) {

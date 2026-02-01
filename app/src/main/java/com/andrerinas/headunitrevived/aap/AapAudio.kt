@@ -48,12 +48,20 @@ internal class AapAudio(
         }
     }
 
-    fun process(message: AapMessage): Int {
-        if (message.size >= 10) {
-            decode(message.channel, 10, message.data, message.size - 10)
+    /**
+     * Processes a message as an audio stream packet.
+     * Returns true if the packet was identified and processed as audio data, false otherwise.
+     */
+    fun process(message: AapMessage): Boolean {
+        // Media stream packets have msgType 0 or 1.
+        // Control packets on audio channels (Setup, Start, Stop) have types > 32767.
+        if (message.type == 0 || message.type == 1) {
+            if (message.size >= 10) {
+                decode(message.channel, 10, message.data, message.size - 10)
+            }
+            return true
         }
-
-        return 0
+        return false
     }
 
     private fun decode(channel: Int, start: Int, buf: ByteArray, len: Int) {

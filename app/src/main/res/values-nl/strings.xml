@@ -93,8 +93,17 @@
     <string name="key_call">Telefoon</string>
     <string name="key_music">Muziek</string>
     <string name="key_nav">Navigatie</string>
-    <string name="key_night">Nacht modus</string>
+    <string name="key_night">Schakel Nachtmodus</string>
 
+    <string name="night_mode_threshold">Drempelwaarde nachtmodus</string>
+    <string name="enter_threshold_value">Voer drempelwaarde in</string>
+    <string name="threshold_lux_desc">Lux waarde (0-10000). Hieronder = Nacht.</string>
+    <string name="threshold_brightness_desc">Helderheidswaarde (0-255). Hieronder = Nacht.</string>
+    <string name="night_mode_start">Starttijd nachtmodus</string>
+    <string name="night_mode_end">Eindtijd nachtmodus</string>
+
+    <string name="reconnection_required_title">Opnieuw verbinden vereist</string>
+    <string name="reconnection_required_message">Het apparaat staat in de wachtstand. Koppel de USB-kabel los en sluit deze opnieuw aan om Android Auto opnieuw te starten.</string>
 
     <!-- Categories for SettingsFragment -->
     <string name="category_general">Algemeen</string>

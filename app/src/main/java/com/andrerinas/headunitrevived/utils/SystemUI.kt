@@ -65,10 +65,12 @@ object SystemUI {
         ViewCompat.setOnApplyWindowInsetsListener(root) { v, insetsCompat ->
             if (fullscreen) {
                 v.setPadding(0, 0, 0, 0)
+                HeadUnitScreenConfig.updateInsets(0, 0, 0, 0)
             } else {
                 val bars = insetsCompat.getInsets(WindowInsetsCompat.Type.systemBars())
                 // Only apply padding if the system actually provides it
                 v.setPadding(bars.left, bars.top, bars.right, bars.bottom)
+                HeadUnitScreenConfig.updateInsets(bars.left, bars.top, bars.right, bars.bottom)
             }
             insetsCompat
         }
