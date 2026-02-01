@@ -1,13 +1,10 @@
 package com.andrerinas.headunitrevived.app
 
-import android.app.Activity
 import android.os.Bundle
-
+import androidx.appcompat.app.AppCompatActivity
 import com.andrerinas.headunitrevived.R
-import com.andrerinas.headunitrevived.utils.SystemUI
 
-
-abstract class SurfaceActivity : Activity() {
+abstract class SurfaceActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

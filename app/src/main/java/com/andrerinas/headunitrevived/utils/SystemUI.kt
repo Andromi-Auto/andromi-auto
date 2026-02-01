@@ -21,6 +21,20 @@ object SystemUI {
             window.attributes = params
         }
 
+        // Handle Translucent flags for older APIs (19-29)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            if (fullscreen) {
+                window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
+                window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION)
+            } else {
+                window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
+                window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION)
+            }
+        }
+
+        // Toggle fitsSystemWindows programmatically.
+        root.fitsSystemWindows = !fullscreen
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             val controller = window.insetsController
             if (controller != null) {
@@ -32,7 +46,7 @@ object SystemUI {
                 }
             }
         } else {
-            // Legacy Flags
+            // Legacy Flags (KitKat API 19 and above)
             @Suppress("DEPRECATION")
             if (fullscreen) {
                 window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_FULLSCREEN
@@ -42,29 +56,24 @@ object SystemUI {
                         or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                         or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN)
             } else {
-                // Clear flags to show bars. VISIBLE is 0.
+                // Reset to visible and clear all layout flags to ensure content stays inside bars
                 window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
             }
         }
 
-        // Manual Inset Handling using compat APIs (safe on API < 21)
+        // Manual Inset Handling
         ViewCompat.setOnApplyWindowInsetsListener(root) { v, insetsCompat ->
             if (fullscreen) {
                 v.setPadding(0, 0, 0, 0)
             } else {
                 val bars = insetsCompat.getInsets(WindowInsetsCompat.Type.systemBars())
+                // Only apply padding if the system actually provides it
                 v.setPadding(bars.left, bars.top, bars.right, bars.bottom)
             }
             insetsCompat
         }
 
         ViewCompat.requestApplyInsets(root)
-    }
-    
-    // Compatibility method for SurfaceActivity (if we keep it calling hide)
-    // But we plan to remove the call in SurfaceActivity.
-    fun hide(view: View) {
-        // No-op or delegate?
-        // We will remove usages in SurfaceActivity.
+        root.requestLayout()
     }
 }
