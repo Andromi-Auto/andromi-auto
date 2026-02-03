@@ -66,11 +66,7 @@ java_*.hprof
 
 todos.txt
 
-openauto/
 bug/
-WirelessAndroidAutoDongle/
-TestImported
-test_files
 headunit-revived/
-headunit-revived.wiki/
 user_logs
+deploy_old_tablet.sh
