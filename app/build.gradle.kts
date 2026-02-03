@@ -9,7 +9,7 @@ plugins {
 
 dependencies {
     // Conscrypt
-    implementation("org.conscrypt:conscrypt-android:2.5.2")
+    implementation("org.conscrypt:conscrypt-android:2.5.3")
 
     implementation("com.google.protobuf:protobuf-java:3.25.1")
     implementation("androidx.activity:activity-ktx:1.8.2")
@@ -73,9 +73,9 @@ android {
     defaultConfig {
         applicationId = "com.andrerinas.headunitrevived"
         minSdk = 16
-        //minSdk = 21 // 21 only for google play console. App should work in minSDK 19 or maybe 17
+//        minSdk = 21 // 21 only for google play console. App should work in minSDK 19 or maybe 17
         targetSdk = 36
-        versionCode = 35
+        versionCode = 38
         versionName = "1.11.1"
         setProperty("archivesBaseName", "${applicationId}_${versionName}")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
