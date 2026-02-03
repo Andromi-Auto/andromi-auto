@@ -74,8 +74,8 @@ android {
         minSdk = 16
         //minSdk = 21 // 21 only for google play console. App should work in minSDK 19 or maybe 17
         targetSdk = 36
-        versionCode = 34
-        versionName = "1.11.0"
+        versionCode = 35
+        versionName = "1.11.1"
         setProperty("archivesBaseName", "${applicationId}_${versionName}")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true

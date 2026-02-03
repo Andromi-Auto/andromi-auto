@@ -64,32 +64,19 @@ class SocketAccessoryConnection(private val ip: String, private val port: Int, p
             if (!transport.isConnected) {
                 val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    var net: android.net.Network? = null
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        net = cm.activeNetwork
-                    } else {
-                        // API 21-22 fallback
-                        @Suppress("DEPRECATION")
-                        for (n in cm.allNetworks) {
-                            val info = cm.getNetworkInfo(n)
-                            if (info?.type == ConnectivityManager.TYPE_WIFI && info.isConnected) {
-                                net = n
-                                break
-                            }
-                        }
-                    }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                   val net = cm.activeNetwork
 
                     if (net != null) {
                         try {
                             net.bindSocket(transport)
-                            AppLog.i("Bound socket to network: $net")
+                            AppLog.i("Bound socket to active network: $net")
                         } catch (e: Exception) {
                             AppLog.w("Failed to bind socket to network", e)
                         }
                     }
                 } else {
-                    // Legacy API < 21
+                    // Legacy API < 23 (Lollipop & KitKat & JB)
                     @Suppress("DEPRECATION")
                     if (cm.getNetworkInfo(ConnectivityManager.TYPE_WIFI)?.isConnected == true) {
                         try {

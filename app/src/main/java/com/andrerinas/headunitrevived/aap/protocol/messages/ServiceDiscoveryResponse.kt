@@ -57,14 +57,23 @@ class ServiceDiscoveryResponse(private val context: Context)
                         else -> Media.MediaCodecType.MEDIA_CODEC_VIDEO_H264_BP
                     }
 
-                    mediaSinkServiceBuilder.availableType = codecToRequest
-                    mediaSinkServiceBuilder.audioType = Media.AudioStreamType.NONE
-                    mediaSinkServiceBuilder.availableWhileInCall = true
-
                     // Use HeadUnitScreenConfig for negotiated resolution and margins
                     val negotiatedResolution = HeadUnitScreenConfig.negotiatedResolutionType
                     val phoneWidthMargin = HeadUnitScreenConfig.getWidthMargin()
                     val phoneHeightMargin = HeadUnitScreenConfig.getHeightMargin()
+
+                    // Enforce H.265 for 1440p resolution as required by Android Auto
+                    val effectiveCodec = if (negotiatedResolution == Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType._2560x1440 ||
+                        negotiatedResolution == Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType._1440x2560) {
+                        AppLog.i("Resolution is 1440p -> Enforcing H.265 codec")
+                        Media.MediaCodecType.MEDIA_CODEC_VIDEO_H265
+                    } else {
+                        codecToRequest
+                    }
+
+                    mediaSinkServiceBuilder.availableType = effectiveCodec
+                    mediaSinkServiceBuilder.audioType = Media.AudioStreamType.NONE
+                    mediaSinkServiceBuilder.availableWhileInCall = true
 
                     AppLog.i("[ServiceDiscovery] NegotiatedResolution is: ${HeadUnitScreenConfig.getNegotiatedWidth()}x${HeadUnitScreenConfig.getNegotiatedHeight()}")
                     AppLog.i("[ServiceDiscovery] Margins are: ${phoneWidthMargin}x${phoneHeightMargin}")
@@ -78,7 +87,7 @@ class ServiceDiscoveryResponse(private val context: Context)
                         setDensity(HeadUnitScreenConfig.getDensityDpi()) // Use actual densityDpi
                         setMarginWidth(phoneWidthMargin)
                         setMarginHeight(phoneHeightMargin)
-                        setVideoCodecType(codecToRequest)
+                        setVideoCodecType(effectiveCodec)
                     }.build())
                 }.build()
             }.build()

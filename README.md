@@ -61,6 +61,12 @@ adb shell am start -a android.intent.action.VIEW -d "headunit://connect?ip=192.1
 - **Native Wireless Connection on Hotspot:** Connecting to the native AA Headunit Server (Port 5277) may fail if the phone creates a mobile hotspot with Carrier-NAT IPs (e.g., 10.x.x.x). Use Wireless Launcher App instead.
 
 ## Changelog
+### v.1.11.1
+- Improvement: 1440p and h265 are now checked both. Some old devices have more than 1080p but no h265 support and android auto crashes with Error 11
+- Fixed bug in Kitkat Devices on search for wireless devices
+- Merged PR #94 - Fixed blurry icon. Thanks to @nicoruy
+- Merged PR #95 - Make Settings own View to apply directly. Thanks to @nicoruy
+
 ### v.1.11.0
 - New Feature: Advanced Night Mode (Light Sensor, Screen Brightness, separate thresholds, manual time)
 - Improvement: Audio Stuttering fixed (Optimized ACK handling)

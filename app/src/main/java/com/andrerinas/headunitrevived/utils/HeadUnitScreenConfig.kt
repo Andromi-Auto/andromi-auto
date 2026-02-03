@@ -122,7 +122,7 @@ object HeadUnitScreenConfig {
             } else { // Landscape mode
                 if (screenWidthPx <= 800 && screenHeightPx <= 480) {
                     negotiatedResolutionType = Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType._800x480
-                } else if (screenWidthPx >= 2560 || screenHeightPx >= 1440) {
+                } else if ((screenWidthPx >= 2560 || screenHeightPx >= 1440) && com.andrerinas.headunitrevived.decoder.VideoDecoder.isHevcSupported() && Build.VERSION.SDK_INT >= 24) {
                     negotiatedResolutionType = Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType._2560x1440
                 } else if (screenWidthPx > 1280 || screenHeightPx > 720) {
                     negotiatedResolutionType = Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType._1920x1080
