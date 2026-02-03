@@ -165,7 +165,8 @@ class HomeFragment : Fragment() {
         }
 
         settings.setOnClickListener {
-            findNavController().navigate(R.id.action_homeFragment_to_settingsFragment)
+            val intent = Intent(requireContext(), SettingsActivity::class.java)
+            startActivity(intent)
         }
 
         wifi.setOnClickListener {

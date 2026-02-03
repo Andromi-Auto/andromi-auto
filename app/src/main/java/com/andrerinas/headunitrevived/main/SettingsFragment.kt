@@ -141,12 +141,23 @@ class SettingsFragment : Fragment() {
                 .setTitle("Unsaved Changes")
                 .setMessage("You have unsaved changes. Do you want to discard them?")
                 .setPositiveButton("Discard") { _, _ ->
-                    findNavController().popBackStack()
+                    navigateBack()
                 }
                 .setNegativeButton(R.string.cancel, null)
                 .show()
         } else {
-            findNavController().popBackStack()
+            navigateBack()
+        }
+    }
+
+    private fun navigateBack() {
+        try {
+            val navController = findNavController()
+            if (!navController.navigateUp()) {
+                requireActivity().finish()
+            }
+        } catch (e: Exception) {
+            requireActivity().finish()
         }
     }
 
@@ -381,7 +392,11 @@ class SettingsFragment : Fragment() {
             nameResId = R.string.keymap,
             value = getString(R.string.keymap_description),
             onClick = { _ ->
-                findNavController().navigate(R.id.action_settingsFragment_to_keymapFragment)
+                try {
+                    findNavController().navigate(R.id.action_settingsFragment_to_keymapFragment)
+                } catch (e: Exception) {
+                    // Failover
+                }
             }
         ))
 
@@ -721,7 +736,11 @@ class SettingsFragment : Fragment() {
             nameResId = R.string.about,
             value = getString(R.string.about_description),
             onClick = {
-                findNavController().navigate(R.id.action_settingsFragment_to_aboutFragment)
+                try {
+                    findNavController().navigate(R.id.action_settingsFragment_to_aboutFragment)
+                } catch (e: Exception) {
+                    // Failover
+                }
             }
         ))
 
