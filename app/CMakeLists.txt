@@ -39,6 +39,11 @@ target_include_directories(hu_jni PUBLIC ${OPENSSL_INCLUDE_DIR})
 
 target_link_libraries(hu_jni log libssl_1_1 libcrypto_1_1 -lc) # Removed -landroid_support
 
+# Enforce 16KB page size alignment for ARM64 (Google Play requirement)
+if (ANDROID_ABI STREQUAL "arm64-v8a")
+    set_target_properties(hu_jni PROPERTIES LINK_FLAGS "-Wl,-z,max-page-size=16384")
+endif()
+
 #target_link_libraries(hu_jni log)
 #target_link_libraries(hu_jni ${OPENSSL_LIBRARIES})\
 #target_link_libraries(hu_jni libssl.so)

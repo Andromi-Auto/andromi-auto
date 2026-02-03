@@ -42,6 +42,7 @@ dependencies {
 
 android {
     compileSdk = 36
+    ndkVersion = "27.0.12077973"
     namespace = "com.andrerinas.headunitrevived"
 
     buildFeatures {
