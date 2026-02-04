@@ -21,13 +21,15 @@ class ConnectedIntent: Intent(action) {
     }
 }
 
-class DisconnectIntent : Intent(action) {
+class DisconnectIntent(isClean: Boolean = false) : Intent(action) {
     init {
         setPackage(HeadUnit.packageName)
+        putExtra(EXTRA_CLEAN, isClean)
     }
 
     companion object {
         const val action = "${HeadUnit.packageName}.ACTION_DISCONNECT"
+        const val EXTRA_CLEAN = "is_clean"
     }
 }
 

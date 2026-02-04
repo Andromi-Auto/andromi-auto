@@ -160,9 +160,20 @@ class Settings(context: Context) {
         get() = prefs.getBoolean("right-hand-drive", false)
         set(value) { prefs.edit().putBoolean("right-hand-drive", value).apply() }
 
-    var wifiLauncherMode: Boolean
-        get() = prefs.getBoolean("wifi-launcher-mode", false)
-        set(value) { prefs.edit().putBoolean("wifi-launcher-mode", value).apply() }
+    // 0 = Manual, 1 = Auto (Headunit Server), 2 = Helper (Wifi Launcher)
+    var wifiConnectionMode: Int
+        get() {
+            // Migration: Check if old boolean exists
+            if (prefs.contains("wifi-launcher-mode")) {
+                val old = prefs.getBoolean("wifi-launcher-mode", false)
+                val newMode = if (old) 2 else 1 // old true -> Helper, old false -> Auto (Default)
+                // Save new preference and remove old one
+                prefs.edit().putInt("wifi-connection-mode", newMode).remove("wifi-launcher-mode").apply()
+                return newMode
+            }
+            return prefs.getInt("wifi-connection-mode", 1) // Default 1 (Auto)
+        }
+        set(value) { prefs.edit().putInt("wifi-connection-mode", value).apply() }
 
     var videoCodec: String
         get() = prefs.getString("video-codec", "Auto")!!

@@ -264,8 +264,8 @@ internal class AapControlService(
         AppLog.i("Sending BYEYERESPONSE")
         aapTransport.send(msg)
         Utils.ms_sleep(500)
-        AppLog.i("Calling aapTransport.quit()")
-        aapTransport.quit()
+        AppLog.i("Calling aapTransport.quit(clean=true)")
+        aapTransport.quit(clean = true)
         return -1
     }
 
