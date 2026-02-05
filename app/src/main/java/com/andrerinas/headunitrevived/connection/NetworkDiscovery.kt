@@ -22,36 +22,37 @@ import java.util.Collections
 class NetworkDiscovery(private val context: Context, private val listener: Listener) {
 
     interface Listener {
-        fun onServiceFound(ip: String, port: Int)
+        fun onServiceFound(ip: String, port: Int, socket: Socket? = null)
         fun onScanFinished()
     }
 
     private var scanJob: Job? = null
+    private val reportedIps = java.util.Collections.synchronizedSet(mutableSetOf<String>())
 
     fun startScan() {
         if (scanJob?.isActive == true) return
 
+        reportedIps.clear()
         AppLog.i("NetworkDiscovery: Starting scan...")
 
         scanJob = CoroutineScope(Dispatchers.IO).launch {
-            // 1. Quick Scan: Check likely Gateways first
-            AppLog.i("NetworkDiscovery: Step 1 - Quick Gateway Scan")
-            val gatewayFound = scanGateways()
-            
-            if (gatewayFound) {
-                 AppLog.i("NetworkDiscovery: Gateway found service, skipping subnet scan.")
-                 withContext(Dispatchers.Main) {
+            try {
+                // 1. Quick Scan: Check likely Gateways first
+                AppLog.i("NetworkDiscovery: Step 1 - Quick Gateway Scan")
+                val gatewayFound = scanGateways()
+
+                if (gatewayFound) {
+                    AppLog.i("NetworkDiscovery: Gateway found service, skipping subnet scan.")
+                    return@launch
+                }
+
+                // 2. Deep Scan: Check entire Subnet
+                AppLog.i("NetworkDiscovery: Step 2 - Full Subnet Scan")
+                scanSubnet()
+            } finally {
+                withContext(Dispatchers.Main) {
                     listener.onScanFinished()
                 }
-                return@launch
-            }
-
-            // 2. Deep Scan: Check entire Subnet
-            AppLog.i("NetworkDiscovery: Step 2 - Full Subnet Scan")
-            scanSubnet()
-
-            withContext(Dispatchers.Main) {
-                listener.onScanFinished()
             }
         }
     }
@@ -76,6 +77,11 @@ class NetworkDiscovery(private val context: Context, private val listener: Liste
             // Always try heuristics (X.X.X.1) for all interfaces
             collectInterfaceSuspects(suspects)
 
+            // Special case for emulators: 10.0.2.2 is the host machine
+            if (isEmulator()) {
+                suspects.add("10.0.2.2")
+            }
+
             if (suspects.isNotEmpty()) {
                 AppLog.i("NetworkDiscovery: Checking suspects: $suspects")
                 for (ip in suspects) {
@@ -97,13 +103,16 @@ class NetworkDiscovery(private val context: Context, private val listener: Liste
             return
         }
 
+        val myIp = getLocalIpAddress()
         AppLog.i("NetworkDiscovery: Scanning subnet: $subnet.*")
 
         val tasks = mutableListOf<Deferred<Boolean>>()
 
-        // Scan range 1..254 (excluding gateway potentially, but checkAndReport handles duplicates if called)
+        // Scan range 1..254
         for (i in 1..254) {
             val ip = "$subnet.$i"
+            if (ip == myIp) continue // Skip self
+
             tasks.add(CoroutineScope(Dispatchers.IO).async {
                 checkAndReport(ip)
             })
@@ -112,21 +121,48 @@ class NetworkDiscovery(private val context: Context, private val listener: Liste
         tasks.awaitAll()
     }
 
+    private fun getLocalIpAddress(): String? {
+        try {
+            val interfaces = Collections.list(NetworkInterface.getNetworkInterfaces())
+            for (intf in interfaces) {
+                if (intf.isLoopback || !intf.isUp) continue
+
+                val addrs = Collections.list(intf.inetAddresses)
+                for (addr in addrs) {
+                    if (addr is java.net.Inet4Address) {
+                        return addr.hostAddress
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            AppLog.e("NetworkDiscovery: Error getting local IP", e)
+        }
+        return null
+    }
+
     private suspend fun checkAndReport(ip: String): Boolean {
+        if (reportedIps.contains(ip)) return true
+
         // Check Port 5289 (Wifi Launcher) - prioritizing this
-        if (checkPort(ip, 5289, timeout = 300)) {
+        val launcherSocket = checkPort(ip, 5289, timeout = 300)
+        if (launcherSocket != null) {
             AppLog.i("NetworkDiscovery: Found Wifi Launcher on $ip:5289")
+            reportedIps.add(ip)
             withContext(Dispatchers.Main) {
+                try { launcherSocket.close() } catch (e: Exception) {}
                 listener.onServiceFound(ip, 5289)
             }
             return true
         }
         
         // Check Port 5277 (Standard Headunit)
-        if (checkPort(ip, 5277, timeout = 300)) {
+        val serverSocket = checkPort(ip, 5277, timeout = 300)
+        if (serverSocket != null) {
             AppLog.i("NetworkDiscovery: Found Headunit Server on $ip:5277")
+            reportedIps.add(ip)
             withContext(Dispatchers.Main) {
-                listener.onServiceFound(ip, 5277)
+                // DO NOT CLOSE serverSocket! Pass it to the listener.
+                listener.onServiceFound(ip, 5277, serverSocket)
             }
             return true
         }
@@ -134,14 +170,13 @@ class NetworkDiscovery(private val context: Context, private val listener: Liste
         return false
     }
 
-    private fun checkPort(ip: String, port: Int, timeout: Int = 500): Boolean {
+    private fun checkPort(ip: String, port: Int, timeout: Int = 500): Socket? {
         return try {
             val socket = Socket()
             socket.connect(InetSocketAddress(ip, port), timeout)
-            socket.close()
-            true
+            socket
         } catch (e: Exception) {
-            false
+            null
         }
     }
 
@@ -196,5 +231,24 @@ class NetworkDiscovery(private val context: Context, private val listener: Liste
     fun stop() {
         scanJob?.cancel()
         scanJob = null
+    }
+
+    private fun isEmulator(): Boolean {
+        return (Build.BRAND.startsWith("generic") && Build.DEVICE.startsWith("generic"))
+                || Build.FINGERPRINT.startsWith("generic")
+                || Build.FINGERPRINT.startsWith("unknown")
+                || Build.HARDWARE.contains("goldfish")
+                || Build.HARDWARE.contains("ranchu")
+                || Build.MODEL.contains("google_sdk")
+                || Build.MODEL.contains("Emulator")
+                || Build.MODEL.contains("Android SDK built for x86")
+                || Build.MANUFACTURER.contains("Genymotion")
+                || Build.PRODUCT.contains("sdk_google")
+                || Build.PRODUCT.contains("google_sdk")
+                || Build.PRODUCT.contains("sdk")
+                || Build.PRODUCT.contains("sdk_x86")
+                || Build.PRODUCT.contains("vbox86p")
+                || Build.PRODUCT.contains("emulator")
+                || Build.PRODUCT.contains("simulator")
     }
 }

@@ -27,12 +27,18 @@ https://github.com/mikereidis/headunit
 - Click on your phone in the list and wait for Android Auto to start
 
 ### Wireless Launcher (Recommended)
-This is the most reliable way to connect wirelessly. It uses the "Wifi Launcher" app on your phone to trigger the connection.
-- Download [Wireless Launcher](https://play.google.com/store/apps/details?id=com.borconi.emil.wifilauncherforhur) (or similar) on your phone.
-- In Headunit Revived Settings: Enable **Wireless Headunit Server**.
+This is the most reliable way to connect wirelessly. It uses a launcher utility on your phone to trigger the connection.
+
+- **Option A (New):** Use the [Wireless Helper](https://github.com/andreknieriem/wireless-helper) app. 
+  - Join the **Beta Test** here: [Google Play Store Beta](https://play.google.com/apps/testing/com.andrerinas.wirelesshelper)
+  - Minimal configuration, supports NSD and Bluetooth Auto-Start.
+- **Option B:** Use the original [Wireless Launcher](https://play.google.com/store/apps/details?id=com.borconi.emil.wifilauncherforhur) on your phone.
+
+**Setup:**
+- In Headunit Revived Settings: Set **Wireless Mode** to **Helper Mode**.
 - Ensure both devices are in the same network (Hotspot or WiFi).
-- Open Wireless Launcher on your phone and start the service (or trigger it via BT connection).
-- The Launcher App will find your headunit (port 5288) and initiate the connection.
+- Open the Launcher App on your phone and start the service.
+- The Launcher will find your headunit and initiate the connection automatically.
 
 ### Wireless Connection (Manual / Native)
 This method uses the native "Headunit Server" built into Android Auto developer settings.

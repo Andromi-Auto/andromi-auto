@@ -44,7 +44,7 @@ class SettingsFragment : Fragment() {
     private var pendingViewMode: Settings.ViewMode? = null
     private var pendingForceSoftware: Boolean? = null
     private var pendingRightHandDrive: Boolean? = null
-    private var pendingWifiLauncherMode: Boolean? = null
+    private var pendingWifiConnectionMode: Int? = null
     private var pendingAutoConnectLastSession: Boolean? = null
     private var pendingVideoCodec: String? = null
     private var pendingFpsLimit: Int? = null
@@ -87,7 +87,7 @@ class SettingsFragment : Fragment() {
         pendingViewMode = settings.viewMode
         pendingForceSoftware = settings.forceSoftwareDecoding
         pendingRightHandDrive = settings.rightHandDrive
-        pendingWifiLauncherMode = settings.wifiLauncherMode
+        pendingWifiConnectionMode = settings.wifiConnectionMode
         pendingAutoConnectLastSession = settings.autoConnectLastSession
         pendingVideoCodec = settings.videoCodec
         pendingFpsLimit = settings.fpsLimit
@@ -190,10 +190,10 @@ class SettingsFragment : Fragment() {
         pendingAutoStartSelfMode?.let { settings.autoStartSelfMode = it }
         pendingScreenOrientation?.let { settings.screenOrientation = it }
 
-        pendingWifiLauncherMode?.let { enabled ->
-            settings.wifiLauncherMode = enabled
+        pendingWifiConnectionMode?.let { mode ->
+            settings.wifiConnectionMode = mode
             val intent = Intent(requireContext(), AapService::class.java).apply {
-                action = if (enabled) AapService.ACTION_START_WIRELESS else AapService.ACTION_STOP_WIRELESS
+                action = if (mode == 2) AapService.ACTION_START_WIRELESS else AapService.ACTION_STOP_WIRELESS
             }
             ContextCompat.startForegroundService(requireContext(), intent)
         }
@@ -237,7 +237,7 @@ class SettingsFragment : Fragment() {
                         pendingViewMode != settings.viewMode ||
                         pendingForceSoftware != settings.forceSoftwareDecoding ||
                         pendingRightHandDrive != settings.rightHandDrive ||
-                        pendingWifiLauncherMode != settings.wifiLauncherMode ||
+                        pendingWifiConnectionMode != settings.wifiConnectionMode ||
                         pendingAutoConnectLastSession != settings.autoConnectLastSession ||
                         pendingVideoCodec != settings.videoCodec ||
                         pendingFpsLimit != settings.fpsLimit ||
@@ -424,15 +424,21 @@ class SettingsFragment : Fragment() {
             }
         ))
 
-        items.add(SettingItem.ToggleSettingEntry(
-            stableId = "wifiLauncherMode",
-            nameResId = R.string.wifi_launcher_mode,
-            descriptionResId = R.string.wifi_launcher_mode_description,
-            isChecked = pendingWifiLauncherMode!!,
-            onCheckedChanged = { isChecked ->
-                pendingWifiLauncherMode = isChecked
-                checkChanges()
-                updateSettingsList()
+        val wifiModes = resources.getStringArray(R.array.wireless_connection_modes)
+        items.add(SettingItem.SettingEntry(
+            stableId = "wifiConnectionMode",
+            nameResId = R.string.wireless_mode,
+            value = wifiModes.getOrElse(pendingWifiConnectionMode!!) { "" },
+            onClick = { _ ->
+                AlertDialog.Builder(requireContext())
+                    .setTitle(R.string.wireless_mode)
+                    .setSingleChoiceItems(wifiModes, pendingWifiConnectionMode!!) { dialog, which ->
+                        pendingWifiConnectionMode = which
+                        checkChanges()
+                        dialog.dismiss()
+                        updateSettingsList()
+                    }
+                    .show()
             }
         ))
 

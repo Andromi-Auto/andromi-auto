@@ -144,10 +144,11 @@ class NetworkListFragment : Fragment(), NetworkDiscovery.Listener {
         }
     }
 
-    override fun onServiceFound(ip: String, port: Int) {
+    override fun onServiceFound(ip: String, port: Int, socket: java.net.Socket?) {
         if (port != 5277) {
             // Only interested in Headunit Server (5277) for manual connection list
             // Ignore WifiLauncher (5289) here as that is for auto-triggering
+            try { socket?.close() } catch (e: Exception) {}
             return
         }
         activity?.runOnUiThread {
@@ -163,7 +164,16 @@ class NetworkListFragment : Fragment(), NetworkDiscovery.Listener {
             if (scanDialog?.isShowing == true) {
                 scanDialog?.dismiss()
                 Toast.makeText(context, "Found $ip, connecting...", Toast.LENGTH_SHORT).show()
+
+                // If we have a socket, we need to pass it to AapService for reuse!
+                if (socket != null && socket.isConnected) {
+                    AapService.pendingSocket = socket
+                }
+
                 context?.let { ctx -> ContextCompat.startForegroundService(ctx, AapService.createIntent(ip, ctx)) }
+            } else {
+                // If not in auto-connect dialog, close the probe socket
+                try { socket?.close() } catch (e: Exception) {}
             }
         }
     }

@@ -144,10 +144,10 @@ class AapTransport(
         quit()
     }
 
-    internal fun quit() {
-        AppLog.i("AapTransport quitting")
+    internal fun quit(clean: Boolean = false) {
+        AppLog.i("AapTransport quitting (clean=$clean)")
         AapService.isConnected = false
-        context.sendBroadcast(DisconnectIntent())
+        context.sendBroadcast(DisconnectIntent(clean))
         micRecorder.listener = null
         pollThread?.quit()
         sendThread?.quit()
@@ -215,8 +215,13 @@ class AapTransport(
 
                 AppLog.d("Handshake: Waiting for version response. TS: ${SystemClock.elapsedRealtime()}")
                 ret = connection.recvBlocking(buffer, buffer.size, 5000, false)
-                AppLog.d("Handshake: Version response received. ret: $ret. TS: ${SystemClock.elapsedRealtime()}")
+
                 if (ret > 0) {
+                    val hexResponse = StringBuilder()
+                    for (i in 0 until minOf(ret, 16)) {
+                        hexResponse.append(String.format("%02X ", buffer[i]))
+                    }
+                    AppLog.i("Handshake: Version response received (ret=$ret). Bytes: $hexResponse")
                     received = true
                     break
                 }

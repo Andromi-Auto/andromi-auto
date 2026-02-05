@@ -24,6 +24,7 @@ import com.andrerinas.headunitrevived.contract.ConnectedIntent
 import com.andrerinas.headunitrevived.contract.DisconnectIntent
 import com.andrerinas.headunitrevived.utils.AppLog
 import com.andrerinas.headunitrevived.utils.Settings
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class HomeFragment : Fragment() {
 
@@ -31,13 +32,27 @@ class HomeFragment : Fragment() {
     private lateinit var usb: Button
     private lateinit var settings: Button
     private lateinit var wifi: Button
+    private lateinit var wifi_text_view: TextView
     private lateinit var exitButton: Button
     private lateinit var self_mode_text: TextView
     private var hasAttemptedAutoConnect = false
+    private var isScanning = false
 
     private val connectionStatusReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             AppLog.i("HomeFragment received ${intent?.action}")
+
+            when (intent?.action) {
+                AapService.ACTION_SCAN_STARTED -> {
+                    isScanning = true
+                    updateWifiButtonFeedback()
+                }
+                AapService.ACTION_SCAN_FINISHED -> {
+                    isScanning = false
+                    updateWifiButtonFeedback()
+                }
+            }
+
             updateProjectionButtonText()
 
             if (intent?.action == ConnectedIntent.action) {
@@ -48,6 +63,16 @@ class HomeFragment : Fragment() {
                 }
                 startActivity(aapIntent)
             }
+        }
+    }
+
+    private fun updateWifiButtonFeedback() {
+        if (isScanning) {
+            wifi_text_view.text = "Searching..."
+            wifi.alpha = 0.6f
+        } else {
+            wifi_text_view.text = getString(R.string.wifi)
+            wifi.alpha = 1.0f
         }
     }
 
@@ -67,6 +92,7 @@ class HomeFragment : Fragment() {
         usb = view.findViewById(R.id.usb_button)
         settings = view.findViewById(R.id.settings_button)
         wifi = view.findViewById(R.id.wifi_button)
+        wifi_text_view = view.findViewById(R.id.wifi_text)
         exitButton = view.findViewById(R.id.exit_button)
         self_mode_text = view.findViewById(R.id.self_mode_text)
 
@@ -170,7 +196,43 @@ class HomeFragment : Fragment() {
         }
 
         wifi.setOnClickListener {
+            val mode = App.provide(requireContext()).settings.wifiConnectionMode
+            when (mode) {
+                1 -> { // Auto (Headunit Server) - One-Shot Scan
+                    if (AapService.isConnected) {
+                        Toast.makeText(requireContext(), "Already connected", Toast.LENGTH_SHORT).show()
+                    } else if (isScanning) {
+                        Toast.makeText(requireContext(), "Already scanning...", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(requireContext(), "Searching for Headunit Server...", Toast.LENGTH_SHORT).show()
+                        val intent = Intent(requireContext(), AapService::class.java).apply {
+                            action = AapService.ACTION_START_WIRELESS_SCAN
+                        }
+                        ContextCompat.startForegroundService(requireContext(), intent)
+                    }
+                }
+                2 -> { // Helper (Wireless Launcher)
+                    if (AapService.isConnected) {
+                        Toast.makeText(requireContext(), "Already connected", Toast.LENGTH_SHORT).show()
+                    } else if (isScanning) {
+                        Toast.makeText(requireContext(), "Already searching for phone...", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(requireContext(), "Searching for phone...", Toast.LENGTH_SHORT).show()
+                        val intent = Intent(requireContext(), AapService::class.java).apply {
+                            action = AapService.ACTION_START_WIRELESS_SCAN
+                        }
+                        ContextCompat.startForegroundService(requireContext(), intent)
+                    }
+                }
+                else -> { // Manual (0) -> Open List
+                    findNavController().navigate(R.id.action_homeFragment_to_networkListFragment)
+                }
+            }
+        }
+
+        wifi.setOnLongClickListener {
             findNavController().navigate(R.id.action_homeFragment_to_networkListFragment)
+            true
         }
     }
 
@@ -188,10 +250,14 @@ class HomeFragment : Fragment() {
         val filter = IntentFilter().apply {
             addAction(ConnectedIntent.action)
             addAction(DisconnectIntent.action)
+            addAction(AapService.ACTION_SCAN_STARTED)
+            addAction(AapService.ACTION_SCAN_FINISHED)
         }
         
         ContextCompat.registerReceiver(requireContext(), connectionStatusReceiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED)
         
+        isScanning = AapService.isScanning
+        updateWifiButtonFeedback()
         updateProjectionButtonText()
     }
 

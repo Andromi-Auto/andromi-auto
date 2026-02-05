@@ -72,11 +72,12 @@ internal class AapControlMedia(
 
     private fun mediaSinkSetupRequest(request: Media.MediaSetupRequest, channel: Int): Int {
 
-        AppLog.i("Media Sink Setup Request: %d", request.type)
+        AppLog.i("Media Sink Setup Request: %d on channel %s", request.type, Channel.name(channel))
 
         val configResponse = Media.Config.newBuilder().apply {
             status = Media.Config.ConfigStatus.HEADUNIT
-            maxUnacked = 1
+            // Use higher maxUnacked for audio to prevent stuttering/drops
+            maxUnacked = if (Channel.isAudio(channel)) 3 else 1
             addConfigurationIndices(0)
         }.build()
         AppLog.i("Config response: %s", configResponse)
@@ -264,8 +265,8 @@ internal class AapControlService(
         AppLog.i("Sending BYEYERESPONSE")
         aapTransport.send(msg)
         Utils.ms_sleep(500)
-        AppLog.i("Calling aapTransport.quit()")
-        aapTransport.quit()
+        AppLog.i("Calling aapTransport.quit(clean=true)")
+        aapTransport.quit(clean = true)
         return -1
     }
 

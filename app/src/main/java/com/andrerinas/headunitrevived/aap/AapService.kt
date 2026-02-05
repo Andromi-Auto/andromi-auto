@@ -39,6 +39,7 @@ import com.andrerinas.headunitrevived.utils.Settings
 import kotlinx.coroutines.*
 import java.net.ServerSocket
 import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicBoolean
 
 class AapService : Service(), UsbReceiver.Listener {
     private val serviceJob = Job()
@@ -54,6 +55,7 @@ class AapService : Service(), UsbReceiver.Listener {
     private var pendingConnectionIp: String = ""
     private var pendingConnectionUsbDevice: String = ""
     private val connectionAttemptId = AtomicInteger(0)
+    private val isConnecting = AtomicBoolean(false)
 
     private val transport: AapTransport
         get() = App.provide(this).transport
@@ -70,9 +72,10 @@ class AapService : Service(), UsbReceiver.Listener {
     private val disconnectReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             if (intent.action == DisconnectIntent.action) {
+                val isClean = intent.getBooleanExtra(DisconnectIntent.EXTRA_CLEAN, false)
                 if (isConnected) {
-                    AppLog.i("AapService received disconnect intent -> closing connection")
-                    onDisconnect()
+                    AppLog.i("AapService received disconnect intent (clean=$isClean) -> closing connection")
+                    onDisconnect(isClean)
                 }
             }
         }
@@ -109,7 +112,8 @@ class AapService : Service(), UsbReceiver.Listener {
 
         startService(GpsLocationService.intent(this));
 
-        if (App.provide(this).settings.wifiLauncherMode) {
+        val mode = App.provide(this).settings.wifiConnectionMode
+        if (mode == 2) {
             startWirelessServer();
         }
     }
@@ -165,6 +169,10 @@ class AapService : Service(), UsbReceiver.Listener {
             ACTION_START_WIRELESS -> {
                 startWirelessServer();
             }
+            ACTION_START_WIRELESS_SCAN -> {
+                val mode = App.provide(this).settings.wifiConnectionMode
+                startDiscovery(oneShot = (mode != 2))
+            }
             ACTION_STOP_WIRELESS -> {
                 stopWirelessServer();
             }
@@ -207,9 +215,8 @@ class AapService : Service(), UsbReceiver.Listener {
         val attemptId = connectionAttemptId.incrementAndGet();
 
         serviceScope.launch {
-            var connectionResult = false;
-            withContext(Dispatchers.IO) {
-                connectionResult = conn?.connect() ?: false;
+            val connectionResult = withContext(Dispatchers.IO) {
+                conn?.connect() ?: false;
             }
             onConnectionResult(connectionResult, attemptId, conn);
         }
@@ -224,19 +231,25 @@ class AapService : Service(), UsbReceiver.Listener {
         startDiscovery()
     }
 
-    private fun startDiscovery() {
-        if (isConnected || wirelessServer == null) return
+    private fun startDiscovery(oneShot: Boolean = false) {
+        if (isConnected || isConnecting.get() || (wirelessServer == null && !oneShot)) return
 
         // Ensure old discovery is stopped/cleaned
         networkDiscovery?.stop()
+        isScanning = true
+        sendBroadcast(Intent(ACTION_SCAN_STARTED))
 
         networkDiscovery = NetworkDiscovery(this, object : NetworkDiscovery.Listener {
-            override fun onServiceFound(ip: String, port: Int) {
-                if (isConnected) return
+            override fun onServiceFound(ip: String, port: Int, socket: java.net.Socket?) {
+                if (isConnected) {
+                    try { socket?.close() } catch (e: Exception) {}
+                    return
+                }
 
                 if (port == 5277) {
                     // Headunit Server detected -> We must connect actively
-                    AppLog.i("Auto-connecting to Headunit Server at $ip:$port")
+                    AppLog.i("Auto-connecting to Headunit Server at $ip:$port (reusing socket)")
+                    pendingSocket = socket
                     val intent = Intent(this@AapService, AapService::class.java).apply {
                         putExtra(EXTRA_IP, ip)
                         putExtra(EXTRA_CONNECTION_TYPE, TYPE_WIFI)
@@ -249,6 +262,12 @@ class AapService : Service(), UsbReceiver.Listener {
             }
 
             override fun onScanFinished() {
+                isScanning = false
+                sendBroadcast(Intent(ACTION_SCAN_FINISHED))
+                if (oneShot) {
+                    AppLog.i("One-shot scan finished.")
+                    return
+                }
                 // Schedule next scan in 10s
                 serviceScope.launch {
                     delay(10000)
@@ -266,6 +285,9 @@ class AapService : Service(), UsbReceiver.Listener {
         networkDiscovery = null
         wirelessServer?.stopServer()
         wirelessServer = null
+
+        isScanning = false
+        sendBroadcast(Intent(ACTION_SCAN_FINISHED))
     }
 
     private inner class WirelessServer : Thread() {
@@ -310,6 +332,7 @@ class AapService : Service(), UsbReceiver.Listener {
                                     try { clientSocket.close() } catch (e: Exception) {}
                                 }
                             } else {
+                                AppLog.i("Wireless client accepted from ${clientSocket.inetAddress}. Initializing connection...");
                                 pendingConnectionType = Settings.CONNECTION_TYPE_WIFI;
                                 pendingConnectionIp = clientSocket.inetAddress.hostAddress ?:"";
                                 pendingConnectionUsbDevice = "";
@@ -324,6 +347,7 @@ class AapService : Service(), UsbReceiver.Listener {
                                 val success = withContext(Dispatchers.IO) {
                                     conn.connect()
                                 }
+                                AppLog.i("Wireless Socket connect() result: $success");
 
                                 onConnectionResult(success, attemptId, conn);
                             }
@@ -411,60 +435,81 @@ class AapService : Service(), UsbReceiver.Listener {
     }
 
     private suspend fun onConnectionResult(success: Boolean, attemptId: Int, connection: AccessoryConnection?) {
-        if (attemptId != connectionAttemptId.get()) {
-            AppLog.w("onConnectionResult: stale attempt $attemptId, current ${connectionAttemptId.get()}");
-            return;
-        }
-        val activeConnection = connection ?: run {
-            AppLog.w("onConnectionResult: accessoryConnection cleared before transport start (attempt $attemptId)");
-            return;
-        }
-
-        if (success) {
-            reset();
-            val transportStarted = withContext(Dispatchers.IO) {
-                transport.start(activeConnection);
+        try {
+            if (attemptId != connectionAttemptId.get()) {
+                AppLog.w("onConnectionResult: stale attempt $attemptId, current ${connectionAttemptId.get()}");
+                return;
+            }
+            val activeConnection = connection ?: run {
+                AppLog.w("onConnectionResult: accessoryConnection cleared before transport start (attempt $attemptId)");
+                return;
             }
 
-            if (transportStarted) {
-                isConnected = true;
-                sendBroadcast(ConnectedIntent());
-                
-                // Sync current night mode state immediately after connection
-                nightModeManager?.resendCurrentState()
-                
-                if (pendingConnectionType.isNotEmpty()) {
-                    val settings = App.provide(this).settings;
-                    settings.saveLastConnection(
-                        type = pendingConnectionType,
-                        ip = pendingConnectionIp,
-                        usbDevice = pendingConnectionUsbDevice
-                    );
-                    AppLog.i("Saved last connection: type=$pendingConnectionType, ip=$pendingConnectionIp, usb=$pendingConnectionUsbDevice");
-                    pendingConnectionType = "";
-                    pendingConnectionIp = "";
-                    pendingConnectionUsbDevice = "";
+            if (success) {
+                reset();
+                val transportStarted = withContext(Dispatchers.IO) {
+                    transport.start(activeConnection);
                 }
 
-                val aapIntent = AapProjectionActivity.intent(this@AapService).apply {
-                    putExtra(AapProjectionActivity.EXTRA_FOCUS, true);
-                    addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                };
-                startActivity(aapIntent);
-            } else {
-                stopSelf();
+                if (transportStarted) {
+                    isConnected = true;
+                    sendBroadcast(ConnectedIntent());
+                    
+                    // Sync current night mode state immediately after connection
+                    nightModeManager?.resendCurrentState()
+                    
+                    if (pendingConnectionType.isNotEmpty()) {
+                        val settings = App.provide(this).settings;
+                        settings.saveLastConnection(
+                            type = pendingConnectionType,
+                            ip = pendingConnectionIp,
+                            usbDevice = pendingConnectionUsbDevice
+                        );
+                        AppLog.i("Saved last connection: type=$pendingConnectionType, ip=$pendingConnectionIp, usb=$pendingConnectionUsbDevice");
+                        pendingConnectionType = "";
+                        pendingConnectionIp = "";
+                        pendingConnectionUsbDevice = "";
+                    }
+
+                    val aapIntent = AapProjectionActivity.intent(this@AapService).apply {
+                        putExtra(AapProjectionActivity.EXTRA_FOCUS, true);
+                        addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                    };
+                    startActivity(aapIntent);
+                } else {
+                    stopSelf();
+                }
             }
+        } finally {
+            isConnecting.set(false)
         }
     }
 
-    private fun onDisconnect() {
+    private fun onDisconnect(isClean: Boolean = false) {
         isConnected = false;
-        sendBroadcast(DisconnectIntent());
+        sendBroadcast(DisconnectIntent(isClean));
         reset();
         accessoryConnection?.disconnect();
         accessoryConnection = null;
         // Invalidate any in-flight attempts
         connectionAttemptId.incrementAndGet();
+
+        if (wirelessServer != null) {
+            AppLog.i("AapService: Disconnected. Restarting discovery loop in 2s...");
+            serviceScope.launch {
+                delay(2000);
+                if (!isConnected) startDiscovery();
+            }
+        } else if (!isClean) {
+             val mode = App.provide(this).settings.wifiConnectionMode
+             if (mode == 1) { // Auto Mode
+                 AppLog.i("AapService: Unclean disconnect in Auto Mode. Retrying discovery in 2s...");
+                 serviceScope.launch {
+                     delay(2000);
+                     if (!isConnected) startDiscovery(oneShot = true);
+                 }
+             }
+        }
     }
 
     private fun reset() {
@@ -487,9 +532,14 @@ class AapService : Service(), UsbReceiver.Listener {
     companion object {
         var isConnected = false;
         var selfMode = false;
+        var isScanning = false;
+        var pendingSocket: java.net.Socket? = null;
         const val ACTION_START_SELF_MODE = "com.andrerinas.headunitrevived.ACTION_START_SELF_MODE";
         const val ACTION_START_WIRELESS = "com.andrerinas.headunitrevived.ACTION_START_WIRELESS";
+        const val ACTION_START_WIRELESS_SCAN = "com.andrerinas.headunitrevived.ACTION_START_WIRELESS_SCAN";
         const val ACTION_STOP_WIRELESS = "com.andrerinas.headunitrevived.ACTION_STOP_WIRELESS";
+        const val ACTION_SCAN_STARTED = "com.andrerinas.headunitrevived.ACTION_SCAN_STARTED"
+        const val ACTION_SCAN_FINISHED = "com.andrerinas.headunitrevived.ACTION_SCAN_FINISHED"
         const val ACTION_STOP_SERVICE = "com.andrerinas.headunitrevived.ACTION_STOP_SERVICE";
         const val ACTION_REQUEST_NIGHT_MODE_UPDATE = "com.andrerinas.headunitrevived.ACTION_REQUEST_NIGHT_MODE_UPDATE"
         private const val TYPE_USB = 1;
@@ -518,6 +568,14 @@ class AapService : Service(), UsbReceiver.Listener {
                 return UsbAccessoryConnection(context.getSystemService(Context.USB_SERVICE) as UsbManager, device);
             } else if (connectionType == TYPE_WIFI) {
                 val ip = intent?.getStringExtra(EXTRA_IP) ?: "";
+
+                val socket = pendingSocket
+                pendingSocket = null // consume
+                if (socket != null && socket.isConnected && socket.inetAddress.hostAddress == ip) {
+                    AppLog.i("Reusing discovery socket for connection to $ip")
+                    return SocketAccessoryConnection(socket, context)
+                }
+
                 return SocketAccessoryConnection(ip, 5277, context);
             }
             return null;
