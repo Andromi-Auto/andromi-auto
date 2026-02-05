@@ -215,9 +215,8 @@ class AapService : Service(), UsbReceiver.Listener {
         val attemptId = connectionAttemptId.incrementAndGet();
 
         serviceScope.launch {
-            var connectionResult = false;
-            withContext(Dispatchers.IO) {
-                connectionResult = conn?.connect() ?: false;
+            val connectionResult = withContext(Dispatchers.IO) {
+                conn?.connect() ?: false;
             }
             onConnectionResult(connectionResult, attemptId, conn);
         }
@@ -436,49 +435,53 @@ class AapService : Service(), UsbReceiver.Listener {
     }
 
     private suspend fun onConnectionResult(success: Boolean, attemptId: Int, connection: AccessoryConnection?) {
-        if (attemptId != connectionAttemptId.get()) {
-            AppLog.w("onConnectionResult: stale attempt $attemptId, current ${connectionAttemptId.get()}");
-            return;
-        }
-        val activeConnection = connection ?: run {
-            AppLog.w("onConnectionResult: accessoryConnection cleared before transport start (attempt $attemptId)");
-            return;
-        }
-
-        if (success) {
-            reset();
-            val transportStarted = withContext(Dispatchers.IO) {
-                transport.start(activeConnection);
+        try {
+            if (attemptId != connectionAttemptId.get()) {
+                AppLog.w("onConnectionResult: stale attempt $attemptId, current ${connectionAttemptId.get()}");
+                return;
+            }
+            val activeConnection = connection ?: run {
+                AppLog.w("onConnectionResult: accessoryConnection cleared before transport start (attempt $attemptId)");
+                return;
             }
 
-            if (transportStarted) {
-                isConnected = true;
-                sendBroadcast(ConnectedIntent());
-                
-                // Sync current night mode state immediately after connection
-                nightModeManager?.resendCurrentState()
-                
-                if (pendingConnectionType.isNotEmpty()) {
-                    val settings = App.provide(this).settings;
-                    settings.saveLastConnection(
-                        type = pendingConnectionType,
-                        ip = pendingConnectionIp,
-                        usbDevice = pendingConnectionUsbDevice
-                    );
-                    AppLog.i("Saved last connection: type=$pendingConnectionType, ip=$pendingConnectionIp, usb=$pendingConnectionUsbDevice");
-                    pendingConnectionType = "";
-                    pendingConnectionIp = "";
-                    pendingConnectionUsbDevice = "";
+            if (success) {
+                reset();
+                val transportStarted = withContext(Dispatchers.IO) {
+                    transport.start(activeConnection);
                 }
 
-                val aapIntent = AapProjectionActivity.intent(this@AapService).apply {
-                    putExtra(AapProjectionActivity.EXTRA_FOCUS, true);
-                    addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                };
-                startActivity(aapIntent);
-            } else {
-                stopSelf();
+                if (transportStarted) {
+                    isConnected = true;
+                    sendBroadcast(ConnectedIntent());
+                    
+                    // Sync current night mode state immediately after connection
+                    nightModeManager?.resendCurrentState()
+                    
+                    if (pendingConnectionType.isNotEmpty()) {
+                        val settings = App.provide(this).settings;
+                        settings.saveLastConnection(
+                            type = pendingConnectionType,
+                            ip = pendingConnectionIp,
+                            usbDevice = pendingConnectionUsbDevice
+                        );
+                        AppLog.i("Saved last connection: type=$pendingConnectionType, ip=$pendingConnectionIp, usb=$pendingConnectionUsbDevice");
+                        pendingConnectionType = "";
+                        pendingConnectionIp = "";
+                        pendingConnectionUsbDevice = "";
+                    }
+
+                    val aapIntent = AapProjectionActivity.intent(this@AapService).apply {
+                        putExtra(AapProjectionActivity.EXTRA_FOCUS, true);
+                        addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                    };
+                    startActivity(aapIntent);
+                } else {
+                    stopSelf();
+                }
             }
+        } finally {
+            isConnecting.set(false)
         }
     }
 

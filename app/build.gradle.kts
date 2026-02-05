@@ -73,10 +73,10 @@ android {
     defaultConfig {
         applicationId = "com.andrerinas.headunitrevived"
         minSdk = 16
-//        minSdk = 21 // 21 only for google play console. App should work in minSDK 19 or maybe 17
+//        minSdk = 21 // 21 only for google play console. App should work in minSDK 16
         targetSdk = 36
-        versionCode = 38
-        versionName = "1.11.1"
+        versionCode = 39
+        versionName = "1.12.0"
         setProperty("archivesBaseName", "${applicationId}_${versionName}")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
