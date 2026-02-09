@@ -132,6 +132,24 @@ class Settings(context: Context) {
             prefs.edit().putInt("dpi-pixel-density", value).apply()
         }
 
+    // Custom Insets (Screen Margins)
+    var insetLeft: Int
+        get() = prefs.getInt("inset-left", 0)
+        set(value) { prefs.edit().putInt("inset-left", value).apply() }
+
+    var insetTop: Int
+        get() = prefs.getInt("inset-top", 0)
+        set(value) { prefs.edit().putInt("inset-top", value).apply() }
+
+    var insetRight: Int
+        get() = prefs.getInt("inset-right", 0)
+        set(value) { prefs.edit().putInt("inset-right", value).apply() }
+
+    var insetBottom: Int
+        get() = prefs.getInt("inset-bottom", 0)
+        set(value) { prefs.edit().putInt("inset-bottom", value).apply() }
+
+    // Legacy Margins (can be removed later if unused)
     var marginLeft: Int
         get() = prefs.getInt("margin-left", 0)
         set(value) { prefs.edit().putInt("margin-left", value).apply() }

@@ -59,6 +59,11 @@ class SettingsFragment : Fragment() {
     private var pendingThresholdBrightness: Int? = null
     private var pendingManualStart: Int? = null
     private var pendingManualEnd: Int? = null
+    // Custom Insets
+    private var pendingInsetLeft: Int? = null
+    private var pendingInsetTop: Int? = null
+    private var pendingInsetRight: Int? = null
+    private var pendingInsetBottom: Int? = null
 
     private var requiresRestart = false
     private var hasChanges = false
@@ -98,6 +103,11 @@ class SettingsFragment : Fragment() {
         pendingUseNativeSsl = settings.useNativeSsl
         pendingAutoStartSelfMode = settings.autoStartSelfMode
         pendingScreenOrientation = settings.screenOrientation
+        
+        pendingInsetLeft = settings.insetLeft
+        pendingInsetTop = settings.insetTop
+        pendingInsetRight = settings.insetRight
+        pendingInsetBottom = settings.insetBottom
 
         // Intercept system back button
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
@@ -189,6 +199,11 @@ class SettingsFragment : Fragment() {
         pendingUseNativeSsl?.let { settings.useNativeSsl = it }
         pendingAutoStartSelfMode?.let { settings.autoStartSelfMode = it }
         pendingScreenOrientation?.let { settings.screenOrientation = it }
+        
+        pendingInsetLeft?.let { settings.insetLeft = it }
+        pendingInsetTop?.let { settings.insetTop = it }
+        pendingInsetRight?.let { settings.insetRight = it }
+        pendingInsetBottom?.let { settings.insetBottom = it }
 
         pendingWifiConnectionMode?.let { mode ->
             settings.wifiConnectionMode = mode
@@ -247,7 +262,11 @@ class SettingsFragment : Fragment() {
                         pendingUseAacAudio != settings.useAacAudio ||
                         pendingUseNativeSsl != settings.useNativeSsl ||
                         pendingAutoStartSelfMode != settings.autoStartSelfMode ||
-                        pendingScreenOrientation != settings.screenOrientation
+                        pendingScreenOrientation != settings.screenOrientation ||
+                        pendingInsetLeft != settings.insetLeft ||
+                        pendingInsetTop != settings.insetTop ||
+                        pendingInsetRight != settings.insetRight ||
+                        pendingInsetBottom != settings.insetBottom
 
         hasChanges = anyChange
 
@@ -260,7 +279,11 @@ class SettingsFragment : Fragment() {
                           pendingRightHandDrive != settings.rightHandDrive ||
                           pendingEnableAudioSink != settings.enableAudioSink ||
                           pendingUseAacAudio != settings.useAacAudio ||
-                          pendingUseNativeSsl != settings.useNativeSsl
+                          pendingUseNativeSsl != settings.useNativeSsl ||
+                          pendingInsetLeft != settings.insetLeft ||
+                          pendingInsetTop != settings.insetTop ||
+                          pendingInsetRight != settings.insetRight ||
+                          pendingInsetBottom != settings.insetBottom
 
         updateSaveButtonState()
     }
@@ -518,6 +541,15 @@ class SettingsFragment : Fragment() {
             }
         ))
 
+        items.add(SettingItem.SettingEntry(
+            stableId = "customInsets",
+            nameResId = R.string.custom_insets,
+            value = "${pendingInsetLeft ?: 0}, ${pendingInsetTop ?: 0}, ${pendingInsetRight ?: 0}, ${pendingInsetBottom ?: 0}",
+            onClick = {
+                showCustomInsetsDialog()
+            }
+        ))
+
         items.add(SettingItem.ToggleSettingEntry(
             stableId = "startInFullscreenMode",
             nameResId = R.string.start_in_fullscreen_mode,
@@ -751,5 +783,108 @@ class SettingsFragment : Fragment() {
         ))
 
         settingsAdapter.submitList(items)
+    }
+
+    private fun showCustomInsetsDialog() {
+        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_custom_insets, null)
+        
+        val inputLeft = dialogView.findViewById<EditText>(R.id.input_left)
+        val inputTop = dialogView.findViewById<EditText>(R.id.input_top)
+        val inputRight = dialogView.findViewById<EditText>(R.id.input_right)
+        val inputBottom = dialogView.findViewById<EditText>(R.id.input_bottom)
+
+        // Set initial values from pending state
+        inputLeft.setText((pendingInsetLeft ?: 0).toString())
+        inputTop.setText((pendingInsetTop ?: 0).toString())
+        inputRight.setText((pendingInsetRight ?: 0).toString())
+        inputBottom.setText((pendingInsetBottom ?: 0).toString())
+
+        // Helper to update pending values and UI preview
+        fun updatePreview() {
+            val l = inputLeft.text.toString().toIntOrNull() ?: 0
+            val t = inputTop.text.toString().toIntOrNull() ?: 0
+            val r = inputRight.text.toString().toIntOrNull() ?: 0
+            val b = inputBottom.text.toString().toIntOrNull() ?: 0
+            
+            pendingInsetLeft = l
+            pendingInsetTop = t
+            pendingInsetRight = r
+            pendingInsetBottom = b
+            
+            // Live Preview: Set padding on the root view of the Activity
+            val root = requireActivity().findViewById<View>(R.id.settings_nav_host)
+            root?.setPadding(l, t, r, b)
+        }
+
+        // Helper to bind buttons
+        fun bindButton(btnId: Int, input: EditText, delta: Int) {
+            dialogView.findViewById<View>(btnId).setOnClickListener {
+                val current = input.text.toString().toIntOrNull() ?: 0
+                val newVal = (current + delta).coerceAtLeast(0)
+                input.setText(newVal.toString())
+                updatePreview()
+            }
+        }
+
+        bindButton(R.id.btn_left_minus, inputLeft, -10)
+        bindButton(R.id.btn_left_plus, inputLeft, 10)
+        bindButton(R.id.btn_top_minus, inputTop, -10)
+        bindButton(R.id.btn_top_plus, inputTop, 10)
+        bindButton(R.id.btn_right_minus, inputRight, -10)
+        bindButton(R.id.btn_right_plus, inputRight, 10)
+        bindButton(R.id.btn_bottom_minus, inputBottom, -10)
+        bindButton(R.id.btn_bottom_plus, inputBottom, 10)
+
+        // Text Watchers? Maybe overkill, buttons are safer.
+        // Let's add simple focus change listener to update preview on manual entry
+        val focusListener = View.OnFocusChangeListener { _, hasFocus ->
+            if (!hasFocus) updatePreview()
+        }
+        inputLeft.onFocusChangeListener = focusListener
+        inputTop.onFocusChangeListener = focusListener
+        inputRight.onFocusChangeListener = focusListener
+        inputBottom.onFocusChangeListener = focusListener
+
+        MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
+            .setTitle(R.string.custom_insets)
+            .setView(dialogView)
+            .setPositiveButton(android.R.string.ok) { dialog, _ ->
+                val l = inputLeft.text.toString().toIntOrNull() ?: 0
+                val t = inputTop.text.toString().toIntOrNull() ?: 0
+                val r = inputRight.text.toString().toIntOrNull() ?: 0
+                val b = inputBottom.text.toString().toIntOrNull() ?: 0
+                
+                // PERSIST IMMEDIATELY to prevent revert on focus change
+                settings.insetLeft = l
+                settings.insetTop = t
+                settings.insetRight = r
+                settings.insetBottom = b
+                
+                // Update pending to keep UI in sync
+                pendingInsetLeft = l
+                pendingInsetTop = t
+                pendingInsetRight = r
+                pendingInsetBottom = b
+                
+                checkChanges()
+                updateSettingsList()
+                dialog.dismiss()
+            }
+            .setNegativeButton(android.R.string.cancel) { dialog, _ ->
+                // Revert Preview immediately
+                val root = requireActivity().findViewById<View>(R.id.settings_nav_host)
+                root?.setPadding(
+                    settings.insetLeft, settings.insetTop, 
+                    settings.insetRight, settings.insetBottom
+                )
+                // Reset pending to old values
+                pendingInsetLeft = settings.insetLeft
+                pendingInsetTop = settings.insetTop
+                pendingInsetRight = settings.insetRight
+                pendingInsetBottom = settings.insetBottom
+                
+                dialog.dismiss()
+            }
+            .show()
     }
 }

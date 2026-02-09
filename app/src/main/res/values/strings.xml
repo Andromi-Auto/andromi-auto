@@ -110,6 +110,7 @@
     <string name="right_hand_drive">Right-hand drive</string>
     <string name="right_hand_drive_description">Position UI for right-side driving</string>
     <string name="category_graphic">Graphic</string>
+    <string name="custom_insets">Custom Insets (Margins)</string>
     <string name="category_debug">Debug</string>
 
     <!-- Video Settings -->
