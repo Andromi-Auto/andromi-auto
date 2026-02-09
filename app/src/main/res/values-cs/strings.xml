@@ -110,14 +110,20 @@
     <string name="right_hand_drive">Pravostranné řízení</string>
     <string name="right_hand_drive_description">Upravit rozhraní pro řízení na pravé straně</string>
     <string name="category_graphic">Grafické</string>
+    <string name="custom_insets">Vlastní okraje</string>
     <string name="category_debug">Ladění</string>
 
     <!-- Video Settings -->
     <string name="category_video">Video</string>
     <string name="force_software_decoding">Vynutit softwarové dekódování</string>
-    <string name="force_software_decoding_description">Může vyřešit problémy na některých zařízeních, ale je méně výkonné</string>
-    <string name="wifi_launcher_mode">Bezdrátový Headunit Server</string>
-    <string name="wifi_launcher_mode_description">Umožnit telefonu připojit se k tomuto tabletu (vyžaduje aplikaci Wireless Launcher v telefonu)</string>
+    <string name="force_software_decoding_description">Může vyřešit problémy na některých zařízenichen, ale je méně výkonné</string>
+    <string name="wireless_mode">Bezdrátový režim</string>
+    <string name="wireless_mode_description">Vyberte způsob bezdrátového připojení (ruční seznam, automatické vyhledávání nebo režim pomocníka)</string>
+    <string-array name="wireless_connection_modes">
+        <item>Ručně (seznam)</item>
+        <item>Automatické vyhledávání (Headunit Server)</item>
+        <item>Bezdrátový pomocník (čekání na telefon)</item>
+    </string-array>
     <string name="auto_connect_last_session">Automaticky připojit poslední relaci</string>
     <string name="auto_connect_last_session_description">Při spuštění aplikace se automaticky znovu připojit k naposledy použitému zařízení</string>
     <string name="video_codec">Video kodek</string>

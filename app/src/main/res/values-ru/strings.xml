@@ -110,13 +110,21 @@
     <string name="right_hand_drive">Праворульный автомобиль</string>
     <string name="right_hand_drive_description">Адаптировать интерфейс для праворульного автомобиля</string>
     <string name="category_graphic">Графика</string>
+    <string name="custom_insets">Пользовательские отступы</string>
     <string name="category_debug">Отладка</string>
 
     <!-- Video Settings -->
     <string name="category_video">Видео</string>
     <string name="force_software_decoding">Принудительное программное декодирование</string>
     <string name="force_software_decoding_description">Может решить проблемы на некоторых устройствах, но менее производительно</string>
-    <string name="wifi_launcher_mode">Беспроводной сервер Headunit</string>
+    <string name="wireless_mode">Беспроводной режим</string>
+    <string name="wireless_mode_description">Выберите способ беспроводного подключения (ручной список, автопоиск или режим помощника)</string>
+    <string-array name="wireless_connection_modes">
+        <item>Вручную (список)</item>
+        <item>Автопоиск (Headunit Server)</item>
+        <item>Wireless Helper (ожидание телефона)</item>
+    </string-array>
+    <string name="auto_connect_last_session">Автоподключение последнего сеанса</string>
     <string name="wifi_launcher_mode_description">Позволяет телефону подключаться к этому планшету (требуется приложение Wifi Launcher на телефоне)</string>
     <string name="auto_connect_last_session">Автоподключение последней сессии</string>
     <string name="auto_connect_last_session_description">Автоматически подключаться к последнему использованному устройству при запуске приложения</string>

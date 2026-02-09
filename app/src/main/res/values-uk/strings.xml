@@ -110,14 +110,20 @@
     <string name="right_hand_drive">Правостороннє керування</string>
     <string name="right_hand_drive_description">Розмістити інтерфейс для правостороннього керування автомобілем.</string>
     <string name="category_graphic">Графіка</string>
+    <string name="custom_insets">Користувацькі відступи</string>
     <string name="category_debug">Налагодження</string>
 
     <!-- Video Settings -->
     <string name="category_video">Відео</string>
     <string name="force_software_decoding">Примусове програмне декодування</string>
     <string name="force_software_decoding_description">Може вирішити проблеми на деяких пристроях, але працює повільніше.</string>
-    <string name="wifi_launcher_mode">Бездротовий сервер</string>
-    <string name="wifi_launcher_mode_description">Дозволити телефону підключатися до цього планшета (потрібен застосунок Wireless Launcher)</string>
+    <string name="wireless_mode">Бездротовий режим</string>
+    <string name="wireless_mode_description">Виберіть спосіб бездротового підключення (ручний список, автопошук або режим помічника)</string>
+    <string-array name="wireless_connection_modes">
+        <item>Вручну (список)</item>
+        <item>Автопошук (Headunit Server)</item>
+        <item>Бездротовий помічник (очікування телефону)</item>
+    </string-array>
     <string name="auto_connect_last_session">Автоматично підключатися до останньої сесії</string>
     <string name="auto_connect_last_session_description">Автоматично підключатися до останнього використаного пристрою під час запуску програми</string>
     <string name="video_codec">Відеокодек</string>

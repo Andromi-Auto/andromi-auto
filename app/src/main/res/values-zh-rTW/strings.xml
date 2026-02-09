@@ -109,14 +109,20 @@
     <string name="right_hand_drive">右側駕駛</string>
     <string name="right_hand_drive_description">右側行駛位置 UI</string>
     <string name="category_graphic">圖形</string>
+    <string name="custom_insets">自定義邊距</string>
     <string name="category_debug">除錯</string>
 
     <!-- Video Settings -->
     <string name="category_video">視訊</string>
     <string name="force_software_decoding">強制軟體解碼</string>
     <string name="force_software_decoding_description">可能修復某些裝置上的問題，但效能降低</string>
-    <string name="wifi_launcher_mode">無線主機伺服器</string>
-    <string name="wifi_launcher_mode_description">讓手機連接到平板電腦 (手機上需要安裝無線啟動器應用程式)</string>
+    <string name="wireless_mode">無線模式</string>
+    <string name="wireless_mode_description">選擇無線連接方式 (手動列表、自動搜尋或助手模式)</string>
+    <string-array name="wireless_connection_modes">
+        <item>手動 (列表)</item>
+        <item>自動搜尋 (Headunit Server)</item>
+        <item>無線助手 (等待手機)</item>
+    </string-array>
     <string name="auto_connect_last_session">自動連接上次會話</string>
     <string name="auto_connect_last_session_description">應用程式啟動時自動重新連線到上次使用的裝置</string>
     <string name="video_codec">視訊編碼</string>

@@ -111,13 +111,19 @@
     <string name="right_hand_drive">Kierownica po prawej stronie</string>
     <string name="right_hand_drive_description">Dostosuj interfejs dla ruchu lewostronnego (RHD)</string>
     <string name="category_graphic">Grafika</string>
+    <string name="custom_insets">Własne marginesy</string>
     <string name="category_debug">Debugowanie</string>
 
     <string name="category_video">Wideo</string>
     <string name="force_software_decoding">Wymuś dekodowanie programowe</string>
     <string name="force_software_decoding_description">Może naprawić błędy na niektórych urządzeniach, ale jest mniej wydajne</string>
-    <string name="wifi_launcher_mode">Serwer bezprzewodowy</string>
-    <string name="wifi_launcher_mode_description">Pozwól telefonowi łączyć się z tym urządzeniem (wymaga aplikacji Wireless Launcher na telefonie)</string>
+    <string name="wireless_mode">Tryb bezprzewodowy</string>
+    <string name="wireless_mode_description">Wybierz sposób połączenia bezprzewodowego (lista ręczna, auto-wyszukiwanie lub tryb pomocnika)</string>
+    <string-array name="wireless_connection_modes">
+        <item>Ręcznie (lista)</item>
+        <item>Auto-wyszukiwanie (Headunit Server)</item>
+        <item>Pomocnik bezprzewodowy (oczekiwanie na telefon)</item>
+    </string-array>
     <string name="auto_connect_last_session">Auto-łączenie ostatniej sesji</string>
     <string name="auto_connect_last_session_description">Automatycznie połącz z ostatnio używanym urządzeniem przy starcie aplikacji</string>
     <string name="video_codec">Kodek wideo</string>
