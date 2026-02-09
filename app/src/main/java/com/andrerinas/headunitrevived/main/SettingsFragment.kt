@@ -737,28 +737,6 @@ class SettingsFragment : Fragment() {
             }
         ))
 
-        items.add(SettingItem.SettingEntry(
-            stableId = "bluetoothAddress",
-            nameResId = R.string.bluetooth_address_s,
-            value = pendingBluetoothAddress!!.ifEmpty { getString(R.string.not_set) },
-            onClick = { _ ->
-                val editView = EditText(requireContext())
-                editView.setText(pendingBluetoothAddress)
-                AlertDialog.Builder(requireContext())
-                    .setTitle(R.string.enter_bluetooth_mac)
-                    .setView(editView)
-                    .setPositiveButton(android.R.string.ok) { dialog, _ ->
-                        pendingBluetoothAddress = editView.text.toString().trim()
-                        checkChanges()
-                        dialog.dismiss()
-                        updateSettingsList()
-                    }
-                                    .setNegativeButton(R.string.cancel) { dialog, _ ->
-                                        dialog.cancel()
-                                    }                    .show()
-            }
-        ))
-
         // --- Info Settings ---
         items.add(SettingItem.CategoryHeader("info", R.string.category_info))
 

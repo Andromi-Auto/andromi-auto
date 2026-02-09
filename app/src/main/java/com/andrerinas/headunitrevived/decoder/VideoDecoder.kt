@@ -86,6 +86,7 @@ class VideoDecoder(private val settings: Settings) {
         synchronized(this) {
             running = false
             try {
+                outputThread?.interrupt()
                 outputThread?.join(500)
             } catch (e: Exception) {}
             outputThread = null
@@ -235,7 +236,17 @@ class VideoDecoder(private val settings: Settings) {
                 }
                 
                 if (nalType == 7) {
-                    sps = buffer.copyOfRange(nextNal, endNal)
+                    val rawSps = buffer.copyOfRange(nextNal, endNal)
+                    sps = if (nalStartLen == 3) {
+                        // Prepend an extra 0x00 to convert 00 00 01 to 00 00 00 01
+                        val fixedSps = ByteArray(rawSps.size + 1)
+                        fixedSps[0] = 0
+                        System.arraycopy(rawSps, 0, fixedSps, 1, rawSps.size)
+                        fixedSps
+                    } else {
+                        rawSps
+                    }
+                    
                     try {
                         val spsData = SpsParser.parse(sps!!)
                         if (spsData != null && (mWidth != spsData.width || mHeight != spsData.height)) {
@@ -246,7 +257,15 @@ class VideoDecoder(private val settings: Settings) {
                         }
                     } catch (e: Exception) {}
                 } else if (nalType == 8) {
-                    pps = buffer.copyOfRange(nextNal, endNal)
+                    val rawPps = buffer.copyOfRange(nextNal, endNal)
+                    pps = if (nalStartLen == 3) {
+                        val fixedPps = ByteArray(rawPps.size + 1)
+                        fixedPps[0] = 0
+                        System.arraycopy(rawPps, 0, fixedPps, 1, rawPps.size)
+                        fixedPps
+                    } else {
+                        rawPps
+                    }
                 }
                 offset = endNal
             } else {
