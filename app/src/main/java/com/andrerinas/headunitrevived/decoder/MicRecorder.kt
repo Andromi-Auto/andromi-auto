@@ -60,7 +60,8 @@ class MicRecorder(private val micSampleRate: Int, private val context: Context) 
 
     private fun micAudioRead(aud_buf: ByteArray, max_len: Int): Int {
         var len = 0
-        if (audioRecord == null) {
+        val currentListener = listener
+        if (audioRecord == null || currentListener == null) {
             return len
         }
         len = audioRecord!!.read(aud_buf, 0, max_len)
@@ -72,7 +73,7 @@ class MicRecorder(private val micSampleRate: Int, private val context: Context) 
             return len
         }
 
-        listener!!.onMicDataAvailable(aud_buf, len)
+        currentListener.onMicDataAvailable(aud_buf, len)
         return len
     }
 

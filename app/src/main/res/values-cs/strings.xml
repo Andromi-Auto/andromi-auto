@@ -111,6 +111,10 @@
     <string name="right_hand_drive_description">Upravit rozhraní pro řízení na pravé straně</string>
     <string name="category_graphic">Grafické</string>
     <string name="custom_insets">Vlastní okraje</string>
+    <string name="inset_top">Nahoře</string>
+    <string name="inset_bottom">Dole</string>
+    <string name="inset_left">Vlevo</string>
+    <string name="inset_right">Vpravo</string>
     <string name="category_debug">Ladění</string>
 
     <!-- Video Settings -->

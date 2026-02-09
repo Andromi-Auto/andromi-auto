@@ -113,6 +113,10 @@
     <string name="right_hand_drive_description">Positioneer de gebruikersinterface voor rechts rijden.</string>
     <string name="category_graphic">Grafisch</string>
     <string name="custom_insets">Aangepaste marges</string>
+    <string name="inset_top">Boven</string>
+    <string name="inset_bottom">Onder</string>
+    <string name="inset_left">Links</string>
+    <string name="inset_right">Rechts</string>
     <string name="category_debug">Debug</string>
 
 

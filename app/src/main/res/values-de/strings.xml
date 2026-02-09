@@ -112,6 +112,10 @@ INHALT</string>
     <string name="right_hand_drive_description">Benutzeroberfläche für Rechtsverkehr ausrichten</string>
     <string name="category_graphic">Grafik</string>
     <string name="custom_insets">Benutzerdefinierte Ränder</string>
+    <string name="inset_top">Oben</string>
+    <string name="inset_bottom">Unten</string>
+    <string name="inset_left">Links</string>
+    <string name="inset_right">Rechts</string>
     <string name="category_debug">Debug</string>
 
     <!-- Video Settings -->

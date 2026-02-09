@@ -123,7 +123,7 @@ class AapTransport(
         ba.data[1] = data[1]
         Utils.intToBytes(ba.limit - AapMessage.HEADER_SIZE, 2, ba.data)
 
-        val size = connection!!.sendBlocking(ba.data, ba.limit, 250)
+        val size = connection?.sendBlocking(ba.data, ba.limit, 250) ?: -1
 
         if (AppLog.LOG_VERBOSE) {
             AppLog.v("Sent size: %d", size)
@@ -196,7 +196,7 @@ class AapTransport(
             notification,
             context
         )
-        pollHandler!!.sendEmptyMessage(MSG_POLL)
+        pollHandler?.sendEmptyMessage(MSG_POLL)
 
         return true
     }
@@ -325,14 +325,15 @@ class AapTransport(
     }
 
     fun send(message: AapMessage) {
-        if (sendHandler == null) {
+        val handler = sendHandler
+        if (handler == null) {
             AppLog.i("Cannot send message, handler is null (quitting?)")
         } else {
             if (AppLog.LOG_VERBOSE) {
                 AppLog.v(message.toString())
             }
-            val msg = sendHandler!!.obtainMessage(MSG_SEND, 0, message.size, message.data)
-            sendHandler!!.sendMessage(msg)
+            val msg = handler.obtainMessage(MSG_SEND, 0, message.size, message.data)
+            handler.sendMessage(msg)
         }
     }
 

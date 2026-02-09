@@ -111,6 +111,10 @@
     <string name="right_hand_drive_description">Posiciona la interfaz para conducción por el lado derecho</string>
     <string name="category_graphic">Gráficos</string>
     <string name="custom_insets">Márgenes personalizados</string>
+    <string name="inset_top">Superior</string>
+    <string name="inset_bottom">Inferior</string>
+    <string name="inset_left">Izquierda</string>
+    <string name="inset_right">Derecha</string>
     <string name="category_debug">Depuración</string>
 
     <!-- Video Settings -->

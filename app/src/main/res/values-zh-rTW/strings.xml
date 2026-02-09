@@ -110,6 +110,10 @@
     <string name="right_hand_drive_description">右側行駛位置 UI</string>
     <string name="category_graphic">圖形</string>
     <string name="custom_insets">自定義邊距</string>
+    <string name="inset_top">上</string>
+    <string name="inset_bottom">下</string>
+    <string name="inset_left">左</string>
+    <string name="inset_right">右</string>
     <string name="category_debug">除錯</string>
 
     <!-- Video Settings -->

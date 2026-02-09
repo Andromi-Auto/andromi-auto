@@ -1,4 +1,11 @@
 # Changelog
+### v.1.13.1
+- Fixed Custom Insets Dialog with a Scrollview
+- Fixed 4 app crashes listed in play console
+- Fixed 2 warnings in play console for edge-to-edge display
+- Fixed a race condition in ssl read/write
+- Preventing disconnect if just one package was broken/corrupt in ssl transfer
+
 ### v.1.13.0
 - Improvement: USB stability overhaul (implemented 16KB internal buffer)
 - New Feature: Custom Insets (Margins) setting with live preview

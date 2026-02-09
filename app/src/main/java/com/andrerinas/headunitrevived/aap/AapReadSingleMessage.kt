@@ -51,8 +51,11 @@ internal class AapReadSingleMessage(connection: AccessoryConnection, ssl: AapSsl
             val msg = AapMessageIncoming.decrypt(recvHeader, 0, msgBuffer, ssl)
 
             if (msg == null) {
-                AppLog.e("AapRead: Decryption failed. enc_len: ${recvHeader.enc_len}, chan: ${Channel.name(recvHeader.chan)}, flags: ${recvHeader.flags}, msg_type: ${recvHeader.msg_type}. Disconnecting.")
-                return -1
+                // This can happen for SSL control messages. Just continue reading.
+                if (AppLog.LOG_VERBOSE) {
+                    AppLog.d("AapRead: Decryption returned no message (likely SSL control packet). Continuing.")
+                }
+                return 0
             }
 
             // Step 4: Handle the decrypted message

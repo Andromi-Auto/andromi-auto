@@ -111,6 +111,10 @@
     <string name="right_hand_drive_description">Posiciona a interface para direção pelo lado direito</string>
     <string name="category_graphic">Gráfico</string>
     <string name="custom_insets">Margens personalizadas</string>
+    <string name="inset_top">Superior</string>
+    <string name="inset_bottom">Inferior</string>
+    <string name="inset_left">Esquerda</string>
+    <string name="inset_right">Direita</string>
     <string name="category_debug">Depuração</string>
 
     <!-- Video Settings -->

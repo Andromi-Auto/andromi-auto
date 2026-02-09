@@ -111,6 +111,10 @@
     <string name="right_hand_drive_description">Адаптировать интерфейс для праворульного автомобиля</string>
     <string name="category_graphic">Графика</string>
     <string name="custom_insets">Пользовательские отступы</string>
+    <string name="inset_top">Сверху</string>
+    <string name="inset_bottom">Снизу</string>
+    <string name="inset_left">Слева</string>
+    <string name="inset_right">Справа</string>
     <string name="category_debug">Отладка</string>
 
     <!-- Video Settings -->

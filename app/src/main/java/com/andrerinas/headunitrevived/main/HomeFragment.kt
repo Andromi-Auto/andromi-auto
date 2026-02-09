@@ -187,7 +187,10 @@ class HomeFragment : Fragment() {
         }
 
         usb.setOnClickListener {
-            findNavController().navigate(R.id.action_homeFragment_to_usbListFragment)
+            val controller = findNavController()
+            if (controller.currentDestination?.id == R.id.homeFragment) {
+                controller.navigate(R.id.action_homeFragment_to_usbListFragment)
+            }
         }
 
         settings.setOnClickListener {
@@ -225,13 +228,19 @@ class HomeFragment : Fragment() {
                     }
                 }
                 else -> { // Manual (0) -> Open List
-                    findNavController().navigate(R.id.action_homeFragment_to_networkListFragment)
+                    val controller = findNavController()
+                    if (controller.currentDestination?.id == R.id.homeFragment) {
+                        controller.navigate(R.id.action_homeFragment_to_networkListFragment)
+                    }
                 }
             }
         }
 
         wifi.setOnLongClickListener {
-            findNavController().navigate(R.id.action_homeFragment_to_networkListFragment)
+            val controller = findNavController()
+            if (controller.currentDestination?.id == R.id.homeFragment) {
+                controller.navigate(R.id.action_homeFragment_to_networkListFragment)
+            }
             true
         }
     }

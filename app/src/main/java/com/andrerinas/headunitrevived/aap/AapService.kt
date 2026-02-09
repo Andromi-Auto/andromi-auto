@@ -514,8 +514,10 @@ class AapService : Service(), UsbReceiver.Listener {
 
     private fun reset() {
         App.provide(this).resetTransport();
-        App.provide(this).audioDecoder.stop();
-        App.provide(this).videoDecoder.stop("AapService::reset");
+        serviceScope.launch(Dispatchers.IO) {
+            App.provide(this@AapService).audioDecoder.stop();
+            App.provide(this@AapService).videoDecoder.stop("AapService::reset");
+        }
     }
 
     override fun onUsbDetach(device: UsbDevice) {

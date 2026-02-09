@@ -112,6 +112,10 @@
     <string name="right_hand_drive_description">Dostosuj interfejs dla ruchu lewostronnego (RHD)</string>
     <string name="category_graphic">Grafika</string>
     <string name="custom_insets">Własne marginesy</string>
+    <string name="inset_top">Góra</string>
+    <string name="inset_bottom">Dół</string>
+    <string name="inset_left">Lewo</string>
+    <string name="inset_right">Prawo</string>
     <string name="category_debug">Debugowanie</string>
 
     <string name="category_video">Wideo</string>

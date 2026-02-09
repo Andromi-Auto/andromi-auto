@@ -72,8 +72,10 @@ internal class AapReadMultipleMessages(
             val msg = AapMessageIncoming.decrypt(recvHeader, 0, msgBuffer, ssl)
 
             if (msg == null) {
-                AppLog.e("AapRead: Decryption failed. enc_len: ${recvHeader.enc_len}, chan: ${Channel.name(recvHeader.chan)}, flags: ${recvHeader.flags}, msg_type: ${recvHeader.msg_type}. Disconnecting.")
-                break
+                if (AppLog.LOG_VERBOSE) {
+                    AppLog.d("AapRead: Decryption returned no message (likely SSL control packet). Continuing.")
+                }
+                continue // Skip to next message in the buffer
             }
 
             handler.handle(msg)

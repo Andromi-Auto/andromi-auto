@@ -111,6 +111,10 @@
     <string name="right_hand_drive_description">Розмістити інтерфейс для правостороннього керування автомобілем.</string>
     <string name="category_graphic">Графіка</string>
     <string name="custom_insets">Користувацькі відступи</string>
+    <string name="inset_top">Зверху</string>
+    <string name="inset_bottom">Знизу</string>
+    <string name="inset_left">Зліва</string>
+    <string name="inset_right">Справа</string>
     <string name="category_debug">Налагодження</string>
 
     <!-- Video Settings -->

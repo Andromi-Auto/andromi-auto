@@ -123,34 +123,51 @@ class AapSslContext(keyManager: SingleKeyKeyManager): AapSsl {
     }
 
     override fun decrypt(start: Int, length: Int, buffer: ByteArray): ByteArrayWithLimit? {
-        try {
-            rxBuffer.clear()
-            val encrypted = ByteBuffer.wrap(buffer, start, length)
-            val result = sslEngine.unwrap(encrypted, rxBuffer)
-            runDelegatedTasks(result, sslEngine)
-            val resultBuffer = ByteArray(result.bytesProduced())
-            rxBuffer.flip()
-            rxBuffer.get(resultBuffer)
-            return ByteArrayWithLimit(resultBuffer, resultBuffer.size)
-        } catch (e: Exception) {
-            AppLog.e("SSL Decrypt failed", e)
-            return null
+        synchronized(this) {
+            if (!::sslEngine.isInitialized || !::rxBuffer.isInitialized) {
+                AppLog.w("SSL Decrypt: Not initialized yet")
+                return null
+            }
+            try {
+                rxBuffer.clear()
+                val encrypted = ByteBuffer.wrap(buffer, start, length)
+                val result = sslEngine.unwrap(encrypted, rxBuffer)
+                runDelegatedTasks(result, sslEngine)
+                
+                if (AppLog.LOG_VERBOSE || result.bytesProduced() == 0) {
+                    AppLog.d("SSL Decrypt Status: ${result.status}, Produced: ${result.bytesProduced()}, Consumed: ${result.bytesConsumed()}")
+                }
+
+                val resultBuffer = ByteArray(result.bytesProduced())
+                rxBuffer.flip()
+                rxBuffer.get(resultBuffer)
+                return ByteArrayWithLimit(resultBuffer, resultBuffer.size)
+            } catch (e: Exception) {
+                AppLog.e("SSL Decrypt failed", e)
+                return null
+            }
         }
     }
 
     override fun encrypt(offset: Int, length: Int, buffer: ByteArray): ByteArrayWithLimit? {
-        try {
-            txBuffer.clear()
-            val byteBuffer = ByteBuffer.wrap(buffer, offset, length)
-            val result = sslEngine.wrap(byteBuffer, txBuffer)
-            runDelegatedTasks(result, sslEngine)
-            val resultBuffer = ByteArray(result.bytesProduced() + offset)
-            txBuffer.flip()
-            txBuffer.get(resultBuffer, offset, result.bytesProduced())
-            return ByteArrayWithLimit(resultBuffer, resultBuffer.size)
-        } catch (e: Exception) {
-            AppLog.e("SSL Encrypt failed", e)
-            return null
+        synchronized(this) {
+            if (!::sslEngine.isInitialized || !::txBuffer.isInitialized) {
+                AppLog.w("SSL Encrypt: Not initialized yet")
+                return null
+            }
+            try {
+                txBuffer.clear()
+                val byteBuffer = ByteBuffer.wrap(buffer, offset, length)
+                val result = sslEngine.wrap(byteBuffer, txBuffer)
+                runDelegatedTasks(result, sslEngine)
+                val resultBuffer = ByteArray(result.bytesProduced() + offset)
+                txBuffer.flip()
+                txBuffer.get(resultBuffer, offset, result.bytesProduced())
+                return ByteArrayWithLimit(resultBuffer, resultBuffer.size)
+            } catch (e: Exception) {
+                AppLog.e("SSL Encrypt failed", e)
+                return null
+            }
         }
     }
 
