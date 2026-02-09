@@ -151,6 +151,14 @@ class AapTransport(
         micRecorder.listener = null
         pollThread?.quit()
         sendThread?.quit()
+        
+        try {
+            pollThread?.join(1000)
+            sendThread?.join(1000)
+        } catch (e: InterruptedException) {
+            AppLog.e("Failed to join threads", e)
+        }
+        
         aapRead = null
         pollHandler = null
         sendHandler = null

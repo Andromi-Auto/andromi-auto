@@ -111,14 +111,20 @@ INHALT</string>
     <string name="right_hand_drive">Rechtslenker</string>
     <string name="right_hand_drive_description">Benutzeroberfläche für Rechtsverkehr ausrichten</string>
     <string name="category_graphic">Grafik</string>
+    <string name="custom_insets">Benutzerdefinierte Ränder</string>
     <string name="category_debug">Debug</string>
 
     <!-- Video Settings -->
     <string name="category_video">Video</string>
     <string name="force_software_decoding">Software-Decoding erzwingen</string>
     <string name="force_software_decoding_description">Kann Probleme auf manchen Geräten beheben, verbraucht aber mehr Leistung.</string>
-    <string name="wifi_launcher_mode">Wireless Headunit Server</string>
-    <string name="wifi_launcher_mode_description">Erlaubt dem Handy sich zu verbinden (erfordert Wireless Launcher App auf dem Handy)</string>
+    <string name="wireless_mode">WLAN-Modus</string>
+    <string name="wireless_mode_description">Wählen Sie, wie sich die App drahtlos verbindet (Manuelle Liste, automatische Suche oder Helper-Modus)</string>
+    <deferred-string-array name="wireless_connection_modes">
+        <item>Manuell (Liste)</item>
+        <item>Auto-Suche (Headunit Server)</item>
+        <item>Wireless Helper (Wartet auf Handy)</item>
+    </deferred-string-array>
     <string name="auto_connect_last_session">Autom. Verbindung zur letzten Sitzung</string>
     <string name="auto_connect_last_session_description">Verbindet beim Start automatisch mit dem zuletzt genutzten Gerät</string>
     <string name="video_codec">Video Codec</string>

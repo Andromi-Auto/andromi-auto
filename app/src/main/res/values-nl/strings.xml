@@ -112,6 +112,7 @@
     <string name="right_hand_drive">Rechts hand gestuurd</string>
     <string name="right_hand_drive_description">Positioneer de gebruikersinterface voor rechts rijden.</string>
     <string name="category_graphic">Grafisch</string>
+    <string name="custom_insets">Aangepaste marges</string>
     <string name="category_debug">Debug</string>
 
 
@@ -119,8 +120,13 @@
     <string name="category_video">Video</string>
     <string name="force_software_decoding">Forceer Software Decoding</string>
     <string name="force_software_decoding_description">Kan problemen op sommige apparaten oplossen, maar presteert minder goed.</string>
-    <string name="wifi_launcher_mode">Draadloze Headunit Server</string>
-    <string name="wifi_launcher_mode_description">Maak verbinding met deze tablet via de telefoon (hiervoor is de app Wireless Launcher op de telefoon nodig).</string>
+    <string name="wireless_mode">Draadloze modus</string>
+    <string name="wireless_mode_description">Selecteer hoe de app draadloos verbinding maakt (handmatige lijst, automatisch zoeken of helpermodus)</string>
+    <string-array name="wireless_connection_modes">
+        <item>Handmatig (lijst)</item>
+        <item>Automatisch zoeken (Headunit Server)</item>
+        <item>Draadloze helper (wachten op telefoon)</item>
+    </string-array>
     <string name="auto_connect_last_session">Auto-Connect laatste Sessie</string>
     <string name="auto_connect_last_session_description">Automatisch opnieuw verbinding maken met het laatst gebruikte apparaat bij het opstarten van de app.</string>
     <string name="video_codec">Video Codec</string>

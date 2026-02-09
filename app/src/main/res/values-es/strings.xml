@@ -110,14 +110,20 @@
     <string name="right_hand_drive">Conducción por la derecha</string>
     <string name="right_hand_drive_description">Posiciona la interfaz para conducción por el lado derecho</string>
     <string name="category_graphic">Gráficos</string>
+    <string name="custom_insets">Márgenes personalizados</string>
     <string name="category_debug">Depuración</string>
 
     <!-- Video Settings -->
     <string name="category_video">Vídeo</string>
     <string name="force_software_decoding">Forzar decodificación por software</string>
     <string name="force_software_decoding_description">Puede corregir problemas en algunos dispositivos, pero es menos eficiente</string>
-    <string name="wifi_launcher_mode">Servidor Headunit inalámbrico</string>
-    <string name="wifi_launcher_mode_description">Permite que el teléfono se conecte a este dispositivo (requiere la app Wireless Launcher en el teléfono)</string>
+    <string name="wireless_mode">Modo inalámbrico</string>
+    <string name="wireless_mode_description">Seleccione cómo se conecta la aplicación de forma inalámbrica (lista manual, búsqueda automática o modo asistente)</string>
+    <string-array name="wireless_connection_modes">
+        <item>Manual (lista)</item>
+        <item>Búsqueda automática (Headunit Server)</item>
+        <item>Asistente inalámbrico (esperando al teléfono)</item>
+    </string-array>
     <string name="auto_connect_last_session">Conectar automáticamente a la última sesión</string>
     <string name="auto_connect_last_session_description">Reconecta automáticamente al último dispositivo usado al iniciar la app</string>
     <string name="video_codec">Códec de vídeo</string>

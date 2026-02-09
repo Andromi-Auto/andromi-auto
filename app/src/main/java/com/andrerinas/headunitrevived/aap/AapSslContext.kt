@@ -27,31 +27,13 @@ class AapSslContext(keyManager: SingleKeyKeyManager): AapSsl {
 
             when (getHandshakeStatus()) {
                 SSLEngineResult.HandshakeStatus.NEED_UNWRAP -> {
-                    // Recv from connection -> unwrap
-                    // Read AAP Header (4 bytes) + Type (2 bytes) = 6 bytes
-                    val headerSize = connection.recvBlocking(buffer, 6, 5000, true)
-                    if (headerSize < 6) {
-                        AppLog.e("SSL Handshake: Header receive failed or too small ($headerSize)")
+                    val size = connection.recvBlocking(buffer, buffer.size, 5000, false)
+                    if (size <= 6) {
+                        AppLog.e("SSL Handshake: Receive failed or too small ($size)")
+
                         return false
                     }
-                    
-                    // Total length is at offset 2 and 3
-                    val payloadLen = ((buffer[2].toInt() and 0xFF) shl 8) or (buffer[3].toInt() and 0xFF)
-                    val remaining = payloadLen - 2
-                    
-                    var totalSize = 6
-                    if (remaining > 0) {
-                        val bodyBuffer = ByteArray(remaining)
-                        val bodyRead = connection.recvBlocking(bodyBuffer, remaining, 5000, true)
-                        if (bodyRead < remaining) {
-                            AppLog.e("SSL Handshake: Body receive failed ($bodyRead/$remaining)")
-                            return false
-                        }
-                        System.arraycopy(bodyBuffer, 0, buffer, 6, remaining)
-                        totalSize += bodyRead
-                    }
-
-                    handshakeWrite(6, totalSize - 6, buffer)
+                    handshakeWrite(6, size - 6, buffer)
                 }
 
                 SSLEngineResult.HandshakeStatus.NEED_WRAP -> {

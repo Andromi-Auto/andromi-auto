@@ -28,4 +28,13 @@ class SettingsActivity : AppCompatActivity() {
         val root = findViewById<View>(R.id.settings_nav_host)
         SystemUI.apply(window, root, appSettings.startInFullscreenMode)
     }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (hasFocus) {
+            val appSettings = Settings(this)
+            val root = findViewById<View>(R.id.settings_nav_host)
+            SystemUI.apply(window, root, appSettings.startInFullscreenMode)
+        }
+    }
 }

@@ -110,14 +110,20 @@
     <string name="right_hand_drive">Direção à direita</string>
     <string name="right_hand_drive_description">Posiciona a interface para direção pelo lado direito</string>
     <string name="category_graphic">Gráfico</string>
+    <string name="custom_insets">Margens personalizadas</string>
     <string name="category_debug">Depuração</string>
 
     <!-- Video Settings -->
     <string name="category_video">Vídeo</string>
     <string name="force_software_decoding">Forçar decodificação por software</string>
     <string name="force_software_decoding_description">Pode corrigir problemas em alguns dispositivos, mas é menos performático</string>
-    <string name="wifi_launcher_mode">Servidor Headunit sem fio</string>
-    <string name="wifi_launcher_mode_description">Permite que o celular se conecte a este tablet (requer o app Wireless Launcher no celular)</string>
+    <string name="wireless_mode">Modo sem fio</string>
+    <string name="wireless_mode_description">Selecione como o aplicativo se conecta sem fio (lista manual, busca automática ou modo auxiliar)</string>
+    <string-array name="wireless_connection_modes">
+        <item>Manual (Lista)</item>
+        <item>Busca automática (Headunit Server)</item>
+        <item>Auxiliar sem fio (Aguardando telefone)</item>
+    </string-array>
     <string name="auto_connect_last_session">Conectar automaticamente à última sessão</string>
     <string name="auto_connect_last_session_description">Reconecta automaticamente ao último dispositivo usado ao iniciar o app</string>
     <string name="video_codec">Codec de vídeo</string>

@@ -13,10 +13,15 @@ import kotlinx.coroutines.withContext
 
 class UsbAccessoryConnection(private val usbMgr: UsbManager, private val device: UsbDevice) : AccessoryConnection {
     private var usbDeviceConnected: UsbDeviceCompat? = null
-    private var usbDeviceConnection: UsbDeviceConnection? = null                   // USB Device connection
-    private var usbInterface: UsbInterface? = null                   // USB Interface
-    private var endpointIn: UsbEndpoint? = null                   // USB Input  endpoint
-    private var endpointOut: UsbEndpoint? = null                   // USB Output endpoint
+    private var usbDeviceConnection: UsbDeviceConnection? = null
+    private var usbInterface: UsbInterface? = null
+    private var endpointIn: UsbEndpoint? = null
+    private var endpointOut: UsbEndpoint? = null
+
+    // Internal buffer to mimic HUR 6.3 behavior (16KB chunks)
+    private val internalBuffer = ByteArray(16384)
+    private var internalBufferPos = 0
+    private var internalBufferAvailable = 0
 
     fun isDeviceRunning(device: UsbDevice): Boolean {
         synchronized(sLock) {
@@ -143,6 +148,8 @@ class UsbAccessoryConnection(private val usbMgr: UsbManager, private val device:
             usbDeviceConnection = null
             usbInterface = null
             usbDeviceConnected = null
+            internalBufferPos = 0
+            internalBufferAvailable = 0
         }
     }
 
@@ -170,16 +177,46 @@ class UsbAccessoryConnection(private val usbMgr: UsbManager, private val device:
 
     override fun recvBlocking(buf: ByteArray, length: Int, timeout: Int, readFully: Boolean): Int {
         synchronized(sLock) {
-            if (usbDeviceConnected == null) {
-                AppLog.e("Not connected")
+            val connection = usbDeviceConnection ?: return -1
+            val ep = endpointIn ?: return -1
+
+            try {
+                var totalReturned = 0
+                
+                while (totalReturned < length) {
+                    // 1. Serve from internal buffer if data is available
+                    if (internalBufferAvailable > 0) {
+                        val toCopy = minOf(length - totalReturned, internalBufferAvailable)
+                        System.arraycopy(internalBuffer, internalBufferPos, buf, totalReturned, toCopy)
+                        internalBufferPos += toCopy
+                        internalBufferAvailable -= toCopy
+                        totalReturned += toCopy
+                        
+                        // If we have enough or we are not in readFully mode, return what we have
+                        if (totalReturned >= length || !readFully) break
+                        continue
+                    }
+
+                    // 2. Internal buffer empty, read new 16KB chunk from USB
+                    val read = connection.bulkTransfer(ep, internalBuffer, internalBuffer.size, timeout)
+                    
+                    if (read < 0) {
+                        return if (totalReturned > 0) totalReturned else -1
+                    }
+                    if (read == 0) {
+                        return totalReturned
+                    }
+
+                    internalBufferPos = 0
+                    internalBufferAvailable = read
+                    // Loop will continue and serve from the new internalBuffer data
+                }
+                
+                return totalReturned
+
+            } catch (e: Exception) {
+                AppLog.e("USB Read Error: ${e.message}")
                 return -1
-            }
-            return try {
-                usbDeviceConnection!!.bulkTransfer(endpointIn, buf, buf.size, timeout)
-            } catch (e: NullPointerException) {
-                disconnect()
-                AppLog.e(e)
-                -1
             }
         }
     }

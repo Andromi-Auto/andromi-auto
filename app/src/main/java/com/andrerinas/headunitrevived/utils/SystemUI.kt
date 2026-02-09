@@ -62,15 +62,27 @@ object SystemUI {
         }
 
         // Manual Inset Handling
+        val settings = Settings(root.context)
         ViewCompat.setOnApplyWindowInsetsListener(root) { v, insetsCompat ->
+            val manualL = settings.insetLeft
+            val manualT = settings.insetTop
+            val manualR = settings.insetRight
+            val manualB = settings.insetBottom
+
             if (fullscreen) {
-                v.setPadding(0, 0, 0, 0)
-                HeadUnitScreenConfig.updateInsets(0, 0, 0, 0)
+                // In Fullscreen we only apply manual insets
+                v.setPadding(manualL, manualT, manualR, manualB)
+                HeadUnitScreenConfig.updateInsets(manualL, manualT, manualR, manualB)
             } else {
                 val bars = insetsCompat.getInsets(WindowInsetsCompat.Type.systemBars())
-                // Only apply padding if the system actually provides it
-                v.setPadding(bars.left, bars.top, bars.right, bars.bottom)
-                HeadUnitScreenConfig.updateInsets(bars.left, bars.top, bars.right, bars.bottom)
+                // Combine system bars with manual insets
+                val totalL = bars.left + manualL
+                val totalT = bars.top + manualT
+                val totalR = bars.right + manualR
+                val totalB = bars.bottom + manualB
+
+                v.setPadding(totalL, totalT, totalR, totalB)
+                HeadUnitScreenConfig.updateInsets(totalL, totalT, totalR, totalB)
             }
             insetsCompat
         }
