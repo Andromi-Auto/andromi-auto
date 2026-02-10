@@ -159,7 +159,6 @@ class VideoDecoder(private val settings: Settings) {
         val length = buffer.size - 5
         for (i in 0 until length) {
             if (buffer[i].toInt() == 0 && buffer[i+1].toInt() == 0) {
-                var nalType = -1
                 if (buffer[i+2].toInt() == 0 && buffer[i+3].toInt() == 1) {
                     val b = buffer[i+4].toInt()
                     val hevcType = (b and 0x7E) shr 1
@@ -284,8 +283,8 @@ class VideoDecoder(private val settings: Settings) {
             codecBufferInfo = MediaCodec.BufferInfo()
 
             val format = MediaFormat.createVideoFormat(mimeType, width, height)
-            if (sps != null) format.setByteBuffer("csd-0", ByteBuffer.wrap(sps))
-            if (pps != null) format.setByteBuffer("csd-1", ByteBuffer.wrap(pps))
+            if (sps != null) format.setByteBuffer("csd-0", ByteBuffer.wrap(sps!!))
+            if (pps != null) format.setByteBuffer("csd-1", ByteBuffer.wrap(pps!!))
             
             // Reduced max input size to 1MB (was 10MB). 
             // 1MB is sufficient for 1080p I-Frames and saves memory on older devices.

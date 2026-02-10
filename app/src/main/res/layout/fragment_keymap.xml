@@ -4,13 +4,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="?android:attr/colorBackground">
+    android:background="?attr/colorSurface">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:elevation="0dp"
-        android:background="?android:attr/colorBackground">
+        android:background="?attr/colorSurface">
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
@@ -38,6 +38,6 @@
         android:gravity="center"
         android:text="Last Key Press: None"
         android:textColor="?android:attr/textColorSecondary"
-        android:background="?android:attr/colorBackground" />
+        android:background="?attr/colorSurface" />
 
 </LinearLayout>
