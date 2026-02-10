@@ -13,7 +13,6 @@ internal class AapVideo(private val videoDecoder: VideoDecoder, private val sett
     fun process(message: AapMessage): Boolean {
 
         val flags = message.flags.toInt()
-        val msg_type = message.type
         val buf = message.data
         val len = message.size
 

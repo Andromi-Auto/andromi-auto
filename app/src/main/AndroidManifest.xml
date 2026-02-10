@@ -41,6 +41,7 @@
     <application
         android:name=".App"
         android:hardwareAccelerated="true"
+        android:largeHeap="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/title"
         tools:ignore="GoogleAppIndexingWarning">

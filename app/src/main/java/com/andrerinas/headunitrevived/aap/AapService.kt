@@ -91,14 +91,12 @@ class AapService : Service(), UsbReceiver.Listener {
 
         uiModeManager = getSystemService(UI_MODE_SERVICE) as UiModeManager;
         uiModeManager.enableCarMode(0);
-        uiModeManager.nightMode = UiModeManager.MODE_NIGHT_AUTO;
 
         usbReceiver = UsbReceiver(this);
         
         nightModeManager = NightModeManager(this, App.provide(this).settings) { isNight ->
             AppLog.i("NightMode update: $isNight")
             App.provide(this).transport.send(NightModeEvent(isNight))
-            uiModeManager.nightMode = if (isNight) UiModeManager.MODE_NIGHT_YES else UiModeManager.MODE_NIGHT_NO
         }
         nightModeManager?.start()
 
