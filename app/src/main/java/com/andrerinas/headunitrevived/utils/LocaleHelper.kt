@@ -3,6 +3,7 @@ package com.andrerinas.headunitrevived.utils
 import android.content.Context
 import android.content.res.Configuration
 import android.os.Build
+import com.andrerinas.headunitrevived.R
 import java.util.Locale
 
 object LocaleHelper {
@@ -11,24 +12,37 @@ object LocaleHelper {
 
     /**
      * Gets available locales from the app's resources.
-     * This dynamically detects all values-XX directories in the APK.
+     * This reads from a generated resource array that contains only the locales
+     * for which the app has actual translations (values-XX directories with strings.xml).
+     *
+     * The list is generated at build time by scanning the res/values-* directories,
+     * so new translations are automatically included when contributors add them.
      */
     fun getAvailableLocales(context: Context): List<Locale> {
-        val assetLocales = context.assets.locales
-        return assetLocales
-            .filter { it.isNotEmpty() }
-            .mapNotNull { parseLocale(it) }
-            .distinctBy { it.toString() }
-            .sortedBy { it.getDisplayName(it) }
+        return try {
+            val localeCodes = context.resources.getStringArray(R.array.available_locales)
+            localeCodes
+                .mapNotNull { parseLocale(it) }
+                .distinctBy { it.toString() }
+                .sortedBy { it.getDisplayName(it).lowercase() }
+        } catch (e: Exception) {
+            // Fallback if resource not found (shouldn't happen in normal builds)
+            emptyList()
+        }
     }
 
     /**
-     * Parse a locale string like "cs", "pt-rBR", "zh-rTW" into a Locale object.
+     * Parse a locale string like "es", "pt-rBR", "zh-rTW" into a Locale object.
+     * Handles Android resource qualifier format where region is prefixed with 'r'.
      */
     private fun parseLocale(localeString: String): Locale? {
+        if (localeString.isBlank()) return null
+
         // Android resource locales use format like "pt-rBR" for regional variants
+        // Convert to standard format: "pt-rBR" -> "pt-BR"
         val normalized = localeString.replace("-r", "-")
         val parts = normalized.split("-", "_")
+
         return when (parts.size) {
             1 -> Locale(parts[0])
             2 -> Locale(parts[0], parts[1])
