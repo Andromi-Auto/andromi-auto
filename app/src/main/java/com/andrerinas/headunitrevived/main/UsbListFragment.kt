@@ -173,8 +173,8 @@ class UsbListFragment : Fragment() {
                     // Device is in Accessory Mode but we are NOT connected.
                     // This likely means the previous session ended and the phone needs a reset.
                     MaterialAlertDialogBuilder(mContext, R.style.DarkAlertDialog)
-                        .setTitle("Reconnection Required")
-                        .setMessage("The device is in a waiting state. Please unplug and re-plug the USB cable to start Android Auto again.")
+                        .setTitle(R.string.reconnection_required_title)
+                        .setMessage(R.string.reconnection_required_message)
                         .setPositiveButton(android.R.string.ok, null)
                         .show()
                 } else {
@@ -183,13 +183,13 @@ class UsbListFragment : Fragment() {
                     if (usbManager.hasPermission(device.wrappedDevice)) {
                         val usbMode = UsbAccessoryMode(usbManager)
                         if (usbMode.connectAndSwitch(device.wrappedDevice)) {
-                            Toast.makeText(mContext, "Switching to Android Auto...", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(mContext, R.string.switching_to_android_auto, Toast.LENGTH_SHORT).show()
                         } else {
-                            Toast.makeText(mContext, "Switch failed", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(mContext, R.string.switch_failed, Toast.LENGTH_SHORT).show()
                         }
                         notifyDataSetChanged()
                     } else {
-                        Toast.makeText(mContext, "Requesting USB Permission...", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(mContext, R.string.requesting_usb_permission, Toast.LENGTH_SHORT).show()
                         usbManager.requestPermission(device.wrappedDevice, PendingIntent.getActivity(
                             mContext, 500, Intent(mContext, UsbAttachedActivity::class.java),
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE else PendingIntent.FLAG_UPDATE_CURRENT))

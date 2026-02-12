@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import com.andrerinas.headunitrevived.App
+import com.andrerinas.headunitrevived.R
 import com.andrerinas.headunitrevived.aap.AapService
 import com.andrerinas.headunitrevived.connection.UsbAccessoryMode
 import com.andrerinas.headunitrevived.connection.UsbDeviceCompat
@@ -59,11 +60,11 @@ class UsbAttachedActivity : Activity() {
         val usbManager = getSystemService(Context.USB_SERVICE) as UsbManager
         val usbMode = UsbAccessoryMode(usbManager)
         AppLog.i("Switching USB device to accessory mode " + deviceCompat.uniqueName)
-        Toast.makeText(this, "Switching USB device to accessory mode " + deviceCompat.uniqueName, Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, getString(R.string.switching_usb_accessory_mode, deviceCompat.uniqueName), Toast.LENGTH_SHORT).show()
         if (usbMode.connectAndSwitch(device)) {
-            Toast.makeText(this, "Success", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.success), Toast.LENGTH_SHORT).show()
         } else {
-            Toast.makeText(this, "Failed", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.failed), Toast.LENGTH_SHORT).show()
         }
 
         finish()

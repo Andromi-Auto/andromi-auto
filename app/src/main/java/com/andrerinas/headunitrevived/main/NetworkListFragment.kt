@@ -96,7 +96,7 @@ class NetworkListFragment : Fragment(), NetworkDiscovery.Listener {
     
     private fun setupToolbarMenu() {
         // Scan Button (Custom Layout)
-        val scanItem = toolbar.menu.add(0, SCAN_ITEM_ID, 0, "Scan")
+        val scanItem = toolbar.menu.add(0, SCAN_ITEM_ID, 0, getString(R.string.scan))
         scanItem.setShowAsAction(android.view.MenuItem.SHOW_AS_ACTION_ALWAYS)
         scanItem.setActionView(R.layout.layout_scan_button)
         
@@ -126,7 +126,7 @@ class NetworkListFragment : Fragment(), NetworkDiscovery.Listener {
         val progressBar = ProgressBar(requireContext())
         progressBar.setPadding(32, 32, 32, 32)
         builder.setView(progressBar)
-        builder.setTitle("Scanning Network...")
+        builder.setTitle(R.string.scanning_network)
         builder.setNegativeButton(R.string.cancel) { _, _ -> 
              networkDiscovery.stop()
         }
@@ -163,7 +163,7 @@ class NetworkListFragment : Fragment(), NetworkDiscovery.Listener {
             // Auto-connect to the first found device during a manual scan
             if (scanDialog?.isShowing == true) {
                 scanDialog?.dismiss()
-                Toast.makeText(context, "Found $ip, connecting...", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, getString(R.string.found_connecting, ip), Toast.LENGTH_SHORT).show()
 
                 // If we have a socket, we need to pass it to AapService for reuse!
                 if (socket != null && socket.isConnected) {
@@ -183,7 +183,7 @@ class NetworkListFragment : Fragment(), NetworkDiscovery.Listener {
             if (scanDialog?.isShowing == true) {
                 scanDialog?.dismiss()
                 if (adapter.addressList.size <= 2) { // Only localhost and current IP
-                    Toast.makeText(context, "No devices found", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, getString(R.string.no_devices_found), Toast.LENGTH_SHORT).show()
                 }
             }
         }

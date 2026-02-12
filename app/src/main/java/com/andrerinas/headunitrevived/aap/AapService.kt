@@ -407,7 +407,7 @@ class AapService : Service(), UsbReceiver.Listener {
             startActivity(magicalIntent);
         } catch (e: Exception) {
             AppLog.e("Failed to launch AA", e);
-            Toast.makeText(this, "Failed to start Android Auto", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.failed_start_android_auto), Toast.LENGTH_SHORT).show();
         }
     }
 
