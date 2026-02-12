@@ -237,6 +237,10 @@ class Settings(context: Context) {
         get() = prefs.getBoolean("enable-audio-sink", true)
         set(value) { prefs.edit().putBoolean("enable-audio-sink", value).apply() }
 
+    var micInputSource: Int
+        get() = prefs.getInt("mic-input-source", 0) // Default: DEFAULT
+        set(value) { prefs.edit().putInt("mic-input-source", value).apply() }
+
     var useAacAudio: Boolean
         get() = prefs.getBoolean("use-aac-audio", false)
         set(value) { prefs.edit().putBoolean("use-aac-audio", value).apply() }

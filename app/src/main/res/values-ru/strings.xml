@@ -145,6 +145,15 @@
     <string name="use_aac_audio_description">Использовать кодек AAC для аудио для экономии трафика (Экспериментально).</string>
 
     <!-- Info Settings -->
+    <string name="mic_input_source">Источник микрофона</string>
+    <string name="mic_input_source_description">Выберите источник звука для микрофона.</string>
+    <string-array name="mic_input_sources">
+        <item>По умолчанию</item>
+        <item>Микрофон</item>
+        <item>Распознавание речи</item>
+        <item>Голосовая связь</item>
+    </string-array>
+
     <string name="category_info">Информация</string>
     <string name="about">Справка и поддержка</string>
     <string name="about_description">Узнать больше о Headunit Revived</string>

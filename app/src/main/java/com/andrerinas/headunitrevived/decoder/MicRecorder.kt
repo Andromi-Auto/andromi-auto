@@ -8,10 +8,12 @@ import android.media.AudioRecord
 import android.media.MediaRecorder
 import androidx.core.content.PermissionChecker
 import com.andrerinas.headunitrevived.utils.AppLog
+import com.andrerinas.headunitrevived.utils.Settings
 
 class MicRecorder(private val micSampleRate: Int, private val context: Context) {
 
     private var audioRecord: AudioRecord? = null
+    private val settings = Settings(context)
 
     private val micBufferSize: Int
     private var micAudioBuf: ByteArray
@@ -83,12 +85,12 @@ class MicRecorder(private val micSampleRate: Int, private val context: Context) 
             return -4
         }
         try {
-            if (PermissionChecker.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            if (PermissionChecker.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) != PermissionChecker.PERMISSION_GRANTED) {
                 AppLog.e("No permission")
                 audioRecord = null
                 return -3
             }
-            audioRecord = AudioRecord(MediaRecorder.AudioSource.DEFAULT, micSampleRate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, micBufferSize)
+            audioRecord = AudioRecord(settings.micInputSource, micSampleRate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, micBufferSize)
             audioRecord!!.startRecording()
             // Start input
 

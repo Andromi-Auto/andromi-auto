@@ -116,34 +116,20 @@ INHALT</string>
     <string name="inset_bottom">Unten</string>
     <string name="inset_left">Links</string>
     <string name="inset_right">Rechts</string>
-    <string name="category_debug">Debug</string>
-
-    <!-- Video Settings -->
-    <string name="category_video">Video</string>
-    <string name="force_software_decoding">Software-Decoding erzwingen</string>
-    <string name="force_software_decoding_description">Kann Probleme auf manchen Geräten beheben, verbraucht aber mehr Leistung.</string>
-    <string name="wireless_mode">WLAN-Modus</string>
-    <string name="wireless_mode_description">Wählen Sie, wie sich die App drahtlos verbindet (Manuelle Liste, automatische Suche oder Helper-Modus)</string>
-    <string-array name="wireless_connection_modes">
-        <item>Manuell (Liste)</item>
-        <item>Auto-Suche (Headunit Server)</item>
-        <item>Wireless Helper (Wartet auf Handy)</item>
-    </string-array>
-    <string name="auto_connect_last_session">Autom. Verbindung zur letzten Sitzung</string>
-    <string name="auto_connect_last_session_description">Verbindet beim Start automatisch mit dem zuletzt genutzten Gerät</string>
-    <string name="video_codec">Video Codec</string>
-    <string name="fps_limit">FPS Limit</string>
-    <string name="save">Speichern</string>
-    <string name="save_and_restart">Speichern (Neustart)</string>
-    <string name="add_new">Hinzufügen</string>
-    <string name="cancel">Abbrechen</string>
-
     <!-- Audio Settings -->
     <string name="category_audio">Audio</string>
-    <string name="enable_audio_sink">Audioausgabe aktivieren</string>
-    <string name="enable_audio_sink_description">Wenn deaktiviert, spielt die Headunit keinen Ton. Audio läuft über das Handy/Bluetooth.</string>
-    <string name="use_aac_audio">AAC Audio nutzen</string>
-    <string name="use_aac_audio_description">AAC Codec nutzen um Bandbreite zu sparen (Experimentell).</string>
+    <string name="enable_audio_sink">Audio-Ausgabe</string>
+    <string name="enable_audio_sink_description">Wenn deaktiviert, empfängt die Headunit keinen Ton. Der Ton wird über das Handy abgespielt.</string>
+    <string name="use_aac_audio">AAC-Audio verwenden</string>
+    <string name="use_aac_audio_description">Verwendet den AAC-Codec für Audio, um Bandbreite zu sparen (Experimentell).</string>
+    <string name="mic_input_source">Mikrofon-Eingangsquelle</string>
+    <string name="mic_input_source_description">Wählen Sie die Audioquelle für das Mikrofon.</string>
+    <string-array name="mic_input_sources">
+        <item>Standard</item>
+        <item>Mikrofon</item>
+        <item>Spracherkennung</item>
+        <item>Sprachkommunikation</item>
+    </string-array>
 
     <!-- Info Settings -->
     <string name="category_info">Info</string>

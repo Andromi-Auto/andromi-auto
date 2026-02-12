@@ -149,6 +149,15 @@
     <string name="use_aac_audio_description">Gebruik de AAC-codec voor audio om bandbreedte te besparen (experimenteel).</string>
 
 
+    <string name="mic_input_source">Microfoon ingangsbron</string>
+    <string name="mic_input_source_description">Kies de audiobron voor de microfoon.</string>
+    <string-array name="mic_input_sources">
+        <item>Standaard</item>
+        <item>Microfoon</item>
+        <item>Spraakherkenning</item>
+        <item>Spraakcommunicatie</item>
+    </string-array>
+
     <!-- Info Settings -->
     <string name="category_info">Info</string>
     <string name="about">Over &amp; Support</string>
