@@ -3,7 +3,7 @@ package com.andrerinas.headunitrevived.utils
 import android.content.Context
 import android.content.res.Configuration
 import android.os.Build
-import com.andrerinas.headunitrevived.R
+import com.andrerinas.headunitrevived.BuildConfig
 import java.util.Locale
 
 object LocaleHelper {
@@ -11,22 +11,25 @@ object LocaleHelper {
     const val SYSTEM_DEFAULT = ""
 
     /**
-     * Gets available locales from the app's resources.
-     * This reads from a generated resource array that contains only the locales
-     * for which the app has actual translations (values-XX directories with strings.xml).
+     * Gets available locales that the app has translations for.
      *
-     * The list is generated at build time by scanning the res/values-* directories,
-     * so new translations are automatically included when contributors add them.
+     * The list is determined at build time by scanning the res/values-* directories
+     * for those containing strings.xml files. This is stored in BuildConfig.AVAILABLE_LOCALES
+     * so new translations are automatically included when contributors add values-XX folders.
      */
     fun getAvailableLocales(context: Context): List<Locale> {
         return try {
-            val localeCodes = context.resources.getStringArray(R.array.available_locales)
-            localeCodes
-                .mapNotNull { parseLocale(it) }
-                .distinctBy { it.toString() }
-                .sortedBy { it.getDisplayName(it).lowercase() }
+            val localesString = BuildConfig.AVAILABLE_LOCALES
+            if (localesString.isBlank()) {
+                emptyList()
+            } else {
+                localesString.split(",")
+                    .mapNotNull { parseLocale(it.trim()) }
+                    .distinctBy { it.toString() }
+                    .sortedBy { it.getDisplayName(it).lowercase() }
+            }
         } catch (e: Exception) {
-            // Fallback if resource not found (shouldn't happen in normal builds)
+            // Fallback if something goes wrong
             emptyList()
         }
     }

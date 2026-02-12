@@ -54,51 +54,28 @@ android {
         into("${project.layout.buildDirectory.get().asFile}/generated/assets/root")
     }
 
-    // Generate available locales list by scanning values-XX directories
-    val generateAvailableLocales = tasks.register("generateAvailableLocales") {
-        val resDir = file("src/main/res")
-        val outputDir = file("${project.layout.buildDirectory.get().asFile}/generated/res/locales")
-        val outputFile = file("$outputDir/values/available_locales.xml")
+    // Scan available locales at configuration time and store as BuildConfig field
+    val resDir = file("src/main/res")
+    val availableLocales = resDir.listFiles { file ->
+        file.isDirectory && file.name.startsWith("values-") &&
+        // Filter out non-language qualifiers (night mode, screen size, etc.)
+        !file.name.contains("night") &&
+        !file.name.contains("land") &&
+        !file.name.contains("port") &&
+        !file.name.matches(Regex("values-[whsml]\\d+.*")) &&
+        !file.name.matches(Regex("values-v\\d+")) &&
+        // Check that it contains strings.xml (actual translation)
+        file.resolve("strings.xml").exists()
+    }?.map { dir ->
+        // Extract locale code from directory name (e.g., "values-es" -> "es", "values-pt-rBR" -> "pt-rBR")
+        dir.name.removePrefix("values-")
+    }?.sorted() ?: emptyList()
 
-        inputs.dir(resDir)
-        outputs.file(outputFile)
-
-        doLast {
-            val locales = resDir.listFiles { file ->
-                file.isDirectory && file.name.startsWith("values-") &&
-                // Filter out non-language qualifiers (night mode, screen size, etc.)
-                !file.name.contains("night") &&
-                !file.name.contains("land") &&
-                !file.name.contains("port") &&
-                !file.name.matches(Regex("values-[whsml]\\d+.*")) &&
-                !file.name.matches(Regex("values-v\\d+")) &&
-                // Check that it contains strings.xml (actual translation)
-                file.resolve("strings.xml").exists()
-            }?.map { dir ->
-                // Extract locale code from directory name (e.g., "values-es" -> "es", "values-pt-rBR" -> "pt-rBR")
-                dir.name.removePrefix("values-")
-            }?.sorted() ?: emptyList()
-
-            outputDir.resolve("values").mkdirs()
-            outputFile.writeText(buildString {
-                appendLine("""<?xml version="1.0" encoding="utf-8"?>""")
-                appendLine("<resources>")
-                appendLine("""    <string-array name="available_locales">""")
-                for (locale in locales) {
-                    appendLine("""        <item>$locale</item>""")
-                }
-                appendLine("    </string-array>")
-                appendLine("</resources>")
-            })
-
-            println("Generated available_locales.xml with ${locales.size} locales: $locales")
-        }
-    }
+    println("Detected available locales: $availableLocales")
 
     sourceSets {
         getByName("main") {
             assets.srcDirs("${project.layout.buildDirectory.get().asFile}/generated/assets/root")
-            res.srcDirs("${project.layout.buildDirectory.get().asFile}/generated/res/locales")
         }
     }
 
@@ -106,19 +83,9 @@ android {
         dependsOn(copyRootAssets)
     }
 
-    // Ensure locale generation runs before resource merging
-    tasks.configureEach {
-        if (name.contains("mergeResources", ignoreCase = true) ||
-            name.contains("generateResValues", ignoreCase = true) ||
-            name.contains("processResources", ignoreCase = true)) {
-            dependsOn(generateAvailableLocales)
-        }
-    }
-
     tasks.configureEach {
         if (name.contains("lint", ignoreCase = true)) {
             dependsOn(copyRootAssets)
-            dependsOn(generateAvailableLocales)
         }
     }
 
@@ -132,6 +99,10 @@ android {
         setProperty("archivesBaseName", "${applicationId}_${versionName}")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
+
+        // Store available locales in BuildConfig for runtime access
+        // This is scanned at build time from values-XX directories
+        buildConfigField("String", "AVAILABLE_LOCALES", "\"${availableLocales.joinToString(",")}\"")
 
         externalNativeBuild {
             cmake {

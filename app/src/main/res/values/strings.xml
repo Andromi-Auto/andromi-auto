@@ -107,7 +107,6 @@
     <string name="app_language">App Language</string>
     <string name="system_default">System Default</string>
     <string name="change_language">Change Language</string>
-    <string name="language_change_restart">Language changed. The app will now restart.</string>
 
     <!-- Categories for SettingsFragment -->
     <string name="category_general">General</string>

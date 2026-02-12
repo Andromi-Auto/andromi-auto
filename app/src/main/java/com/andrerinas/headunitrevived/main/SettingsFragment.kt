@@ -243,9 +243,8 @@ class SettingsFragment : Fragment() {
 
         Toast.makeText(context, "Settings saved", Toast.LENGTH_SHORT).show()
 
-        // Restart app if language changed
+        // Restart activity if language changed to apply new locale
         if (languageChanged) {
-            Toast.makeText(context, R.string.language_change_restart, Toast.LENGTH_SHORT).show()
             requireActivity().recreate()
         }
     }
