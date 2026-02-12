@@ -63,7 +63,7 @@
     <string name="running">En ejecución</string>
     <string name="not_running">Sin ejecutar</string>
     <string name="no_android_auto_device_connected">No hay un dispositivo Android Auto conectado. Por favor, verifique la conexión USB.</string>
-    <string name="no_usb_device_connected">No hay un dispositivo USB conectado al dispositivo.</string>
+    <string name="no_usb_device_connected">No se detectó ningún teléfono conectado por USB.</string>
     <string name="press_back_again_to_exit">Presione atrás nuevamente para salir</string>
     <string name="back">Atrás</string>
     <string name="debug_mode">Modo de depuración</string>
