@@ -93,6 +93,11 @@
     <string name="key_nav">Nawigacja</string>
     <string name="key_night">Przełącz tryb nocny</string>
 
+    <!-- Language Settings -->
+    <string name="app_language">Język aplikacji</string>
+    <string name="system_default">Domyślny systemowy</string>
+    <string name="change_language">Zmień język</string>
+
     <string name="night_mode_threshold">Próg trybu nocnego</string>
     <string name="enter_threshold_value">Wprowadź wartość progu</string>
     <string name="threshold_lux_desc">Wartość Lux (0-10000). Poniżej = Noc.</string>

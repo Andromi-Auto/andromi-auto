@@ -93,6 +93,11 @@
     <string name="key_nav">Навигация</string>
     <string name="key_night">Переключить ночной режим</string>
 
+    <!-- Language Settings -->
+    <string name="app_language">Язык приложения</string>
+    <string name="system_default">По умолчанию системы</string>
+    <string name="change_language">Изменить язык</string>
+
     <string name="night_mode_threshold">Порог ночного режима</string>
     <string name="enter_threshold_value">Введите пороговое значение</string>
     <string name="threshold_lux_desc">Значение люкс (0-10000). Ниже = Ночь.</string>

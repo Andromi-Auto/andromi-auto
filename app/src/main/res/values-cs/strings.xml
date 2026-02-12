@@ -93,6 +93,11 @@
     <string name="key_nav">Navigace</string>
     <string name="key_night">Přepnout noční režim</string>
 
+    <!-- Language Settings -->
+    <string name="app_language">Jazyk aplikace</string>
+    <string name="system_default">Výchozí systémový</string>
+    <string name="change_language">Změnit jazyk</string>
+
     <string name="night_mode_threshold">Práh nočního režimu</string>
     <string name="enter_threshold_value">Zadejte hodnotu prahu</string>
     <string name="threshold_lux_desc">Hodnota Lux (0-10000). Pod touto hodnotou = Noc.</string>
