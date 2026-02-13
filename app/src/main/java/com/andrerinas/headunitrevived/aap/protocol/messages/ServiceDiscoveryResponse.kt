@@ -11,7 +11,6 @@ import com.andrerinas.headunitrevived.aap.protocol.proto.Control
 import com.andrerinas.headunitrevived.aap.protocol.proto.Media
 import com.andrerinas.headunitrevived.aap.protocol.proto.Sensors
 import com.andrerinas.headunitrevived.utils.AppLog
-import com.andrerinas.headunitrevived.utils.Settings
 import com.andrerinas.headunitrevived.utils.HeadUnitScreenConfig
 import com.google.protobuf.Message
 
@@ -146,6 +145,7 @@ class ServiceDiscoveryResponse(private val context: Context)
                 }
             }
 
+            // Microphone Service (Channel 7) - Always required for AA connection (Assistant)
             val mic = Control.Service.newBuilder().also { service ->
                 service.id = Channel.ID_MIC
                 service.mediaSourceService = Control.Service.MediaSourceService.newBuilder().also {
@@ -159,6 +159,7 @@ class ServiceDiscoveryResponse(private val context: Context)
             }.build()
             services.add(mic)
 
+            // Bluetooth Service
             if (settings.bluetoothAddress.isNotEmpty()) {
                 val bluetooth = Control.Service.newBuilder().also { service ->
                     service.id = Channel.ID_BTH

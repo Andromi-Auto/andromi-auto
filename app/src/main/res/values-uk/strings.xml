@@ -150,6 +150,15 @@
     <string name="use_aac_audio_description">Використовувати кодек AAC для збереження швидкості (експериментально).</string>
 
     <!-- Info Settings -->
+    <string name="mic_input_source">Джерело мікрофона</string>
+    <string name="mic_input_source_description">Виберіть джерело звуку для мікрофона.</string>
+    <string-array name="mic_input_sources">
+        <item>За замовчуванням</item>
+        <item>Мікрофон</item>
+        <item>Розпізнавання мови</item>
+        <item>Голосовий зв’язок</item>
+    </string-array>
+
     <string name="category_info">Інформація</string>
     <string name="about">Про застосунок і підтримка</string>
     <string name="about_description">Отримати більше інформації про Headunit Revived</string>

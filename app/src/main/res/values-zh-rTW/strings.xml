@@ -149,6 +149,15 @@
     <string name="use_aac_audio_description">使用 AAC 編碼器進行音訊處理以節省頻寬 (實驗性)。</string>
 
     <!-- Info Settings -->
+    <string name="mic_input_source">麥克風輸入來源</string>
+    <string name="mic_input_source_description">選擇麥克風的音訊來源。</string>
+    <string-array name="mic_input_sources">
+        <item>預設</item>
+        <item>麥克風</item>
+        <item>語音辨識</item>
+        <item>語音通訊</item>
+    </string-array>
+
     <string name="category_info">資訊</string>
     <string name="about">關於 &amp; 支援</string>
     <string name="about_description">取得更多資訊關於 Headunit Revived</string>

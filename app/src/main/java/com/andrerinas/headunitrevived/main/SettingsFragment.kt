@@ -54,6 +54,7 @@ class SettingsFragment : Fragment() {
     private var pendingBluetoothAddress: String? = null
     private var pendingEnableAudioSink: Boolean? = null
     private var pendingUseAacAudio: Boolean? = null
+    private var pendingMicInputSource: Int? = null
     private var pendingUseNativeSsl: Boolean? = null
     private var pendingAutoStartSelfMode: Boolean? = null
     private var pendingScreenOrientation: Settings.ScreenOrientation? = null
@@ -103,6 +104,7 @@ class SettingsFragment : Fragment() {
         pendingBluetoothAddress = settings.bluetoothAddress
         pendingEnableAudioSink = settings.enableAudioSink
         pendingUseAacAudio = settings.useAacAudio
+        pendingMicInputSource = settings.micInputSource
         pendingUseNativeSsl = settings.useNativeSsl
         pendingAutoStartSelfMode = settings.autoStartSelfMode
         pendingScreenOrientation = settings.screenOrientation
@@ -200,6 +202,7 @@ class SettingsFragment : Fragment() {
         pendingBluetoothAddress?.let { settings.bluetoothAddress = it }
         pendingEnableAudioSink?.let { settings.enableAudioSink = it }
         pendingUseAacAudio?.let { settings.useAacAudio = it }
+        pendingMicInputSource?.let { settings.micInputSource = it }
         pendingUseNativeSsl?.let { settings.useNativeSsl = it }
         pendingAutoStartSelfMode?.let { settings.autoStartSelfMode = it }
         pendingScreenOrientation?.let { settings.screenOrientation = it }
@@ -272,6 +275,7 @@ class SettingsFragment : Fragment() {
                         pendingBluetoothAddress != settings.bluetoothAddress ||
                         pendingEnableAudioSink != settings.enableAudioSink ||
                         pendingUseAacAudio != settings.useAacAudio ||
+                        pendingMicInputSource != settings.micInputSource ||
                         pendingUseNativeSsl != settings.useNativeSsl ||
                         pendingAutoStartSelfMode != settings.autoStartSelfMode ||
                         pendingScreenOrientation != settings.screenOrientation ||
@@ -437,27 +441,6 @@ class SettingsFragment : Fragment() {
                 }
             ))
         }
-
-        items.add(SettingItem.SettingEntry(
-            stableId = "micSampleRate",
-            nameResId = R.string.mic_sample_rate,
-            value = "${pendingMicSampleRate!! / 1000}kHz",
-            onClick = { _ ->
-                val currentSampleRateIndex = Settings.MicSampleRates.indexOf(pendingMicSampleRate!!)
-                val sampleRateNames = Settings.MicSampleRates.map { "${it / 1000}kHz" }.toTypedArray()
-
-                AlertDialog.Builder(requireContext())
-                    .setTitle(R.string.mic_sample_rate)
-                    .setSingleChoiceItems(sampleRateNames, currentSampleRateIndex) { dialog, which ->
-                        val newValue = Settings.MicSampleRates.elementAt(which)
-                        pendingMicSampleRate = newValue
-                        checkChanges()
-                        dialog.dismiss()
-                        updateSettingsList()
-                    }
-                    .show()
-            }
-        ))
 
         items.add(SettingItem.SettingEntry(
             stableId = "keymap",
@@ -731,6 +714,48 @@ class SettingsFragment : Fragment() {
                 pendingUseAacAudio = isChecked
                 checkChanges()
                 updateSettingsList()
+            }
+        ))
+
+        items.add(SettingItem.SettingEntry(
+            stableId = "micSampleRate",
+            nameResId = R.string.mic_sample_rate,
+            value = "${pendingMicSampleRate!! / 1000}kHz",
+            onClick = { _ ->
+                val currentSampleRateIndex = Settings.MicSampleRates.indexOf(pendingMicSampleRate!!)
+                val sampleRateNames = Settings.MicSampleRates.map { "${it / 1000}kHz" }.toTypedArray()
+
+                AlertDialog.Builder(requireContext())
+                    .setTitle(R.string.mic_sample_rate)
+                    .setSingleChoiceItems(sampleRateNames, currentSampleRateIndex) { dialog, which ->
+                        val newValue = Settings.MicSampleRates.elementAt(which)
+                        pendingMicSampleRate = newValue
+                        checkChanges()
+                        dialog.dismiss()
+                        updateSettingsList()
+                    }
+                    .show()
+            }
+        ))
+
+        val micSources = resources.getStringArray(R.array.mic_input_sources)
+        val micSourceValues = intArrayOf(0, 1, 6, 7) // DEFAULT, MIC, VOICE_RECOGNITION, VOICE_COMMUNICATION
+        val currentSourceIndex = micSourceValues.indexOf(pendingMicInputSource ?: 0).coerceAtLeast(0)
+
+        items.add(SettingItem.SettingEntry(
+            stableId = "micInputSource",
+            nameResId = R.string.mic_input_source,
+            value = micSources[currentSourceIndex],
+            onClick = {
+                MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
+                    .setTitle(R.string.mic_input_source)
+                    .setSingleChoiceItems(micSources, currentSourceIndex) { dialog, which ->
+                        pendingMicInputSource = micSourceValues[which]
+                        checkChanges()
+                        updateSettingsList()
+                        dialog.dismiss()
+                    }
+                    .show()
             }
         ))
 

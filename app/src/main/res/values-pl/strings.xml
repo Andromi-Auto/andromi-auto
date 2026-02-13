@@ -148,6 +148,15 @@
     <string name="use_aac_audio">Użyj dźwięku AAC</string>
     <string name="use_aac_audio_description">Użyj kodeka AAC dla dźwięku, aby oszczędzać przepustowość (Eksperymentalne).</string>
 
+    <string name="mic_input_source">Źródło wejściowe mikrofonu</string>
+    <string name="mic_input_source_description">Wybierz źródło dźwięku für mikrofon.</string>
+    <string-array name="mic_input_sources">
+        <item>Domyślne</item>
+        <item>Mikrofon</item>
+        <item>Rozpoznawanie głosu</item>
+        <item>Komunikacja głosowa</item>
+    </string-array>
+
     <string name="category_info">Informacje</string>
     <string name="about">O aplikacji i Wsparcie</string>
     <string name="about_description">Uzyskaj więcej informacji o Headunit Revived</string>

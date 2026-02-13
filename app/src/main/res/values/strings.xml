@@ -144,10 +144,18 @@
 
     <!-- Audio Settings -->
     <string name="category_audio">Audio</string>
-    <string name="enable_audio_sink">Enable Audio Sink</string>
-    <string name="enable_audio_sink_description">If disabled, the head unit will not act as an audio sink. Audio will play from the phone.</string>
+    <string name="enable_audio_sink">Audio Sink</string>
+    <string name="enable_audio_sink_description">If disabled, the headunit will not receive audio. Sound will play from the phone.</string>
     <string name="use_aac_audio">Use AAC Audio</string>
     <string name="use_aac_audio_description">Use AAC codec for audio to save bandwidth (Experimental).</string>
+    <string name="mic_input_source">Microphone Input Source</string>
+    <string name="mic_input_source_description">Choose the audio source for the microphone.</string>
+    <string-array name="mic_input_sources">
+        <item>Default</item>
+        <item>Microphone</item>
+        <item>Voice Recognition</item>
+        <item>Voice Communication</item>
+    </string-array>
 
     <!-- Info Settings -->
     <string name="category_info">Info</string>

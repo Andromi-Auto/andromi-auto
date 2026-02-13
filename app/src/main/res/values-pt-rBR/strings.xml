@@ -150,6 +150,15 @@
     <string name="use_aac_audio_description">Usa o codec AAC para áudio para economizar banda (experimental).</string>
 
     <!-- Info Settings -->
+    <string name="mic_input_source">Fonte de entrada do microfone</string>
+    <string name="mic_input_source_description">Escolha a fonte de áudio para o microfone.</string>
+    <string-array name="mic_input_sources">
+        <item>Padrão</item>
+        <item>Microfone</item>
+        <item>Reconhecimento de voz</item>
+        <item>Comunicação de voz</item>
+    </string-array>
+
     <string name="category_info">Informações</string>
     <string name="about">Sobre &amp; Suporte</string>
     <string name="about_description">Obtenha mais informações sobre o Headunit Revived</string>
