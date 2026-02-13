@@ -93,6 +93,11 @@
     <string name="key_nav">Navegação</string>
     <string name="key_night">Alternar Modo Noturno</string>
 
+    <!-- Language Settings -->
+    <string name="app_language">Idioma do aplicativo</string>
+    <string name="system_default">Padrão do sistema</string>
+    <string name="change_language">Alterar idioma</string>
+
     <string name="night_mode_threshold">Limiar do Modo Noturno</string>
     <string name="enter_threshold_value">Inserir valor do limiar</string>
     <string name="threshold_lux_desc">Valor Lux (0-10000). Abaixo disto = Noite.</string>

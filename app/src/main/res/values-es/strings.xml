@@ -93,6 +93,11 @@
     <string name="key_nav">Navegación</string>
     <string name="key_night">Alternar modo nocturno</string>
 
+    <!-- Language Settings -->
+    <string name="app_language">Idioma de la aplicación</string>
+    <string name="system_default">Por defecto del sistema</string>
+    <string name="change_language">Cambiar idioma</string>
+
     <string name="night_mode_threshold">Umbral del modo noche</string>
     <string name="enter_threshold_value">Ingrese el valor del umbral</string>
     <string name="threshold_lux_desc">Valor de lux (0-10000). Por debajo de esto = Noche.</string>

@@ -22,7 +22,9 @@ import com.andrerinas.headunitrevived.aap.AapService
 import com.andrerinas.headunitrevived.main.settings.SettingItem
 import com.andrerinas.headunitrevived.main.settings.SettingsAdapter
 import com.andrerinas.headunitrevived.utils.Settings
+import com.andrerinas.headunitrevived.utils.LocaleHelper
 import com.andrerinas.headunitrevived.BuildConfig
+import java.util.Locale
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -55,6 +57,7 @@ class SettingsFragment : Fragment() {
     private var pendingUseNativeSsl: Boolean? = null
     private var pendingAutoStartSelfMode: Boolean? = null
     private var pendingScreenOrientation: Settings.ScreenOrientation? = null
+    private var pendingAppLanguage: String? = null
     private var pendingThresholdLux: Int? = null
     private var pendingThresholdBrightness: Int? = null
     private var pendingManualStart: Int? = null
@@ -103,6 +106,7 @@ class SettingsFragment : Fragment() {
         pendingUseNativeSsl = settings.useNativeSsl
         pendingAutoStartSelfMode = settings.autoStartSelfMode
         pendingScreenOrientation = settings.screenOrientation
+        pendingAppLanguage = settings.appLanguage
         
         pendingInsetLeft = settings.insetLeft
         pendingInsetTop = settings.insetTop
@@ -199,6 +203,9 @@ class SettingsFragment : Fragment() {
         pendingUseNativeSsl?.let { settings.useNativeSsl = it }
         pendingAutoStartSelfMode?.let { settings.autoStartSelfMode = it }
         pendingScreenOrientation?.let { settings.screenOrientation = it }
+
+        val languageChanged = pendingAppLanguage != settings.appLanguage
+        pendingAppLanguage?.let { settings.appLanguage = it }
         
         pendingInsetLeft?.let { settings.insetLeft = it }
         pendingInsetTop?.let { settings.insetTop = it }
@@ -233,8 +240,13 @@ class SettingsFragment : Fragment() {
         hasChanges = false
         requiresRestart = false
         updateSaveButtonState()
-        
+
         Toast.makeText(context, "Settings saved", Toast.LENGTH_SHORT).show()
+
+        // Restart activity if language changed to apply new locale
+        if (languageChanged) {
+            requireActivity().recreate()
+        }
     }
 
     private fun checkChanges() {
@@ -263,6 +275,7 @@ class SettingsFragment : Fragment() {
                         pendingUseNativeSsl != settings.useNativeSsl ||
                         pendingAutoStartSelfMode != settings.autoStartSelfMode ||
                         pendingScreenOrientation != settings.screenOrientation ||
+                        pendingAppLanguage != settings.appLanguage ||
                         pendingInsetLeft != settings.insetLeft ||
                         pendingInsetTop != settings.insetTop ||
                         pendingInsetRight != settings.insetRight ||
@@ -293,7 +306,43 @@ class SettingsFragment : Fragment() {
 
         // --- General Settings ---
         items.add(SettingItem.CategoryHeader("general", R.string.category_general))
-        
+
+        // Language Selector
+        val availableLocales = LocaleHelper.getAvailableLocales(requireContext())
+        val currentLocale = LocaleHelper.stringToLocale(pendingAppLanguage ?: "")
+        val currentLanguageDisplay = if (currentLocale != null) {
+            LocaleHelper.getDisplayName(currentLocale)
+        } else {
+            getString(R.string.system_default)
+        }
+
+        items.add(SettingItem.SettingEntry(
+            stableId = "appLanguage",
+            nameResId = R.string.app_language,
+            value = currentLanguageDisplay,
+            onClick = { _ ->
+                val languageNames = mutableListOf(getString(R.string.system_default))
+                val localeCodes = mutableListOf("")
+
+                availableLocales.forEach { locale ->
+                    languageNames.add(LocaleHelper.getDisplayName(locale))
+                    localeCodes.add(LocaleHelper.localeToString(locale))
+                }
+
+                val currentIndex = localeCodes.indexOf(pendingAppLanguage ?: "").coerceAtLeast(0)
+
+                AlertDialog.Builder(requireContext())
+                    .setTitle(R.string.change_language)
+                    .setSingleChoiceItems(languageNames.toTypedArray(), currentIndex) { dialog, which ->
+                        pendingAppLanguage = localeCodes[which]
+                        checkChanges()
+                        dialog.dismiss()
+                        updateSettingsList()
+                    }
+                    .show()
+            }
+        ))
+
         items.add(SettingItem.SettingEntry(
             stableId = "nightMode",
             nameResId = R.string.night_mode,

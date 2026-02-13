@@ -92,6 +92,11 @@
     <string name="key_nav">導航</string>
     <string name="key_night">切換夜間模式</string>
 
+    <!-- Language Settings -->
+    <string name="app_language">應用程式語言</string>
+    <string name="system_default">系統預設</string>
+    <string name="change_language">變更語言</string>
+
     <string name="night_mode_threshold">夜間模式閾值</string>
     <string name="enter_threshold_value">輸入閾值</string>
     <string name="threshold_lux_desc">Lux 值 (0-10000)。低於此值 = 夜間。</string>

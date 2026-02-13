@@ -95,6 +95,11 @@
     <string name="key_nav">Navigatie</string>
     <string name="key_night">Schakel Nachtmodus</string>
 
+    <!-- Language Settings -->
+    <string name="app_language">App-taal</string>
+    <string name="system_default">Systeemstandaard</string>
+    <string name="change_language">Taal wijzigen</string>
+
     <string name="night_mode_threshold">Drempelwaarde nachtmodus</string>
     <string name="enter_threshold_value">Voer drempelwaarde in</string>
     <string name="threshold_lux_desc">Lux waarde (0-10000). Hieronder = Nacht.</string>

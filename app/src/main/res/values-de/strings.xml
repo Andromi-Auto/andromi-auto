@@ -94,6 +94,11 @@ INHALT</string>
     <string name="key_nav">Navigation</string>
     <string name="key_night">Nachtmodus umschalten</string>
 
+    <!-- Language Settings -->
+    <string name="app_language">App-Sprache</string>
+    <string name="system_default">Systemstandard</string>
+    <string name="change_language">Sprache ändern</string>
+
     <string name="night_mode_threshold">Nachtmodus Schwellenwert</string>
     <string name="enter_threshold_value">Schwellenwert eingeben</string>
     <string name="threshold_lux_desc">Lux Wert (0-10000). Darunter = Nacht.</string>

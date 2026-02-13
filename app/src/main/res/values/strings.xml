@@ -103,6 +103,11 @@
     <string name="key_nav">Navigation</string>
     <string name="key_night">Toggle Night Mode</string>
 
+    <!-- Language Settings -->
+    <string name="app_language">App Language</string>
+    <string name="system_default">System Default</string>
+    <string name="change_language">Change Language</string>
+
     <!-- Categories for SettingsFragment -->
     <string name="category_general">General</string>
     <string name="auto_start_self_mode">Auto start Self-Mode</string>
