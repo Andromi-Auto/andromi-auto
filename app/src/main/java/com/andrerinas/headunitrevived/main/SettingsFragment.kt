@@ -154,9 +154,9 @@ class SettingsFragment : Fragment() {
     private fun handleBackPress() {
         if (hasChanges) {
             AlertDialog.Builder(requireContext())
-                .setTitle("Unsaved Changes")
-                .setMessage("You have unsaved changes. Do you want to discard them?")
-                .setPositiveButton("Discard") { _, _ ->
+                .setTitle(R.string.unsaved_changes)
+                .setMessage(R.string.unsaved_changes_message)
+                .setPositiveButton(R.string.discard) { _, _ ->
                     navigateBack()
                 }
                 .setNegativeButton(R.string.cancel, null)
@@ -231,7 +231,7 @@ class SettingsFragment : Fragment() {
 
         if (requiresRestart) {
             if (AapService.isConnected) {
-                Toast.makeText(context, "Stopping service to apply changes...", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, getString(R.string.stopping_service), Toast.LENGTH_SHORT).show()
                 val stopServiceIntent = Intent(requireContext(), AapService::class.java).apply {
                     action = AapService.ACTION_STOP_SERVICE
                 }
@@ -244,7 +244,7 @@ class SettingsFragment : Fragment() {
         requiresRestart = false
         updateSaveButtonState()
 
-        Toast.makeText(context, "Settings saved", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, getString(R.string.settings_saved), Toast.LENGTH_SHORT).show()
 
         // Restart activity if language changed to apply new locale
         if (languageChanged) {
@@ -784,17 +784,17 @@ class SettingsFragment : Fragment() {
 
                 if (logFile != null) {
                     MaterialAlertDialogBuilder(context, R.style.DarkAlertDialog)
-                        .setTitle("Logs Exported")
-                        .setMessage("Log saved to:\n${logFile.absolutePath}\n\n")
-                        .setPositiveButton("Share") { _, _ ->
+                        .setTitle(R.string.logs_exported)
+                        .setMessage(getString(R.string.log_saved_to, logFile.absolutePath))
+                        .setPositiveButton(R.string.share) { _, _ ->
                             com.andrerinas.headunitrevived.utils.LogExporter.shareLogFile(context, logFile)
                         }
-                        .setNegativeButton("Close") { dialog, _ ->
+                        .setNegativeButton(R.string.close) { dialog, _ ->
                             dialog.dismiss()
                         }
                         .show()
                 } else {
-                    Toast.makeText(context, "Failed to export logs", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, getString(R.string.failed_export_logs), Toast.LENGTH_SHORT).show()
                 }
             }
         ))

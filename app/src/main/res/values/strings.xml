@@ -177,5 +177,42 @@
         <b>3. No Affiliation</b><br/>
         This project is an independent open-source initiative and is not affiliated with, endorsed by, or connected to Google LLC or the Android Auto brand.
     ]]></string>
+
+    <!-- Toast Messages -->
+    <string name="searching">Searching…</string>
+    <string name="auto_connecting_to">Auto-connecting to %s…</string>
+    <string name="auto_connecting_usb">Auto-connecting to USB device…</string>
+    <string name="already_connected">Already connected</string>
+    <string name="already_scanning">Already scanning…</string>
+    <string name="searching_headunit_server">Searching for Headunit Server…</string>
+    <string name="already_searching_phone">Already searching for phone…</string>
+    <string name="searching_phone">Searching for phone…</string>
+    <string name="key_mappings_reset">Key mappings reset</string>
+    <string name="press_key_to_assign">Press a key to assign to \'%s\'…</string>
+    <string name="key_assigned">\'%1$s\' assigned to \'%2$s\'</string>
+    <string name="last_key_press">Last Key Press: %1$s (%2$d)</string>
+    <string name="scan">Scan</string>
+    <string name="scanning_network">Scanning Network…</string>
+    <string name="found_connecting">Found %s, connecting…</string>
+    <string name="no_devices_found">No devices found</string>
+    <string name="unsaved_changes">Unsaved Changes</string>
+    <string name="unsaved_changes_message">You have unsaved changes. Do you want to discard them?</string>
+    <string name="discard">Discard</string>
+    <string name="stopping_service">Stopping service to apply changes…</string>
+    <string name="settings_saved">Settings saved</string>
+    <string name="logs_exported">Logs Exported</string>
+    <string name="log_saved_to">Log saved to:\n%s</string>
+    <string name="share">Share</string>
+    <string name="close">Close</string>
+    <string name="failed_export_logs">Failed to export logs</string>
+    <string name="switching_to_android_auto">Switching to Android Auto…</string>
+    <string name="switch_failed">Switch failed</string>
+    <string name="requesting_usb_permission">Requesting USB Permission…</string>
+    <string name="enter_ip_address">Enter IP Address</string>
+    <string name="switching_usb_accessory_mode">Switching USB device to accessory mode %s</string>
+    <string name="success">Success</string>
+    <string name="failed">Failed</string>
+    <string name="failed_start_android_auto">Failed to start Android Auto</string>
+    <string name="android_auto_starting">Android Auto is starting…</string>
 </resources>
 

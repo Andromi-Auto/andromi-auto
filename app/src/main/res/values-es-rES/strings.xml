@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Spanish (Spain) - Español de España -->
+    <!-- Only includes strings that differ from generic Spanish (es) -->
+
+    <!-- "Configuración" → "Ajustes" -->
+    <string name="settings">Ajustes</string>
+    <string name="title_activity_settings">Actividad de Ajustes</string>
+    <string name="settings_saved">Ajustes guardados</string>
+
+    <!-- "teléfono" → "móvil" -->
+    <string name="gps_for_navigation_description">Usar el GPS de este dispositivo en lugar del GPS del móvil conectado</string>
+    <string name="key_call">Móvil</string>
+    <string name="enable_audio_sink_description">Si está desactivado, este dispositivo no actuará como receptor de audio. El audio se reproducirá en el móvil conectado.</string>
+    <string name="already_searching_phone">Ya buscando el móvil…</string>
+    <string name="searching_phone">Buscando el móvil…</string>
+
+    <!-- USB device message -->
+    <string name="no_usb_device_connected">No se detectó ningún móvil conectado por USB.</string>
+
+    <!-- Wireless connection modes array with "móvil" -->
+    <string-array name="wireless_connection_modes">
+        <item>Manual (lista)</item>
+        <item>Búsqueda automática (Headunit Server)</item>
+        <item>Asistente inalámbrico (esperando al móvil)</item>
+    </string-array>
+</resources>

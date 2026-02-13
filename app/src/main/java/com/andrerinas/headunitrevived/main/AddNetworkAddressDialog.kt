@@ -43,7 +43,7 @@ class AddNetworkAddressDialog : DialogFragment() {
 
         // Create the dialog without default buttons
         val dialog = builder.setView(content)
-                .setTitle("Enter IP Address")
+                .setTitle(R.string.enter_ip_address)
                 .create()
 
         // Set listeners on our custom buttons

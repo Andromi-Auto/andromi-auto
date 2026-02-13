@@ -94,7 +94,7 @@ class KeymapFragment : Fragment(), MainActivity.KeyListener {
         resetButton?.setOnClickListener {
             settings.keyCodes = mutableMapOf()
             adapter.updateCodes(settings.keyCodes)
-            Toast.makeText(requireContext(), "Key mappings reset", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), getString(R.string.key_mappings_reset), Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -104,7 +104,7 @@ class KeymapFragment : Fragment(), MainActivity.KeyListener {
         
         assignDialog = MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
             .setTitle(name)
-            .setMessage("Press a key to assign to '$name'...")
+            .setMessage(getString(R.string.press_key_to_assign, name))
             .setNegativeButton(R.string.cancel) { dialog, _ ->
                 assignTargetCode = KeyEvent.KEYCODE_UNKNOWN
                 dialog.dismiss()
@@ -167,7 +167,7 @@ class KeymapFragment : Fragment(), MainActivity.KeyListener {
         if (keyCode == KeyEvent.KEYCODE_BACK) return false
 
         val keyName = KeyEvent.keyCodeToString(keyCode)
-        keypressDebuggerTextView.text = "Last Key Press: $keyName ($keyCode)"
+        keypressDebuggerTextView.text = getString(R.string.last_key_press, keyName, keyCode)
 
         if (event.action == KeyEvent.ACTION_DOWN) {
             return true // Consume down events
@@ -183,7 +183,7 @@ class KeymapFragment : Fragment(), MainActivity.KeyListener {
             adapter.updateCodes(codesMap)
             
             val targetName = getString(keyList.find { it.keyCode == assignTargetCode }?.nameResId ?: R.string.keymap)
-            Toast.makeText(requireContext(), "'$keyName' assigned to '$targetName'", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), getString(R.string.key_assigned, keyName, targetName), Toast.LENGTH_SHORT).show()
             
             assignDialog?.dismiss()
             // assignTargetCode reset in dismiss listener

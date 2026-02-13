@@ -68,7 +68,7 @@ class HomeFragment : Fragment() {
 
     private fun updateWifiButtonFeedback() {
         if (isScanning) {
-            wifi_text_view.text = "Searching..."
+            wifi_text_view.text = getString(R.string.searching)
             wifi.alpha = 0.6f
         } else {
             wifi_text_view.text = getString(R.string.wifi)
@@ -144,7 +144,7 @@ class HomeFragment : Fragment() {
                 val ip = appSettings.lastConnectionIp
                 if (ip.isNotEmpty()) {
                     AppLog.i("Auto-connect: Attempting WiFi connection to $ip")
-                    Toast.makeText(requireContext(), "Auto-connecting to $ip...", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), getString(R.string.auto_connecting_to, ip), Toast.LENGTH_SHORT).show()
                     ContextCompat.startForegroundService(requireContext(), AapService.createIntent(ip, requireContext()))
                 }
             }
@@ -157,7 +157,7 @@ class HomeFragment : Fragment() {
                     }
                     if (matchingDevice != null && usbManager.hasPermission(matchingDevice)) {
                         AppLog.i("Auto-connect: Attempting USB connection to $lastUsbDevice")
-                        Toast.makeText(requireContext(), "Auto-connecting to USB device...", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), getString(R.string.auto_connecting_usb), Toast.LENGTH_SHORT).show()
                         ContextCompat.startForegroundService(requireContext(), AapService.createIntent(matchingDevice, requireContext()))
                     } else {
                         AppLog.i("Auto-connect: USB device $lastUsbDevice not found or no permission")
@@ -203,11 +203,11 @@ class HomeFragment : Fragment() {
             when (mode) {
                 1 -> { // Auto (Headunit Server) - One-Shot Scan
                     if (AapService.isConnected) {
-                        Toast.makeText(requireContext(), "Already connected", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), getString(R.string.already_connected), Toast.LENGTH_SHORT).show()
                     } else if (isScanning) {
-                        Toast.makeText(requireContext(), "Already scanning...", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), getString(R.string.already_scanning), Toast.LENGTH_SHORT).show()
                     } else {
-                        Toast.makeText(requireContext(), "Searching for Headunit Server...", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), getString(R.string.searching_headunit_server), Toast.LENGTH_SHORT).show()
                         val intent = Intent(requireContext(), AapService::class.java).apply {
                             action = AapService.ACTION_START_WIRELESS_SCAN
                         }
@@ -216,11 +216,11 @@ class HomeFragment : Fragment() {
                 }
                 2 -> { // Helper (Wireless Launcher)
                     if (AapService.isConnected) {
-                        Toast.makeText(requireContext(), "Already connected", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), getString(R.string.already_connected), Toast.LENGTH_SHORT).show()
                     } else if (isScanning) {
-                        Toast.makeText(requireContext(), "Already searching for phone...", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), getString(R.string.already_searching_phone), Toast.LENGTH_SHORT).show()
                     } else {
-                        Toast.makeText(requireContext(), "Searching for phone...", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), getString(R.string.searching_phone), Toast.LENGTH_SHORT).show()
                         val intent = Intent(requireContext(), AapService::class.java).apply {
                             action = AapService.ACTION_START_WIRELESS_SCAN
                         }
