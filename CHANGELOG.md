@@ -1,4 +1,9 @@
 # Changelog
+### v.1.13.3
+- Fixed Screen Issues on Android 4 with header and navigations #114
+- Fixed Night-Mode Bug #116
+- Merged several PR for better Language Handling with a new language selector. Thanks to @andrecuellar
+
 ### v.1.13.2
 - Fixed margins now working for devices prior Android 5 Lollipop
 - Fixing warnings
