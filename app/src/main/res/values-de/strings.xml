@@ -156,6 +156,10 @@
     <string name="enable_audio_sink_description">Wenn deaktiviert, empfängt die Headunit keinen Ton. Der Ton wird über das Handy abgespielt.</string>
     <string name="use_aac_audio">AAC-Audio verwenden</string>
     <string name="use_aac_audio_description">Verwendet den AAC-Codec für Audio, um Bandbreite zu sparen (Experimentell).</string>
+    <string name="audio_volume_offset">Lautstärke-Offsets</string>
+    <string name="media_volume_offset">Medien</string>
+    <string name="assistant_volume_offset">Assistent</string>
+    <string name="navigation_volume_offset">Navigation</string>
     <string name="mic_input_source">Mikrofon-Eingangsquelle</string>
     <string name="mic_input_source_description">Wählen Sie die Audioquelle für das Mikrofon.</string>
     <string-array name="mic_input_sources">

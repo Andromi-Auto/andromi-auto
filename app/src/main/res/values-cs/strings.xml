@@ -156,6 +156,10 @@
     <string name="enable_audio_sink_description">Pokud je zakázáno, hlavní jednotka nebude přijímat zvuk. Zvuk se bude přehrávat z telefonu.</string>
     <string name="use_aac_audio">Použít AAC audio</string>
     <string name="use_aac_audio_description">Použít kodek AAC pro zvuk pro úsporu šířky pásma (experimentální).</string>
+    <string name="audio_volume_offset">Posun hlasitosti</string>
+    <string name="media_volume_offset">Média</string>
+    <string name="assistant_volume_offset">Asistent</string>
+    <string name="navigation_volume_offset">Navigace</string>
     <string name="mic_input_source">Zdroj vstupu mikrofonu</string>
     <string name="mic_input_source_description">Vyberte zdroj zvuku pro mikrofon.</string>
     <string-array name="mic_input_sources">
