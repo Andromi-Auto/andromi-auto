@@ -74,8 +74,17 @@ internal class AapAudio(
         if (audioDecoder.getTrack(channel) == null) {
             val config = AudioConfigs.get(channel)
             val stream = AudioManager.STREAM_MUSIC
-            AppLog.i("AudioDecoder.start: channel=$channel, stream=$stream, sampleRate=${config.sampleRate}, numberOfBits=${config.numberOfBits}, numberOfChannels=${config.numberOfChannels}, isAac=${settings.useAacAudio}")
-            audioDecoder.start(channel, stream, config.sampleRate, config.numberOfBits, config.numberOfChannels, settings.useAacAudio)
+
+            val offset = when (channel) {
+                Channel.ID_AUD -> settings.mediaVolumeOffset
+                Channel.ID_AU1 -> settings.assistantVolumeOffset
+                Channel.ID_AU2 -> settings.navigationVolumeOffset
+                else -> 0
+            }
+            val gain = (1.0f + (offset / 100.0f)).coerceIn(0.0f, 2.0f)
+
+            AppLog.i("AudioDecoder.start: channel=$channel, stream=$stream, gain=$gain, sampleRate=${config.sampleRate}, numberOfBits=${config.numberOfBits}, numberOfChannels=${config.numberOfChannels}, isAac=${settings.useAacAudio}")
+            audioDecoder.start(channel, stream, config.sampleRate, config.numberOfBits, config.numberOfChannels, settings.useAacAudio, gain)
         }
 
         audioDecoder.decode(channel, buf, start, length)

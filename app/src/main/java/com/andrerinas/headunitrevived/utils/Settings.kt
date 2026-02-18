@@ -265,6 +265,18 @@ class Settings(context: Context) {
         get() = prefs.getString("app-language", "")!!
         set(value) { prefs.edit().putString("app-language", value).apply() }
 
+    var mediaVolumeOffset: Int
+        get() = prefs.getInt("media-volume-offset", 0)
+        set(value) { prefs.edit().putInt("media-volume-offset", value).apply() }
+
+    var assistantVolumeOffset: Int
+        get() = prefs.getInt("assistant-volume-offset", 0)
+        set(value) { prefs.edit().putInt("assistant-volume-offset", value).apply() }
+
+    var navigationVolumeOffset: Int
+        get() = prefs.getInt("navigation-volume-offset", 0)
+        set(value) { prefs.edit().putInt("navigation-volume-offset", value).apply() }
+
     @SuppressLint("ApplySharedPref")
     fun commit() {
         prefs.edit().commit()

@@ -20,7 +20,8 @@ class AudioTrackWrapper(
     sampleRateInHz: Int,
     bitDepth: Int,
     channelCount: Int,
-    private val isAac: Boolean = false
+    private val isAac: Boolean = false,
+    gain: Float
 ) : Thread() {
 
     private val audioTrack: AudioTrack
@@ -33,6 +34,8 @@ class AudioTrackWrapper(
     private val dataQueue = LinkedBlockingQueue<ByteArray>()
     @Volatile
     private var isRunning = true
+
+    private var currentGain: Float = gain
 
     // Track frames written for better draining
     private var framesWritten: Long = 0
@@ -128,7 +131,20 @@ class AudioTrackWrapper(
         }
     }
 
+    private fun applyGain(buffer: ByteArray) {
+        if (currentGain == 1.0f) return
+        for (i in 0 until buffer.size - 1 step 2) {
+            val low = buffer[i].toInt() and 0xFF
+            val high = buffer[i + 1].toInt() // High byte handles sign
+            val sample = (high shl 8) or low
+            val modifiedSample = (sample * currentGain).toInt().coerceIn(-32768, 32767)
+            buffer[i] = (modifiedSample and 0xFF).toByte()
+            buffer[i + 1] = (modifiedSample shr 8).toByte()
+        }
+    }
+
     private fun writeToTrack(buffer: ByteArray) {
+        applyGain(buffer)
         val result = audioTrack.write(buffer, 0, buffer.size)
         if (result > 0) {
             framesWritten += result / bytesPerFrame

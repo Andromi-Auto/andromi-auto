@@ -1,4 +1,11 @@
 # Changelog
+### v.1.14.0
+- Added Separate volume setting #91
+- Added Auto-Start on Bluetooth Option
+- Merged PR #134 - Fixing Connection on Mediathek Headunits
+- Merged PR #131 - Fixes SystemUI on < Android 6 Devices
+- Merged PR #127 - Fixing Audio Truncation
+
 ### v.1.13.3
 - Fixed Screen Issues on Android 4 with header and navigations #114
 - Fixed Night-Mode Bug #116
