@@ -20,7 +20,8 @@ class AudioTrackWrapper(
     sampleRateInHz: Int,
     bitDepth: Int,
     channelCount: Int,
-    private val isAac: Boolean = false
+    private val isAac: Boolean = false,
+    var gain: Float = 1.0f
 ) : Thread() {
 
     private val audioTrack: AudioTrack
@@ -87,6 +88,7 @@ class AudioTrackWrapper(
                                 // Write to AudioTrack using executor
                                 writeExecutor.submit {
                                     if (isRunning) {
+                                        applyGain(chunk)
                                         audioTrack.write(chunk, 0, chunk.size)
                                     }
                                 }
@@ -133,6 +135,7 @@ class AudioTrackWrapper(
                         queueInput(buffer)
                     } else {
                         // PCM path - direct write in this high-priority thread
+                        applyGain(buffer)
                         audioTrack.write(buffer, 0, buffer.size)
                     }
                 }
@@ -145,6 +148,18 @@ class AudioTrackWrapper(
         }
         cleanup()
         AppLog.i("AudioTrackWrapper thread finished.")
+    }
+
+    private fun applyGain(buffer: ByteArray) {
+        if (gain == 1.0f) return
+        for (i in 0 until buffer.size - 1 step 2) {
+            val low = buffer[i].toInt() and 0xFF
+            val high = buffer[i + 1].toInt() // High byte handles sign
+            val sample = (high shl 8) or low
+            val modifiedSample = (sample * gain).toInt().coerceIn(-32768, 32767)
+            buffer[i] = (modifiedSample and 0xFF).toByte()
+            buffer[i + 1] = (modifiedSample shr 8).toByte()
+        }
     }
 
     private fun queueInput(inputData: ByteArray) {

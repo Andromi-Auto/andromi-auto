@@ -64,9 +64,15 @@ adb shell am start -a android.intent.action.VIEW -d "headunit://connect?ip=192.1
 
 ## Known Issues
 - **Google Maps in Portrait Mode:** Touch interactions (searching, scrolling) within Google Maps may not work as expected when using Portrait Mode. While visual feedback (like ripple effects) might appear, the map itself may remain unresponsive. This appears to be an internal Android Auto / Google Maps limitation or bug in vertical orientations.
-- **Native Wireless Connection on Hotspot:** Connecting to the native AA Headunit Server (Port 5277) may fail if the phone creates a mobile hotspot with Carrier-NAT IPs (e.g., 10.x.x.x). Use Wireless Launcher App instead.
 
 ## Changelog
+### v.1.14.0
+- Added Separate volume setting #91
+- Added Auto-Start on Bluetooth Option
+- Merged PR #134 - Fixing Connection on Mediathek Headunits
+- Merged PR #131 - Fixes SystemUI on < Android 6 Devices
+- Merged PR #127 - Fixing Audio Truncation
+
 ### v.1.13.3
 - Fixed Screen Issues on Android 4 with header and navigations #114
 - Fixed Night-Mode Bug #116
