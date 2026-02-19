@@ -243,7 +243,15 @@ class SettingsFragment : Fragment() {
             ContextCompat.startForegroundService(requireContext(), intent)
         }
 
-        pendingAutoConnectLastSession?.let { settings.autoConnectLastSession = it }
+        pendingAutoConnectLastSession?.let { 
+            settings.autoConnectLastSession = it 
+            if (it) {
+                val intent = Intent(requireContext(), AapService::class.java).apply {
+                    action = AapService.ACTION_CHECK_USB
+                }
+                ContextCompat.startForegroundService(requireContext(), intent)
+            }
+        }
 
         // Notify Service about Night Mode changes immediately
         val nightModeUpdateIntent = Intent(AapService.ACTION_REQUEST_NIGHT_MODE_UPDATE)
