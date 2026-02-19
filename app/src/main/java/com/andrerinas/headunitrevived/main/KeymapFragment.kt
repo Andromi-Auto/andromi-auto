@@ -192,10 +192,12 @@ class KeymapFragment : Fragment(), MainActivity.KeyListener {
 
         val keyName = try { KeyEvent.keyCodeToString(keyCode).replace("KEYCODE_", "") } catch (e: Exception) { "UNKNOWN" }
         val actionName = if (event.action == KeyEvent.ACTION_DOWN) "DOWN" else "UP"
+        val unicodeChar = event.unicodeChar
+        val charSuffix = if (unicodeChar != 0) " (Char: '${unicodeChar.toChar()}')" else ""
         
-        AppLog.i("KeymapFragment: Captured $keyName ($keyCode) $actionName")
+        AppLog.i("KeymapFragment: Captured $keyName ($keyCode) $actionName$charSuffix")
         
-        keypressDebuggerTextView.text = "Key: $keyName ($keyCode) - $actionName"
+        keypressDebuggerTextView.text = "Key: $keyName ($keyCode) - $actionName$charSuffix"
         keypressDebuggerTextView.setTextColor(ContextCompat.getColor(requireContext(), R.color.material_green_700))
 
         if (assignTargetCode != KeyEvent.KEYCODE_UNKNOWN) {

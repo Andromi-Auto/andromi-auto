@@ -360,11 +360,9 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         unregisterReceiver(disconnectReceiver)
         videoDecoder.dimensionsListener = null
 
-        if (isFinishing && AapService.isConnected) {
-            AppLog.i("AapProjectionActivity closing -> sending stop and disconnect intent to service")
-            transport.stop()
-            sendBroadcast(DisconnectIntent())
-        }
+        // Note: Disconnect is now only handled via explicit user action (Exit button)
+        // or when the phone closes the connection. This prevents accidental closes
+        // during task switching or launcher interaction.
     }
 
     companion object {
