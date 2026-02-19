@@ -259,7 +259,7 @@ class Settings(context: Context) {
 
     var autoStartBluetoothDeviceMac: String
         get() = prefs.getString("auto-start-bt-mac", "")!!
-        set(value) { prefs.edit().putString("auto-start-bt-mac", value).apply() }
+        set(value) = prefs.edit().putString("auto-start-bt-mac", value).apply()
 
     var appLanguage: String
         get() = prefs.getString("app-language", "")!!
