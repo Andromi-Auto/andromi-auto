@@ -162,10 +162,14 @@ class AapService : Service(), UsbReceiver.Listener {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else PendingIntent.FLAG_UPDATE_CURRENT
         )
 
-        val targetActivity = if (isConnected) {
-            com.andrerinas.headunitrevived.aap.AapProjectionActivity::class.java
+        val (notificationIntent, requestCode) = if (isConnected) {
+            AapProjectionActivity.intent(this).apply {
+                addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+            } to 100
         } else {
-            com.andrerinas.headunitrevived.main.MainActivity::class.java
+            Intent(this, com.andrerinas.headunitrevived.main.MainActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            } to 101
         }
 
         val contentText = if (isConnected) {
@@ -180,8 +184,8 @@ class AapService : Service(), UsbReceiver.Listener {
             .setOngoing(true)
             .setContentTitle("Headunit Revived")
             .setContentText(contentText)
-            .setContentIntent(PendingIntent.getActivity(this, 0, 
-                Intent(this, targetActivity),
+            .setContentIntent(PendingIntent.getActivity(this, requestCode, 
+                notificationIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT or (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0)))
             .addAction(R.drawable.ic_exit_to_app_white_24dp, getString(R.string.exit), stopPendingIntent)
             .build();
