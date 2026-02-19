@@ -71,7 +71,11 @@ class MainActivity : BaseActivity() {
     }
 
     private fun handleIntent(intent: Intent?) {
-        if (intent?.action == android.content.Intent.ACTION_VIEW) {
+        if (intent == null) return
+
+        AppLog.i("MainActivity received intent: ${intent.action}, data: ${intent.data}")
+
+        if (intent.action == Intent.ACTION_VIEW) {
             val data = intent.data
             if (data?.scheme == "headunit" && data.host == "connect") {
                 val ip = data.getQueryParameter("ip")
@@ -79,7 +83,13 @@ class MainActivity : BaseActivity() {
                     AppLog.i("Received connect intent for IP: $ip")
                     ContextCompat.startForegroundService(this, AapService.createIntent(ip, this))
                 }
+            } else if (data?.scheme == "geo" || data?.scheme == "google.navigation" || data?.host == "maps.google.com") {
+                AppLog.i("Received navigation intent: $data")
+                // In the future, we could parse coordinates and send to AA via a custom message
+                // For now, we just ensure the app is opened (which it is by reaching this point)
             }
+        } else if (intent.action == "android.intent.action.NAVIGATE") {
+            AppLog.i("Received generic NAVIGATE intent")
         }
     }
 
@@ -118,20 +128,17 @@ class MainActivity : BaseActivity() {
         }
     }
 
-    override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
-        AppLog.i("onKeyDown: %d", keyCode)
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
-            return super.onKeyDown(keyCode, event)
-        }
-        return keyListener?.onKeyEvent(event) ?: super.onKeyDown(keyCode, event)
-    }
-
-    override fun onKeyUp(keyCode: Int, event: KeyEvent): Boolean {
-        AppLog.i("onKeyUp: %d", keyCode)
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
-            return super.onKeyUp(keyCode, event)
-        }
-        return keyListener?.onKeyEvent(event) ?: super.onKeyUp(keyCode, event)
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        AppLog.i("dispatchKeyEvent: keyCode=%d, action=%d", event.keyCode, event.action)
+        
+        // Always give the KeymapFragment (if active) a chance to see the key
+        val handled = keyListener?.onKeyEvent(event) ?: false
+        
+        // If the key was handled by our listener (e.g. in KeymapFragment), stop here
+        if (handled) return true
+        
+        // Otherwise continue with standard handling
+        return super.dispatchKeyEvent(event)
     }
 
     override fun onDestroy() {
