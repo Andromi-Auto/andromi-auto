@@ -66,6 +66,11 @@ adb shell am start -a android.intent.action.VIEW -d "headunit://connect?ip=192.1
 - **Google Maps in Portrait Mode:** Touch interactions (searching, scrolling) within Google Maps may not work as expected when using Portrait Mode. While visual feedback (like ripple effects) might appear, the map itself may remain unresponsive. This appears to be an internal Android Auto / Google Maps limitation or bug in vertical orientations.
 
 ## Changelog
+
+### v.1.14.2
+- Bugfix: Notification and Exit Button do not close the app
+- Improvement: Removed old legacy Invisible Bluetooth Setting to prevent Bluetooth from start on the whole time
+
 ### v.1.14.1
 - Improvement: Integrated USB Auto-Connect into "Auto-Connect Last Session". App now behaves like a native headunit and connects automatically on startup or USB plug-in.
 - New Feature: Added USB Soft-Reset logic. Automatic recovery from USB "stalls" without needing to replug the cable.

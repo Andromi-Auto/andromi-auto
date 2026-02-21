@@ -31,6 +31,8 @@ class MainActivity : BaseActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
         // If an Android Auto session is active, jump straight to projection activity
         if (AapService.isConnected) {
             AppLog.i("MainActivity: Active session detected in onCreate, jumping to projection")
@@ -45,7 +47,6 @@ class MainActivity : BaseActivity() {
 
         setTheme(R.style.AppTheme)
         enableEdgeToEdge()
-        super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         val appSettings = Settings(this)
