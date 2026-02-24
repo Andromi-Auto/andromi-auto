@@ -1,7 +1,12 @@
 # Changelog
+### v.1.14.3
+- New Feature: Added `headunit://disconnect` intent for automation apps to end sessions remotely.
+
 ### v.1.14.2
+- Bugfix: Resolved `SuperNotCalledException` crash in MainActivity.
 - Bugfix: Notification and Exit Button do not close the app
 - Improvement: Removed old legacy Invisible Bluetooth Setting to prevent Bluetooth from start on the whole time
+- Localization: Corrected "Version" translations in multiple languages.
 
 ### v.1.14.1
 - Improvement: Integrated USB Auto-Connect into "Auto-Connect Last Session". App now behaves like a native headunit and connects automatically on startup or USB plug-in.

@@ -239,6 +239,12 @@ class AapService : Service(), UsbReceiver.Listener {
             ACTION_STOP_WIRELESS -> {
                 stopWirelessServer();
             }
+            ACTION_DISCONNECT -> {
+                AppLog.i("Disconnect action received.");
+                if (isConnected) {
+                    transport.stop()
+                }
+            }
             ACTION_CHECK_USB -> {
                 checkAlreadyConnectedUsb();
             }
@@ -646,6 +652,7 @@ class AapService : Service(), UsbReceiver.Listener {
         const val ACTION_SCAN_STARTED = "com.andrerinas.headunitrevived.ACTION_SCAN_STARTED"
         const val ACTION_SCAN_FINISHED = "com.andrerinas.headunitrevived.ACTION_SCAN_FINISHED"
         const val ACTION_STOP_SERVICE = "com.andrerinas.headunitrevived.ACTION_STOP_SERVICE";
+        const val ACTION_DISCONNECT = "com.andrerinas.headunitrevived.ACTION_DISCONNECT";
         const val ACTION_REQUEST_NIGHT_MODE_UPDATE = "com.andrerinas.headunitrevived.ACTION_REQUEST_NIGHT_MODE_UPDATE"
         private const val TYPE_USB = 1;
         private const val TYPE_WIFI = 2;

@@ -97,6 +97,12 @@ class MainActivity : BaseActivity() {
                     AppLog.i("Received connect intent for IP: $ip")
                     ContextCompat.startForegroundService(this, AapService.createIntent(ip, this))
                 }
+            } else if (data?.scheme == "headunit" && data.host == "disconnect") {
+                AppLog.i("Received disconnect intent")
+                val stopIntent = Intent(this, AapService::class.java).apply {
+                    action = AapService.ACTION_DISCONNECT
+                }
+                ContextCompat.startForegroundService(this, stopIntent)
             } else if (data?.scheme == "geo" || data?.scheme == "google.navigation" || data?.host == "maps.google.com") {
                 AppLog.i("Received navigation intent: $data")
                 // In the future, we could parse coordinates and send to AA via a custom message
