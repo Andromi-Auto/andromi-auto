@@ -229,4 +229,8 @@
     <string name="android_auto_starting">Android Auto startet…</string>
     <string name="notification_service_running">Headunit Revived läuft</string>
     <string name="notification_projection_active">Android Auto wird projiziert</string>
+    <string name="shortcut_connect_title">Verbinden</string>
+    <string name="shortcut_connect_desc">Mit letztem Gerät verbinden</string>
+    <string name="shortcut_disconnect_title">Trennen</string>
+    <string name="shortcut_disconnect_desc">Aktuelle Sitzung beenden</string>
 </resources>

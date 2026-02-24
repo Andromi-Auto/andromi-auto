@@ -96,6 +96,12 @@ class MainActivity : BaseActivity() {
                 if (!ip.isNullOrEmpty()) {
                     AppLog.i("Received connect intent for IP: $ip")
                     ContextCompat.startForegroundService(this, AapService.createIntent(ip, this))
+                } else {
+                    AppLog.i("Received connect intent without IP -> triggering last session auto-connect")
+                    val autoIntent = Intent(this, AapService::class.java).apply {
+                        action = AapService.ACTION_CHECK_USB
+                    }
+                    ContextCompat.startForegroundService(this, autoIntent)
                 }
             } else if (data?.scheme == "headunit" && data.host == "disconnect") {
                 AppLog.i("Received disconnect intent")

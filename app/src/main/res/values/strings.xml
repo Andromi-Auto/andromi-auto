@@ -229,5 +229,9 @@
     <string name="android_auto_starting">Android Auto is starting…</string>
     <string name="notification_service_running">Headunit Revived is running</string>
     <string name="notification_projection_active">Android Auto is projected</string>
+    <string name="shortcut_connect_title">Connect</string>
+    <string name="shortcut_connect_desc">Connect to last known device</string>
+    <string name="shortcut_disconnect_title">Disconnect</string>
+    <string name="shortcut_disconnect_desc">End current session</string>
 </resources>
 

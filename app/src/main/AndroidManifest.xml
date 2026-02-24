@@ -60,7 +60,7 @@
         android:largeHeap="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/title"
-        android:appCategory="navigation"
+        android:appCategory="maps"
         tools:ignore="GoogleAppIndexingWarning">
 
         <activity
@@ -126,6 +126,10 @@
                 <action android:name="android.intent.action.NAVIGATE" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
+
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
         </activity>
 
         <activity
