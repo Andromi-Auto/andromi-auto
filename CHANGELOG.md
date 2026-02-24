@@ -1,6 +1,10 @@
 # Changelog
 ### v.1.14.3
-- New Feature: Added `headunit://disconnect` intent for automation apps to end sessions remotely.
+- New Feature: Added **App Shortcuts** for quick Connect/Disconnect. Now compatible with Samsung Modes & Routines.
+- New Feature: Registered HURev as an official system navigation provider (Category: Maps).
+- Improvement: Added `headunit://disconnect` intent for remote session termination.
+- Fixed: Resolved potential app freezes during long-running sessions by optimizing memory hygiene and FIFO handling.
+- Compatibility: Improved support for Amazon Fire Tablets and devices without GPS hardware by marking hardware features as optional.
 
 ### v.1.14.2
 - Bugfix: Resolved `SuperNotCalledException` crash in MainActivity.

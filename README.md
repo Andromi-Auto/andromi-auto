@@ -68,6 +68,12 @@ adb shell am start -a android.intent.action.VIEW -d "headunit://connect?ip=192.1
 
 ## Changelog
 
+### v.1.14.3
+- **Automation:** Added App Shortcuts for Samsung Modes & Routines support.
+- **Navigation:** Officially registered as a navigation provider (compatible with NAV buttons).
+- **Stability:** Fixed rare app freezes by improving internal data handling and memory hygiene.
+- **Compatibility:** Improved hardware support for Amazon Fire Tablets and GPS-less devices.
+
 ### v.1.14.2
 - Bugfix: Notification and Exit Button do not close the app
 - Improvement: Removed old legacy Invisible Bluetooth Setting to prevent Bluetooth from start on the whole time
