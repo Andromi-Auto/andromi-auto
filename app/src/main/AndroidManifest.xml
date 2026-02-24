@@ -60,6 +60,7 @@
         android:largeHeap="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/title"
+        android:appCategory="navigation"
         tools:ignore="GoogleAppIndexingWarning">
 
         <activity
@@ -94,6 +95,7 @@
             <intent-filter>
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.APP_MAPS" />
 
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
@@ -118,14 +120,6 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="google.navigation" />
-            </intent-filter>
-
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="http" android:host="maps.google.com" />
-                <data android:scheme="https" android:host="maps.google.com" />
             </intent-filter>
 
             <intent-filter>
