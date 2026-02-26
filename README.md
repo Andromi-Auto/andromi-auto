@@ -70,6 +70,9 @@ adb shell am start -a android.intent.action.VIEW -d "headunit://connect?ip=192.1
 ### v.1.15.0
 - Added arabic language thanks to A5H0
 - Added new intent for setting day/night via intent
+- Added new window flags for older devices to finally fix fullscreen issues
+- Added new intents to make the headunit recognize the app as navigation app
+- Added LegacyOptimizer which will handle things directly and faster for single core cpus. Should improve the performance on Android 4.1 - 4.4 Devices
 
 ### v.1.14.3
 - **Automation:** Added App Shortcuts for Samsung Modes & Routines support.
