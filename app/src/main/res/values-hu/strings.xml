@@ -33,7 +33,7 @@
     <string name="enter_bluetooth_mac">Add meg a Bluetooth MAC-et</string>
     <string name="reset">Visszaállítás</string>
     <string name="gps_for_navigation">GPS a navigációhoz</string>
-    <string name="gps_for_navigation_description">GPS használata a navigációhoz</string>
+    <string name="gps_for_navigation_description">GPS használata a navigációhoz.</string>
     <string name="enabled">Engedélyezve</string>
     <string name="disabled">Letiltva</string>
     <string name="resolution">Felbontás</string>
@@ -48,22 +48,22 @@
     <string name="screen_orientation">Képernyő tájolása</string>
     <string name="change_screen_orientation">Képernyő tájolásának megváltoztatása</string>
     <string name="orientation_system_default">Rendszer alapértelmezett</string>
-    <string name="orientation_auto_sensor">Auto (Érzékelő)</string>
+    <string name="orientation_auto_sensor">Automatikus (Érzékelő)</string>
     <string name="orientation_landscape">Fekvő (0°)</string>
     <string name="orientation_landscape_reverse">Fordított fekvő (180°)</string>
     <string name="orientation_portrait">Álló (90°)</string>
     <string name="orientation_portrait_reverse">Fordított álló (270°)</string>
-    <string name="enter_dpi_value">Add meg a DPI értéket (0 az auto-hoz)</string>
+    <string name="enter_dpi_value">Add meg a DPI értéket (0 az automatikushoz)</string>
     <string name="custom_margin">Egyedi margó</string>
-    <string name="custom_margin_description">Állíts be egyedi margót (0 az auto-hoz)</string>
-    <string name="enter_custom_margins">Add meg az egyedi margókat (0 az auto-hoz)</string>
+    <string name="custom_margin_description">Állíts be egyedi margót (0 az automatikushoz).</string>
+    <string name="enter_custom_margins">Add meg az egyedi margókat (0 az automatikushoz)</string>
     <string name="margin_left">Bal</string>
     <string name="margin_top">Felső</string>
     <string name="margin_right">Jobb</string>
     <string name="margin_bottom">Alsó</string>
 
     <string name="start_in_fullscreen_mode">Indítás teljes képernyős módban</string>
-    <string name="start_in_fullscreen_mode_description">Teljes képernyős mód beállítása. A változtatások érvényesítéséhez újra kell indítani az alkalmazást.</string>
+    <string name="start_in_fullscreen_mode_description">A változtatások érvényesítéséhez újra kell indítani az alkalmazást.</string>
 
     <string name="usb_status">USB állapota: %s</string>
     <string name="projection_status">Kivetítés állapota: %s</string>
@@ -76,13 +76,13 @@
     <string name="press_back_again_to_exit">Nyomd meg a visszát újra a kilépéshez</string>
     <string name="back">Vissza</string>
     <string name="debug_mode">Hibakeresési mód</string>
-    <string name="debug_mode_description">Naplózás ki- és bekapcsolása</string>
+    <string name="debug_mode_description">Naplózás ki- és bekapcsolása.</string>
     <string name="export_logs">Naplók exportálása</string>
-    <string name="export_logs_description">Naplók mentése hibakereséshez</string>
+    <string name="export_logs_description">Naplók mentése hibakereséshez.</string>
     <string name="use_native_ssl">Natív SSL használata</string>
     <string name="use_native_ssl_description">Natív OpenSSL könyvtár használata (régebbi eszközökön gyorsabb).</string>
     <string name="not_set">Nincs beállítva</string>
-    <string name="keymap_description">A fejegység gombkiosztásának módosítása</string>
+    <string name="keymap_description">A fejegység gombkiosztásának módosítása.</string>
 
     <string name="key_soft_left">Soft bal</string>
     <string name="key_soft_right">Soft jobb</string>
@@ -103,7 +103,7 @@
     <string name="key_night">Éjszakai mód kapcsolása</string>
 
     <!-- Language Settings -->
-    <string name="app_language">Alkalmazás nyelv</string>
+    <string name="app_language">Alkalmazás nyelve</string>
     <string name="system_default">Rendszer alapértelmezett</string>
     <string name="change_language">Nyelv megváltoztatása</string>
 
@@ -111,7 +111,7 @@
     <string name="category_general">Általános</string>
     <string name="auto_start_self_mode">Önálló mód automatikus indítása</string>
     <string name="auto_start_self_mode_description">Az alkalmazás megnyitásakor az önálló mód automatikus indítása.</string>
-    <string name="usb_auto_connect">USB automatikus csatlakozás</string>
+    <string name="usb_auto_connect">Automatikus USB-csatlakozás</string>
     <string name="usb_auto_connect_description">Az alkalmazás megnyitásakor automatikus csatlakozás egy ismert USB-eszközhöz.</string>
     <string name="auto_start_bt_label">Bluetooth automatikus indítás</string>
     <string name="auto_start_bt_description">A Headunit Revived automatikus megnyitása, amikor egy adott Bluetooth-eszköz csatlakozik.</string>
@@ -133,16 +133,16 @@
     <!-- Video Settings -->
     <string name="category_video">Videó</string>
     <string name="force_software_decoding">Szoftveres dekódolás kényszerítése</string>
-    <string name="force_software_decoding_description">Egyes eszközökön megoldhat problémákat, de alacsonyabb teljesítményt nyújt</string>
+    <string name="force_software_decoding_description">Egyes eszközökön segíthet, de teljesítményvesztéssel jár.</string>
     <string name="wireless_mode">Vezeték nélküli mód</string>
-    <string name="wireless_mode_description">Válaszd ki, hogyan csatlakozzon az alkalmazás vezeték nélkül (Kézi lista, automatikus telefonkeresés vagy Wireless Helper mód)</string>
+    <string name="wireless_mode_description">Válaszd ki, hogyan csatlakozzon az alkalmazás vezeték nélkül.</string>
     <string-array name="wireless_connection_modes">
         <item>Kézi (Lista)</item>
         <item>Auto-keresés (fejegység szerver)</item>
         <item>Wireless Helper (Várakozás a telefonra)</item>
     </string-array>
-    <string name="auto_connect_last_session">Utolsó munkamenet automatikus folytatása</string>
-    <string name="auto_connect_last_session_description">Az alkalmazás indításakor automatikus újracsatlakozás a legutóbb használt eszközhöz</string>
+    <string name="auto_connect_last_session">Automatikus folytatás</string>
+    <string name="auto_connect_last_session_description">Indításkor automatikus újracsatlakozás a legutóbb használt eszközhöz.</string>
     <string name="video_codec">Videókódek</string>
     <string name="fps_limit">FPS korlát</string>
     <string name="save">Mentés</string>
@@ -155,7 +155,7 @@
     <string name="enable_audio_sink">Hang fogadása</string>
     <string name="enable_audio_sink_description">Ha nincs engedélyezve, a fejegység nem kap hangot. A hang a telefonon fog szólni.</string>
     <string name="use_aac_audio">AAC hang használata</string>
-    <string name="use_aac_audio_description">AAC hang kódek használata a sávszélesség csökkentése érdekében (Kísérleti).</string>
+    <string name="use_aac_audio_description">AAC kódek használata a sávszélesség csökkentéséért (Kísérleti).</string>
     <string name="audio_volume_offset">Hangerő-eltolás</string>
     <string name="media_volume_offset">Média hangerő-eltolás</string>
     <string name="assistant_volume_offset">Asszisztens hangerő-eltolás</string>
@@ -172,7 +172,7 @@
     <!-- Info Settings -->
     <string name="category_info">Információ</string>
     <string name="about">Rólunk &amp; támogatás</string>
-    <string name="about_description">További információk a Headunit Revived-ról</string>
+    <string name="about_description">További információk a Headunit Revived-ról.</string>
     <string name="version">Verzió</string>
     <string name="about_title">Headunit Revived-ról</string>
     <string name="copyright">© 2025-%d André Rinas</string>
@@ -213,7 +213,7 @@
     <string name="stopping_service">Szolgáltatás leállítása a módosítások alkalmazásához…</string>
     <string name="settings_saved">Beállítások elmentve</string>
     <string name="logs_exported">Naplók exportálva</string>
-    <string name="log_saved_to">Napló elmentve ide:\n%s</string>
+    <string name="log_saved_to">Naplók elmentve ide:\n%s</string>
     <string name="share">Megosztás</string>
     <string name="close">Bezárás</string>
     <string name="failed_export_logs">Naplók exportálása sikertelen</string>
@@ -221,7 +221,7 @@
     <string name="switch_failed">Sikertelen váltás</string>
     <string name="requesting_usb_permission">USB-hozzáférés kérése…</string>
     <string name="enter_ip_address">Add meg az IP címet</string>
-    <string name="switching_usb_accessory_mode">Az USB-eszköz átváltása kiegészítő módba %s</string>
+    <string name="switching_usb_accessory_mode">Az USB-eszköz átváltása kiegészítő módba: %s</string>
     <string name="success">Sikeres</string>
     <string name="failed">Sikertelen</string>
     <string name="failed_start_android_auto">Az Android Auto indítása sikertelen</string>
