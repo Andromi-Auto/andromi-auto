@@ -1,4 +1,8 @@
 # Changelog
+### v.1.15.0
+- Added arabic language thanks to A5H0
+- Added new intent for setting day/night via intent
+
 ### v.1.14.3
 - New Feature: Added **App Shortcuts** for quick Connect/Disconnect. Now compatible with Samsung Modes & Routines.
 - New Feature: Registered HURev as an official system navigation provider (Category: Maps).

@@ -100,13 +100,6 @@
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
 
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="headunit" android:host="connect" />
-            </intent-filter>
-
             <!-- Navigation Intent Filters -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -168,6 +161,29 @@
                 <action android:name="android.bluetooth.device.action.ACL_CONNECTED" />
             </intent-filter>
         </receiver>
+
+        <activity
+            android:name=".main.AutomationActivity"
+            android:exported="true"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:excludeFromRecents="true"
+            android:noHistory="true"
+            android:taskAffinity="">
+            <intent-filter>
+                <action android:name="com.andrerinas.headunitrevived.ACTION_SET_NIGHT_MODE" />
+                <action android:name="com.andrerinas.headunitrevived.ACTION_CONNECT" />
+                <action android:name="com.andrerinas.headunitrevived.ACTION_DISCONNECT" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="headunit" android:host="connect" />
+                <data android:scheme="headunit" android:host="disconnect" />
+                <data android:scheme="headunit" android:host="nightmode" />
+            </intent-filter>
+        </activity>
 
         <provider
             android:name="androidx.core.content.FileProvider"

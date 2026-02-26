@@ -245,6 +245,10 @@ class AapService : Service(), UsbReceiver.Listener {
                     transport.stop()
                 }
             }
+            ACTION_REQUEST_NIGHT_MODE_UPDATE -> {
+                AppLog.i("Night mode update action received.");
+                nightModeManager?.resendCurrentState()
+            }
             ACTION_CHECK_USB -> {
                 checkAlreadyConnectedUsb();
             }
