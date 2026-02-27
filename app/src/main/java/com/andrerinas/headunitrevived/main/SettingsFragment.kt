@@ -601,22 +601,18 @@ class SettingsFragment : Fragment() {
         ))
 
         if (pendingUsbStabilityCheck == true) {
-            items.add(SettingItem.SettingEntry(
+            items.add(SettingItem.SliderSettingEntry(
                 stableId = "usbStabilityTimeout",
                 nameResId = R.string.usb_stability_timeout,
                 value = getString(R.string.usb_stability_timeout_description, pendingUsbStabilityTimeout!!),
-                onClick = { _ ->
-                    val options = (5..30).map { "${it}s" }.toTypedArray()
-                    val currentIndex = (pendingUsbStabilityTimeout!! - 5).coerceIn(0, options.size - 1)
-                    AlertDialog.Builder(requireContext())
-                        .setTitle(R.string.usb_stability_timeout)
-                        .setSingleChoiceItems(options, currentIndex) { dialog, which ->
-                            pendingUsbStabilityTimeout = which + 5
-                            checkChanges()
-                            dialog.dismiss()
-                            updateSettingsList()
-                        }
-                        .show()
+                sliderValue = pendingUsbStabilityTimeout!!.toFloat(),
+                valueFrom = 3f,
+                valueTo = 50f,
+                stepSize = 1f,
+                onValueChanged = { value ->
+                    pendingUsbStabilityTimeout = value.toInt()
+                    checkChanges()
+                    updateSettingsList()
                 }
             ))
         }
