@@ -5,8 +5,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.LinearLayout
-import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
@@ -22,8 +20,6 @@ import com.andrerinas.headunitrevived.main.settings.AutoConnectTouchCallback
 import com.andrerinas.headunitrevived.utils.Settings
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
-import com.google.android.material.slider.Slider
-import com.google.android.material.switchmaterial.SwitchMaterial
 
 class AutoConnectFragment : Fragment() {
 
@@ -33,20 +29,9 @@ class AutoConnectFragment : Fragment() {
     private lateinit var adapter: AutoConnectAdapter
     private var saveButton: MaterialButton? = null
 
-    private lateinit var stabilityToggle: SwitchMaterial
-    private lateinit var stabilityTimeoutSection: LinearLayout
-    private lateinit var stabilityTimeoutLabel: TextView
-    private lateinit var stabilityTimeoutSlider: Slider
-
     // Snapshot of initial state for change detection
     private lateinit var initialOrder: List<String>
     private lateinit var initialEnabled: Map<String, Boolean>
-    private var initialStabilityCheck = false
-    private var initialStabilityTimeout = 10
-
-    // Pending values
-    private var pendingStabilityCheck = false
-    private var pendingStabilityTimeout = 10
 
     private var hasChanges = false
     private val SAVE_ITEM_ID = 1001
@@ -67,10 +52,6 @@ class AutoConnectFragment : Fragment() {
             Settings.AUTO_CONNECT_SELF_MODE to settings.autoStartSelfMode,
             Settings.AUTO_CONNECT_SINGLE_USB to settings.autoConnectSingleUsbDevice
         )
-        initialStabilityCheck = settings.usbStabilityCheck
-        initialStabilityTimeout = settings.usbStabilityTimeout
-        pendingStabilityCheck = initialStabilityCheck
-        pendingStabilityTimeout = initialStabilityTimeout
 
         // Build method list in priority order
         val methods = initialOrder.mapNotNull { id ->
@@ -91,29 +72,6 @@ class AutoConnectFragment : Fragment() {
         recyclerView.adapter = adapter
         itemTouchHelper.attachToRecyclerView(recyclerView)
 
-        // Stability settings
-        stabilityToggle = view.findViewById(R.id.stability_toggle)
-        stabilityTimeoutSection = view.findViewById(R.id.stability_timeout_section)
-        stabilityTimeoutLabel = view.findViewById(R.id.stability_timeout_label)
-        stabilityTimeoutSlider = view.findViewById(R.id.stability_timeout_slider)
-
-        stabilityToggle.isChecked = pendingStabilityCheck
-        stabilityTimeoutSlider.value = pendingStabilityTimeout.toFloat()
-        updateStabilityTimeoutLabel(pendingStabilityTimeout)
-        updateStabilityTimeoutVisibility(pendingStabilityCheck)
-
-        stabilityToggle.setOnCheckedChangeListener { _, isChecked ->
-            pendingStabilityCheck = isChecked
-            updateStabilityTimeoutVisibility(isChecked)
-            checkChanges()
-        }
-
-        stabilityTimeoutSlider.addOnChangeListener { _, value, _ ->
-            pendingStabilityTimeout = value.toInt()
-            updateStabilityTimeoutLabel(pendingStabilityTimeout)
-            checkChanges()
-        }
-
         setupToolbar()
 
         // Intercept system back button
@@ -122,14 +80,6 @@ class AutoConnectFragment : Fragment() {
                 handleBackPress()
             }
         })
-    }
-
-    private fun updateStabilityTimeoutLabel(seconds: Int) {
-        stabilityTimeoutLabel.text = getString(R.string.usb_stability_timeout_description, seconds)
-    }
-
-    private fun updateStabilityTimeoutVisibility(enabled: Boolean) {
-        stabilityTimeoutSection.visibility = if (enabled) View.VISIBLE else View.GONE
     }
 
     private fun methodDefinition(id: String): Pair<Int, Int>? {
@@ -189,9 +139,7 @@ class AutoConnectFragment : Fragment() {
         val currentEnabled = adapter.getEnabledStates()
 
         hasChanges = currentOrder != initialOrder ||
-            currentEnabled != initialEnabled ||
-            pendingStabilityCheck != initialStabilityCheck ||
-            pendingStabilityTimeout != initialStabilityTimeout
+            currentEnabled != initialEnabled
         updateSaveButtonState()
     }
 
@@ -212,15 +160,9 @@ class AutoConnectFragment : Fragment() {
         enabledStates[Settings.AUTO_CONNECT_SELF_MODE]?.let { settings.autoStartSelfMode = it }
         enabledStates[Settings.AUTO_CONNECT_SINGLE_USB]?.let { settings.autoConnectSingleUsbDevice = it }
 
-        // Persist stability settings
-        settings.usbStabilityCheck = pendingStabilityCheck
-        settings.usbStabilityTimeout = pendingStabilityTimeout
-
         // Update snapshot
         initialOrder = orderedIds.toList()
         initialEnabled = enabledStates.toMap()
-        initialStabilityCheck = pendingStabilityCheck
-        initialStabilityTimeout = pendingStabilityTimeout
 
         hasChanges = false
         updateSaveButtonState()

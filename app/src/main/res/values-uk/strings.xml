@@ -160,7 +160,7 @@
     <string name="usb_stability_check">Перевірка стабільності USB</string>
     <string name="usb_stability_check_description">Увімкніть, якщо ваш бездротовий адаптер Android Auto відключається та підключається кілька разів, перш ніж почати працювати правильно</string>
     <string name="usb_stability_timeout">Таймаут стабільності</string>
-    <string name="usb_stability_timeout_description">Секунди, протягом яких пристрій має залишатися підключеним перед автопідключенням (%d с)</string>
+    <string name="usb_stability_timeout_description">Секунди, протягом яких пристрій має залишатися підключеним перед автопідключенням або перепідключенням (%d с)</string>
     <string name="usb_device_settling">Очікування стабілізації USB-пристрою…</string>
     <string name="video_codec">Відеокодек</string>
     <string name="fps_limit">Обмеження FPS</string>
