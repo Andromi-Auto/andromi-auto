@@ -1,7 +1,7 @@
 # Changelog
 ### v.1.15.0
 - Added arabic language thanks to A5H0
-- Added new intent for setting day/night via intent
+- Added new intent for setting day/night mode for maps
 - Added new window flags for older devices to finally fix fullscreen issues
 - Added new intents to make the headunit recognize the app as navigation app
 - Added LegacyOptimizer which will handle things directly and faster for single core cpus. Should improve the performance on Android 4.1 - 4.4 Devices
