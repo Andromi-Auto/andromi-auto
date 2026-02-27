@@ -162,7 +162,7 @@
     <string name="usb_stability_check">Kontrola stability USB</string>
     <string name="usb_stability_check_description">Povolte, pokud se váš bezdrátový adaptér Android Auto opakovaně odpojuje a připojuje, než začne správně fungovat</string>
     <string name="usb_stability_timeout">Časový limit stability</string>
-    <string name="usb_stability_timeout_description">Počet sekund, po které musí být zařízení připojeno před automatickým připojením (%d s)</string>
+    <string name="usb_stability_timeout_description">Počet sekund, po které musí být zařízení připojeno před automatickým připojením nebo opětovným připojením (%d s)</string>
     <string name="usb_device_settling">Čekání na stabilizaci USB zařízení…</string>
     <string name="video_codec">Video kodek</string>
     <string name="fps_limit">Limit FPS</string>

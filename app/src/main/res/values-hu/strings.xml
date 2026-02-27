@@ -153,7 +153,7 @@
     <string name="usb_stability_check">USB stabilitás ellenőrzés</string>
     <string name="usb_stability_check_description">Engedélyezze, ha a vezeték nélküli Android Auto adapter többször lecsatlakozik és újracsatlakozik, mielőtt megfelelően működne</string>
     <string name="usb_stability_timeout">Stabilitási időkorlát</string>
-    <string name="usb_stability_timeout_description">Másodpercek, ameddig az eszköznek csatlakozva kell maradnia az automatikus csatlakozás előtt (%d mp)</string>
+    <string name="usb_stability_timeout_description">Másodpercek, ameddig az eszköznek csatlakozva kell maradnia az automatikus csatlakozás vagy újracsatlakozás előtt (%d mp)</string>
     <string name="usb_device_settling">Várakozás az USB-eszköz stabilizálódására…</string>
     <string name="auto_connect_settings">Automatikus csatlakozás beállítások</string>
     <string name="auto_connect_settings_description">Az automatikus csatlakozási módok és prioritásuk konfigurálása</string>
