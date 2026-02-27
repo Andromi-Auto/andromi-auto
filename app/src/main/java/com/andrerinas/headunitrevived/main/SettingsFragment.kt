@@ -49,6 +49,14 @@ class SettingsFragment : Fragment() {
         }
     }
 
+    private val bluetoothEnableLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == android.app.Activity.RESULT_OK) {
+            showBluetoothDeviceSelector()
+        }
+    }
+
     // Local state to hold changes before saving
     private var pendingNightMode: Settings.NightMode? = null
     private var pendingMicSampleRate: Int? = null
@@ -1106,6 +1114,13 @@ class SettingsFragment : Fragment() {
 
         val bluetoothManager = requireContext().getSystemService(Context.BLUETOOTH_SERVICE) as android.bluetooth.BluetoothManager
         val adapter = bluetoothManager.adapter
+
+        if (adapter == null || !adapter.isEnabled) {
+            val enableIntent = Intent(android.bluetooth.BluetoothAdapter.ACTION_REQUEST_ENABLE)
+            bluetoothEnableLauncher.launch(enableIntent)
+            return
+        }
+
         val bondedDevices = adapter.bondedDevices.toList()
 
         if (bondedDevices.isEmpty()) {
