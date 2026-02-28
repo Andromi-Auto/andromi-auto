@@ -19,8 +19,12 @@ import androidx.fragment.app.FragmentManager
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import android.content.Intent
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import com.andrerinas.headunitrevived.App
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import com.andrerinas.headunitrevived.R
 import com.andrerinas.headunitrevived.aap.AapService
 import com.andrerinas.headunitrevived.connection.NetworkDiscovery
@@ -165,12 +169,16 @@ class NetworkListFragment : Fragment(), NetworkDiscovery.Listener {
                 scanDialog?.dismiss()
                 Toast.makeText(context, getString(R.string.found_connecting, ip), Toast.LENGTH_SHORT).show()
 
-                // If we have a socket, we need to pass it to AapService for reuse!
-                if (socket != null && socket.isConnected) {
-                    AapService.pendingSocket = socket
+                val ctx = context ?: return@runOnUiThread
+                lifecycleScope.launch(Dispatchers.IO) {
+                    if (socket != null && socket.isConnected)
+                        App.provide(ctx).commManager.connect(socket)
+                    else
+                        App.provide(ctx).commManager.connect(ip, 5277)
+                    ContextCompat.startForegroundService(ctx, Intent(ctx, AapService::class.java).apply {
+                        action = AapService.ACTION_CONNECT_SOCKET
+                    })
                 }
-
-                context?.let { ctx -> ContextCompat.startForegroundService(ctx, AapService.createIntent(ip, ctx)) }
             } else {
                 // If not in auto-connect dialog, close the probe socket
                 try { socket?.close() } catch (e: Exception) {}

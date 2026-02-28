@@ -18,8 +18,10 @@ import com.andrerinas.headunitrevived.R
 import com.andrerinas.headunitrevived.aap.protocol.messages.TouchEvent
 import com.andrerinas.headunitrevived.aap.protocol.messages.VideoFocusEvent
 import com.andrerinas.headunitrevived.app.SurfaceActivity
+import com.andrerinas.headunitrevived.connection.CommManager
 import com.andrerinas.headunitrevived.contract.DisconnectIntent
 import com.andrerinas.headunitrevived.contract.KeyIntent
+import kotlinx.coroutines.runBlocking
 import com.andrerinas.headunitrevived.decoder.VideoDecoder
 import com.andrerinas.headunitrevived.decoder.VideoDimensionsListener
 import com.andrerinas.headunitrevived.utils.AppLog
@@ -44,7 +46,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
             val loadingOverlay = findViewById<View>(R.id.loading_overlay)
             if (loadingOverlay?.visibility == View.VISIBLE && AapService.isConnected) {
                 AppLog.w("Watchdog: No video received. Requesting Keyframe (Unsolicited Focus)...")
-                transport.send(VideoFocusEvent(gain = true, unsolicited = true))
+                commManager.send(VideoFocusEvent(gain = true, unsolicited = true))
                 watchdogHandler.postDelayed(this, 3000)
             }
         }
@@ -220,7 +222,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         setFullscreen() // Call setFullscreen here as well
 
         // Pre-emptively request audio focus to push background apps away
-        App.provide(this).transport.aapAudio?.requestFocusChange(
+        commManager.aapAudio?.requestFocusChange(
             android.media.AudioManager.STREAM_MUSIC,
             com.andrerinas.headunitrevived.aap.protocol.proto.Control.AudioFocusRequestNotification.AudioFocusRequestType.GAIN_VALUE,
             android.media.AudioManager.OnAudioFocusChangeListener { focusChange ->
@@ -260,8 +262,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         }
     }
 
-    val transport: AapTransport
-        get() = App.provide(this).transport
+    private val commManager get() = App.provide(this).commManager
 
     override fun onSurfaceCreated(surface: android.view.Surface) {
         AppLog.i("[AapProjectionActivity] onSurfaceCreated")
@@ -277,9 +278,26 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
             AppLog.i("Delayed setting surface to decoder")
             videoDecoder.setSurface(surface)
 
-            // Simply request focus to ensure stream is active
-            transport.send(VideoFocusEvent(gain = true, unsolicited = false))
-            
+            when (commManager.connectionState.value) {
+                is CommManager.ConnectionState.Connected -> {
+                    Thread({
+                        runBlocking { commManager.startTransport() }
+                        if (commManager.connectionState.value is CommManager.ConnectionState.TransportStarted) {
+                            sendBroadcast(Intent(AapService.ACTION_REQUEST_NIGHT_MODE_UPDATE).apply {
+                                setPackage(packageName)
+                            })
+                        } else {
+                            sendBroadcast(DisconnectIntent(false))
+                        }
+                    }, "TransportStart").start()
+                }
+                is CommManager.ConnectionState.TransportStarted -> {
+                    commManager.send(VideoFocusEvent(gain = true, unsolicited = true))
+                }
+                else -> {
+                    commManager.send(VideoFocusEvent(gain = true, unsolicited = false))
+                }
+            }
         }, 150)
 
         // Explicitly check and set video dimensions if already known by the decoder
@@ -299,7 +317,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
     override fun onSurfaceDestroyed(surface: android.view.Surface) {
         AppLog.i("SurfaceCallback: onSurfaceDestroyed. Surface: $surface")
         isSurfaceSet = false
-        transport.send(VideoFocusEvent(gain = false, unsolicited = false))
+        commManager.send(VideoFocusEvent(gain = false, unsolicited = false))
         videoDecoder.stop("surfaceDestroyed")
     }
 
@@ -330,7 +348,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
             pointerData.add(Triple(pointerId, correctedX, correctedY))
         }
 
-        transport.send(TouchEvent(ts, action, event.actionIndex, pointerData))
+        commManager.send(TouchEvent(ts, action, event.actionIndex, pointerData))
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
@@ -351,7 +369,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
 
 
     private fun onKeyEvent(keyCode: Int, isPress: Boolean) {
-        transport.send(keyCode, isPress)
+        commManager.send(keyCode, isPress)
     }
 
     override fun onDestroy() {

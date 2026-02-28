@@ -10,6 +10,7 @@ import androidx.core.content.ContextCompat
 import com.andrerinas.headunitrevived.App
 import com.andrerinas.headunitrevived.R
 import com.andrerinas.headunitrevived.aap.AapService
+import com.andrerinas.headunitrevived.connection.CommManager
 import com.andrerinas.headunitrevived.connection.UsbAccessoryMode
 import com.andrerinas.headunitrevived.connection.UsbDeviceCompat
 import com.andrerinas.headunitrevived.utils.AppLog
@@ -36,7 +37,7 @@ class UsbAttachedActivity : Activity() {
             return
         }
 
-        if (App.provide(this).transport.isAlive) {
+        if (App.provide(this).commManager.connectionState.value is CommManager.ConnectionState.TransportStarted) {
             AppLog.e("Thread already running")
             finish()
             return
@@ -82,7 +83,7 @@ class UsbAttachedActivity : Activity() {
 
         AppLog.i(UsbDeviceCompat.getUniqueName(device))
 
-        if (!App.provide(this).transport.isAlive) {
+        if (App.provide(this).commManager.connectionState.value !is CommManager.ConnectionState.TransportStarted) {
             if (UsbDeviceCompat.isInAccessoryMode(device)) {
                 AppLog.e("Usb in accessory mode")
                 ContextCompat.startForegroundService(this, AapService.createIntent(device, this))
