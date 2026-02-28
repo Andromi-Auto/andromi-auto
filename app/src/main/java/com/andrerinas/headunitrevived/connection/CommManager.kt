@@ -14,7 +14,6 @@ import android.media.AudioManager
 import com.andrerinas.headunitrevived.aap.AapMessage
 import com.andrerinas.headunitrevived.aap.protocol.messages.SensorEvent
 import java.net.Socket
-import com.andrerinas.headunitrevived.aap.AapAudio
 
 class CommManager(
     private val context: Context,
@@ -38,14 +37,7 @@ class CommManager(
     private var _connection: AccessoryConnection? = null
     private val _backgroundNotification = BackgroundNotification(context)
 
-
     val connectionState = _connectionState.asStateFlow()
-    internal val aapAudio: AapAudio? get() = _transport?.aapAudio
-
-    // Last-used connection metadata, read by AapService to persist the auto-reconnect preference
-    var lastConnectionType: String = ""; private set
-    var lastConnectionIp: String = ""; private set
-    var lastConnectionUsbDevice: String = ""; private set
 
     fun isConnectedToUsbDevice(device: UsbDevice): Boolean =
         (_connection as? UsbAccessoryConnection)?.isDeviceRunning(device) == true
@@ -57,9 +49,7 @@ class CommManager(
             _connection = UsbAccessoryConnection(context.getSystemService(Context.USB_SERVICE) as UsbManager, device)
 
             if (_connection?.connect() ?: false) {
-                lastConnectionType = Settings.CONNECTION_TYPE_USB
-                lastConnectionIp = ""
-                lastConnectionUsbDevice = UsbDeviceCompat.getUniqueName(device)
+                settings.saveLastConnection(type = Settings.CONNECTION_TYPE_USB, usbDevice = UsbDeviceCompat.getUniqueName(device))
                 _connectionState.emit(ConnectionState.Connected)
             } else {
                 _connectionState.emit(ConnectionState.Disconnected)
@@ -77,9 +67,7 @@ class CommManager(
             _connection = SocketAccessoryConnection(socket, context)
 
             if (_connection?.connect() ?: false) {
-                lastConnectionType = Settings.CONNECTION_TYPE_WIFI
-                lastConnectionIp = socket.inetAddress?.hostAddress ?: ""
-                lastConnectionUsbDevice = ""
+                settings.saveLastConnection(type = Settings.CONNECTION_TYPE_WIFI, ip = socket.inetAddress?.hostAddress ?: "")
                 _connectionState.emit(ConnectionState.Connected)
             } else {
                 _connectionState.emit(ConnectionState.Disconnected)
@@ -97,9 +85,7 @@ class CommManager(
             _connection = SocketAccessoryConnection(ip, port, context)
 
             if (_connection?.connect() ?: false) {
-                lastConnectionType = Settings.CONNECTION_TYPE_WIFI
-                lastConnectionIp = ip
-                lastConnectionUsbDevice = ""
+                settings.saveLastConnection(type = Settings.CONNECTION_TYPE_WIFI, ip = ip)
                 _connectionState.emit(ConnectionState.Connected)
             } else {
                 _connectionState.emit(ConnectionState.Disconnected)
@@ -120,8 +106,14 @@ class CommManager(
                     val audioManager = context.getSystemService(Application.AUDIO_SERVICE) as AudioManager
                     _transport = AapTransport(audioDecoder, videoDecoder, audioManager, settings, _backgroundNotification, context)
                 }
-                if (_transport?.start(_connection!!) == true)
+                if (_transport?.start(_connection!!) == true) {
+                    _transport?.aapAudio?.requestFocusChange(
+                        AudioManager.STREAM_MUSIC,
+                        AudioManager.AUDIOFOCUS_GAIN,
+                        AudioManager.OnAudioFocusChangeListener { }
+                    )
                     _connectionState.emit(ConnectionState.TransportStarted)
+                }
             }
             else
                 _connectionState.emit(ConnectionState.Error("Starting transport without connection"))

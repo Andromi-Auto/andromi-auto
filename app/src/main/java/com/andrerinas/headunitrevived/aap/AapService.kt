@@ -519,16 +519,6 @@ class AapService : Service(), UsbReceiver.Listener {
                 // Sync current night mode state (will be a no-op until transport is started)
                 nightModeManager?.resendCurrentState()
 
-                if (commManager.lastConnectionType.isNotEmpty()) {
-                    val settings = App.provide(this).settings
-                    settings.saveLastConnection(
-                        type = commManager.lastConnectionType,
-                        ip = commManager.lastConnectionIp,
-                        usbDevice = commManager.lastConnectionUsbDevice
-                    )
-                    AppLog.i("Saved last connection: type=${commManager.lastConnectionType}, ip=${commManager.lastConnectionIp}, usb=${commManager.lastConnectionUsbDevice}")
-                }
-
                 val aapIntent = AapProjectionActivity.intent(this@AapService).apply {
                     putExtra(AapProjectionActivity.EXTRA_FOCUS, true)
                     addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)

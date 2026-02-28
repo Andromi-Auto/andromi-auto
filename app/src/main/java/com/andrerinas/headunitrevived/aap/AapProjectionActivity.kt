@@ -221,14 +221,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         
         setFullscreen() // Call setFullscreen here as well
 
-        // Pre-emptively request audio focus to push background apps away
-        commManager.aapAudio?.requestFocusChange(
-            android.media.AudioManager.STREAM_MUSIC,
-            com.andrerinas.headunitrevived.aap.protocol.proto.Control.AudioFocusRequestNotification.AudioFocusRequestType.GAIN_VALUE,
-            android.media.AudioManager.OnAudioFocusChangeListener { focusChange ->
-                AppLog.i("Activity AudioFocus pre-emptive change: $focusChange")
-            }
-        )
+
     }
 
     override fun onNewIntent(intent: Intent) {
