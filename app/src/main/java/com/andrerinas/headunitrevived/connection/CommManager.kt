@@ -67,7 +67,7 @@ class CommManager(
         }
     }
 
-    suspend fun connect(socket: Socket) {
+    suspend fun connect(socket: Socket) = withContext(Dispatchers.IO) {
         try {
             _connectionState.emit(ConnectionState.Connecting)
             _connection?.disconnect()

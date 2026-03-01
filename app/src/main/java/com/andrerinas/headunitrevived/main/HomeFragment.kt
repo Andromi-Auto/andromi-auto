@@ -1,9 +1,7 @@
 package com.andrerinas.headunitrevived.main
 
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.hardware.usb.UsbManager
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -24,6 +22,7 @@ import com.andrerinas.headunitrevived.aap.AapProjectionActivity
 import com.andrerinas.headunitrevived.aap.AapService
 import com.andrerinas.headunitrevived.connection.UsbDeviceCompat
 import com.andrerinas.headunitrevived.utils.AppLog
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import com.andrerinas.headunitrevived.utils.Settings
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -40,26 +39,9 @@ class HomeFragment : Fragment() {
     private lateinit var exitButton: Button
     private lateinit var self_mode_text: TextView
     private var hasAttemptedAutoConnect = false
-    private var isScanning = false
 
-    private val connectionStatusReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            AppLog.i("HomeFragment received ${intent?.action}")
-            when (intent?.action) {
-                AapService.ACTION_SCAN_STARTED -> {
-                    isScanning = true
-                    updateWifiButtonFeedback()
-                }
-                AapService.ACTION_SCAN_FINISHED -> {
-                    isScanning = false
-                    updateWifiButtonFeedback()
-                }
-            }
-        }
-    }
-
-    private fun updateWifiButtonFeedback() {
-        if (isScanning) {
+    private fun updateWifiButtonFeedback(scanning: Boolean) {
+        if (scanning) {
             wifi_text_view.text = getString(R.string.searching)
             wifi.alpha = 0.6f
         } else {
@@ -94,6 +76,12 @@ class HomeFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 commManager.connectionState.collect { updateProjectionButtonText() }
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                AapService.scanningState.collect { updateWifiButtonFeedback(it) }
             }
         }
 
@@ -142,7 +130,11 @@ class HomeFragment : Fragment() {
                 if (ip.isNotEmpty()) {
                     AppLog.i("Auto-connect: Attempting WiFi connection to $ip")
                     Toast.makeText(requireContext(), getString(R.string.auto_connecting_to, ip), Toast.LENGTH_SHORT).show()
-                    ContextCompat.startForegroundService(requireContext(), AapService.createIntent(ip, requireContext()))
+                    val ctx = requireContext()
+                    lifecycleScope.launch(Dispatchers.IO) { App.provide(ctx).commManager.connect(ip, 5277) }
+                    ContextCompat.startForegroundService(requireContext(), Intent(requireContext(), AapService::class.java).apply {
+                        action = AapService.ACTION_CONNECT_SOCKET
+                    })
                 }
             }
             Settings.CONNECTION_TYPE_USB -> {
@@ -155,7 +147,9 @@ class HomeFragment : Fragment() {
                     if (matchingDevice != null && usbManager.hasPermission(matchingDevice)) {
                         AppLog.i("Auto-connect: Attempting USB connection to $lastUsbDevice")
                         Toast.makeText(requireContext(), getString(R.string.auto_connecting_usb), Toast.LENGTH_SHORT).show()
-                        ContextCompat.startForegroundService(requireContext(), AapService.createIntent(matchingDevice, requireContext()))
+                        ContextCompat.startForegroundService(requireContext(), Intent(requireContext(), AapService::class.java).apply {
+                            action = AapService.ACTION_CHECK_USB
+                        })
                     } else {
                         AppLog.i("Auto-connect: USB device $lastUsbDevice not found or no permission")
                     }
@@ -201,7 +195,7 @@ class HomeFragment : Fragment() {
                 1 -> { // Auto (Headunit Server) - One-Shot Scan
                     if (commManager.isConnected) {
                         // Already connected, no toast needed
-                    } else if (isScanning) {
+                    } else if (AapService.scanningState.value) {
                         Toast.makeText(requireContext(), getString(R.string.already_scanning), Toast.LENGTH_SHORT).show()
                     } else {
                         Toast.makeText(requireContext(), getString(R.string.searching_headunit_server), Toast.LENGTH_SHORT).show()
@@ -214,7 +208,7 @@ class HomeFragment : Fragment() {
                 2 -> { // Helper (Wireless Launcher)
                     if (commManager.isConnected) {
                         // Already connected, no toast needed
-                    } else if (isScanning) {
+                    } else if (AapService.scanningState.value) {
                         Toast.makeText(requireContext(), getString(R.string.already_searching_phone), Toast.LENGTH_SHORT).show()
                     } else {
                         Toast.makeText(requireContext(), getString(R.string.searching_phone), Toast.LENGTH_SHORT).show()
@@ -253,21 +247,7 @@ class HomeFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         AppLog.i("HomeFragment: onResume. isConnected=${commManager.isConnected}")
-        val filter = IntentFilter().apply {
-            addAction(AapService.ACTION_SCAN_STARTED)
-            addAction(AapService.ACTION_SCAN_FINISHED)
-        }
-        
-        ContextCompat.registerReceiver(requireContext(), connectionStatusReceiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED)
-        
-        isScanning = AapService.isScanning
-        updateWifiButtonFeedback()
         updateProjectionButtonText()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        requireContext().unregisterReceiver(connectionStatusReceiver)
     }
 
     companion object {

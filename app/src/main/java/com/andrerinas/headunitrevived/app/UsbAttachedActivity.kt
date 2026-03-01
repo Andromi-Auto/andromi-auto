@@ -45,7 +45,9 @@ class UsbAttachedActivity : Activity() {
 
         if (UsbDeviceCompat.isInAccessoryMode(device)) {
             AppLog.e("Usb in accessory mode")
-            ContextCompat.startForegroundService(this, AapService.createIntent(device, this))
+            ContextCompat.startForegroundService(this, Intent(this, AapService::class.java).apply {
+                action = AapService.ACTION_CHECK_USB
+            })
             finish()
             return
         }
@@ -86,7 +88,9 @@ class UsbAttachedActivity : Activity() {
         if (App.provide(this).commManager.connectionState.value !is CommManager.ConnectionState.TransportStarted) {
             if (UsbDeviceCompat.isInAccessoryMode(device)) {
                 AppLog.e("Usb in accessory mode")
-                ContextCompat.startForegroundService(this, AapService.createIntent(device, this))
+                ContextCompat.startForegroundService(this, Intent(this, AapService::class.java).apply {
+                    action = AapService.ACTION_CHECK_USB
+                })
             }
         } else {
             AppLog.e("Thread already running")

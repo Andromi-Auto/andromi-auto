@@ -176,7 +176,9 @@ class UsbListFragment : Fragment() {
                     // Device is in Accessory Mode but we are NOT connected.
                     // Start connection immediately.
                     Toast.makeText(mContext, R.string.android_auto_starting, Toast.LENGTH_SHORT).show()
-                    ContextCompat.startForegroundService(mContext, AapService.createIntent(device.wrappedDevice, mContext))
+                    ContextCompat.startForegroundService(mContext, Intent(mContext, AapService::class.java).apply {
+                        action = AapService.ACTION_CHECK_USB
+                    })
                 } else {
                     // Standard connection flow
                     val usbManager = mContext.getSystemService(Context.USB_SERVICE) as UsbManager

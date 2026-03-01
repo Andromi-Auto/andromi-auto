@@ -23,6 +23,7 @@ import android.content.Intent
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.andrerinas.headunitrevived.App
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import com.andrerinas.headunitrevived.R
@@ -315,7 +316,11 @@ class NetworkListFragment : Fragment(), NetworkDiscovery.Listener {
 
         override fun onClick(v: View) {
             if (v.id == android.R.id.button2) {
-                ContextCompat.startForegroundService(context, AapService.createIntent(v.getTag(R.integer.key_data) as String, context))
+                val ip = v.getTag(R.integer.key_data) as String
+                ContextCompat.startForegroundService(context, Intent(context, AapService::class.java).apply {
+                    action = AapService.ACTION_CONNECT_SOCKET
+                })
+                CoroutineScope(Dispatchers.Main).launch { App.provide(context).commManager.connect(ip, 5277) }
             } else {
                 this.removeAddress(v.getTag(R.integer.key_data) as String)
             }

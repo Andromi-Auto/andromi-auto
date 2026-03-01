@@ -251,8 +251,6 @@ class AapTransport(
             }
 
             ssl.postHandshakeReset()
-
-            ssl.postHandshakeReset()
             AppLog.d("Handshake: SSL buffers reset after handshake.")
 
             AppLog.d("Handshake: SSL handshake complete. TS: ${SystemClock.elapsedRealtime()}")

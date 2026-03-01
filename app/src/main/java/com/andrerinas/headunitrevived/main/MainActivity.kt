@@ -17,8 +17,11 @@ import com.andrerinas.headunitrevived.R
 import com.andrerinas.headunitrevived.aap.AapProjectionActivity
 import com.andrerinas.headunitrevived.aap.AapService
 import com.andrerinas.headunitrevived.app.BaseActivity
+import androidx.lifecycle.lifecycleScope
 import com.andrerinas.headunitrevived.utils.AppLog
 import com.andrerinas.headunitrevived.utils.Settings
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class MainActivity : BaseActivity() {
 
@@ -96,7 +99,10 @@ class MainActivity : BaseActivity() {
                 val ip = data.getQueryParameter("ip")
                 if (!ip.isNullOrEmpty()) {
                     AppLog.i("Received connect intent for IP: $ip")
-                    ContextCompat.startForegroundService(this, AapService.createIntent(ip, this))
+                    ContextCompat.startForegroundService(this, Intent(this, AapService::class.java).apply {
+                        action = AapService.ACTION_CONNECT_SOCKET
+                    })
+                    lifecycleScope.launch(Dispatchers.IO) { App.provide(this@MainActivity).commManager.connect(ip, 5277) }
                 } else {
                     AppLog.i("Received connect intent without IP -> triggering last session auto-connect")
                     val autoIntent = Intent(this, AapService::class.java).apply {
