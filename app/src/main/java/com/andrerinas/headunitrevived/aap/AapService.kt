@@ -158,6 +158,10 @@ class AapService : Service(), UsbReceiver.Listener {
         updateNotification()
         mediaSession = MediaSessionCompat(this, "HeadunitRevived").apply { isActive = true }
         nightModeManager?.resendCurrentState()
+        // Start the AAP handshake immediately, before the projection activity even opens.
+        // This hides handshake latency (especially the multi-second USB SSL negotiation) behind
+        // the activity startup time rather than adding it on top.
+        serviceScope.launch { commManager.startTransport() }
         startActivity(AapProjectionActivity.intent(this).apply {
             putExtra(AapProjectionActivity.EXTRA_FOCUS, true)
             addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
@@ -294,8 +298,14 @@ class AapService : Service(), UsbReceiver.Listener {
     // -------------------------------------------------------------------------
 
     override fun onUsbAttach(device: UsbDevice) {
-        AppLog.i("USB attached, checking for connectable device.")
-        checkAlreadyConnectedUsb(force = true)
+        if (UsbDeviceCompat.isInAccessoryMode(device)) {
+            // Device already in AOA mode (re-enumerated after UsbAttachedActivity switched it).
+            AppLog.i("USB accessory device attached, connecting.")
+            checkAlreadyConnectedUsb(force = true)
+        }
+        // Normal-mode devices are handled exclusively by UsbAttachedActivity (manifest intent
+        // filter). Calling connectAndSwitch() here would race with UsbAttachedActivity and
+        // cause openDevice() to return null in one of the two callers → "Failed" toast.
     }
 
     override fun onUsbDetach(device: UsbDevice) {
@@ -318,7 +328,8 @@ class AapService : Service(), UsbReceiver.Listener {
     private fun checkAlreadyConnectedUsb(force: Boolean = false) {
         val settings = App.provide(this).settings
         if (!force && !settings.autoConnectLastSession) return
-        if (commManager.isConnected) return
+        if (commManager.isConnected ||
+            commManager.connectionState.value is CommManager.ConnectionState.Connecting) return
 
         val usbManager = getSystemService(Context.USB_SERVICE) as UsbManager
         for (device in usbManager.deviceList.values) {

@@ -179,7 +179,7 @@ class AapTransport(
         pollHandler = Handler(pollThread!!.looper, pollHandlerCallback)
         pollHandler?.post { com.andrerinas.headunitrevived.utils.LegacyOptimizer.setHighPriority() }
 
-        SystemClock.sleep(200)
+        SystemClock.sleep(50)
 
         if (!handshake(connection)) {
             quit()

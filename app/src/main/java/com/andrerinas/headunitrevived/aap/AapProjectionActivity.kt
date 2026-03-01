@@ -24,6 +24,7 @@ import com.andrerinas.headunitrevived.app.SurfaceActivity
 import com.andrerinas.headunitrevived.connection.CommManager
 import com.andrerinas.headunitrevived.contract.KeyIntent
 import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import com.andrerinas.headunitrevived.decoder.VideoDecoder
@@ -267,13 +268,13 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         AppLog.i("[AapProjectionActivity] onSurfaceChanged. Actual surface dimensions: width=$width, height=$height")
         isSurfaceSet = true
         
-        // Reduced delay from 750ms to 150ms to catch the first I-Frame
         android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
             AppLog.i("Delayed setting surface to decoder")
             videoDecoder.setSurface(surface)
 
             when (commManager.connectionState.value) {
                 is CommManager.ConnectionState.Connected -> {
+                    // Fallback: AapService didn't start transport yet (e.g. service restarted).
                     Thread({
                         runBlocking { commManager.startTransport() }
                         if (commManager.connectionState.value is CommManager.ConnectionState.TransportStarted) {
@@ -285,14 +286,30 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
                         }
                     }, "TransportStart").start()
                 }
+                is CommManager.ConnectionState.StartingTransport -> {
+                    // AapService already started the handshake in parallel with the activity
+                    // opening. Wait for it to finish, then sync night mode.
+                    lifecycleScope.launch {
+                        commManager.connectionState
+                            .filterIsInstance<CommManager.ConnectionState.TransportStarted>()
+                            .first()
+                        sendBroadcast(Intent(AapService.ACTION_REQUEST_NIGHT_MODE_UPDATE).apply {
+                            setPackage(packageName)
+                        })
+                    }
+                }
                 is CommManager.ConnectionState.TransportStarted -> {
+                    // Handshake finished before the surface was ready; request a keyframe now.
                     commManager.send(VideoFocusEvent(gain = true, unsolicited = true))
+                    sendBroadcast(Intent(AapService.ACTION_REQUEST_NIGHT_MODE_UPDATE).apply {
+                        setPackage(packageName)
+                    })
                 }
                 else -> {
                     commManager.send(VideoFocusEvent(gain = true, unsolicited = false))
                 }
             }
-        }, 150)
+        }, 50)
 
         // Explicitly check and set video dimensions if already known by the decoder
         // This handles cases where the activity is recreated but the decoder already has dimensions
