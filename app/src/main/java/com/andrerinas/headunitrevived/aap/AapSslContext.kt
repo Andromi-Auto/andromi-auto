@@ -21,8 +21,12 @@ class AapSslContext(keyManager: SingleKeyKeyManager): AapSsl {
         if (prepare() < 0) return false
 
         val buffer = ByteArray(Messages.DEF_BUFFER_LENGTH)
-        // Hard cap on the entire SSL phase. Without this, a phone that goes silent after
-        // the first round-trip would stall for (remaining rounds × per-call timeout) seconds.
+        // Accumulates bytes across NEED_UNWRAP iterations when a TLS record is fragmented
+        // across multiple USB packets. JSSE returns BUFFER_UNDERFLOW when the input is too
+        // short to hold a complete record; without this accumulation the previous
+        // handshakeWrite() inner loop would spin forever on the same partial data.
+        var pendingTlsData = ByteArray(0)
+        // Hard cap on the entire SSL phase.
         val deadline = android.os.SystemClock.elapsedRealtime() + SSL_HANDSHAKE_TIMEOUT_MS
 
         while (getHandshakeStatus() != SSLEngineResult.HandshakeStatus.FINISHED &&
@@ -35,17 +39,49 @@ class AapSslContext(keyManager: SingleKeyKeyManager): AapSsl {
 
             when (getHandshakeStatus()) {
                 SSLEngineResult.HandshakeStatus.NEED_UNWRAP -> {
-                    val size = connection.recvBlocking(buffer, buffer.size, 2000, false)
-                    if (size <= 6) {
-                        AppLog.e("SSL Handshake: Receive failed or too small ($size)")
-
-                        return false
+                    // Use buffered data first; only block on USB if the buffer is empty
+                    // (normal case) or after BUFFER_UNDERFLOW appended more data below.
+                    if (pendingTlsData.isEmpty()) {
+                        val size = connection.recvBlocking(buffer, buffer.size, 2000, false)
+                        if (size <= 6) {
+                            AppLog.e("SSL Handshake: Receive failed or too small ($size)")
+                            return false
+                        }
+                        pendingTlsData = buffer.copyOfRange(6, size)
                     }
-                    handshakeWrite(6, size - 6, buffer)
+
+                    rxBuffer.clear()
+                    val data = ByteBuffer.wrap(pendingTlsData)
+                    val result = sslEngine.unwrap(data, rxBuffer)
+                    runDelegatedTasks(result, sslEngine)
+
+                    when (result.status) {
+                        SSLEngineResult.Status.OK -> {
+                            // Keep any unconsumed bytes (e.g. next record already in the packet).
+                            pendingTlsData = if (data.hasRemaining())
+                                ByteArray(data.remaining()).also { data.get(it) }
+                            else ByteArray(0)
+                        }
+                        SSLEngineResult.Status.BUFFER_UNDERFLOW -> {
+                            // Partial TLS record — read the next USB packet and append it.
+                            // The outer loop re-enters NEED_UNWRAP and retries unwrap with
+                            // the now-larger buffer (pendingTlsData non-empty → no extra USB read).
+                            val size = connection.recvBlocking(buffer, buffer.size, 2000, false)
+                            if (size <= 6) {
+                                AppLog.e("SSL Handshake: Receive failed during accumulation ($size)")
+                                return false
+                            }
+                            pendingTlsData += buffer.copyOfRange(6, size)
+                            AppLog.d("SSL Handshake: partial TLS record, ${pendingTlsData.size} B buffered")
+                        }
+                        else -> {
+                            AppLog.e("SSL Handshake: unwrap failed with status ${result.status}")
+                            return false
+                        }
+                    }
                 }
 
                 SSLEngineResult.HandshakeStatus.NEED_WRAP -> {
-                    // Wrap -> Send to connection
                     val handshakeData = handshakeRead()
                     val bio = Messages.createRawMessage(0, 3, 3, handshakeData)
                     if (connection.sendBlocking(bio, bio.size, 2000) < 0) {
@@ -75,7 +111,7 @@ class AapSslContext(keyManager: SingleKeyKeyManager): AapSsl {
         return true
     }
 
-    override fun prepare(): Int {
+    private fun prepare(): Int {
         // Use a consistent (host, port) key so JSSE's ClientSessionContext can find and reuse
         // the session from the previous connection.  The values are arbitrary — they are never
         // used for DNS resolution; they just serve as the cache lookup key.
@@ -100,11 +136,11 @@ class AapSslContext(keyManager: SingleKeyKeyManager): AapSsl {
         rxBuffer.clear()
     }
 
-    override fun getHandshakeStatus(): SSLEngineResult.HandshakeStatus {
+    private fun getHandshakeStatus(): SSLEngineResult.HandshakeStatus {
         return sslEngine.handshakeStatus
     }
 
-    override fun runDelegatedTasks() {
+    private fun runDelegatedTasks() {
         if (sslEngine.handshakeStatus === SSLEngineResult.HandshakeStatus.NEED_TASK) {
             var runnable: Runnable? = sslEngine.delegatedTask
             while (runnable != null) {
@@ -118,7 +154,7 @@ class AapSslContext(keyManager: SingleKeyKeyManager): AapSsl {
         }
     }
 
-    override fun handshakeRead(): ByteArray {
+    private fun handshakeRead(): ByteArray {
         txBuffer.clear()
         val result = sslEngine.wrap(emptyArray(), txBuffer)
         runDelegatedTasks(result, sslEngine)
@@ -128,7 +164,7 @@ class AapSslContext(keyManager: SingleKeyKeyManager): AapSsl {
         return resultBuffer
     }
 
-    override fun handshakeWrite(start: Int, length: Int, buffer: ByteArray): Int {
+    private fun handshakeWrite(start: Int, length: Int, buffer: ByteArray): Int {
         rxBuffer.clear()
         val receivedHandshakeData = ByteArray(length)
         System.arraycopy(buffer, start, receivedHandshakeData, 0, length)
@@ -137,6 +173,10 @@ class AapSslContext(keyManager: SingleKeyKeyManager): AapSsl {
         while (data.hasRemaining()) {
             val result = sslEngine.unwrap(data, rxBuffer)
             runDelegatedTasks(result, sslEngine)
+            // Break on any non-OK status (especially BUFFER_UNDERFLOW on a partial TLS record)
+            // to prevent an infinite loop. performHandshake() no longer calls this method for
+            // NEED_UNWRAP — it handles fragmented records directly via pendingTlsData.
+            if (result.status != SSLEngineResult.Status.OK) break
         }
         return receivedHandshakeData.size
     }
