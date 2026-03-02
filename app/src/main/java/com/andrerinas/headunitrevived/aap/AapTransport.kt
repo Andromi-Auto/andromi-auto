@@ -34,13 +34,36 @@ import com.andrerinas.headunitrevived.aap.AapService
 import com.andrerinas.headunitrevived.aap.protocol.proto.Control
 import javax.net.ssl.SSLEngineResult
 
+/**
+ * Core AAP message pump.
+ *
+ * Owns two [HandlerThread]s:
+ * - **Send** (`AapTransport:Handler::Send`) — encrypts and delivers outbound messages.
+ * - **Poll** (`AapTransport:Handler::Poll`) — reads, decrypts, and dispatches inbound messages.
+ *
+ * Lifecycle: [start] → message loop → [stop]/[quit].
+ *
+ * @param audioDecoder Decodes PCM audio received from the phone.
+ * @param videoDecoder Decodes H.264/H.265 video received from the phone.
+ * @param audioManager Used to request and release audio focus.
+ * @param settings User preferences (SSL mode, key mappings, microphone sample rate, …).
+ * @param notification Background notification handle; updated as connection state changes.
+ * @param context Application context; used for broadcasts and system services.
+ * @param externalSsl Optional singleton [AapSslContext] whose internal [javax.net.ssl.SSLContext]
+ *   (and its `ClientSessionContext` session cache) survives across [AapTransport] recreations.
+ *   When provided on the Java-SSL path, JSSE can resume the previous TLS session on reconnect,
+ *   skipping 4–6 round-trips and saving 1–3 s of handshake time. Pass `null` to create a
+ *   fresh [AapSslContext] per transport (no session resumption). Ignored when native SSL is
+ *   active (`settings.useNativeSsl = true`).
+ */
 class AapTransport(
         audioDecoder: AudioDecoder,
         videoDecoder: VideoDecoder,
         audioManager: AudioManager,
         private val settings: Settings,
         private val notification: BackgroundNotification,
-        private val context: Context)
+        private val context: Context,
+        private val externalSsl: AapSslContext? = null)
     : MicRecorder.Listener {
 
     val ssl: AapSsl = if (settings.useNativeSsl) {
@@ -49,11 +72,15 @@ class AapTransport(
             AapSslNative()
         } catch (e: Throwable) {
             AppLog.e("Failed to instantiate Native SSL, falling back to Java SSL", e)
-            AapSslContext(SingleKeyKeyManager(context))
+            // Use the shared context when available so session resumption works on fallback.
+            externalSsl ?: AapSslContext(SingleKeyKeyManager(context))
         }
     } else {
         AppLog.i("Using Java SSL implementation")
-        AapSslContext(SingleKeyKeyManager(context))
+        // externalSsl is the singleton AapSslContext from AppComponent whose SSLContext
+        // (and its ClientSessionContext session cache) survives across transport recreations,
+        // enabling TLS session resumption on reconnect.
+        externalSsl ?: AapSslContext(SingleKeyKeyManager(context))
     }
 
     internal val aapAudio: AapAudio
@@ -214,9 +241,17 @@ class AapTransport(
             var ret = -1
             var attempt = 0
             var received = false
+            // Outer deadline prevents the loop from running for minutes on an unresponsive device.
+            // Each send+recv pair uses 2 s per operation; 3 attempts × 4 s ≈ 12 s worst-case,
+            // capped here at HANDSHAKE_TIMEOUT_MS so a stuck device fails fast.
+            val versionDeadline = SystemClock.elapsedRealtime() + HANDSHAKE_TIMEOUT_MS
             while (attempt < 3 && connection.isConnected) {
+                if (SystemClock.elapsedRealtime() >= versionDeadline) {
+                    AppLog.e("Handshake: Version exchange timed out after $attempt attempt(s).")
+                    return false
+                }
                 attempt++
-                ret = connection.sendBlocking(version, version.size, 5000)
+                ret = connection.sendBlocking(version, version.size, 2000)
                 AppLog.d("Handshake: Version request sent. ret: $ret. attempt: $attempt. TS: ${SystemClock.elapsedRealtime()}")
                 if (ret < 0) {
                     AppLog.w("Handshake: Version request send failed (ret=$ret), attempt $attempt")
@@ -225,7 +260,7 @@ class AapTransport(
                 }
 
                 AppLog.d("Handshake: Waiting for version response. TS: ${SystemClock.elapsedRealtime()}")
-                ret = connection.recvBlocking(buffer, buffer.size, 5000, false)
+                ret = connection.recvBlocking(buffer, buffer.size, 2000, false)
 
                 if (ret > 0) {
                     val hexResponse = StringBuilder()
@@ -364,5 +399,8 @@ class AapTransport(
     companion object {
         private const val MSG_POLL = 1
         private const val MSG_SEND = 2
+        // Maximum wall-clock time allowed for the version-exchange phase of the AAP handshake.
+        // Prevents the retry loop from blocking for minutes on an unresponsive USB device.
+        private const val HANDSHAKE_TIMEOUT_MS = 10_000L
     }
 }

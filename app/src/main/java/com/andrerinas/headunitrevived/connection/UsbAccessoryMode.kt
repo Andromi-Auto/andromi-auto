@@ -48,13 +48,17 @@ class UsbAccessoryMode(private val usbMgr: UsbManager) {
         }
         AppLog.i("acc_ver: $acc_ver")
 
-        // Send all accessory identification strings
-        initStringControlTransfer(connection, ACC_IDX_MAN, MANUFACTURER)
-        initStringControlTransfer(connection, ACC_IDX_MOD, MODEL)
-        initStringControlTransfer(connection, ACC_IDX_DES, DESCRIPTION)
-        initStringControlTransfer(connection, ACC_IDX_VER, VERSION)
-        initStringControlTransfer(connection, ACC_IDX_URI, URI)
-        initStringControlTransfer(connection, ACC_IDX_SER, SERIAL)
+        // Send all accessory identification strings. Abort if any transfer fails — a partial
+        // identification (e.g. manufacturer sent but model missing) can cause the phone to
+        // ignore the ACC_REQ_START or fail to switch into accessory mode.
+        if (!initStringControlTransfer(connection, ACC_IDX_MAN, MANUFACTURER) ||
+            !initStringControlTransfer(connection, ACC_IDX_MOD, MODEL) ||
+            !initStringControlTransfer(connection, ACC_IDX_DES, DESCRIPTION) ||
+            !initStringControlTransfer(connection, ACC_IDX_VER, VERSION) ||
+            !initStringControlTransfer(connection, ACC_IDX_URI, URI) ||
+            !initStringControlTransfer(connection, ACC_IDX_SER, SERIAL)) {
+            return false
+        }
 
         AppLog.i("Sending acc start")
         // Send accessory start request. Device should re-enumerate as an accessory.
@@ -68,12 +72,14 @@ class UsbAccessoryMode(private val usbMgr: UsbManager) {
         return true
     }
 
-    private fun initStringControlTransfer(conn: UsbDeviceConnection, index: Int, string: String) {
+    private fun initStringControlTransfer(conn: UsbDeviceConnection, index: Int, string: String): Boolean {
         val len = conn.controlTransfer(UsbConstants.USB_TYPE_VENDOR, ACC_REQ_SEND_STRING, 0, index, string.toByteArray(), string.length, USB_TIMEOUT_IN_MS)
-        if (len != string.length) {
+        return if (len != string.length) {
             AppLog.e("Error controlTransfer len: $len  index: $index  string: \"$string\"")
+            false
         } else {
             AppLog.i("Success controlTransfer len: $len  index: $index  string: \"$string\"")
+            true
         }
     }
 

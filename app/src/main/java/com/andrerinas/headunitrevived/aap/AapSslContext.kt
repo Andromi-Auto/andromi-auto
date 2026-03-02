@@ -56,11 +56,22 @@ class AapSslContext(keyManager: SingleKeyKeyManager): AapSsl {
                 }
             }
         }
+        // Log the session ID so we can verify resumption in logcat: two consecutive connects
+        // with the same non-empty base-64 value means the abbreviated handshake was used.
+        val sessionId = sslEngine.session?.id
+        if (sessionId != null && sessionId.isNotEmpty()) {
+            AppLog.i("SSL handshake complete. Session id: ${android.util.Base64.encodeToString(sessionId, android.util.Base64.NO_WRAP)}")
+        } else {
+            AppLog.i("SSL handshake complete. No session id (full handshake).")
+        }
         return true
     }
 
     override fun prepare(): Int {
-        sslEngine = sslContext.createSSLEngine().apply {
+        // Use a consistent (host, port) key so JSSE's ClientSessionContext can find and reuse
+        // the session from the previous connection.  The values are arbitrary — they are never
+        // used for DNS resolution; they just serve as the cache lookup key.
+        sslEngine = sslContext.createSSLEngine("android-auto", 5277).apply {
             useClientMode = true
             session.also {
                 val appBufferMax = it.applicationBufferSize
@@ -204,9 +215,8 @@ class AapSslContext(keyManager: SingleKeyKeyManager): AapSsl {
 
             return sslContext.apply {
                 init(arrayOf(keyManager), arrayOf(NoCheckTrustManager()), null)
-                // Disable session caching to prevent stale states across connection attempts
-                clientSessionContext.sessionCacheSize = 0
-                clientSessionContext.sessionTimeout = 1
+                // Keep the default session cache (size 10, timeout 86400 s) so that a
+                // reconnect within the same app session can use an abbreviated handshake.
             }
         }
     }

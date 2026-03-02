@@ -3,9 +3,11 @@ import android.app.Application
 import android.content.Context
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
+import com.andrerinas.headunitrevived.aap.AapSslContext
 import com.andrerinas.headunitrevived.aap.AapTransport
 import com.andrerinas.headunitrevived.utils.AppLog
 import com.andrerinas.headunitrevived.main.BackgroundNotification
+import com.andrerinas.headunitrevived.ssl.SingleKeyKeyManager
 import com.andrerinas.headunitrevived.utils.Settings
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -53,6 +55,11 @@ class CommManager(
     private val audioDecoder: AudioDecoder,
     private val videoDecoder: VideoDecoder) {
 
+    // Single AapSslContext for the lifetime of this CommManager. Its internal SSLContext holds
+    // JSSE's ClientSessionContext session cache, which survives transport recreations and enables
+    // abbreviated TLS handshakes on reconnect (session resumption).
+    private val aapSslContext: AapSslContext = AapSslContext(SingleKeyKeyManager(context))
+
     /**
      * Represents the lifecycle state of the Android Auto connection.
      *
@@ -93,6 +100,13 @@ class CommManager(
     @Volatile private var _transport: AapTransport? = null
     @Volatile private var _connection: AccessoryConnection? = null
 
+    /**
+     * Tracks the most-recently-launched [doDisconnect] coroutine.
+     * [connect] overloads join this job before opening a new connection, ensuring the previous
+     * device is fully closed before `openDevice()` is called on it again.
+     */
+    @Volatile private var _disconnectJob: kotlinx.coroutines.Job? = null
+
     private val _backgroundNotification = BackgroundNotification(context)
 
     /** Public read-only view of [_connectionState]. */
@@ -128,6 +142,15 @@ class CommManager(
      * connection so it can be auto-reconnected on the next launch.
      */
     suspend fun connect(device: UsbDevice) = withContext(Dispatchers.IO) {
+        // Another caller already started the connection — do nothing.
+        if (_connectionState.value is ConnectionState.Connecting)
+            return@withContext
+
+        // Wait for any in-progress cleanup to finish before opening the USB device.
+        // Without this, openDevice() on the same hardware can return null because the previous
+        // UsbDeviceConnection hasn't been close()d yet.
+        _disconnectJob?.join()
+
         try {
             _connectionState.emit(ConnectionState.Connecting)
             _connection?.disconnect()
@@ -153,6 +176,12 @@ class CommManager(
      * sets up the AAP framing layer.
      */
     suspend fun connect(socket: Socket) = withContext(Dispatchers.IO) {
+        // Another caller already started the connection — do nothing.
+        if (_connectionState.value is ConnectionState.Connecting)
+            return@withContext
+
+        _disconnectJob?.join()
+
         try {
             _connectionState.emit(ConnectionState.Connecting)
             _connection?.disconnect()
@@ -176,6 +205,12 @@ class CommManager(
      * Used by the manual IP entry flow and the NSD-discovered device list.
      */
     suspend fun connect(ip: String, port: Int) = withContext(Dispatchers.IO) {
+        // Another caller already started the connection — do nothing.
+        if (_connectionState.value is ConnectionState.Connecting)
+            return@withContext
+
+        _disconnectJob?.join()
+
         try {
             _connectionState.emit(ConnectionState.Connecting)
             _connection?.disconnect()
@@ -208,6 +243,10 @@ class CommManager(
      * stops (read error, phone bye-bye, timeout) and triggers [transportedQuited].
      */
     suspend fun startTransport() = withContext(Dispatchers.IO) {
+        // Another caller already started the handshake — do nothing.
+        if (_connectionState.value is ConnectionState.StartingTransport)
+            return@withContext
+
         try {
             if (_connectionState.value is ConnectionState.Connected)
             {
@@ -215,7 +254,7 @@ class CommManager(
 
                 if (_transport == null) {
                     val audioManager = context.getSystemService(Application.AUDIO_SERVICE) as AudioManager
-                    _transport = AapTransport(audioDecoder, videoDecoder, audioManager, settings, _backgroundNotification, context)
+                    _transport = AapTransport(audioDecoder, videoDecoder, audioManager, settings, _backgroundNotification, context, externalSsl = aapSslContext)
                     _transport!!.onQuit = { isClean -> transportedQuited(isClean) }
                 }
                 if (_transport?.start(_connection!!) == true) {
@@ -226,9 +265,9 @@ class CommManager(
                     )
                     _connectionState.emit(ConnectionState.TransportStarted)
                 }
-            }
-            else
+            } else {
                 _connectionState.emit(ConnectionState.Error("Starting transport without connection"))
+            }
         } catch (e: Exception) {
             _connectionState.emit(ConnectionState.Error("Connection failed: ${e.message}"))
             disconnect()
@@ -246,7 +285,7 @@ class CommManager(
     private fun transportedQuited(isClean: Boolean) {
         _connectionState.value = ConnectionState.Disconnected(isClean)
         // Transport already quit on its own — no ByeByeRequest needed (connection is dead).
-        _scope.launch { doDisconnect(sendByeBye = false) }
+        _disconnectJob = _scope.launch { doDisconnect(sendByeBye = false) }
     }
 
     // -----------------------------------------------------------------------------------------
@@ -316,7 +355,7 @@ class CommManager(
         if (_connectionState.value is ConnectionState.Disconnected) return
 
         _connectionState.value = ConnectionState.Disconnected()
-        _scope.launch { doDisconnect() }
+        _disconnectJob = _scope.launch { doDisconnect() }
     }
 
     /**

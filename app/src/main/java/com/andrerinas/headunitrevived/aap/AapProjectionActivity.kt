@@ -275,7 +275,12 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
                 // Night mode sync is handled by AapService's TransportStarted observer.
                 lifecycleScope.launch {
                     commManager.startTransport()
-                    if (commManager.connectionState.value !is CommManager.ConnectionState.TransportStarted) {
+                    // Accept TransportStarted (we started it) or StartingTransport (AapService
+                    // beat us to it — the race resolved benignly). Any other state means
+                    // something went wrong and we should tear down.
+                    val state = commManager.connectionState.value
+                    if (state !is CommManager.ConnectionState.TransportStarted &&
+                        state !is CommManager.ConnectionState.StartingTransport) {
                         commManager.disconnect()
                     }
                 }
