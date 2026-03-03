@@ -164,6 +164,8 @@
     <string name="usb_stability_timeout">Časový limit stability</string>
     <string name="usb_stability_timeout_description">Počet sekund, po které musí být zařízení připojeno před automatickým připojením nebo opětovným připojením (%d s)</string>
     <string name="usb_device_settling">Čekání na stabilizaci USB zařízení…</string>
+    <string name="max_auto_retry_attempts">Max. počet pokusů o opětovné připojení</string>
+    <string name="max_auto_retry_attempts_description">Počet automatických pokusů o opětovné připojení (%d)</string>
     <string name="video_codec">Video kodek</string>
     <string name="fps_limit">Limit FPS</string>
     <string name="save">Uložit</string>
@@ -251,4 +253,9 @@
     <string name="failed">Selhalo</string>
     <string name="failed_start_android_auto">Spuštění Android Auto selhalo</string>
     <string name="android_auto_starting">Android Auto se spouští…</string>
+    <string name="retry">Opakovat</string>
+    <string name="retry_connection_title">Opakovat připojení</string>
+    <string name="retry_connection_option">Opakovat Android Auto</string>
+    <string name="reset_usb_option">Resetovat USB připojení</string>
+    <string name="reset_usb_timeout">USB zařízení nenalezeno. Zkontrolujte připojení.</string>
 </resources>
