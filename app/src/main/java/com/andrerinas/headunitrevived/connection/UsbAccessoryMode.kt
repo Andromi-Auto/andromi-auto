@@ -74,11 +74,20 @@ class UsbAccessoryMode(private val usbMgr: UsbManager) {
 
     private fun initStringControlTransfer(conn: UsbDeviceConnection, index: Int, string: String): Boolean {
         val len = conn.controlTransfer(UsbConstants.USB_TYPE_VENDOR, ACC_REQ_SEND_STRING, 0, index, string.toByteArray(), string.length, USB_TIMEOUT_IN_MS)
-        return if (len != string.length) {
+        return if (len < 0) {
+            // Negative means the USB transfer itself failed (e.g. device disconnected or
+            // timed out). Abort the switch — ACC_REQ_START would be pointless.
             AppLog.e("Error controlTransfer len: $len  index: $index  string: \"$string\"")
             false
         } else {
-            AppLog.i("Success controlTransfer len: $len  index: $index  string: \"$string\"")
+            // len == string.length is the ideal ACK. Some phones return 0 for a successful
+            // OUT control transfer (they accept the data but report 0 bytes in the data
+            // stage). Treat any non-negative return as success; log a warning if unexpected.
+            if (len != string.length) {
+                AppLog.w("Unexpected controlTransfer len: $len (expected ${string.length})  index: $index  string: \"$string\"")
+            } else {
+                AppLog.i("Success controlTransfer len: $len  index: $index  string: \"$string\"")
+            }
             true
         }
     }

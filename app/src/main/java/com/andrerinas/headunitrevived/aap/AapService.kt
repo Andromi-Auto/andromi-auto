@@ -364,12 +364,17 @@ class AapService : Service(), UsbReceiver.Listener {
                 if (usbManager.hasPermission(device)) {
                     AppLog.i("Found known USB device with permission: ${deviceCompat.uniqueName}. Switching to accessory mode.")
                     val usbMode = UsbAccessoryMode(usbManager)
-                    if (usbMode.connectAndSwitch(device)) {
-                        AppLog.i("Successfully requested switch to accessory mode for ${deviceCompat.uniqueName}")
-                        // The device will detach and re-attach as an accessory,
-                        // triggering UsbAttachedActivity or UsbReceiver again
-                        return
+                    // Run on IO — connectAndSwitch() blocks for 7 × USB_TIMEOUT_IN_MS control
+                    // transfers plus a 500 ms re-enumeration sleep. Keeping this on the main
+                    // thread delayed processing of the subsequent USB attach broadcast.
+                    serviceScope.launch(Dispatchers.IO) {
+                        if (usbMode.connectAndSwitch(device)) {
+                            AppLog.i("Successfully requested switch to accessory mode for ${deviceCompat.uniqueName}")
+                        }
+                        // Device will detach and re-attach as an accessory,
+                        // triggering onUsbAttach → checkAlreadyConnectedUsb → connectUsbWithRetry
                     }
+                    return
                 } else {
                     AppLog.i("Found known USB device but no permission: ${deviceCompat.uniqueName}")
                 }
