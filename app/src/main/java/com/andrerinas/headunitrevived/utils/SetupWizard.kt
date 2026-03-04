@@ -89,6 +89,7 @@ class SetupWizard(private val context: Context, private val onFinished: () -> Un
         val summary = StringBuilder()
         summary.append("${context.getString(R.string.resolution)}: ${Settings.Resolution.fromId(result.recommendedResolutionId)?.resName}\n")
         summary.append("${context.getString(R.string.video_codec)}: ${result.recommendedVideoCodec}\n")
+        summary.append("${context.getString(R.string.view_mode)}: ${result.recommendedViewMode.name}\n")
         summary.append("${context.getString(R.string.dpi)}: ${result.recommendedDpi}\n")
         
         if (result.isWidescreen) {
@@ -113,6 +114,7 @@ class SetupWizard(private val context: Context, private val onFinished: () -> Un
     private fun applySettings(result: SystemOptimizer.OptimizationResult) {
         settings.resolutionId = result.recommendedResolutionId
         settings.videoCodec = result.recommendedVideoCodec
+        settings.viewMode = result.recommendedViewMode
         settings.dpiPixelDensity = result.recommendedDpi
         settings.screenOrientation = result.suggestedOrientation
         settings.hasCompletedSetupWizard = true
