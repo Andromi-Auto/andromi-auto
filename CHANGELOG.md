@@ -3,6 +3,7 @@
 - New Feature: Added **Auto-Optimization Wizard** to automatically find the best Resolution, DPI, and Codec settings for your hardware.
 - Bugfix: Fixed **Self Mode** failing to start in offline/hotspot scenarios (Network ID 0 fix).
 - Bugfix: Improved **Audio Routing**. The phone is now more likely to route audio to the headunit immediately upon connection by using an early-initialized MediaSession with remote playback metadata.
+- Bugfix: Fixed **GPS Speed** calculation. Speeds were previously doubled due to an incorrect unit conversion (knots instead of mm/s).
 - UI: Improved Settings readability on small screens by allowing multi-line descriptions.
 
 ### v.1.15.0
