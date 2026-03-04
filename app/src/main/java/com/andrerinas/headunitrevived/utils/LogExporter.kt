@@ -5,6 +5,7 @@ import android.content.Intent
 import android.util.Log
 import androidx.core.content.FileProvider
 import java.io.File
+import java.io.FileOutputStream
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -20,10 +21,11 @@ object LogExporter {
         ERROR("*:E", Log.ERROR)
     }
 
-    private const val MAX_LOG_FILES = 5
+    private const val MAX_LOG_FILES = 10
     private const val MAX_TOTAL_SIZE = 50L * 1024 * 1024 // 50 MB
 
     private var captureProcess: Process? = null
+    private var captureThread: Thread? = null
     private var captureFile: File? = null
 
     val isCapturing: Boolean get() = captureProcess != null
@@ -65,9 +67,19 @@ object LogExporter {
         captureFile = file
 
         try {
-            captureProcess = Runtime.getRuntime().exec(
-                arrayOf("logcat", "-v", "brief", verbosity.filter, "-f", file.absolutePath)
+            val process = Runtime.getRuntime().exec(
+                arrayOf("logcat", "-v", "threadtime", verbosity.filter)
             )
+            captureProcess = process
+            // On Android 4.4, logcat's -f flag may not write to app-owned paths.
+            // Pipe stdout into the file from a background thread instead.
+            captureThread = Thread {
+                try {
+                    FileOutputStream(file).use { out ->
+                        process.inputStream.copyTo(out)
+                    }
+                } catch (_: IOException) { }
+            }.also { it.isDaemon = true; it.start() }
         } catch (e: IOException) {
             AppLog.e("Failed to start log capture", e)
             captureFile = null
@@ -78,6 +90,8 @@ object LogExporter {
     fun stopCapture() {
         captureProcess?.destroy()
         captureProcess = null
+        captureThread?.join(2000)
+        captureThread = null
     }
 
     /**
@@ -100,9 +114,14 @@ object LogExporter {
             rotateLogs(logDir)
             val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
             val logFile = File(logDir, "HUR_Log_$timeStamp.txt")
-            Runtime.getRuntime().exec(
-                arrayOf("logcat", "-d", "-v", "threadtime", verbosity.filter, "-f", logFile.absolutePath)
-            ).waitFor()
+            // Use stdout piping instead of -f flag; -f is unreliable on Android 4.4.
+            val process = Runtime.getRuntime().exec(
+                arrayOf("logcat", "-d", "-v", "threadtime", verbosity.filter)
+            )
+            FileOutputStream(logFile).use { out ->
+                process.inputStream.copyTo(out)
+            }
+            process.waitFor()
             logFile
         } catch (e: Exception) {
             AppLog.e("Failed to save logs", e)
