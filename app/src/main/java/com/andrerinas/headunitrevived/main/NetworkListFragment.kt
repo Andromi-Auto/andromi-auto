@@ -72,7 +72,7 @@ class NetworkListFragment : Fragment(), NetworkDiscovery.Listener {
             }
         }
 
-        adapter = AddressAdapter(requireContext(), childFragmentManager)
+        adapter = AddressAdapter(requireContext(), childFragmentManager, viewLifecycleOwner.lifecycleScope)
         recyclerView.layoutManager = LinearLayoutManager(context)
         recyclerView.adapter = adapter
         
@@ -268,7 +268,8 @@ class NetworkListFragment : Fragment(), NetworkDiscovery.Listener {
 
     private class AddressAdapter(
         private val context: Context,
-        private val fragmentManager: FragmentManager
+        private val fragmentManager: FragmentManager,
+        private val scope: kotlinx.coroutines.CoroutineScope
     ) : RecyclerView.Adapter<DeviceViewHolder>(), View.OnClickListener {
 
         val addressList = ArrayList<String>()
@@ -319,7 +320,7 @@ class NetworkListFragment : Fragment(), NetworkDiscovery.Listener {
                 ContextCompat.startForegroundService(context, Intent(context, AapService::class.java).apply {
                     action = AapService.ACTION_CONNECT_SOCKET
                 })
-                viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) { App.provide(context).commManager.connect(ip, 5277) }
+                scope.launch(Dispatchers.IO) { App.provide(context).commManager.connect(ip, 5277) }
             } else {
                 this.removeAddress(v.getTag(R.integer.key_data) as String)
             }

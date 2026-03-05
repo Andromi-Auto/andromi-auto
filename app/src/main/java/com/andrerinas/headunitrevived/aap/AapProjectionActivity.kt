@@ -429,23 +429,11 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
     }
 
     private fun showRetryDialog() {
-        val isUsb = settings.lastConnectionType == Settings.CONNECTION_TYPE_USB
-
-        val options = mutableListOf(getString(R.string.retry_connection_option))
-        if (isUsb) {
-            options.add(getString(R.string.reset_usb_option))
-        }
-
         MaterialAlertDialogBuilder(this)
             .setTitle(R.string.retry_connection_title)
-            .setItems(options.toTypedArray()) { _, which ->
-                val action = when (which) {
-                    0 -> AapService.ACTION_RETRY_CONNECTION
-                    1 -> AapService.ACTION_RESET_USB
-                    else -> return@setItems
-                }
+            .setItems(arrayOf(getString(R.string.retry_connection_option))) { _, _ ->
                 val intent = Intent(this, AapService::class.java).apply {
-                    this.action = action
+                    action = AapService.ACTION_CHECK_USB
                 }
                 startService(intent)
                 finish()
