@@ -4,6 +4,7 @@ import android.app.Notification
 import android.app.PendingIntent
 import android.app.Service
 import android.app.UiModeManager
+import android.content.pm.ServiceInfo
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -15,6 +16,7 @@ import android.hardware.usb.UsbManager
 import android.net.ConnectivityManager
 import android.os.Build
 import android.os.IBinder
+import android.os.SystemClock
 import android.os.Parcel
 import android.os.Parcelable
 import android.widget.Toast
@@ -31,6 +33,8 @@ import com.andrerinas.headunitrevived.connection.UsbDeviceCompat
 import com.andrerinas.headunitrevived.connection.UsbReceiver
 import com.andrerinas.headunitrevived.location.GpsLocationService
 import com.andrerinas.headunitrevived.utils.AppLog
+import com.andrerinas.headunitrevived.utils.DeviceIntent
+import com.andrerinas.headunitrevived.utils.LocaleHelper
 import com.andrerinas.headunitrevived.utils.NightModeManager
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -74,6 +78,27 @@ class AapService : Service(), UsbReceiver.Listener {
     private var isDestroying = false
 
     private val commManager get() = App.provide(this).commManager
+
+    private var usbStabilityJob: Job? = null
+    private var stableDeviceName: String? = null
+
+    fun updateMediaSessionState(isPlaying: Boolean) {
+        val state = if (isPlaying) {
+            android.support.v4.media.session.PlaybackStateCompat.STATE_PLAYING
+        } else {
+            android.support.v4.media.session.PlaybackStateCompat.STATE_STOPPED
+        }
+
+        mediaSession?.setPlaybackState(
+            android.support.v4.media.session.PlaybackStateCompat.Builder()
+                .setState(state, 0, 1.0f)
+                .setActions(android.support.v4.media.session.PlaybackStateCompat.ACTION_PLAY or
+                           android.support.v4.media.session.PlaybackStateCompat.ACTION_PAUSE or
+                           android.support.v4.media.session.PlaybackStateCompat.ACTION_STOP)
+                .build()
+        )
+        AppLog.d("MediaSession: State updated to ${if (isPlaying) "PLAYING" else "STOPPED"}")
+    }
 
     // Receives ACTION_REQUEST_NIGHT_MODE_UPDATE broadcasts sent by the key-binding handler
     // when the user presses the night-mode toggle key.
@@ -234,6 +259,10 @@ class AapService : Service(), UsbReceiver.Listener {
         }
     }
 
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(LocaleHelper.wrapContext(newBase))
+    }
+
     private fun registerReceivers() {
         usbReceiver = UsbReceiver(this)
         ContextCompat.registerReceiver(
@@ -348,38 +377,124 @@ class AapService : Service(), UsbReceiver.Listener {
      */
     private fun checkAlreadyConnectedUsb(force: Boolean = false) {
         val settings = App.provide(this).settings
-        if (!force && !settings.autoConnectLastSession) return
+        val lastSession = settings.autoConnectLastSession
+        val singleUsb = settings.autoConnectSingleUsbDevice
+
+        if (!force && !lastSession && !singleUsb) return
         if (commManager.isConnected ||
             commManager.connectionState.value is CommManager.ConnectionState.Connecting) return
 
         val usbManager = getSystemService(Context.USB_SERVICE) as UsbManager
-        for (device in usbManager.deviceList.values) {
-            val deviceCompat = UsbDeviceCompat(device)
+        val deviceList = usbManager.deviceList
+
+        // Check for devices already in accessory mode first
+        for (device in deviceList.values) {
             if (UsbDeviceCompat.isInAccessoryMode(device)) {
-                AppLog.i("Found device already in accessory mode: ${deviceCompat.uniqueName}")
+                AppLog.i("Found device already in accessory mode: ${UsbDeviceCompat(device).uniqueName}")
                 serviceScope.launch { connectUsbWithRetry(device) }
                 return
             }
-            if (settings.isConnectingDevice(deviceCompat)) {
-                if (usbManager.hasPermission(device)) {
-                    AppLog.i("Found known USB device with permission: ${deviceCompat.uniqueName}. Switching to accessory mode.")
-                    val usbMode = UsbAccessoryMode(usbManager)
-                    // Run on IO — connectAndSwitch() blocks for 7 × USB_TIMEOUT_IN_MS control
-                    // transfers plus a 500 ms re-enumeration sleep. Keeping this on the main
-                    // thread delayed processing of the subsequent USB attach broadcast.
-                    serviceScope.launch(Dispatchers.IO) {
-                        if (usbMode.connectAndSwitch(device)) {
-                            AppLog.i("Successfully requested switch to accessory mode for ${deviceCompat.uniqueName}")
+        }
+
+        // Last-session mode: reconnect to a known/allowed device
+        if (lastSession) {
+            for (device in deviceList.values) {
+                val deviceCompat = UsbDeviceCompat(device)
+                if (settings.isConnectingDevice(deviceCompat)) {
+                    if (usbManager.hasPermission(device)) {
+                        AppLog.i("Found known USB device with permission: ${deviceCompat.uniqueName}. Switching to accessory mode.")
+                        val usbMode = UsbAccessoryMode(usbManager)
+                        serviceScope.launch(Dispatchers.IO) {
+                            if (usbMode.connectAndSwitch(device)) {
+                                AppLog.i("Successfully requested switch to accessory mode for ${deviceCompat.uniqueName}")
+                            }
                         }
-                        // Device will detach and re-attach as an accessory,
-                        // triggering onUsbAttach → checkAlreadyConnectedUsb → connectUsbWithRetry
+                        return
+                    } else {
+                        AppLog.i("Found known USB device but no permission: ${deviceCompat.uniqueName}")
                     }
-                    return
-                } else {
-                    AppLog.i("Found known USB device but no permission: ${deviceCompat.uniqueName}")
                 }
             }
         }
+
+        // Single-USB mode: if exactly one non-accessory device is present, connect to it
+        if (singleUsb) {
+            val nonAccessoryDevices = deviceList.values.filter { !UsbDeviceCompat.isInAccessoryMode(it) }
+            if (nonAccessoryDevices.size == 1) {
+                // Skip if stability check is already running for this exact device
+                val deviceName = UsbDeviceCompat(nonAccessoryDevices[0]).uniqueName
+                if (usbStabilityJob != null && stableDeviceName == deviceName) {
+                    AppLog.i("checkAlreadyConnectedUsb: stability check already in progress for $deviceName, skipping")
+                    return
+                }
+                startSingleUsbStabilityCheck(nonAccessoryDevices[0])
+                return
+            } else if (usbStabilityJob != null) {
+                cancelUsbStabilityCheck()
+            }
+        }
+    }
+
+    private fun startSingleUsbStabilityCheck(device: UsbDevice) {
+        val settings = App.provide(this).settings
+        if (!settings.usbStabilityCheck) {
+            performSingleUsbConnect(device)
+            return
+        }
+
+        val deviceName = UsbDeviceCompat(device).uniqueName
+        val timeoutMs = settings.usbStabilityTimeout * 1000L
+
+        stableDeviceName = deviceName
+        usbStabilityJob?.cancel()
+
+        AppLog.i("USB stability: Starting ${settings.usbStabilityTimeout}s timer for $deviceName")
+        Toast.makeText(this, getString(R.string.usb_device_settling), Toast.LENGTH_SHORT).show()
+
+        usbStabilityJob = serviceScope.launch {
+            delay(timeoutMs)
+
+            val usbManager = getSystemService(Context.USB_SERVICE) as UsbManager
+            val stillPresent = usbManager.deviceList.values.any {
+                UsbDeviceCompat(it).uniqueName == deviceName
+            }
+
+            if (stillPresent) {
+                val dev = usbManager.deviceList.values.first {
+                    UsbDeviceCompat(it).uniqueName == deviceName
+                }
+                AppLog.i("USB stability: Device $deviceName stable after ${settings.usbStabilityTimeout}s, connecting")
+                performSingleUsbConnect(dev)
+            } else {
+                AppLog.i("USB stability: Device $deviceName disappeared during wait")
+                cancelUsbStabilityCheck()
+            }
+        }
+    }
+
+    private fun performSingleUsbConnect(device: UsbDevice) {
+        val usbManager = getSystemService(Context.USB_SERVICE) as UsbManager
+        if (usbManager.hasPermission(device)) {
+            val deviceName = UsbDeviceCompat(device).uniqueName
+            AppLog.i("Single USB auto-connect: connecting to $deviceName")
+            val usbMode = UsbAccessoryMode(usbManager)
+            serviceScope.launch(Dispatchers.IO) {
+                if (usbMode.connectAndSwitch(device)) {
+                    AppLog.i("Successfully requested switch to accessory mode for single USB device. Waiting for re-enumeration...")
+                } else {
+                    AppLog.w("Single USB auto-connect: connectAndSwitch failed for $deviceName")
+                }
+            }
+        } else {
+            AppLog.i("Single USB auto-connect: device found but no permission")
+        }
+        cancelUsbStabilityCheck()
+    }
+
+    private fun cancelUsbStabilityCheck() {
+        usbStabilityJob?.cancel()
+        usbStabilityJob = null
+        stableDeviceName = null
     }
 
     // -------------------------------------------------------------------------
@@ -736,6 +851,5 @@ class AapService : Service(), UsbReceiver.Listener {
          * does nothing for this action.
          */
         const val ACTION_CONNECT_SOCKET            = "com.andrerinas.headunitrevived.ACTION_CONNECT_SOCKET"
-
     }
 }

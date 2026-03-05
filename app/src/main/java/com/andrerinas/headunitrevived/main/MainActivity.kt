@@ -20,6 +20,8 @@ import com.andrerinas.headunitrevived.app.BaseActivity
 import androidx.lifecycle.lifecycleScope
 import com.andrerinas.headunitrevived.utils.AppLog
 import com.andrerinas.headunitrevived.utils.Settings
+import com.andrerinas.headunitrevived.utils.SetupWizard
+import com.andrerinas.headunitrevived.utils.SystemUI
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -146,12 +148,14 @@ class MainActivity : BaseActivity() {
     private fun setFullscreen() {
         val root = findViewById<View>(R.id.root)
         val appSettings = Settings(this)
-        com.andrerinas.headunitrevived.utils.SystemUI.apply(window, root, appSettings.startInFullscreenMode)
+        SystemUI.apply(window, root, appSettings.startInFullscreenMode)
     }
 
     override fun onResume() {
         super.onResume()
         setFullscreen()
+
+        checkSetupFlow()
 
         // If an Android Auto session is active, bring the projection activity to front
         if (App.provide(this).commManager.isConnected) {
@@ -161,6 +165,18 @@ class MainActivity : BaseActivity() {
                 addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
             }
             startActivity(aapIntent)
+        }
+    }
+
+    fun checkSetupFlow() {
+        val appSettings = Settings(this)
+        if (!appSettings.hasAcceptedDisclaimer) {
+            SafetyDisclaimerDialog.show(supportFragmentManager)
+        } else if (!appSettings.hasCompletedSetupWizard) {
+            SetupWizard(this) {
+                // Refresh activity after setup
+                recreate()
+            }.start()
         }
     }
 
@@ -188,7 +204,7 @@ class MainActivity : BaseActivity() {
         super.onDestroy()
         if (isFinishing) {
             AppLog.i("MainActivity finishing, resetting auto-start flag.")
-            com.andrerinas.headunitrevived.main.HomeFragment.resetAutoStart()
+            HomeFragment.resetAutoStart()
         }
     }
 

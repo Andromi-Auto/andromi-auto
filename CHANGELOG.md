@@ -1,4 +1,23 @@
 # Changelog
+### v.1.15.1
+- New Feature: Added **Auto-Optimization Wizard** to automatically find the best Resolution, DPI, and Codec settings for your hardware.
+- Bugfix: Fixed **Self Mode** failing to start in offline/hotspot scenarios (Network ID 0 fix).
+- Bugfix: Improved **Audio Routing**. The phone is now more likely to route audio to the headunit immediately upon connection by using an early-initialized MediaSession with remote playback metadata.
+- Bugfix: Fixed **GPS Speed** calculation. Speeds were previously doubled due to an incorrect unit conversion (knots instead of mm/s).
+- UI: Improved Settings readability on small screens by allowing multi-line descriptions.
+
+### v.1.15.0
+- Added arabic language thanks to A5H0
+- Added new intent for setting day/night mode for maps
+- Added new window flags for older devices to finally fix fullscreen issues
+- Added new intents to make the headunit recognize the app as navigation app
+- Added LegacyOptimizer which will handle things directly and faster for single core cpus. Should improve the performance on Android 4.1 - 4.4 Devices
+- Fixed BT Permission Bug
+- Changed the Twilight-Calculator for better switch to day/night on auto mode to prevent to bright display
+- Added more mediasession logic to gain audio focus and audio routing
+- Merged Retry Button on connect screen, thanks to @andrecuellar
+- Merged auto connect usb feature, thanks to @andrecuellar
+
 ### v.1.14.3
 - New Feature: Added **App Shortcuts** for quick Connect/Disconnect. Now compatible with Samsung Modes & Routines.
 - New Feature: Registered HURev as an official system navigation provider (Category: Maps).

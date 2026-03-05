@@ -26,6 +26,8 @@ import com.andrerinas.headunitrevived.main.settings.SettingsAdapter
 import com.andrerinas.headunitrevived.utils.Settings
 import com.andrerinas.headunitrevived.utils.LocaleHelper
 import com.andrerinas.headunitrevived.BuildConfig
+import java.util.Locale
+import androidx.activity.result.contract.ActivityResultContracts
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -36,6 +38,24 @@ class SettingsFragment : Fragment() {
     private lateinit var settingsAdapter: SettingsAdapter
     private lateinit var toolbar: MaterialToolbar
     private var saveButton: MaterialButton? = null
+
+    private val bluetoothPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) {
+            showBluetoothDeviceSelector()
+        } else {
+            showBluetoothPermissionDeniedDialog()
+        }
+    }
+
+    private val bluetoothEnableLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == android.app.Activity.RESULT_OK) {
+            showBluetoothDeviceSelector()
+        }
+    }
 
     // Local state to hold changes before saving
     private var pendingNightMode: Settings.NightMode? = null
@@ -48,7 +68,6 @@ class SettingsFragment : Fragment() {
     private var pendingForceSoftware: Boolean? = null
     private var pendingRightHandDrive: Boolean? = null
     private var pendingWifiConnectionMode: Int? = null
-    private var pendingAutoConnectLastSession: Boolean? = null
     private var pendingVideoCodec: String? = null
     private var pendingFpsLimit: Int? = null
     private var pendingBluetoothAddress: String? = null
@@ -56,7 +75,6 @@ class SettingsFragment : Fragment() {
     private var pendingUseAacAudio: Boolean? = null
     private var pendingMicInputSource: Int? = null
     private var pendingUseNativeSsl: Boolean? = null
-    private var pendingAutoStartSelfMode: Boolean? = null
     private var pendingAutoStartBtName: String? = null
     private var pendingAutoStartBtMac: String? = null
     private var pendingScreenOrientation: Settings.ScreenOrientation? = null
@@ -70,6 +88,10 @@ class SettingsFragment : Fragment() {
     private var pendingInsetTop: Int? = null
     private var pendingInsetRight: Int? = null
     private var pendingInsetBottom: Int? = null
+
+    private var pendingAutoStartOnUsb: Boolean? = null
+    private var pendingUsbStabilityCheck: Boolean? = null
+    private var pendingUsbStabilityTimeout: Int? = null
 
     private var pendingMediaVolumeOffset: Int? = null
     private var pendingAssistantVolumeOffset: Int? = null
@@ -103,7 +125,6 @@ class SettingsFragment : Fragment() {
         pendingForceSoftware = settings.forceSoftwareDecoding
         pendingRightHandDrive = settings.rightHandDrive
         pendingWifiConnectionMode = settings.wifiConnectionMode
-        pendingAutoConnectLastSession = settings.autoConnectLastSession
         pendingVideoCodec = settings.videoCodec
         pendingFpsLimit = settings.fpsLimit
         pendingBluetoothAddress = settings.bluetoothAddress
@@ -111,9 +132,11 @@ class SettingsFragment : Fragment() {
         pendingUseAacAudio = settings.useAacAudio
         pendingMicInputSource = settings.micInputSource
         pendingUseNativeSsl = settings.useNativeSsl
-        pendingAutoStartSelfMode = settings.autoStartSelfMode
         pendingAutoStartBtName = settings.autoStartBluetoothDeviceName
         pendingAutoStartBtMac = settings.autoStartBluetoothDeviceMac
+        pendingAutoStartOnUsb = settings.autoStartOnUsb
+        pendingUsbStabilityCheck = settings.usbStabilityCheck
+        pendingUsbStabilityTimeout = settings.usbStabilityTimeout
         pendingScreenOrientation = settings.screenOrientation
         pendingAppLanguage = settings.appLanguage
         
@@ -214,9 +237,11 @@ class SettingsFragment : Fragment() {
         pendingUseAacAudio?.let { settings.useAacAudio = it }
         pendingMicInputSource?.let { settings.micInputSource = it }
         pendingUseNativeSsl?.let { settings.useNativeSsl = it }
-        pendingAutoStartSelfMode?.let { settings.autoStartSelfMode = it }
         pendingAutoStartBtName?.let { settings.autoStartBluetoothDeviceName = it }
         pendingAutoStartBtMac?.let { settings.autoStartBluetoothDeviceMac = it }
+        pendingAutoStartOnUsb?.let { settings.autoStartOnUsb = it }
+        pendingUsbStabilityCheck?.let { settings.usbStabilityCheck = it }
+        pendingUsbStabilityTimeout?.let { settings.usbStabilityTimeout = it }
         pendingScreenOrientation?.let { settings.screenOrientation = it }
 
         pendingMediaVolumeOffset?.let { settings.mediaVolumeOffset = it }
@@ -237,16 +262,6 @@ class SettingsFragment : Fragment() {
                 action = if (mode == 2) AapService.ACTION_START_WIRELESS else AapService.ACTION_STOP_WIRELESS
             }
             ContextCompat.startForegroundService(requireContext(), intent)
-        }
-
-        pendingAutoConnectLastSession?.let { 
-            settings.autoConnectLastSession = it 
-            if (it) {
-                val intent = Intent(requireContext(), AapService::class.java).apply {
-                    action = AapService.ACTION_CHECK_USB
-                }
-                ContextCompat.startForegroundService(requireContext(), intent)
-            }
         }
 
         // Notify Service about Night Mode changes immediately
@@ -270,8 +285,8 @@ class SettingsFragment : Fragment() {
 
         Toast.makeText(context, getString(R.string.settings_saved), Toast.LENGTH_SHORT).show()
 
-        // Check for Overlay permission if BT Auto-start is configured
-        if (!pendingAutoStartBtMac.isNullOrEmpty() && Build.VERSION.SDK_INT >= 23) {
+        // Check for Overlay permission if BT or USB Auto-start is configured
+        if ((!pendingAutoStartBtMac.isNullOrEmpty() || pendingAutoStartOnUsb == true) && Build.VERSION.SDK_INT >= 23) {
             if (!android.provider.Settings.canDrawOverlays(requireContext())) {
                 MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
                     .setTitle(R.string.overlay_permission_title)
@@ -310,7 +325,6 @@ class SettingsFragment : Fragment() {
                         pendingForceSoftware != settings.forceSoftwareDecoding ||
                         pendingRightHandDrive != settings.rightHandDrive ||
                         pendingWifiConnectionMode != settings.wifiConnectionMode ||
-                        pendingAutoConnectLastSession != settings.autoConnectLastSession ||
                         pendingVideoCodec != settings.videoCodec ||
                         pendingFpsLimit != settings.fpsLimit ||
                         pendingBluetoothAddress != settings.bluetoothAddress ||
@@ -318,8 +332,10 @@ class SettingsFragment : Fragment() {
                         pendingUseAacAudio != settings.useAacAudio ||
                         pendingMicInputSource != settings.micInputSource ||
                         pendingUseNativeSsl != settings.useNativeSsl ||
-                        pendingAutoStartSelfMode != settings.autoStartSelfMode ||
                         pendingAutoStartBtMac != settings.autoStartBluetoothDeviceMac ||
+                        pendingAutoStartOnUsb != settings.autoStartOnUsb ||
+                        pendingUsbStabilityCheck != settings.usbStabilityCheck ||
+                        pendingUsbStabilityTimeout != settings.usbStabilityTimeout ||
                         pendingScreenOrientation != settings.screenOrientation ||
                         pendingAppLanguage != settings.appLanguage ||
                         pendingInsetLeft != settings.insetLeft ||
@@ -355,6 +371,18 @@ class SettingsFragment : Fragment() {
 
         // --- General Settings ---
         items.add(SettingItem.CategoryHeader("general", R.string.category_general))
+
+        // Auto-Optimize Wizard
+        items.add(SettingItem.SettingEntry(
+            stableId = "autoOptimize",
+            nameResId = R.string.auto_optimize,
+            value = getString(R.string.auto_optimize_desc),
+            onClick = { _ ->
+                com.andrerinas.headunitrevived.utils.SetupWizard(requireContext()) {
+                    requireActivity().recreate()
+                }.start()
+            }
+        ))
 
         // Language Selector
         val availableLocales = LocaleHelper.getAvailableLocales(requireContext())
@@ -430,29 +458,20 @@ class SettingsFragment : Fragment() {
                 nameResId = R.string.night_mode_threshold,
                 value = "$currentValue $unit",
                 onClick = { _ ->
-                    val editView = EditText(requireContext())
-                    editView.inputType = InputType.TYPE_CLASS_NUMBER
-                    editView.setText(currentValue.toString())
-                    
-                    MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
-                        .setTitle(R.string.enter_threshold_value)
-                        .setMessage(desc)
-                        .setView(editView)
-                        .setPositiveButton(android.R.string.ok) { dialog, _ ->
-                            val newVal = editView.text.toString().toIntOrNull()
-                            if (newVal != null && newVal >= 0) {
-                                if (isSensor) {
-                                    pendingThresholdLux = newVal
-                                } else {
-                                    pendingThresholdBrightness = newVal
-                                }
-                                checkChanges()
-                                updateSettingsList()
+                    showNumericInputDialog(
+                        title = getString(R.string.enter_threshold_value),
+                        message = desc,
+                        initialValue = currentValue ?: 0,
+                        onConfirm = { newVal ->
+                            if (isSensor) {
+                                pendingThresholdLux = newVal
+                            } else {
+                                pendingThresholdBrightness = newVal
                             }
-                            dialog.dismiss()
+                            checkChanges()
+                            updateSettingsList()
                         }
-                        .setNegativeButton(android.R.string.cancel, null)
-                        .show()
+                    )
                 }
             ))
         }
@@ -542,18 +561,6 @@ class SettingsFragment : Fragment() {
             }
         ))
 
-        items.add(SettingItem.ToggleSettingEntry(
-            stableId = "autoStartSelfMode",
-            nameResId = R.string.auto_start_self_mode,
-            descriptionResId = R.string.auto_start_self_mode_description,
-            isChecked = pendingAutoStartSelfMode!!,
-            onCheckedChanged = { isChecked ->
-                pendingAutoStartSelfMode = isChecked
-                checkChanges()
-                updateSettingsList()
-            }
-        ))
-
         items.add(SettingItem.SettingEntry(
             stableId = "autoStartBt",
             nameResId = R.string.auto_start_bt_label,
@@ -564,16 +571,73 @@ class SettingsFragment : Fragment() {
         ))
 
         items.add(SettingItem.ToggleSettingEntry(
-            stableId = "autoConnectLastSession",
-            nameResId = R.string.auto_connect_last_session,
-            descriptionResId = R.string.auto_connect_last_session_description,
-            isChecked = pendingAutoConnectLastSession!!,
+            stableId = "autoStartUsb",
+            nameResId = R.string.auto_start_usb_label,
+            descriptionResId = R.string.auto_start_usb_description,
+            isChecked = pendingAutoStartOnUsb!!,
             onCheckedChanged = { isChecked ->
-                pendingAutoConnectLastSession = isChecked
+                pendingAutoStartOnUsb = isChecked
                 checkChanges()
                 updateSettingsList()
             }
         ))
+
+        items.add(SettingItem.SettingEntry(
+            stableId = "autoConnectSettings",
+            nameResId = R.string.auto_connect_settings,
+            value = getAutoConnectSummary(),
+            onClick = {
+                try {
+                    findNavController().navigate(R.id.action_settingsFragment_to_autoConnectFragment)
+                } catch (e: Exception) {
+                    // Failover
+                }
+            }
+        ))
+
+        items.add(SettingItem.ToggleSettingEntry(
+            stableId = "usbStabilityCheck",
+            nameResId = R.string.usb_stability_check,
+            descriptionResId = R.string.usb_stability_check_description,
+            isChecked = pendingUsbStabilityCheck!!,
+            onCheckedChanged = { isChecked ->
+                if (isChecked) {
+                    pendingUsbStabilityCheck = true
+                    updateSettingsList()
+                    showExperimentalWarning(
+                        onConfirm = {
+                            checkChanges()
+                        },
+                        onCancel = {
+                            pendingUsbStabilityCheck = false
+                            checkChanges()
+                            updateSettingsList()
+                        }
+                    )
+                } else {
+                    pendingUsbStabilityCheck = false
+                    checkChanges()
+                    updateSettingsList()
+                }
+            }
+        ))
+
+        if (pendingUsbStabilityCheck == true) {
+            items.add(SettingItem.SliderSettingEntry(
+                stableId = "usbStabilityTimeout",
+                nameResId = R.string.usb_stability_timeout,
+                value = getString(R.string.usb_stability_timeout_description, pendingUsbStabilityTimeout!!),
+                sliderValue = pendingUsbStabilityTimeout!!.toFloat(),
+                valueFrom = 3f,
+                valueTo = 50f,
+                stepSize = 1f,
+                onValueChanged = { value ->
+                    pendingUsbStabilityTimeout = value.toInt()
+                    checkChanges()
+                    updateSettingsList()
+                }
+            ))
+        }
 
         // --- Graphic Settings ---
         items.add(SettingItem.CategoryHeader("graphic", R.string.category_graphic))
@@ -600,30 +664,16 @@ class SettingsFragment : Fragment() {
             nameResId = R.string.dpi,
             value = if (pendingDpi == 0) getString(R.string.auto) else pendingDpi.toString(),
             onClick = { _ ->
-                val editView = EditText(requireContext())
-                editView.inputType = InputType.TYPE_CLASS_NUMBER
-                if (pendingDpi != 0) {
-                    editView.setText(pendingDpi.toString())
-                }
-
-                AlertDialog.Builder(requireContext())
-                    .setTitle(R.string.enter_dpi_value)
-                    .setView(editView)
-                    .setPositiveButton(android.R.string.ok) { dialog, _ ->
-                        val inputText = editView.text.toString().trim()
-                        val newDpi = inputText.toIntOrNull()
-                        if (newDpi != null && newDpi >= 0) {
-                            pendingDpi = newDpi
-                        } else {
-                            pendingDpi = 0
-                        }
+                showNumericInputDialog(
+                    title = getString(R.string.enter_dpi_value),
+                    message = null,
+                    initialValue = pendingDpi ?: 0,
+                    onConfirm = { newVal ->
+                        pendingDpi = newVal
                         checkChanges()
-                        dialog.dismiss()
                         updateSettingsList()
                     }
-                                    .setNegativeButton(R.string.cancel) { dialog, _ ->
-                                        dialog.cancel()
-                                    }                    .show()
+                )
             }
         ))
 
@@ -1084,12 +1134,19 @@ class SettingsFragment : Fragment() {
 
     private fun showBluetoothDeviceSelector() {
         if (Build.VERSION.SDK_INT >= 31 && ContextCompat.checkSelfPermission(requireContext(), android.Manifest.permission.BLUETOOTH_CONNECT) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(arrayOf(android.Manifest.permission.BLUETOOTH_CONNECT), BT_CONNECT_PERMISSION_CODE)
+            bluetoothPermissionLauncher.launch(android.Manifest.permission.BLUETOOTH_CONNECT)
             return
         }
 
         val bluetoothManager = requireContext().getSystemService(Context.BLUETOOTH_SERVICE) as android.bluetooth.BluetoothManager
         val adapter = bluetoothManager.adapter
+
+        if (adapter == null || !adapter.isEnabled) {
+            val enableIntent = Intent(android.bluetooth.BluetoothAdapter.ACTION_REQUEST_ENABLE)
+            bluetoothEnableLauncher.launch(enableIntent)
+            return
+        }
+
         val bondedDevices = adapter.bondedDevices.toList()
 
         if (bondedDevices.isEmpty()) {
@@ -1118,18 +1175,106 @@ class SettingsFragment : Fragment() {
             .show()
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        if (requestCode == BT_CONNECT_PERMISSION_CODE) {
-            if (grantResults.isNotEmpty() && grantResults[0] == android.content.pm.PackageManager.PERMISSION_GRANTED) {
-                showBluetoothDeviceSelector()
-            } else {
-                Toast.makeText(requireContext(), "Bluetooth permission denied", Toast.LENGTH_SHORT).show()
-            }
+    override fun onResume() {
+        super.onResume()
+        // Refresh settings list when returning from sub-screens (e.g. AutoConnectFragment)
+        if (::settingsAdapter.isInitialized) {
+            // Re-read settings in case they changed in a sub-screen
+            settings = App.provide(requireContext()).settings
+            updateSettingsList()
         }
     }
 
+    private fun getAutoConnectSummary(): String {
+        val order = settings.autoConnectPriorityOrder
+        val enabledNames = order.mapNotNull { id ->
+            val isEnabled = when (id) {
+                Settings.AUTO_CONNECT_LAST_SESSION -> settings.autoConnectLastSession
+                Settings.AUTO_CONNECT_SELF_MODE -> settings.autoStartSelfMode
+                Settings.AUTO_CONNECT_SINGLE_USB -> settings.autoConnectSingleUsbDevice
+                else -> false
+            }
+            if (isEnabled) {
+                when (id) {
+                    Settings.AUTO_CONNECT_LAST_SESSION -> getString(R.string.auto_connect_last_session)
+                    Settings.AUTO_CONNECT_SELF_MODE -> getString(R.string.auto_start_self_mode)
+                    Settings.AUTO_CONNECT_SINGLE_USB -> getString(R.string.auto_connect_single_usb)
+                    else -> null
+                }
+            } else null
+        }
+        return if (enabledNames.isEmpty()) {
+            getString(R.string.auto_connect_all_disabled)
+        } else {
+            enabledNames.joinToString(" → ")
+        }
+    }
+
+    private fun showBluetoothPermissionDeniedDialog() {
+        MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
+            .setTitle(R.string.bt_permission_denied_title)
+            .setMessage(R.string.bt_permission_denied_message)
+            .setPositiveButton(R.string.open_settings) { _, _ ->
+                val intent = Intent(
+                    android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                    android.net.Uri.parse("package:${requireContext().packageName}")
+                )
+                startActivity(intent)
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
+    }
+
+    private fun showExperimentalWarning(onConfirm: () -> Unit, onCancel: () -> Unit) {
+        val message = getString(R.string.experimental_feature_message) + "\n\n" +
+            getString(R.string.experimental_feature_usb_hint)
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.experimental_feature_title)
+            .setMessage(message)
+            .setPositiveButton(R.string.enable) { _, _ -> onConfirm() }
+            .setNegativeButton(R.string.cancel) { _, _ -> onCancel() }
+            .setOnCancelListener { onCancel() }
+            .show()
+    }
+
+    private fun showNumericInputDialog(
+        title: String,
+        message: String?,
+        initialValue: Int,
+        onConfirm: (Int) -> Unit
+    ) {
+        val context = requireContext()
+        val editView = EditText(context).apply {
+            inputType = InputType.TYPE_CLASS_NUMBER
+            setText(if (initialValue == 0 && title.contains("DPI", true)) "" else initialValue.toString())
+        }
+
+        // Use a container to add padding around the EditText
+        val container = android.widget.FrameLayout(context)
+        val params = android.widget.FrameLayout.LayoutParams(
+            android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
+            android.widget.FrameLayout.LayoutParams.WRAP_CONTENT
+        )
+        val margin = (24 * context.resources.displayMetrics.density).toInt()
+        params.setMargins(margin, 8, margin, 8)
+        container.addView(editView, params)
+
+        MaterialAlertDialogBuilder(context, R.style.DarkAlertDialog)
+            .setTitle(title)
+            .apply { if (message != null) setMessage(message) }
+            .setView(container)
+            .setPositiveButton(android.R.string.ok) { dialog, _ ->
+                val newVal = (editView.text.toString().toIntOrNull() ?: 0).coerceAtLeast(0)
+                onConfirm(newVal)
+                dialog.dismiss()
+            }
+            .setNegativeButton(android.R.string.cancel) { dialog, _ ->
+                dialog.cancel()
+            }
+            .show()
+    }
+
     companion object {
-        private const val BT_CONNECT_PERMISSION_CODE = 101
         private val SAVE_ITEM_ID = 1001
     }
 }

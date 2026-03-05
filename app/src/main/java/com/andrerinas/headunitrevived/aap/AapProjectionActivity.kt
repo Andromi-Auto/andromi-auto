@@ -10,6 +10,7 @@ import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.TextureView
 import android.view.View
+import android.widget.Button
 import android.widget.FrameLayout
 import androidx.activity.enableEdgeToEdge
 import androidx.core.content.ContextCompat
@@ -36,6 +37,7 @@ import com.andrerinas.headunitrevived.utils.Settings
 import com.andrerinas.headunitrevived.view.OverlayTouchView
 import com.andrerinas.headunitrevived.utils.HeadUnitScreenConfig
 import com.andrerinas.headunitrevived.utils.SystemUI
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, VideoDimensionsListener {
 
@@ -59,6 +61,13 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         if (!isSurfaceSet) {
             AppLog.w("Watchdog: Surface not set after 2s. Checking view state...")
             checkAndForceSurface()
+        }
+    }
+    private var retryButton: Button? = null
+    private val retryTimerRunnable = Runnable {
+        val loadingOverlay = findViewById<View>(R.id.loading_overlay)
+        if (loadingOverlay?.visibility == View.VISIBLE) {
+            retryButton?.visibility = View.VISIBLE
         }
     }
 
@@ -106,7 +115,9 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            enableEdgeToEdge()
+        }
         super.onCreate(savedInstanceState)
 
         val screenOrientation = settings.screenOrientation
@@ -212,9 +223,15 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         // Ensure loading overlay is on top of everything
         loadingOverlay?.bringToFront()
         
+        retryButton = findViewById(R.id.retry_button)
+        retryButton?.setOnClickListener { showRetryDialog() }
+        watchdogHandler.postDelayed(retryTimerRunnable, RETRY_DELAY_MS)
+
         videoDecoder.onFirstFrameListener = {
             runOnUiThread {
                 loadingOverlay?.visibility = View.GONE
+                retryButton?.visibility = View.GONE
+                watchdogHandler.removeCallbacks(retryTimerRunnable)
             }
         }
     }
@@ -224,6 +241,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         super.onPause()
         watchdogHandler.removeCallbacks(watchdogRunnable)
         watchdogHandler.removeCallbacks(videoWatchdogRunnable)
+        watchdogHandler.removeCallbacks(retryTimerRunnable)
         unregisterReceiver(keyCodeReceiver)
     }
 
@@ -232,6 +250,11 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         super.onResume()
         watchdogHandler.postDelayed(watchdogRunnable, 2000)
         watchdogHandler.postDelayed(videoWatchdogRunnable, 3000)
+
+        val loadingOverlay = findViewById<View>(R.id.loading_overlay)
+        if (loadingOverlay?.visibility == View.VISIBLE && retryButton?.visibility != View.VISIBLE) {
+            watchdogHandler.postDelayed(retryTimerRunnable, RETRY_DELAY_MS)
+        }
         
         // Register key event receiver safely for Android 14+
         ContextCompat.registerReceiver(this, keyCodeReceiver, IntentFilters.keyEvent, ContextCompat.RECEIVER_NOT_EXPORTED)
@@ -256,6 +279,11 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
 
     private fun setFullscreen() {
         val container = findViewById<View>(R.id.container)
+        
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT && settings.startInFullscreenMode) {
+            window.addFlags(android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN)
+        }
+
         SystemUI.apply(window, container, settings.startInFullscreenMode)
 
         // Workaround for API < 19 (Jelly Bean) where Sticky Immersive Mode doesn't exist.
@@ -345,6 +373,11 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         val horizontalCorrection = HeadUnitScreenConfig.getHorizontalCorrection()
         val verticalCorrection = HeadUnitScreenConfig.getVerticalCorrection()
 
+        if (horizontalCorrection <= 0 || verticalCorrection <= 0) {
+            AppLog.w("sendTouchEvent: Ignoring touch, screen config not ready yet.")
+            return
+        }
+
         val pointerData = mutableListOf<Triple<Int, Int, Int>>()
         repeat(event.pointerCount) { pointerIndex ->
             val pointerId = event.getPointerId(pointerIndex)
@@ -376,6 +409,14 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         return true
     }
 
+    override fun dispatchTouchEvent(event: MotionEvent): Boolean {
+        // On older devices (API < 19), the system often consumes the first touch 
+        // to show system bars. By handling it here, we ensure it's sent to AA.
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
+            sendTouchEvent(event)
+        }
+        return super.dispatchTouchEvent(event)
+    }
 
     private fun onKeyEvent(keyCode: Int, isPress: Boolean) {
         commManager.send(keyCode, isPress)
@@ -387,8 +428,35 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         videoDecoder.dimensionsListener = null
     }
 
+    private fun showRetryDialog() {
+        val isUsb = settings.lastConnectionType == Settings.CONNECTION_TYPE_USB
+
+        val options = mutableListOf(getString(R.string.retry_connection_option))
+        if (isUsb) {
+            options.add(getString(R.string.reset_usb_option))
+        }
+
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.retry_connection_title)
+            .setItems(options.toTypedArray()) { _, which ->
+                val action = when (which) {
+                    0 -> AapService.ACTION_RETRY_CONNECTION
+                    1 -> AapService.ACTION_RESET_USB
+                    else -> return@setItems
+                }
+                val intent = Intent(this, AapService::class.java).apply {
+                    this.action = action
+                }
+                startService(intent)
+                finish()
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
+    }
+
     companion object {
         const val EXTRA_FOCUS = "focus"
+        private const val RETRY_DELAY_MS = 10_000L
 
         fun intent(context: Context): Intent {
             val aapIntent = Intent(context, AapProjectionActivity::class.java)
