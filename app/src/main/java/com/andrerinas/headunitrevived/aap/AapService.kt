@@ -364,7 +364,27 @@ class AapService : Service(), UsbReceiver.Listener {
         }
     }
 
-    override fun onUsbPermission(granted: Boolean, connect: Boolean, device: UsbDevice) {}
+    override fun onUsbPermission(granted: Boolean, connect: Boolean, device: UsbDevice) {
+        val deviceName = UsbDeviceCompat(device).uniqueName
+        if (granted) {
+            AppLog.i("USB permission granted for $deviceName")
+            if (UsbDeviceCompat.isInAccessoryMode(device)) {
+                serviceScope.launch { connectUsbWithRetry(device) }
+            } else {
+                val usbManager = getSystemService(Context.USB_SERVICE) as UsbManager
+                val usbMode = UsbAccessoryMode(usbManager)
+                serviceScope.launch(Dispatchers.IO) {
+                    if (usbMode.connectAndSwitch(device)) {
+                        AppLog.i("Successfully requested switch to accessory mode for $deviceName")
+                    } else {
+                        AppLog.w("USB permission granted but connectAndSwitch failed for $deviceName")
+                    }
+                }
+            }
+        } else {
+            AppLog.w("USB permission denied for $deviceName")
+        }
+    }
 
     /**
      * Scans currently connected USB devices and connects to any that are already in
@@ -411,7 +431,9 @@ class AapService : Service(), UsbReceiver.Listener {
                         }
                         return
                     } else {
-                        AppLog.i("Found known USB device but no permission: ${deviceCompat.uniqueName}")
+                        AppLog.i("Found known USB device but no permission: ${deviceCompat.uniqueName}, requesting...")
+                        requestUsbPermission(device)
+                        return
                     }
                 }
             }
@@ -486,7 +508,8 @@ class AapService : Service(), UsbReceiver.Listener {
                 }
             }
         } else {
-            AppLog.i("Single USB auto-connect: device found but no permission")
+            AppLog.i("Single USB auto-connect: device found but no permission, requesting...")
+            requestUsbPermission(device)
         }
         cancelUsbStabilityCheck()
     }
@@ -495,6 +518,26 @@ class AapService : Service(), UsbReceiver.Listener {
         usbStabilityJob?.cancel()
         usbStabilityJob = null
         stableDeviceName = null
+    }
+
+    /**
+     * Requests USB host permission for [device] via the Android system dialog.
+     * The result is delivered asynchronously to [onUsbPermission] via [UsbReceiver].
+     */
+    private fun requestUsbPermission(device: UsbDevice) {
+        val usbManager = getSystemService(Context.USB_SERVICE) as UsbManager
+        val permissionIntent = PendingIntent.getBroadcast(
+            this, 0,
+            Intent(UsbReceiver.ACTION_USB_DEVICE_PERMISSION).apply {
+                setPackage(packageName)
+            },
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
+            else PendingIntent.FLAG_UPDATE_CURRENT
+        )
+        AppLog.i("Requesting USB permission for ${UsbDeviceCompat(device).uniqueName}")
+        Toast.makeText(this, getString(R.string.requesting_usb_permission), Toast.LENGTH_SHORT).show()
+        usbManager.requestPermission(device, permissionIntent)
     }
 
     // -------------------------------------------------------------------------
