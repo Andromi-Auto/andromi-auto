@@ -363,7 +363,43 @@ class AapService : Service(), UsbReceiver.Listener {
         }
     }
 
-    override fun onUsbPermission(granted: Boolean, connect: Boolean, device: UsbDevice) {}
+    override fun onUsbPermission(granted: Boolean, connect: Boolean, device: UsbDevice) {
+        val deviceName = UsbDeviceCompat(device).uniqueName
+        if (granted) {
+            AppLog.i("USB permission granted for $deviceName")
+            if (UsbDeviceCompat.isInAccessoryMode(device)) {
+                serviceScope.launch { connectUsbWithRetry(device) }
+            } else {
+                val usbManager = getSystemService(Context.USB_SERVICE) as UsbManager
+                val usbMode = UsbAccessoryMode(usbManager)
+                serviceScope.launch(Dispatchers.IO) {
+                    if (usbMode.connectAndSwitch(device)) {
+                        AppLog.i("Successfully requested switch to accessory mode for $deviceName")
+                    } else {
+                        AppLog.w("USB permission granted but connectAndSwitch failed for $deviceName")
+                    }
+                }
+            }
+        } else {
+            AppLog.w("USB permission denied for $deviceName")
+        }
+    }
+
+    private fun requestUsbPermission(device: UsbDevice) {
+        val usbManager = getSystemService(Context.USB_SERVICE) as UsbManager
+        val permissionIntent = PendingIntent.getBroadcast(
+            this, 0,
+            Intent(UsbReceiver.ACTION_USB_DEVICE_PERMISSION).apply {
+                setPackage(packageName)
+            },
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
+            else PendingIntent.FLAG_UPDATE_CURRENT
+        )
+        AppLog.i("Requesting USB permission for ${UsbDeviceCompat(device).uniqueName}")
+        Toast.makeText(this, getString(R.string.requesting_usb_permission), Toast.LENGTH_SHORT).show()
+        usbManager.requestPermission(device, permissionIntent)
+    }
 
     /**
      * Called when a handshake fails. If an accessory-mode device is still present,
@@ -440,6 +476,8 @@ class AapService : Service(), UsbReceiver.Listener {
                         serviceScope.launch(Dispatchers.IO) {
                             if (usbMode.connectAndSwitch(device)) {
                                 AppLog.i("Successfully requested switch to accessory mode for ${deviceCompat.uniqueName}")
+                            } else {
+                                AppLog.w("connectAndSwitch failed for ${deviceCompat.uniqueName}")
                             }
                         }
                         return

@@ -94,8 +94,15 @@ class UsbAttachedActivity : Activity() {
         // Run the USB control transfers on a background thread — they block for several
         // hundred ms and must not execute on the main thread (ANR risk).
         Thread {
-            usbMode.connectAndSwitch(device)
-            runOnUiThread { finish() }
+            val result = usbMode.connectAndSwitch(device)
+            runOnUiThread {
+                if (result) {
+                    Toast.makeText(this, getString(R.string.success), Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this, getString(R.string.failed), Toast.LENGTH_SHORT).show()
+                }
+                finish()
+            }
         }.start()
     }
 
