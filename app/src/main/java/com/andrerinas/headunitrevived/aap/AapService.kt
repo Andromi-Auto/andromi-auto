@@ -308,7 +308,7 @@ class AapService : Service(), UsbReceiver.Listener {
             Intent(UsbReceiver.ACTION_USB_DEVICE_PERMISSION).apply {
                 setPackage(packageName)
             },
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
             else PendingIntent.FLAG_UPDATE_CURRENT
         )
