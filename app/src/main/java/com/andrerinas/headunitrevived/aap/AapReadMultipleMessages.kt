@@ -28,10 +28,15 @@ internal class AapReadMultipleMessages(
         }
 
         if (size < 0) {
-            // USB error (distinct from a timeout which returns 0). The stream may be
-            // corrupted — discard any partial data accumulated in the FIFO so the
-            // parser re-syncs cleanly on the next successful read.
+            // USB read failure — discard any partial data accumulated in the FIFO
+            // so the parser re-syncs cleanly on the next successful read.
             fifo.clear()
+            // If the connection is dead (e.g. resetInterface failed to re-claim),
+            // signal the transport to quit instead of spinning on a broken connection.
+            if (!connection.isConnected) {
+                AppLog.e("AapRead: Connection lost. Stopping read loop.")
+                return -1
+            }
             return 0
         }
         if (size == 0) return 0

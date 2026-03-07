@@ -141,7 +141,8 @@ class UsbAccessoryConnection(private val usbMgr: UsbManager, private val device:
                     internalBufferAvailable = 0
                     initEndpoint()
                 } else {
-                    AppLog.e("Failed to re-claim USB interface")
+                    AppLog.e("Failed to re-claim USB interface — disconnecting")
+                    disconnect()
                 }
             } catch (e: Exception) {
                 AppLog.e("Error during USB reset: ${e.message}")
@@ -189,7 +190,7 @@ class UsbAccessoryConnection(private val usbMgr: UsbManager, private val device:
 
     // consecutiveReadErrors is only accessed by the poll thread; no lock needed.
     private var consecutiveReadErrors = 0
-    private val maxConsecutiveErrorsBeforeReset = 3
+    private val maxConsecutiveErrorsBeforeReset = 10
 
     // Volatile reads capture the latest connection/endpoint references; bulkTransfer runs
     // entirely outside any lock. If disconnect() calls close() concurrently, bulkTransfer
