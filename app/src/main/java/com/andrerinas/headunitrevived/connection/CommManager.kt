@@ -324,7 +324,6 @@ class CommManager(
      * connection is already dead — there is no point sending a `ByeByeRequest`.
      */
     private fun transportedQuited(isClean: Boolean) {
-        AppLog.i("[DEBUG] CommManager: transportedQuited called. isClean=$isClean")
         _connectionState.value = ConnectionState.Disconnected(isClean)
         // Transport already quit on its own — no ByeByeRequest needed (connection is dead).
         _disconnectJob = _scope.launch { doDisconnect(sendByeBye = false) }
