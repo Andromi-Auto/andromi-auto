@@ -105,10 +105,12 @@ internal class AapControlMedia(
     }
 
     private fun mediaSinkStopRequest(channel: Int): Int {
-        AppLog.i("Media Sink Stop Request: " + Channel.name(channel))
+        AppLog.i("[DEBUG] Media Sink Stop Request on Channel: ${Channel.name(channel)}")
         if (Channel.isAudio(channel)) {
             aapAudio.stopAudio(channel)
         } else if (channel == Channel.ID_VID) {
+            AppLog.i("[DEBUG] Video Stop info: ignoreNextStopRequest=${aapTransport.ignoreNextStopRequest}, isQuittingAllowed=${aapTransport.isQuittingAllowed}")
+            
             if (aapTransport.ignoreNextStopRequest) {
                 AppLog.i("Video Sink Stopped -> Ignored (Forced Keyframe Request)")
                 aapTransport.ignoreNextStopRequest = false
@@ -116,10 +118,10 @@ internal class AapControlMedia(
             }
 
             if (aapTransport.isQuittingAllowed) {
-                AppLog.i("Video Sink Stopped -> Quitting")
+                AppLog.i("Video Sink Stopped -> Quitting session via aapTransport.stop()")
                 aapTransport.stop()
             } else {
-                AppLog.i("Video Sink Stopped -> Ignored (Background)")
+                AppLog.i("Video Sink Stopped -> Ignored because isQuittingAllowed is false. AA might still be in foreground.")
             }
         }
         return 0

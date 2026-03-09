@@ -262,6 +262,12 @@ class AapService : Service(), UsbReceiver.Listener {
      * disconnect) produce `isClean = false`.
      */
     private fun scheduleReconnectIfNeeded(state: CommManager.ConnectionState.Disconnected) {
+        if (selfMode) {
+            AppLog.i("AapService: Self Mode disconnected. Not restarting.")
+            selfMode = false
+            return
+        }
+
         if (wirelessServer != null) {
             AppLog.i("AapService: Disconnected. Restarting discovery loop in 2s...")
             serviceScope.launch {
@@ -755,6 +761,7 @@ class AapService : Service(), UsbReceiver.Listener {
      * relevant Android classes have no public constructors.
      */
     private fun startSelfMode() {
+        selfMode = true
         startWirelessServer()
 
         val connectivityManager = getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
