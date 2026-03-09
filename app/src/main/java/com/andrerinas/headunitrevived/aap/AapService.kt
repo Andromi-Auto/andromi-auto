@@ -776,41 +776,20 @@ class AapService : Service(), UsbReceiver.Listener {
         }
 
         try {
-            AppLog.i("Launching AA Wireless Startup (Legacy Activity)...")
+            AppLog.i("Launching AA Wireless Startup...")
             startActivity(magicalIntent)
         } catch (e: android.content.ActivityNotFoundException) {
-            AppLog.w("Legacy WirelessStartupActivity not found (AA 16.4+). Trying WirelessStartupReceiver via Broadcast...")
-            
+            AppLog.w("Legacy activity not found. Trying minimal broadcast fallback for AA 16.4+.")
             val receiverIntent = Intent().apply {
                 setClassName(
                     "com.google.android.projection.gearhead",
                     "com.google.android.apps.auto.wireless.setup.receiver.WirelessStartupReceiver"
                 )
                 action = "com.google.android.apps.auto.wireless.setup.receiver.wirelessstartup.START"
-                
-                // Provide both legacy and modern parameter names to be sure
-                putExtra("PARAM_HOST_ADDRESS", "127.0.0.1")
-                putExtra("PARAM_SERVICE_PORT", 5288)
-                putExtra("wifi_host_address", "127.0.0.1")
-                putExtra("wifi_port", 5288)
-                
-                networkToUse?.let { 
-                    putExtra("PARAM_SERVICE_WIFI_NETWORK", it)
-                    putExtra("wifi_network", it)
-                }
-                fakeWifiInfo?.let { putExtra("wifi_info", it) }
-                
-                // Add common flags for broadcasts
-                addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
+                putExtra("ip_address", "127.0.0.1")
+                putExtra("projection_port", 5288)
             }
-            
-            try {
-                sendBroadcast(receiverIntent)
-                AppLog.i("Self Mode: Broadcast sent to WirelessStartupReceiver.")
-            } catch (e2: Exception) {
-                AppLog.e("Failed to trigger modern AA Wireless Receiver", e2)
-                Toast.makeText(this, getString(R.string.failed_start_android_auto), Toast.LENGTH_SHORT).show()
-            }
+            sendBroadcast(receiverIntent)
         } catch (e: Exception) {
             AppLog.e("Failed to launch AA", e)
             Toast.makeText(this, getString(R.string.failed_start_android_auto), Toast.LENGTH_SHORT).show()
