@@ -140,7 +140,29 @@ class AapService : Service(), UsbReceiver.Listener {
 
         // Initialize MediaSession early to be ready for early focus requests
         mediaSession = MediaSessionCompat(this, "HeadunitRevived").apply {
-            setCallback(object : MediaSessionCompat.Callback() {})
+            setCallback(object : MediaSessionCompat.Callback() {
+                override fun onPlay() { commManager.send(android.view.KeyEvent.KEYCODE_MEDIA_PLAY, true); commManager.send(android.view.KeyEvent.KEYCODE_MEDIA_PLAY, false) }
+                override fun onPause() { commManager.send(android.view.KeyEvent.KEYCODE_MEDIA_PAUSE, true); commManager.send(android.view.KeyEvent.KEYCODE_MEDIA_PAUSE, false) }
+                override fun onSkipToNext() { commManager.send(android.view.KeyEvent.KEYCODE_MEDIA_NEXT, true); commManager.send(android.view.KeyEvent.KEYCODE_MEDIA_NEXT, false) }
+                override fun onSkipToPrevious() { commManager.send(android.view.KeyEvent.KEYCODE_MEDIA_PREVIOUS, true); commManager.send(android.view.KeyEvent.KEYCODE_MEDIA_PREVIOUS, false) }
+                override fun onStop() { commManager.send(android.view.KeyEvent.KEYCODE_MEDIA_STOP, true); commManager.send(android.view.KeyEvent.KEYCODE_MEDIA_STOP, false) }
+                
+                override fun onMediaButtonEvent(mediaButtonEvent: Intent?): Boolean {
+                    // This handles generic media button intents (e.g. from Bluetooth headsets)
+                    val keyEvent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        mediaButtonEvent?.getParcelableExtra(Intent.EXTRA_KEY_EVENT, android.view.KeyEvent::class.java)
+                    } else {
+                        @Suppress("DEPRECATION")
+                        mediaButtonEvent?.getParcelableExtra(Intent.EXTRA_KEY_EVENT)
+                    }
+                    keyEvent?.let {
+                        val isPress = it.action == android.view.KeyEvent.ACTION_DOWN
+                        commManager.send(it.keyCode, isPress)
+                        return true
+                    }
+                    return super.onMediaButtonEvent(mediaButtonEvent)
+                }
+            })
             setPlaybackToRemote(object : androidx.media.VolumeProviderCompat(
                 androidx.media.VolumeProviderCompat.VOLUME_CONTROL_RELATIVE, 100, 50
             ) {
