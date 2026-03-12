@@ -27,6 +27,7 @@
                 android:indeterminateTint="@android:color/white" />
 
             <TextView
+                android:id="@+id/overlay_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
@@ -34,6 +35,30 @@
                 android:textColor="@android:color/white"
                 android:textSize="18sp" />
         </LinearLayout>
+
+        <TextView
+            android:id="@+id/overlay_detail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:gravity="center"
+            android:maxWidth="400dp"
+            android:textColor="@android:color/white"
+            android:textSize="14sp"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/disconnect_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="?android:attr/selectableItemBackground"
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp"
+            android:text="@string/shortcut_disconnect_title"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            android:visibility="gone" />
     </LinearLayout>
 
 </FrameLayout>

@@ -242,6 +242,8 @@
     <string name="failed">失敗</string>
     <string name="failed_start_android_auto">啟動 Android Auto 失敗</string>
     <string name="android_auto_starting">Android Auto 啟動中…</string>
+    <string name="connection_interrupted">連線中斷</string>
+    <string name="connection_interrupted_detail">您的手機已停止傳送資料。這通常是由手機端的網路變更所引起。等待恢復中…</string>
     <string name="reset_usb_option">重設 USB 連線</string>
     <string name="reset_usb_timeout">找不到 USB 裝置，請檢查連線。</string>
     <string name="notification_service_running">Headunit Revived 執行中</string>
