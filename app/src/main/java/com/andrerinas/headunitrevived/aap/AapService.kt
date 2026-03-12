@@ -13,6 +13,9 @@ import android.net.nsd.NsdServiceInfo
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.net.NetworkRequest
 import android.os.Build
 import android.os.IBinder
 import android.os.Parcel
@@ -33,6 +36,7 @@ import com.andrerinas.headunitrevived.connection.UsbReceiver
 import com.andrerinas.headunitrevived.location.GpsLocationService
 import com.andrerinas.headunitrevived.utils.AppLog
 import com.andrerinas.headunitrevived.utils.LocaleHelper
+import com.andrerinas.headunitrevived.utils.LogExporter
 import com.andrerinas.headunitrevived.utils.NightModeManager
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -76,6 +80,7 @@ class AapService : Service(), UsbReceiver.Listener {
     private var isDestroying = false
     private var hasEverConnected = false
     private var accessoryHandshakeFailures = 0
+    private var networkCallback: ConnectivityManager.NetworkCallback? = null
 
     /**
      * Guards against duplicate [UsbAccessoryMode.connectAndSwitch] calls.
@@ -143,10 +148,14 @@ class AapService : Service(), UsbReceiver.Listener {
             setupMediaSession()
         }
 
+        LogExporter.startCapture(this, LogExporter.LogLevel.DEBUG)
+        AppLog.i("Auto-started continuous log capture")
+
         startService(GpsLocationService.intent(this))
         wifiDirectManager = WifiDirectManager(this)
         initWifiMode()
         checkAlreadyConnectedUsb()
+        registerNetworkMonitor()
     }
 
     /** Enables Android Automotive UI mode so the system uses car-optimised layouts. */
@@ -355,6 +364,35 @@ class AapService : Service(), UsbReceiver.Listener {
         )
     }
 
+    private fun registerNetworkMonitor() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) return
+        val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val callback = object : ConnectivityManager.NetworkCallback() {
+            override fun onAvailable(network: Network) {
+                AppLog.i("NetworkMonitor: Network available: $network")
+            }
+            override fun onLost(network: Network) {
+                AppLog.w("NetworkMonitor: Network lost: $network")
+            }
+            override fun onCapabilitiesChanged(network: Network, caps: NetworkCapabilities) {
+                AppLog.d("NetworkMonitor: Capabilities changed: $network → $caps")
+            }
+        }
+        networkCallback = callback
+        val request = NetworkRequest.Builder().build()
+        cm.registerNetworkCallback(request, callback)
+        AppLog.i("NetworkMonitor: Registered network change listener")
+    }
+
+    private fun unregisterNetworkMonitor() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) return
+        networkCallback?.let {
+            val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            try { cm.unregisterNetworkCallback(it) } catch (e: IllegalArgumentException) { AppLog.w("Network callback not registered or already unregistered", e) }
+            networkCallback = null
+        }
+    }
+
     /** Starts [WirelessServer] if the user has configured server WiFi mode (mode == 2). */
     private fun initWifiMode() {
         if (App.provide(this).settings.wifiConnectionMode == 2) {
@@ -366,6 +404,7 @@ class AapService : Service(), UsbReceiver.Listener {
     override fun onDestroy() {
         AppLog.i("AapService destroying...")
         isDestroying = true
+        unregisterNetworkMonitor()
         stopForeground(true)
         stopWirelessServer()
         wifiDirectManager?.stop()
@@ -378,6 +417,7 @@ class AapService : Service(), UsbReceiver.Listener {
         unregisterReceiver(usbReceiver)
         uiModeManager.disableCarMode(0)
         serviceScope.cancel()
+        LogExporter.stopCapture()
         super.onDestroy()
     }
 
