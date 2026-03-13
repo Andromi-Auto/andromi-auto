@@ -25,7 +25,6 @@ import com.andrerinas.headunitrevived.utils.AppLog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import com.andrerinas.headunitrevived.utils.Settings
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class HomeFragment : Fragment() {
 
@@ -75,7 +74,11 @@ class HomeFragment : Fragment() {
                     updateProjectionButtonText()
                     if (state is com.andrerinas.headunitrevived.connection.CommManager.ConnectionState.Disconnected
                         && !state.isClean) {
-                        showWifiDisconnectDialog()
+                        val msg = getString(R.string.wifi_disconnect_toast)
+                        Toast.makeText(requireContext(), msg, Toast.LENGTH_LONG).show()
+                        view?.postDelayed({
+                            if (isAdded) Toast.makeText(requireContext(), msg, Toast.LENGTH_LONG).show()
+                        }, 3500)
                     }
                 }
             }
@@ -184,22 +187,6 @@ class HomeFragment : Fragment() {
             Intent(requireContext(), AapService::class.java).apply {
                 action = AapService.ACTION_CHECK_USB
             })
-    }
-
-    private var wifiDisconnectDialogShown = false
-
-    private fun showWifiDisconnectDialog() {
-        if (wifiDisconnectDialogShown || !isAdded) return
-        wifiDisconnectDialogShown = true
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.wifi_disconnect_title)
-            .setMessage(R.string.wifi_disconnect_message)
-            .setPositiveButton(android.R.string.ok) { dialog, _ ->
-                dialog.dismiss()
-                wifiDisconnectDialogShown = false
-            }
-            .setOnDismissListener { wifiDisconnectDialogShown = false }
-            .show()
     }
 
     private fun setupListeners() {
