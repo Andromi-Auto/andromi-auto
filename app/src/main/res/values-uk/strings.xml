@@ -243,6 +243,9 @@
     <string name="failed">Помилка</string>
     <string name="failed_start_android_auto">Не вдалося запустити Android Auto</string>
     <string name="android_auto_starting">Запуск Android Auto…</string>
+    <string name="connection_interrupted">З\'єднання втрачено</string>
+    <string name="connection_interrupted_detail">Повторна спроба…</string>
+    <string name="wifi_disconnect_toast">При бездротовому AA вимкніть \"Перемикання між мережами\" або \"Прискорення мережі\" в налаштуваннях WiFi телефону</string>
     <string name="reset_usb_option">Скинути USB-підключення</string>
     <string name="reset_usb_timeout">USB-пристрій не знайдено. Перевірте підключення.</string>
     <string name="notification_service_running">Headunit Revived запущено</string>
@@ -284,11 +287,12 @@
     <string name="start_log_capture_description">Починає запис системних логів у файл.</string>
     <string name="stop_log_capture">Зупинити запис лога</string>
     <string name="stop_log_capture_description">Зупиняє запис і зберігає файл лога.</string>
+
     <!-- Navigation notifications -->
     <string name="show_navigation_notifications">Сповіщення навігації</string>
-    <string name="show_navigation_notifications_description">Показувати «Через X метрів Y» та поточну вулицю в сповіщеннях (для налагодження)</string>
+    <string name="show_navigation_notifications_description">Показувати «Через X метрів Y» та поточну вулицю у сповіщеннях (для налагодження)</string>
     <string name="nav_notification_channel_name">Навігація</string>
-    <string name="nav_notification_channel_description">Покрокові оновлення навігації від Android Auto</string>
+    <string name="nav_notification_channel_description">Покрокові вказівки від Android Auto</string>
     <string name="nav_notification_title_format">Через %1$d м — %2$s</string>
     <string name="nav_notification_street_format">Вулиця: %1$s</string>
     <string name="nav_action_unknown">Дія</string>
@@ -298,14 +302,14 @@
     <string name="nav_action_turn">Поворот</string>
     <string name="nav_action_sharp_turn">Різкий поворот</string>
     <string name="nav_action_uturn">Розворот</string>
-    <string name="nav_action_on_ramp">Виїзд на дорогу</string>
-    <string name="nav_action_off_ramp">З’їзд з рампи</string>
+    <string name="nav_action_on_ramp">В\'їзд на дорогу</string>
+    <string name="nav_action_off_ramp">З\'їзд</string>
     <string name="nav_action_merge">Злиття</string>
-    <string name="nav_action_roundabout_enter">В’їзд на кільце</string>
+    <string name="nav_action_roundabout_enter">В\'їзд на кільце</string>
     <string name="nav_action_roundabout_exit">Виїзд з кільця</string>
     <string name="nav_action_roundabout">Кільце</string>
     <string name="nav_action_straight">Прямо</string>
-    <string name="nav_action_ferry">Паром</string>
-    <string name="nav_action_ferry_train">Паром / поїзд</string>
+    <string name="nav_action_ferry">Пором</string>
+    <string name="nav_action_ferry_train">Пором / потяг</string>
     <string name="nav_action_destination">Прибуття</string>
     </resources>

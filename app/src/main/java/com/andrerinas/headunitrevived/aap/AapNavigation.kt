@@ -7,14 +7,15 @@ import android.content.Context
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.andrerinas.headunitrevived.R
+import com.andrerinas.headunitrevived.aap.protocol.Channel
 import com.andrerinas.headunitrevived.aap.protocol.proto.NavigationStatus
 import com.andrerinas.headunitrevived.contract.NavigationUpdateIntent
 import com.andrerinas.headunitrevived.utils.AppLog
 import com.andrerinas.headunitrevived.utils.Settings
 
 /**
- * Processes navigation messages from the ID_NAV channel from any app that supports Android Auto (Google Maps, Yandex.Maps, etc.).
- * Displays notifications in the format "In X meters Y" and the current street.
+ * Handles navigation messages from the ID_NAV channel from any Android Auto-enabled app
+ * (Google Maps, Yandex Maps, etc.). Shows notifications with turn-by-turn directions and current street.
  */
 class AapNavigation(
     private val context: Context,
@@ -24,7 +25,7 @@ class AapNavigation(
     private var currentStreet: String = ""
 
     fun process(message: AapMessage): Boolean {
-        if (message.channel != com.andrerinas.headunitrevived.aap.protocol.Channel.ID_NAV) return false
+        if (message.channel != Channel.ID_NAV) return false
 
         return when (message.type) {
             NavigationStatus.MsgType.NEXTTURNDETAILS_VALUE -> {
@@ -36,7 +37,7 @@ class AapNavigation(
                     sendNavigationBroadcast(distanceMeters = null, timeSeconds = null, detail = detail)
                     if (settings.showNavigationNotifications) {
                         val actionText = nextEventToAction(detail.nextturn)
-                        val street = currentStreet.ifBlank { "—" }
+                        val street = currentStreet.ifBlank { detail.road.takeIf { r -> r.isNotBlank() } ?: "" }.ifBlank { "—" }
                         showNotification(distanceMeters = null, action = actionText, street = street)
                     }
                     true
