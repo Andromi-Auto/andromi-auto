@@ -30,6 +30,7 @@
     <string name="app_theme">Темний режим (Додаток)</string>
     <string name="app_theme_description">Керування зовнішнім виглядом додатку</string>
     <string name="change_app_theme">Змінити тему</string>
+    <string name="category_dark_mode">Темний режим</string>
 
     <string name="reconnection_required_title">Потрібне перепідключення</string>
     <string name="reconnection_required_message">Пристрій у стані очікування. Відʼєднайте та знову підключіть USB-кабель, щоб перезапустити Android Auto.</string>

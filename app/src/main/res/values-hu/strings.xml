@@ -30,6 +30,7 @@
     <string name="app_theme">Sötét mód (Alkalmazás)</string>
     <string name="app_theme_description">Az alkalmazás megjelenésének vezérlése</string>
     <string name="change_app_theme">Téma módosítása</string>
+    <string name="category_dark_mode">Sötét mód</string>
 
     <string name="reconnection_required_title">Újrakapcsolódás szükséges</string>
     <string name="reconnection_required_message">Az eszköz várakozó állapotban van. Kérlek húzd ki, majd dugd vissza az USB-kábelt az Android Auto újraindításához.</string>

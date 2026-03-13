@@ -29,6 +29,7 @@
     <string name="app_theme">深色模式（應用程式）</string>
     <string name="app_theme_description">控制應用的視覺外觀</string>
     <string name="change_app_theme">更改應用主題</string>
+    <string name="category_dark_mode">深色模式</string>
 
     <string name="reconnection_required_title">需要重新連接</string>
     <string name="reconnection_required_message">設備處於等待狀態。請拔下並重新插入 USB 電纜以重新啟動 Android Auto。</string>

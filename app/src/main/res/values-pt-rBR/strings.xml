@@ -30,6 +30,7 @@
     <string name="app_theme">Modo escuro (Aplicativo)</string>
     <string name="app_theme_description">Controlar a aparência visual do app</string>
     <string name="change_app_theme">Alterar tema</string>
+    <string name="category_dark_mode">Modo escuro</string>
 
     <string name="reconnection_required_title">Reconexão necessária</string>
     <string name="reconnection_required_message">O dispositivo está em espera. Desconecte e reconecte o cabo USB para reiniciar o Android Auto.</string>

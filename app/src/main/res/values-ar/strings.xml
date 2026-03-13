@@ -30,6 +30,7 @@
     <string name="app_theme">الوضع الداكن (التطبيق)</string>
     <string name="app_theme_description">التحكم في المظهر المرئي للتطبيق</string>
     <string name="change_app_theme">تغيير سمة التطبيق</string>
+    <string name="category_dark_mode">الوضع الداكن</string>
 
     <string name="reconnection_required_title">يلزم إعادة الاتصال</string>
     <string name="reconnection_required_message">الجهاز في حالة انتظار. يرجى فصل كابل USB وإعادة توصيله لبدء Android Auto مجددا.</string>

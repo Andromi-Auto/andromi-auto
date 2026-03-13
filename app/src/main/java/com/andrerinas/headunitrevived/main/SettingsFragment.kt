@@ -439,92 +439,6 @@ class SettingsFragment : Fragment() {
         ))
 
         items.add(SettingItem.SettingEntry(
-            stableId = "nightMode",
-            nameResId = R.string.night_mode,
-            value = run {
-                val base = resources.getStringArray(R.array.night_mode)[pendingNightMode!!.value]
-                if (pendingNightMode == Settings.NightMode.AUTO) {
-                    val info = com.andrerinas.headunitrevived.utils.NightMode(settings, true).getCalculationInfo()
-                    "$base ($info)"
-                } else {
-                    base
-                }
-            },
-            onClick = { _ ->
-                val nightModeTitles = resources.getStringArray(R.array.night_mode)
-                
-                AlertDialog.Builder(requireContext())
-                    .setTitle(R.string.night_mode)
-                    .setSingleChoiceItems(nightModeTitles, pendingNightMode!!.value) { dialog, which ->
-                        pendingNightMode = Settings.NightMode.fromInt(which)!!
-                        checkChanges()
-                        dialog.dismiss()
-                        updateSettingsList()
-                    }
-                    .show()
-            }
-        ))
-
-        if (pendingNightMode == Settings.NightMode.LIGHT_SENSOR || pendingNightMode == Settings.NightMode.SCREEN_BRIGHTNESS) {
-            val isSensor = pendingNightMode == Settings.NightMode.LIGHT_SENSOR
-            val unit = if (isSensor) "Lux" else "/ 255"
-            val desc = if (isSensor) getString(R.string.threshold_lux_desc) else getString(R.string.threshold_brightness_desc)
-            val currentValue = if (isSensor) pendingThresholdLux else pendingThresholdBrightness
-            
-            items.add(SettingItem.SettingEntry(
-                stableId = "nightModeThreshold",
-                nameResId = R.string.night_mode_threshold,
-                value = "$currentValue $unit",
-                onClick = { _ ->
-                    showNumericInputDialog(
-                        title = getString(R.string.enter_threshold_value),
-                        message = desc,
-                        initialValue = currentValue ?: 0,
-                        onConfirm = { newVal ->
-                            if (isSensor) {
-                                pendingThresholdLux = newVal
-                            } else {
-                                pendingThresholdBrightness = newVal
-                            }
-                            checkChanges()
-                            updateSettingsList()
-                        }
-                    )
-                }
-            ))
-        }
-
-        if (pendingNightMode == Settings.NightMode.MANUAL_TIME) {
-            val formatTime = { minutes: Int -> "%02d:%02d".format(minutes / 60, minutes % 60) }
-
-            items.add(SettingItem.SettingEntry(
-                stableId = "nightModeStart",
-                nameResId = R.string.night_mode_start,
-                value = formatTime(pendingManualStart!!),
-                onClick = { _ ->
-                    TimePickerDialog(requireContext(), { _, hour, minute ->
-                        pendingManualStart = hour * 60 + minute
-                        checkChanges()
-                        updateSettingsList()
-                    }, pendingManualStart!! / 60, pendingManualStart!! % 60, true).show()
-                }
-            ))
-
-            items.add(SettingItem.SettingEntry(
-                stableId = "nightModeEnd",
-                nameResId = R.string.night_mode_end,
-                value = formatTime(pendingManualEnd!!),
-                onClick = { _ ->
-                    TimePickerDialog(requireContext(), { _, hour, minute ->
-                        pendingManualEnd = hour * 60 + minute
-                        checkChanges()
-                        updateSettingsList()
-                    }, pendingManualEnd!! / 60, pendingManualEnd!! % 60, true).show()
-                }
-            ))
-        }
-
-        items.add(SettingItem.SettingEntry(
             stableId = "keymap",
             nameResId = R.string.keymap,
             value = getString(R.string.keymap_description),
@@ -625,9 +539,10 @@ class SettingsFragment : Fragment() {
             }
         ))
 
-        // --- Graphic Settings ---
-        items.add(SettingItem.CategoryHeader("graphic", R.string.category_graphic))
+        // --- Dark Mode Settings ---
+        items.add(SettingItem.CategoryHeader("darkMode", R.string.category_dark_mode))
 
+        // App Theme (Application)
         val appThemeTitles = resources.getStringArray(R.array.app_theme)
         items.add(SettingItem.SettingEntry(
             stableId = "appTheme",
@@ -645,6 +560,159 @@ class SettingsFragment : Fragment() {
                     .show()
             }
         ))
+
+        // App theme sub-options: threshold for Light Sensor / Screen Brightness
+        if (pendingAppTheme == Settings.AppTheme.LIGHT_SENSOR || pendingAppTheme == Settings.AppTheme.SCREEN_BRIGHTNESS) {
+            val isSensor = pendingAppTheme == Settings.AppTheme.LIGHT_SENSOR
+            val unit = if (isSensor) "Lux" else "/ 255"
+            val desc = if (isSensor) getString(R.string.threshold_lux_desc) else getString(R.string.threshold_brightness_desc)
+            val currentValue = if (isSensor) pendingThresholdLux else pendingThresholdBrightness
+
+            items.add(SettingItem.SettingEntry(
+                stableId = "appThemeThreshold",
+                nameResId = R.string.night_mode_threshold,
+                value = "$currentValue $unit",
+                onClick = { _ ->
+                    showNumericInputDialog(
+                        title = getString(R.string.enter_threshold_value),
+                        message = desc,
+                        initialValue = currentValue ?: 0,
+                        onConfirm = { newVal ->
+                            if (isSensor) {
+                                pendingThresholdLux = newVal
+                            } else {
+                                pendingThresholdBrightness = newVal
+                            }
+                            checkChanges()
+                            updateSettingsList()
+                        }
+                    )
+                }
+            ))
+        }
+
+        // App theme sub-options: time pickers for Manual Time
+        if (pendingAppTheme == Settings.AppTheme.MANUAL_TIME) {
+            val formatTime = { minutes: Int -> "%02d:%02d".format(minutes / 60, minutes % 60) }
+
+            items.add(SettingItem.SettingEntry(
+                stableId = "appThemeStart",
+                nameResId = R.string.night_mode_start,
+                value = formatTime(pendingManualStart!!),
+                onClick = { _ ->
+                    TimePickerDialog(requireContext(), { _, hour, minute ->
+                        pendingManualStart = hour * 60 + minute
+                        checkChanges()
+                        updateSettingsList()
+                    }, pendingManualStart!! / 60, pendingManualStart!! % 60, true).show()
+                }
+            ))
+
+            items.add(SettingItem.SettingEntry(
+                stableId = "appThemeEnd",
+                nameResId = R.string.night_mode_end,
+                value = formatTime(pendingManualEnd!!),
+                onClick = { _ ->
+                    TimePickerDialog(requireContext(), { _, hour, minute ->
+                        pendingManualEnd = hour * 60 + minute
+                        checkChanges()
+                        updateSettingsList()
+                    }, pendingManualEnd!! / 60, pendingManualEnd!! % 60, true).show()
+                }
+            ))
+        }
+
+        // Night Mode (Android Auto)
+        items.add(SettingItem.SettingEntry(
+            stableId = "nightMode",
+            nameResId = R.string.night_mode,
+            value = run {
+                val base = resources.getStringArray(R.array.night_mode)[pendingNightMode!!.value]
+                if (pendingNightMode == Settings.NightMode.AUTO) {
+                    val info = com.andrerinas.headunitrevived.utils.NightMode(settings, true).getCalculationInfo()
+                    "$base ($info)"
+                } else {
+                    base
+                }
+            },
+            onClick = { _ ->
+                val nightModeTitles = resources.getStringArray(R.array.night_mode)
+
+                AlertDialog.Builder(requireContext())
+                    .setTitle(R.string.night_mode)
+                    .setSingleChoiceItems(nightModeTitles, pendingNightMode!!.value) { dialog, which ->
+                        pendingNightMode = Settings.NightMode.fromInt(which)!!
+                        checkChanges()
+                        dialog.dismiss()
+                        updateSettingsList()
+                    }
+                    .show()
+            }
+        ))
+
+        // Night mode sub-options: threshold for Light Sensor / Screen Brightness
+        if (pendingNightMode == Settings.NightMode.LIGHT_SENSOR || pendingNightMode == Settings.NightMode.SCREEN_BRIGHTNESS) {
+            val isSensor = pendingNightMode == Settings.NightMode.LIGHT_SENSOR
+            val unit = if (isSensor) "Lux" else "/ 255"
+            val desc = if (isSensor) getString(R.string.threshold_lux_desc) else getString(R.string.threshold_brightness_desc)
+            val currentValue = if (isSensor) pendingThresholdLux else pendingThresholdBrightness
+
+            items.add(SettingItem.SettingEntry(
+                stableId = "nightModeThreshold",
+                nameResId = R.string.night_mode_threshold,
+                value = "$currentValue $unit",
+                onClick = { _ ->
+                    showNumericInputDialog(
+                        title = getString(R.string.enter_threshold_value),
+                        message = desc,
+                        initialValue = currentValue ?: 0,
+                        onConfirm = { newVal ->
+                            if (isSensor) {
+                                pendingThresholdLux = newVal
+                            } else {
+                                pendingThresholdBrightness = newVal
+                            }
+                            checkChanges()
+                            updateSettingsList()
+                        }
+                    )
+                }
+            ))
+        }
+
+        // Night mode sub-options: time pickers for Manual Time
+        if (pendingNightMode == Settings.NightMode.MANUAL_TIME) {
+            val formatTime = { minutes: Int -> "%02d:%02d".format(minutes / 60, minutes % 60) }
+
+            items.add(SettingItem.SettingEntry(
+                stableId = "nightModeStart",
+                nameResId = R.string.night_mode_start,
+                value = formatTime(pendingManualStart!!),
+                onClick = { _ ->
+                    TimePickerDialog(requireContext(), { _, hour, minute ->
+                        pendingManualStart = hour * 60 + minute
+                        checkChanges()
+                        updateSettingsList()
+                    }, pendingManualStart!! / 60, pendingManualStart!! % 60, true).show()
+                }
+            ))
+
+            items.add(SettingItem.SettingEntry(
+                stableId = "nightModeEnd",
+                nameResId = R.string.night_mode_end,
+                value = formatTime(pendingManualEnd!!),
+                onClick = { _ ->
+                    TimePickerDialog(requireContext(), { _, hour, minute ->
+                        pendingManualEnd = hour * 60 + minute
+                        checkChanges()
+                        updateSettingsList()
+                    }, pendingManualEnd!! / 60, pendingManualEnd!! % 60, true).show()
+                }
+            ))
+        }
+
+        // --- Graphic Settings ---
+        items.add(SettingItem.CategoryHeader("graphic", R.string.category_graphic))
 
         items.add(SettingItem.SettingEntry(
             stableId = "resolution",

@@ -13,6 +13,7 @@ import com.andrerinas.headunitrevived.utils.Settings
 open class BaseActivity : AppCompatActivity() {
 
     private var currentLanguage: String? = null
+    private var currentAppTheme: Settings.AppTheme? = null
 
     override fun attachBaseContext(newBase: Context) {
         super.attachBaseContext(LocaleHelper.wrapContext(newBase))
@@ -20,14 +21,15 @@ open class BaseActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        currentLanguage = Settings(this).appLanguage
+        val settings = Settings(this)
+        currentLanguage = settings.appLanguage
+        currentAppTheme = settings.appTheme
     }
 
     override fun onResume() {
         super.onResume()
         val settings = Settings(this)
-        if (currentLanguage != settings.appLanguage) {
-            // Language changed while we were in the background
+        if (currentLanguage != settings.appLanguage || currentAppTheme != settings.appTheme) {
             recreate()
         }
     }

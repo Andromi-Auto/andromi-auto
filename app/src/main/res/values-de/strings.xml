@@ -30,6 +30,7 @@
     <string name="app_theme">Dunkelmodus (Anwendung)</string>
     <string name="app_theme_description">Aussehen der App steuern</string>
     <string name="change_app_theme">Design ändern</string>
+    <string name="category_dark_mode">Dunkelmodus</string>
 
     <string name="reconnection_required_title">Neuverbindung erforderlich</string>
     <string name="reconnection_required_message">Das Gerät befindet sich in einem Wartezustand. Bitte ziehen Sie das USB-Kabel ab und stecken Sie es wieder ein, um Android Auto neu zu starten.</string>
