@@ -2,8 +2,8 @@
 <resources>
     <string-array name="night_mode">
         <item>Авто (Восход/Закат)</item>
-        <item>День</item>
-        <item>Ночь</item>
+        <item>Светлая</item>
+        <item>Тёмная</item>
         <item>Ручное время</item>
         <item>Датчик света</item>
         <item>Яркость экрана</item>

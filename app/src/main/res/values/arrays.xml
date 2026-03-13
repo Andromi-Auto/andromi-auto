@@ -2,8 +2,8 @@
 <resources>
     <string-array name="night_mode">
         <item>Auto (Sunrise/Sunset)</item>
-        <item>Day</item>
-        <item>Night</item>
+        <item>Clear</item>
+        <item>Dark</item>
         <item>Manual Time</item>
         <item>Light Sensor</item>
         <item>Screen Brightness</item>

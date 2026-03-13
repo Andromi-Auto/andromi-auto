@@ -2,8 +2,8 @@
 <resources>
     <string-array name="night_mode">
         <item>Auto (Răsărit/Apus)</item>
-        <item>Zi</item>
-        <item>Noapte</item>
+        <item>Deschis</item>
+        <item>Întunecat</item>
         <item>Oră manuală</item>
         <item>Senzor de lumină</item>
         <item>Luminozitate ecran</item>

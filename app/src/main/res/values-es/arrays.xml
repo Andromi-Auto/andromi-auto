@@ -2,8 +2,8 @@
 <resources>
     <string-array name="night_mode">
         <item>Automático (Amanecer/Atardecer)</item>
-        <item>Día</item>
-        <item>Noche</item>
+        <item>Claro</item>
+        <item>Oscuro</item>
         <item>Tiempo manual</item>
         <item>Sensor de luz</item>
         <item>Brillo de pantalla</item>

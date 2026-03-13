@@ -2,8 +2,8 @@
 <resources>
     <string-array name="night_mode">
         <item>Auto (Wschód/zachód słońca)</item>
-        <item>Dzień</item>
-        <item>Noc</item>
+        <item>Jasny</item>
+        <item>Ciemny</item>
         <item>Czas ręczny</item>
         <item>Czujnik światła</item>
         <item>Jasność ekranu</item>

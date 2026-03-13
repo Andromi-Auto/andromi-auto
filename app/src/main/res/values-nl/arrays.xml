@@ -2,8 +2,8 @@
 <resources>
     <string-array name="night_mode">
         <item>Auto (Zonsopgang/-ondergang)</item>
-        <item>Dag</item>
-        <item>Nacht</item>
+        <item>Licht</item>
+        <item>Donker</item>
         <item>Handmatige tijd</item>
         <item>Lichtsensor</item>
         <item>Schermhelderheid</item>
