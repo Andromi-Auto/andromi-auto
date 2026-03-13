@@ -33,7 +33,7 @@
                 android:layout_marginStart="16dp"
                 android:text="@string/android_auto_starting"
                 android:textColor="@android:color/white"
-                android:textSize="18sp" />
+                android:textSize="27sp" />
         </LinearLayout>
 
         <TextView

@@ -74,8 +74,7 @@ class HomeFragment : Fragment() {
                 commManager.connectionState.collect { state ->
                     updateProjectionButtonText()
                     if (state is com.andrerinas.headunitrevived.connection.CommManager.ConnectionState.Disconnected
-                        && !state.isClean
-                        && App.provide(requireContext()).settings.lastConnectionType == Settings.CONNECTION_TYPE_WIFI) {
+                        && !state.isClean) {
                         showWifiDisconnectDialog()
                     }
                 }
