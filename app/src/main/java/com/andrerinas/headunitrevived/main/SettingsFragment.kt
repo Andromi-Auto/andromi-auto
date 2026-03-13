@@ -561,23 +561,23 @@ class SettingsFragment : Fragment() {
             }
         ))
 
-        // App theme sub-options: threshold for Light Sensor / Screen Brightness
+        // App theme sub-options: threshold slider for Light Sensor / Screen Brightness
         if (pendingAppTheme == Settings.AppTheme.LIGHT_SENSOR || pendingAppTheme == Settings.AppTheme.SCREEN_BRIGHTNESS) {
             val isSensor = pendingAppTheme == Settings.AppTheme.LIGHT_SENSOR
-            val unit = if (isSensor) "Lux" else "/ 255"
-            val desc = if (isSensor) getString(R.string.threshold_lux_desc) else getString(R.string.threshold_brightness_desc)
+            val maxVal = if (isSensor) LUX_MAX else BRIGHTNESS_MAX
             val currentValue = if (isSensor) pendingThresholdLux else pendingThresholdBrightness
+            val percentage = ((currentValue ?: 0) * 100 / maxVal).coerceIn(0, 100)
 
             items.add(SettingItem.SettingEntry(
                 stableId = "appThemeThreshold",
                 nameResId = R.string.night_mode_threshold,
-                value = "$currentValue $unit",
+                value = "$percentage%",
                 onClick = { _ ->
-                    showNumericInputDialog(
-                        title = getString(R.string.enter_threshold_value),
-                        message = desc,
-                        initialValue = currentValue ?: 0,
-                        onConfirm = { newVal ->
+                    showSliderDialog(
+                        title = getString(R.string.night_mode_threshold),
+                        initialPercentage = percentage,
+                        onConfirm = { newPercentage ->
+                            val newVal = newPercentage * maxVal / 100
                             if (isSensor) {
                                 pendingThresholdLux = newVal
                             } else {
@@ -650,23 +650,23 @@ class SettingsFragment : Fragment() {
             }
         ))
 
-        // Night mode sub-options: threshold for Light Sensor / Screen Brightness
+        // Night mode sub-options: threshold slider for Light Sensor / Screen Brightness
         if (pendingNightMode == Settings.NightMode.LIGHT_SENSOR || pendingNightMode == Settings.NightMode.SCREEN_BRIGHTNESS) {
             val isSensor = pendingNightMode == Settings.NightMode.LIGHT_SENSOR
-            val unit = if (isSensor) "Lux" else "/ 255"
-            val desc = if (isSensor) getString(R.string.threshold_lux_desc) else getString(R.string.threshold_brightness_desc)
+            val maxVal = if (isSensor) LUX_MAX else BRIGHTNESS_MAX
             val currentValue = if (isSensor) pendingThresholdLux else pendingThresholdBrightness
+            val percentage = ((currentValue ?: 0) * 100 / maxVal).coerceIn(0, 100)
 
             items.add(SettingItem.SettingEntry(
                 stableId = "nightModeThreshold",
                 nameResId = R.string.night_mode_threshold,
-                value = "$currentValue $unit",
+                value = "$percentage%",
                 onClick = { _ ->
-                    showNumericInputDialog(
-                        title = getString(R.string.enter_threshold_value),
-                        message = desc,
-                        initialValue = currentValue ?: 0,
-                        onConfirm = { newVal ->
+                    showSliderDialog(
+                        title = getString(R.string.night_mode_threshold),
+                        initialPercentage = percentage,
+                        onConfirm = { newPercentage ->
+                            val newVal = newPercentage * maxVal / 100
                             if (isSensor) {
                                 pendingThresholdLux = newVal
                             } else {
@@ -1350,7 +1350,54 @@ class SettingsFragment : Fragment() {
             .show()
     }
 
+    private fun showSliderDialog(
+        title: String,
+        initialPercentage: Int,
+        onConfirm: (Int) -> Unit
+    ) {
+        val context = requireContext()
+        val layout = android.widget.LinearLayout(context).apply {
+            orientation = android.widget.LinearLayout.VERTICAL
+            val padding = (24 * context.resources.displayMetrics.density).toInt()
+            setPadding(padding, padding, padding, 0)
+        }
+
+        val label = android.widget.TextView(context).apply {
+            text = "${initialPercentage.coerceIn(0, 100)}%"
+            textSize = 18f
+            gravity = android.view.Gravity.CENTER
+        }
+        layout.addView(label)
+
+        val seekBar = android.widget.SeekBar(context).apply {
+            max = 100
+            progress = initialPercentage.coerceIn(0, 100)
+            setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
+                override fun onProgressChanged(seekBar: android.widget.SeekBar?, progress: Int, fromUser: Boolean) {
+                    label.text = "$progress%"
+                }
+                override fun onStartTrackingTouch(seekBar: android.widget.SeekBar?) {}
+                override fun onStopTrackingTouch(seekBar: android.widget.SeekBar?) {}
+            })
+        }
+        layout.addView(seekBar)
+
+        MaterialAlertDialogBuilder(context, R.style.DarkAlertDialog)
+            .setTitle(title)
+            .setView(layout)
+            .setPositiveButton(android.R.string.ok) { dialog, _ ->
+                onConfirm(seekBar.progress)
+                dialog.dismiss()
+            }
+            .setNegativeButton(android.R.string.cancel) { dialog, _ ->
+                dialog.cancel()
+            }
+            .show()
+    }
+
     companion object {
         private val SAVE_ITEM_ID = 1001
+        private const val LUX_MAX = 500
+        private const val BRIGHTNESS_MAX = 255
     }
 }
