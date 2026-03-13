@@ -2663,7 +2663,7 @@ public final class Control {
         }
         private VideoConfiguration() {
           codecResolution_ = 1;
-          frameRate_ = 0;
+          frameRate_ = 1;
           videoCodecType_ = 1;
         }
 
@@ -2852,23 +2852,23 @@ public final class Control {
         public enum VideoFrameRateType
             implements com.google.protobuf.ProtocolMessageEnum {
           /**
-           * <code>_30 = 0;</code>
-           */
-          _30(0),
-          /**
            * <code>_60 = 1;</code>
            */
           _60(1),
+          /**
+           * <code>_30 = 2;</code>
+           */
+          _30(2),
           ;
 
-          /**
-           * <code>_30 = 0;</code>
-           */
-          public static final int _30_VALUE = 0;
           /**
            * <code>_60 = 1;</code>
            */
           public static final int _60_VALUE = 1;
+          /**
+           * <code>_30 = 2;</code>
+           */
+          public static final int _30_VALUE = 2;
 
 
           public final int getNumber() {
@@ -2891,8 +2891,8 @@ public final class Control {
            */
           public static VideoFrameRateType forNumber(int value) {
             switch (value) {
-              case 0: return _30;
               case 1: return _60;
+              case 2: return _30;
               default: return null;
             }
           }
@@ -2962,7 +2962,7 @@ public final class Control {
         }
 
         public static final int FRAME_RATE_FIELD_NUMBER = 2;
-        private int frameRate_ = 0;
+        private int frameRate_ = 1;
         /**
          * <code>required .com.andrerinas.headunitrevived.aap.protocol.proto.Service.MediaSinkService.VideoConfiguration.VideoFrameRateType frame_rate = 2;</code>
          * @return Whether the frameRate field is set.
@@ -2976,7 +2976,7 @@ public final class Control {
          */
         @java.lang.Override public com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.MediaSinkService.VideoConfiguration.VideoFrameRateType getFrameRate() {
           com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.MediaSinkService.VideoConfiguration.VideoFrameRateType result = com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.MediaSinkService.VideoConfiguration.VideoFrameRateType.forNumber(frameRate_);
-          return result == null ? com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.MediaSinkService.VideoConfiguration.VideoFrameRateType._30 : result;
+          return result == null ? com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.MediaSinkService.VideoConfiguration.VideoFrameRateType._60 : result;
         }
 
         public static final int MARGIN_WIDTH_FIELD_NUMBER = 3;
@@ -3383,7 +3383,7 @@ public final class Control {
             super.clear();
             bitField0_ = 0;
             codecResolution_ = 1;
-            frameRate_ = 0;
+            frameRate_ = 1;
             marginWidth_ = 0;
             marginHeight_ = 0;
             density_ = 0;
@@ -3675,7 +3675,7 @@ public final class Control {
             return this;
           }
 
-          private int frameRate_ = 0;
+          private int frameRate_ = 1;
           /**
            * <code>required .com.andrerinas.headunitrevived.aap.protocol.proto.Service.MediaSinkService.VideoConfiguration.VideoFrameRateType frame_rate = 2;</code>
            * @return Whether the frameRate field is set.
@@ -3690,7 +3690,7 @@ public final class Control {
           @java.lang.Override
           public com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.MediaSinkService.VideoConfiguration.VideoFrameRateType getFrameRate() {
             com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.MediaSinkService.VideoConfiguration.VideoFrameRateType result = com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.MediaSinkService.VideoConfiguration.VideoFrameRateType.forNumber(frameRate_);
-            return result == null ? com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.MediaSinkService.VideoConfiguration.VideoFrameRateType._30 : result;
+            return result == null ? com.andrerinas.headunitrevived.aap.protocol.proto.Control.Service.MediaSinkService.VideoConfiguration.VideoFrameRateType._60 : result;
           }
           /**
            * <code>required .com.andrerinas.headunitrevived.aap.protocol.proto.Service.MediaSinkService.VideoConfiguration.VideoFrameRateType frame_rate = 2;</code>
@@ -3712,7 +3712,7 @@ public final class Control {
            */
           public Builder clearFrameRate() {
             bitField0_ = (bitField0_ & ~0x00000002);
-            frameRate_ = 0;
+            frameRate_ = 1;
             onChanged();
             return this;
           }
@@ -32197,7 +32197,7 @@ public final class Control {
       "080\020\003\022\016\n\n_2560x1440\020\004\022\016\n\n_3840x2160\020\005\022\r\n" +
       "\t_720x1280\020\006\022\016\n\n_1080x1920\020\007\022\016\n\n_1440x25" +
       "60\020\010\022\016\n\n_2160x3840\020\t\"&\n\022VideoFrameRateTy" +
-      "pe\022\007\n\003_30\020\000\022\007\n\003_60\020\001\032\273\002\n\022InputSourceServ" +
+      "pe\022\007\n\003_60\020\001\022\007\n\003_30\020\002\032\273\002\n\022InputSourceServ" +
       "ice\022\032\n\022keycodes_supported\030\001 \003(\r\022n\n\013touch" +
       "screen\030\002 \001(\0132Y.com.andrerinas.headunitre" +
       "vived.aap.protocol.proto.Service.InputSo" +
