@@ -9,6 +9,7 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings as SystemSettings
@@ -130,6 +131,13 @@ class NightModeManager(
                     false,
                     brightnessObserver
                 )
+                if (Build.VERSION.SDK_INT >= 28) {
+                    context.contentResolver.registerContentObserver(
+                        SystemSettings.System.getUriFor("screen_brightness_float"),
+                        false,
+                        brightnessObserver
+                    )
+                }
                 isObserverRegistered = true
             }
         } else {
@@ -150,7 +158,7 @@ class NightModeManager(
             Settings.NightMode.LIGHT_SENSOR -> {
                 if (currentLux >= 0) {
                     // Hysteresis Logic
-                    val hyst = 5.0f // 5 Lux buffer
+                    val hyst = 10.0f // 5 Lux buffer
                     val currentIsNight = lastEmittedValue ?: false
                     
                     isNight = if (currentIsNight) {
@@ -161,22 +169,16 @@ class NightModeManager(
                 }
             }
             Settings.NightMode.SCREEN_BRIGHTNESS -> {
-                try {
-                    currentBrightness = SystemSettings.System.getInt(
-                        context.contentResolver, 
-                        SystemSettings.System.SCREEN_BRIGHTNESS
-                    )
-                    // Hysteresis Logic for Brightness
-                    val hyst = 10 // 10 steps buffer
+                currentBrightness = readBrightness()
+                if (currentBrightness >= 0) {
+                    val hyst = 10
                     val currentIsNight = lastEmittedValue ?: false
-                    
+
                     isNight = if (currentIsNight) {
                         currentBrightness < (thresholdBrightness + hyst)
                     } else {
                         currentBrightness < thresholdBrightness
                     }
-                } catch (e: Exception) {
-                    AppLog.e("NightModeManager: Failed to read brightness", e)
                 }
             }
             // Delegate to standard calculator for other modes (Auto, Day, Night, Manual)
@@ -223,4 +225,12 @@ class NightModeManager(
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+
+    private fun readBrightness(): Int {
+        return try {
+            SystemSettings.System.getInt(
+                context.contentResolver, SystemSettings.System.SCREEN_BRIGHTNESS
+            ).coerceIn(0, 255)
+        } catch (_: Exception) { -1 }
+    }
 }
