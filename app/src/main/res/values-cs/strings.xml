@@ -27,7 +27,7 @@
     <string name="threshold_light_title">Citlivost na světlo</string>
     <string name="threshold_brightness_title">Úroveň jasu</string>
     <string name="threshold_light_hint">Tmavý režim se aktivuje, když okolní světlo klesne pod tuto úroveň</string>
-    <string name="threshold_brightness_hint">Tmavý režim se aktivuje, když je jas obrazovky pod touto hodnotou. Android hlásí jas jako 0–255, ale skutečný rozsah se může lišit podle zařízení. Možná budete muset experimentovat, abyste našli správnou prahovou hodnotu pro váš telefon.</string>
+    <string name="threshold_brightness_hint">Tmavý režim se aktivuje, když je jas obrazovky pod touto hodnotou. Android hlásí jas jako 0–255, ale skutečný rozsah se může lišit podle zařízení. Možná budete muset experimentovat, abyste našli správnou prahovou hodnotu pro vaše zařízení.</string>
     <string name="current_light_reading">Aktuální světlo: %d Lux</string>
     <string name="enable_fine_lux_control">Jemné ovládání (0–100 Lux)</string>
     <string name="night_mode_start">Čas zahájení nočního režimu</string>

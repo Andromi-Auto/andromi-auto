@@ -27,7 +27,7 @@
     <string name="threshold_light_title">حساسية الضوء</string>
     <string name="threshold_brightness_title">مستوى السطوع</string>
     <string name="threshold_light_hint">يتم تفعيل الوضع الداكن عندما ينخفض الضوء المحيط عن هذا المستوى</string>
-    <string name="threshold_brightness_hint">يتم تفعيل الوضع الداكن عندما يكون سطوع الشاشة أقل من هذه القيمة. يُبلغ أندرويد عن السطوع بنطاق 0–255، لكن النطاق الفعلي قد يختلف حسب الجهاز. قد تحتاج إلى التجربة للعثور على الحد المناسب لهاتفك.</string>
+    <string name="threshold_brightness_hint">يتم تفعيل الوضع الداكن عندما يكون سطوع الشاشة أقل من هذه القيمة. يُبلغ أندرويد عن السطوع بنطاق 0–255، لكن النطاق الفعلي قد يختلف حسب الجهاز. قد تحتاج إلى التجربة للعثور على الحد المناسب لجهازك.</string>
     <string name="current_light_reading">الضوء الحالي: %d لوكس</string>
     <string name="enable_fine_lux_control">تحكم دقيق (0–100 لوكس)</string>
     <string name="night_mode_start">وقت بدء الوضع الليلي</string>

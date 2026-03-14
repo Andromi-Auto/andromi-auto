@@ -27,7 +27,7 @@
     <string name="threshold_light_title">Lichtempfindlichkeit</string>
     <string name="threshold_brightness_title">Helligkeitsstufe</string>
     <string name="threshold_light_hint">Der Dunkelmodus wird aktiviert, wenn das Umgebungslicht unter diesen Wert fällt</string>
-    <string name="threshold_brightness_hint">Der Dunkelmodus wird aktiviert, wenn die Bildschirmhelligkeit unter diesem Wert liegt. Android meldet die Helligkeit als 0–255, aber der tatsächliche Bereich kann je nach Gerät variieren. Möglicherweise müssen Sie experimentieren, um den richtigen Schwellenwert für Ihr Telefon zu finden.</string>
+    <string name="threshold_brightness_hint">Der Dunkelmodus wird aktiviert, wenn die Bildschirmhelligkeit unter diesem Wert liegt. Android meldet die Helligkeit als 0–255, aber der tatsächliche Bereich kann je nach Gerät variieren. Möglicherweise müssen Sie experimentieren, um den richtigen Schwellenwert für Ihr Gerät zu finden.</string>
     <string name="current_light_reading">Aktuelles Licht: %d Lux</string>
     <string name="enable_fine_lux_control">Feinsteuerung (0–100 Lux)</string>
     <string name="night_mode_start">Nachtmodus Startzeit</string>
