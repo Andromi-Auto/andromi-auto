@@ -15,6 +15,7 @@ import android.os.Looper
 import android.provider.Settings as SystemSettings
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.MutableLiveData
 import com.andrerinas.headunitrevived.contract.LocationUpdateIntent
 import java.util.Calendar
 
@@ -66,7 +67,7 @@ class AppThemeManager(
     }
 
     fun start() {
-        AppLog.d("AppThemeManager: Starting with mode=${settings.appTheme}, luxThreshold=${settings.nightModeThresholdLux}, brightnessThreshold=${settings.nightModeThresholdBrightness}")
+        AppLog.d("AppThemeManager: Starting with mode=${settings.appTheme}, luxThreshold=${settings.appThemeThresholdLux}, brightnessThreshold=${settings.appThemeThresholdBrightness}")
         val filter = IntentFilter().apply {
             addAction(Intent.ACTION_TIME_TICK)
             addAction(LocationUpdateIntent.action)
@@ -132,8 +133,8 @@ class AppThemeManager(
 
     private fun update(debounce: Boolean = true) {
         var isNight = false
-        val threshold = settings.nightModeThresholdLux
-        val thresholdBrightness = settings.nightModeThresholdBrightness
+        val threshold = settings.appThemeThresholdLux
+        val thresholdBrightness = settings.appThemeThresholdBrightness
 
         when (settings.appTheme) {
             Settings.AppTheme.LIGHT_SENSOR -> {
@@ -149,16 +150,16 @@ class AppThemeManager(
                 }
             }
             Settings.AppTheme.SCREEN_BRIGHTNESS -> {
-                currentBrightness = readBrightnessPercent()
+                currentBrightness = readBrightness()
                 if (currentBrightness >= 0) {
-                    val hyst = 4
+                    val hyst = 10
                     val currentIsNight = lastEmittedNight ?: false
                     isNight = if (currentIsNight) {
                         currentBrightness < (thresholdBrightness + hyst)
                     } else {
                         currentBrightness < thresholdBrightness
                     }
-                    AppLog.d("AppThemeManager: SCREEN_BRIGHTNESS brightness=$currentBrightness% threshold=$thresholdBrightness% isNight=$isNight")
+                    AppLog.d("AppThemeManager: SCREEN_BRIGHTNESS brightness=$currentBrightness threshold=$thresholdBrightness isNight=$isNight")
                 }
             }
             Settings.AppTheme.AUTO_SUNRISE -> {
@@ -169,8 +170,8 @@ class AppThemeManager(
             Settings.AppTheme.MANUAL_TIME -> {
                 val now = Calendar.getInstance()
                 val currentMinutes = now.get(Calendar.HOUR_OF_DAY) * 60 + now.get(Calendar.MINUTE)
-                val start = settings.nightModeManualStart
-                val end = settings.nightModeManualEnd
+                val start = settings.appThemeManualStart
+                val end = settings.appThemeManualEnd
                 isNight = if (start <= end) {
                     currentMinutes in start..end
                 } else {
@@ -198,8 +199,10 @@ class AppThemeManager(
 
     private fun applyNightMode(isNight: Boolean) {
         val mode = if (isNight) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
-        AppLog.d("AppThemeManager: Setting night mode to ${if (isNight) "NIGHT" else "DAY"}")
+        val changed = AppCompatDelegate.getDefaultNightMode() != mode
+        AppLog.d("AppThemeManager: Setting night mode to ${if (isNight) "NIGHT" else "DAY"} (changed=$changed)")
         AppCompatDelegate.setDefaultNightMode(mode)
+        if (changed) signalThemeChange()
     }
 
     override fun onSensorChanged(event: SensorEvent) {
@@ -220,26 +223,26 @@ class AppThemeManager(
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
 
-    private fun readBrightnessPercent(): Int {
+    private fun readBrightness(): Int {
         return try {
-            if (Build.VERSION.SDK_INT >= 28) {
-                val floatVal = SystemSettings.System.getFloat(
-                    context.contentResolver, "screen_brightness_float"
-                )
-                (floatVal * 100).toInt().coerceIn(0, 100)
-            } else {
-                val intVal = SystemSettings.System.getInt(
-                    context.contentResolver, SystemSettings.System.SCREEN_BRIGHTNESS
-                )
-                (intVal * 100 / 255).coerceIn(0, 100)
-            }
-        } catch (e: Exception) { -1 }
+            SystemSettings.System.getInt(
+                context.contentResolver, SystemSettings.System.SCREEN_BRIGHTNESS
+            ).coerceIn(0, 255)
+        } catch (_: Exception) { -1 }
     }
 
     fun getCurrentLux(): Float = currentLux
     fun getCurrentBrightness(): Int = currentBrightness
 
     companion object {
+        val themeVersion = MutableLiveData<Int>()
+        private var versionCounter = 0
+
+        private fun signalThemeChange() {
+            versionCounter++
+            themeVersion.value = versionCounter
+        }
+
         fun applyStaticTheme(settings: Settings) {
             val mode = when (settings.appTheme) {
                 Settings.AppTheme.AUTOMATIC -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
@@ -247,7 +250,9 @@ class AppThemeManager(
                 Settings.AppTheme.DARK, Settings.AppTheme.EXTREME_DARK -> AppCompatDelegate.MODE_NIGHT_YES
                 else -> return
             }
+            val changed = AppCompatDelegate.getDefaultNightMode() != mode
             AppCompatDelegate.setDefaultNightMode(mode)
+            if (changed) signalThemeChange()
         }
 
         fun isStaticMode(theme: Settings.AppTheme): Boolean {

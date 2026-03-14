@@ -4,7 +4,7 @@
         <item>Automático (Amanecer/Atardecer)</item>
         <item>Claro</item>
         <item>Oscuro</item>
-        <item>Tiempo manual</item>
+        <item>Hora manual</item>
         <item>Sensor de luz</item>
         <item>Brillo de pantalla</item>
     </string-array>

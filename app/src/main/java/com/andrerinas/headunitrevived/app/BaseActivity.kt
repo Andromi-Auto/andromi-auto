@@ -1,19 +1,23 @@
 package com.andrerinas.headunitrevived.app
 
 import android.content.Context
+import android.content.res.Configuration
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.andrerinas.headunitrevived.utils.AppThemeManager
 import com.andrerinas.headunitrevived.utils.LocaleHelper
 import com.andrerinas.headunitrevived.utils.Settings
 
 /**
- * Base Activity that handles app language configuration.
+ * Base Activity that handles app language configuration and live theme switching.
  * All activities should extend this class to properly apply the user's language preference.
  */
 open class BaseActivity : AppCompatActivity() {
 
+    protected open val autoRecreateOnThemeChange: Boolean = true
     private var currentLanguage: String? = null
     private var currentAppTheme: Settings.AppTheme? = null
+    private var currentNightMode: Int = 0
 
     override fun attachBaseContext(newBase: Context) {
         super.attachBaseContext(LocaleHelper.wrapContext(newBase))
@@ -24,12 +28,26 @@ open class BaseActivity : AppCompatActivity() {
         val settings = Settings(this)
         currentLanguage = settings.appLanguage
         currentAppTheme = settings.appTheme
+        currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+
+        // Observe live theme changes from AppThemeManager.
+        // This fires while the activity is in the foreground (STARTED/RESUMED),
+        // covering the case where setDefaultNightMode() doesn't auto-recreate.
+        val appliedVersion = AppThemeManager.themeVersion.value
+        if (autoRecreateOnThemeChange) {
+            AppThemeManager.themeVersion.observe(this) { version ->
+                if (version != appliedVersion) {
+                    recreate()
+                }
+            }
+        }
     }
 
     override fun onResume() {
         super.onResume()
         val settings = Settings(this)
-        if (currentLanguage != settings.appLanguage || currentAppTheme != settings.appTheme) {
+        val actualNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+        if (currentLanguage != settings.appLanguage || currentAppTheme != settings.appTheme || currentNightMode != actualNightMode) {
             recreate()
         }
     }

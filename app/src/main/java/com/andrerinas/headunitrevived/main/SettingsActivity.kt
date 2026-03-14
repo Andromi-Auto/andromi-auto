@@ -10,6 +10,8 @@ import com.andrerinas.headunitrevived.utils.Settings
 import com.andrerinas.headunitrevived.utils.SystemUI
 
 class SettingsActivity : BaseActivity() {
+    override val autoRecreateOnThemeChange = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)

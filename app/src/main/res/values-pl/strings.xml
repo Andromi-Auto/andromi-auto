@@ -29,7 +29,8 @@
     <string name="threshold_light_hint">Tryb ciemny aktywuje się, gdy światło otoczenia spadnie poniżej tego poziomu</string>
     <string name="threshold_brightness_hint">Tryb ciemny aktywuje się, gdy jasność ekranu jest poniżej tego poziomu</string>
     <string name="current_light_reading">Aktualne światło: %d Lux</string>
-    <string name="current_brightness_reading">Aktualna jasność: %d%%</string>
+    <string name="current_brightness_reading">Aktualna: %d</string>
+    <string name="enable_fine_lux_control">Precyzyjna kontrola (0–100 Lux)</string>
     <string name="night_mode_start">Czas rozpoczęcia trybu nocnego</string>
     <string name="night_mode_end">Czas zakończenia trybu nocnego</string>
 

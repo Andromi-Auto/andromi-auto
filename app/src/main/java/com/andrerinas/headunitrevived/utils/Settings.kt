@@ -88,7 +88,7 @@ class Settings(context: Context) {
         }
 
     var nightModeThresholdBrightness: Int
-        get() = prefs.getInt("night-mode-threshold-brightness", 40)
+        get() = prefs.getInt("night-mode-threshold-brightness", 100)
         set(value) {
             prefs.edit().putInt("night-mode-threshold-brightness", value).apply()
         }
@@ -386,6 +386,23 @@ class Settings(context: Context) {
         set(value) {
             prefs.edit().putInt("night-mode-manual-end", value).apply()
         }
+
+    // App Theme independent threshold/time settings (separate from Night Mode)
+    var appThemeThresholdLux: Int
+        get() = prefs.getInt("app-theme-threshold-lux", 100)
+        set(value) { prefs.edit().putInt("app-theme-threshold-lux", value).apply() }
+
+    var appThemeThresholdBrightness: Int
+        get() = prefs.getInt("app-theme-threshold-brightness", 100)
+        set(value) { prefs.edit().putInt("app-theme-threshold-brightness", value).apply() }
+
+    var appThemeManualStart: Int
+        get() = prefs.getInt("app-theme-manual-start", 1140)
+        set(value) { prefs.edit().putInt("app-theme-manual-start", value).apply() }
+
+    var appThemeManualEnd: Int
+        get() = prefs.getInt("app-theme-manual-end", 420)
+        set(value) { prefs.edit().putInt("app-theme-manual-end", value).apply() }
 
     companion object {
         const val CONNECTION_TYPE_WIFI = "wifi"

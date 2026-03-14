@@ -27,7 +27,6 @@ import com.andrerinas.headunitrevived.utils.AppThemeManager
 import com.andrerinas.headunitrevived.utils.Settings
 import com.andrerinas.headunitrevived.utils.LocaleHelper
 import com.andrerinas.headunitrevived.BuildConfig
-import android.database.ContentObserver
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -100,6 +99,10 @@ class SettingsFragment : Fragment(), SensorEventListener {
 
     private var pendingAutoStartOnUsb: Boolean? = null
     private var pendingAppTheme: Settings.AppTheme? = null
+    private var pendingAppThemeThresholdLux: Int? = null
+    private var pendingAppThemeThresholdBrightness: Int? = null
+    private var pendingAppThemeManualStart: Int? = null
+    private var pendingAppThemeManualEnd: Int? = null
 
     // Direct light sensor reading (independent of AppThemeManager)
     private var cachedLux: Float = -1f
@@ -110,12 +113,6 @@ class SettingsFragment : Fragment(), SensorEventListener {
             updateSettingsList()
         }
     }
-    private val brightnessObserver = object : ContentObserver(refreshHandler) {
-        override fun onChange(selfChange: Boolean) {
-            scheduleListRefresh()
-        }
-    }
-
     private var pendingMediaVolumeOffset: Int? = null
     private var pendingAssistantVolumeOffset: Int? = null
     private var pendingNavigationVolumeOffset: Int? = null
@@ -171,6 +168,10 @@ class SettingsFragment : Fragment(), SensorEventListener {
         pendingAssistantVolumeOffset = settings.assistantVolumeOffset
         pendingNavigationVolumeOffset = settings.navigationVolumeOffset
         pendingAppTheme = settings.appTheme
+        pendingAppThemeThresholdLux = settings.appThemeThresholdLux
+        pendingAppThemeThresholdBrightness = settings.appThemeThresholdBrightness
+        pendingAppThemeManualStart = settings.appThemeManualStart
+        pendingAppThemeManualEnd = settings.appThemeManualEnd
 
         // Intercept system back button
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
@@ -252,6 +253,14 @@ class SettingsFragment : Fragment(), SensorEventListener {
     }
 
     private fun saveSettings() {
+        // Detect changes BEFORE saving values to SharedPreferences
+        val themeChanged = pendingAppTheme != settings.appTheme
+        val appThemeThresholdChanged = pendingAppThemeThresholdLux != settings.appThemeThresholdLux ||
+                pendingAppThemeThresholdBrightness != settings.appThemeThresholdBrightness ||
+                pendingAppThemeManualStart != settings.appThemeManualStart ||
+                pendingAppThemeManualEnd != settings.appThemeManualEnd
+        val languageChanged = pendingAppLanguage != settings.appLanguage
+
         pendingNightMode?.let { settings.nightMode = it }
         pendingThresholdLux?.let { settings.nightModeThresholdLux = it }
         pendingThresholdBrightness?.let { settings.nightModeThresholdBrightness = it }
@@ -282,14 +291,14 @@ class SettingsFragment : Fragment(), SensorEventListener {
         pendingAssistantVolumeOffset?.let { settings.assistantVolumeOffset = it }
         pendingNavigationVolumeOffset?.let { settings.navigationVolumeOffset = it }
 
-        val themeChanged = pendingAppTheme != settings.appTheme
-        val thresholdChanged = pendingThresholdLux != settings.nightModeThresholdLux ||
-                pendingThresholdBrightness != settings.nightModeThresholdBrightness ||
-                pendingManualStart != settings.nightModeManualStart ||
-                pendingManualEnd != settings.nightModeManualEnd
+        pendingAppThemeThresholdLux?.let { settings.appThemeThresholdLux = it }
+        pendingAppThemeThresholdBrightness?.let { settings.appThemeThresholdBrightness = it }
+        pendingAppThemeManualStart?.let { settings.appThemeManualStart = it }
+        pendingAppThemeManualEnd?.let { settings.appThemeManualEnd = it }
+
         pendingAppTheme?.let { newTheme ->
             settings.appTheme = newTheme
-            if (themeChanged || (thresholdChanged && !AppThemeManager.isStaticMode(newTheme))) {
+            if (themeChanged || (appThemeThresholdChanged && !AppThemeManager.isStaticMode(newTheme))) {
                 // Stop existing auto theme manager
                 com.andrerinas.headunitrevived.App.appThemeManager?.stop()
                 com.andrerinas.headunitrevived.App.appThemeManager = null
@@ -304,7 +313,6 @@ class SettingsFragment : Fragment(), SensorEventListener {
             }
         }
 
-        val languageChanged = pendingAppLanguage != settings.appLanguage
         pendingAppLanguage?.let { settings.appLanguage = it }
         
         pendingInsetLeft?.let { settings.insetLeft = it }
@@ -359,8 +367,10 @@ class SettingsFragment : Fragment(), SensorEventListener {
             }
         }
 
-        // Restart activity if language or theme changed
-        if (languageChanged || themeChanged) {
+        // Restart activity if language, theme, or app theme thresholds/times changed
+        val needsRecreate = languageChanged || themeChanged ||
+                (appThemeThresholdChanged && pendingAppTheme?.let { !AppThemeManager.isStaticMode(it) } == true)
+        if (needsRecreate) {
             requireActivity().recreate()
         }
     }
@@ -400,7 +410,11 @@ class SettingsFragment : Fragment(), SensorEventListener {
                         pendingMediaVolumeOffset != settings.mediaVolumeOffset ||
                         pendingAssistantVolumeOffset != settings.assistantVolumeOffset ||
                         pendingNavigationVolumeOffset != settings.navigationVolumeOffset ||
-                        pendingAppTheme != settings.appTheme
+                        pendingAppTheme != settings.appTheme ||
+                        pendingAppThemeThresholdLux != settings.appThemeThresholdLux ||
+                        pendingAppThemeThresholdBrightness != settings.appThemeThresholdBrightness ||
+                        pendingAppThemeManualStart != settings.appThemeManualStart ||
+                        pendingAppThemeManualEnd != settings.appThemeManualEnd
 
         hasChanges = anyChange
 
@@ -602,22 +616,21 @@ class SettingsFragment : Fragment(), SensorEventListener {
         // App theme sub-options: threshold slider for Light Sensor / Screen Brightness
         if (pendingAppTheme == Settings.AppTheme.LIGHT_SENSOR || pendingAppTheme == Settings.AppTheme.SCREEN_BRIGHTNESS) {
             val isSensor = pendingAppTheme == Settings.AppTheme.LIGHT_SENSOR
-            val maxVal = if (isSensor) LUX_MAX else BRIGHTNESS_MAX
-            val currentValue = if (isSensor) pendingThresholdLux else pendingThresholdBrightness
-            val percentage = ((currentValue ?: 0) * 100 / maxVal).coerceIn(0, 100)
+            val currentValue = if (isSensor) pendingAppThemeThresholdLux else pendingAppThemeThresholdBrightness
             val title = getString(if (isSensor) R.string.threshold_light_title else R.string.threshold_brightness_title)
             val hint = getString(if (isSensor) R.string.threshold_light_hint else R.string.threshold_brightness_hint)
             val currentReading = if (isSensor) {
                 if (cachedLux >= 0) getString(R.string.current_light_reading, cachedLux.toInt()) else ""
             } else {
-                val bp = readBrightnessPercent()
-                if (bp >= 0) getString(R.string.current_brightness_reading, bp) else ""
+                val b = readBrightness()
+                if (b >= 0) getString(R.string.current_brightness_reading, b) else ""
             }
             val displayValue = if (isSensor) {
                 val base = "${currentValue ?: 0} Lux"
                 if (currentReading.isNotEmpty()) "$base ($currentReading)" else base
             } else {
-                if (currentReading.isNotEmpty()) "$percentage% ($currentReading)" else "$percentage%"
+                val base = "${currentValue ?: 0} / 255"
+                if (currentReading.isNotEmpty()) "$base ($currentReading)" else base
             }
 
             items.add(SettingItem.SettingEntry(
@@ -625,29 +638,35 @@ class SettingsFragment : Fragment(), SensorEventListener {
                 nameResId = if (isSensor) R.string.threshold_light_title else R.string.threshold_brightness_title,
                 value = displayValue,
                 onClick = { _ ->
-                    showSliderDialog(
-                        title = title,
-                        message = hint,
-                        initialPercentage = percentage,
-                        minLabel = if (isSensor) "0 Lux" else "0%",
-                        maxLabel = if (isSensor) "10,000 Lux" else "100%",
-                        formatValue = if (isSensor) {
-                            { p -> "${p * LUX_MAX / 100} Lux" }
-                        } else {
-                            { p -> "$p%" }
-                        },
-                        currentReading = currentReading,
-                        onConfirm = { newPercentage ->
-                            val newVal = newPercentage * maxVal / 100
-                            if (isSensor) {
-                                pendingThresholdLux = newVal
-                            } else {
-                                pendingThresholdBrightness = newVal
+                    if (isSensor) {
+                        showLuxSliderDialog(
+                            title = title,
+                            message = hint,
+                            initialLux = currentValue ?: 0,
+                            currentReading = currentReading,
+                            onConfirm = { newLux ->
+                                pendingAppThemeThresholdLux = newLux
+                                checkChanges()
+                                updateSettingsList()
                             }
-                            checkChanges()
-                            updateSettingsList()
-                        }
-                    )
+                        )
+                    } else {
+                        showSliderDialog(
+                            title = title,
+                            message = hint,
+                            initialPercentage = currentValue ?: 100,
+                            minLabel = "0",
+                            maxLabel = "255",
+                            formatValue = { v -> "$v" },
+                            currentReading = currentReading,
+                            sliderMax = 255,
+                            onConfirm = { newVal ->
+                                pendingAppThemeThresholdBrightness = newVal
+                                checkChanges()
+                                updateSettingsList()
+                            }
+                        )
+                    }
                 }
             ))
         }
@@ -659,26 +678,26 @@ class SettingsFragment : Fragment(), SensorEventListener {
             items.add(SettingItem.SettingEntry(
                 stableId = "appThemeStart",
                 nameResId = R.string.night_mode_start,
-                value = formatTime(pendingManualStart!!),
+                value = formatTime(pendingAppThemeManualStart!!),
                 onClick = { _ ->
                     TimePickerDialog(requireContext(), { _, hour, minute ->
-                        pendingManualStart = hour * 60 + minute
+                        pendingAppThemeManualStart = hour * 60 + minute
                         checkChanges()
                         updateSettingsList()
-                    }, pendingManualStart!! / 60, pendingManualStart!! % 60, true).show()
+                    }, pendingAppThemeManualStart!! / 60, pendingAppThemeManualStart!! % 60, true).show()
                 }
             ))
 
             items.add(SettingItem.SettingEntry(
                 stableId = "appThemeEnd",
                 nameResId = R.string.night_mode_end,
-                value = formatTime(pendingManualEnd!!),
+                value = formatTime(pendingAppThemeManualEnd!!),
                 onClick = { _ ->
                     TimePickerDialog(requireContext(), { _, hour, minute ->
-                        pendingManualEnd = hour * 60 + minute
+                        pendingAppThemeManualEnd = hour * 60 + minute
                         checkChanges()
                         updateSettingsList()
-                    }, pendingManualEnd!! / 60, pendingManualEnd!! % 60, true).show()
+                    }, pendingAppThemeManualEnd!! / 60, pendingAppThemeManualEnd!! % 60, true).show()
                 }
             ))
         }
@@ -714,22 +733,21 @@ class SettingsFragment : Fragment(), SensorEventListener {
         // Night mode sub-options: threshold slider for Light Sensor / Screen Brightness
         if (pendingNightMode == Settings.NightMode.LIGHT_SENSOR || pendingNightMode == Settings.NightMode.SCREEN_BRIGHTNESS) {
             val isSensor = pendingNightMode == Settings.NightMode.LIGHT_SENSOR
-            val maxVal = if (isSensor) LUX_MAX else BRIGHTNESS_MAX
             val currentValue = if (isSensor) pendingThresholdLux else pendingThresholdBrightness
-            val percentage = ((currentValue ?: 0) * 100 / maxVal).coerceIn(0, 100)
             val title = getString(if (isSensor) R.string.threshold_light_title else R.string.threshold_brightness_title)
             val hint = getString(if (isSensor) R.string.threshold_light_hint else R.string.threshold_brightness_hint)
             val nmCurrentReading = if (isSensor) {
                 if (cachedLux >= 0) getString(R.string.current_light_reading, cachedLux.toInt()) else ""
             } else {
-                val bp = readBrightnessPercent()
-                if (bp >= 0) getString(R.string.current_brightness_reading, bp) else ""
+                val b = readBrightness()
+                if (b >= 0) getString(R.string.current_brightness_reading, b) else ""
             }
             val displayValue = if (isSensor) {
                 val base = "${currentValue ?: 0} Lux"
                 if (nmCurrentReading.isNotEmpty()) "$base ($nmCurrentReading)" else base
             } else {
-                if (nmCurrentReading.isNotEmpty()) "$percentage% ($nmCurrentReading)" else "$percentage%"
+                val base = "${currentValue ?: 0} / 255"
+                if (nmCurrentReading.isNotEmpty()) "$base ($nmCurrentReading)" else base
             }
 
             items.add(SettingItem.SettingEntry(
@@ -737,29 +755,35 @@ class SettingsFragment : Fragment(), SensorEventListener {
                 nameResId = if (isSensor) R.string.threshold_light_title else R.string.threshold_brightness_title,
                 value = displayValue,
                 onClick = { _ ->
-                    showSliderDialog(
-                        title = title,
-                        message = hint,
-                        initialPercentage = percentage,
-                        minLabel = if (isSensor) "0 Lux" else "0%",
-                        maxLabel = if (isSensor) "10,000 Lux" else "100%",
-                        formatValue = if (isSensor) {
-                            { p -> "${p * LUX_MAX / 100} Lux" }
-                        } else {
-                            { p -> "$p%" }
-                        },
-                        currentReading = nmCurrentReading,
-                        onConfirm = { newPercentage ->
-                            val newVal = newPercentage * maxVal / 100
-                            if (isSensor) {
-                                pendingThresholdLux = newVal
-                            } else {
-                                pendingThresholdBrightness = newVal
+                    if (isSensor) {
+                        showLuxSliderDialog(
+                            title = title,
+                            message = hint,
+                            initialLux = currentValue ?: 0,
+                            currentReading = nmCurrentReading,
+                            onConfirm = { newLux ->
+                                pendingThresholdLux = newLux
+                                checkChanges()
+                                updateSettingsList()
                             }
-                            checkChanges()
-                            updateSettingsList()
-                        }
-                    )
+                        )
+                    } else {
+                        showSliderDialog(
+                            title = title,
+                            message = hint,
+                            initialPercentage = currentValue ?: 100,
+                            minLabel = "0",
+                            maxLabel = "255",
+                            formatValue = { v -> "$v" },
+                            currentReading = nmCurrentReading,
+                            sliderMax = 255,
+                            onConfirm = { newVal ->
+                                pendingThresholdBrightness = newVal
+                                checkChanges()
+                                updateSettingsList()
+                            }
+                        )
+                    }
                 }
             ))
         }
@@ -1355,17 +1379,6 @@ class SettingsFragment : Fragment(), SensorEventListener {
         if (lightSensor != null) {
             sensorManager?.registerListener(this, lightSensor, SensorManager.SENSOR_DELAY_NORMAL)
         }
-        // Register brightness observer for live updates
-        requireContext().contentResolver.registerContentObserver(
-            android.provider.Settings.System.getUriFor(android.provider.Settings.System.SCREEN_BRIGHTNESS),
-            false, brightnessObserver
-        )
-        if (Build.VERSION.SDK_INT >= 28) {
-            requireContext().contentResolver.registerContentObserver(
-                android.provider.Settings.System.getUriFor("screen_brightness_float"),
-                false, brightnessObserver
-            )
-        }
         // Refresh settings list when returning from sub-screens (e.g. AutoConnectFragment)
         if (::settingsAdapter.isInitialized) {
             settings = App.provide(requireContext()).settings
@@ -1376,7 +1389,6 @@ class SettingsFragment : Fragment(), SensorEventListener {
     override fun onPause() {
         super.onPause()
         sensorManager?.unregisterListener(this)
-        try { requireContext().contentResolver.unregisterContentObserver(brightnessObserver) } catch (_: Exception) {}
         refreshHandler.removeCallbacks(refreshRunnable)
     }
 
@@ -1465,6 +1477,7 @@ class SettingsFragment : Fragment(), SensorEventListener {
         maxLabel: String,
         formatValue: (Int) -> String,
         currentReading: String = "",
+        sliderMax: Int = 100,
         onConfirm: (Int) -> Unit
     ) {
         val context = requireContext()
@@ -1484,7 +1497,7 @@ class SettingsFragment : Fragment(), SensorEventListener {
         layout.addView(hint)
 
         val label = android.widget.TextView(context).apply {
-            text = formatValue(initialPercentage.coerceIn(0, 100))
+            text = formatValue(initialPercentage.coerceIn(0, sliderMax))
             textSize = 24f
             gravity = android.view.Gravity.CENTER
             val topMargin = (16 * density).toInt()
@@ -1498,8 +1511,8 @@ class SettingsFragment : Fragment(), SensorEventListener {
         layout.addView(label)
 
         val seekBar = android.widget.SeekBar(context).apply {
-            max = 100
-            progress = initialPercentage.coerceIn(0, 100)
+            max = sliderMax
+            progress = initialPercentage.coerceIn(0, sliderMax)
             setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
                 override fun onProgressChanged(seekBar: android.widget.SeekBar?, progress: Int, fromUser: Boolean) {
                     label.text = formatValue(progress)
@@ -1568,21 +1581,12 @@ class SettingsFragment : Fragment(), SensorEventListener {
             .show()
     }
 
-    private fun readBrightnessPercent(): Int {
+    private fun readBrightness(): Int {
         return try {
-            if (Build.VERSION.SDK_INT >= 28) {
-                val floatVal = android.provider.Settings.System.getFloat(
-                    requireContext().contentResolver, "screen_brightness_float"
-                )
-                (floatVal * 100).toInt().coerceIn(0, 100)
-            } else {
-                val intVal = android.provider.Settings.System.getInt(
-                    requireContext().contentResolver,
-                    android.provider.Settings.System.SCREEN_BRIGHTNESS
-                )
-                (intVal * 100 / 255).coerceIn(0, 100)
-            }
-        } catch (e: Exception) { -1 }
+            android.provider.Settings.System.getInt(
+                requireContext().contentResolver, android.provider.Settings.System.SCREEN_BRIGHTNESS
+            ).coerceIn(0, 255)
+        } catch (_: Exception) { -1 }
     }
 
     private fun scheduleListRefresh() {
@@ -1590,9 +1594,132 @@ class SettingsFragment : Fragment(), SensorEventListener {
         refreshHandler.postDelayed(refreshRunnable, 500)
     }
 
+    private fun showLuxSliderDialog(
+        title: String,
+        message: String,
+        initialLux: Int,
+        currentReading: String = "",
+        onConfirm: (Int) -> Unit
+    ) {
+        val context = requireContext()
+        val density = context.resources.displayMetrics.density
+        val padding = (24 * density).toInt()
+
+        var currentMax = if (initialLux <= LUX_MAX_FINE) LUX_MAX_FINE else LUX_MAX
+
+        val layout = android.widget.LinearLayout(context).apply {
+            orientation = android.widget.LinearLayout.VERTICAL
+            setPadding(padding, (8 * density).toInt(), padding, 0)
+        }
+
+        val hint = android.widget.TextView(context).apply {
+            text = message
+            textSize = 14f
+            setTextColor(context.resources.getColor(android.R.color.darker_gray, null))
+        }
+        layout.addView(hint)
+
+        val label = android.widget.TextView(context).apply {
+            text = "$initialLux Lux"
+            textSize = 24f
+            gravity = android.view.Gravity.CENTER
+            val lp = android.widget.LinearLayout.LayoutParams(
+                android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            lp.topMargin = (16 * density).toInt()
+            layoutParams = lp
+        }
+        layout.addView(label)
+
+        val seekBar = android.widget.SeekBar(context).apply {
+            max = currentMax
+            progress = initialLux.coerceIn(0, currentMax)
+        }
+
+        val minText = android.widget.TextView(context).apply {
+            text = "0 Lux"
+            textSize = 12f
+            setTextColor(context.resources.getColor(android.R.color.darker_gray, null))
+            layoutParams = android.widget.LinearLayout.LayoutParams(0, android.widget.LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+        }
+        val maxText = android.widget.TextView(context).apply {
+            text = "${currentMax} Lux"
+            textSize = 12f
+            gravity = android.view.Gravity.END
+            setTextColor(context.resources.getColor(android.R.color.darker_gray, null))
+            layoutParams = android.widget.LinearLayout.LayoutParams(0, android.widget.LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+        }
+
+        seekBar.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(sb: android.widget.SeekBar?, progress: Int, fromUser: Boolean) {
+                label.text = "$progress Lux"
+            }
+            override fun onStartTrackingTouch(sb: android.widget.SeekBar?) {}
+            override fun onStopTrackingTouch(sb: android.widget.SeekBar?) {}
+        })
+        layout.addView(seekBar)
+
+        val rangeRow = android.widget.LinearLayout(context).apply {
+            orientation = android.widget.LinearLayout.HORIZONTAL
+        }
+        rangeRow.addView(minText)
+        rangeRow.addView(maxText)
+        layout.addView(rangeRow)
+
+        val checkBox = android.widget.CheckBox(context).apply {
+            text = getString(R.string.enable_fine_lux_control)
+            isChecked = currentMax == LUX_MAX_FINE
+            val lp = android.widget.LinearLayout.LayoutParams(
+                android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            lp.topMargin = (12 * density).toInt()
+            layoutParams = lp
+        }
+        checkBox.setOnCheckedChangeListener { _, isChecked ->
+            val oldProgress = seekBar.progress
+            currentMax = if (isChecked) LUX_MAX_FINE else LUX_MAX
+            seekBar.max = currentMax
+            seekBar.progress = oldProgress.coerceIn(0, currentMax)
+            maxText.text = "${currentMax} Lux"
+            label.text = "${seekBar.progress} Lux"
+        }
+        layout.addView(checkBox)
+
+        if (currentReading.isNotEmpty()) {
+            val readingLabel = android.widget.TextView(context).apply {
+                text = currentReading
+                textSize = 16f
+                gravity = android.view.Gravity.CENTER
+                setTextColor(context.resources.getColor(android.R.color.darker_gray, null))
+                val lp = android.widget.LinearLayout.LayoutParams(
+                    android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                    android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+                )
+                lp.topMargin = (16 * density).toInt()
+                layoutParams = lp
+            }
+            layout.addView(readingLabel)
+        }
+
+        MaterialAlertDialogBuilder(context, R.style.DarkAlertDialog)
+            .setTitle(title)
+            .setView(layout)
+            .setPositiveButton(android.R.string.ok) { dialog, _ ->
+                onConfirm(seekBar.progress)
+                dialog.dismiss()
+            }
+            .setNegativeButton(android.R.string.cancel) { dialog, _ ->
+                dialog.cancel()
+            }
+            .show()
+    }
+
     companion object {
         private val SAVE_ITEM_ID = 1001
         private const val LUX_MAX = 10000
-        private const val BRIGHTNESS_MAX = 100
+        private const val LUX_MAX_FINE = 100
+        private const val BRIGHTNESS_MAX = 255
     }
 }
