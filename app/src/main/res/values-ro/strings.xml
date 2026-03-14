@@ -326,5 +326,7 @@
     <string name="nav_action_ferry_train">Feribot / tren</string>
     <string name="nav_action_destination">Sosire</string>
     <string name="monochrome_icons">Pictograme monocrome</string>
-    <string name="monochrome_icons_description">Utilizați pictograme în tonuri de gri pe ecranul principal</string>
+    <string name="monochrome_icons_description">Utilizați pictograme în tonuri de gri pe ecranul principal în modul Întunecat sau Negru extrem</string>
+    <string name="use_extreme_dark">Folosiți negru extrem</string>
+    <string name="use_extreme_dark_description">Utilizați fundal negru pur când modul întunecat este activ</string>
 </resources>

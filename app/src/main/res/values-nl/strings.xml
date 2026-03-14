@@ -325,5 +325,7 @@
     <string name="nav_action_ferry_train">Veerboot / trein</string>
     <string name="nav_action_destination">Aankomst</string>
     <string name="monochrome_icons">Monochrome pictogrammen</string>
-    <string name="monochrome_icons_description">Grijstinten pictogrammen op het startscherm gebruiken</string>
+    <string name="monochrome_icons_description">Grijstinten pictogrammen op het startscherm gebruiken in Donker of Extra donker modus</string>
+    <string name="use_extreme_dark">Extra donker gebruiken</string>
+    <string name="use_extreme_dark_description">Puur zwarte achtergrond gebruiken wanneer donkere modus actief is</string>
     </resources>

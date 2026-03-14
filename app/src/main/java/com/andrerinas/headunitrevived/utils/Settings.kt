@@ -488,6 +488,10 @@ class Settings(context: Context) {
         get() = prefs.getBoolean("monochrome-icons", false)
         set(value) { prefs.edit().putBoolean("monochrome-icons", value).apply() }
 
+    var useExtremeDarkMode: Boolean
+        get() = prefs.getBoolean("use-extreme-dark-mode", false)
+        set(value) { prefs.edit().putBoolean("use-extreme-dark-mode", value).apply() }
+
     var appTheme: AppTheme
         get() {
             val value = prefs.getInt("app-theme", 0)

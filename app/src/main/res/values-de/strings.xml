@@ -326,5 +326,7 @@
     <string name="nav_action_ferry_train">Fähre / Zug</string>
     <string name="nav_action_destination">Ankunft</string>
     <string name="monochrome_icons">Einfarbige Symbole</string>
-    <string name="monochrome_icons_description">Graustufen-Symbole auf dem Startbildschirm verwenden</string>
+    <string name="monochrome_icons_description">Graustufen-Symbole auf dem Startbildschirm im Dunkel- oder Extra-Dunkel-Modus verwenden</string>
+    <string name="use_extreme_dark">Extra Dunkel verwenden</string>
+    <string name="use_extreme_dark_description">Rein schwarzen Hintergrund verwenden, wenn der Dunkelmodus aktiv ist</string>
 </resources>

@@ -104,6 +104,7 @@ class SettingsFragment : Fragment(), SensorEventListener {
     private var pendingAppThemeManualStart: Int? = null
     private var pendingAppThemeManualEnd: Int? = null
     private var pendingMonochromeIcons: Boolean? = null
+    private var pendingUseExtremeDarkMode: Boolean? = null
 
     // Direct light sensor reading (independent of AppThemeManager)
     private var cachedLux: Float = -1f
@@ -174,6 +175,7 @@ class SettingsFragment : Fragment(), SensorEventListener {
         pendingAppThemeManualStart = settings.appThemeManualStart
         pendingAppThemeManualEnd = settings.appThemeManualEnd
         pendingMonochromeIcons = settings.monochromeIcons
+        pendingUseExtremeDarkMode = settings.useExtremeDarkMode
 
         // Intercept system back button
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
@@ -311,6 +313,7 @@ class SettingsFragment : Fragment(), SensorEventListener {
         pendingAppThemeManualStart?.let { settings.appThemeManualStart = it }
         pendingAppThemeManualEnd?.let { settings.appThemeManualEnd = it }
         pendingMonochromeIcons?.let { settings.monochromeIcons = it }
+        pendingUseExtremeDarkMode?.let { settings.useExtremeDarkMode = it }
 
         pendingAppTheme?.let { newTheme ->
             settings.appTheme = newTheme
@@ -431,7 +434,8 @@ class SettingsFragment : Fragment(), SensorEventListener {
                         pendingAppThemeThresholdBrightness != settings.appThemeThresholdBrightness ||
                         pendingAppThemeManualStart != settings.appThemeManualStart ||
                         pendingAppThemeManualEnd != settings.appThemeManualEnd ||
-                        pendingMonochromeIcons != settings.monochromeIcons
+                        pendingMonochromeIcons != settings.monochromeIcons ||
+                        pendingUseExtremeDarkMode != settings.useExtremeDarkMode
 
         hasChanges = anyChange
 
@@ -587,8 +591,16 @@ class SettingsFragment : Fragment(), SensorEventListener {
                     .setTitle(R.string.change_app_theme)
                     .setSingleChoiceItems(appThemeTitles, pendingAppTheme!!.value) { dialog, which ->
                         pendingAppTheme = Settings.AppTheme.fromInt(which)
-                        if (pendingAppTheme != Settings.AppTheme.EXTREME_DARK && pendingAppTheme != Settings.AppTheme.DARK) {
+                        if (pendingAppTheme == Settings.AppTheme.EXTREME_DARK) {
+                            pendingMonochromeIcons = true
+                        } else if (pendingAppTheme == Settings.AppTheme.CLEAR) {
                             pendingMonochromeIcons = false
+                        }
+                        // Reset useExtremeDarkMode for static modes
+                        if (pendingAppTheme == Settings.AppTheme.CLEAR ||
+                            pendingAppTheme == Settings.AppTheme.DARK ||
+                            pendingAppTheme == Settings.AppTheme.EXTREME_DARK) {
+                            pendingUseExtremeDarkMode = false
                         }
                         checkChanges()
                         dialog.dismiss()
@@ -598,8 +610,25 @@ class SettingsFragment : Fragment(), SensorEventListener {
             }
         ))
 
-        // Monochrome icons toggle (for Dark and Extreme Dark)
-        if (pendingAppTheme == Settings.AppTheme.DARK || pendingAppTheme == Settings.AppTheme.EXTREME_DARK) {
+        // "Use Extreme Dark" toggle for auto modes
+        if (pendingAppTheme != Settings.AppTheme.CLEAR &&
+            pendingAppTheme != Settings.AppTheme.DARK &&
+            pendingAppTheme != Settings.AppTheme.EXTREME_DARK) {
+            items.add(SettingItem.ToggleSettingEntry(
+                stableId = "useExtremeDarkMode",
+                nameResId = R.string.use_extreme_dark,
+                descriptionResId = R.string.use_extreme_dark_description,
+                isChecked = pendingUseExtremeDarkMode!!,
+                onCheckedChanged = { isChecked ->
+                    pendingUseExtremeDarkMode = isChecked
+                    checkChanges()
+                    updateSettingsList()
+                }
+            ))
+        }
+
+        // Monochrome icons toggle (for all dark-capable modes)
+        if (pendingAppTheme != Settings.AppTheme.CLEAR) {
             items.add(SettingItem.ToggleSettingEntry(
                 stableId = "monochromeIcons",
                 nameResId = R.string.monochrome_icons,

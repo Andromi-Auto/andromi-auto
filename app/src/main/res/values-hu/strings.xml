@@ -325,5 +325,7 @@
     <string name="nav_action_ferry_train">Komp / vonat</string>
     <string name="nav_action_destination">Megérkezés</string>
     <string name="monochrome_icons">Monokróm ikonok</string>
-    <string name="monochrome_icons_description">Szürkeárnyalatos ikonok használata a kezdőképernyőn</string>
+    <string name="monochrome_icons_description">Szürkeárnyalatos ikonok használata a kezdőképernyőn Sötét vagy Extrém sötét módban</string>
+    <string name="use_extreme_dark">Extrém sötét használata</string>
+    <string name="use_extreme_dark_description">Tiszta fekete háttér használata sötét módban</string>
 </resources>

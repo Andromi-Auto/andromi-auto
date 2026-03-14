@@ -326,5 +326,7 @@
     <string name="nav_action_ferry_train">Пором / потяг</string>
     <string name="nav_action_destination">Прибуття</string>
     <string name="monochrome_icons">Монохромні значки</string>
-    <string name="monochrome_icons_description">Використовувати сірі значки на головному екрані</string>
+    <string name="monochrome_icons_description">Використовувати сірі значки на головному екрані в темному або надтемному режимі</string>
+    <string name="use_extreme_dark">Використовувати надтемний режим</string>
+    <string name="use_extreme_dark_description">Використовувати повністю чорний фон при активному темному режимі</string>
     </resources>

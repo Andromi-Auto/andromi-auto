@@ -326,5 +326,7 @@
     <string name="nav_action_ferry_train">Balsa / trem</string>
     <string name="nav_action_destination">Chegada</string>
     <string name="monochrome_icons">Ícones monocromáticos</string>
-    <string name="monochrome_icons_description">Usar ícones em tons de cinza na tela inicial</string>
+    <string name="monochrome_icons_description">Usar ícones em tons de cinza na tela inicial no modo Escuro ou Escuro Extremo</string>
+    <string name="use_extreme_dark">Usar escuro extremo</string>
+    <string name="use_extreme_dark_description">Usar fundo preto puro quando o modo escuro está ativo</string>
 </resources>

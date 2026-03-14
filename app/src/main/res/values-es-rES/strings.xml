@@ -326,5 +326,7 @@
     <string name="nav_action_ferry_train">Ferry / tren</string>
     <string name="nav_action_destination">Llegada</string>
     <string name="monochrome_icons">Iconos monocromáticos</string>
-    <string name="monochrome_icons_description">Usar iconos en escala de grises en la pantalla principal</string>
+    <string name="monochrome_icons_description">Usar iconos en escala de grises en la pantalla principal en modo Oscuro o Oscuro Extremo</string>
+    <string name="use_extreme_dark">Usar oscuro extremo</string>
+    <string name="use_extreme_dark_description">Usar fondo negro puro cuando el modo oscuro está activo</string>
 </resources>

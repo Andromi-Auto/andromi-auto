@@ -326,5 +326,7 @@
     <string name="nav_action_ferry_train">عبّارة / قطار</string>
     <string name="nav_action_destination">وصول</string>
     <string name="monochrome_icons">أيقونات أحادية اللون</string>
-    <string name="monochrome_icons_description">استخدام أيقونات رمادية على الشاشة الرئيسية</string>
+    <string name="monochrome_icons_description">استخدام أيقونات رمادية على الشاشة الرئيسية في الوضع الداكن أو الداكن المطلق</string>
+    <string name="use_extreme_dark">استخدام الوضع الداكن المطلق</string>
+    <string name="use_extreme_dark_description">استخدام خلفية سوداء بالكامل عند تفعيل الوضع الداكن</string>
 </resources>

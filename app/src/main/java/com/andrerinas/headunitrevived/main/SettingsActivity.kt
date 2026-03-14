@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.navigation.fragment.NavHostFragment
+import android.content.res.Configuration
 import com.andrerinas.headunitrevived.R
 import com.andrerinas.headunitrevived.app.BaseActivity
 import com.andrerinas.headunitrevived.utils.Settings
@@ -15,7 +16,9 @@ class SettingsActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
 
         val appSettings = Settings(this)
-        if (appSettings.appTheme == Settings.AppTheme.EXTREME_DARK) {
+        val isNightActive = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+        if (appSettings.appTheme == Settings.AppTheme.EXTREME_DARK ||
+            (appSettings.useExtremeDarkMode && isNightActive)) {
             theme.applyStyle(R.style.ThemeOverlay_ExtremeDark, true)
         }
         requestedOrientation = appSettings.screenOrientation.androidOrientation

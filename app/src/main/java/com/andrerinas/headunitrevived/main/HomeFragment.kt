@@ -22,6 +22,7 @@ import com.andrerinas.headunitrevived.R
 import com.andrerinas.headunitrevived.aap.AapProjectionActivity
 import com.andrerinas.headunitrevived.aap.AapService
 import com.andrerinas.headunitrevived.connection.UsbDeviceCompat
+import android.content.res.Configuration
 import com.andrerinas.headunitrevived.utils.AppLog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -210,7 +211,10 @@ class HomeFragment : Fragment() {
 
     private fun updateButtonStyle() {
         val appSettings = App.provide(requireContext()).settings
-        val isDarkTheme = appSettings.appTheme == Settings.AppTheme.DARK || appSettings.appTheme == Settings.AppTheme.EXTREME_DARK
+        val isNightActive = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+        val isDarkTheme = appSettings.appTheme == Settings.AppTheme.DARK ||
+                          appSettings.appTheme == Settings.AppTheme.EXTREME_DARK ||
+                          isNightActive
         if (isDarkTheme && appSettings.monochromeIcons) {
             applyMonochromeStyle()
         } else {

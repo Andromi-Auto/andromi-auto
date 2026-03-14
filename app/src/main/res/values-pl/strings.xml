@@ -326,5 +326,7 @@
     <string name="nav_action_ferry_train">Prom / pociąg</string>
     <string name="nav_action_destination">Przyjazd</string>
     <string name="monochrome_icons">Monochromatyczne ikony</string>
-    <string name="monochrome_icons_description">Używaj szarych ikon na ekranie głównym</string>
+    <string name="monochrome_icons_description">Używaj szarych ikon na ekranie głównym w trybie ciemnym lub ekstremalnie ciemnym</string>
+    <string name="use_extreme_dark">Użyj ekstremalnie ciemnego</string>
+    <string name="use_extreme_dark_description">Używaj czystego czarnego tła gdy tryb ciemny jest aktywny</string>
     </resources>
