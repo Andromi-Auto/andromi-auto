@@ -501,6 +501,14 @@ class Settings(context: Context) {
         get() = prefs.getBoolean("use-gradient-background", false)
         set(value) { prefs.edit().putBoolean("use-gradient-background", value).apply() }
 
+    var aaMonochromeEnabled: Boolean
+        get() = prefs.getBoolean("aa-monochrome-enabled", false)
+        set(value) { prefs.edit().putBoolean("aa-monochrome-enabled", value).apply() }
+
+    var aaDesaturationLevel: Int
+        get() = prefs.getInt("aa-desaturation-level", 100)
+        set(value) { prefs.edit().putInt("aa-desaturation-level", value).apply() }
+
     var appTheme: AppTheme
         get() {
             val value = prefs.getInt("app-theme", 0)
