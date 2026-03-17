@@ -110,7 +110,8 @@
     <string name="key_media_next">Siguiente pista</string>
     <string name="key_media_prev">Pista anterior</string>
     <string name="key_search">Comando de voz</string>
-    <string name="key_call">Teléfono</string>
+    <string name="key_call">Teléfono (Aceptar)</string>
+    <string name="key_endcall">Finalizar llamada (Rechazar)</string>
     <string name="key_music">Música</string>
     <string name="key_nav">Navegación</string>
     <string name="key_night">Alternar modo nocturno</string>

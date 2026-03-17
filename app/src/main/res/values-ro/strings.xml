@@ -119,7 +119,8 @@
     <string name="key_media_next">Piesa următoare</string>
     <string name="key_media_prev">Piesa anterioară</string>
     <string name="key_search">Comandă vocală</string>
-    <string name="key_call">Telefon</string>
+    <string name="key_call">Telefon (Acceptare)</string>
+    <string name="key_endcall">Încheiere apel (Respingere)</string>
     <string name="key_music">Muzică</string>
     <string name="key_nav">Navigație</string>
     <string name="key_night">Comută mod noapte</string>

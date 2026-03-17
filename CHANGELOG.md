@@ -4,6 +4,7 @@
 - Fixed: SSL Handshake fix for truncated messages
 - Added: dark mode and xtreme dark mode setting for the app itself thanks to @andrecuellar!
 - Removed: App category="maps" so nav buttons recognize the app again
+- Fixed: Multiple Button Events and double/tripple skips
 
 ### v.2.0.1
 - Fixed: Multiple volume sliders appearing on modern devices (Pixel 9 fix)

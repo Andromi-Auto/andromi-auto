@@ -109,7 +109,8 @@
     <string name="key_media_next">Volgend Nummer</string>
     <string name="key_media_prev">Vorig Nummer</string>
     <string name="key_search">Spraak commando</string>
-    <string name="key_call">Telefoon</string>
+    <string name="key_call">Telefoon (Accepteren)</string>
+    <string name="key_endcall">Oproep beëindigen (Weigeren)</string>
     <string name="key_music">Muziek</string>
     <string name="key_nav">Navigatie</string>
     <string name="key_night">Schakel Nachtmodus</string>

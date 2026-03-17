@@ -110,7 +110,8 @@
     <string name="key_media_next">Наступний трек</string>
     <string name="key_media_prev">Попередній трек</string>
     <string name="key_search">Голосові команди</string>
-    <string name="key_call">Телефон</string>
+    <string name="key_call">Телефон (Прийняти)</string>
+    <string name="key_endcall">Завершити виклик (Відхилити)</string>
     <string name="key_music">Музика</string>
     <string name="key_nav">Навігація</string>
     <string name="key_night">Перемкнути нічний режим</string>

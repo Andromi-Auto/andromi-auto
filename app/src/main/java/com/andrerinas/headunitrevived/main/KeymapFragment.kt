@@ -54,6 +54,7 @@ class KeymapFragment : Fragment(), MainActivity.KeyListener {
         KeymapItem(R.string.key_media_prev, KeyEvent.KEYCODE_MEDIA_PREVIOUS),
         KeymapItem(R.string.key_search, KeyEvent.KEYCODE_SEARCH),
         KeymapItem(R.string.key_call, KeyEvent.KEYCODE_CALL),
+        KeymapItem(R.string.key_endcall, KeyEvent.KEYCODE_ENDCALL),
         KeymapItem(R.string.key_music, KeyEvent.KEYCODE_MUSIC),
         KeymapItem(R.string.key_nav, KeyEvent.KEYCODE_GUIDE),
         KeymapItem(R.string.key_night, KeyEvent.KEYCODE_N)

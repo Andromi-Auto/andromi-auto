@@ -110,7 +110,8 @@
     <string name="key_media_next">Další skladba</string>
     <string name="key_media_prev">Předchozí skladba</string>
     <string name="key_search">Hlasový příkaz</string>
-    <string name="key_call">Telefon</string>
+    <string name="key_call">Telefon (Přijmout)</string>
+    <string name="key_endcall">Ukončit hovor (Odmítnout)</string>
     <string name="key_music">Hudba</string>
     <string name="key_nav">Navigace</string>
     <string name="key_night">Přepnout noční režim</string>

@@ -113,7 +113,8 @@
     <string name="key_media_next">Nächster Titel</string>
     <string name="key_media_prev">Vorheriger Titel</string>
     <string name="key_search">Sprachbefehl</string>
-    <string name="key_call">Telefon</string>
+    <string name="key_call">Telefon (Annehmen)</string>
+    <string name="key_endcall">Auflegen (Ablehnen)</string>
     <string name="key_music">Musik</string>
     <string name="key_nav">Navigation</string>
     <string name="key_night">Nachtmodus umschalten</string>

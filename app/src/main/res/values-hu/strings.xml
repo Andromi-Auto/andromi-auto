@@ -109,7 +109,8 @@
     <string name="key_media_next">Következő zeneszám</string>
     <string name="key_media_prev">Előző zeneszám</string>
     <string name="key_search">Hangutasítás</string>
-    <string name="key_call">Telefon</string>
+    <string name="key_call">Telefon (Elfogadás)</string>
+    <string name="key_endcall">Hívás befejezése (Elutasítás)</string>
     <string name="key_music">Zene</string>
     <string name="key_nav">Navigáció</string>
     <string name="key_night">Éjszakai mód kapcsolása</string>

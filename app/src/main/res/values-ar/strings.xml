@@ -110,7 +110,8 @@
     <string name="key_media_next">المقطع التالي</string>
     <string name="key_media_prev">المقطع السابق</string>
     <string name="key_search">الأوامر الصوتية</string>
-    <string name="key_call">الهاتف</string>
+    <string name="key_call">الهاتف (قبول)</string>
+    <string name="key_endcall">إنهاء المكالمة (رفض)</string>
     <string name="key_music">الموسيقى</string>
     <string name="key_nav">الملاحة</string>
     <string name="key_night">تبديل الوضع الليلي</string>

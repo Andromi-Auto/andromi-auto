@@ -123,7 +123,8 @@
     <string name="key_media_next">Next Track</string>
     <string name="key_media_prev">Previous Track</string>
     <string name="key_search">Voice Command</string>
-    <string name="key_call">Phone</string>
+    <string name="key_call">Phone (Accept)</string>
+    <string name="key_endcall">End Call (Decline)</string>
     <string name="key_music">Music</string>
     <string name="key_nav">Navigation</string>
     <string name="key_night">Toggle Night Mode</string>

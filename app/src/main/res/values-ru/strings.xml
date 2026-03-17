@@ -110,7 +110,8 @@
     <string name="key_media_next">Следующий трек</string>
     <string name="key_media_prev">Предыдущий трек</string>
     <string name="key_search">Голосовая команда</string>
-    <string name="key_call">Телефон</string>
+    <string name="key_call">Телефон (Принять)</string>
+    <string name="key_endcall">Завершить вызов (Отклонить)</string>
     <string name="key_music">Музыка</string>
     <string name="key_nav">Навигация</string>
     <string name="key_night">Переключить ночной режим</string>

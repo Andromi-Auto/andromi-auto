@@ -109,7 +109,8 @@
     <string name="key_media_next">下一曲目</string>
     <string name="key_media_prev">上一曲目</string>
     <string name="key_search">語音指令</string>
-    <string name="key_call">手機</string>
+    <string name="key_call">手機 (接聽)</string>
+    <string name="key_endcall">結束通話 (拒絕)</string>
     <string name="key_music">音樂</string>
     <string name="key_nav">導航</string>
     <string name="key_night">切換夜間模式</string>
