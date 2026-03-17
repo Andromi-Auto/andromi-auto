@@ -16,6 +16,8 @@ class AapSslContext(keyManager: SingleKeyKeyManager): AapSsl {
     private lateinit var sslEngine: SSLEngine
     private lateinit var txBuffer: ByteBuffer
     private lateinit var rxBuffer: ByteBuffer
+    
+    @Volatile var isUserDisconnect = false
 
     override fun performHandshake(connection: AccessoryConnection): Boolean {
         if (prepare() < 0) return false
@@ -222,7 +224,24 @@ class AapSslContext(keyManager: SingleKeyKeyManager): AapSsl {
                 rxBuffer.get(resultBuffer)
                 return ByteArrayWithLimit(resultBuffer, resultBuffer.size)
             } catch (e: Exception) {
-                AppLog.e("SSL Decrypt failed", e)
+                // Check for Magic Garbage disconnect signal from Wireless Helper
+                if (length >= 16) {
+                    var allFF = true
+                    for (i in 0 until 16) {
+                        if (buffer[start + i] != 0xFF.toByte()) {
+                            allFF = false
+                            break
+                        }
+                    }
+                    if (allFF) {
+                        AppLog.i("SSL Decrypt: Magic Garbage detected. Marking as clean user disconnect.")
+                        isUserDisconnect = true
+                    }
+                }
+                
+                if (!isUserDisconnect) {
+                    AppLog.e("SSL Decrypt failed", e)
+                }
                 return null
             }
         }

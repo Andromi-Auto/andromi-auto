@@ -116,8 +116,8 @@ class AapTransport(
         }
 
         if (ret < 0) {
-            AppLog.i("Quitting because ret < 0");
-            this.quit()
+            AppLog.i("Quitting because ret < 0 ($ret)")
+            this.quit(clean = (ret == -2))
         }
         return@Callback true
     }
@@ -173,10 +173,11 @@ class AapTransport(
     }
 
     internal fun quit(clean: Boolean = false) {
-        AppLog.i("AapTransport quitting (clean=$clean)")
-        val cb = onQuit
+        val cb = onQuit ?: return
         onQuit = null
-        cb?.invoke(clean)
+
+        AppLog.i("AapTransport quitting (clean=$clean)")
+        cb.invoke(clean)
         micRecorder.listener = null
         pollThread?.quit()
         sendThread?.quit()

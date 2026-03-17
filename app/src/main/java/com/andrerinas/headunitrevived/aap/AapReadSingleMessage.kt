@@ -1,6 +1,5 @@
 package com.andrerinas.headunitrevived.aap
 
-import com.andrerinas.headunitrevived.aap.protocol.Channel
 import com.andrerinas.headunitrevived.connection.AccessoryConnection
 import com.andrerinas.headunitrevived.utils.AppLog
 
@@ -27,6 +26,13 @@ internal class AapReadSingleMessage(connection: AccessoryConnection, ssl: AapSsl
 
             recvHeader.decode()
 
+            // Immediate check for Magic Garbage in the header bytes.
+            // This is the most reliable path for intentional disconnects from the Helper.
+            if (isMagicGarbage(recvHeader.buf, 0, recvHeader.buf.size)) {
+                AppLog.i("AapRead: Magic Garbage detected in header. Clean disconnect.")
+                return -2
+            }
+
             if (recvHeader.flags == 0x09) {
                 val readSize = connection.recvBlocking(fragmentSizeBuffer, 4, 150, true)
                 if(readSize != 4) {
@@ -43,6 +49,10 @@ internal class AapReadSingleMessage(connection: AccessoryConnection, ssl: AapSsl
             
             val msgSize = connection.recvBlocking(msgBuffer, recvHeader.enc_len, 5000, true)
             if (msgSize != recvHeader.enc_len) {
+                if (msgSize == -1) {
+                    AppLog.i("AapRead: Connection closed (EOF) during body read.")
+                    return -1
+                }
                 AppLog.e("AapRead: Failed to read full message body. Expected ${recvHeader.enc_len}, got $msgSize. Skipping.")
                 return 0
             }
@@ -51,6 +61,11 @@ internal class AapReadSingleMessage(connection: AccessoryConnection, ssl: AapSsl
             val msg = AapMessageIncoming.decrypt(recvHeader, 0, msgBuffer, ssl)
 
             if (msg == null) {
+                // If decryption failed because of a Magic Garbage signal, return -2 to signal clean quit
+                if (ssl is AapSslContext && ssl.isUserDisconnect) {
+                    AppLog.i("AapRead: Magic Garbage detected in decryption. Triggering clean disconnect.")
+                    return -2
+                }
                 return 0
             }
 
@@ -61,5 +76,14 @@ internal class AapReadSingleMessage(connection: AccessoryConnection, ssl: AapSsl
             AppLog.e("AapRead: Error in read loop (ignored): ${e.message}")
             return 0
         }
+    }
+
+    private fun isMagicGarbage(buffer: ByteArray, start: Int, length: Int): Boolean {
+        if (length < 4) return false // Need at least some bytes to verify
+        // Check if at least the first 4 bytes are 0xFF
+        for (i in 0 until 4.coerceAtMost(length)) {
+            if (buffer[start + i] != 0xFF.toByte()) return false
+        }
+        return true
     }
 }
