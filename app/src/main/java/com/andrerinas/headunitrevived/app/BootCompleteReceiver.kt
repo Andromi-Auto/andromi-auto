@@ -10,12 +10,15 @@ import com.andrerinas.headunitrevived.App
 import com.andrerinas.headunitrevived.aap.AapService
 
 import com.andrerinas.headunitrevived.location.GpsLocationService
+import com.andrerinas.headunitrevived.utils.Settings
 
 class BootCompleteReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
 
         val h = Handler(Looper.getMainLooper())
         h.postDelayed({
+            val settings = Settings(context)
+            if (!settings.autoStartOnBoot) return@postDelayed
             val serviceIntent = Intent(context, AapService::class.java)
             ContextCompat.startForegroundService(context, serviceIntent)
         }, 10000)
