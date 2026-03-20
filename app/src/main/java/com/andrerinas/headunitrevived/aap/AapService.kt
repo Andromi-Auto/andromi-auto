@@ -541,23 +541,12 @@ class AapService : Service(), UsbReceiver.Listener {
         } else {
             startForeground(1, createNotification())
         }
-        // Launch the UI from the foreground service context (not the receiver)
-        // so that Android 10+ background activity start restrictions are satisfied.
+        // Launch the UI after boot via a full-screen intent notification.
+        // Direct startActivity() is silently blocked on MIUI/HyperOS even from
+        // a foreground service. A full-screen intent bypasses OEM restrictions.
         if (intent?.getBooleanExtra(BootCompleteReceiver.EXTRA_BOOT_START, false) == true) {
-            AppLog.i("Boot auto-start: launching MainActivity from foreground service")
-            if (Build.VERSION.SDK_INT < 23 || android.provider.Settings.canDrawOverlays(this)) {
-                val launchIntent = Intent(this, MainActivity::class.java).apply {
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    putExtra(MainActivity.EXTRA_LAUNCH_SOURCE, "Boot auto-start")
-                }
-                try {
-                    startActivity(launchIntent)
-                } catch (e: Exception) {
-                    AppLog.w("Could not start UI from boot auto-start: ${e.message}")
-                }
-            } else {
-                AppLog.w("Boot auto-start: overlay permission not granted, cannot launch UI")
-            }
+            AppLog.i("Boot auto-start: launching MainActivity via full-screen intent")
+            launchViaFullScreenIntent()
         }
 
         when (intent?.action) {
@@ -993,6 +982,41 @@ class AapService : Service(), UsbReceiver.Listener {
         notificationManager.notify(1, createNotification())
     }
 
+    /**
+     * Launch MainActivity via a full-screen intent notification.
+     * Direct startActivity() is silently blocked on MIUI/HyperOS even from a
+     * foreground service. Full-screen intents bypass OEM background-start
+     * restrictions because Android treats them like incoming calls/alarms.
+     */
+    private fun launchViaFullScreenIntent() {
+        val launchIntent = Intent(this, MainActivity::class.java).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            putExtra(MainActivity.EXTRA_LAUNCH_SOURCE, "Boot auto-start")
+        }
+        val flags = PendingIntent.FLAG_UPDATE_CURRENT or
+            (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0)
+        val fullScreenPi = PendingIntent.getActivity(this, 200, launchIntent, flags)
+
+        val notification = NotificationCompat.Builder(this, App.bootStartChannel)
+            .setSmallIcon(R.drawable.ic_stat_aa)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setCategory(NotificationCompat.CATEGORY_ALARM)
+            .setContentTitle("Headunit Revived")
+            .setContentText(getString(R.string.notification_service_running))
+            .setFullScreenIntent(fullScreenPi, true)
+            .setAutoCancel(true)
+            .build()
+
+        val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        nm.notify(BOOT_START_NOTIFICATION_ID, notification)
+
+        // Dismiss the boot notification after a short delay
+        serviceScope.launch {
+            delay(5000)
+            nm.cancel(BOOT_START_NOTIFICATION_ID)
+        }
+    }
+
     // -------------------------------------------------------------------------
     // Self Mode
     // -------------------------------------------------------------------------
@@ -1199,6 +1223,8 @@ class AapService : Service(), UsbReceiver.Listener {
          * Observed by `HomeFragment` via a lifecycle-aware flow collector.
          */
         val scanningState = MutableStateFlow(false)
+
+        private const val BOOT_START_NOTIFICATION_ID = 42
 
         // Service action strings used with startService() and sendBroadcast()
         const val ACTION_START_SELF_MODE           = "com.andrerinas.headunitrevived.ACTION_START_SELF_MODE"

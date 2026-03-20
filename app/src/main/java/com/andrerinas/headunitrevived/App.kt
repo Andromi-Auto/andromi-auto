@@ -68,6 +68,11 @@ class App : Application() {
             component.notificationManager.createNotificationChannel(mediaChannel)
 
             AapNavigation.createNotificationChannel(this)
+
+            val bootChannel = NotificationChannel(bootStartChannel, "Boot Auto-Start", NotificationManager.IMPORTANCE_HIGH)
+            bootChannel.description = "Shown once after boot to open the app"
+            bootChannel.setShowBadge(false)
+            component.notificationManager.createNotificationChannel(bootChannel)
         }
 
         // Register the main broadcast receiver safely for Android 14+ using ContextCompat
@@ -76,6 +81,7 @@ class App : Application() {
 
     companion object {
         const val defaultChannel = "headunit_service_v2"
+        const val bootStartChannel = "headunit_boot_start"
         var appThemeManager: AppThemeManager? = null
 
         fun get(context: Context): App {
