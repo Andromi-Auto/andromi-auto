@@ -25,6 +25,8 @@ import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.andrerinas.headunitrevived.App
+import com.andrerinas.headunitrevived.app.BootCompleteReceiver
+import com.andrerinas.headunitrevived.main.MainActivity
 import com.andrerinas.headunitrevived.R
 import com.andrerinas.headunitrevived.aap.protocol.messages.NightModeEvent
 import com.andrerinas.headunitrevived.connection.CommManager
@@ -539,6 +541,25 @@ class AapService : Service(), UsbReceiver.Listener {
         } else {
             startForeground(1, createNotification())
         }
+        // Launch the UI from the foreground service context (not the receiver)
+        // so that Android 10+ background activity start restrictions are satisfied.
+        if (intent?.getBooleanExtra(BootCompleteReceiver.EXTRA_BOOT_START, false) == true) {
+            AppLog.i("Boot auto-start: launching MainActivity from foreground service")
+            if (Build.VERSION.SDK_INT < 23 || android.provider.Settings.canDrawOverlays(this)) {
+                val launchIntent = Intent(this, MainActivity::class.java).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    putExtra(MainActivity.EXTRA_LAUNCH_SOURCE, "Boot auto-start")
+                }
+                try {
+                    startActivity(launchIntent)
+                } catch (e: Exception) {
+                    AppLog.w("Could not start UI from boot auto-start: ${e.message}")
+                }
+            } else {
+                AppLog.w("Boot auto-start: overlay permission not granted, cannot launch UI")
+            }
+        }
+
         when (intent?.action) {
             ACTION_START_SELF_MODE       -> startSelfMode()
             ACTION_START_WIRELESS        -> startWirelessServer()
