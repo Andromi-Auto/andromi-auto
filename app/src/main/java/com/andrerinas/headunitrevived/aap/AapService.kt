@@ -50,6 +50,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import java.util.concurrent.atomic.AtomicBoolean
 import android.app.NotificationManager
 import android.content.pm.ServiceInfo
+import android.graphics.PixelFormat
+import android.provider.Settings as AndroidSettings
+import android.view.View
+import android.view.WindowManager
 import java.net.ServerSocket
 
 /**
@@ -541,12 +545,14 @@ class AapService : Service(), UsbReceiver.Listener {
         } else {
             startForeground(1, createNotification())
         }
-        // Launch the UI after boot via a full-screen intent notification.
+        // Launch the UI after boot.
         // Direct startActivity() is silently blocked on MIUI/HyperOS even from
-        // a foreground service. A full-screen intent bypasses OEM restrictions.
+        // a foreground service. We use an overlay window trampoline: creating a
+        // zero-size overlay gives the app a "visible" context that bypasses OEM
+        // background activity start restrictions. Falls back to full-screen
+        // intent notification if overlay permission is not granted.
         if (intent?.getBooleanExtra(BootCompleteReceiver.EXTRA_BOOT_START, false) == true) {
-            AppLog.i("Boot auto-start: launching MainActivity via full-screen intent")
-            launchViaFullScreenIntent()
+            launchMainActivityOnBoot()
         }
 
         when (intent?.action) {
@@ -983,27 +989,105 @@ class AapService : Service(), UsbReceiver.Listener {
     }
 
     /**
-     * Launch MainActivity via a full-screen intent notification.
-     * Direct startActivity() is silently blocked on MIUI/HyperOS even from a
-     * foreground service. Full-screen intents bypass OEM background-start
-     * restrictions because Android treats them like incoming calls/alarms.
+     * Launch MainActivity after boot using a cascading fallback chain designed
+     * to work across stock AOSP head units, Xiaomi MIUI/HyperOS, Samsung One UI,
+     * Huawei EMUI, OPPO ColorOS, and other OEM ROMs.
+     *
+     * Strategy order:
+     * 1. Direct startActivity (Android < 10, or any device without background
+     *    activity restrictions — works on most head units running AOSP)
+     * 2. Overlay window trampoline (Android 10+): creates a zero-size invisible
+     *    overlay giving the app a "visible" context. Bypasses MIUI, EMUI, ColorOS
+     *    background start restrictions. Requires SYSTEM_ALERT_WINDOW.
+     * 3. Full-screen intent notification (Android 10+): high-priority notification
+     *    with fullScreenIntent. Works on stock Android 10-13 and Samsung. On
+     *    Android 14+ needs USE_FULL_SCREEN_INTENT permission.
+     * 4. Tap-to-open notification (last resort): user taps notification to open.
      */
+    private fun launchMainActivityOnBoot() {
+        // Android < 10: no background activity start restrictions
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            AppLog.i("Boot auto-start: launching directly (API ${Build.VERSION.SDK_INT} < 29)")
+            launchDirectly()
+            return
+        }
+
+        // Android 10+: try overlay trampoline (bypasses all known OEM restrictions)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+            AndroidSettings.canDrawOverlays(this)) {
+            AppLog.i("Boot auto-start: launching via overlay window trampoline")
+            if (launchViaOverlayTrampoline()) return
+        }
+
+        // Fallback: full-screen intent notification
+        AppLog.i("Boot auto-start: falling back to full-screen intent notification")
+        launchViaFullScreenIntent()
+    }
+
+    private fun launchDirectly() {
+        try {
+            val launchIntent = Intent(this, MainActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                putExtra(MainActivity.EXTRA_LAUNCH_SOURCE, "Boot auto-start")
+            }
+            startActivity(launchIntent)
+            AppLog.i("Boot auto-start: direct startActivity succeeded")
+        } catch (e: Exception) {
+            AppLog.e("Boot auto-start: direct startActivity failed: ${e.message}")
+            launchViaFullScreenIntent()
+        }
+    }
+
+    private fun launchViaOverlayTrampoline(): Boolean {
+        val wm = getSystemService(WINDOW_SERVICE) as WindowManager
+        val overlayType = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+        else
+            @Suppress("DEPRECATION")
+            WindowManager.LayoutParams.TYPE_SYSTEM_ALERT
+
+        val params = WindowManager.LayoutParams(
+            0, 0, overlayType,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE or
+                WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+            PixelFormat.TRANSLUCENT
+        )
+        val view = View(this)
+        return try {
+            wm.addView(view, params)
+            val launchIntent = Intent(this, MainActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                putExtra(MainActivity.EXTRA_LAUNCH_SOURCE, "Boot auto-start")
+            }
+            startActivity(launchIntent)
+            AppLog.i("Boot auto-start: startActivity called from overlay context")
+            true
+        } catch (e: Exception) {
+            AppLog.e("Boot auto-start: overlay trampoline failed: ${e.message}")
+            false
+        } finally {
+            try { wm.removeView(view) } catch (_: Exception) {}
+        }
+    }
+
     private fun launchViaFullScreenIntent() {
         val launchIntent = Intent(this, MainActivity::class.java).apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
             putExtra(MainActivity.EXTRA_LAUNCH_SOURCE, "Boot auto-start")
         }
-        val flags = PendingIntent.FLAG_UPDATE_CURRENT or
+        val piFlags = PendingIntent.FLAG_UPDATE_CURRENT or
             (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0)
-        val fullScreenPi = PendingIntent.getActivity(this, 200, launchIntent, flags)
+        val fullScreenPi = PendingIntent.getActivity(this, 200, launchIntent, piFlags)
 
         val notification = NotificationCompat.Builder(this, App.bootStartChannel)
             .setSmallIcon(R.drawable.ic_stat_aa)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
-            .setContentTitle("Headunit Revived")
+            .setContentTitle(getString(R.string.app_name))
             .setContentText(getString(R.string.notification_service_running))
             .setFullScreenIntent(fullScreenPi, true)
+            .setContentIntent(fullScreenPi)
             .setAutoCancel(true)
             .build()
 
