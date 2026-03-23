@@ -306,6 +306,7 @@ class SettingsFragment : Fragment() {
                           pendingDpi != settings.dpiPixelDensity ||
                           pendingForceSoftware != settings.forceSoftwareDecoding ||
                           pendingRightHandDrive != settings.rightHandDrive ||
+                          pendingEnableRotary != settings.enableRotary ||
                           pendingEnableAudioSink != settings.enableAudioSink ||
                           pendingUseAacAudio != settings.useAacAudio ||
                           pendingUseNativeSsl != settings.useNativeSsl ||
@@ -370,31 +371,6 @@ class SettingsFragment : Fragment() {
                         updateSettingsList()
                     }
                     .show()
-            }
-        ))
-
-        items.add(SettingItem.SettingEntry(
-            stableId = "keymap",
-            nameResId = R.string.keymap,
-            value = getString(R.string.keymap_description),
-            onClick = { _ ->
-                try {
-                    findNavController().navigate(R.id.action_settingsFragment_to_keymapFragment)
-                } catch (e: Exception) {
-                    // Failover
-                }
-            }
-        ))
-
-        items.add(SettingItem.ToggleSettingEntry(
-            stableId = "enableRotary",
-            nameResId = R.string.enable_rotary,
-            descriptionResId = R.string.enable_rotary_description,
-            isChecked = pendingEnableRotary!!,
-            onCheckedChanged = { isChecked ->
-                pendingEnableRotary = isChecked
-                checkChanges()
-                updateSettingsList()
             }
         ))
 
@@ -678,6 +654,34 @@ class SettingsFragment : Fragment() {
                         updateSettingsList()
                     }
                     .show()
+            }
+        ))
+
+        // --- Input Settings ---
+        items.add(SettingItem.CategoryHeader("input", R.string.category_input))
+
+        items.add(SettingItem.SettingEntry(
+            stableId = "keymap",
+            nameResId = R.string.keymap,
+            value = getString(R.string.keymap_description),
+            onClick = { _ ->
+                try {
+                    findNavController().navigate(R.id.action_settingsFragment_to_keymapFragment)
+                } catch (e: Exception) {
+                    // Failover
+                }
+            }
+        ))
+
+        items.add(SettingItem.ToggleSettingEntry(
+            stableId = "enableRotary",
+            nameResId = R.string.enable_rotary,
+            descriptionResId = R.string.enable_rotary_description,
+            isChecked = pendingEnableRotary ?: false,
+            onCheckedChanged = { isChecked ->
+                pendingEnableRotary = isChecked
+                checkChanges()
+                updateSettingsList()
             }
         ))
 
