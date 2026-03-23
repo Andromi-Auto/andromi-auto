@@ -192,6 +192,7 @@ class AapTransport(
         }
         
         aapRead = null
+        ssl.release()
         pollHandler = null
         sendHandler = null
         pollThread = null

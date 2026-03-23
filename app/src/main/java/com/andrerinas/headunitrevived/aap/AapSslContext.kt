@@ -158,6 +158,10 @@ class AapSslContext(keyManager: SingleKeyKeyManager): AapSsl {
         rxBuffer.clear()
     }
 
+    override fun release() {
+        // No-op for SSLEngine (garbage collection handles it)
+    }
+
     private fun getHandshakeStatus(): SSLEngineResult.HandshakeStatus {
         return sslEngine.handshakeStatus
     }

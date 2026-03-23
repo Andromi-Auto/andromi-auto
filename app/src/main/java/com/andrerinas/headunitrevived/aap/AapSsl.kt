@@ -7,4 +7,5 @@ interface AapSsl {
     fun encrypt(offset: Int, length: Int, buffer: ByteArray): ByteArrayWithLimit?
     fun postHandshakeReset()
     fun performHandshake(connection: AccessoryConnection): Boolean
+    fun release()
 }
