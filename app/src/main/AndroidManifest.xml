@@ -81,7 +81,6 @@
                 <data android:scheme="headunit" android:host="connect" />
                 <data android:scheme="headunit" android:host="disconnect" />
                 <data android:scheme="headunit" android:host="nightmode" />
-                <data android:scheme="headunit" android:host="exit" />
             </intent-filter>
         </activity>
 
