@@ -596,10 +596,19 @@ class SettingsFragment : Fragment() {
                 MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
                     .setTitle(R.string.start_in_fullscreen_mode)
                     .setSingleChoiceItems(modes, pendingFullscreenMode?.value ?: 0) { dialog, which ->
-                        pendingFullscreenMode = Settings.FullscreenMode.fromInt(which)
+                        val newMode = Settings.FullscreenMode.fromInt(which) ?: Settings.FullscreenMode.NONE
+                        pendingFullscreenMode = newMode
+                        
+                        // PERSIST IMMEDIATELY (Rescue Mode)
+                        settings.fullscreenMode = newMode
+                        settings.commit()
+                        
                         checkChanges()
                         dialog.dismiss()
                         updateSettingsList()
+                        
+                        // Apply immediately to current UI
+                        requireActivity().recreate()
                     }
                     .setNegativeButton(R.string.cancel, null)
                     .show()
@@ -1062,11 +1071,12 @@ class SettingsFragment : Fragment() {
                 val r = inputRight.text.toString().toIntOrNull() ?: 0
                 val b = inputBottom.text.toString().toIntOrNull() ?: 0
                 
-                // PERSIST IMMEDIATELY to prevent revert on focus change
+                // PERSIST IMMEDIATELY (Rescue Mode)
                 settings.insetLeft = l
                 settings.insetTop = t
                 settings.insetRight = r
                 settings.insetBottom = b
+                settings.commit()
                 
                 // Update pending to keep UI in sync
                 pendingInsetLeft = l
@@ -1077,6 +1087,9 @@ class SettingsFragment : Fragment() {
                 checkChanges()
                 updateSettingsList()
                 dialog.dismiss()
+                
+                // Refresh activity to apply padding immediately
+                requireActivity().recreate()
             }
             .setNegativeButton(android.R.string.cancel) { dialog, _ ->
                 // Revert Preview immediately

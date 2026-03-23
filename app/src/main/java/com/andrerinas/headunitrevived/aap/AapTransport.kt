@@ -105,20 +105,25 @@ class AapTransport(
     var onAudioFocusStateChanged: ((Boolean) -> Unit)? = null
     private var pollHandler: Handler? = null
     private val pollHandlerCallback = Handler.Callback {
-        val ret = aapRead?.read() ?: -1
-        if (pollHandler == null) {
+        val readInstance = aapRead
+        if (readInstance == null) {
             return@Callback false
         }
+        
+        val ret = readInstance.read()
+        
+        if (ret < 0) {
+            AppLog.i("Quitting because ret < 0 ($ret)")
+            this.quit(clean = (ret == -2))
+            return@Callback true
+        }
+
         pollHandler?.let {
             if (!it.hasMessages(MSG_POLL)) {
                 it.sendEmptyMessage(MSG_POLL)
             }
         }
-
-        if (ret < 0) {
-            AppLog.i("Quitting because ret < 0 ($ret)")
-            this.quit(clean = (ret == -2))
-        }
+        
         return@Callback true
     }
     private var sendHandler: Handler? = null
