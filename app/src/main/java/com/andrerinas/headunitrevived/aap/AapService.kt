@@ -393,9 +393,13 @@ class AapService : Service(), UsbReceiver.Listener {
         // USB attach event will re-trigger the flow cleanly.
         if (lastType == com.andrerinas.headunitrevived.utils.Settings.CONNECTION_TYPE_USB &&
             (settings.autoConnectLastSession || settings.autoConnectSingleUsbDevice)) {
-            if (state.isUserExit) {
+            if (state.isUserExit && !settings.reopenOnReconnection) {
                 AppLog.i("AapService: USB disconnect after user Exit. Skipping auto-reconnect (waiting for dongle re-enumeration).")
                 userExitedAA = true
+                return
+            }
+            if (state.isUserExit && settings.reopenOnReconnection) {
+                AppLog.i("AapService: USB disconnect after user Exit with reopenOnReconnection enabled. Will reconnect on next USB attach.")
                 return
             }
             AppLog.i("AapService: USB disconnect. Scheduling reconnect check in ${USB_RECONNECT_DELAY_MS}ms...")
@@ -591,6 +595,7 @@ class AapService : Service(), UsbReceiver.Listener {
         if (UsbDeviceCompat.isInAccessoryMode(device)) {
             // Device already in AOA mode (re-enumerated after UsbAttachedActivity switched it).
             AppLog.i("USB accessory device attached, connecting.")
+            launchMainActivityIfNeeded("USB accessory attach")
             checkAlreadyConnectedUsb(force = true)
         } else {
             // UsbAttachedActivity normally handles normal-mode devices via a manifest intent
@@ -599,6 +604,7 @@ class AapService : Service(), UsbReceiver.Listener {
             // check after a delay to give UsbAttachedActivity a chance to handle it first.
             val deviceName = UsbDeviceCompat(device).uniqueName
             AppLog.i("Normal USB device attached: $deviceName. Will check auto-connect in ${USB_ATTACH_FALLBACK_DELAY_MS}ms...")
+            launchMainActivityIfNeeded("USB normal attach ($deviceName)")
             serviceScope.launch {
                 delay(USB_ATTACH_FALLBACK_DELAY_MS)
                 if (!commManager.isConnected && !isSwitchingToAccessory.get()) {
@@ -1002,6 +1008,19 @@ class AapService : Service(), UsbReceiver.Listener {
      *    Android 14+ needs USE_FULL_SCREEN_INTENT permission.
      * 4. Tap-to-open notification (last resort): user taps notification to open.
      */
+    /**
+     * Launches MainActivity when reopenOnReconnection is enabled and no activity is currently
+     * visible. Uses the same overlay trampoline technique as boot auto-start to bypass OEM
+     * background activity start restrictions.
+     */
+    private fun launchMainActivityIfNeeded(source: String) {
+        val settings = App.provide(this).settings
+        if (!settings.reopenOnReconnection) return
+
+        AppLog.i("Reopen on reconnection: launching MainActivity ($source)")
+        launchMainActivityOnBoot()
+    }
+
     private fun launchMainActivityOnBoot() {
         // Android < 10: no background activity start restrictions
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {

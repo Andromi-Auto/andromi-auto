@@ -355,4 +355,6 @@
     <string name="usb_permission_denied">Дозвіл USB відхилено. Будь ласка, дозвольте доступ до USB для автоматичного підключення.</string>
     <string name="overlay_permission_denied_auto_start_disabled">Дозвіл на накладення не надано. Автозапуск було вимкнено.</string>
     <string name="use_white_background">Використовувати білі шпалери головного екрана</string>
+    <string name="reopen_on_reconnection_label">Відкривати при повторному підключенні</string>
+    <string name="reopen_on_reconnection_description">Коли ви натискаєте кнопку «Вихід», додаток продовжує працювати у фоновому режимі та відстежує USB-підключення. Якщо пристрій підключається повторно, додаток відкривається автоматично.</string>
     </resources>

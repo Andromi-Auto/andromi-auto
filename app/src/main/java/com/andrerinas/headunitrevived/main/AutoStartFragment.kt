@@ -37,6 +37,7 @@ class AutoStartFragment : Fragment() {
     private var pendingAutoStartOnUsb: Boolean? = null
     private var pendingAutoStartBtName: String? = null
     private var pendingAutoStartBtMac: String? = null
+    private var pendingReopenOnReconnection: Boolean? = null
 
     private var hasChanges = false
     private val SAVE_ITEM_ID = 1001
@@ -72,6 +73,7 @@ class AutoStartFragment : Fragment() {
         pendingAutoStartOnUsb = settings.autoStartOnUsb
         pendingAutoStartBtName = settings.autoStartBluetoothDeviceName
         pendingAutoStartBtMac = settings.autoStartBluetoothDeviceMac
+        pendingReopenOnReconnection = settings.reopenOnReconnection
 
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
@@ -142,6 +144,7 @@ class AutoStartFragment : Fragment() {
         pendingAutoStartOnUsb?.let { settings.autoStartOnUsb = it }
         pendingAutoStartBtName?.let { settings.autoStartBluetoothDeviceName = it }
         pendingAutoStartBtMac?.let { settings.autoStartBluetoothDeviceMac = it }
+        pendingReopenOnReconnection?.let { settings.reopenOnReconnection = it }
 
         // Check for Overlay permission if BT, USB, or Boot Auto-start is configured
         if ((!pendingAutoStartBtMac.isNullOrEmpty() || pendingAutoStartOnUsb == true || pendingAutoStartOnBoot == true) && Build.VERSION.SDK_INT >= 23) {
@@ -170,7 +173,8 @@ class AutoStartFragment : Fragment() {
     private fun checkChanges() {
         hasChanges = pendingAutoStartOnBoot != settings.autoStartOnBoot ||
                 pendingAutoStartOnUsb != settings.autoStartOnUsb ||
-                pendingAutoStartBtMac != settings.autoStartBluetoothDeviceMac
+                pendingAutoStartBtMac != settings.autoStartBluetoothDeviceMac ||
+                pendingReopenOnReconnection != settings.reopenOnReconnection
 
         updateSaveButtonState()
     }
@@ -204,6 +208,19 @@ class AutoStartFragment : Fragment() {
                 updateSettingsList()
             }
         ))
+
+        if (pendingAutoStartOnUsb == true) {
+            items.add(SettingItem.ToggleSettingEntry(
+                stableId = "reopenOnReconnection",
+                nameResId = R.string.reopen_on_reconnection_label,
+                descriptionResId = R.string.reopen_on_reconnection_description,
+                isChecked = pendingReopenOnReconnection!!,
+                onCheckedChanged = { isChecked ->
+                    pendingReopenOnReconnection = isChecked
+                    checkChanges()
+                }
+            ))
+        }
 
         items.add(SettingItem.SettingEntry(
             stableId = "autoStartBt",

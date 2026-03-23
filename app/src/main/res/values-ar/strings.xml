@@ -355,4 +355,6 @@
     <string name="usb_permission_denied">تم رفض إذن USB. يرجى السماح بالوصول إلى USB للاتصال تلقائيًا.</string>
     <string name="overlay_permission_denied_auto_start_disabled">لم يتم منح إذن العرض. تم تعطيل التشغيل التلقائي.</string>
     <string name="use_white_background">استخدام خلفية بيضاء للشاشة الرئيسية</string>
+    <string name="reopen_on_reconnection_label">إعادة الفتح عند إعادة الاتصال</string>
+    <string name="reopen_on_reconnection_description">عند الضغط على زر الخروج، يبقى التطبيق يعمل في الخلفية ويستمر في مراقبة اتصالات USB. إذا أُعيد اتصال جهاز، يُفتح التطبيق تلقائيًا.</string>
 </resources>

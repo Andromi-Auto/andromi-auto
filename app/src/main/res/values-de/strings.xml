@@ -355,4 +355,6 @@
     <string name="usb_permission_denied">USB-Berechtigung verweigert. Bitte erlauben Sie den USB-Zugriff für automatische Verbindung.</string>
     <string name="overlay_permission_denied_auto_start_disabled">Overlay-Berechtigung nicht erteilt. Autostart wurde deaktiviert.</string>
     <string name="use_white_background">Weißes Startbildschirm-Hintergrundbild verwenden</string>
+    <string name="reopen_on_reconnection_label">Bei Neuverbindung erneut öffnen</string>
+    <string name="reopen_on_reconnection_description">Wenn Sie die Beenden-Taste drücken, läuft die App im Hintergrund weiter und überwacht USB-Verbindungen. Wenn ein Gerät erneut verbunden wird, öffnet sich die App automatisch.</string>
 </resources>

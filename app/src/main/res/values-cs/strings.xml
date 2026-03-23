@@ -355,4 +355,6 @@
     <string name="usb_permission_denied">Oprávnění USB bylo zamítnuto. Povolte prosím přístup k USB pro automatické připojení.</string>
     <string name="overlay_permission_denied_auto_start_disabled">Oprávnění pro překrytí nebylo uděleno. Automatické spuštění bylo zakázáno.</string>
     <string name="use_white_background">Použít bílou tapetu hlavní obrazovky</string>
+    <string name="reopen_on_reconnection_label">Znovu otevřít při opětovném připojení</string>
+    <string name="reopen_on_reconnection_description">Po stisknutí tlačítka Ukončit aplikace zůstane běžet na pozadí a nadále sleduje USB připojení. Pokud se zařízení znovu připojí, aplikace se automaticky otevře.</string>
 </resources>

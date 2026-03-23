@@ -354,6 +354,8 @@
     <string name="show_fps_counter_description">Display a real-time FPS overlay in the top-left corner during projection.</string>
 
     <!-- Auto-start permission strings -->
+    <string name="reopen_on_reconnection_label">Reopen on reconnection</string>
+    <string name="reopen_on_reconnection_description">When you press the Exit button, the app stays running in the background and continues monitoring USB connections. If a device reconnects, the app reopens automatically.</string>
     <string name="overlay_permission_required">Auto-start requires \'Display over other apps\' permission</string>
     <string name="usb_permission_denied">USB permission denied. Please allow USB access to connect automatically.</string>
     <string name="overlay_permission_denied_auto_start_disabled">Overlay permission not granted. Auto-start has been disabled.</string>

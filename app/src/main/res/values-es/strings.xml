@@ -355,4 +355,6 @@
     <string name="usb_permission_denied">Permiso USB denegado. Por favor, permita el acceso USB para conectar automáticamente.</string>
     <string name="overlay_permission_denied_auto_start_disabled">Permiso de superposición no otorgado. El inicio automático ha sido desactivado.</string>
     <string name="use_white_background">Usar fondo de pantalla blanco en inicio</string>
+    <string name="reopen_on_reconnection_label">Reabrir al reconectar</string>
+    <string name="reopen_on_reconnection_description">Al presionar el botón Salir, la app sigue ejecutándose en segundo plano y continúa monitoreando las conexiones USB. Si un dispositivo se reconecta, la app se reabre automáticamente.</string>
 </resources>

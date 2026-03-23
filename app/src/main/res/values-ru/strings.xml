@@ -355,4 +355,6 @@
     <string name="usb_permission_denied">Разрешение USB отклонено. Пожалуйста, разрешите доступ к USB для автоматического подключения.</string>
     <string name="overlay_permission_denied_auto_start_disabled">Разрешение на наложение не предоставлено. Автозапуск был отключён.</string>
     <string name="use_white_background">Использовать белые обои главного экрана</string>
+    <string name="reopen_on_reconnection_label">Открывать при повторном подключении</string>
+    <string name="reopen_on_reconnection_description">При нажатии кнопки «Выход» приложение продолжает работать в фоновом режиме и отслеживает USB-подключения. Если устройство подключается повторно, приложение открывается автоматически.</string>
 </resources>
