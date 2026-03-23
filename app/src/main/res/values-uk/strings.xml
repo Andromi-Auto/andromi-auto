@@ -357,4 +357,8 @@
     <string name="use_white_background">Використовувати білі шпалери головного екрана</string>
     <string name="reopen_on_reconnection_label">Відкривати при повторному підключенні</string>
     <string name="reopen_on_reconnection_description">Коли ви натискаєте кнопку «Вихід», додаток продовжує працювати у фоновому режимі та відстежує USB-підключення. Якщо пристрій підключається повторно, додаток відкривається автоматично.</string>
-    </resources>
+
+    <string name="category_input">Налаштування введення</string>
+    <string name="enable_rotary">Увімкнути поворотний контролер (Rotary)</string>
+    <string name="enable_rotary_description">Оголосити підтримку фізичних поворотних ручок і коліс. Вимкніть це, якщо ваш сенсорний екран працює неправильно.</string>
+</resources>

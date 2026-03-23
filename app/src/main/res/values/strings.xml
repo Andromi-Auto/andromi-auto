@@ -362,4 +362,7 @@
 
     <!-- Theme -->
     <string name="use_white_background">Use white home screen wallpaper</string>
+    <string name="category_input">Input Settings</string>
+    <string name="enable_rotary">Enable Rotary Controller</string>
+    <string name="enable_rotary_description">Announce support for physical rotary knobs and wheels. Disable this if your touch screen is not working correctly.</string>
 </resources>

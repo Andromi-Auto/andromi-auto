@@ -59,3 +59,8 @@ Java_com_andrerinas_headunitrevived_aap_AapSslNative_native_1ssl_1write(JNIEnv *
 
     return ret;
 }
+
+JNIEXPORT void JNICALL
+Java_com_andrerinas_headunitrevived_aap_AapSslNative_native_1ssl_1cleanup(JNIEnv *env, jclass type) {
+    hu_ssl_cleanup();
+}

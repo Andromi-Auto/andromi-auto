@@ -357,4 +357,8 @@
     <string name="use_white_background">Использовать белые обои главного экрана</string>
     <string name="reopen_on_reconnection_label">Открывать при повторном подключении</string>
     <string name="reopen_on_reconnection_description">При нажатии кнопки «Выход» приложение продолжает работать в фоновом режиме и отслеживает USB-подключения. Если устройство подключается повторно, приложение открывается автоматически.</string>
+
+    <string name="category_input">Настройки ввода</string>
+    <string name="enable_rotary">Включить поворотный контроллер (Rotary)</string>
+    <string name="enable_rotary_description">Объявить поддержку физических поворотных ручек и колес. Отключите это, если ваш сенсорный экран работает неправильно.</string>
 </resources>

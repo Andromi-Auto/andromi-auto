@@ -74,7 +74,6 @@ object KeyCode {
             KeyEvent.KEYCODE_SOFT_LEFT,
             KeyEvent.KEYCODE_SOFT_RIGHT,
             KeyEvent.KEYCODE_MUSIC,
-            KeyEvent.KEYCODE_ENTER,
             KeyEvent.KEYCODE_TAB,
             KeyEvent.KEYCODE_SPACE,
             KeyEvent.KEYCODE_VOLUME_UP,
@@ -94,6 +93,7 @@ object KeyCode {
             KeyEvent.KEYCODE_STAR,
             KeyEvent.KEYCODE_POUND
                 -> return keyCode
+            KeyEvent.KEYCODE_ENTER -> return KeyEvent.KEYCODE_DPAD_CENTER
             KeyEvent.KEYCODE_HEADSETHOOK -> return KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE
             KeyEvent.KEYCODE_MEDIA_STOP -> return KeyEvent.KEYCODE_MEDIA_PAUSE
             // Add any custom or rotary codes that should be passed through directly

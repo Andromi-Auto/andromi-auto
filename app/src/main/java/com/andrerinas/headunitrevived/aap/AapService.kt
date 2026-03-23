@@ -85,6 +85,7 @@ class AapService : Service(), UsbReceiver.Listener {
     private var wirelessServer: WirelessServer? = null
     private var networkDiscovery: NetworkDiscovery? = null
     private var mediaSession: MediaSessionCompat? = null
+    private var lastMediaButtonClickTime = 0L
 
     /**
      * Set to `true` before calling [stopSelf] or entering [onDestroy] to suppress any
@@ -308,20 +309,30 @@ class AapService : Service(), UsbReceiver.Listener {
                         mediaButtonEvent?.getParcelableExtra(Intent.EXTRA_KEY_EVENT)
                     }
 
-                    // Only handle ACTION_DOWN to ensure instant response and prevent double triggers.
-                    if (keyEvent != null && keyEvent.action == android.view.KeyEvent.ACTION_DOWN) {
-                        val keyCode = keyEvent.keyCode
-                        AppLog.d("MediaSession: Handling key $keyCode via ACTION_DOWN")
+                    if (keyEvent != null) {
+                        val actionStr = if (keyEvent.action == android.view.KeyEvent.ACTION_DOWN) "DOWN" else "UP"
+                        AppLog.d("MediaButtonEvent: Received key ${keyEvent.keyCode} ($actionStr)")
+
+                        // Only handle ACTION_DOWN to prevent double triggers.
+                        if (keyEvent.action == android.view.KeyEvent.ACTION_DOWN) {
+                            val now = System.currentTimeMillis()
+                            if (now - lastMediaButtonClickTime < 300) {
+                                AppLog.i("MediaButtonEvent: Debouncing key ${keyEvent.keyCode} (too fast)")
+                                return true
+                            }
+                            lastMediaButtonClickTime = now
+                            
+                            AppLog.i("MediaButtonEvent: Processing key ${keyEvent.keyCode}")
+                            // Send a complete click sequence (press + release) immediately
+                            commManager.send(keyEvent.keyCode, true)
+                            commManager.send(keyEvent.keyCode, false)
+                            return true
+                        }
                         
-                        // Send a complete click sequence (press + release) immediately
-                        commManager.send(keyCode, true)
-                        commManager.send(keyCode, false)
-                        return true
-                    }
-                    
-                    // Consume ACTION_UP to prevent fallback to individual callbacks (onPlay, etc.)
-                    if (keyEvent != null && keyEvent.action == android.view.KeyEvent.ACTION_UP) {
-                        return true
+                        // Consume ACTION_UP to prevent fallback
+                        if (keyEvent.action == android.view.KeyEvent.ACTION_UP) {
+                            return true
+                        }
                     }
 
                     return super.onMediaButtonEvent(mediaButtonEvent)

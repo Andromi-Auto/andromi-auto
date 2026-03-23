@@ -1,4 +1,9 @@
 # Changelog
+### v.2.1.0-beta1
+- Fixed: Exit Intent not working. Thanks to benyjr
+- Added: Rotary Support
+- Fixed: Crash in Android < 5
+
 ### v.2.0.2
 - Fixed: 60FPS never applied
 - Fixed: SSL Handshake fix for truncated messages
@@ -8,6 +13,7 @@
 - Fixed: USB Permission Request thanks to @Bastel2020
 - Added: Setting for Disable stretch to fit. This will fix  wrong rendering on some devices @thanks to tsabaia
 - Fixed: Touch screen accuracy when not in full screen mode for older devices
+- Fixed: Big Icon-Button on main screen when the dpi is small and the screen is wide
 
 ### v.2.0.1
 - Fixed: Multiple volume sliders appearing on modern devices (Pixel 9 fix)

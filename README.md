@@ -58,6 +58,11 @@ adb shell am start -a android.intent.action.VIEW -d "headunit://connect?ip=192.1
 - **Wireless Connection Drops:** If the connection drops frequently, disable **"WiFi Assistant"** or **"Switch between networks"** in your phone's WiFi settings to prevent it from killing the connection due to "no internet."
 
 ## Changelog
+### v.2.1.0-beta1
+- Fixed: Exit Intent not working. Thanks to benyjr
+- Added: Rotary Support
+- Fixed: Crash in Android < 5
+
 ### v.2.0.2
 - Fixed: 60FPS never applied
 - Fixed: SSL Handshake fix for truncated messages
@@ -67,6 +72,7 @@ adb shell am start -a android.intent.action.VIEW -d "headunit://connect?ip=192.1
 - Fixed: USB Permission Request thanks to @Bastel2020
 - Added: Setting for Disable stretch to fit. This will fix  wrong rendering on some devices @thanks to tsabaia
 - Fixed: Touch screen accuracy when not in full screen mode for older devices
+- Fixed: Big Icon-Button on main screen when the dpi is small and the screen is wide
 
 ### v.2.0.1
 - Fixed: Multiple volume sliders appearing on modern devices (Pixel 9 fix)

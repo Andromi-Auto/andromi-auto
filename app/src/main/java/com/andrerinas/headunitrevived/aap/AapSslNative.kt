@@ -36,6 +36,8 @@ internal class AapSslNative : AapSsl {
     private external fun native_ssl_read(offset: Int, res_len: Int, res_buf: ByteArray): Int
     @Keep
     private external fun native_ssl_write(offset: Int, msg_len: Int, msg_buf: ByteArray): Int
+    @Keep
+    private external fun native_ssl_cleanup()
 
     private val bio_read = ByteArray(Messages.DEF_BUFFER_LENGTH)
     private val enc_buf = ByteArray(Messages.DEF_BUFFER_LENGTH)
@@ -116,6 +118,11 @@ internal class AapSslNative : AapSsl {
         // No-op
     }
 
+    override fun release() {
+        AppLog.i("Native SSL: Releasing resources")
+        native_ssl_cleanup()
+    }
+
     override fun decrypt(start: Int, length: Int, buffer: ByteArray): ByteArrayWithLimit? {
         val bytes_written = native_ssl_bio_write(start, length, buffer)
         // Write encrypted to SSL input BIO
@@ -127,7 +134,8 @@ internal class AapSslNative : AapSsl {
         val bytes_read = native_ssl_read(0, Messages.DEF_BUFFER_LENGTH, dec_buf)
         // Read decrypted to decrypted rx buf
         if (bytes_read <= 0) {
-            AppLog.e("SSL_read bytes_read: %d", bytes_read)
+            // Only log if it's a real error, not just a cleanup state
+            if (bytes_read < 0) AppLog.e("SSL_read bytes_read: %d", bytes_read)
             return null
         }
 

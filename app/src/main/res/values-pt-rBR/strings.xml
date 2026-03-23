@@ -357,4 +357,8 @@
     <string name="use_white_background">Usar papel de parede branco na tela inicial</string>
     <string name="reopen_on_reconnection_label">Reabrir ao reconectar</string>
     <string name="reopen_on_reconnection_description">Ao pressionar o botão Sair, o app continua rodando em segundo plano e monitora as conexões USB. Se um dispositivo reconectar, o app reabre automaticamente.</string>
+
+    <string name="category_input">Configurações de entrada</string>
+    <string name="enable_rotary">Ativar controle giratório (Rotary)</string>
+    <string name="enable_rotary_description">Anuncia suporte para botões e rodas giratórias físicas. Desative isso se sua tela sensível au toque não estiver funcionando corretamente.</string>
 </resources>

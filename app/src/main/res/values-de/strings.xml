@@ -357,4 +357,8 @@
     <string name="use_white_background">Weißes Startbildschirm-Hintergrundbild verwenden</string>
     <string name="reopen_on_reconnection_label">Bei Neuverbindung erneut öffnen</string>
     <string name="reopen_on_reconnection_description">Wenn Sie die Beenden-Taste drücken, läuft die App im Hintergrund weiter und überwacht USB-Verbindungen. Wenn ein Gerät erneut verbunden wird, öffnet sich die App automatisch.</string>
+
+    <string name="category_input">Eingabeeinstellungen</string>
+    <string name="enable_rotary">Rotary-Controller aktivieren</string>
+    <string name="enable_rotary_description">Unterstützung für physische Drehknöpfe und Räder (BMW, Mazda, Audi etc.) melden. Deaktiviere dies, wenn dein Touchscreen nicht korrekt funktioniert.</string>
 </resources>

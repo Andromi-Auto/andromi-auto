@@ -52,6 +52,7 @@ class SettingsFragment : Fragment() {
     private var pendingUseAacAudio: Boolean? = null
     private var pendingMicInputSource: Int? = null
     private var pendingUseNativeSsl: Boolean? = null
+    private var pendingEnableRotary: Boolean? = null
     private var pendingShowFpsCounter: Boolean? = null
     private var pendingScreenOrientation: Settings.ScreenOrientation? = null
     private var pendingAppLanguage: String? = null
@@ -100,6 +101,7 @@ class SettingsFragment : Fragment() {
         pendingUseAacAudio = settings.useAacAudio
         pendingMicInputSource = settings.micInputSource
         pendingUseNativeSsl = settings.useNativeSsl
+        pendingEnableRotary = settings.enableRotary
         pendingShowFpsCounter = settings.showFpsCounter
         pendingScreenOrientation = settings.screenOrientation
         pendingAppLanguage = settings.appLanguage
@@ -215,6 +217,7 @@ class SettingsFragment : Fragment() {
         pendingUseAacAudio?.let { settings.useAacAudio = it }
         pendingMicInputSource?.let { settings.micInputSource = it }
         pendingUseNativeSsl?.let { settings.useNativeSsl = it }
+        pendingEnableRotary?.let { settings.enableRotary = it }
         pendingShowFpsCounter?.let { settings.showFpsCounter = it }
         pendingScreenOrientation?.let { settings.screenOrientation = it }
 
@@ -281,6 +284,7 @@ class SettingsFragment : Fragment() {
                         pendingUseAacAudio != settings.useAacAudio ||
                         pendingMicInputSource != settings.micInputSource ||
                         pendingUseNativeSsl != settings.useNativeSsl ||
+                        pendingEnableRotary != settings.enableRotary ||
                         pendingShowFpsCounter != settings.showFpsCounter ||
                         pendingScreenOrientation != settings.screenOrientation ||
                         pendingAppLanguage != settings.appLanguage ||
@@ -305,6 +309,7 @@ class SettingsFragment : Fragment() {
                           pendingEnableAudioSink != settings.enableAudioSink ||
                           pendingUseAacAudio != settings.useAacAudio ||
                           pendingUseNativeSsl != settings.useNativeSsl ||
+                          pendingEnableRotary != settings.enableRotary ||
                           pendingInsetLeft != settings.insetLeft ||
                           pendingInsetTop != settings.insetTop ||
                           pendingInsetRight != settings.insetRight ||
@@ -378,6 +383,18 @@ class SettingsFragment : Fragment() {
                 } catch (e: Exception) {
                     // Failover
                 }
+            }
+        ))
+
+        items.add(SettingItem.ToggleSettingEntry(
+            stableId = "enableRotary",
+            nameResId = R.string.enable_rotary,
+            descriptionResId = R.string.enable_rotary_description,
+            isChecked = pendingEnableRotary!!,
+            onCheckedChanged = { isChecked ->
+                pendingEnableRotary = isChecked
+                checkChanges()
+                updateSettingsList()
             }
         ))
 

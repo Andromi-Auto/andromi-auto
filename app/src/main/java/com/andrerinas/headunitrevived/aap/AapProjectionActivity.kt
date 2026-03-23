@@ -525,6 +525,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
     }
 
     private fun onKeyEvent(keyCode: Int, isPress: Boolean) {
+        AppLog.d("AapProjectionActivity: onKeyEvent code=$keyCode, isPress=$isPress")
         commManager.send(keyCode, isPress)
     }
 
