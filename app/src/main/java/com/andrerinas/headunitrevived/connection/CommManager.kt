@@ -343,6 +343,12 @@ class CommManager(
         _disconnectJob = _scope.launch { doDisconnect(sendByeBye = false) }
         if (settings.killOnDisconnect) {
             android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                // Stop the foreground service first to remove the notification
+                val stopIntent = android.content.Intent(context, com.andrerinas.headunitrevived.aap.AapService::class.java).apply {
+                    action = com.andrerinas.headunitrevived.aap.AapService.ACTION_STOP_SERVICE
+                }
+                context.stopService(stopIntent)
+                // Finish all tasks and exit
                 val app = context.applicationContext as Application
                 val activityManager = app.getSystemService(Context.ACTIVITY_SERVICE) as android.app.ActivityManager
                 activityManager.appTasks.forEach { it.finishAndRemoveTask() }
@@ -394,6 +400,12 @@ class CommManager(
         _disconnectJob = _scope.launch { doDisconnect(sendByeBye) }
         if (settings.killOnDisconnect) {
             android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                // Stop the foreground service first to remove the notification
+                val stopIntent = android.content.Intent(context, com.andrerinas.headunitrevived.aap.AapService::class.java).apply {
+                    action = com.andrerinas.headunitrevived.aap.AapService.ACTION_STOP_SERVICE
+                }
+                context.stopService(stopIntent)
+                // Finish all tasks and exit
                 val app = context.applicationContext as Application
                 val activityManager = app.getSystemService(Context.ACTIVITY_SERVICE) as android.app.ActivityManager
                 activityManager.appTasks.forEach { it.finishAndRemoveTask() }
