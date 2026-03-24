@@ -47,6 +47,13 @@ sealed class SettingItem {
     data class CategoryHeader(override val stableId: String, @StringRes val titleResId: Int) : SettingItem()
 
     data class InfoBanner(override val stableId: String, @StringRes val textResId: Int) : SettingItem()
+
+    data class ActionButton(
+        override val stableId: String,
+        @StringRes val textResId: Int,
+        val isEnabled: Boolean = true,
+        val onClick: () -> Unit
+    ) : SettingItem()
 }
 
 class SettingsAdapter : ListAdapter<SettingItem, RecyclerView.ViewHolder>(SettingsDiffCallback()) { // Inherit from ListAdapter
@@ -58,6 +65,7 @@ class SettingsAdapter : ListAdapter<SettingItem, RecyclerView.ViewHolder>(Settin
         private const val VIEW_TYPE_TOGGLE = 3
         private const val VIEW_TYPE_SLIDER = 4
         private const val VIEW_TYPE_INFO_BANNER = 5
+        private const val VIEW_TYPE_ACTION_BUTTON = 6
     }
 
     override fun getItemViewType(position: Int): Int {
@@ -67,6 +75,7 @@ class SettingsAdapter : ListAdapter<SettingItem, RecyclerView.ViewHolder>(Settin
             is SettingItem.ToggleSettingEntry -> VIEW_TYPE_TOGGLE
             is SettingItem.SliderSettingEntry -> VIEW_TYPE_SLIDER
             is SettingItem.InfoBanner -> VIEW_TYPE_INFO_BANNER
+            is SettingItem.ActionButton -> VIEW_TYPE_ACTION_BUTTON
         }
     }
 
@@ -78,6 +87,7 @@ class SettingsAdapter : ListAdapter<SettingItem, RecyclerView.ViewHolder>(Settin
             VIEW_TYPE_TOGGLE -> ToggleSettingViewHolder(inflater.inflate(R.layout.layout_setting_item_toggle, parent, false))
             VIEW_TYPE_SLIDER -> SliderSettingViewHolder(inflater.inflate(R.layout.layout_setting_item_slider, parent, false))
             VIEW_TYPE_INFO_BANNER -> InfoBannerViewHolder(inflater.inflate(R.layout.layout_setting_info_banner, parent, false))
+            VIEW_TYPE_ACTION_BUTTON -> ActionButtonViewHolder(inflater.inflate(R.layout.layout_setting_action_button, parent, false))
             else -> throw IllegalArgumentException("Unknown view type: $viewType")
         }
     }
@@ -85,7 +95,7 @@ class SettingsAdapter : ListAdapter<SettingItem, RecyclerView.ViewHolder>(Settin
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val item = getItem(position)
 
-        if (holder is SettingViewHolder || holder is ToggleSettingViewHolder || holder is SliderSettingViewHolder) {
+        if (holder is SettingViewHolder || holder is ToggleSettingViewHolder || holder is SliderSettingViewHolder || holder is ActionButtonViewHolder) {
             updateItemVisuals(holder.itemView, position)
         }
 
@@ -95,6 +105,7 @@ class SettingsAdapter : ListAdapter<SettingItem, RecyclerView.ViewHolder>(Settin
             is SettingItem.ToggleSettingEntry -> (holder as ToggleSettingViewHolder).bind(item)
             is SettingItem.SliderSettingEntry -> (holder as SliderSettingViewHolder).bind(item)
             is SettingItem.InfoBanner -> (holder as InfoBannerViewHolder).bind(item)
+            is SettingItem.ActionButton -> (holder as ActionButtonViewHolder).bind(item)
         }
     }
 
@@ -164,6 +175,15 @@ class SettingsAdapter : ListAdapter<SettingItem, RecyclerView.ViewHolder>(Settin
         }
     }
 
+    class ActionButtonViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        private val button: com.google.android.material.button.MaterialButton = itemView.findViewById(R.id.action_button)
+        fun bind(item: SettingItem.ActionButton) {
+            button.setText(item.textResId)
+            button.isEnabled = item.isEnabled
+            button.setOnClickListener { item.onClick() }
+        }
+    }
+
     class SliderSettingViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val settingName: TextView = itemView.findViewById(R.id.settingName)
         private val settingValue: TextView = itemView.findViewById(R.id.settingValue)
@@ -203,6 +223,8 @@ class SettingsAdapter : ListAdapter<SettingItem, RecyclerView.ViewHolder>(Settin
                     oldItem.titleResId == newItem.titleResId
                 oldItem is SettingItem.InfoBanner && newItem is SettingItem.InfoBanner ->
                     oldItem.textResId == newItem.textResId
+                oldItem is SettingItem.ActionButton && newItem is SettingItem.ActionButton ->
+                    oldItem.textResId == newItem.textResId && oldItem.isEnabled == newItem.isEnabled
                 else -> false
             }
         }
