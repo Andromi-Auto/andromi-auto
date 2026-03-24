@@ -3,6 +3,7 @@
 - Fixed: Exit Intent not working. Thanks to benyjr
 - Added: Rotary Support
 - Fixed: Crash in Android < 5
+- Fixed: Double Button fire and enter/knob click as dpad center mapping
 
 ### v.2.0.2
 - Fixed: 60FPS never applied
