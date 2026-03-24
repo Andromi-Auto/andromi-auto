@@ -1095,18 +1095,9 @@ class SettingsFragment : Fragment() {
 
     private fun getKillOnDisconnectConflicts(): List<String> {
         val conflicts = mutableListOf<String>()
-        if (settings.autoConnectLastSession) {
-            conflicts.add(getString(R.string.auto_connect_last_session))
-        }
-        if (settings.autoConnectSingleUsbDevice) {
-            conflicts.add(getString(R.string.auto_connect_single_usb))
-        }
-        if (settings.autoStartSelfMode) {
-            conflicts.add(getString(R.string.auto_start_self_mode))
-        }
-        if (settings.autoStartOnUsb) {
-            conflicts.add(getString(R.string.auto_start_usb_label))
-        }
+        // Only reconnection-related settings conflict with close-on-disconnect.
+        // Initial connection settings (auto-connect last session, single USB,
+        // self mode, auto-start on USB) should keep working when the car starts.
         if (settings.reopenOnReconnection) {
             conflicts.add(getString(R.string.reopen_on_reconnection_label))
         }
@@ -1173,11 +1164,8 @@ class SettingsFragment : Fragment() {
     }
 
     private fun disableKillOnDisconnectConflicts() {
-        // These settings live in sub-fragments, so save directly to prefs
-        settings.autoConnectLastSession = false
-        settings.autoConnectSingleUsbDevice = false
-        settings.autoStartSelfMode = false
-        settings.autoStartOnUsb = false
+        // Only disable reconnection-related settings.
+        // Initial connection settings are kept so they work when the car starts.
         settings.reopenOnReconnection = false
         // WiFi mode is a pending var on this screen, update both
         if (pendingWifiConnectionMode == 1) {

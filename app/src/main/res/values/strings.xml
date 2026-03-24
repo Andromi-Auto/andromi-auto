@@ -370,7 +370,7 @@
     <string name="kill_on_disconnect">Close app on disconnect</string>
     <string name="kill_on_disconnect_description">Automatically close the app when Android Auto disconnects</string>
     <string name="kill_on_disconnect_warning_title">Warning</string>
-    <string name="kill_on_disconnect_warning">The following settings will conflict with closing the app on disconnect. The app may close before these features have a chance to work:\n\n%1$s\n\nNote: With this option enabled, the app will close on any disconnection, including brief signal drops. It will no longer attempt to reconnect automatically.\n\nWould you like to disable them and enable close on disconnect?</string>
+    <string name="kill_on_disconnect_warning">The following reconnection settings will conflict with closing the app on disconnect:\n\n%1$s\n\nYour initial connection settings (auto-connect, auto-start) will still work when the headunit turns on. However, after the first disconnection the app will close immediately instead of trying to reconnect.\n\nWould you like to disable the reconnection settings listed above?</string>
     <string name="kill_on_disconnect_disable_and_enable">Disable and enable</string>
     <string name="kill_on_disconnect_conflicts_disabled">Conflicting settings have been disabled</string>
 
