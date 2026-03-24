@@ -416,9 +416,20 @@ class SettingsFragment : Fragment() {
             descriptionResId = R.string.kill_on_disconnect_description,
             isChecked = pendingKillOnDisconnect!!,
             onCheckedChanged = { isChecked ->
-                pendingKillOnDisconnect = isChecked
-                checkChanges()
-                updateSettingsList()
+                if (isChecked) {
+                    val conflicts = getKillOnDisconnectConflicts()
+                    if (conflicts.isNotEmpty()) {
+                        showKillOnDisconnectWarning(conflicts)
+                    } else {
+                        pendingKillOnDisconnect = true
+                        checkChanges()
+                        updateSettingsList()
+                    }
+                } else {
+                    pendingKillOnDisconnect = false
+                    checkChanges()
+                    updateSettingsList()
+                }
             }
         ))
 
@@ -1075,6 +1086,57 @@ class SettingsFragment : Fragment() {
         if (::settingsAdapter.isInitialized) {
             settings = App.provide(requireContext()).settings
             updateSettingsList()
+        }
+    }
+
+    private fun getKillOnDisconnectConflicts(): List<String> {
+        val conflicts = mutableListOf<String>()
+        if (settings.autoConnectLastSession) {
+            conflicts.add(getString(R.string.auto_connect_last_session))
+        }
+        if (settings.autoConnectSingleUsbDevice) {
+            conflicts.add(getString(R.string.auto_connect_single_usb))
+        }
+        if (settings.autoStartSelfMode) {
+            conflicts.add(getString(R.string.auto_start_self_mode))
+        }
+        if (settings.autoStartOnUsb) {
+            conflicts.add(getString(R.string.auto_start_usb_label))
+        }
+        if (settings.reopenOnReconnection) {
+            conflicts.add(getString(R.string.reopen_on_reconnection_label))
+        }
+        if (settings.wifiConnectionMode == 1) {
+            conflicts.add(getString(R.string.wireless_mode))
+        }
+        return conflicts
+    }
+
+    private fun showKillOnDisconnectWarning(conflicts: List<String>) {
+        val conflictList = conflicts.joinToString("\n") { "• $it" }
+        val message = getString(R.string.kill_on_disconnect_warning, conflictList)
+
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.kill_on_disconnect_warning_title)
+            .setMessage(message)
+            .setPositiveButton(R.string.kill_on_disconnect_disable_and_enable) { _, _ ->
+                disableKillOnDisconnectConflicts()
+                pendingKillOnDisconnect = true
+                checkChanges()
+                updateSettingsList()
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    private fun disableKillOnDisconnectConflicts() {
+        settings.autoConnectLastSession = false
+        settings.autoConnectSingleUsbDevice = false
+        settings.autoStartSelfMode = false
+        settings.autoStartOnUsb = false
+        settings.reopenOnReconnection = false
+        if (settings.wifiConnectionMode == 1) {
+            settings.wifiConnectionMode = 0
         }
     }
 

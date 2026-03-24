@@ -343,7 +343,10 @@ class CommManager(
         _disconnectJob = _scope.launch { doDisconnect(sendByeBye = false) }
         if (settings.killOnDisconnect) {
             android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-                android.os.Process.killProcess(android.os.Process.myPid())
+                val app = context.applicationContext as Application
+                val activityManager = app.getSystemService(Context.ACTIVITY_SERVICE) as android.app.ActivityManager
+                activityManager.appTasks.forEach { it.finishAndRemoveTask() }
+                System.exit(0)
             }, 500)
         }
     }
@@ -391,7 +394,10 @@ class CommManager(
         _disconnectJob = _scope.launch { doDisconnect(sendByeBye) }
         if (settings.killOnDisconnect) {
             android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-                android.os.Process.killProcess(android.os.Process.myPid())
+                val app = context.applicationContext as Application
+                val activityManager = app.getSystemService(Context.ACTIVITY_SERVICE) as android.app.ActivityManager
+                activityManager.appTasks.forEach { it.finishAndRemoveTask() }
+                System.exit(0)
             }, 500)
         }
     }
