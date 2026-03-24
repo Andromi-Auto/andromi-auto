@@ -410,18 +410,6 @@ class SettingsFragment : Fragment() {
             }
         ))
 
-        items.add(SettingItem.ToggleSettingEntry(
-            stableId = "killOnDisconnect",
-            nameResId = R.string.kill_on_disconnect,
-            descriptionResId = R.string.kill_on_disconnect_description,
-            isChecked = pendingKillOnDisconnect!!,
-            onCheckedChanged = { isChecked ->
-                pendingKillOnDisconnect = isChecked
-                checkChanges()
-                updateSettingsList()
-            }
-        ))
-
         items.add(SettingItem.SettingEntry(
             stableId = "autoConnectSettings",
             nameResId = R.string.auto_connect_settings,
@@ -431,6 +419,33 @@ class SettingsFragment : Fragment() {
                     findNavController().navigate(R.id.action_settingsFragment_to_autoConnectFragment)
                 } catch (e: Exception) {
                     // Failover
+                }
+            }
+        ))
+
+        items.add(SettingItem.ToggleSettingEntry(
+            stableId = "killOnDisconnect",
+            nameResId = R.string.kill_on_disconnect,
+            descriptionResId = R.string.kill_on_disconnect_description,
+            isChecked = pendingKillOnDisconnect!!,
+            onCheckedChanged = { isChecked ->
+                if (isChecked) {
+                    val conflicts = getKillOnDisconnectConflicts()
+                    if (conflicts.isNotEmpty()) {
+                        // Sync data model to true so DiffUtil can detect the
+                        // change back to false when the dialog is canceled
+                        pendingKillOnDisconnect = true
+                        updateSettingsList()
+                        showKillOnDisconnectWarning(conflicts)
+                    } else {
+                        pendingKillOnDisconnect = true
+                        checkChanges()
+                        updateSettingsList()
+                    }
+                } else {
+                    pendingKillOnDisconnect = false
+                    checkChanges()
+                    updateSettingsList()
                 }
             }
         ))
@@ -1075,6 +1090,86 @@ class SettingsFragment : Fragment() {
         if (::settingsAdapter.isInitialized) {
             settings = App.provide(requireContext()).settings
             updateSettingsList()
+        }
+    }
+
+    private fun getKillOnDisconnectConflicts(): List<String> {
+        val conflicts = mutableListOf<String>()
+        // Only reconnection-related settings conflict with close-on-disconnect.
+        // Initial connection settings (auto-connect last session, single USB,
+        // self mode, auto-start on USB) should keep working when the car starts.
+        if (settings.reopenOnReconnection) {
+            conflicts.add(getString(R.string.reopen_on_reconnection_label))
+        }
+        if (pendingWifiConnectionMode == 1) {
+            val wifiModes = resources.getStringArray(R.array.wireless_connection_modes)
+            conflicts.add(wifiModes[1])
+        }
+        return conflicts
+    }
+
+    private fun showKillOnDisconnectWarning(conflicts: List<String>) {
+        val conflictList = conflicts.joinToString("\n") { "• $it" }
+        val message = getString(R.string.kill_on_disconnect_warning, conflictList)
+
+        var confirmed = false
+
+        val dialog = MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.kill_on_disconnect_warning_title)
+            .setMessage(message)
+            .setPositiveButton(R.string.kill_on_disconnect_disable_and_enable) { _, _ ->
+                confirmed = true
+                disableKillOnDisconnectConflicts()
+                pendingKillOnDisconnect = true
+                checkChanges()
+                updateSettingsList()
+                Toast.makeText(context, getString(R.string.kill_on_disconnect_conflicts_disabled), Toast.LENGTH_LONG).show()
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .create()
+
+        dialog.show()
+
+        // Disable the positive button and show a countdown
+        val positiveButton = dialog.getButton(android.app.AlertDialog.BUTTON_POSITIVE)
+        positiveButton.isEnabled = false
+        positiveButton.alpha = 0.4f
+        val baseText = getString(R.string.kill_on_disconnect_disable_and_enable)
+        val handler = android.os.Handler(android.os.Looper.getMainLooper())
+        var remaining = 4
+
+        val countdownRunnable = object : Runnable {
+            override fun run() {
+                if (remaining > 0) {
+                    positiveButton.text = "$baseText (${remaining}s)"
+                    remaining--
+                    handler.postDelayed(this, 1000)
+                } else {
+                    positiveButton.text = baseText
+                    positiveButton.isEnabled = true
+                    positiveButton.alpha = 1.0f
+                }
+            }
+        }
+        handler.post(countdownRunnable)
+
+        dialog.setOnDismissListener {
+            handler.removeCallbacks(countdownRunnable)
+            if (!confirmed) {
+                pendingKillOnDisconnect = false
+                checkChanges()
+                updateSettingsList()
+            }
+        }
+    }
+
+    private fun disableKillOnDisconnectConflicts() {
+        // Only disable reconnection-related settings.
+        // Initial connection settings are kept so they work when the car starts.
+        settings.reopenOnReconnection = false
+        // WiFi mode is a pending var on this screen, update both
+        if (pendingWifiConnectionMode == 1) {
+            pendingWifiConnectionMode = 0
         }
     }
 

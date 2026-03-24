@@ -362,4 +362,10 @@
     <string name="category_input">Настройки ввода</string>
     <string name="enable_rotary">Включить поворотный контроллер (Rotary)</string>
     <string name="enable_rotary_description">Объявить поддержку физических поворотных ручек и колес. Отключите это, если ваш сенсорный экран работает неправильно.</string>
+    <string name="kill_on_disconnect">Закрывать приложение при отключении</string>
+    <string name="kill_on_disconnect_description">Автоматически закрывать приложение при отключении Android Auto</string>
+    <string name="kill_on_disconnect_warning_title">Предупреждение</string>
+    <string name="kill_on_disconnect_warning">Следующие настройки переподключения будут конфликтовать с закрытием приложения при отключении:\n\n%1$s\n\nВаши начальные настройки подключения (автоподключение, автозапуск) продолжат работать при включении магнитолы. Однако после первого отключения приложение закроется немедленно вместо попытки переподключения.\n\nХотите отключить перечисленные выше настройки переподключения?</string>
+    <string name="kill_on_disconnect_disable_and_enable">Отключить и включить</string>
+    <string name="kill_on_disconnect_conflicts_disabled">Конфликтующие настройки были отключены</string>
 </resources>
