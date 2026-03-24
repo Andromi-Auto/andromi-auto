@@ -1142,9 +1142,10 @@ class SettingsFragment : Fragment() {
         // Disable the positive button and show a countdown
         val positiveButton = dialog.getButton(android.app.AlertDialog.BUTTON_POSITIVE)
         positiveButton.isEnabled = false
+        positiveButton.alpha = 0.4f
         val baseText = getString(R.string.kill_on_disconnect_disable_and_enable)
         val handler = android.os.Handler(android.os.Looper.getMainLooper())
-        var remaining = 3
+        var remaining = 4
 
         val countdownRunnable = object : Runnable {
             override fun run() {
@@ -1155,6 +1156,7 @@ class SettingsFragment : Fragment() {
                 } else {
                     positiveButton.text = baseText
                     positiveButton.isEnabled = true
+                    positiveButton.alpha = 1.0f
                 }
             }
         }
