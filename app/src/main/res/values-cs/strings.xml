@@ -368,4 +368,5 @@
     <string name="kill_on_disconnect_warning">Následující nastavení opětovného připojení budou v konfliktu se zavřením aplikace při odpojení:\n\n%1$s\n\nVaše počáteční nastavení připojení (automatické připojení, automatické spuštění) budou nadále fungovat při zapnutí autorádia. Po prvním odpojení se však aplikace okamžitě zavře namísto pokusu o opětovné připojení.\n\nChcete deaktivovat výše uvedená nastavení opětovného připojení?</string>
     <string name="kill_on_disconnect_disable_and_enable">Deaktivovat a povolit</string>
     <string name="kill_on_disconnect_conflicts_disabled">Konfliktní nastavení byla deaktivována</string>
+    <string name="wifi_disabled_info">Info: Wi-Fi je vypnuto.</string>
 </resources>
