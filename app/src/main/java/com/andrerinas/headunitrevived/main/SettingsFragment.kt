@@ -919,6 +919,15 @@ class SettingsFragment : Fragment() {
             }
         ))
 
+        // Add a dedicated Save button at the bottom if there are changes
+        if (hasChanges) {
+            items.add(SettingItem.ActionButton(
+                stableId = "bottomSaveButton",
+                textResId = if (requiresRestart) R.string.save_and_restart else R.string.save,
+                onClick = { saveSettings() }
+            ))
+        }
+
         settingsAdapter.submitList(items) {
             scrollState?.let { settingsRecyclerView.layoutManager?.onRestoreInstanceState(it) }
         }
