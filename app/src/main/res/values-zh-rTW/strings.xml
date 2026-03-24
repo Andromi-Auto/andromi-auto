@@ -361,4 +361,10 @@
     <string name="category_input">輸入設定</string>
     <string name="enable_rotary">啟用旋鈕控制器 (Rotary)</string>
     <string name="enable_rotary_description">宣告支援實體旋鈕和控制輪。如果您的觸控螢幕運作不正常，請停用此選項。</string>
+    <string name="kill_on_disconnect">斷線時關閉應用程式</string>
+    <string name="kill_on_disconnect_description">當 Android Auto 斷線時自動關閉應用程式</string>
+    <string name="kill_on_disconnect_warning_title">警告</string>
+    <string name="kill_on_disconnect_warning">以下設定將與斷線時關閉應用程式發生衝突。應用程式可能在這些功能有機會運作之前就關閉：\n\n%1$s\n\n是否要停用這些設定並啟用斷線時關閉？</string>
+    <string name="kill_on_disconnect_disable_and_enable">停用並啟用</string>
+    <string name="kill_on_disconnect_conflicts_disabled">衝突的設定已被停用</string>
 </resources>

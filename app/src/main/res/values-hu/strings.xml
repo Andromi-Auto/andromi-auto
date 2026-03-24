@@ -361,4 +361,10 @@
     <string name="category_input">Beviteli beállítások</string>
     <string name="enable_rotary">Forgókapcsoló (Rotary) engedélyezése</string>
     <string name="enable_rotary_description">Fizikai forgatógombok és kerekek támogatásának bejelentése. Kapcsolja ki, ha az érintőképernyő nem működik megfelelően.</string>
+    <string name="kill_on_disconnect">Alkalmazás bezárása leválasztáskor</string>
+    <string name="kill_on_disconnect_description">Az alkalmazás automatikus bezárása, amikor az Android Auto leválik</string>
+    <string name="kill_on_disconnect_warning_title">Figyelmeztetés</string>
+    <string name="kill_on_disconnect_warning">A következő beállítások ütköznek az alkalmazás leválasztáskor történő bezárásával. Az alkalmazás bezáródhat, mielőtt ezek a funkciók működhetnének:\n\n%1$s\n\nSzeretnéd letiltani őket és engedélyezni a bezárást leválasztáskor?</string>
+    <string name="kill_on_disconnect_disable_and_enable">Letiltás és engedélyezés</string>
+    <string name="kill_on_disconnect_conflicts_disabled">Az ütköző beállítások letiltásra kerültek</string>
 </resources>

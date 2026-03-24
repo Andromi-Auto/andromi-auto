@@ -410,6 +410,19 @@ class SettingsFragment : Fragment() {
             }
         ))
 
+        items.add(SettingItem.SettingEntry(
+            stableId = "autoConnectSettings",
+            nameResId = R.string.auto_connect_settings,
+            value = getAutoConnectSummary(),
+            onClick = {
+                try {
+                    findNavController().navigate(R.id.action_settingsFragment_to_autoConnectFragment)
+                } catch (e: Exception) {
+                    // Failover
+                }
+            }
+        ))
+
         items.add(SettingItem.ToggleSettingEntry(
             stableId = "killOnDisconnect",
             nameResId = R.string.kill_on_disconnect,
@@ -419,6 +432,9 @@ class SettingsFragment : Fragment() {
                 if (isChecked) {
                     val conflicts = getKillOnDisconnectConflicts()
                     if (conflicts.isNotEmpty()) {
+                        // Temporarily mark as true so DiffUtil can detect the
+                        // change back to false when the dialog is canceled
+                        pendingKillOnDisconnect = true
                         showKillOnDisconnectWarning(conflicts)
                     } else {
                         pendingKillOnDisconnect = true
@@ -429,19 +445,6 @@ class SettingsFragment : Fragment() {
                     pendingKillOnDisconnect = false
                     checkChanges()
                     updateSettingsList()
-                }
-            }
-        ))
-
-        items.add(SettingItem.SettingEntry(
-            stableId = "autoConnectSettings",
-            nameResId = R.string.auto_connect_settings,
-            value = getAutoConnectSummary(),
-            onClick = {
-                try {
-                    findNavController().navigate(R.id.action_settingsFragment_to_autoConnectFragment)
-                } catch (e: Exception) {
-                    // Failover
                 }
             }
         ))
@@ -1107,7 +1110,8 @@ class SettingsFragment : Fragment() {
             conflicts.add(getString(R.string.reopen_on_reconnection_label))
         }
         if (pendingWifiConnectionMode == 1) {
-            conflicts.add(getString(R.string.wireless_mode))
+            val wifiModes = resources.getStringArray(R.array.wireless_connection_modes)
+            conflicts.add(wifiModes[1])
         }
         return conflicts
     }

@@ -362,4 +362,10 @@
     <string name="category_input">Eingabeeinstellungen</string>
     <string name="enable_rotary">Rotary-Controller aktivieren</string>
     <string name="enable_rotary_description">Unterstützung für physische Drehknöpfe und Räder (BMW, Mazda, Audi etc.) melden. Deaktiviere dies, wenn dein Touchscreen nicht korrekt funktioniert.</string>
+    <string name="kill_on_disconnect">App beim Trennen schließen</string>
+    <string name="kill_on_disconnect_description">Die App automatisch schließen, wenn Android Auto getrennt wird</string>
+    <string name="kill_on_disconnect_warning_title">Warnung</string>
+    <string name="kill_on_disconnect_warning">Die folgenden Einstellungen stehen im Konflikt mit dem Schließen der App beim Trennen. Die App könnte sich schließen, bevor diese Funktionen wirken können:\n\n%1$s\n\nMöchtest du sie deaktivieren und das Schließen beim Trennen aktivieren?</string>
+    <string name="kill_on_disconnect_disable_and_enable">Deaktivieren und aktivieren</string>
+    <string name="kill_on_disconnect_conflicts_disabled">Konfliktierende Einstellungen wurden deaktiviert</string>
 </resources>

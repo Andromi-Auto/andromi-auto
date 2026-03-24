@@ -362,4 +362,10 @@
     <string name="category_input">Ustawienia wejściowe</string>
     <string name="enable_rotary">Włącz kontroler obrotowy (Rotary)</string>
     <string name="enable_rotary_description">Zgłaszaj obsługę fizycznych pokręteł i kółek. Wyłącz to, jeśli ekran dotykowy nie działa prawidłowo.</string>
+    <string name="kill_on_disconnect">Zamknij aplikację po rozłączeniu</string>
+    <string name="kill_on_disconnect_description">Automatycznie zamknij aplikację po rozłączeniu Android Auto</string>
+    <string name="kill_on_disconnect_warning_title">Ostrzeżenie</string>
+    <string name="kill_on_disconnect_warning">Następujące ustawienia będą kolidować z zamykaniem aplikacji po rozłączeniu. Aplikacja może się zamknąć, zanim te funkcje zdążą zadziałać:\n\n%1$s\n\nCzy chcesz je wyłączyć i włączyć zamykanie po rozłączeniu?</string>
+    <string name="kill_on_disconnect_disable_and_enable">Wyłącz i włącz</string>
+    <string name="kill_on_disconnect_conflicts_disabled">Kolidujące ustawienia zostały wyłączone</string>
 </resources>

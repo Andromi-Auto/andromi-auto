@@ -362,4 +362,10 @@
     <string name="category_input">Nastavení vstupu</string>
     <string name="enable_rotary">Povolit otočný ovladač (Rotary)</string>
     <string name="enable_rotary_description">Oznámit podporu pro fyzické otočné knoflíky a kolečka. Deaktivujte toto, pokud vaše dotyková obrazovka nefunguje správně.</string>
+    <string name="kill_on_disconnect">Zavřít aplikaci při odpojení</string>
+    <string name="kill_on_disconnect_description">Automaticky zavřít aplikaci, když se Android Auto odpojí</string>
+    <string name="kill_on_disconnect_warning_title">Varování</string>
+    <string name="kill_on_disconnect_warning">Následující nastavení budou v konfliktu se zavřením aplikace při odpojení. Aplikace se může zavřít dříve, než tyto funkce stihnou zafungovat:\n\n%1$s\n\nChcete je deaktivovat a povolit zavření při odpojení?</string>
+    <string name="kill_on_disconnect_disable_and_enable">Deaktivovat a povolit</string>
+    <string name="kill_on_disconnect_conflicts_disabled">Konfliktní nastavení byla deaktivována</string>
 </resources>
