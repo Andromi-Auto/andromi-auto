@@ -365,7 +365,7 @@
     <string name="kill_on_disconnect">Închide aplicația la deconectare</string>
     <string name="kill_on_disconnect_description">Închide automat aplicația când Android Auto se deconectează</string>
     <string name="kill_on_disconnect_warning_title">Avertisment</string>
-    <string name="kill_on_disconnect_warning">Următoarele setări vor intra în conflict cu închiderea aplicației la deconectare. Aplicația se poate închide înainte ca aceste funcții să aibă șansa de a funcționa:\n\n%1$s\n\nDorești să le dezactivezi și să activezi închiderea la deconectare?</string>
+    <string name="kill_on_disconnect_warning">Următoarele setări vor intra în conflict cu închiderea aplicației la deconectare. Aplicația se poate închide înainte ca aceste funcții să aibă șansa de a funcționa:\n\n%1$s\n\nNotă: Cu această opțiune activată, aplicația se va închide la orice deconectare, inclusiv la scăderi scurte de semnal. Nu va mai încerca să se reconecteze automat.\n\nDorești să le dezactivezi și să activezi închiderea la deconectare?</string>
     <string name="kill_on_disconnect_disable_and_enable">Dezactivează și activează</string>
     <string name="kill_on_disconnect_conflicts_disabled">Setările conflictuale au fost dezactivate</string>
 </resources>

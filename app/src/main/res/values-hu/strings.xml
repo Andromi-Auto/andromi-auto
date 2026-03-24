@@ -364,7 +364,7 @@
     <string name="kill_on_disconnect">Alkalmazás bezárása leválasztáskor</string>
     <string name="kill_on_disconnect_description">Az alkalmazás automatikus bezárása, amikor az Android Auto leválik</string>
     <string name="kill_on_disconnect_warning_title">Figyelmeztetés</string>
-    <string name="kill_on_disconnect_warning">A következő beállítások ütköznek az alkalmazás leválasztáskor történő bezárásával. Az alkalmazás bezáródhat, mielőtt ezek a funkciók működhetnének:\n\n%1$s\n\nSzeretnéd letiltani őket és engedélyezni a bezárást leválasztáskor?</string>
+    <string name="kill_on_disconnect_warning">A következő beállítások ütköznek az alkalmazás leválasztáskor történő bezárásával. Az alkalmazás bezáródhat, mielőtt ezek a funkciók működhetnének:\n\n%1$s\n\nMegjegyzés: Ha ez az opció engedélyezve van, az alkalmazás minden leválasztáskor bezáródik, beleértve a rövid jelkimaradásokat is. Többé nem próbál automatikusan újracsatlakozni.\n\nSzeretnéd letiltani őket és engedélyezni a bezárást leválasztáskor?</string>
     <string name="kill_on_disconnect_disable_and_enable">Letiltás és engedélyezés</string>
     <string name="kill_on_disconnect_conflicts_disabled">Az ütköző beállítások letiltásra kerültek</string>
 </resources>
