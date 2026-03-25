@@ -35,7 +35,9 @@ class BootCompleteReceiver : BroadcastReceiver() {
             Intent.ACTION_BOOT_COMPLETED,
             Intent.ACTION_LOCKED_BOOT_COMPLETED,
             "android.intent.action.QUICKBOOT_POWERON",
-            "com.htc.intent.action.QUICKBOOT_POWERON"
+            "com.htc.intent.action.QUICKBOOT_POWERON",
+            "com.mediatek.intent.action.QUICKBOOT_POWERON",
+            "com.mediatek.intent.action.BOOT_IPO"
         )
     }
 }
