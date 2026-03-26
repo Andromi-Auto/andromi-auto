@@ -151,6 +151,8 @@
     <string name="auto_start_oem_warning">To urządzenie może wymagać włączenia automatycznego uruchamiania oraz usunięcia optymalizacji baterii lub ograniczeń w tle dla tej aplikacji. Jest to częste w urządzeniach Xiaomi, Huawei, Samsung, OPPO i Vivo.</string>
     <string name="auto_start_on_boot_label">Uruchamiaj przy starcie</string>
     <string name="auto_start_on_boot_description">Automatycznie otwórz aplikację po uruchomieniu urządzenia. Wymaga uprawnienia \'Wyświetlaj nad innymi aplikacjami\' na Android 10+</string>
+    <string name="auto_start_screen_on_label">Uruchom przy włączeniu ekranu</string>
+    <string name="auto_start_screen_on_description">Otwieraj aplikację za każdym razem, gdy ekran się włącza. Idealne dla radioodtwarzaczy samochodowych, które nigdy się całkowicie nie wyłączają lub używają trybów szybkiego uruchamiania, gdzie inne opcje automatycznego startu nie działają. Niezalecane dla telefonów i tabletów.</string>
     <string name="select_bt_device">Wybierz urządzenie Bluetooth</string>
     <string name="bt_device_not_set">Nie ustawiono</string>
     <string name="bt_permission_denied_title">Wymagane uprawnienie Bluetooth</string>

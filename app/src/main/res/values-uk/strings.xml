@@ -151,6 +151,8 @@
     <string name="auto_start_oem_warning">Можливо, на цьому пристрої потрібно увімкнути автозапуск та зняти обмеження оптимізації батареї або фонової роботи для цього додатку. Це поширено на пристроях Xiaomi, Huawei, Samsung, OPPO та Vivo.</string>
     <string name="auto_start_on_boot_label">Запуск при завантаженні</string>
     <string name="auto_start_on_boot_description">Автоматично відкривати додаток при запуску пристрою. Потрібен дозвіл \'Відображення поверх інших додатків\' на Android 10+</string>
+    <string name="auto_start_screen_on_label">Запуск при увімкненні екрана</string>
+    <string name="auto_start_screen_on_description">Відкривати додаток щоразу, коли вмикається екран. Ідеально для автомагнітол, які ніколи повністю не вимикаються або використовують режими швидкого запуску, де інші параметри автозапуску не працюють. Не рекомендується для телефонів та планшетів.</string>
     <string name="select_bt_device">Вибрати Bluetooth-пристрій</string>
     <string name="bt_device_not_set">Не задано</string>
     <string name="bt_permission_denied_title">Потрібен дозвіл Bluetooth</string>

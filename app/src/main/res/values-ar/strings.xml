@@ -151,6 +151,8 @@
     <string name="auto_start_oem_warning">قد يتطلب هذا الجهاز تفعيل التشغيل التلقائي وإزالة قيود توفير البطارية أو قيود الخلفية لهذا التطبيق. هذا شائع في أجهزة Xiaomi وHuawei وSamsung وOPPO وVivo.</string>
     <string name="auto_start_on_boot_label">التشغيل عند الإقلاع</string>
     <string name="auto_start_on_boot_description">فتح التطبيق تلقائيًا عند بدء تشغيل الجهاز. يتطلب إذن \'العرض فوق التطبيقات الأخرى\' على Android 10+</string>
+    <string name="auto_start_screen_on_label">التشغيل عند تشغيل الشاشة</string>
+    <string name="auto_start_screen_on_description">فتح التطبيق في كل مرة يتم فيها تشغيل الشاشة. مثالي لأجهزة الراديو التي لا تنطفئ تمامًا أو تستخدم أوضاع التشغيل السريع حيث لا تعمل خيارات التشغيل التلقائي الأخرى. غير موصى به للهواتف أو الأجهزة اللوحية.</string>
     <string name="select_bt_device">اختر جهاز البلوتوث</string>
     <string name="bt_device_not_set">غير محدد</string>
     <string name="bt_permission_denied_title">مطلوب إذن البلوتوث</string>

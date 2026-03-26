@@ -151,6 +151,8 @@
     <string name="auto_start_oem_warning">Este dispositivo pode exigir a ativação do início automático e a remoção da otimização de bateria ou restrições em segundo plano para este app. Isso é comum em dispositivos da Xiaomi, Huawei, Samsung, OPPO e Vivo.</string>
     <string name="auto_start_on_boot_label">Iniciar na inicialização</string>
     <string name="auto_start_on_boot_description">Abrir o app automaticamente quando o dispositivo iniciar. Requer a permissão \'Exibir sobre outros apps\' no Android 10+</string>
+    <string name="auto_start_screen_on_label">Iniciar ao ligar a tela</string>
+    <string name="auto_start_screen_on_description">Abrir o app sempre que a tela ligar. Ideal para centrais multimídia que nunca desligam completamente ou usam modos de inicialização rápida onde as outras opções de início automático não funcionam. Não recomendado para celulares ou tablets.</string>
     <string name="select_bt_device">Selecionar dispositivo Bluetooth</string>
     <string name="bt_device_not_set">Não definido</string>
     <string name="bt_permission_denied_title">Permissão de Bluetooth necessária</string>

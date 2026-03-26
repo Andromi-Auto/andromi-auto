@@ -151,6 +151,8 @@
     <string name="auto_start_oem_warning">Es posible que este dispositivo requiera habilitar el inicio automático y eliminar las restricciones de ahorro de batería o de segundo plano para esta app. Esto es común en dispositivos de Xiaomi, Huawei, Samsung, OPPO y Vivo.</string>
     <string name="auto_start_on_boot_label">Iniciar al arrancar</string>
     <string name="auto_start_on_boot_description">Abrir la app automáticamente cuando se inicie el dispositivo. Requiere el permiso \'Mostrar sobre otras apps\' en Android 10+</string>
+    <string name="auto_start_screen_on_label">Iniciar al encender pantalla</string>
+    <string name="auto_start_screen_on_description">Abrir la app cada vez que la pantalla se enciende. Ideal para radios que nunca se apagan completamente o usan modos de arranque rápido donde las otras opciones de inicio automático no funcionan. No recomendado para móviles o tablets.</string>
     <string name="select_bt_device">Seleccionar dispositivo Bluetooth</string>
     <string name="bt_device_not_set">No establecido</string>
     <string name="bt_permission_denied_title">Permiso de Bluetooth requerido</string>

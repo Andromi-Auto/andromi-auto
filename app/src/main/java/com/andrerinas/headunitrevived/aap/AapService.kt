@@ -224,7 +224,15 @@ class AapService : Service(), UsbReceiver.Listener {
 
                     AppLog.i("WakeDetect: SCREEN_ON (screen was off for ${offSec}s)")
 
-                    if (offDuration > HIBERNATE_WAKE_THRESHOLD_MS) {
+                    val settings = App.provide(this@AapService).settings
+
+                    // "Start on screen on" — triggers on every SCREEN_ON, designed for
+                    // head units that never truly power off (quick boot / always-on).
+                    if (settings.autoStartOnScreenOn) {
+                        AppLog.i("WakeDetect: start-on-screen-on enabled, triggering auto-start")
+                        onScreenOnAutoStart()
+                    } else if (offDuration > HIBERNATE_WAKE_THRESHOLD_MS) {
+                        // Hibernate wake detection — only for longer sleeps
                         AppLog.i("WakeDetect: hibernate wake detected (off for ${offSec}s > ${HIBERNATE_WAKE_THRESHOLD_MS / 1000}s threshold)")
                         onHibernateWake("SCREEN_ON after ${offSec}s sleep")
                     }
@@ -305,6 +313,53 @@ class AapService : Service(), UsbReceiver.Listener {
         val settings = App.provide(this).settings
         if (settings.autoStartOnUsb) {
             AppLog.i("WakeDetect: possible wake, checking USB (trigger=$trigger)")
+            checkAlreadyConnectedUsb(force = true)
+        }
+    }
+
+    /**
+     * Called on every SCREEN_ON when "Start on screen on" is enabled.
+     * Designed for head units that never truly power off — screen on = car turned on.
+     *
+     * If the connection is still active (e.g. brief screen toggle), returns to the
+     * projection activity. Otherwise launches the main UI and checks USB.
+     */
+    private fun onScreenOnAutoStart() {
+        // Debounce: don't re-trigger within 5 seconds
+        val now = SystemClock.elapsedRealtime()
+        if (now - lastWakeHandledTimestamp < 5_000) {
+            AppLog.i("WakeDetect: screen-on auto-start already handled recently, skipping")
+            return
+        }
+        lastWakeHandledTimestamp = now
+
+        if (commManager.isConnected) {
+            // Connection still alive — return to projection screen
+            AppLog.i("WakeDetect: connection active, returning to projection")
+            try {
+                val projectionIntent = AapProjectionActivity.intent(this).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+                }
+                startActivity(projectionIntent)
+            } catch (e: Exception) {
+                AppLog.e("WakeDetect: failed to launch projection: ${e.message}")
+            }
+            return
+        }
+
+        if (commManager.connectionState.value is CommManager.ConnectionState.Connecting ||
+            isSwitchingToAccessory.get()) {
+            AppLog.i("WakeDetect: already connecting, skipping screen-on auto-start")
+            return
+        }
+
+        // Not connected — launch UI (which triggers auto-connect via HomeFragment)
+        AppLog.i("WakeDetect: launching UI on screen on")
+        launchMainActivityOnBoot()
+
+        val settings = App.provide(this).settings
+        if (settings.autoStartOnUsb) {
+            AppLog.i("WakeDetect: checking USB devices on screen on")
             checkAlreadyConnectedUsb(force = true)
         }
     }

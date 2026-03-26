@@ -34,6 +34,7 @@ class AutoStartFragment : Fragment() {
     private var saveButton: MaterialButton? = null
 
     private var pendingAutoStartOnBoot: Boolean? = null
+    private var pendingAutoStartOnScreenOn: Boolean? = null
     private var pendingAutoStartOnUsb: Boolean? = null
     private var pendingAutoStartBtName: String? = null
     private var pendingAutoStartBtMac: String? = null
@@ -70,6 +71,7 @@ class AutoStartFragment : Fragment() {
         settings = App.provide(requireContext()).settings
 
         pendingAutoStartOnBoot = settings.autoStartOnBoot
+        pendingAutoStartOnScreenOn = settings.autoStartOnScreenOn
         pendingAutoStartOnUsb = settings.autoStartOnUsb
         pendingAutoStartBtName = settings.autoStartBluetoothDeviceName
         pendingAutoStartBtMac = settings.autoStartBluetoothDeviceMac
@@ -144,6 +146,7 @@ class AutoStartFragment : Fragment() {
             settings.autoStartOnBoot = it
             Settings.syncAutoStartOnBootToDeviceStorage(requireContext(), it)
         }
+        pendingAutoStartOnScreenOn?.let { settings.autoStartOnScreenOn = it }
         pendingAutoStartOnUsb?.let {
             settings.autoStartOnUsb = it
             Settings.syncAutoStartOnUsbToDeviceStorage(requireContext(), it)
@@ -155,8 +158,8 @@ class AutoStartFragment : Fragment() {
         }
         pendingReopenOnReconnection?.let { settings.reopenOnReconnection = it }
 
-        // Check for Overlay permission if BT, USB, or Boot Auto-start is configured
-        if ((!pendingAutoStartBtMac.isNullOrEmpty() || pendingAutoStartOnUsb == true || pendingAutoStartOnBoot == true) && Build.VERSION.SDK_INT >= 23) {
+        // Check for Overlay permission if any auto-start is configured
+        if ((!pendingAutoStartBtMac.isNullOrEmpty() || pendingAutoStartOnUsb == true || pendingAutoStartOnBoot == true || pendingAutoStartOnScreenOn == true) && Build.VERSION.SDK_INT >= 23) {
             if (!android.provider.Settings.canDrawOverlays(requireContext())) {
                 MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
                     .setTitle(R.string.overlay_permission_title)
@@ -181,6 +184,7 @@ class AutoStartFragment : Fragment() {
 
     private fun checkChanges() {
         hasChanges = pendingAutoStartOnBoot != settings.autoStartOnBoot ||
+                pendingAutoStartOnScreenOn != settings.autoStartOnScreenOn ||
                 pendingAutoStartOnUsb != settings.autoStartOnUsb ||
                 pendingAutoStartBtMac != settings.autoStartBluetoothDeviceMac ||
                 pendingReopenOnReconnection != settings.reopenOnReconnection
@@ -206,6 +210,18 @@ class AutoStartFragment : Fragment() {
             isChecked = pendingAutoStartOnBoot!!,
             onCheckedChanged = { isChecked ->
                 pendingAutoStartOnBoot = isChecked
+                checkChanges()
+                updateSettingsList()
+            }
+        ))
+
+        items.add(SettingItem.ToggleSettingEntry(
+            stableId = "autoStartOnScreenOn",
+            nameResId = R.string.auto_start_screen_on_label,
+            descriptionResId = R.string.auto_start_screen_on_description,
+            isChecked = pendingAutoStartOnScreenOn!!,
+            onCheckedChanged = { isChecked ->
+                pendingAutoStartOnScreenOn = isChecked
                 checkChanges()
                 updateSettingsList()
             }
@@ -259,6 +275,11 @@ class AutoStartFragment : Fragment() {
             if (settings.autoStartOnBoot) {
                 settings.autoStartOnBoot = false
                 pendingAutoStartOnBoot = false
+                disabled = true
+            }
+            if (settings.autoStartOnScreenOn) {
+                settings.autoStartOnScreenOn = false
+                pendingAutoStartOnScreenOn = false
                 disabled = true
             }
             if (settings.autoStartOnUsb) {

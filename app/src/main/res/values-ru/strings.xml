@@ -151,6 +151,8 @@
     <string name="auto_start_oem_warning">Возможно, на этом устройстве потребуется включить автозапуск и снять ограничения оптимизации батареи или фоновой работы для этого приложения. Это характерно для устройств Xiaomi, Huawei, Samsung, OPPO и Vivo.</string>
     <string name="auto_start_on_boot_label">Запуск при загрузке</string>
     <string name="auto_start_on_boot_description">Автоматически открывать приложение при запуске устройства. Требуется разрешение \'Поверх других приложений\' на Android 10+</string>
+    <string name="auto_start_screen_on_label">Запуск при включении экрана</string>
+    <string name="auto_start_screen_on_description">Открывать приложение каждый раз при включении экрана. Идеально для автомагнитол, которые никогда полностью не выключаются или используют режимы быстрого запуска, где другие параметры автозапуска не работают. Не рекомендуется для телефонов и планшетов.</string>
     <string name="select_bt_device">Выбрать Bluetooth-устройство</string>
     <string name="bt_device_not_set">Не задано</string>
     <string name="bt_permission_denied_title">Требуется разрешение Bluetooth</string>

@@ -150,6 +150,8 @@
     <string name="auto_start_oem_warning">Dit apparaat vereist mogelijk het inschakelen van automatisch starten en het verwijderen van batterijoptimalisatie of achtergrondbeperkingen voor deze app. Dit is gebruikelijk bij apparaten van Xiaomi, Huawei, Samsung, OPPO en Vivo.</string>
     <string name="auto_start_on_boot_label">Starten bij opstarten</string>
     <string name="auto_start_on_boot_description">De app automatisch openen wanneer het apparaat opstart. Vereist de machtiging \'Weergeven over andere apps\' op Android 10+</string>
+    <string name="auto_start_screen_on_label">Starten bij scherm aan</string>
+    <string name="auto_start_screen_on_description">De app openen telkens wanneer het scherm wordt ingeschakeld. Ideaal voor autoradio\'s die nooit volledig uitschakelen of snelle opstartmodi gebruiken waarbij de andere autostart-opties niet werken. Niet aanbevolen voor telefoons of tablets.</string>
     <string name="select_bt_device">Selecteer Bluetooth-apparaat</string>
     <string name="bt_device_not_set">Niet ingesteld</string>
     <string name="bt_permission_denied_title">Bluetooth-toestemming vereist</string>

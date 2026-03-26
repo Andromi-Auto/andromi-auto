@@ -228,8 +228,10 @@ class HomeFragment : Fragment() {
             val appSettings = App.provide(requireContext()).settings
             // Keep the service alive when auto-start is enabled:
             // - autoStartOnBoot: service must survive hibernate to detect SCREEN_ON wake
+            // - autoStartOnScreenOn: service catches every SCREEN_ON for always-on head units
             // - autoStartOnUsb + reopenOnReconnection: service detects USB reconnections
             val keepServiceAlive = appSettings.autoStartOnBoot ||
+                appSettings.autoStartOnScreenOn ||
                 (appSettings.autoStartOnUsb && appSettings.reopenOnReconnection)
             if (keepServiceAlive) {
                 val disconnectIntent = Intent(requireContext(), AapService::class.java).apply {

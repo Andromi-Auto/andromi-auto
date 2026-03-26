@@ -150,6 +150,8 @@
     <string name="auto_start_oem_warning">此裝置可能需要啟用自動啟動並移除電池最佳化或背景限制才能使用此應用程式。這在小米、華為、三星、OPPO 和 Vivo 的裝置上很常見。</string>
     <string name="auto_start_on_boot_label">開機時啟動</string>
     <string name="auto_start_on_boot_description">裝置啟動時自動開啟應用程式。Android 10+ 需要「顯示在其他應用程式上層」權限</string>
+    <string name="auto_start_screen_on_label">螢幕開啟時啟動</string>
+    <string name="auto_start_screen_on_description">每次螢幕開啟時開啟應用程式。適用於從未完全關機或使用快速開機模式的車機，其中其他自動啟動選項無法使用。不建議用於手機或平板電腦。</string>
     <string name="select_bt_device">選擇藍牙裝置</string>
     <string name="bt_device_not_set">未設定</string>
     <string name="bt_permission_denied_title">需要藍牙權限</string>

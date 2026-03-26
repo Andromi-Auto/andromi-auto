@@ -296,6 +296,10 @@ class Settings(context: Context) {
         get() = prefs.getBoolean("auto-start-on-boot", false)
         set(value) { prefs.edit().putBoolean("auto-start-on-boot", value).apply() }
 
+    var autoStartOnScreenOn: Boolean
+        get() = prefs.getBoolean("auto-start-on-screen-on", false)
+        set(value) { prefs.edit().putBoolean("auto-start-on-screen-on", value).apply() }
+
     var reopenOnReconnection: Boolean
         get() = prefs.getBoolean("reopen-on-reconnection", true)
         set(value) { prefs.edit().putBoolean("reopen-on-reconnection", value).apply() }

@@ -150,6 +150,8 @@
     <string name="auto_start_oem_warning">Előfordulhat, hogy ezen az eszközön engedélyezni kell az automatikus indítást, valamint el kell távolítani az akkumulátor-optimalizálást vagy a háttérkorlátozásokat ehhez az alkalmazáshoz. Ez gyakori Xiaomi, Huawei, Samsung, OPPO és Vivo eszközökön.</string>
     <string name="auto_start_on_boot_label">Indítás rendszerindításkor</string>
     <string name="auto_start_on_boot_description">Az alkalmazás automatikus megnyitása az eszköz indításakor. Android 10+-on szükséges a \'Megjelenítés más alkalmazások felett\' engedély</string>
+    <string name="auto_start_screen_on_label">Indítás képernyő bekapcsolásakor</string>
+    <string name="auto_start_screen_on_description">Az alkalmazás megnyitása minden alkalommal, amikor a képernyő bekapcsol. Ideális olyan autórádiókhoz, amelyek soha nem kapcsolnak ki teljesen, vagy gyorsindítási módot használnak, ahol a többi automatikus indítási lehetőség nem működik. Telefonokhoz és táblagépekhez nem ajánlott.</string>
     <string name="select_bt_device">Bluetooth eszköz kiválasztása</string>
     <string name="bt_device_not_set">Nincs beállítva</string>
     <string name="bt_permission_denied_title">Bluetooth-engedély szükséges</string>

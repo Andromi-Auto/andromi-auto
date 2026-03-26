@@ -154,6 +154,8 @@
     <string name="auto_start_oem_warning">Dieses Gerät erfordert möglicherweise die Aktivierung des Autostarts und die Entfernung von Batterieoptimierung oder Hintergrundbeschränkungen für diese App. Dies ist häufig bei Geräten von Xiaomi, Huawei, Samsung, OPPO und Vivo.</string>
     <string name="auto_start_on_boot_label">Start beim Hochfahren</string>
     <string name="auto_start_on_boot_description">Die App automatisch öffnen, wenn das Gerät startet. Erfordert die Berechtigung \'Über anderen Apps einblenden\' ab Android 10+</string>
+    <string name="auto_start_screen_on_label">Start bei Bildschirm an</string>
+    <string name="auto_start_screen_on_description">Die App jedes Mal öffnen, wenn der Bildschirm eingeschaltet wird. Ideal für Autoradios, die nie vollständig herunterfahren oder Schnellstart-Modi verwenden, bei denen die anderen Autostart-Optionen nicht funktionieren. Nicht empfohlen für Telefone oder Tablets.</string>
     <string name="select_bt_device">Bluetooth-Gerät wählen</string>
     <string name="bt_device_not_set">Nicht festgelegt</string>
     <string name="bt_permission_denied_title">Bluetooth-Berechtigung erforderlich</string>
