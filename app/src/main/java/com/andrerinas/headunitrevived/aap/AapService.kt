@@ -21,6 +21,7 @@ import android.os.Build
 import android.os.IBinder
 import android.os.Parcel
 import android.os.Parcelable
+import android.os.PowerManager
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
@@ -97,6 +98,13 @@ class AapService : Service(), UsbReceiver.Listener {
     private var accessoryHandshakeFailures = 0
     private var networkCallback: ConnectivityManager.NetworkCallback? = null
     private var wifiLock: WifiManager.WifiLock? = null
+
+    /**
+     * Partial wake lock acquired when the service starts from boot/screen-on.
+     * Keeps the CPU active while the head unit runs without ACC, making the
+     * service harder for MediaTek's background power saving to kill.
+     */
+    private var bootWakeLock: PowerManager.WakeLock? = null
 
     /**
      * Runtime-registered receiver for MEDIA_BUTTON intents.
@@ -336,6 +344,9 @@ class AapService : Service(), UsbReceiver.Listener {
             return
         }
         lastWakeHandledTimestamp = now
+
+        // Acquire wake lock to resist power saving cleanup on Quick Boot devices
+        acquireBootWakeLock()
 
         if (commManager.isConnected) {
             // Connection still alive — return to projection screen
@@ -786,9 +797,52 @@ class AapService : Service(), UsbReceiver.Listener {
         }
     }
 
+    /**
+     * Acquires a partial wake lock to resist MediaTek/Reglink background power
+     * saving that force-stops third-party apps when ACC is off.
+     * The wake lock has a 10-minute timeout as a safety net.
+     */
+    private fun acquireBootWakeLock() {
+        if (bootWakeLock?.isHeld == true) return
+        val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
+        bootWakeLock = pm.newWakeLock(
+            PowerManager.PARTIAL_WAKE_LOCK,
+            "HeadunitRevived::BootAutoStart"
+        ).apply {
+            acquire(10 * 60 * 1000L) // 10 minute timeout
+        }
+        AppLog.i("Boot WakeLock acquired (10min timeout)")
+
+        // Log battery optimization status for diagnostics
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val exempt = pm.isIgnoringBatteryOptimizations(packageName)
+            AppLog.i("Battery optimization exempt: $exempt")
+        }
+    }
+
+    private fun releaseBootWakeLock() {
+        if (bootWakeLock?.isHeld == true) {
+            bootWakeLock?.release()
+            AppLog.i("Boot WakeLock released")
+        }
+        bootWakeLock = null
+    }
+
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        AppLog.i("AapService: onTaskRemoved — attempting restart")
+        try {
+            val restartIntent = Intent(this, AapService::class.java)
+            ContextCompat.startForegroundService(this, restartIntent)
+        } catch (e: Exception) {
+            AppLog.e("AapService: failed to restart after task removal: ${e.message}")
+        }
+        super.onTaskRemoved(rootIntent)
+    }
+
     override fun onDestroy() {
-        AppLog.i("AapService destroying...")
+        AppLog.i("AapService destroying... (wakeLock held=${bootWakeLock?.isHeld == true})")
         isDestroying = true
+        releaseBootWakeLock()
         releaseWifiLock()
         unregisterNetworkMonitor()
         stopForeground(true)
@@ -839,6 +893,14 @@ class AapService : Service(), UsbReceiver.Listener {
         // zero-size overlay gives the app a "visible" context that bypasses OEM
         // background activity start restrictions. Falls back to full-screen
         // intent notification if overlay permission is not granted.
+        // Acquire a partial wake lock on any boot/screen-on start to resist
+        // aggressive power saving on MediaTek/Reglink head units that force-stop
+        // third-party apps when ACC is off after a Quick Boot reboot.
+        if (intent?.getBooleanExtra(BootCompleteReceiver.EXTRA_BOOT_START, false) == true ||
+            intent?.action == ACTION_CHECK_USB) {
+            acquireBootWakeLock()
+        }
+
         if (intent?.getBooleanExtra(BootCompleteReceiver.EXTRA_BOOT_START, false) == true) {
             // Mark wake as handled so the dynamic wakeDetectReceiver doesn't double-trigger
             lastWakeHandledTimestamp = SystemClock.elapsedRealtime()
