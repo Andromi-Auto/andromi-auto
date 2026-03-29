@@ -42,6 +42,7 @@
     <string name="use_gradient_background_description_on_auto">Додаток малює власний фон із центрованим градієнтним колом. Не застосовується до режиму Екстремально темний</string>
     <string name="use_gradient_background_description_off_auto">Використовується класичний фон додатку. Не застосовується до режиму Екстремально темний</string>
     <string name="category_dark_mode">Темний режим</string>
+    <string name="category_automation">Автоматизація</string>
     <string name="dark_mode_settings">Налаштування темного режиму</string>
     <string name="app_theme_short">App</string>
     <string name="night_mode_short">Android Auto</string>
@@ -376,4 +377,28 @@
     <string name="kill_on_disconnect_screen_on_warning">У вас увімкнено \"Запуск при увімкненні екрана\". Це налаштування відкриває додаток щоразу, коли вмикається екран. У поєднанні із закриттям при від\'єднанні додаток закриється після від\'єднання, але одразу відкриється знову, коли екран увімкнеться, створюючи цикл перезапуску.</string>
     <string name="kill_on_disconnect_conflicts_disabled">Конфліктуючі налаштування були вимкнені</string>
     <string name="wifi_disabled_info">Інфо: Wi-Fi вимкнено.</string>
+
+    <!-- Vehicle Info Settings -->
+    <string name="vehicle_info_settings">Інформація про транспортний засіб</string>
+    <string name="vehicle_info_settings_description">Налаштуйте, як ваш автомобіль відображається на телефоні</string>
+    <string name="category_vehicle">Транспортний засіб</string>
+    <string name="category_head_unit">Головний пристрій</string>
+    <string name="vehicle_display_name_label">Відображуване ім\'я</string>
+    <string name="vehicle_display_name_description">Ім\'я, що відображається на телефоні для цього автомобіля</string>
+    <string name="vehicle_make_label">Виробник</string>
+    <string name="vehicle_make_description">Виробник автомобіля (напр. Honda, Toyota)</string>
+    <string name="vehicle_model_label">Модель</string>
+    <string name="vehicle_model_description">Модель автомобіля (напр. Civic, Corolla)</string>
+    <string name="vehicle_year_label">Рік</string>
+    <string name="vehicle_year_description">Рік випуску автомобіля</string>
+    <string name="vehicle_id_label">ID автомобіля</string>
+    <string name="vehicle_id_description">Лише внутрішній ідентифікатор. Його зміна призведе до того, що телефон визначить це як інший автомобіль, скинувши налаштування Android Auto для цієї машини.</string>
+    <string name="head_unit_make_label">Виробник</string>
+    <string name="head_unit_make_description">Виробник головного пристрою</string>
+    <string name="head_unit_make_hint">Ваш телефон показує це ім\'я у налаштуваннях Android Auto.</string>
+    <string name="head_unit_model_label">Модель</string>
+    <string name="head_unit_model_description">Модель головного пристрою</string>
+    <string name="vehicle_year_error_invalid">Введіть коректний рік</string>
+    <string name="vehicle_year_error_max">Рік не може бути пізніше %1$d</string>
+    <string name="vehicle_info_restart_note">Ці дані надсилаються до Android Auto щоразу, коли ви підключаєтесь.</string>
 </resources>

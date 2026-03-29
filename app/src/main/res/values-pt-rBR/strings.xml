@@ -42,6 +42,7 @@
     <string name="use_gradient_background_description_on_auto">O app desenha seu próprio fundo com o círculo de gradiente centralizado. Não se aplica ao modo Escuro extremo</string>
     <string name="use_gradient_background_description_off_auto">O fundo clássico do app está sendo usado. Não se aplica ao modo Escuro extremo</string>
     <string name="category_dark_mode">Modo escuro</string>
+    <string name="category_automation">Automação</string>
     <string name="dark_mode_settings">Configurações do modo escuro</string>
     <string name="app_theme_short">App</string>
     <string name="night_mode_short">Android Auto</string>
@@ -376,4 +377,28 @@
     <string name="kill_on_disconnect_screen_on_warning">Você tem \"Iniciar ao ligar a tela\" ativado. Esta configuração abre o app toda vez que a tela é ligada. Combinado com fechar ao desconectar, o app será fechado após a desconexão, mas reabrirá imediatamente quando a tela ligar novamente, criando um loop de reinício.</string>
     <string name="kill_on_disconnect_conflicts_disabled">As configurações conflitantes foram desativadas</string>
     <string name="wifi_disabled_info">Info: O Wi-Fi está desativado.</string>
+
+    <!-- Vehicle Info Settings -->
+    <string name="vehicle_info_settings">Informações do veículo</string>
+    <string name="vehicle_info_settings_description">Personalize como seu veículo aparece no celular</string>
+    <string name="category_vehicle">Veículo</string>
+    <string name="category_head_unit">Central multimídia</string>
+    <string name="vehicle_display_name_label">Nome de exibição</string>
+    <string name="vehicle_display_name_description">Nome exibido no celular para este veículo</string>
+    <string name="vehicle_make_label">Fabricante</string>
+    <string name="vehicle_make_description">Fabricante do veículo (ex. Honda, Toyota)</string>
+    <string name="vehicle_model_label">Modelo</string>
+    <string name="vehicle_model_description">Modelo do veículo (ex. Civic, Corolla)</string>
+    <string name="vehicle_year_label">Ano</string>
+    <string name="vehicle_year_description">Ano do veículo</string>
+    <string name="vehicle_id_label">ID do veículo</string>
+    <string name="vehicle_id_description">Apenas identificador interno. Alterá-lo fará com que seu celular detecte este como um veículo diferente, redefinindo as preferências do Android Auto para este carro.</string>
+    <string name="head_unit_make_label">Fabricante</string>
+    <string name="head_unit_make_description">Fabricante da central multimídia</string>
+    <string name="head_unit_make_hint">Seu celular mostra este nome nas configurações do Android Auto.</string>
+    <string name="head_unit_model_label">Modelo</string>
+    <string name="head_unit_model_description">Modelo da central multimídia</string>
+    <string name="vehicle_year_error_invalid">Insira um ano válido</string>
+    <string name="vehicle_year_error_max">O ano não pode ser posterior a %1$d</string>
+    <string name="vehicle_info_restart_note">Estes dados são enviados ao Android Auto toda vez que você se conecta.</string>
 </resources>

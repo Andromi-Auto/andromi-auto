@@ -42,6 +42,7 @@
     <string name="use_gradient_background_description_on_auto">Aplikacja rysuje własne tło z wyśrodkowanym okręgiem gradientu. Nie dotyczy trybu Ekstremalnie ciemny</string>
     <string name="use_gradient_background_description_off_auto">Używane jest klasyczne tło aplikacji. Nie dotyczy trybu Ekstremalnie ciemny</string>
     <string name="category_dark_mode">Tryb ciemny</string>
+    <string name="category_automation">Automatyzacja</string>
     <string name="dark_mode_settings">Ustawienia trybu ciemnego</string>
     <string name="app_theme_short">App</string>
     <string name="night_mode_short">Android Auto</string>
@@ -376,4 +377,28 @@
     <string name="kill_on_disconnect_screen_on_warning">Masz włączoną opcję \"Uruchom przy włączeniu ekranu\". To ustawienie otwiera aplikację za każdym razem, gdy ekran się włącza. W połączeniu z zamykaniem przy rozłączeniu, aplikacja zamknie się po rozłączeniu, ale natychmiast otworzy się ponownie, gdy ekran się włączy, tworząc pętlę restartów.</string>
     <string name="kill_on_disconnect_conflicts_disabled">Kolidujące ustawienia zostały wyłączone</string>
     <string name="wifi_disabled_info">Info: Wi-Fi jest wyłączone.</string>
+
+    <!-- Vehicle Info Settings -->
+    <string name="vehicle_info_settings">Informacje o pojeździe</string>
+    <string name="vehicle_info_settings_description">Dostosuj, jak pojazd jest wyświetlany na telefonie</string>
+    <string name="category_vehicle">Pojazd</string>
+    <string name="category_head_unit">Radio</string>
+    <string name="vehicle_display_name_label">Nazwa wyświetlana</string>
+    <string name="vehicle_display_name_description">Nazwa wyświetlana na telefonie dla tego pojazdu</string>
+    <string name="vehicle_make_label">Producent</string>
+    <string name="vehicle_make_description">Producent pojazdu (np. Honda, Toyota)</string>
+    <string name="vehicle_model_label">Model</string>
+    <string name="vehicle_model_description">Model pojazdu (np. Civic, Corolla)</string>
+    <string name="vehicle_year_label">Rok</string>
+    <string name="vehicle_year_description">Rok produkcji pojazdu</string>
+    <string name="vehicle_id_label">ID pojazdu</string>
+    <string name="vehicle_id_description">Tylko wewnętrzny identyfikator. Jego zmiana spowoduje, że telefon potraktuje to jako inny pojazd, resetując preferencje Android Auto dla tego samochodu.</string>
+    <string name="head_unit_make_label">Producent</string>
+    <string name="head_unit_make_description">Producent radia</string>
+    <string name="head_unit_make_hint">Twój telefon wyświetla tę nazwę w ustawieniach Android Auto.</string>
+    <string name="head_unit_model_label">Model</string>
+    <string name="head_unit_model_description">Model radia</string>
+    <string name="vehicle_year_error_invalid">Wprowadź prawidłowy rok</string>
+    <string name="vehicle_year_error_max">Rok nie może być późniejszy niż %1$d</string>
+    <string name="vehicle_info_restart_note">Te dane są wysyłane do Android Auto przy każdym połączeniu.</string>
 </resources>

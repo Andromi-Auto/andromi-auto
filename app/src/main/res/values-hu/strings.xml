@@ -42,6 +42,7 @@
     <string name="use_gradient_background_description_on_auto">Az alkalmazás saját hátteret rajzol a középre igazított színátmenetes körrel. Nem vonatkozik az Extrém sötét módra</string>
     <string name="use_gradient_background_description_off_auto">Az alkalmazás klasszikus háttere van használatban. Nem vonatkozik az Extrém sötét módra</string>
     <string name="category_dark_mode">Sötét mód</string>
+    <string name="category_automation">Automatizálás</string>
     <string name="dark_mode_settings">Sötét mód beállítások</string>
     <string name="app_theme_short">App</string>
     <string name="night_mode_short">Android Auto</string>
@@ -374,4 +375,28 @@
     <string name="kill_on_disconnect_boot_warning">A \"Indítás rendszerindításkor\" be van kapcsolva. Ha az alkalmazás bezárul lecsatlakozáskor és ez az eszköz hibernálódik kikapcsolás helyett, az alkalmazás nem feltétlenül nyílik meg automatikusan a következő indításkor, mert nem jön létre rendszerindítási esemény — az eszköz egyszerűen felébred az alvó módból.</string>
     <string name="kill_on_disconnect_conflicts_disabled">Az ütköző beállítások letiltásra kerültek</string>
     <string name="wifi_disabled_info">Infó: A Wi-Fi ki van kapcsolva.</string>
+
+    <!-- Vehicle Info Settings -->
+    <string name="vehicle_info_settings">Járműinformáció</string>
+    <string name="vehicle_info_settings_description">Testreszabhatja, hogyan jelenik meg járműve a telefonján</string>
+    <string name="category_vehicle">Jármű</string>
+    <string name="category_head_unit">Fejegység</string>
+    <string name="vehicle_display_name_label">Megjelenítési név</string>
+    <string name="vehicle_display_name_description">A telefonján megjelenő név ehhez a járműhöz</string>
+    <string name="vehicle_make_label">Gyártó</string>
+    <string name="vehicle_make_description">Jármű gyártója (pl. Honda, Toyota)</string>
+    <string name="vehicle_model_label">Modell</string>
+    <string name="vehicle_model_description">Jármű modellje (pl. Civic, Corolla)</string>
+    <string name="vehicle_year_label">Évjárat</string>
+    <string name="vehicle_year_description">Jármű évjárata</string>
+    <string name="vehicle_id_label">Jármű-azonosító</string>
+    <string name="vehicle_id_description">Csak belső azonosító. Megváltoztatása azt eredményezi, hogy telefonja ezt más járműként érzékeli, visszaállítva az Android Auto beállításait ehhez az autóhoz.</string>
+    <string name="head_unit_make_label">Gyártó</string>
+    <string name="head_unit_make_description">Fejegység gyártója</string>
+    <string name="head_unit_make_hint">A telefonja ezt a nevet jeleníti meg az Android Auto beállításaiban.</string>
+    <string name="head_unit_model_label">Modell</string>
+    <string name="head_unit_model_description">Fejegység modellje</string>
+    <string name="vehicle_year_error_invalid">Adjon meg egy érvényes évet</string>
+    <string name="vehicle_year_error_max">Az év nem lehet későbbi, mint %1$d</string>
+    <string name="vehicle_info_restart_note">Ezek az adatok minden csatlakozáskor elküldésre kerülnek az Android Auto-nak.</string>
 </resources>

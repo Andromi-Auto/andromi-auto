@@ -205,6 +205,35 @@ class Settings(context: Context) {
         get() = prefs.getBoolean("right-hand-drive", false)
         set(value) { prefs.edit().putBoolean("right-hand-drive", value).apply() }
 
+    // Vehicle info settings (sent to phone during Android Auto handshake)
+    var vehicleDisplayName: String
+        get() = prefs.getString("vehicle-display-name", "Headunit Revived")!!
+        set(value) { prefs.edit().putString("vehicle-display-name", value).apply() }
+
+    var vehicleMake: String
+        get() = prefs.getString("vehicle-make", "Google")!!
+        set(value) { prefs.edit().putString("vehicle-make", value).apply() }
+
+    var vehicleModel: String
+        get() = prefs.getString("vehicle-model", "Desktop Head Unit")!!
+        set(value) { prefs.edit().putString("vehicle-model", value).apply() }
+
+    var vehicleYear: String
+        get() = prefs.getString("vehicle-year", "2025")!!
+        set(value) { prefs.edit().putString("vehicle-year", value).apply() }
+
+    var vehicleId: String
+        get() = prefs.getString("vehicle-id", "headlessunit-001")!!
+        set(value) { prefs.edit().putString("vehicle-id", value).apply() }
+
+    var headUnitMake: String
+        get() = prefs.getString("head-unit-make", "Google")!!
+        set(value) { prefs.edit().putString("head-unit-make", value).apply() }
+
+    var headUnitModel: String
+        get() = prefs.getString("head-unit-model", "Desktop Head Unit")!!
+        set(value) { prefs.edit().putString("head-unit-model", value).apply() }
+
     // 0 = Manual, 1 = Auto (Headunit Server), 2 = Helper (Wifi Launcher)
     var wifiConnectionMode: Int
         get() {

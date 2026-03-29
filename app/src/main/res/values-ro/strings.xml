@@ -42,6 +42,7 @@
     <string name="use_gradient_background_description_on_auto">Aplicația desenează propriul fundal cu cercul de degradat centrat. Nu se aplică modului Întunecat extrem</string>
     <string name="use_gradient_background_description_off_auto">Fundalul clasic al aplicației este utilizat. Nu se aplică modului Întunecat extrem</string>
     <string name="category_dark_mode">Mod întunecat</string>
+    <string name="category_automation">Automatizare</string>
     <string name="dark_mode_settings">Setări mod întunecat</string>
     <string name="app_theme_short">App</string>
     <string name="night_mode_short">Android Auto</string>
@@ -375,4 +376,28 @@
     <string name="kill_on_disconnect_boot_warning">Aveți \"Pornire la boot\" activat. Dacă aplicația se închide la deconectare și acest dispozitiv intră în hibernare în loc să se oprească, aplicația s-ar putea să nu se redeschidă automat la următorul ciclu de pornire deoarece nu este generat un eveniment de boot — dispozitivul pur și simplu se trezește din modul de repaus.</string>
     <string name="kill_on_disconnect_conflicts_disabled">Setările conflictuale au fost dezactivate</string>
     <string name="wifi_disabled_info">Info: Wi-Fi este dezactivat.</string>
+
+    <!-- Vehicle Info Settings -->
+    <string name="vehicle_info_settings">Informații vehicul</string>
+    <string name="vehicle_info_settings_description">Personalizați cum apare vehiculul dvs. pe telefon</string>
+    <string name="category_vehicle">Vehicul</string>
+    <string name="category_head_unit">Unitate principală</string>
+    <string name="vehicle_display_name_label">Nume afișat</string>
+    <string name="vehicle_display_name_description">Numele afișat pe telefon pentru acest vehicul</string>
+    <string name="vehicle_make_label">Producător</string>
+    <string name="vehicle_make_description">Producătorul vehiculului (ex. Honda, Toyota)</string>
+    <string name="vehicle_model_label">Model</string>
+    <string name="vehicle_model_description">Modelul vehiculului (ex. Civic, Corolla)</string>
+    <string name="vehicle_year_label">An</string>
+    <string name="vehicle_year_description">Anul vehiculului</string>
+    <string name="vehicle_id_label">ID vehicul</string>
+    <string name="vehicle_id_description">Doar identificator intern. Schimbarea acestuia va face ca telefonul dvs. să detecteze acesta ca un vehicul diferit, resetând preferințele Android Auto pentru această mașină.</string>
+    <string name="head_unit_make_label">Producător</string>
+    <string name="head_unit_make_description">Producătorul unității principale</string>
+    <string name="head_unit_make_hint">Telefonul dvs. afișează acest nume în setările Android Auto.</string>
+    <string name="head_unit_model_label">Model</string>
+    <string name="head_unit_model_description">Modelul unității principale</string>
+    <string name="vehicle_year_error_invalid">Introduceți un an valid</string>
+    <string name="vehicle_year_error_max">Anul nu poate fi mai târziu de %1$d</string>
+    <string name="vehicle_info_restart_note">Aceste date sunt trimise către Android Auto de fiecare dată când vă conectați.</string>
 </resources>

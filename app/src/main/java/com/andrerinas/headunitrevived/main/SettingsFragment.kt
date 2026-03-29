@@ -43,7 +43,6 @@ class SettingsFragment : Fragment() {
     private var pendingFullscreenMode: Settings.FullscreenMode? = null
     private var pendingViewMode: Settings.ViewMode? = null
     private var pendingForceSoftware: Boolean? = null
-    private var pendingRightHandDrive: Boolean? = null
     private var pendingWifiConnectionMode: Int? = null
     private var pendingVideoCodec: String? = null
     private var pendingFpsLimit: Int? = null
@@ -94,7 +93,6 @@ class SettingsFragment : Fragment() {
         pendingFullscreenMode = settings.fullscreenMode
         pendingViewMode = settings.viewMode
         pendingForceSoftware = settings.forceSoftwareDecoding
-        pendingRightHandDrive = settings.rightHandDrive
         pendingWifiConnectionMode = settings.wifiConnectionMode
         pendingVideoCodec = settings.videoCodec
         pendingFpsLimit = settings.fpsLimit
@@ -213,7 +211,6 @@ class SettingsFragment : Fragment() {
         pendingFullscreenMode?.let { settings.fullscreenMode = it }
         pendingViewMode?.let { settings.viewMode = it }
         pendingForceSoftware?.let { settings.forceSoftwareDecoding = it }
-        pendingRightHandDrive?.let { settings.rightHandDrive = it }
         pendingVideoCodec?.let { settings.videoCodec = it }
         pendingFpsLimit?.let { settings.fpsLimit = it }
         pendingBluetoothAddress?.let { settings.bluetoothAddress = it }
@@ -281,7 +278,6 @@ class SettingsFragment : Fragment() {
                         pendingFullscreenMode != settings.fullscreenMode ||
                         pendingViewMode != settings.viewMode ||
                         pendingForceSoftware != settings.forceSoftwareDecoding ||
-                        pendingRightHandDrive != settings.rightHandDrive ||
                         pendingWifiConnectionMode != settings.wifiConnectionMode ||
                         pendingVideoCodec != settings.videoCodec ||
                         pendingFpsLimit != settings.fpsLimit ||
@@ -312,7 +308,6 @@ class SettingsFragment : Fragment() {
                           pendingFpsLimit != settings.fpsLimit ||
                           pendingDpi != settings.dpiPixelDensity ||
                           pendingForceSoftware != settings.forceSoftwareDecoding ||
-                          pendingRightHandDrive != settings.rightHandDrive ||
                           pendingEnableRotary != settings.enableRotary ||
                           pendingEnableAudioSink != settings.enableAudioSink ||
                           pendingUseAacAudio != settings.useAacAudio ||
@@ -400,55 +395,13 @@ class SettingsFragment : Fragment() {
         ))
 
         items.add(SettingItem.SettingEntry(
-            stableId = "autoStartSettings",
-            nameResId = R.string.auto_start_settings,
-            value = getString(R.string.auto_start_settings_description),
+            stableId = "vehicleInfoSettings",
+            nameResId = R.string.vehicle_info_settings,
+            value = getString(R.string.vehicle_info_settings_description),
             onClick = {
                 try {
-                    findNavController().navigate(R.id.action_settingsFragment_to_autoStartFragment)
+                    findNavController().navigate(R.id.action_settingsFragment_to_vehicleInfoFragment)
                 } catch (e: Exception) { }
-            }
-        ))
-
-        items.add(SettingItem.SettingEntry(
-            stableId = "autoConnectSettings",
-            nameResId = R.string.auto_connect_settings,
-            value = getAutoConnectSummary(),
-            onClick = {
-                try {
-                    findNavController().navigate(R.id.action_settingsFragment_to_autoConnectFragment)
-                } catch (e: Exception) {
-                    // Failover
-                }
-            }
-        ))
-
-        items.add(SettingItem.ToggleSettingEntry(
-            stableId = "killOnDisconnect",
-            nameResId = R.string.kill_on_disconnect,
-            descriptionResId = R.string.kill_on_disconnect_description,
-            isChecked = pendingKillOnDisconnect!!,
-            onCheckedChanged = { isChecked ->
-                if (isChecked) {
-                    val conflicts = getKillOnDisconnectConflicts()
-                    val hasAutoStartOnBoot = settings.autoStartOnBoot
-                    val hasAutoStartOnScreenOn = settings.autoStartOnScreenOn
-                    if (conflicts.isNotEmpty() || hasAutoStartOnBoot || hasAutoStartOnScreenOn) {
-                        // Sync data model to true so DiffUtil can detect the
-                        // change back to false when the dialog is canceled
-                        pendingKillOnDisconnect = true
-                        updateSettingsList()
-                        showKillOnDisconnectWarning(conflicts, hasAutoStartOnBoot, hasAutoStartOnScreenOn)
-                    } else {
-                        pendingKillOnDisconnect = true
-                        checkChanges()
-                        updateSettingsList()
-                    }
-                } else {
-                    pendingKillOnDisconnect = false
-                    checkChanges()
-                    updateSettingsList()
-                }
             }
         ))
 
@@ -468,6 +421,58 @@ class SettingsFragment : Fragment() {
                     findNavController().navigate(R.id.action_settingsFragment_to_darkModeFragment)
                 } catch (e: Exception) {
                     // Failover
+                }
+            }
+        ))
+
+        // --- Automation ---
+        items.add(SettingItem.CategoryHeader("automation", R.string.category_automation))
+
+        items.add(SettingItem.SettingEntry(
+            stableId = "autoStartSettings",
+            nameResId = R.string.auto_start_settings,
+            value = getString(R.string.auto_start_settings_description),
+            onClick = {
+                try {
+                    findNavController().navigate(R.id.action_settingsFragment_to_autoStartFragment)
+                } catch (e: Exception) { }
+            }
+        ))
+
+        items.add(SettingItem.SettingEntry(
+            stableId = "autoConnectSettings",
+            nameResId = R.string.auto_connect_settings,
+            value = getAutoConnectSummary(),
+            onClick = {
+                try {
+                    findNavController().navigate(R.id.action_settingsFragment_to_autoConnectFragment)
+                } catch (e: Exception) { }
+            }
+        ))
+
+        items.add(SettingItem.ToggleSettingEntry(
+            stableId = "killOnDisconnect",
+            nameResId = R.string.kill_on_disconnect,
+            descriptionResId = R.string.kill_on_disconnect_description,
+            isChecked = pendingKillOnDisconnect!!,
+            onCheckedChanged = { isChecked ->
+                if (isChecked) {
+                    val conflicts = getKillOnDisconnectConflicts()
+                    val hasAutoStartOnBoot = settings.autoStartOnBoot
+                    val hasAutoStartOnScreenOn = settings.autoStartOnScreenOn
+                    if (conflicts.isNotEmpty() || hasAutoStartOnBoot || hasAutoStartOnScreenOn) {
+                        pendingKillOnDisconnect = true
+                        updateSettingsList()
+                        showKillOnDisconnectWarning(conflicts, hasAutoStartOnBoot, hasAutoStartOnScreenOn)
+                    } else {
+                        pendingKillOnDisconnect = true
+                        checkChanges()
+                        updateSettingsList()
+                    }
+                } else {
+                    pendingKillOnDisconnect = false
+                    checkChanges()
+                    updateSettingsList()
                 }
             }
         ))
@@ -494,18 +499,6 @@ class SettingsFragment : Fragment() {
             isChecked = pendingShowNavigationNotifications!!,
             onCheckedChanged = { isChecked ->
                 pendingShowNavigationNotifications = isChecked
-                checkChanges()
-                updateSettingsList()
-            }
-        ))
-
-        items.add(SettingItem.ToggleSettingEntry(
-            stableId = "rightHandDrive",
-            nameResId = R.string.right_hand_drive,
-            descriptionResId = R.string.right_hand_drive_description,
-            isChecked = pendingRightHandDrive!!,
-            onCheckedChanged = { isChecked ->
-                pendingRightHandDrive = isChecked
                 checkChanges()
                 updateSettingsList()
             }
