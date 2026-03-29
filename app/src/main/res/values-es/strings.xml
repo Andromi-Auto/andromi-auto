@@ -42,6 +42,7 @@
     <string name="use_gradient_background_description_on_auto">La app dibuja su propio fondo con el círculo de degradado centrado. No aplica al modo Oscuro extremo</string>
     <string name="use_gradient_background_description_off_auto">Se está usando el fondo clásico de la app. No aplica al modo Oscuro extremo</string>
     <string name="category_dark_mode">Modo oscuro</string>
+    <string name="category_automation">Automatización</string>
     <string name="dark_mode_settings">Ajustes del modo oscuro</string>
     <string name="app_theme_short">App</string>
     <string name="night_mode_short">Android Auto</string>
@@ -396,5 +397,7 @@
     <string name="head_unit_make_description">Fabricante de la radio</string>
     <string name="head_unit_model_label">Modelo</string>
     <string name="head_unit_model_description">Modelo de la radio</string>
+    <string name="vehicle_year_error_invalid">Introduce un año válido</string>
+    <string name="vehicle_year_error_max">El año no puede ser posterior a %1$d</string>
     <string name="vehicle_info_restart_note">Los cambios se aplicarán en la próxima conexión de Android Auto.</string>
 </resources>

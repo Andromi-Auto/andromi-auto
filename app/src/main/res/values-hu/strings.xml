@@ -42,6 +42,7 @@
     <string name="use_gradient_background_description_on_auto">Az alkalmazás saját hátteret rajzol a középre igazított színátmenetes körrel. Nem vonatkozik az Extrém sötét módra</string>
     <string name="use_gradient_background_description_off_auto">Az alkalmazás klasszikus háttere van használatban. Nem vonatkozik az Extrém sötét módra</string>
     <string name="category_dark_mode">Sötét mód</string>
+    <string name="category_automation">Automatizálás</string>
     <string name="dark_mode_settings">Sötét mód beállítások</string>
     <string name="app_theme_short">App</string>
     <string name="night_mode_short">Android Auto</string>
@@ -394,5 +395,7 @@
     <string name="head_unit_make_description">Fejegység gyártója</string>
     <string name="head_unit_model_label">Modell</string>
     <string name="head_unit_model_description">Fejegység modellje</string>
+    <string name="vehicle_year_error_invalid">Adjon meg egy érvényes évet</string>
+    <string name="vehicle_year_error_max">Az év nem lehet későbbi, mint %1$d</string>
     <string name="vehicle_info_restart_note">A változások a következő Android Auto csatlakozáskor lépnek érvénybe.</string>
 </resources>

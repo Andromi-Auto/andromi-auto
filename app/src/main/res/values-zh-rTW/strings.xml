@@ -41,6 +41,7 @@
     <string name="use_gradient_background_description_on_auto">應用程式繪製自己的背景，漸層圓形置中顯示。不適用於極致深色模式</string>
     <string name="use_gradient_background_description_off_auto">正在使用應用程式的傳統背景。不適用於極致深色模式</string>
     <string name="category_dark_mode">深色模式</string>
+    <string name="category_automation">自動化</string>
     <string name="dark_mode_settings">深色模式設定</string>
     <string name="app_theme_short">App</string>
     <string name="night_mode_short">Android Auto</string>
@@ -395,5 +396,7 @@
     <string name="head_unit_make_description">車機製造商</string>
     <string name="head_unit_model_label">型號</string>
     <string name="head_unit_model_description">車機型號</string>
+    <string name="vehicle_year_error_invalid">請輸入有效年份</string>
+    <string name="vehicle_year_error_max">年份不能晚於 %1$d</string>
     <string name="vehicle_info_restart_note">變更將在下次連接 Android Auto 時生效。</string>
 </resources>

@@ -42,6 +42,7 @@
     <string name="use_gradient_background_description_on_auto">Aplicația desenează propriul fundal cu cercul de degradat centrat. Nu se aplică modului Întunecat extrem</string>
     <string name="use_gradient_background_description_off_auto">Fundalul clasic al aplicației este utilizat. Nu se aplică modului Întunecat extrem</string>
     <string name="category_dark_mode">Mod întunecat</string>
+    <string name="category_automation">Automatizare</string>
     <string name="dark_mode_settings">Setări mod întunecat</string>
     <string name="app_theme_short">App</string>
     <string name="night_mode_short">Android Auto</string>
@@ -395,5 +396,7 @@
     <string name="head_unit_make_description">Producătorul unității principale</string>
     <string name="head_unit_model_label">Model</string>
     <string name="head_unit_model_description">Modelul unității principale</string>
+    <string name="vehicle_year_error_invalid">Introduceți un an valid</string>
+    <string name="vehicle_year_error_max">Anul nu poate fi mai târziu de %1$d</string>
     <string name="vehicle_info_restart_note">Modificările vor fi aplicate la următoarea conexiune Android Auto.</string>
 </resources>

@@ -42,6 +42,7 @@
     <string name="use_gradient_background_description_on_auto">Aplikace kreslí vlastní pozadí s přechodovým kruhem uprostřed. Neplatí pro režim Extrémně tmavý</string>
     <string name="use_gradient_background_description_off_auto">Používá se klasické pozadí aplikace. Neplatí pro režim Extrémně tmavý</string>
     <string name="category_dark_mode">Tmavý režim</string>
+    <string name="category_automation">Automatizace</string>
     <string name="dark_mode_settings">Nastavení tmavého režimu</string>
     <string name="app_theme_short">App</string>
     <string name="night_mode_short">Android Auto</string>
@@ -396,5 +397,7 @@
     <string name="head_unit_make_description">Výrobce autorádia</string>
     <string name="head_unit_model_label">Model</string>
     <string name="head_unit_model_description">Model autorádia</string>
+    <string name="vehicle_year_error_invalid">Zadejte platný rok</string>
+    <string name="vehicle_year_error_max">Rok nemůže být pozdější než %1$d</string>
     <string name="vehicle_info_restart_note">Změny se projeví při dalším připojení Android Auto.</string>
 </resources>

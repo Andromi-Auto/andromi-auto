@@ -394,6 +394,29 @@ class SettingsFragment : Fragment() {
             }
         ))
 
+        // --- Dark Mode ---
+        items.add(SettingItem.CategoryHeader("darkMode", R.string.category_dark_mode))
+
+        val appThemeTitles = resources.getStringArray(R.array.app_theme)
+        val nightModeTitles = resources.getStringArray(R.array.night_mode)
+        val darkModeValue = "${getString(R.string.app_theme_short)}: ${appThemeTitles[settings.appTheme.value]} · " +
+                "${getString(R.string.night_mode_short)}: ${nightModeTitles[settings.nightMode.value]}"
+        items.add(SettingItem.SettingEntry(
+            stableId = "darkModeSettings",
+            nameResId = R.string.dark_mode_settings,
+            value = darkModeValue,
+            onClick = {
+                try {
+                    findNavController().navigate(R.id.action_settingsFragment_to_darkModeFragment)
+                } catch (e: Exception) {
+                    // Failover
+                }
+            }
+        ))
+
+        // --- Automation ---
+        items.add(SettingItem.CategoryHeader("automation", R.string.category_automation))
+
         items.add(SettingItem.SettingEntry(
             stableId = "autoStartSettings",
             nameResId = R.string.auto_start_settings,
@@ -412,9 +435,7 @@ class SettingsFragment : Fragment() {
             onClick = {
                 try {
                     findNavController().navigate(R.id.action_settingsFragment_to_autoConnectFragment)
-                } catch (e: Exception) {
-                    // Failover
-                }
+                } catch (e: Exception) { }
             }
         ))
 
@@ -429,8 +450,6 @@ class SettingsFragment : Fragment() {
                     val hasAutoStartOnBoot = settings.autoStartOnBoot
                     val hasAutoStartOnScreenOn = settings.autoStartOnScreenOn
                     if (conflicts.isNotEmpty() || hasAutoStartOnBoot || hasAutoStartOnScreenOn) {
-                        // Sync data model to true so DiffUtil can detect the
-                        // change back to false when the dialog is canceled
                         pendingKillOnDisconnect = true
                         updateSettingsList()
                         showKillOnDisconnectWarning(conflicts, hasAutoStartOnBoot, hasAutoStartOnScreenOn)
@@ -455,26 +474,6 @@ class SettingsFragment : Fragment() {
                 try {
                     findNavController().navigate(R.id.action_settingsFragment_to_vehicleInfoFragment)
                 } catch (e: Exception) { }
-            }
-        ))
-
-        // --- Dark Mode ---
-        items.add(SettingItem.CategoryHeader("darkMode", R.string.category_dark_mode))
-
-        val appThemeTitles = resources.getStringArray(R.array.app_theme)
-        val nightModeTitles = resources.getStringArray(R.array.night_mode)
-        val darkModeValue = "${getString(R.string.app_theme_short)}: ${appThemeTitles[settings.appTheme.value]} · " +
-                "${getString(R.string.night_mode_short)}: ${nightModeTitles[settings.nightMode.value]}"
-        items.add(SettingItem.SettingEntry(
-            stableId = "darkModeSettings",
-            nameResId = R.string.dark_mode_settings,
-            value = darkModeValue,
-            onClick = {
-                try {
-                    findNavController().navigate(R.id.action_settingsFragment_to_darkModeFragment)
-                } catch (e: Exception) {
-                    // Failover
-                }
             }
         ))
 

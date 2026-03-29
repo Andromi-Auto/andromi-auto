@@ -42,6 +42,7 @@
     <string name="use_gradient_background_description_on_auto">Додаток малює власний фон із центрованим градієнтним колом. Не застосовується до режиму Екстремально темний</string>
     <string name="use_gradient_background_description_off_auto">Використовується класичний фон додатку. Не застосовується до режиму Екстремально темний</string>
     <string name="category_dark_mode">Темний режим</string>
+    <string name="category_automation">Автоматизація</string>
     <string name="dark_mode_settings">Налаштування темного режиму</string>
     <string name="app_theme_short">App</string>
     <string name="night_mode_short">Android Auto</string>
@@ -396,5 +397,7 @@
     <string name="head_unit_make_description">Виробник головного пристрою</string>
     <string name="head_unit_model_label">Модель</string>
     <string name="head_unit_model_description">Модель головного пристрою</string>
+    <string name="vehicle_year_error_invalid">Введіть коректний рік</string>
+    <string name="vehicle_year_error_max">Рік не може бути пізніше %1$d</string>
     <string name="vehicle_info_restart_note">Зміни набудуть чинності при наступному підключенні Android Auto.</string>
 </resources>

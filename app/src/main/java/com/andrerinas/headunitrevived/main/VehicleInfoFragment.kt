@@ -204,7 +204,7 @@ class VehicleInfoFragment : Fragment() {
             nameResId = R.string.vehicle_year_label,
             value = pendingVehicleYear ?: "",
             onClick = {
-                showTextInputDialog(R.string.vehicle_year_label, pendingVehicleYear ?: "") { value ->
+                showYearInputDialog(pendingVehicleYear ?: "") { value ->
                     pendingVehicleYear = value
                     checkChanges()
                     updateSettingsList()
@@ -312,5 +312,44 @@ class VehicleInfoFragment : Fragment() {
             }
             .setNegativeButton(android.R.string.cancel, null)
             .show()
+    }
+
+    private fun showYearInputDialog(currentValue: String, onResult: (String) -> Unit) {
+        val maxYear = java.util.Calendar.getInstance().get(java.util.Calendar.YEAR) + 2
+
+        val editText = android.widget.EditText(requireContext()).apply {
+            setText(currentValue)
+            setSelection(text.length)
+            setPadding(48, 32, 48, 16)
+            inputType = android.text.InputType.TYPE_CLASS_NUMBER
+            filters = arrayOf(android.text.InputFilter.LengthFilter(4))
+        }
+
+        val dialog = MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
+            .setTitle(R.string.vehicle_year_label)
+            .setView(editText)
+            .setPositiveButton(android.R.string.ok, null)
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+
+        dialog.getButton(android.app.AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+            val text = editText.text.toString().trim()
+            val year = text.toIntOrNull()
+            when {
+                text.isEmpty() || year == null -> {
+                    editText.error = getString(R.string.vehicle_year_error_invalid)
+                }
+                year > maxYear -> {
+                    editText.error = getString(R.string.vehicle_year_error_max, maxYear)
+                }
+                year < 1900 -> {
+                    editText.error = getString(R.string.vehicle_year_error_invalid)
+                }
+                else -> {
+                    onResult(text)
+                    dialog.dismiss()
+                }
+            }
+        }
     }
 }

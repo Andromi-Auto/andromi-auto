@@ -42,6 +42,7 @@
     <string name="use_gradient_background_description_on_auto">O app desenha seu próprio fundo com o círculo de gradiente centralizado. Não se aplica ao modo Escuro extremo</string>
     <string name="use_gradient_background_description_off_auto">O fundo clássico do app está sendo usado. Não se aplica ao modo Escuro extremo</string>
     <string name="category_dark_mode">Modo escuro</string>
+    <string name="category_automation">Automação</string>
     <string name="dark_mode_settings">Configurações do modo escuro</string>
     <string name="app_theme_short">App</string>
     <string name="night_mode_short">Android Auto</string>
@@ -396,5 +397,7 @@
     <string name="head_unit_make_description">Fabricante da central multimídia</string>
     <string name="head_unit_model_label">Modelo</string>
     <string name="head_unit_model_description">Modelo da central multimídia</string>
+    <string name="vehicle_year_error_invalid">Insira um ano válido</string>
+    <string name="vehicle_year_error_max">O ano não pode ser posterior a %1$d</string>
     <string name="vehicle_info_restart_note">As alterações serão aplicadas na próxima conexão do Android Auto.</string>
 </resources>

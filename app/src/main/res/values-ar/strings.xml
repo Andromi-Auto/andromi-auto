@@ -42,6 +42,7 @@
     <string name="use_gradient_background_description_on_auto">يرسم التطبيق خلفيته الخاصة مع دائرة التدرج في المنتصف. لا ينطبق على وضع الداكن المتطرف</string>
     <string name="use_gradient_background_description_off_auto">يتم استخدام الخلفية الكلاسيكية للتطبيق. لا ينطبق على وضع الداكن المتطرف</string>
     <string name="category_dark_mode">الوضع الداكن</string>
+    <string name="category_automation">الأتمتة</string>
     <string name="dark_mode_settings">إعدادات الوضع الداكن</string>
     <string name="app_theme_short">التطبيق</string>
     <string name="night_mode_short">Android Auto</string>
@@ -396,5 +397,7 @@
     <string name="head_unit_make_description">الشركة المصنعة لوحدة الوسائط</string>
     <string name="head_unit_model_label">الطراز</string>
     <string name="head_unit_model_description">طراز وحدة الوسائط</string>
+    <string name="vehicle_year_error_invalid">أدخل سنة صالحة</string>
+    <string name="vehicle_year_error_max">لا يمكن أن تكون السنة بعد %1$d</string>
     <string name="vehicle_info_restart_note">ستُطبق التغييرات عند الاتصال التالي بـ Android Auto.</string>
 </resources>

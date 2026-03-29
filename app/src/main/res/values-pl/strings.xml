@@ -42,6 +42,7 @@
     <string name="use_gradient_background_description_on_auto">Aplikacja rysuje własne tło z wyśrodkowanym okręgiem gradientu. Nie dotyczy trybu Ekstremalnie ciemny</string>
     <string name="use_gradient_background_description_off_auto">Używane jest klasyczne tło aplikacji. Nie dotyczy trybu Ekstremalnie ciemny</string>
     <string name="category_dark_mode">Tryb ciemny</string>
+    <string name="category_automation">Automatyzacja</string>
     <string name="dark_mode_settings">Ustawienia trybu ciemnego</string>
     <string name="app_theme_short">App</string>
     <string name="night_mode_short">Android Auto</string>
@@ -396,5 +397,7 @@
     <string name="head_unit_make_description">Producent radia</string>
     <string name="head_unit_model_label">Model</string>
     <string name="head_unit_model_description">Model radia</string>
+    <string name="vehicle_year_error_invalid">Wprowadź prawidłowy rok</string>
+    <string name="vehicle_year_error_max">Rok nie może być późniejszy niż %1$d</string>
     <string name="vehicle_info_restart_note">Zmiany zostaną zastosowane przy następnym połączeniu Android Auto.</string>
 </resources>

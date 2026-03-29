@@ -41,6 +41,7 @@
     <string name="use_gradient_background_description_on_auto">De app tekent een eigen achtergrond met de gecentreerde verloopcirkel. Geldt niet voor de modus Extreem donker</string>
     <string name="use_gradient_background_description_off_auto">De klassieke achtergrond van de app wordt gebruikt. Geldt niet voor de modus Extreem donker</string>
     <string name="category_dark_mode">Donkere modus</string>
+    <string name="category_automation">Automatisering</string>
     <string name="dark_mode_settings">Instellingen donkere modus</string>
     <string name="app_theme_short">App</string>
     <string name="night_mode_short">Android Auto</string>
@@ -395,5 +396,7 @@
     <string name="head_unit_make_description">Fabrikant van de headunit</string>
     <string name="head_unit_model_label">Model</string>
     <string name="head_unit_model_description">Model van de headunit</string>
+    <string name="vehicle_year_error_invalid">Voer een geldig jaar in</string>
+    <string name="vehicle_year_error_max">Het jaar mag niet later zijn dan %1$d</string>
     <string name="vehicle_info_restart_note">Wijzigingen worden toegepast bij de volgende Android Auto-verbinding.</string>
 </resources>
