@@ -374,4 +374,25 @@
     <string name="kill_on_disconnect_boot_warning">A \"Indítás rendszerindításkor\" be van kapcsolva. Ha az alkalmazás bezárul lecsatlakozáskor és ez az eszköz hibernálódik kikapcsolás helyett, az alkalmazás nem feltétlenül nyílik meg automatikusan a következő indításkor, mert nem jön létre rendszerindítási esemény — az eszköz egyszerűen felébred az alvó módból.</string>
     <string name="kill_on_disconnect_conflicts_disabled">Az ütköző beállítások letiltásra kerültek</string>
     <string name="wifi_disabled_info">Infó: A Wi-Fi ki van kapcsolva.</string>
+
+    <!-- Vehicle Info Settings -->
+    <string name="vehicle_info_settings">Járműinformáció</string>
+    <string name="vehicle_info_settings_description">Testreszabhatja, hogyan jelenik meg járműve a telefonján</string>
+    <string name="category_vehicle">Jármű</string>
+    <string name="category_head_unit">Fejegység</string>
+    <string name="vehicle_display_name_label">Megjelenítési név</string>
+    <string name="vehicle_display_name_description">A telefonján megjelenő név ehhez a járműhöz</string>
+    <string name="vehicle_make_label">Gyártó</string>
+    <string name="vehicle_make_description">Jármű gyártója (pl. Honda, Toyota)</string>
+    <string name="vehicle_model_label">Modell</string>
+    <string name="vehicle_model_description">Jármű modellje (pl. Civic, Corolla)</string>
+    <string name="vehicle_year_label">Évjárat</string>
+    <string name="vehicle_year_description">Jármű évjárata</string>
+    <string name="vehicle_id_label">Jármű-azonosító</string>
+    <string name="vehicle_id_description">Csak belső azonosító. Megváltoztatása azt eredményezi, hogy telefonja ezt más járműként érzékeli, visszaállítva az Android Auto beállításait ehhez az autóhoz.</string>
+    <string name="head_unit_make_label">Gyártó</string>
+    <string name="head_unit_make_description">Fejegység gyártója</string>
+    <string name="head_unit_model_label">Modell</string>
+    <string name="head_unit_model_description">Fejegység modellje</string>
+    <string name="vehicle_info_restart_note">A változások a következő Android Auto csatlakozáskor lépnek érvénybe.</string>
 </resources>

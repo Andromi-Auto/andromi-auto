@@ -376,4 +376,25 @@
     <string name="kill_on_disconnect_screen_on_warning">Máte zapnutou možnost \"Spustit při zapnutí obrazovky\". Toto nastavení otevře aplikaci při každém zapnutí obrazovky. V kombinaci se zavřením při odpojení se aplikace po odpojení zavře, ale ihned se znovu otevře při dalším zapnutí obrazovky, což vytvoří smyčku restartování.</string>
     <string name="kill_on_disconnect_conflicts_disabled">Konfliktní nastavení byla deaktivována</string>
     <string name="wifi_disabled_info">Info: Wi-Fi je vypnuto.</string>
+
+    <!-- Vehicle Info Settings -->
+    <string name="vehicle_info_settings">Informace o vozidle</string>
+    <string name="vehicle_info_settings_description">Přizpůsobte, jak se vaše vozidlo zobrazuje na telefonu</string>
+    <string name="category_vehicle">Vozidlo</string>
+    <string name="category_head_unit">Autorádio</string>
+    <string name="vehicle_display_name_label">Zobrazovaný název</string>
+    <string name="vehicle_display_name_description">Název zobrazený na telefonu pro toto vozidlo</string>
+    <string name="vehicle_make_label">Výrobce</string>
+    <string name="vehicle_make_description">Výrobce vozidla (např. Honda, Toyota)</string>
+    <string name="vehicle_model_label">Model</string>
+    <string name="vehicle_model_description">Model vozidla (např. Civic, Corolla)</string>
+    <string name="vehicle_year_label">Rok</string>
+    <string name="vehicle_year_description">Rok výroby vozidla</string>
+    <string name="vehicle_id_label">ID vozidla</string>
+    <string name="vehicle_id_description">Pouze interní identifikátor. Jeho změna způsobí, že váš telefon bude toto vozidlo považovat za jiné, čímž se resetují vaše předvolby Android Auto pro toto auto.</string>
+    <string name="head_unit_make_label">Výrobce</string>
+    <string name="head_unit_make_description">Výrobce autorádia</string>
+    <string name="head_unit_model_label">Model</string>
+    <string name="head_unit_model_description">Model autorádia</string>
+    <string name="vehicle_info_restart_note">Změny se projeví při dalším připojení Android Auto.</string>
 </resources>

@@ -375,4 +375,25 @@
     <string name="kill_on_disconnect_screen_on_warning">您已啟用「螢幕開啟時啟動」。此設定會在每次螢幕開啟時開啟應用程式。結合中斷連線時關閉，應用程式將在中斷連線後關閉，但在螢幕再次開啟時立即重新開啟，形成重啟循環。</string>
     <string name="kill_on_disconnect_conflicts_disabled">衝突的設定已被停用</string>
     <string name="wifi_disabled_info">資訊：Wi-Fi 已關閉。</string>
+
+    <!-- Vehicle Info Settings -->
+    <string name="vehicle_info_settings">車輛資訊</string>
+    <string name="vehicle_info_settings_description">自訂您的車輛在手機上的顯示方式</string>
+    <string name="category_vehicle">車輛</string>
+    <string name="category_head_unit">車機</string>
+    <string name="vehicle_display_name_label">顯示名稱</string>
+    <string name="vehicle_display_name_description">在手機上顯示的車輛名稱</string>
+    <string name="vehicle_make_label">製造商</string>
+    <string name="vehicle_make_description">車輛製造商（例如 Honda、Toyota）</string>
+    <string name="vehicle_model_label">型號</string>
+    <string name="vehicle_model_description">車輛型號（例如 Civic、Corolla）</string>
+    <string name="vehicle_year_label">年份</string>
+    <string name="vehicle_year_description">車輛年份</string>
+    <string name="vehicle_id_label">車輛 ID</string>
+    <string name="vehicle_id_description">僅為內部識別碼。更改此項將導致您的手機將此視為不同的車輛，重置此車的 Android Auto 偏好設定。</string>
+    <string name="head_unit_make_label">製造商</string>
+    <string name="head_unit_make_description">車機製造商</string>
+    <string name="head_unit_model_label">型號</string>
+    <string name="head_unit_model_description">車機型號</string>
+    <string name="vehicle_info_restart_note">變更將在下次連接 Android Auto 時生效。</string>
 </resources>

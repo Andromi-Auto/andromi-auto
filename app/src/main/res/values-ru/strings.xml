@@ -376,4 +376,25 @@
     <string name="kill_on_disconnect_screen_on_warning">У вас включена опция \"Запуск при включении экрана\". Эта настройка открывает приложение каждый раз при включении экрана. В сочетании с закрытием при отключении приложение закроется после отключения, но сразу откроется снова при включении экрана, создавая цикл перезапуска.</string>
     <string name="kill_on_disconnect_conflicts_disabled">Конфликтующие настройки были отключены</string>
     <string name="wifi_disabled_info">Инфо: Wi-Fi отключен.</string>
+
+    <!-- Vehicle Info Settings -->
+    <string name="vehicle_info_settings">Информация о транспортном средстве</string>
+    <string name="vehicle_info_settings_description">Настройте, как ваш автомобиль отображается на телефоне</string>
+    <string name="category_vehicle">Транспортное средство</string>
+    <string name="category_head_unit">Головное устройство</string>
+    <string name="vehicle_display_name_label">Отображаемое имя</string>
+    <string name="vehicle_display_name_description">Имя, отображаемое на телефоне для этого автомобиля</string>
+    <string name="vehicle_make_label">Производитель</string>
+    <string name="vehicle_make_description">Производитель автомобиля (напр. Honda, Toyota)</string>
+    <string name="vehicle_model_label">Модель</string>
+    <string name="vehicle_model_description">Модель автомобиля (напр. Civic, Corolla)</string>
+    <string name="vehicle_year_label">Год</string>
+    <string name="vehicle_year_description">Год выпуска автомобиля</string>
+    <string name="vehicle_id_label">ID автомобиля</string>
+    <string name="vehicle_id_description">Только внутренний идентификатор. Его изменение приведёт к тому, что телефон определит это как другой автомобиль, сбросив настройки Android Auto для этой машины.</string>
+    <string name="head_unit_make_label">Производитель</string>
+    <string name="head_unit_make_description">Производитель головного устройства</string>
+    <string name="head_unit_model_label">Модель</string>
+    <string name="head_unit_model_description">Модель головного устройства</string>
+    <string name="vehicle_info_restart_note">Изменения вступят в силу при следующем подключении Android Auto.</string>
 </resources>

@@ -43,7 +43,6 @@ class SettingsFragment : Fragment() {
     private var pendingFullscreenMode: Settings.FullscreenMode? = null
     private var pendingViewMode: Settings.ViewMode? = null
     private var pendingForceSoftware: Boolean? = null
-    private var pendingRightHandDrive: Boolean? = null
     private var pendingWifiConnectionMode: Int? = null
     private var pendingVideoCodec: String? = null
     private var pendingFpsLimit: Int? = null
@@ -94,7 +93,6 @@ class SettingsFragment : Fragment() {
         pendingFullscreenMode = settings.fullscreenMode
         pendingViewMode = settings.viewMode
         pendingForceSoftware = settings.forceSoftwareDecoding
-        pendingRightHandDrive = settings.rightHandDrive
         pendingWifiConnectionMode = settings.wifiConnectionMode
         pendingVideoCodec = settings.videoCodec
         pendingFpsLimit = settings.fpsLimit
@@ -213,7 +211,6 @@ class SettingsFragment : Fragment() {
         pendingFullscreenMode?.let { settings.fullscreenMode = it }
         pendingViewMode?.let { settings.viewMode = it }
         pendingForceSoftware?.let { settings.forceSoftwareDecoding = it }
-        pendingRightHandDrive?.let { settings.rightHandDrive = it }
         pendingVideoCodec?.let { settings.videoCodec = it }
         pendingFpsLimit?.let { settings.fpsLimit = it }
         pendingBluetoothAddress?.let { settings.bluetoothAddress = it }
@@ -281,7 +278,6 @@ class SettingsFragment : Fragment() {
                         pendingFullscreenMode != settings.fullscreenMode ||
                         pendingViewMode != settings.viewMode ||
                         pendingForceSoftware != settings.forceSoftwareDecoding ||
-                        pendingRightHandDrive != settings.rightHandDrive ||
                         pendingWifiConnectionMode != settings.wifiConnectionMode ||
                         pendingVideoCodec != settings.videoCodec ||
                         pendingFpsLimit != settings.fpsLimit ||
@@ -312,7 +308,6 @@ class SettingsFragment : Fragment() {
                           pendingFpsLimit != settings.fpsLimit ||
                           pendingDpi != settings.dpiPixelDensity ||
                           pendingForceSoftware != settings.forceSoftwareDecoding ||
-                          pendingRightHandDrive != settings.rightHandDrive ||
                           pendingEnableRotary != settings.enableRotary ||
                           pendingEnableAudioSink != settings.enableAudioSink ||
                           pendingUseAacAudio != settings.useAacAudio ||
@@ -411,6 +406,17 @@ class SettingsFragment : Fragment() {
         ))
 
         items.add(SettingItem.SettingEntry(
+            stableId = "vehicleInfoSettings",
+            nameResId = R.string.vehicle_info_settings,
+            value = getString(R.string.vehicle_info_settings_description),
+            onClick = {
+                try {
+                    findNavController().navigate(R.id.action_settingsFragment_to_vehicleInfoFragment)
+                } catch (e: Exception) { }
+            }
+        ))
+
+        items.add(SettingItem.SettingEntry(
             stableId = "autoConnectSettings",
             nameResId = R.string.auto_connect_settings,
             value = getAutoConnectSummary(),
@@ -494,18 +500,6 @@ class SettingsFragment : Fragment() {
             isChecked = pendingShowNavigationNotifications!!,
             onCheckedChanged = { isChecked ->
                 pendingShowNavigationNotifications = isChecked
-                checkChanges()
-                updateSettingsList()
-            }
-        ))
-
-        items.add(SettingItem.ToggleSettingEntry(
-            stableId = "rightHandDrive",
-            nameResId = R.string.right_hand_drive,
-            descriptionResId = R.string.right_hand_drive_description,
-            isChecked = pendingRightHandDrive!!,
-            onCheckedChanged = { isChecked ->
-                pendingRightHandDrive = isChecked
                 checkChanges()
                 updateSettingsList()
             }

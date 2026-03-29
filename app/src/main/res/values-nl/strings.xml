@@ -375,4 +375,25 @@
     <string name="kill_on_disconnect_screen_on_warning">U hebt \"Starten bij scherm aan\" ingeschakeld. Deze instelling opent de app telkens wanneer het scherm wordt ingeschakeld. Gecombineerd met sluiten bij ontkoppeling zal de app na ontkoppeling sluiten, maar onmiddellijk weer openen wanneer het scherm opnieuw wordt ingeschakeld, waardoor een herstartlus ontstaat.</string>
     <string name="kill_on_disconnect_conflicts_disabled">Conflicterende instellingen zijn uitgeschakeld</string>
     <string name="wifi_disabled_info">Info: Wi-Fi is uitgeschakeld.</string>
+
+    <!-- Vehicle Info Settings -->
+    <string name="vehicle_info_settings">Voertuiginformatie</string>
+    <string name="vehicle_info_settings_description">Pas aan hoe uw voertuig op uw telefoon wordt weergegeven</string>
+    <string name="category_vehicle">Voertuig</string>
+    <string name="category_head_unit">Headunit</string>
+    <string name="vehicle_display_name_label">Weergavenaam</string>
+    <string name="vehicle_display_name_description">Naam die op uw telefoon wordt weergegeven voor dit voertuig</string>
+    <string name="vehicle_make_label">Merk</string>
+    <string name="vehicle_make_description">Voertuigfabrikant (bijv. Honda, Toyota)</string>
+    <string name="vehicle_model_label">Model</string>
+    <string name="vehicle_model_description">Voertuigmodel (bijv. Civic, Corolla)</string>
+    <string name="vehicle_year_label">Bouwjaar</string>
+    <string name="vehicle_year_description">Bouwjaar van het voertuig</string>
+    <string name="vehicle_id_label">Voertuig-ID</string>
+    <string name="vehicle_id_description">Alleen interne identificatie. Wijzigen zorgt ervoor dat uw telefoon dit als een ander voertuig detecteert, waardoor uw Android Auto-voorkeuren voor deze auto worden gereset.</string>
+    <string name="head_unit_make_label">Merk</string>
+    <string name="head_unit_make_description">Fabrikant van de headunit</string>
+    <string name="head_unit_model_label">Model</string>
+    <string name="head_unit_model_description">Model van de headunit</string>
+    <string name="vehicle_info_restart_note">Wijzigingen worden toegepast bij de volgende Android Auto-verbinding.</string>
 </resources>
