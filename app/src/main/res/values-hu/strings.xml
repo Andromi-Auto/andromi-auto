@@ -316,15 +316,15 @@
     <string name="setup_widescreen_detected">Szélesvásznú kijelző észlelve.</string>
     <string name="auto_optimize">Beállítások automatikus optimalizálása</string>
     <string name="auto_optimize_desc">Rendszerellenőrzés futtatása az eszközhöz legjobban illő beállítások megtalálásához.</string>
-    <string name="fullscreen_none">Normal (All bars visible)</string>
-    <string name="fullscreen_immersive">Immersive (All bars hidden)</string>
-    <string name="fullscreen_status_only">Hide status bar only</string>
-    <string name="log_level">Log Level</string>
-    <string name="log_level_description">Choose the detail level of log output for debugging.</string>
-    <string name="start_log_capture">Start log capture</string>
-    <string name="start_log_capture_description">Begins recording system logs to a file.</string>
-    <string name="stop_log_capture">Stop log capture</string>
-    <string name="stop_log_capture_description">Stops recording and saves the log file.</string>
+    <string name="fullscreen_none">Normál (Minden sáv látható)</string>
+    <string name="fullscreen_immersive">Teljes képernyő (Minden sáv rejtett)</string>
+    <string name="fullscreen_status_only">Csak az állapotsor elrejtése</string>
+    <string name="log_level">Naplózási szint</string>
+    <string name="log_level_description">A hibaelhárításhoz szükséges részletesség beállítása.</string>
+    <string name="start_log_capture">Naplózás indítása</string>
+    <string name="start_log_capture_description">Rögzíti a rendszernaplókat egy helyi fájlba a hibaelhárításhoz.</string>
+    <string name="stop_log_capture">Naplózás leállítása</string>
+    <string name="stop_log_capture_description">Leállítja a naplózást és menti a fájlt.</string>
 
     <!-- Navigation notifications -->
     <string name="show_navigation_notifications">Navigációs értesítések</string>
@@ -373,6 +373,7 @@
     <string name="kill_on_disconnect_disable_and_enable">Letiltás és engedélyezés</string>
     <string name="kill_on_disconnect_enable_anyway">Engedélyezés mindenképp</string>
     <string name="kill_on_disconnect_boot_warning">A \"Indítás rendszerindításkor\" be van kapcsolva. Ha az alkalmazás bezárul lecsatlakozáskor és ez az eszköz hibernálódik kikapcsolás helyett, az alkalmazás nem feltétlenül nyílik meg automatikusan a következő indításkor, mert nem jön létre rendszerindítási esemény — az eszköz egyszerűen felébred az alvó módból.</string>
+    <string name="kill_on_disconnect_screen_on_warning">A \"Bekapcsolás a képernyő bekapcsolásakor\" funkció aktív. Ez a beállítás minden alkalommal megnyitja az alkalmazást, amikor a képernyő bekapcsol. A lekapcsoláskor történő bezárással kombinálva az alkalmazás lekapcsolás után bezárul, de azonnal újranyílik, amikor a képernyő ismét bekapcsol, ami újraindítási hurkot eredményez.</string>
     <string name="kill_on_disconnect_conflicts_disabled">Az ütköző beállítások letiltásra kerültek</string>
     <string name="wifi_disabled_info">Infó: A Wi-Fi ki van kapcsolva.</string>
 

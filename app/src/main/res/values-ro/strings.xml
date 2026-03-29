@@ -374,6 +374,7 @@
     <string name="kill_on_disconnect_disable_and_enable">Dezactivează și activează</string>
     <string name="kill_on_disconnect_enable_anyway">Activează oricum</string>
     <string name="kill_on_disconnect_boot_warning">Aveți \"Pornire la boot\" activat. Dacă aplicația se închide la deconectare și acest dispozitiv intră în hibernare în loc să se oprească, aplicația s-ar putea să nu se redeschidă automat la următorul ciclu de pornire deoarece nu este generat un eveniment de boot — dispozitivul pur și simplu se trezește din modul de repaus.</string>
+    <string name="kill_on_disconnect_screen_on_warning">Aveți \"Pornire la aprinderea ecranului\" activată. Această setare deschide aplicația de fiecare dată când ecranul se aprinde. Combinată cu închiderea la deconectare, aplicația se va închide după deconectare, dar se va redeschide imediat când ecranul se aprinde din nou, creând o buclă de repornire.</string>
     <string name="kill_on_disconnect_conflicts_disabled">Setările conflictuale au fost dezactivate</string>
     <string name="wifi_disabled_info">Info: Wi-Fi este dezactivat.</string>
 
