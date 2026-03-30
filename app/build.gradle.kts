@@ -99,7 +99,7 @@ android {
         minSdk = 16
 //        minSdk = 21 // 21 only for google play console. App should work in minSDK 16
         targetSdk = 36
-        versionCode = 54
+        versionCode = 55
         versionName = "2.1.1"
         setProperty("archivesBaseName", "${applicationId}_${versionName}")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -113,6 +113,18 @@ android {
             cmake {
                 cppFlags("")
             }
+        }
+    }
+
+    flavorDimensions.add("distribution")
+    productFlavors {
+        create("playstore") {
+            dimension = "distribution"
+            // No extra config needed, this build will be clean
+        }
+        create("github") {
+            dimension = "distribution"
+            // This build will contain the VpnService
         }
     }
 
