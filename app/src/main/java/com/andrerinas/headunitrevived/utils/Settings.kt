@@ -688,4 +688,8 @@ class Settings(context: Context) {
         get() = prefs.getBoolean("auto-enable-hotspot", false)
         set(value) { prefs.edit().putBoolean("auto-enable-hotspot", value).apply() }
 
+    var nativeAaWireless: Boolean
+        get() = prefs.getBoolean("native-aa-wireless", false)
+        set(value) { prefs.edit().putBoolean("native-aa-wireless", value).apply() }
+
 }

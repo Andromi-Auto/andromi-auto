@@ -86,6 +86,7 @@ class AapService : Service(), UsbReceiver.Listener {
     private lateinit var usbReceiver: UsbReceiver
     private var nightModeManager: NightModeManager? = null
     private var wifiDirectManager: WifiDirectManager? = null
+    private var nativeAaHandshakeManager: com.andrerinas.headunitrevived.connection.NativeAaHandshakeManager? = null
     private var wirelessServer: WirelessServer? = null
     private var networkDiscovery: NetworkDiscovery? = null
     private var mediaSession: MediaSessionCompat? = null
@@ -415,11 +416,19 @@ class AapService : Service(), UsbReceiver.Listener {
         LogExporter.startCapture(this, LogExporter.LogLevel.DEBUG)
         AppLog.i("Auto-started continuous log capture")
 
-        LogExporter.startCapture(this, LogExporter.LogLevel.DEBUG)
-        AppLog.i("Auto-started continuous log capture")
-
         startService(GpsLocationService.intent(this))
+        
+        nativeAaHandshakeManager = com.andrerinas.headunitrevived.connection.NativeAaHandshakeManager(this, serviceScope)
         wifiDirectManager = WifiDirectManager(this)
+        wifiDirectManager?.setCredentialsListener { ssid, psk, ip, bssid ->
+            nativeAaHandshakeManager?.updateWifiCredentials(ssid, psk, ip, bssid)
+        }
+        
+        // Start the BT handshake server if enabled
+        if (App.provide(this).settings.nativeAaWireless) {
+            nativeAaHandshakeManager?.start()
+        }
+
         initWifiMode()
         checkAlreadyConnectedUsb()
         registerNetworkMonitor()
@@ -882,6 +891,7 @@ class AapService : Service(), UsbReceiver.Listener {
     override fun onDestroy() {
         AppLog.i("AapService destroying... (wakeLock held=${bootWakeLock?.isHeld == true})")
         isDestroying = true
+        nativeAaHandshakeManager?.stop()
         releaseBootWakeLock()
 
         if (App.provide(this).settings.autoEnableHotspot) {

@@ -28,9 +28,9 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
     private var isConnected = false
     private val handler = Handler(Looper.getMainLooper())
 
-    private var onCredentialsReady: ((ssid: String, psk: String, ip: String) -> Unit)? = null
+    private var onCredentialsReady: ((ssid: String, psk: String, ip: String, bssid: String) -> Unit)? = null
 
-    fun setCredentialsListener(callback: (String, String, String) -> Unit) {
+    fun setCredentialsListener(callback: (String, String, String, String) -> Unit) {
         this.onCredentialsReady = callback
     }
 
@@ -123,9 +123,31 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
             val psk = it.passphrase ?: ""
             // When we are GO, our IP is always the gateway .1 in the P2P range
             val ip = "192.168.49.1" 
-            AppLog.i("WifiDirectManager: Group credentials ready. SSID: $ssid")
-            onCredentialsReady?.invoke(ssid, psk, ip)
+            val bssid = getWifiDirectMac(it.`interface`)
+            AppLog.i("WifiDirectManager: Group credentials ready. SSID: $ssid, BSSID: $bssid")
+            onCredentialsReady?.invoke(ssid, psk, ip, bssid)
         }
+    }
+
+    private fun getWifiDirectMac(ifaceName: String?): String {
+        try {
+            val interfaces = java.net.NetworkInterface.getNetworkInterfaces()
+            while (interfaces.hasMoreElements()) {
+                val iface = interfaces.nextElement()
+                if (ifaceName != null && iface.name != ifaceName) continue
+                if (ifaceName == null && !iface.name.contains("p2p")) continue
+                
+                val mac = iface.hardwareAddress
+                if (mac != null) {
+                    val sb = StringBuilder()
+                    for (i in mac.indices) {
+                        sb.append(String.format("%02X%s", mac[i], if (i < mac.size - 1) ":" else ""))
+                    }
+                    return sb.toString()
+                }
+            }
+        } catch (e: Exception) {}
+        return "00:00:00:00:00:00"
     }
 
     @SuppressLint("MissingPermission")

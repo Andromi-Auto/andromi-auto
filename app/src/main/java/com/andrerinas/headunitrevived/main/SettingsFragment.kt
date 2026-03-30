@@ -61,6 +61,7 @@ class SettingsFragment : Fragment() {
 
     private var pendingKillOnDisconnect: Boolean? = null
     private var pendingAutoEnableHotspot: Boolean? = null
+    private var pendingNativeAaWireless: Boolean? = null
     
     // Custom Insets
     private var pendingInsetLeft: Int? = null
@@ -112,6 +113,7 @@ class SettingsFragment : Fragment() {
 
         pendingKillOnDisconnect = settings.killOnDisconnect
         pendingAutoEnableHotspot = settings.autoEnableHotspot
+        pendingNativeAaWireless = settings.nativeAaWireless
         
         pendingInsetLeft = settings.insetLeft
         pendingInsetTop = settings.insetTop
@@ -235,6 +237,7 @@ class SettingsFragment : Fragment() {
 
         pendingKillOnDisconnect?.let { settings.killOnDisconnect = it }
         pendingAutoEnableHotspot?.let { settings.autoEnableHotspot = it }
+        pendingNativeAaWireless?.let { settings.nativeAaWireless = it }
         
         pendingInsetLeft?.let { settings.insetLeft = it }
         pendingInsetTop?.let { settings.insetTop = it }
@@ -302,7 +305,8 @@ class SettingsFragment : Fragment() {
                         pendingAssistantVolumeOffset != settings.assistantVolumeOffset ||
                         pendingNavigationVolumeOffset != settings.navigationVolumeOffset ||
                         pendingKillOnDisconnect != settings.killOnDisconnect ||
-                        pendingAutoEnableHotspot != settings.autoEnableHotspot
+                        pendingAutoEnableHotspot != settings.autoEnableHotspot ||
+                        pendingNativeAaWireless != settings.nativeAaWireless
 
         hasChanges = anyChange
 
@@ -448,6 +452,18 @@ class SettingsFragment : Fragment() {
                         checkChanges()
                         updateSettingsList()
                     }
+                }
+            ))
+
+            items.add(SettingItem.ToggleSettingEntry(
+                stableId = "nativeAaWireless",
+                nameResId = R.string.native_aa_wireless,
+                descriptionResId = R.string.native_aa_wireless_description,
+                isChecked = pendingNativeAaWireless ?: false,
+                onCheckedChanged = { isChecked ->
+                    pendingNativeAaWireless = isChecked
+                    checkChanges()
+                    updateSettingsList()
                 }
             ))
         }

@@ -25,6 +25,21 @@ class NativeAaHandshakeManager(
     companion object {
         private val AA_UUID = UUID.fromString("4de17a00-52cb-11e6-bdf4-0800200c9a66")
         private val HFP_UUID = UUID.fromString("0000111e-0000-1000-8000-00805f9b34fb")
+        private val A2DP_SOURCE_UUID = UUID.fromString("00001112-0000-1000-8000-00805f9b34fb")
+
+        fun checkCompatibility(): Boolean {
+            val adapter = BluetoothAdapter.getDefaultAdapter() ?: return false
+            if (!adapter.isEnabled) return false
+            return try {
+                val socket = adapter.listenUsingRfcommWithServiceRecord("Compatibility Check", AA_UUID)
+                socket.close()
+                AppLog.i("NativeAA: Compatibility Check SUCCESS")
+                true
+            } catch (e: Exception) {
+                AppLog.w("NativeAA: Compatibility Check FAILED: ${e.message}")
+                false
+            }
+        }
     }
 
     private var aaServerSocket: BluetoothServerSocket? = null
@@ -34,15 +49,17 @@ class NativeAaHandshakeManager(
     private var currentSsid: String? = null
     private var currentPsk: String? = null
     private var currentIp: String? = null
+    private var currentBssid: String? = null
 
     /**
      * Updates the WiFi credentials that will be sent to the phone during the next handshake.
      */
-    fun updateWifiCredentials(ssid: String, psk: String, ip: String) {
-        AppLog.i("NativeAA: Credentials updated. SSID=$ssid, IP=$ip")
+    fun updateWifiCredentials(ssid: String, psk: String, ip: String, bssid: String) {
+        AppLog.i("NativeAA: Credentials updated. SSID=$ssid, IP=$ip, BSSID=$bssid")
         currentSsid = ssid
         currentPsk = psk
         currentIp = ip
+        currentBssid = bssid
     }
 
     @SuppressLint("MissingPermission")
@@ -95,6 +112,25 @@ class NativeAaHandshakeManager(
                 if (isRunning) AppLog.d("NativeAA: HFP Server socket closed: ${e.message}")
             }
         }
+
+        // Active Poke logic: Wake up the phone if it's already paired but not looking for HU
+        val settings = com.andrerinas.headunitrevived.App.provide(context).settings
+        val lastMac = settings.autoStartBluetoothDeviceMac
+        if (lastMac.isNotEmpty()) {
+            scope.launch(Dispatchers.IO + CoroutineName("NativeAa-Wakeup")) {
+                delay(2000) // Give the servers time to start
+                AppLog.i("NativeAA: Attempting active poke to phone ($lastMac)...")
+                try {
+                    val device = adapter.getRemoteDevice(lastMac)
+                    val socket = device.createRfcommSocketToServiceRecord(A2DP_SOURCE_UUID)
+                    socket.connect()
+                    AppLog.i("NativeAA: Successfully poked phone ($lastMac).")
+                    socket.close()
+                } catch (e: Exception) {
+                    AppLog.d("NativeAA: Active poke failed (this is often normal): ${e.message}")
+                }
+            }
+        }
     }
 
     private suspend fun handleHandshake(socket: BluetoothSocket) = withContext(Dispatchers.IO) {
@@ -118,19 +154,20 @@ class NativeAaHandshakeManager(
             val ip = currentIp!!
             val ssid = currentSsid!!
             val psk = currentPsk ?: ""
+            val bssid = currentBssid ?: ""
 
             AppLog.i("NativeAA: Sending WifiStartRequest (Type 1) to $ip:5288")
             sendWifiStartRequest(output, ip, 5288)
 
             val response = readProtobuf(input)
             if (response.type == 2) {
-                AppLog.i("NativeAA: Phone requested security info. Sending SSID=$ssid")
-                sendWifiSecurityResponse(output, ssid, psk)
-                AppLog.i("NativeAA: Handshake success. Waiting for transition...")
+                AppLog.i("NativeAA: Phone requested security info. Sending SSID=$ssid, BSSID=$bssid")
+                sendWifiSecurityResponse(output, ssid, psk, bssid)
+                AppLog.i("NativeAA: Handshake success. Keeping BT socket alive for transition...")
                 
-                // Keep the socket open for a while so the phone feels "stable" 
+                // Keep the socket open for 20 seconds so the phone feels "stable" 
                 // during the WiFi switch
-                delay(15000)
+                delay(20000)
             } else {
                 AppLog.w("NativeAA: Unexpected response type: ${response.type}")
             }
@@ -152,11 +189,11 @@ class NativeAaHandshakeManager(
         sendProtobuf(output, request.toByteArray(), 1)
     }
 
-    private fun sendWifiSecurityResponse(output: OutputStream, ssid: String, key: String) {
+    private fun sendWifiSecurityResponse(output: OutputStream, ssid: String, key: String, bssid: String) {
         val response = Wireless.WifiInfoResponse.newBuilder()
             .setSsid(ssid)
             .setKey(key)
-            .setBssid("") // Empty BSSID is standard for P2P
+            .setBssid(bssid)
             .setSecurityMode(Wireless.SecurityMode.WPA2_PERSONAL)
             .setAccessPointType(Wireless.AccessPointType.STATIC)
             .build()

@@ -403,6 +403,8 @@
     <string name="vehicle_info_restart_note">Diese Daten werden bei jeder Verbindung an Android Auto gesendet.</string>
     <string name="auto_enable_hotspot">Hotspot automatisch aktivieren</string>
     <string name="auto_enable_hotspot_description">Startet automatisch einen WLAN-Hotspot auf diesem Gerät. (Funktioniert nicht auf allen Geräten)</string>
+    <string name="native_aa_wireless">Natives Android Auto Wireless</string>
+    <string name="native_aa_wireless_description">Aktiviert den offiziellen Bluetooth-Handshake für kabellose Verbindungen. Dies ermöglicht dem Handy, die Headunit automatisch zu erkennen.</string>
     <string name="hotspot_warning_title">Experimentelle Funktion</string>
     <string name="hotspot_warning_message">Diese Funktion nutzt Reflection und funktioniert möglicherweise nicht auf allen Geräten. Eventuell muss die Berechtigung \"Systemeinstellungen ändern\" manuell erteilt werden.</string>
     <string name="hotspot_permission_title">Berechtigung erforderlich</string>
