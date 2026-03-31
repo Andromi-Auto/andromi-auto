@@ -181,6 +181,7 @@
         <item>Ręcznie (lista)</item>
         <item>Auto-wyszukiwanie (Headunit Server)</item>
         <item>Pomocnik bezprzewodowy (oczekiwanie na telefon)</item>
+        <item>Native Android Auto</item>
     </string-array>
     <string name="auto_connect_last_session">Auto-łączenie ostatniej sesji</string>
     <string name="auto_connect_last_session_description">Automatycznie połącz z ostatnio używanym urządzeniem przy starcie aplikacji</string>
@@ -377,6 +378,7 @@
     <string name="kill_on_disconnect_screen_on_warning">Masz włączoną opcję \"Uruchom przy włączeniu ekranu\". To ustawienie otwiera aplikację za każdym razem, gdy ekran się włącza. W połączeniu z zamykaniem przy rozłączeniu, aplikacja zamknie się po rozłączeniu, ale natychmiast otworzy się ponownie, gdy ekran się włączy, tworząc pętlę restartów.</string>
     <string name="kill_on_disconnect_conflicts_disabled">Kolidujące ustawienia zostały wyłączone</string>
     <string name="wifi_disabled_info">Info: Wi-Fi jest wyłączone.</string>
+    <string name="bt_not_enabled">Info: Bluetooth jest wyłączone.</string>
 
     <!-- Vehicle Info Settings -->
     <string name="vehicle_info_settings">Informacje o pojeździe</string>

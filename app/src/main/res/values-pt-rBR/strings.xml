@@ -181,6 +181,7 @@
         <item>Manual (Lista)</item>
         <item>Busca automática (Headunit Server)</item>
         <item>Auxiliar sem fio (Aguardando telefone)</item>
+        <item>Native Android Auto</item>
     </string-array>
     <string name="auto_connect_last_session">Conectar automaticamente à última sessão</string>
     <string name="auto_connect_last_session_description">Reconecta automaticamente ao último dispositivo usado ao iniciar o app</string>
@@ -377,6 +378,7 @@
     <string name="kill_on_disconnect_screen_on_warning">Você tem \"Iniciar ao ligar a tela\" ativado. Esta configuração abre o app toda vez que a tela é ligada. Combinado com fechar ao desconectar, o app será fechado após a desconexão, mas reabrirá imediatamente quando a tela ligar novamente, criando um loop de reinício.</string>
     <string name="kill_on_disconnect_conflicts_disabled">As configurações conflitantes foram desativadas</string>
     <string name="wifi_disabled_info">Info: O Wi-Fi está desativado.</string>
+    <string name="bt_not_enabled">Info: O Bluetooth está desativado.</string>
 
     <!-- Vehicle Info Settings -->
     <string name="vehicle_info_settings">Informações do veículo</string>

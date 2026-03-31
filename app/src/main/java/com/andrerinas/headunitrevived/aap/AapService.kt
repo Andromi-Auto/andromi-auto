@@ -425,7 +425,7 @@ class AapService : Service(), UsbReceiver.Listener {
         }
         
         // Start the BT handshake server if enabled
-        if (App.provide(this).settings.nativeAaWireless) {
+        if (App.provide(this).settings.wifiConnectionMode == 3) {
             nativeAaHandshakeManager?.start()
         }
 
@@ -810,7 +810,7 @@ class AapService : Service(), UsbReceiver.Listener {
     /** Starts [WirelessServer] if the user has configured server WiFi mode (mode == 2). */
     private fun initWifiMode() {
         val settings = App.provide(this).settings
-        if (settings.wifiConnectionMode == 2 || settings.nativeAaWireless) {
+        if (settings.wifiConnectionMode == 2 || settings.wifiConnectionMode == 3) {
             startWirelessServer()
             if (settings.autoEnableHotspot) {
                 // Run on background thread since hotspot enable may sleep briefly
@@ -821,7 +821,11 @@ class AapService : Service(), UsbReceiver.Listener {
             } else {
                 val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as android.net.wifi.WifiManager
                 if (wifiManager.isWifiEnabled) {
-                    wifiDirectManager?.makeVisible()
+                    if (settings.wifiConnectionMode == 3) {
+                        wifiDirectManager?.startNativeAaQuietHost()
+                    } else {
+                        wifiDirectManager?.makeVisible()
+                    }
                 } else {
                     AppLog.i("AapService: WiFi is disabled, skipping Wi-Fi Direct visibility.")
                 }
@@ -969,9 +973,18 @@ class AapService : Service(), UsbReceiver.Listener {
             ACTION_START_WIRELESS        -> startWirelessServer()
             ACTION_START_WIRELESS_SCAN   -> {
                 val mode = App.provide(this).settings.wifiConnectionMode
-                startDiscovery(oneShot = (mode != 2))
+                if (mode != 3) {
+                    startDiscovery(oneShot = (mode != 2))
+                }
             }
             ACTION_STOP_WIRELESS         -> stopWirelessServer()
+            ACTION_NATIVE_AA_POKE        -> {
+                val mac = intent?.getStringExtra(EXTRA_MAC)
+                if (mac != null) {
+                    AppLog.i("AapService: Received manual Native-AA poke request for $mac")
+                    nativeAaHandshakeManager?.manualPoke(mac)
+                }
+            }
             ACTION_DISCONNECT            -> {
                 AppLog.i("Disconnect action received.")
                 if (commManager.isConnected) commManager.disconnect()
@@ -1283,8 +1296,11 @@ class AapService : Service(), UsbReceiver.Listener {
      */
     private fun startWirelessServer() {
         if (wirelessServer != null) return
-        wirelessServer = WirelessServer().apply { start() }
-        startDiscovery()
+        val mode = App.provide(this).settings.wifiConnectionMode
+        wirelessServer = WirelessServer().apply { start(registerNsd = (mode != 3)) }
+        if (mode != 3) {
+            startDiscovery()
+        }
     }
 
     /**
@@ -1294,6 +1310,7 @@ class AapService : Service(), UsbReceiver.Listener {
      *                used for the "auto WiFi" reconnect case.
      */
     private fun startDiscovery(oneShot: Boolean = false) {
+        if (App.provide(this).settings.wifiConnectionMode == 3) return
         if (commManager.isConnected || (wirelessServer == null && !oneShot)) return
 
         networkDiscovery?.stop()
@@ -1645,11 +1662,11 @@ class AapService : Service(), UsbReceiver.Listener {
         private var registrationListener: NsdManager.RegistrationListener? = null
         private var job: Job? = null
 
-        fun start() {
+        fun start(registerNsd: Boolean = true) {
             nsdManager = getSystemService(Context.NSD_SERVICE) as? NsdManager
             if (nsdManager == null) {
                 AppLog.e("WirelessServer: NsdManager not available on this device.")
-            } else {
+            } else if (registerNsd) {
                 registerNsd()
             }
 
@@ -1753,6 +1770,7 @@ class AapService : Service(), UsbReceiver.Listener {
         const val ACTION_START_WIRELESS            = "com.andrerinas.headunitrevived.ACTION_START_WIRELESS"
         const val ACTION_START_WIRELESS_SCAN       = "com.andrerinas.headunitrevived.ACTION_START_WIRELESS_SCAN"
         const val ACTION_STOP_WIRELESS             = "com.andrerinas.headunitrevived.ACTION_STOP_WIRELESS"
+        const val ACTION_NATIVE_AA_POKE            = "com.andrerinas.headunitrevived.ACTION_NATIVE_AA_POKE"
         const val ACTION_CHECK_USB                 = "com.andrerinas.headunitrevived.ACTION_CHECK_USB"
         const val ACTION_STOP_SERVICE              = "com.andrerinas.headunitrevived.ACTION_STOP_SERVICE"
         const val ACTION_DISCONNECT                = "com.andrerinas.headunitrevived.ACTION_DISCONNECT"
@@ -1778,5 +1796,7 @@ class AapService : Service(), UsbReceiver.Listener {
         /** Screen-off duration (ms) above which SCREEN_ON is treated as a hibernate wake.
          *  60 seconds filters out normal screen timeouts while catching any hibernate/quick boot. */
         private const val HIBERNATE_WAKE_THRESHOLD_MS = 60_000L
+
+        const val EXTRA_MAC = "extra_mac"
     }
 }

@@ -180,6 +180,7 @@
         <item>手動 (列表)</item>
         <item>自動搜尋 (Headunit Server)</item>
         <item>無線助手 (等待手機)</item>
+        <item>Native Android Auto</item>
     </string-array>
     <string name="auto_connect_last_session">自動連接上次會話</string>
     <string name="auto_connect_last_session_description">應用程式啟動時自動重新連線到上次使用的裝置</string>
@@ -376,6 +377,7 @@
     <string name="kill_on_disconnect_screen_on_warning">您已啟用「螢幕開啟時啟動」。此設定會在每次螢幕開啟時開啟應用程式。結合中斷連線時關閉，應用程式將在中斷連線後關閉，但在螢幕再次開啟時立即重新開啟，形成重啟循環。</string>
     <string name="kill_on_disconnect_conflicts_disabled">衝突的設定已被停用</string>
     <string name="wifi_disabled_info">資訊：Wi-Fi 已關閉。</string>
+    <string name="bt_not_enabled">資訊：Bluetooth 已關閉。</string>
 
     <!-- Vehicle Info Settings -->
     <string name="vehicle_info_settings">車輛資訊</string>

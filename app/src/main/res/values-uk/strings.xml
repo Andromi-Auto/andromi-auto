@@ -181,6 +181,7 @@
         <item>Вручну (список)</item>
         <item>Автопошук (Headunit Server)</item>
         <item>Бездротовий помічник (очікування телефону)</item>
+        <item>Native Android Auto</item>
     </string-array>
     <string name="auto_connect_last_session">Автоматично підключатися до останньої сесії</string>
     <string name="auto_connect_last_session_description">Автоматично підключатися до останнього використаного пристрою під час запуску програми</string>
@@ -377,6 +378,7 @@
     <string name="kill_on_disconnect_screen_on_warning">У вас увімкнено \"Запуск при увімкненні екрана\". Це налаштування відкриває додаток щоразу, коли вмикається екран. У поєднанні із закриттям при від\'єднанні додаток закриється після від\'єднання, але одразу відкриється знову, коли екран увімкнеться, створюючи цикл перезапуску.</string>
     <string name="kill_on_disconnect_conflicts_disabled">Конфліктуючі налаштування були вимкнені</string>
     <string name="wifi_disabled_info">Інфо: Wi-Fi вимкнено.</string>
+    <string name="bt_not_enabled">Інфо: Bluetooth вимкнено.</string>
 
     <!-- Vehicle Info Settings -->
     <string name="vehicle_info_settings">Інформація про транспортний засіб</string>

@@ -28,9 +28,13 @@ import com.andrerinas.headunitrevived.aap.AapProjectionActivity
 import com.andrerinas.headunitrevived.aap.AapService
 import com.andrerinas.headunitrevived.connection.UsbDeviceCompat
 import android.content.res.Configuration
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothManager
 import com.andrerinas.headunitrevived.utils.AppLog
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.collect
 import com.andrerinas.headunitrevived.utils.Settings
 import com.andrerinas.headunitrevived.utils.VpnControl
 
@@ -101,17 +105,11 @@ class HomeFragment : Fragment() {
 
         val appSettings = App.provide(requireContext()).settings
 
-        // Ensure the foreground service is running when wake-detection settings
-        // are enabled. The service must be alive to catch SCREEN_ON broadcasts
-        // (which can only be received by dynamically registered receivers).
-        // Without this, turning off the car and back on won't auto-start the app
-        // because no one is listening for SCREEN_ON.
         if (appSettings.autoStartOnScreenOn || appSettings.autoStartOnBoot) {
             ContextCompat.startForegroundService(requireContext(),
                 Intent(requireContext(), AapService::class.java))
         }
 
-        // Execute auto-connect methods in user-defined priority order
         for (methodId in appSettings.autoConnectPriorityOrder) {
             if (commManager.isConnected) break
             when (methodId) {
@@ -273,10 +271,6 @@ class HomeFragment : Fragment() {
     private fun setupListeners() {
         exitButton.setOnClickListener {
             val appSettings = App.provide(requireContext()).settings
-            // Keep the service alive when auto-start is enabled:
-            // - autoStartOnBoot: service must survive hibernate to detect SCREEN_ON wake
-            // - autoStartOnScreenOn: service catches every SCREEN_ON for always-on head units
-            // - autoStartOnUsb + reopenOnReconnection: service detects USB reconnections
             val keepServiceAlive = appSettings.autoStartOnBoot ||
                 appSettings.autoStartOnScreenOn ||
                 (appSettings.autoStartOnUsb && appSettings.reopenOnReconnection)
@@ -321,7 +315,7 @@ class HomeFragment : Fragment() {
             when (mode) {
                 1 -> { // Auto (Headunit Server) - One-Shot Scan
                     if (commManager.isConnected) {
-                        // Already connected, no toast needed
+                        // Already connected
                     } else if (AapService.scanningState.value) {
                         Toast.makeText(requireContext(), getString(R.string.already_scanning), Toast.LENGTH_SHORT).show()
                     } else {
@@ -334,7 +328,7 @@ class HomeFragment : Fragment() {
                 }
                 2 -> { // Helper (Wireless Launcher)
                     if (commManager.isConnected) {
-                        // Already connected, no toast needed
+                        // Already connected
                     } else if (AapService.scanningState.value) {
                         Toast.makeText(requireContext(), getString(R.string.already_searching_phone), Toast.LENGTH_SHORT).show()
                     } else {
@@ -344,6 +338,9 @@ class HomeFragment : Fragment() {
                         }
                         ContextCompat.startForegroundService(requireContext(), intent)
                     }
+                }
+                3 -> { // Native AA
+                    showNativeAaDeviceSelector()
                 }
                 else -> { // Manual (0) -> Open List
                     val controller = findNavController()
@@ -379,6 +376,44 @@ class HomeFragment : Fragment() {
         updateTextColors()
     }
 
+    private fun showNativeAaDeviceSelector() {
+        val adapter = if (Build.VERSION.SDK_INT >= 18) {
+            (requireContext().getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager).adapter
+        } else {
+            @Suppress("DEPRECATION")
+            BluetoothAdapter.getDefaultAdapter()
+        }
+
+        if (adapter == null || !adapter.isEnabled) {
+            Toast.makeText(requireContext(), getString(R.string.bt_not_enabled), Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val bondedDevices = adapter.bondedDevices?.toList() ?: emptyList()
+        if (bondedDevices.isEmpty()) {
+            Toast.makeText(requireContext(), "No paired Bluetooth devices found", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val deviceNames = bondedDevices.map { it.name ?: "Unknown Device" }.toTypedArray()
+        
+        MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
+            .setTitle(R.string.select_bt_device)
+            .setItems(deviceNames) { _, which ->
+                val device = bondedDevices[which]
+                AppLog.i("HomeFragment: Manually selected ${device.name} for Native-AA poke")
+                
+                val intent = Intent(requireContext(), AapService::class.java).apply {
+                    action = AapService.ACTION_NATIVE_AA_POKE
+                    putExtra(AapService.EXTRA_MAC, device.address)
+                }
+                ContextCompat.startForegroundService(requireContext(), intent)
+                Toast.makeText(requireContext(), "Searching for ${device.name}...", Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
+    }
+
     private fun updateTextColors() {
         val appSettings = App.provide(requireContext()).settings
         val nightModeFlags = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
@@ -402,7 +437,6 @@ class HomeFragment : Fragment() {
             }
         }
 
-        // Exit button always has a dark background, so text must always be white
         exitButton.setTextColor(Color.WHITE)
     }
 

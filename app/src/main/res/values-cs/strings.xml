@@ -181,6 +181,7 @@
         <item>Ručně (seznam)</item>
         <item>Automatické vyhledávání (Headunit Server)</item>
         <item>Bezdrátový pomocník (čekání na telefon)</item>
+        <item>Native Android Auto</item>
     </string-array>
     <string name="auto_connect_last_session">Automaticky připojit poslední relaci</string>
     <string name="auto_connect_last_session_description">Při spuštění aplikace se automaticky znovu připojit k naposledy použitému zařízení</string>
@@ -377,6 +378,7 @@
     <string name="kill_on_disconnect_screen_on_warning">Máte zapnutou možnost \"Spustit při zapnutí obrazovky\". Toto nastavení otevře aplikaci při každém zapnutí obrazovky. V kombinaci se zavřením při odpojení se aplikace po odpojení zavře, ale ihned se znovu otevře při dalším zapnutí obrazovky, což vytvoří smyčku restartování.</string>
     <string name="kill_on_disconnect_conflicts_disabled">Konfliktní nastavení byla deaktivována</string>
     <string name="wifi_disabled_info">Info: Wi-Fi je vypnuto.</string>
+    <string name="bt_not_enabled">Info: Bluetooth je vypnuto.</string>
 
     <!-- Vehicle Info Settings -->
     <string name="vehicle_info_settings">Informace o vozidle</string>

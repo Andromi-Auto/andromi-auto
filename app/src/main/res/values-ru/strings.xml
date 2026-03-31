@@ -181,6 +181,7 @@
         <item>Вручную (список)</item>
         <item>Автопоиск (Headunit Server)</item>
         <item>Wireless Helper (ожидание телефона)</item>
+        <item>Native Android Auto</item>
     </string-array>
     <string name="auto_connect_last_session">Автоподключение последней сессии</string>
     <string name="auto_connect_last_session_description">Автоматически подключаться к последнему использованному устройству при запуске приложения</string>
@@ -377,6 +378,7 @@
     <string name="kill_on_disconnect_screen_on_warning">У вас включена опция \"Запуск при включении экрана\". Эта настройка открывает приложение каждый раз при включении экрана. В сочетании с закрытием при отключении приложение закроется после отключения, но сразу откроется снова при включении экрана, создавая цикл перезапуска.</string>
     <string name="kill_on_disconnect_conflicts_disabled">Конфликтующие настройки были отключены</string>
     <string name="wifi_disabled_info">Инфо: Wi-Fi отключен.</string>
+    <string name="bt_not_enabled">Инфо: Bluetooth отключен.</string>
 
     <!-- Vehicle Info Settings -->
     <string name="vehicle_info_settings">Информация о транспортном средстве</string>

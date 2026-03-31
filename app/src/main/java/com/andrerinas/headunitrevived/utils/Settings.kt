@@ -234,16 +234,20 @@ class Settings(context: Context) {
         get() = prefs.getString("head-unit-model", "Desktop Head Unit")!!
         set(value) { prefs.edit().putString("head-unit-model", value).apply() }
 
-    // 0 = Manual, 1 = Auto (Headunit Server), 2 = Helper (Wifi Launcher)
+    // 0 = Manual, 1 = Auto (Headunit Server), 2 = Helper (Wifi Launcher), 3 = Native AA
     var wifiConnectionMode: Int
         get() {
-            // Migration: Check if old boolean exists
+            // Migration: Check if old helper boolean exists
             if (prefs.contains("wifi-launcher-mode")) {
                 val old = prefs.getBoolean("wifi-launcher-mode", false)
-                val newMode = if (old) 2 else 1 // old true -> Helper, old false -> Auto (Default)
-                // Save new preference and remove old one
+                val newMode = if (old) 2 else 1
                 prefs.edit().putInt("wifi-connection-mode", newMode).remove("wifi-launcher-mode").apply()
                 return newMode
+            }
+            // Migration: Check if native-aa-wireless was true
+            if (prefs.getBoolean("native-aa-wireless", false)) {
+                prefs.edit().putInt("wifi-connection-mode", 3).remove("native-aa-wireless").apply()
+                return 3
             }
             return prefs.getInt("wifi-connection-mode", 1) // Default 1 (Auto)
         }
@@ -687,9 +691,5 @@ class Settings(context: Context) {
     var autoEnableHotspot: Boolean
         get() = prefs.getBoolean("auto-enable-hotspot", false)
         set(value) { prefs.edit().putBoolean("auto-enable-hotspot", value).apply() }
-
-    var nativeAaWireless: Boolean
-        get() = prefs.getBoolean("native-aa-wireless", false)
-        set(value) { prefs.edit().putBoolean("native-aa-wireless", value).apply() }
 
 }

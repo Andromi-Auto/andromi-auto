@@ -55,7 +55,9 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
                         intent.getParcelableExtra(WifiP2pManager.EXTRA_WIFI_P2P_DEVICE)
                     }
                     device?.let {
-                        AppLog.i("WifiDirectManager: Local name: ${it.deviceName}")
+                        if (com.andrerinas.headunitrevived.App.provide(context).settings.wifiConnectionMode != 3) {
+                            AppLog.i("WifiDirectManager: Local name: ${it.deviceName}")
+                        }
                         AapService.wifiDirectName.value = it.deviceName
                     }
                 }
@@ -116,16 +118,30 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
         }
     }
 
+    private var groupInfoRetries = 0
+
     @SuppressLint("MissingPermission")
     override fun onGroupInfoAvailable(group: android.net.wifi.p2p.WifiP2pGroup?) {
-        group?.let {
-            val ssid = it.networkName
-            val psk = it.passphrase ?: ""
+        AppLog.i("WifiDirectManager: onGroupInfoAvailable called. group is null? ${group == null}")
+        if (group != null) {
+            groupInfoRetries = 0
+            val ssid = group.networkName
+            val psk = group.passphrase ?: ""
             // When we are GO, our IP is always the gateway .1 in the P2P range
             val ip = "192.168.49.1" 
-            val bssid = getWifiDirectMac(it.`interface`)
-            AppLog.i("WifiDirectManager: Group credentials ready. SSID: $ssid, BSSID: $bssid")
+            val bssid = getWifiDirectMac(group.`interface`)
+            AppLog.i("WifiDirectManager: Group credentials READY! SSID: $ssid, BSSID: $bssid, IP: $ip")
             onCredentialsReady?.invoke(ssid, psk, ip, bssid)
+        } else {
+            if (groupInfoRetries < 20) {
+                groupInfoRetries++
+                AppLog.w("WifiDirectManager: Group info was null! Retrying in 1s (Attempt $groupInfoRetries/20)...")
+                handler.postDelayed({
+                    manager?.requestGroupInfo(channel, this)
+                }, 1000L)
+            } else {
+                AppLog.e("WifiDirectManager: FATAL: Group info remained null after 20 retries. Cannot start Native AA properly.")
+            }
         }
     }
 
@@ -251,6 +267,49 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
                 context.startActivity(intent)
             } catch (e: Exception) {}
         }, 800L)
+    }
+
+    @SuppressLint("MissingPermission")
+    fun startNativeAaQuietHost() {
+        val mgr = manager ?: return
+        val ch = channel ?: return
+
+        // Ensure WiFi is enabled (Required for P2P)
+        val wifiManager = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as android.net.wifi.WifiManager
+        if (!wifiManager.isWifiEnabled) {
+            AppLog.w("WifiDirectManager: WiFi is disabled. Cannot start quiet P2P host.")
+            return
+        }
+
+        AppLog.i("WifiDirectManager: Starting Native AA Host (Group Owner only, no discovery)")
+        mgr.removeGroup(ch, object : WifiP2pManager.ActionListener {
+            override fun onSuccess() { delayedCreateQuietGroup(0) }
+            override fun onFailure(reason: Int) { delayedCreateQuietGroup(0) }
+        })
+    }
+
+    private fun delayedCreateQuietGroup(retryCount: Int) {
+        handler.postDelayed({ createQuietGroup(retryCount) }, 500L)
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun createQuietGroup(retryCount: Int) {
+        manager?.createGroup(channel, object : WifiP2pManager.ActionListener {
+            override fun onSuccess() {
+                AppLog.i("WifiDirectManager: Quiet P2P Group created. Waiting for phone...")
+                isGroupOwner = true
+                // Request info to dispatch credentials to NativeAaHandshakeManager
+                manager?.requestGroupInfo(channel, this@WifiDirectManager)
+            }
+            override fun onFailure(reason: Int) {
+                if (reason == 2 && retryCount < 3) {
+                    AppLog.w("WifiDirectManager: Chip is BUSY, retrying quiet group in 2s...")
+                    handler.postDelayed({ createQuietGroup(retryCount + 1) }, 2000L)
+                } else {
+                    AppLog.e("WifiDirectManager: createQuietGroup failed: $reason")
+                }
+            }
+        })
     }
 
     fun stop() {

@@ -78,7 +78,8 @@ class NativeAaHandshakeManager(
         // Start AA RFCOMM Server
         scope.launch(Dispatchers.IO + CoroutineName("NativeAa-RfcommServer")) {
             try {
-                aaServerSocket = adapter.listenUsingRfcommWithServiceRecord("Android Auto", AA_UUID)
+                aaServerSocket = adapter.listenUsingRfcommWithServiceRecord("AA BT Listener", AA_UUID)
+                AppLog.i("NativeAA: ACTIVELY LISTENING on Android Auto UUID ($AA_UUID)... Waiting for phone to connect back!")
                 while (isRunning && isActive) {
                     val socket = aaServerSocket?.accept()
                     if (socket != null) {
@@ -116,25 +117,82 @@ class NativeAaHandshakeManager(
         // Active Poke logic: Wake up the phone if it's already paired but not looking for HU
         val settings = com.andrerinas.headunitrevived.App.provide(context).settings
         val lastMac = settings.autoStartBluetoothDeviceMac
-        if (lastMac.isNotEmpty()) {
-            scope.launch(Dispatchers.IO + CoroutineName("NativeAa-Wakeup")) {
-                delay(2000) // Give the servers time to start
-                AppLog.i("NativeAA: Attempting active poke to phone ($lastMac)...")
+        
+        scope.launch(Dispatchers.IO + CoroutineName("NativeAa-Wakeup")) {
+            delay(2000) // Give the servers time to start
+            
+            val devicesToPoke = if (lastMac.isNotEmpty()) {
+                listOf(adapter.getRemoteDevice(lastMac))
+            } else {
+                AppLog.w("NativeAA: No 'Auto Start BT Device' selected in settings. Poking all paired devices as fallback...")
+                adapter.bondedDevices.toList()
+            }
+
+            if (devicesToPoke.isEmpty()) {
+                AppLog.w("NativeAA: No paired Bluetooth devices found to poke.")
+                return@launch
+            }
+
+            for (device in devicesToPoke) {
+                if (!isRunning || !isActive) break
+                AppLog.i("NativeAA: Attempting active A2DP poke to device: ${device.name} (${device.address})...")
                 try {
-                    val device = adapter.getRemoteDevice(lastMac)
                     val socket = device.createRfcommSocketToServiceRecord(A2DP_SOURCE_UUID)
+                    AppLog.i("NativeAA: Calling socket.connect() for ${device.name}...")
                     socket.connect()
-                    AppLog.i("NativeAA: Successfully poked phone ($lastMac).")
+                    AppLog.i("NativeAA: Successfully poked ${device.name}. Keeping socket alive for 20s...")
+                    delay(20000)
                     socket.close()
+                    AppLog.i("NativeAA: Poke socket for ${device.name} closed.")
                 } catch (e: Exception) {
-                    AppLog.d("NativeAA: Active poke failed (this is often normal): ${e.message}")
+                    AppLog.d("NativeAA: Poke for ${device.name} failed (normal if device disconnected): ${e.message}")
                 }
             }
         }
     }
 
+    /**
+     * Start a manual poke (wakeup) for a specific Bluetooth device.
+     */
+    fun manualPoke(address: String) {
+        val adapter = android.bluetooth.BluetoothAdapter.getDefaultAdapter() ?: return
+        try {
+            val device = adapter.getRemoteDevice(address)
+            AppLog.i("NativeAA: Manual poke requested for ${device.name} ($address)")
+            
+            scope.launch(Dispatchers.IO + CoroutineName("NativeAa-ManualWakeup")) {
+                AppLog.i("NativeAA: Attempting manual A2DP poke to ${device.name}...")
+                try {
+                    val socket = device.createRfcommSocketToServiceRecord(A2DP_SOURCE_UUID)
+                    AppLog.i("NativeAA: Calling socket.connect() for ${device.name}...")
+                    socket.connect()
+                    AppLog.i("NativeAA: Successfully poked ${device.name}. Keeping socket alive for 20s...")
+                    delay(20000)
+                    socket.close()
+                    AppLog.i("NativeAA: Manual poke socket for ${device.name} closed.")
+                } catch (e: Exception) {
+                    AppLog.d("NativeAA: Manual poke for ${device.name} failed: ${e.message}")
+                }
+            }
+        } catch (e: Exception) {
+            AppLog.e("NativeAA: Manual poke error", e)
+        }
+    }
+
     private suspend fun handleHandshake(socket: BluetoothSocket) = withContext(Dispatchers.IO) {
         try {
+            val device = socket.remoteDevice
+            AppLog.i("NativeAA: Handling handshake for ${device.name} (${device.address})")
+            
+            // Auto-save this device as the last successful one for future pokes
+            val settings = com.andrerinas.headunitrevived.App.provide(context).settings
+            if (settings.autoStartBluetoothDeviceMac != device.address) {
+                AppLog.i("NativeAA: Saving ${device.address} (${device.name}) as the new default auto-start device.")
+                settings.autoStartBluetoothDeviceMac = device.address
+                settings.autoStartBluetoothDeviceName = device.name ?: "Unknown Device"
+                com.andrerinas.headunitrevived.utils.Settings.syncAutoStartBtMacToDeviceStorage(context, device.address)
+            }
+
             val input = DataInputStream(socket.inputStream)
             val output = socket.outputStream
 
@@ -208,6 +266,7 @@ class NativeAaHandshakeManager(
         buffer.put(data)
         output.write(buffer.array())
         output.flush()
+        AppLog.i("NativeAA: Successfully delivered Protobuf TYPE $type (size ${data.size}) over Bluetooth!")
     }
 
     private fun readProtobuf(input: DataInputStream): ProtobufMessage {

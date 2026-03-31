@@ -190,6 +190,7 @@
         <item>Manual (Listă)</item>
         <item>Căutare automată (Server Headunit)</item>
         <item>Asistent Wireless (Așteaptă telefonul)</item>
+        <item>Native Android Auto</item>
     </string-array>
     <string name="auto_connect_last_session">Conectare automată la ultima sesiune</string>
     <string name="auto_connect_last_session_description">Reconectează automat ultimul dispozitiv la pornirea aplicației</string>
@@ -377,6 +378,7 @@
     <string name="kill_on_disconnect_screen_on_warning">Aveți \"Pornire la aprinderea ecranului\" activată. Această setare deschide aplicația de fiecare dată când ecranul se aprinde. Combinată cu închiderea la deconectare, aplicația se va închide după deconectare, dar se va redeschide imediat când ecranul se aprinde din nou, creând o buclă de repornire.</string>
     <string name="kill_on_disconnect_conflicts_disabled">Setările conflictuale au fost dezactivate</string>
     <string name="wifi_disabled_info">Info: Wi-Fi este dezactivat.</string>
+    <string name="bt_not_enabled">Info: Bluetooth este dezactivat.</string>
 
     <!-- Vehicle Info Settings -->
     <string name="vehicle_info_settings">Informații vehicul</string>

@@ -194,6 +194,7 @@
         <item>Manual (List)</item>
         <item>Auto-search (Headunit Server)</item>
         <item>Wireless Helper (Waiting for Phone)</item>
+        <item>Native Android Auto (Official Handshake)</item>
     </string-array>
     <string name="auto_connect_last_session">Auto-Connect Last Session</string>
     <string name="auto_connect_last_session_description">Automatically reconnect to the last used device on app startup</string>
@@ -383,6 +384,7 @@
     <string name="kill_on_disconnect_screen_on_warning">You have \"Start on screen on\" enabled. This setting opens the app every time the screen turns on. Combined with closing on disconnect, the app will close after disconnection but reopen immediately when the screen turns on again, creating a restart loop.</string>
 
     <string name="wifi_disabled_info">Info: Wi-Fi is disabled.</string>
+    <string name="bt_not_enabled">Bluetooth is disabled</string>
 
     <!-- Vehicle Info Settings -->
     <string name="vehicle_info_settings">Vehicle information</string>
@@ -410,8 +412,6 @@
 
     <string name="auto_enable_hotspot">Auto-Enable Hotspot</string>
     <string name="auto_enable_hotspot_description">Automatically starts a Wi-Fi hotspot on this device. (Won\'t work on every device)</string>
-    <string name="native_aa_wireless">Native Android Auto Wireless</string>
-    <string name="native_aa_wireless_description">Enable official Bluetooth handshake for wireless connections. Allows the phone to automatically find and launch AA. IMPORTANT: Your phone must be PAIRED with this tablet via Bluetooth first.</string>
     <string name="hotspot_warning_title">Experimental Feature</string>
     <string name="hotspot_warning_message">This feature uses reflection and might not work on all devices. It may also require the "Modify system settings" permission to be granted manually.</string>
     <string name="hotspot_permission_title">Permission Required</string>

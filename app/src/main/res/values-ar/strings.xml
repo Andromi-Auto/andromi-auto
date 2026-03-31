@@ -181,6 +181,7 @@
         <item>يدوي (قائمة)</item>
         <item>بحث تلقائي (خادم Headunit)</item>
         <item>مساعد لاسلكي (في انتظار الهاتف)</item>
+        <item>Native Android Auto</item>
     </string-array>
     <string name="auto_connect_last_session">الاتصال التلقائي بالجلسة الأخيرة</string>
     <string name="auto_connect_last_session_description">إعادة الاتصال تلقائيا بآخر جهاز مستخدم عند بدء التطبيق</string>
@@ -377,6 +378,7 @@
     <string name="kill_on_disconnect_screen_on_warning">لديك خيار \"البدء عند تشغيل الشاشة\" مفعّل. هذا الإعداد يفتح التطبيق في كل مرة تُشغّل فيها الشاشة. مع خيار الإغلاق عند قطع الاتصال، سيُغلق التطبيق بعد قطع الاتصال لكنه سيُعاد فتحه فوراً عند تشغيل الشاشة مجدداً، مما يُنشئ حلقة إعادة تشغيل.</string>
     <string name="kill_on_disconnect_conflicts_disabled">تم تعطيل الإعدادات المتعارضة</string>
     <string name="wifi_disabled_info">معلومات: واي فاي معطل.</string>
+    <string name="bt_not_enabled">معلومات: البلوتوث معطل.</string>
 
     <!-- Vehicle Info Settings -->
     <string name="vehicle_info_settings">معلومات المركبة</string>

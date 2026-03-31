@@ -181,6 +181,7 @@
         <item>Manual (Lista)</item>
         <item>Auto (Headunit Server)</item>
         <item>Wireless Helper</item>
+        <item>Native Android Auto</item>
     </string-array>
     <string name="auto_connect_last_session">Auto-conectar última sesión</string>
     <string name="auto_connect_last_session_description">Conectar automáticamente al último dispositivo al iniciar</string>
@@ -377,6 +378,7 @@
     <string name="kill_on_disconnect_screen_on_warning">Tienes activado \"Iniciar al encender la pantalla\". Esta opción abre la app cada vez que se enciende la pantalla. Combinado con cerrar al desconectar, la app se cerrará tras la desconexión pero se reabrirá inmediatamente cuando la pantalla se encienda de nuevo, creando un bucle de reinicio.</string>
     <string name="kill_on_disconnect_conflicts_disabled">Los ajustes en conflicto han sido desactivados</string>
     <string name="wifi_disabled_info">Info: El Wi-Fi está desactivado.</string>
+    <string name="bt_not_enabled">Info: El Bluetooth está desactivado.</string>
 
     <!-- Vehicle Info Settings -->
     <string name="vehicle_info_settings">Información del vehículo</string>

@@ -180,6 +180,7 @@
         <item>Handmatig (lijst)</item>
         <item>Automatisch zoeken (Headunit Server)</item>
         <item>Draadloze helper (wachten op telefoon)</item>
+        <item>Native Android Auto</item>
     </string-array>
     <string name="auto_connect_last_session">Auto-Connect laatste Sessie</string>
     <string name="auto_connect_last_session_description">Automatisch opnieuw verbinding maken met het laatst gebruikte apparaat bij het opstarten van de app.</string>
@@ -376,6 +377,7 @@
     <string name="kill_on_disconnect_screen_on_warning">U hebt \"Starten bij scherm aan\" ingeschakeld. Deze instelling opent de app telkens wanneer het scherm wordt ingeschakeld. Gecombineerd met sluiten bij ontkoppeling zal de app na ontkoppeling sluiten, maar onmiddellijk weer openen wanneer het scherm opnieuw wordt ingeschakeld, waardoor een herstartlus ontstaat.</string>
     <string name="kill_on_disconnect_conflicts_disabled">Conflicterende instellingen zijn uitgeschakeld</string>
     <string name="wifi_disabled_info">Info: Wi-Fi is uitgeschakeld.</string>
+    <string name="bt_not_enabled">Info: Bluetooth is uitgeschakeld.</string>
 
     <!-- Vehicle Info Settings -->
     <string name="vehicle_info_settings">Voertuiginformatie</string>

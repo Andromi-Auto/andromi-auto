@@ -180,6 +180,7 @@
         <item>Kézi (Lista)</item>
         <item>Auto-keresés (fejegység szerver)</item>
         <item>Wireless Helper (Várakozás a telefonra)</item>
+        <item>Native Android Auto</item>
     </string-array>
     <string name="auto_connect_last_session">Automatikus folytatás</string>
     <string name="auto_connect_last_session_description">Indításkor automatikus újracsatlakozás a legutóbb használt eszközhöz.</string>
@@ -376,6 +377,7 @@
     <string name="kill_on_disconnect_screen_on_warning">A \"Bekapcsolás a képernyő bekapcsolásakor\" funkció aktív. Ez a beállítás minden alkalommal megnyitja az alkalmazást, amikor a képernyő bekapcsol. A lekapcsoláskor történő bezárással kombinálva az alkalmazás lekapcsolás után bezárul, de azonnal újranyílik, amikor a képernyő ismét bekapcsol, ami újraindítási hurkot eredményez.</string>
     <string name="kill_on_disconnect_conflicts_disabled">Az ütköző beállítások letiltásra kerültek</string>
     <string name="wifi_disabled_info">Infó: A Wi-Fi ki van kapcsolva.</string>
+    <string name="bt_not_enabled">Infó: A Bluetooth ki van kapcsolva.</string>
 
     <!-- Vehicle Info Settings -->
     <string name="vehicle_info_settings">Járműinformáció</string>

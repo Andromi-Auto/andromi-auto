@@ -61,7 +61,6 @@ class SettingsFragment : Fragment() {
 
     private var pendingKillOnDisconnect: Boolean? = null
     private var pendingAutoEnableHotspot: Boolean? = null
-    private var pendingNativeAaWireless: Boolean? = null
     
     // Custom Insets
     private var pendingInsetLeft: Int? = null
@@ -113,7 +112,6 @@ class SettingsFragment : Fragment() {
 
         pendingKillOnDisconnect = settings.killOnDisconnect
         pendingAutoEnableHotspot = settings.autoEnableHotspot
-        pendingNativeAaWireless = settings.nativeAaWireless
         
         pendingInsetLeft = settings.insetLeft
         pendingInsetTop = settings.insetTop
@@ -237,20 +235,13 @@ class SettingsFragment : Fragment() {
 
         pendingKillOnDisconnect?.let { settings.killOnDisconnect = it }
         pendingAutoEnableHotspot?.let { settings.autoEnableHotspot = it }
-        pendingNativeAaWireless?.let { settings.nativeAaWireless = it }
         
         pendingInsetLeft?.let { settings.insetLeft = it }
         pendingInsetTop?.let { settings.insetTop = it }
         pendingInsetRight?.let { settings.insetRight = it }
         pendingInsetBottom?.let { settings.insetBottom = it }
 
-        pendingWifiConnectionMode?.let { mode ->
-            settings.wifiConnectionMode = mode
-            val intent = Intent(requireContext(), AapService::class.java).apply {
-                action = if (mode == 2) AapService.ACTION_START_WIRELESS else AapService.ACTION_STOP_WIRELESS
-            }
-            ContextCompat.startForegroundService(requireContext(), intent)
-        }
+        pendingWifiConnectionMode?.let { settings.wifiConnectionMode = it }
 
         if (requiresRestart) {
             if (App.provide(requireContext()).commManager.isConnected) {
@@ -305,8 +296,7 @@ class SettingsFragment : Fragment() {
                         pendingAssistantVolumeOffset != settings.assistantVolumeOffset ||
                         pendingNavigationVolumeOffset != settings.navigationVolumeOffset ||
                         pendingKillOnDisconnect != settings.killOnDisconnect ||
-                        pendingAutoEnableHotspot != settings.autoEnableHotspot ||
-                        pendingNativeAaWireless != settings.nativeAaWireless
+                        pendingAutoEnableHotspot != settings.autoEnableHotspot
 
         hasChanges = anyChange
 
@@ -324,7 +314,8 @@ class SettingsFragment : Fragment() {
                           pendingInsetLeft != settings.insetLeft ||
                           pendingInsetTop != settings.insetTop ||
                           pendingInsetRight != settings.insetRight ||
-                          pendingInsetBottom != settings.insetBottom
+                          pendingInsetBottom != settings.insetBottom ||
+                          pendingWifiConnectionMode != settings.wifiConnectionMode
 
         updateSaveButtonState()
     }
@@ -452,18 +443,6 @@ class SettingsFragment : Fragment() {
                         checkChanges()
                         updateSettingsList()
                     }
-                }
-            ))
-
-            items.add(SettingItem.ToggleSettingEntry(
-                stableId = "nativeAaWireless",
-                nameResId = R.string.native_aa_wireless,
-                descriptionResId = R.string.native_aa_wireless_description,
-                isChecked = pendingNativeAaWireless ?: false,
-                onCheckedChanged = { isChecked ->
-                    pendingNativeAaWireless = isChecked
-                    checkChanges()
-                    updateSettingsList()
                 }
             ))
         }
