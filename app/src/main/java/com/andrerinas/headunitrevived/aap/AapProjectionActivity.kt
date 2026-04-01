@@ -68,7 +68,10 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
     }
     private val reconnectingWatchdog = object : Runnable {
         override fun run() {
-            if (!commManager.isConnected) return
+            // Only run watchdog if we are actually supposed to be connected
+            if (commManager.connectionState.value !is CommManager.ConnectionState.HandshakeComplete) {
+                return
+            }
             val lastFrame = videoDecoder.lastFrameRenderedMs
             if (lastFrame == 0L) {
                 // First frame hasn't arrived yet — handled by the starting overlay
