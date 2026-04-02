@@ -1,8 +1,10 @@
 # Changelog
 ### v.2.2.0-beta1
-- Bringing back Native AA. Warning! This will only work on a limited amount of headunits! Most Android devices do not support connecting 2 Android devices via Bluetooth which is essential for this to work.
+- Added: Native AA. 🎉  Warning! This will only work on a limited amount of headunits! Most Android devices do not support connecting 2 Android devices via Bluetooth which is essential for this to work.
 - Try to fix connection problems on WiFi
-- Adding intent and routine for starting the app directly to self mode
+- Added: Intent and routine for starting the app directly to self mode
+- Added: Force Scale Option for older devices on surface view
+- Added: New Immersive Fullscreen with avoided notch area. This should fix problems for eg. Pixel Phones
 - More to come...
 
 ### v.2.1.1
