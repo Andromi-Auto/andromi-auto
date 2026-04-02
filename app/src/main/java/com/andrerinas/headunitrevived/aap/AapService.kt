@@ -59,6 +59,8 @@ import com.andrerinas.headunitrevived.app.UsbAttachedActivity
 import android.media.AudioManager
 import com.andrerinas.headunitrevived.utils.HotspotManager
 import com.andrerinas.headunitrevived.utils.VpnControl
+import com.andrerinas.headunitrevived.utils.SilentAudioPlayer
+import com.andrerinas.headunitrevived.connection.CarKeyReceiver
 import java.net.ServerSocket
 
 /**
@@ -86,6 +88,8 @@ class AapService : Service(), UsbReceiver.Listener {
     private lateinit var usbReceiver: UsbReceiver
     private var nightModeManager: NightModeManager? = null
     private var wifiDirectManager: WifiDirectManager? = null
+    private var carKeyReceiver: CarKeyReceiver? = null
+    private var silentAudioPlayer: SilentAudioPlayer? = null
     private var wirelessServer: WirelessServer? = null
     private var networkDiscovery: NetworkDiscovery? = null
     private var mediaSession: MediaSessionCompat? = null
@@ -420,6 +424,9 @@ class AapService : Service(), UsbReceiver.Listener {
 
         startService(GpsLocationService.intent(this))
         wifiDirectManager = WifiDirectManager(this)
+        carKeyReceiver = CarKeyReceiver()
+        silentAudioPlayer = SilentAudioPlayer(this)
+        
         initWifiMode()
         checkAlreadyConnectedUsb()
         registerNetworkMonitor()
@@ -525,6 +532,20 @@ class AapService : Service(), UsbReceiver.Listener {
         updateNotification()
         acquireWifiLock()
 
+        // Start silent audio hack to keep media focus (helps with steering wheel buttons)
+        silentAudioPlayer?.start()
+
+        // Register the comprehensive steering wheel key receiver
+        val filter = android.content.IntentFilter().apply {
+            priority = 1000
+            com.andrerinas.headunitrevived.connection.CarKeyReceiver.ACTIONS.forEach { addAction(it) }
+        }
+        try {
+            registerReceiver(carKeyReceiver, filter)
+        } catch (e: Exception) {
+            AppLog.e("AapService: Failed to register CarKeyReceiver", e)
+        }
+
         // Reactivate the existing MediaSession (created in onCreate, kept alive across disconnects)
         mediaSession?.isActive = true
         updateMediaSessionState(true)
@@ -629,6 +650,13 @@ class AapService : Service(), UsbReceiver.Listener {
     private fun onDisconnected(state: CommManager.ConnectionState.Disconnected) {
         isSwitchingToAccessory.set(false)
         releaseWifiLock()
+
+        // Cleanup steering wheel and audio focus hacks
+        silentAudioPlayer?.stop()
+        try {
+            unregisterReceiver(carKeyReceiver)
+        } catch (e: Exception) {}
+
         if (!isDestroying) updateNotification()
         // Keep MediaSession alive across disconnect/reconnect cycles.
         // Only deactivate it — do NOT release it. A released session can no longer
