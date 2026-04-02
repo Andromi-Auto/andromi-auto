@@ -5,6 +5,7 @@
 - Added: Intent and routine for starting the app directly to self mode
 - Added: Force Scale Option for older devices on surface view
 - Added: New Immersive Fullscreen with avoided notch area. This should fix problems for eg. Pixel Phones
+- Enhanced: Video Decoder Error Handling
 - More to come...
 
 ### v.2.1.1
