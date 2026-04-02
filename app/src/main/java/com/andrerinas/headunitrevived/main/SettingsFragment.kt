@@ -620,13 +620,15 @@ class SettingsFragment : Fragment() {
                 Settings.FullscreenMode.NONE -> getString(R.string.fullscreen_none)
                 Settings.FullscreenMode.IMMERSIVE -> getString(R.string.fullscreen_immersive)
                 Settings.FullscreenMode.STATUS_ONLY -> getString(R.string.fullscreen_status_only)
+                Settings.FullscreenMode.IMMERSIVE_WITH_NOTCH -> getString(R.string.fullscreen_immersive_avoid_notch)
                 else -> getString(R.string.auto)
             },
             onClick = {
                 val modes = arrayOf(
                     getString(R.string.fullscreen_none),
                     getString(R.string.fullscreen_immersive),
-                    getString(R.string.fullscreen_status_only)
+                    getString(R.string.fullscreen_status_only),
+                    getString(R.string.fullscreen_immersive_avoid_notch)
                 )
                 MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
                     .setTitle(R.string.start_in_fullscreen_mode)

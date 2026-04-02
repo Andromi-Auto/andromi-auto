@@ -628,7 +628,8 @@ class Settings(context: Context) {
     enum class FullscreenMode(val value: Int) {
         NONE(0),
         IMMERSIVE(1),
-        STATUS_ONLY(2);
+        STATUS_ONLY(2),
+        IMMERSIVE_WITH_NOTCH(3);
 
         companion object {
             private val map = values().associateBy(FullscreenMode::value)

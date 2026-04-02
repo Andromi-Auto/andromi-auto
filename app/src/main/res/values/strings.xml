@@ -98,8 +98,10 @@
     <string name="start_in_fullscreen_mode">Screen mode</string>
     <string name="start_in_fullscreen_mode_description">Choose how system bars (status and navigation) should be handled.</string>
     <string name="fullscreen_none">Normal (All bars visible)</string>
-    <string name="fullscreen_immersive">Immersive (All bars hidden)</string>
+    <string name="fullscreen_immersive">Immersive (Overlay Notch)</string>
     <string name="fullscreen_status_only">Hide status bar only</string>
+    <string name="fullscreen_immersive_avoid_notch">Immersive (Avoid Notch)</string>
+    <string name="fullscreen_immersive_avoid_notch_desc">Hides all bars and adds padding to prevent the projection from being covered by the Notch/Cutout.</string>
 
     <string name="usb_status">USB Status: %s</string>
     <string name="projection_status">Projection Status: %s</string>

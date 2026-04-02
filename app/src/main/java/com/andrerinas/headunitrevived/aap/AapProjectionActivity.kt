@@ -396,7 +396,11 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
             window.addFlags(android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN)
         }
 
-        SystemUI.apply(window, container, settings.fullscreenMode)
+        SystemUI.apply(window, container, settings.fullscreenMode) {
+            if (::projectionView.isInitialized) {
+                ProjectionViewScaler.updateScale(projectionView as View, videoDecoder.videoWidth, videoDecoder.videoHeight)
+            }
+        }
 
         // Workaround for API < 19 (Jelly Bean) where Sticky Immersive Mode doesn't exist.
         // If bars appear (e.g. on touch), hide them again after a delay.
@@ -405,7 +409,11 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
                 if ((visibility and View.SYSTEM_UI_FLAG_FULLSCREEN) == 0) {
                     // Bars are visible. Hide them again.
                     android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-                        SystemUI.apply(window, container, settings.fullscreenMode)
+                        SystemUI.apply(window, container, settings.fullscreenMode) {
+            if (::projectionView.isInitialized) {
+                ProjectionViewScaler.updateScale(projectionView as View, videoDecoder.videoWidth, videoDecoder.videoHeight)
+            }
+        }
                     }, 2000)
                 }
             }
