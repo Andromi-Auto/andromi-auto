@@ -20,6 +20,7 @@ internal class AapVideo(private val videoDecoder: VideoDecoder, private val sett
 
         when (flags) {
             11 -> {
+                // If the video frame is small enough to fit in a single message (Flags 11)
                 messageBuffer.clear()
                 // Timestamp Indication (Offset 10)
                 if (len > 14 && buf[10].toInt() == 0 && buf[11].toInt() == 0 && buf[12].toInt() == 0 && buf[13].toInt() == 1) {
@@ -31,41 +32,50 @@ internal class AapVideo(private val videoDecoder: VideoDecoder, private val sett
                     videoDecoder.decode(buf, 2, len - 2, settings.forceSoftwareDecoding, settings.videoCodec)
                     return true
                 }
-                AppLog.w("AapVideo: Dropped Flag 11 packet. len=$len, buf[10]=${if (len > 10) buf[10] else "?"}")
+                AppLog.w("AapVideo: Dropped Flag 11 packet. len=$len")
             }
             9 -> {
+                // First fragment of a large video frame (Flag 9)
+                // IMPORTANT: Always clear buffer on first fragment.
+                // This prevents cross-frame corruption if the previous frame was partial.
+                messageBuffer.clear()
+
                 // Timestamp Indication (Offset 10)
                 if (len > 14 && buf[10].toInt() == 0 && buf[11].toInt() == 0 && buf[12].toInt() == 0 && buf[13].toInt() == 1) {
-                    messageBuffer.clear()
                     messageBuffer.put(message.data, 10, message.size - 10)
                     return true
                 }
                 // Media Indication (Offset 2)
                 if (len > 6 && buf[2].toInt() == 0 && buf[3].toInt() == 0 && buf[4].toInt() == 0 && buf[5].toInt() == 1) {
-                    messageBuffer.clear()
                     messageBuffer.put(message.data, 2, message.size - 2)
                     return true
                 }
             }
             8 -> {
-                messageBuffer.put(message.data, 0, message.size)// If Middle fragment Video
+                // Middle fragment of a large video frame (Flag 8)
+                if (messageBuffer.remaining() >= message.size) {
+                    messageBuffer.put(message.data, 0, message.size)
+                }
                 return true
             }
             10 -> {
-                messageBuffer.put(message.data, 0, message.size)
+                // Last fragment of a large video frame (Flag 10)
+                if (messageBuffer.remaining() >= message.size) {
+                    messageBuffer.put(message.data, 0, message.size)
+                }
                 messageBuffer.flip()
                 
                 val assembledSize = messageBuffer.limit()
                 
                 if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.LOLLIPOP) {
-                    // For legacy devices, use recycled buffer if possible to avoid GC
+                    // For legacy devices, use recycled buffer if possible to avoid GC pressure
                     if (legacyAssembledBuffer == null || legacyAssembledBuffer!!.size < assembledSize) {
                         legacyAssembledBuffer = ByteArray(assembledSize + 1024)
                     }
                     messageBuffer.get(legacyAssembledBuffer!!, 0, assembledSize)
                     videoDecoder.decode(legacyAssembledBuffer!!, 0, assembledSize, settings.forceSoftwareDecoding, settings.videoCodec)
                 } else {
-                    // Modern devices handle short-lived allocations well
+                    // Modern devices handle buffer.array() well if allocated via allocate()
                     videoDecoder.decode(messageBuffer.array(), 0, assembledSize, settings.forceSoftwareDecoding, settings.videoCodec)
                 }
                 
