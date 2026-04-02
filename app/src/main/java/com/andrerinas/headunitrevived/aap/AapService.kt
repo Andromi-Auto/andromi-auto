@@ -536,12 +536,17 @@ class AapService : Service(), UsbReceiver.Listener {
         silentAudioPlayer?.start()
 
         // Register the comprehensive steering wheel key receiver
-        val filter = android.content.IntentFilter().apply {
+        val filter = IntentFilter().apply {
             priority = 1000
-            com.andrerinas.headunitrevived.connection.CarKeyReceiver.ACTIONS.forEach { addAction(it) }
+            CarKeyReceiver.ACTIONS.forEach { addAction(it) }
         }
         try {
-            registerReceiver(carKeyReceiver, filter)
+            ContextCompat.registerReceiver(
+                this, 
+                carKeyReceiver, 
+                filter, 
+                ContextCompat.RECEIVER_EXPORTED
+            )
         } catch (e: Exception) {
             AppLog.e("AapService: Failed to register CarKeyReceiver", e)
         }
