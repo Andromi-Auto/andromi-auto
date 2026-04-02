@@ -55,7 +55,7 @@ class CarKeyReceiver : BroadcastReceiver() {
             val event = IntentCompat.getParcelableExtra(intent, Intent.EXTRA_KEY_EVENT, KeyEvent::class.java)
             if (event != null) {
                 keyCode = event.keyCode
-                
+
                 // If it's just a down event, wait for up or handle immediately
                 if (event.action == KeyEvent.ACTION_DOWN) {
                     if (event.repeatCount == 0) {
