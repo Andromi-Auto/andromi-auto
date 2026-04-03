@@ -413,4 +413,7 @@
     <string name="hotspot_permission_message">A hotspot funkció a \"Rendszerbeállítások módosítása\" engedélyt igényli. Kérjük, engedélyezze a következő képernyőn.</string>
     <string name="not_supported_nativeaa">A natív vezeték nélküli mód úgy tűnik, nem támogatott</string>
     <string name="not_supported_nativeaa_desc">Lehet, hogy eszköze nem támogatja a natív vezeték nélküli módhoz szükséges Bluetooth vagy Wi-Fi funkciókat. Ennek ellenére megpróbálhatja, de ha nem sikerül, kérjük, használja helyette a „Wireless Helper” vagy az „Auto (Headunit Server)” módot.</string>
+    <string name="wait_for_wifi">Várakozás WiFi-re a WiFi Direct előtt</string>
+    <string name="wait_for_wifi_description">Indításkor megvárja a WiFi csatlakozást a WiFi Direct elindítása előtt. Hasznos, ha a fejegység néhány másodpercet vesz igénybe a WiFi csatlakozáshoz bekapcsolás után.</string>
+    <string name="wait_for_wifi_timeout">WiFi várakozási időkorlát</string>
 </resources>

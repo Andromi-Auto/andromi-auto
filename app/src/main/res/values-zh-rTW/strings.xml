@@ -414,4 +414,7 @@
     <string name="not_supported_nativeaa_desc">您的裝置可能不支援原生無線所需的藍牙或 Wi-Fi 功能。您可以嘗試連線，但如果失敗，請改用「Wireless Helper」或「Auto (主機伺服器)」模式。</string>
     <string name="shortcut_selfmode_title">本機模式</string>
     <string name="shortcut_selfmode_desc">在此裝置上啟動 Android Auto</string>
+    <string name="wait_for_wifi">啟動 WiFi Direct 前等待 WiFi</string>
+    <string name="wait_for_wifi_description">開機時，在啟動 WiFi Direct 之前等待 WiFi 連接。適用於主機開機後需要幾秒才能連上 WiFi 的情況。</string>
+    <string name="wait_for_wifi_timeout">WiFi 等待逾時</string>
 </resources>

@@ -110,6 +110,10 @@ class AapService : Service(), UsbReceiver.Listener {
     private var networkCallback: ConnectivityManager.NetworkCallback? = null
     private var wifiLock: WifiManager.WifiLock? = null
 
+    private var wifiReadyCallback: ConnectivityManager.NetworkCallback? = null
+    private var wifiReadyTimeoutJob: Job? = null
+    private var wifiModeInitialized = false
+
     /**
      * Partial wake lock acquired when the service starts from boot/screen-on.
      * Keeps the CPU active while the head unit runs without ACC, making the
@@ -427,6 +431,7 @@ class AapService : Service(), UsbReceiver.Listener {
 
         nativeAaHandshakeManager = NativeAaHandshakeManager(this, serviceScope)
         wifiDirectManager = WifiDirectManager(this)
+        initWifiModeWithOptionalWait()
         wifiDirectManager?.setCredentialsListener { ssid, psk, ip, bssid ->
             AppLog.i("AapService: Received WiFi credentials from manager (SSID=$ssid, IP=$ip). Updating HandshakeManager.")
             nativeAaHandshakeManager?.updateWifiCredentials(ssid, psk, ip, bssid)
@@ -555,9 +560,9 @@ class AapService : Service(), UsbReceiver.Listener {
         }
         try {
             ContextCompat.registerReceiver(
-                this, 
-                carKeyReceiver, 
-                filter, 
+                this,
+                carKeyReceiver,
+                filter,
                 ContextCompat.RECEIVER_EXPORTED
             )
         } catch (e: Exception) {
@@ -834,13 +839,104 @@ class AapService : Service(), UsbReceiver.Listener {
     private fun unregisterNetworkMonitor() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) return
         networkCallback?.let {
-            val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-            try { cm.unregisterNetworkCallback(it) } catch (e: IllegalArgumentException) { AppLog.w("Network callback not registered or already unregistered", e) }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+                try { cm.unregisterNetworkCallback(it) } catch (e: Exception) { }
+            }
             networkCallback = null
         }
     }
 
-    /** Starts [WirelessServer] and configures WiFi Hotspot/Direct based on the selected mode. */
+    /**
+     * Decides whether to call [initWifiMode] immediately or wait for WiFi connectivity.
+     *
+     * When "Wait for WiFi before WiFi Direct" is enabled AND WiFi connection mode is 2
+     * (Wireless Helper), registers a [ConnectivityManager.NetworkCallback] filtered to
+     * TRANSPORT_WIFI. [initWifiMode] fires as soon as WiFi connects, or after the
+     * configured timeout — whichever comes first.
+     *
+     * When the setting is disabled, or the mode is not 2, [initWifiMode] runs immediately.
+     */
+    private fun initWifiModeWithOptionalWait() {
+        val settings = App.provide(this).settings
+
+        if (settings.wifiConnectionMode != 2 || !settings.waitForWifiBeforeWifiDirect) {
+            initWifiMode()
+            return
+        }
+
+        wifiModeInitialized = false
+
+        val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val isWifiConnected = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val activeNetwork = cm.activeNetwork
+            val caps = if (activeNetwork != null) cm.getNetworkCapabilities(activeNetwork) else null
+            caps != null && caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
+        } else {
+            @Suppress("DEPRECATION")
+            val info = cm.activeNetworkInfo
+            info != null && info.isConnected && info.type == ConnectivityManager.TYPE_WIFI
+        }
+
+        if (isWifiConnected || Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            if (isWifiConnected) AppLog.i("WifiWait: WiFi already connected, initializing immediately")
+            else AppLog.i("WifiWait: Legacy device (API < 21), skipping wait.")
+
+            wifiModeInitialized = true
+            initWifiMode()
+            return
+        }
+
+        val timeoutSec = settings.waitForWifiTimeout.toLong()
+        AppLog.i("WifiWait: Waiting up to ${timeoutSec}s for WiFi before initializing WiFi Direct...")
+
+        val callback = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            object : ConnectivityManager.NetworkCallback() {
+                override fun onAvailable(network: Network) {
+                    AppLog.i("WifiWait: WiFi connected (network=$network)")
+                    serviceScope.launch {
+                        completeWifiWait("WiFi connected")
+                    }
+                }
+            }
+        } else null
+
+        wifiReadyCallback = callback
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && callback != null) {
+            val request = NetworkRequest.Builder()
+                .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+                .build()
+            cm.registerNetworkCallback(request, callback)
+        }
+
+        wifiReadyTimeoutJob = serviceScope.launch {
+            delay(timeoutSec * 1000)
+            completeWifiWait("timeout (${timeoutSec}s)")
+        }
+    }
+
+    private fun completeWifiWait(reason: String) {
+        if (wifiModeInitialized || isDestroying) return
+        wifiModeInitialized = true
+
+        AppLog.i("WifiWait: Completing (reason=$reason)")
+
+        wifiReadyTimeoutJob?.cancel()
+        wifiReadyTimeoutJob = null
+
+        wifiReadyCallback?.let {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+                try { cm.unregisterNetworkCallback(it) } catch (_: Exception) {}
+            }
+            wifiReadyCallback = null
+        }
+
+        initWifiMode()
+    }
+
+    /** Starts [WirelessServer] if the user has configured server WiFi mode (mode == 2). */
     private fun initWifiMode() {
         val settings = App.provide(this).settings
         val mode = settings.wifiConnectionMode
@@ -942,6 +1038,16 @@ class AapService : Service(), UsbReceiver.Listener {
         if (App.provide(this).settings.autoEnableHotspot) {
             AppLog.i("AapService: Auto-disabling hotspot...")
             HotspotManager.setHotspotEnabled(this, false)
+        }
+
+        wifiReadyTimeoutJob?.cancel()
+        wifiReadyTimeoutJob = null
+        wifiReadyCallback?.let {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+                try { cm.unregisterNetworkCallback(it) } catch (_: Exception) {}
+            }
+            wifiReadyCallback = null
         }
 
         releaseWifiLock()

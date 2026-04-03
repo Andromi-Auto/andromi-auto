@@ -415,4 +415,7 @@
     <string name="not_supported_nativeaa_desc">Twoje urządzenie może nie obsługiwać wymaganych funkcji Bluetooth lub Wi-Fi dla natywnej łączności bezprzewodowej. Możesz spróbować mimo to, ale jeśli się nie uda, użyj trybu „Wireless Helper” lub „Auto (Headunit Server)”.</string>
     <string name="shortcut_selfmode_title">Tryb własny (Self Mode)</string>
     <string name="shortcut_selfmode_desc">Uruchom Android Auto na tym urządzeniu</string>
+    <string name="wait_for_wifi">Czekaj na WiFi przed WiFi Direct</string>
+    <string name="wait_for_wifi_description">Przy uruchomieniu czeka na połączenie WiFi przed uruchomieniem WiFi Direct. Przydatne, jeśli Twoje headunit potrzebuje kilku sekund na połączenie z WiFi po włączeniu.</string>
+    <string name="wait_for_wifi_timeout">Limit czasu oczekiwania na WiFi</string>
 </resources>

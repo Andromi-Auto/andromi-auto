@@ -424,9 +424,13 @@
     <string name="hotspot_warning_message">This feature uses reflection and might not work on all devices. It may also require the "Modify system settings" permission to be granted manually.</string>
     <string name="hotspot_permission_title">Permission Required</string>
     <string name="hotspot_permission_message">The hotspot feature requires the \"Modify system settings\" permission. Please enable it in the next screen.</string>
-    
+
     <string name="supported_nativeaa">Enhanced Wireless Support</string>
     <string name="supported_nativeaa_desc">Great news! Your device supports \"Native Wireless\" mode, which provides a more seamless Android Auto experience. \n\nTo enable this, we need to refresh your Bluetooth cache. Please: \n1. Remove the existing pairing on your phone \n2. Click OK to restart Bluetooth \n3. Re-pair your phone \n\nWould you like to switch to Native AA mode now?</string>
     <string name="not_supported_nativeaa">Native Wireless seems not supported</string>
     <string name="not_supported_nativeaa_desc">Your device might not support the required Bluetooth or Wi-Fi features for Native Wireless. You can try it anyway, but if it fails, please use the \"Wireless Helper\" or \"Auto (Headunit Server)\" mode instead.</string>
+
+    <string name="wait_for_wifi">Wait for WiFi before WiFi Direct</string>
+    <string name="wait_for_wifi_description">On boot, wait for WiFi to connect before starting WiFi Direct. Enable this if your head unit needs a few seconds to connect to WiFi after power on.</string>
+    <string name="wait_for_wifi_timeout">WiFi wait timeout</string>
 </resources>

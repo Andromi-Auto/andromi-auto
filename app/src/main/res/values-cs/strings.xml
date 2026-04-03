@@ -414,4 +414,7 @@
     <string name="hotspot_permission_message">Funkce hotspotu vyžaduje oprávnění \"Změna systémových nastavení\". Povolte jej prosím na další obrazovce.</string>
     <string name="not_supported_nativeaa">Nativní bezdrátové připojení se zdá být nepodporováno</string>
     <string name="not_supported_nativeaa_desc">Vaše zařízení nemusí podporovat požadované funkce Bluetooth nebo Wi-Fi pro nativní bezdrátové připojení. Můžete to přesto zkusit, ale pokud to selže, použijte prosím místo toho režim „Wireless Helper“ nebo „Auto (Headunit Server)“.</string>
+    <string name="wait_for_wifi">Počkat na WiFi před WiFi Direct</string>
+    <string name="wait_for_wifi_description">Při startu počká na připojení WiFi před spuštěním WiFi Direct. Užitečné, pokud vaše headunit potřebuje několik sekund na připojení k WiFi po zapnutí.</string>
+    <string name="wait_for_wifi_timeout">Časový limit čekání na WiFi</string>
 </resources>

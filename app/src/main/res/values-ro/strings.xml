@@ -415,4 +415,7 @@
     <string name="not_supported_nativeaa_desc">Este posibil ca dispozitivul tău să nu suporte funcțiile Bluetooth sau Wi-Fi necesare pentru Wireless Nativ. Poți încerca oricum, dar dacă nu reușești, te rugăm să folosești modul „Wireless Helper” sau „Auto (Headunit Server)”.</string>
     <string name="shortcut_selfmode_title">Mod Self</string>
     <string name="shortcut_selfmode_desc">Pornește Android Auto pe acest dispozitiv</string>
+    <string name="wait_for_wifi">Așteaptă WiFi înainte de WiFi Direct</string>
+    <string name="wait_for_wifi_description">La pornire, așteaptă conectarea WiFi înainte de a porni WiFi Direct. Util dacă headunit-ul tău are nevoie de câteva secunde pentru a se conecta la WiFi după pornire.</string>
+    <string name="wait_for_wifi_timeout">Limita de așteptare WiFi</string>
 </resources>

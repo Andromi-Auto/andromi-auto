@@ -415,4 +415,7 @@
     <string name="not_supported_nativeaa_desc">Ваш пристрій може не підтримувати необхідні функції Bluetooth або Wi-Fi для нативного бездротового режиму. Ви можете спробувати в будь-якому випадку, але якщо не вдасться, використовуйте режим «Wireless Helper» або «Auto (Headunit Server)».</string>
     <string name="shortcut_selfmode_title">Self Mode</string>
     <string name="shortcut_selfmode_desc">Запустити Android Auto на цьому пристрої</string>
+    <string name="wait_for_wifi">Чекати WiFi перед WiFi Direct</string>
+    <string name="wait_for_wifi_description">При запуску чекати підключення WiFi перед запуском WiFi Direct. Корисно, якщо вашому головному пристрою потрібно кілька секунд для підключення до WiFi після увімкнення.</string>
+    <string name="wait_for_wifi_timeout">Тайм-аут очікування WiFi</string>
 </resources>
