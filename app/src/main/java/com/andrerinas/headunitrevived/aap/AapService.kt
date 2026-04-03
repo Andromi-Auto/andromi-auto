@@ -796,8 +796,10 @@ class AapService : Service(), UsbReceiver.Listener {
     private fun unregisterNetworkMonitor() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) return
         networkCallback?.let {
-            val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-            try { cm.unregisterNetworkCallback(it) } catch (e: IllegalArgumentException) { AppLog.w("Network callback not registered or already unregistered", e) }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+                try { cm.unregisterNetworkCallback(it) } catch (e: Exception) { }
+            }
             networkCallback = null
         }
     }
@@ -823,34 +825,47 @@ class AapService : Service(), UsbReceiver.Listener {
         wifiModeInitialized = false
 
         val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        val isWifiConnected = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             val activeNetwork = cm.activeNetwork
             val caps = if (activeNetwork != null) cm.getNetworkCapabilities(activeNetwork) else null
-            if (caps != null && caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
-                AppLog.i("WifiWait: WiFi already connected, initializing immediately")
-                wifiModeInitialized = true
-                initWifiMode()
-                return
-            }
+            caps != null && caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
+        } else {
+            @Suppress("DEPRECATION")
+            val info = cm.activeNetworkInfo
+            info != null && info.isConnected && info.type == ConnectivityManager.TYPE_WIFI
+        }
+
+        if (isWifiConnected || Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            if (isWifiConnected) AppLog.i("WifiWait: WiFi already connected, initializing immediately")
+            else AppLog.i("WifiWait: Legacy device (API < 21), skipping wait.")
+            
+            wifiModeInitialized = true
+            initWifiMode()
+            return
         }
 
         val timeoutSec = settings.waitForWifiTimeout.toLong()
         AppLog.i("WifiWait: Waiting up to ${timeoutSec}s for WiFi before initializing WiFi Direct...")
 
-        val callback = object : ConnectivityManager.NetworkCallback() {
-            override fun onAvailable(network: Network) {
-                AppLog.i("WifiWait: WiFi connected (network=$network)")
-                serviceScope.launch {
-                    completeWifiWait("WiFi connected")
+        val callback = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            object : ConnectivityManager.NetworkCallback() {
+                override fun onAvailable(network: Network) {
+                    AppLog.i("WifiWait: WiFi connected (network=$network)")
+                    serviceScope.launch {
+                        completeWifiWait("WiFi connected")
+                    }
                 }
             }
-        }
+        } else null
+
         wifiReadyCallback = callback
 
-        val request = NetworkRequest.Builder()
-            .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
-            .build()
-        cm.registerNetworkCallback(request, callback)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && callback != null) {
+            val request = NetworkRequest.Builder()
+                .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+                .build()
+            cm.registerNetworkCallback(request, callback)
+        }
 
         wifiReadyTimeoutJob = serviceScope.launch {
             delay(timeoutSec * 1000)
@@ -868,8 +883,10 @@ class AapService : Service(), UsbReceiver.Listener {
         wifiReadyTimeoutJob = null
 
         wifiReadyCallback?.let {
-            val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-            try { cm.unregisterNetworkCallback(it) } catch (_: IllegalArgumentException) {}
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+                try { cm.unregisterNetworkCallback(it) } catch (_: Exception) {}
+            }
             wifiReadyCallback = null
         }
 
@@ -970,8 +987,10 @@ class AapService : Service(), UsbReceiver.Listener {
         wifiReadyTimeoutJob?.cancel()
         wifiReadyTimeoutJob = null
         wifiReadyCallback?.let {
-            val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-            try { cm.unregisterNetworkCallback(it) } catch (_: IllegalArgumentException) {}
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+                try { cm.unregisterNetworkCallback(it) } catch (_: Exception) {}
+            }
             wifiReadyCallback = null
         }
 
