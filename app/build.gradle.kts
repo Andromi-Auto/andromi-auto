@@ -63,14 +63,14 @@ android {
     val resDir = file("src/main/res")
     val availableLocales = resDir.listFiles { file ->
         file.isDirectory && file.name.startsWith("values-") &&
-                // Filter out non-language qualifiers (night mode, screen size, etc.)
-                !file.name.contains("night") &&
-                !file.name.contains("land") &&
-                !file.name.contains("port") &&
-                !file.name.matches(Regex("values-[whsml]\\d+.*")) &&
-                !file.name.matches(Regex("values-v\\d+")) &&
-                // Check that it contains strings.xml (actual translation)
-                file.resolve("strings.xml").exists()
+        // Filter out non-language qualifiers (night mode, screen size, etc.)
+        !file.name.contains("night") &&
+        !file.name.contains("land") &&
+        !file.name.contains("port") &&
+        !file.name.matches(Regex("values-[whsml]\\d+.*")) &&
+        !file.name.matches(Regex("values-v\\d+")) &&
+        // Check that it contains strings.xml (actual translation)
+        file.resolve("strings.xml").exists()
     }?.map { dir ->
         // Extract locale code from directory name (e.g., "values-es" -> "es", "values-pt-rBR" -> "pt-rBR")
         dir.name.removePrefix("values-")
