@@ -5,6 +5,7 @@ import android.app.PendingIntent
 import android.app.Service
 import android.app.UiModeManager
 import android.content.BroadcastReceiver
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -586,7 +587,8 @@ class AapService : Service(), UsbReceiver.Listener {
     }
 
     private fun setupMediaSession() {
-        mediaSession = MediaSessionCompat(this, "HeadunitRevived").apply {
+        val mbr = ComponentName(this, MediaButtonReceiver::class.java)
+        mediaSession = MediaSessionCompat(this, "HeadunitRevived", mbr, null).apply {
             setCallback(object : MediaSessionCompat.Callback() {
                 override fun onMediaButtonEvent(mediaButtonEvent: Intent?): Boolean {
                     val keyEvent = mediaButtonEvent?.let { IntentCompat.getParcelableExtra(it, Intent.EXTRA_KEY_EVENT, android.view.KeyEvent::class.java) }
