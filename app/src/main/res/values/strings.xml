@@ -436,4 +436,9 @@
     <string name="wireless_24ghz_warning">Note: Wireless Android Auto on 2.4GHz devices can lead to lag, stutters, and disconnects. If you experience issues, please test via USB to confirm if it\'s a network limitation.</string>
     <string name="fake_speed_title">Disable Video-Lock (Fake Speed)</string>
     <string name="fake_speed_description">Reports a constant low speed (0.5 m/s) to the phone to prevent video content from being blocked while driving. Use with caution.</string>
+    <string name="exit_dialog_title">Exit Android Auto</string>
+    <string name="exit_dialog_stop">Stop Connection</string>
+    <string name="exit_dialog_pip">Picture-in-Picture</string>
+    <string name="exit_dialog_background">Move to Background</string>
+    <string name="gesture_hint">Tip: Swipe from the left edge with 2 fingers to open the exit menu.</string>
 </resources>

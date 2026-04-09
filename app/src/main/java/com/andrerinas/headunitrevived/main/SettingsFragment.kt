@@ -54,6 +54,7 @@ class SettingsFragment : Fragment() {
     private var pendingShowFpsCounter: Boolean? = null
     private var pendingScreenOrientation: Settings.ScreenOrientation? = null
     private var pendingAppLanguage: String? = null
+    private var pendingFakeSpeed: Boolean? = null
     
     // Flag to determine if the projection should stretch to fill the screen
     private var pendingStretchToFill: Boolean? = null
@@ -112,6 +113,7 @@ class SettingsFragment : Fragment() {
 
         pendingKillOnDisconnect = settings.killOnDisconnect
         pendingAutoEnableHotspot = settings.autoEnableHotspot
+        pendingFakeSpeed = settings.fakeSpeed
         
         pendingInsetLeft = settings.insetLeft
         pendingInsetTop = settings.insetTop
@@ -236,6 +238,7 @@ class SettingsFragment : Fragment() {
 
         pendingKillOnDisconnect?.let { settings.killOnDisconnect = it }
         pendingAutoEnableHotspot?.let { settings.autoEnableHotspot = it }
+        pendingFakeSpeed?.let { settings.fakeSpeed = it }
         
         pendingInsetLeft?.let { settings.insetLeft = it }
         pendingInsetTop?.let { settings.insetTop = it }
@@ -494,6 +497,18 @@ class SettingsFragment : Fragment() {
             isChecked = pendingShowNavigationNotifications!!,
             onCheckedChanged = { isChecked ->
                 pendingShowNavigationNotifications = isChecked
+                checkChanges()
+                updateSettingsList()
+            }
+        ))
+
+        items.add(SettingItem.ToggleSettingEntry(
+            stableId = "fakeSpeed",
+            nameResId = R.string.fake_speed_title,
+            descriptionResId = R.string.fake_speed_description,
+            isChecked = pendingFakeSpeed!!,
+            onCheckedChanged = { isChecked ->
+                pendingFakeSpeed = isChecked
                 checkChanges()
                 updateSettingsList()
             }

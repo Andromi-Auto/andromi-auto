@@ -155,6 +155,12 @@ class Settings(context: Context) {
             prefs.edit().putBoolean("fake_speed", value).apply()
         }
 
+    var gestureHintShown: Boolean
+        get() = prefs.getBoolean("gesture_hint_shown", false)
+        set(value) {
+            prefs.edit().putBoolean("gesture_hint_shown", value).apply()
+        }
+
     // Custom Insets (Screen Margins)
     var insetLeft: Int
         get() = prefs.getInt("inset-left", 0)
@@ -405,11 +411,7 @@ class Settings(context: Context) {
         _1280x720(2, "720p", 1280, 720, Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType._1280x720),
         _1920x1080(3, "1080p", 1920, 1080, Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType._1920x1080),
         _2560x1440(4, "1440p (2K)", 2560, 1440, Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType._2560x1440),
-        _3840x2160(5, "2160p (4K)", 3840, 2160, Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType._3840x2160),
-        _720x1280(6, "720p (Portrait)", 720, 1280, Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType._720x1280),
-        _1080x1920(7, "1080p (Portrait)", 1080, 1920, Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType._1080x1920),
-        _1440x2560(8, "1440p (Portrait)", 1440, 2560, Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType._1440x2560),
-        _2160x3840(9, "2160p (Portrait)", 2160, 3840, Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType._2160x3840);
+        _3840x2160(5, "2160p (4K)", 3840, 2160, Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType._3840x2160);
 
         companion object {
             private val map = values().associateBy(Resolution::id)

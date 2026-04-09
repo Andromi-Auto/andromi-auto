@@ -45,6 +45,7 @@ import com.andrerinas.headunitrevived.utils.HeadUnitScreenConfig
 import com.andrerinas.headunitrevived.utils.SystemUI
 import android.content.IntentFilter
 import com.andrerinas.headunitrevived.view.ProjectionViewScaler
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, VideoDimensionsListener {
 
@@ -56,6 +57,11 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
     private var isSurfaceSet = false
     private var overlayState = OverlayState.STARTING
     private val watchdogHandler = android.os.Handler(android.os.Looper.getMainLooper())
+
+    private var initialX = 0f
+    private var initialY = 0f
+    private var isPotentialGesture = false
+    private var fpsTextView: TextView? = null
 
     private val videoWatchdogRunnable = object : Runnable {
         override fun run() {
@@ -181,23 +187,9 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
 
         setContentView(R.layout.activity_headunit)
 
-        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                val currentTime = System.currentTimeMillis()
-                if (currentTime - lastBackPressTime < 2000) {
-                    AppLog.i("AapProjectionActivity: Double back press detected. Disconnecting...")
-                    commManager.disconnect()
-                    finish()
-                } else {
-                    lastBackPressTime = currentTime
-                    Toast.makeText(this@AapProjectionActivity, getString(R.string.press_back_again_to_exit), Toast.LENGTH_SHORT).show()
-                }
-            }
-        })
-
         if (settings.showFpsCounter) {
             val container = findViewById<FrameLayout>(R.id.container)
-            val fpsText = TextView(this).apply {
+            fpsTextView = TextView(this).apply {
                 setTextColor(Color.YELLOW)
                 textSize = 12f
                 setTypeface(null, Typeface.BOLD)
@@ -217,18 +209,33 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
                 gravity = Gravity.TOP or Gravity.START
                 setMargins(20, 20, 0, 0)
             }
-            container.addView(fpsText, params)
+            container.addView(fpsTextView, params)
 
             videoDecoder.onFpsChanged = { fps ->
-                runOnUiThread { fpsText.text = "FPS: $fps" }
+                runOnUiThread { fpsTextView?.text = "FPS: $fps" }
             }
         }
 
         videoDecoder.dimensionsListener = this
 
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                showExitDialog()
+            }
+        })
+
+        var isFirstEmission = true
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 commManager.connectionState.collect { state ->
+                    val first = isFirstEmission
+                    isFirstEmission = false
+                    
+                    if (first && state is CommManager.ConnectionState.Disconnected) {
+                        AppLog.i("AapProjectionActivity: Ignoring initial Disconnected state from StateFlow replay.")
+                        return@collect
+                    }
+
                     when (state) {
                         is CommManager.ConnectionState.Disconnected -> {
                             watchdogHandler.removeCallbacksAndMessages(null)
@@ -238,12 +245,14 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
                             }
                             // Only finish immediately if the user explicitly exited or it was a clean close.
                             if (state.isUserExit || state.isClean) {
+                                AppLog.i("AapProjectionActivity: Finishing because state isUserExit=${state.isUserExit}, isClean=${state.isClean}")
                                 hideReconnectingOverlay()
                                 finish()
                             } else {
                                 // For unexpected disconnects (especially Wireless), wait a tiny bit to see if service restarts it
                                 watchdogHandler.postDelayed({
                                     if (commManager.connectionState.value is CommManager.ConnectionState.Disconnected) {
+                                        AppLog.i("AapProjectionActivity: Finishing after delay due to Disconnected state.")
                                         hideReconnectingOverlay()
                                         finish()
                                     }
@@ -336,6 +345,12 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
             runOnUiThread {
                 loadingOverlay?.visibility = View.GONE
                 overlayState = OverlayState.HIDDEN
+
+                // Show one-time gesture hint
+                if (!settings.gestureHintShown) {
+                    Toast.makeText(this@AapProjectionActivity, R.string.gesture_hint, Toast.LENGTH_LONG).show()
+                    settings.gestureHintShown = true
+                }
             }
         }
     }
@@ -440,9 +455,108 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         }
     }
 
-    private var lastBackPressTime = 0L
+    private fun showExitDialog() {
+        val items = mutableListOf(getString(R.string.exit_dialog_stop))
+        
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            items.add(getString(R.string.exit_dialog_pip))
+        }
+        
+        items.add(getString(R.string.exit_dialog_background))
+
+        MaterialAlertDialogBuilder(this, R.style.DarkAlertDialog)
+            .setTitle(R.string.exit_dialog_title)
+            .setItems(items.toTypedArray()) { _, which ->
+                val selected = items[which]
+                when {
+                    selected == getString(R.string.exit_dialog_stop) -> {
+                        commManager.disconnect(sendByeBye = true)
+                        finish()
+                    }
+                    selected == getString(R.string.exit_dialog_pip) -> {
+                        enterPiP()
+                    }
+                    selected == getString(R.string.exit_dialog_background) -> {
+                        moveToBackground()
+                    }
+                }
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
+    }
+
+    private fun enterPiP() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            try {
+                val params = android.app.PictureInPictureParams.Builder()
+                    // Default aspect ratio for AA (usually 16:9 or 16:10)
+                    .setAspectRatio(android.util.Rational(videoDecoder.videoWidth.coerceAtLeast(1), videoDecoder.videoHeight.coerceAtLeast(1)))
+                    .build()
+                enterPictureInPictureMode(params)
+            } catch (e: Exception) {
+                AppLog.e("Failed to enter PiP mode: ${e.message}")
+            }
+        }
+    }
+
+    private fun moveToBackground() {
+        val startMain = Intent(Intent.ACTION_MAIN)
+        startMain.addCategory(Intent.CATEGORY_HOME)
+        startMain.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        startActivity(startMain)
+    }
+
+    override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean, newConfig: android.content.res.Configuration) {
+        super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
+        if (isInPictureInPictureMode) {
+            // Hide UI elements during PiP (like FPS counter, loading overlay)
+            findViewById<View>(R.id.loading_overlay)?.visibility = View.GONE
+            fpsTextView?.visibility = View.GONE
+        } else {
+            // Restore UI if needed
+            fpsTextView?.visibility = if (settings.showFpsCounter) View.VISIBLE else View.GONE
+            setFullscreen()
+        }
+    }
+
+    override fun onUserLeaveHint() {
+        // Optional: Auto-enter PiP if user presses home (like HUR 8)
+        // For now, we only enter via dialog as requested.
+        super.onUserLeaveHint()
+    }
 
     private val commManager get() = App.provide(this).commManager
+
+    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+        // 1. 2-finger swipe detection from the left edge (to open exit menu)
+        if (ev.pointerCount == 2) {
+            when (ev.actionMasked) {
+                MotionEvent.ACTION_POINTER_DOWN -> {
+                    initialX = ev.getX(0)
+                    initialY = ev.getY(0)
+                    isPotentialGesture = initialX < 100
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    if (isPotentialGesture) {
+                        val deltaX = ev.getX(0) - initialX
+                        val deltaY = Math.abs(ev.getY(0) - initialY)
+                        if (deltaX > 200 && deltaY < 100) {
+                            isPotentialGesture = false
+                            showExitDialog()
+                            return true // Consume
+                        }
+                    }
+                }
+            }
+        }
+        
+        // 2. Legacy Touch handling for older devices (API < 19)
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
+            sendTouchEvent(ev)
+        }
+        
+        return super.dispatchTouchEvent(ev)
+    }
 
     override fun onSurfaceCreated(surface: android.view.Surface) {
         AppLog.i("[AapProjectionActivity] onSurfaceCreated")
@@ -556,15 +670,6 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         }
         onKeyEvent(keyCode, false)
         return true
-    }
-
-    override fun dispatchTouchEvent(event: MotionEvent): Boolean {
-        // On older devices (API < 19), the system often consumes the first touch 
-        // to show system bars. By handling it here, we ensure it's sent to AA.
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
-            sendTouchEvent(event)
-        }
-        return super.dispatchTouchEvent(event)
     }
 
     private fun onKeyEvent(keyCode: Int, isPress: Boolean) {

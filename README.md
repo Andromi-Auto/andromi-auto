@@ -76,6 +76,7 @@ adb shell am start -a android.intent.action.VIEW -d "headunit://connect?ip=192.1
 - Added: Pip-Support
 - Added: Google Nearby Support
 - Added: 4K in select
+- New App-Icon without text for better visibility
 
 ### v.2.1.1
 - Fixed: Layout crash on Android 4.2
