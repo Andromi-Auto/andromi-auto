@@ -21,7 +21,9 @@ class AudioTrackWrapper(
     bitDepth: Int,
     channelCount: Int,
     private val isAac: Boolean = false,
-    gain: Float
+    gain: Float,
+    private val audioLatencyMultiplier: Int = 2,
+    private val audioQueueCapacity: Int = 20
 ) : Thread() {
 
     private val audioTrack: AudioTrack
@@ -31,7 +33,7 @@ class AudioTrackWrapper(
     private val writeExecutor = Executors.newSingleThreadExecutor()
 
     // Limit queue capacity to provide backpressure to the network thread if audio playback is slow
-    private val dataQueue = LinkedBlockingQueue<ByteArray>()
+    private val dataQueue = if (audioQueueCapacity > 0) LinkedBlockingQueue<ByteArray>(audioQueueCapacity) else LinkedBlockingQueue<ByteArray>()
     @Volatile
     private var isRunning = true
 
@@ -43,7 +45,7 @@ class AudioTrackWrapper(
 
     init {
         this.name = "AudioPlaybackThread"
-        audioTrack = createAudioTrack(stream, sampleRateInHz, bitDepth, channelCount)
+        audioTrack = createAudioTrack(stream, sampleRateInHz, bitDepth, channelCount, audioLatencyMultiplier)
         audioTrack.play()
 
         if (isAac) {
@@ -270,7 +272,8 @@ class AudioTrackWrapper(
         stream: Int,
         sampleRateInHz: Int,
         bitDepth: Int,
-        channelCount: Int
+        channelCount: Int,
+        multiplier: Int
     ): AudioTrack {
         val channelConfig =
             if (channelCount == 2) AudioFormat.CHANNEL_OUT_STEREO else AudioFormat.CHANNEL_OUT_MONO
@@ -278,8 +281,8 @@ class AudioTrackWrapper(
             if (bitDepth == 16) AudioFormat.ENCODING_PCM_16BIT else AudioFormat.ENCODING_PCM_8BIT
 
         val minBufferSize = AudioTrack.getMinBufferSize(sampleRateInHz, channelConfig, dataFormat)
-        // Larger buffer (8x) to prevent stuttering on jittery connections
-        val bufferSize = minBufferSize * 8
+        // Adjust buffer size based on user preference to balance latency and stutter
+        val bufferSize = minBufferSize * multiplier
 
         AppLog.i("Audio stream: $stream buffer size: $bufferSize (min: $minBufferSize) sampleRateInHz: $sampleRateInHz channelCount: $channelCount")
 

@@ -326,6 +326,14 @@ class Settings(context: Context) {
         get() = prefs.getInt("mic-input-source", 0) // Default: DEFAULT
         set(value) { prefs.edit().putInt("mic-input-source", value).apply() }
 
+    var audioLatencyMultiplier: Int
+        get() = prefs.getInt("audio-latency-multiplier", 2)
+        set(value) { prefs.edit().putInt("audio-latency-multiplier", value).apply() }
+    
+    var audioQueueCapacity: Int
+        get() = prefs.getInt("audio-queue-capacity", 20)
+        set(value) { prefs.edit().putInt("audio-queue-capacity", value).apply() }
+
     var useAacAudio: Boolean
         get() = prefs.getBoolean("use-aac-audio", false)
         set(value) { prefs.edit().putBoolean("use-aac-audio", value).apply() }
