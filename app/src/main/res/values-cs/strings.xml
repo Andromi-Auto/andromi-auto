@@ -418,4 +418,17 @@
     <string name="wait_for_wifi_description">Při startu počká na připojení WiFi před spuštěním WiFi Direct. Užitečné, pokud vaše headunit potřebuje několik sekund na připojení k WiFi po zapnutí.</string>
     <string name="wait_for_wifi_timeout">Časový limit čekání na WiFi</string>
     <string name="wireless_24ghz_warning">Poznámka: Bezdrátové Android Auto na 2,4GHz zařízeních může vést k lagům, sekání a odpojování. Pokud máte problémy, otestujte připojení přes USB, abyste potvrdili, zda se jedná o omezení sítě.</string>
+    <!-- Custom loading screen -->
+    <string name="loading_screen">Načítací obrazovka</string>
+    <string name="loading_screen_default">Výchozí</string>
+    <string name="loading_screen_custom">Vlastní</string>
+    <string name="loading_screen_dialog_title">Vlastní načítací obrazovka</string>
+    <string name="loading_screen_select_file">Vybrat soubor</string>
+    <string name="loading_screen_remove">Odebrat</string>
+    <string name="loading_screen_recommendation">Doporučené rozlišení: %1 00d7 %2</string>
+    <string name="loading_screen_supported_formats">Podporované: Obrázky (PNG, JPG, BMP, WEBP, GIF) \u2022 Videa (MP4, MKV, WEBM, 3GP) \u2022 Max: 10 MB</string>
+    <string name="loading_screen_no_media">Není vybrán vlastní obsah</string>
+    <string name="loading_screen_file_too_large">Soubor je příliš velký (max 10 MB)</string>
+    <string name="loading_screen_unsupported_format">Nepodporovaný formát. Použijte soubor obrázku nebo videa</string>
+    <string name="loading_screen_file_error">Nepodařilo se načíst vybraný soubor</string>
 </resources>

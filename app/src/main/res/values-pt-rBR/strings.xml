@@ -419,4 +419,17 @@
     <string name="wait_for_wifi_description">Ao iniciar, aguarda a conexão WiFi antes de iniciar o WiFi Direct. Útil se seu headunit demora alguns segundos para conectar ao WiFi após ligar.</string>
     <string name="wait_for_wifi_timeout">Tempo limite de espera WiFi</string>
     <string name="wireless_24ghz_warning">Nota: O Android Auto sem fio em dispositivos de 2,4 GHz pode causar atrasos, travamentos e desconexões. Se você tiver problemas, teste via USB para confirmar se é uma limitação da rede.</string>
+    <!-- Custom loading screen -->
+    <string name="loading_screen">Tela de carregamento</string>
+    <string name="loading_screen_default">Padrão</string>
+    <string name="loading_screen_custom">Personalizada</string>
+    <string name="loading_screen_dialog_title">Tela de carregamento personalizada</string>
+    <string name="loading_screen_select_file">Selecionar arquivo</string>
+    <string name="loading_screen_remove">Remover</string>
+    <string name="loading_screen_recommendation">Resolução recomendada: %1 00d7 %2</string>
+    <string name="loading_screen_supported_formats">Suportados: Imagens (PNG, JPG, BMP, WEBP, GIF) \u2022 Vídeos (MP4, MKV, WEBM, 3GP) \u2022 Máx: 10 MB</string>
+    <string name="loading_screen_no_media">Nenhuma mídia personalizada selecionada</string>
+    <string name="loading_screen_file_too_large">O arquivo é muito grande (máx 10 MB)</string>
+    <string name="loading_screen_unsupported_format">Formato não suportado. Use um arquivo de imagem ou vídeo</string>
+    <string name="loading_screen_file_error">Não foi possível carregar o arquivo selecionado</string>
 </resources>

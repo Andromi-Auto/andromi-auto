@@ -419,4 +419,17 @@
     <string name="wait_for_wifi_description">При запуске ждать подключения WiFi перед запуском WiFi Direct. Полезно, если вашему головному устройству требуется несколько секунд для подключения к WiFi после включения.</string>
     <string name="wait_for_wifi_timeout">Тайм-аут ожидания WiFi</string>
     <string name="wireless_24ghz_warning">Примечание: Беспроводной Android Auto на устройствах 2,4 ГГц может приводить к задержкам, рывкам и разрывам соединения. Если вы столкнулись с проблемами, проверьте работу через USB, чтобы подтвердить ограничение сети.</string>
+    <!-- Custom loading screen -->
+    <string name="loading_screen">Экран загрузки</string>
+    <string name="loading_screen_default">По умолчанию</string>
+    <string name="loading_screen_custom">Пользовательский</string>
+    <string name="loading_screen_dialog_title">Пользовательский экран загрузки</string>
+    <string name="loading_screen_select_file">Выбрать файл</string>
+    <string name="loading_screen_remove">Удалить</string>
+    <string name="loading_screen_recommendation">Рекомендуемое разрешение: %1 00d7 %2</string>
+    <string name="loading_screen_supported_formats">Поддерживаемые: Изображения (PNG, JPG, BMP, WEBP, GIF) \u2022 Видео (MP4, MKV, WEBM, 3GP) \u2022 Макс: 10 МБ</string>
+    <string name="loading_screen_no_media">Пользовательский контент не выбран</string>
+    <string name="loading_screen_file_too_large">Файл слишком большой (макс. 10 МБ)</string>
+    <string name="loading_screen_unsupported_format">Неподдерживаемый формат. Используйте файл изображения или видео</string>
+    <string name="loading_screen_file_error">Не удалось загрузить выбранный файл</string>
 </resources>

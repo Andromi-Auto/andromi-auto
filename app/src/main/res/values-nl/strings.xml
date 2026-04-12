@@ -418,4 +418,17 @@
     <string name="wait_for_wifi_description">Wacht bij het opstarten tot WiFi verbonden is voordat WiFi Direct wordt gestart. Handig als uw headunit een paar seconden nodig heeft om verbinding te maken met WiFi na het opstarten.</string>
     <string name="wait_for_wifi_timeout">WiFi wachttijd</string>
     <string name="wireless_24ghz_warning">Opmerking: Draadloze Android Auto op 2,4 GHz-apparaten kan leiden tot vertragingen, haperingen en verbrekingen. Als u problemen ondervindt, test dan via USB om te bevestigen of het een netwerkbeperking is.</string>
+    <!-- Custom loading screen -->
+    <string name="loading_screen">Laadscherm</string>
+    <string name="loading_screen_default">Standaard</string>
+    <string name="loading_screen_custom">Aangepast</string>
+    <string name="loading_screen_dialog_title">Aangepast laadscherm</string>
+    <string name="loading_screen_select_file">Bestand kiezen</string>
+    <string name="loading_screen_remove">Verwijderen</string>
+    <string name="loading_screen_recommendation">Aanbevolen resolutie: %1 00d7 %2</string>
+    <string name="loading_screen_supported_formats">Ondersteund: Afbeeldingen (PNG, JPG, BMP, WEBP, GIF) \u2022 Video (MP4, MKV, WEBM, 3GP) \u2022 Max: 10 MB</string>
+    <string name="loading_screen_no_media">Geen aangepast medium geselecteerd</string>
+    <string name="loading_screen_file_too_large">Bestand is te groot (max 10 MB)</string>
+    <string name="loading_screen_unsupported_format">Niet-ondersteund formaat. Gebruik een afbeelding of videobestand</string>
+    <string name="loading_screen_file_error">Kan het geselecteerde bestand niet laden</string>
 </resources>

@@ -417,4 +417,17 @@
     <string name="wait_for_wifi_description">Indításkor megvárja a WiFi csatlakozást a WiFi Direct elindítása előtt. Hasznos, ha a fejegység néhány másodpercet vesz igénybe a WiFi csatlakozáshoz bekapcsolás után.</string>
     <string name="wait_for_wifi_timeout">WiFi várakozási időkorlát</string>
     <string name="wireless_24ghz_warning">Megjegyzés: A vezeték nélküli Android Auto 2,4 GHz-es eszközökön akadozáshoz, szaggatáshoz és leálláshoz vezethet. Ha problémákat tapasztal, kérjük, tesztelje USB-n keresztül, hogy megerősítse, hálózati korlátozásról van-e szó.</string>
+    <!-- Custom loading screen -->
+    <string name="loading_screen">Betöltő képernyő</string>
+    <string name="loading_screen_default">Alapértelmezett</string>
+    <string name="loading_screen_custom">Egyéni</string>
+    <string name="loading_screen_dialog_title">Egyéni betöltő képernyő</string>
+    <string name="loading_screen_select_file">Fájl kiválasztása</string>
+    <string name="loading_screen_remove">Eltávolítás</string>
+    <string name="loading_screen_recommendation">Ajánlott felbontás: %1 00d7 %2</string>
+    <string name="loading_screen_supported_formats">Támogatott: Képek (PNG, JPG, BMP, WEBP, GIF) \u2022 Videók (MP4, MKV, WEBM, 3GP) \u2022 Max: 10 MB</string>
+    <string name="loading_screen_no_media">Nincs egyéni tartalom kiválasztva</string>
+    <string name="loading_screen_file_too_large">A fájl túl nagy (max 10 MB)</string>
+    <string name="loading_screen_unsupported_format">Nem támogatott formátum. Használjon kép- vagy videófájlt</string>
+    <string name="loading_screen_file_error">A kiválasztott fájl nem tölthető be</string>
 </resources>

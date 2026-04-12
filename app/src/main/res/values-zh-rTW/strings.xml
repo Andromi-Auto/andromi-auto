@@ -418,4 +418,17 @@
     <string name="wait_for_wifi_description">開機時，在啟動 WiFi Direct 之前等待 WiFi 連接。適用於主機開機後需要幾秒才能連上 WiFi 的情況。</string>
     <string name="wait_for_wifi_timeout">WiFi 等待逾時</string>
     <string name="wireless_24ghz_warning">注意：在 2.4GHz 設備上使用無線 Android Auto 可能會導致延遲、卡頓和斷開連接。如果您遇到問題，請透過 USB 進行測試，以確認是否為網絡限制。</string>
+    <!-- Custom loading screen -->
+    <string name="loading_screen">載入畫面</string>
+    <string name="loading_screen_default">預設</string>
+    <string name="loading_screen_custom">自訂</string>
+    <string name="loading_screen_dialog_title">自訂載入畫面</string>
+    <string name="loading_screen_select_file">選擇檔案</string>
+    <string name="loading_screen_remove">移除</string>
+    <string name="loading_screen_recommendation">建議解析度：%1 00d7 %2</string>
+    <string name="loading_screen_supported_formats">支援格式：圖片（PNG、JPG、BMP、WEBP、GIF）\u2022 影片（MP4、MKV、WEBM、3GP）\u2022 最大：10 MB</string>
+    <string name="loading_screen_no_media">未選擇自訂媒體</string>
+    <string name="loading_screen_file_too_large">檔案太大（最大 10 MB）</string>
+    <string name="loading_screen_unsupported_format">不支援的格式。請使用圖片或影片檔案</string>
+    <string name="loading_screen_file_error">無法載入所選檔案</string>
 </resources>

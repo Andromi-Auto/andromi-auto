@@ -400,6 +400,15 @@ class Settings(context: Context) {
         get() = prefs.getInt("navigation-volume-offset", 0)
         set(value) { prefs.edit().putInt("navigation-volume-offset", value).apply() }
 
+    // Custom loading screen
+    var loadingScreenMediaPath: String
+        get() = prefs.getString("loading-screen-media-path", "")!!
+        set(value) { prefs.edit().putString("loading-screen-media-path", value).apply() }
+
+    var loadingScreenMediaType: String
+        get() = prefs.getString("loading-screen-media-type", "")!!
+        set(value) { prefs.edit().putString("loading-screen-media-type", value).apply() }
+
     @SuppressLint("ApplySharedPref")
     fun commit() {
         prefs.edit().commit()

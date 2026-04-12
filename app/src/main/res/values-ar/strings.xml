@@ -418,4 +418,17 @@
     <string name="wait_for_wifi_description">عند بدء التشغيل، انتظر اتصال WiFi قبل بدء WiFi Direct. مفيد إذا كان جهازك يحتاج بضع ثوانٍ للاتصال بشبكة WiFi بعد التشغيل.</string>
     <string name="wait_for_wifi_timeout">مهلة انتظار WiFi</string>
     <string name="wireless_24ghz_warning">ملاحظة: يمكن أن يؤدي استخدام Android Auto اللاسلكي على أجهزة 2.4 جيجا هرتز إلى حدوث تأخير وتقطع وانقطاع في الاتصال. إذا واجهت مشكلات، يرجى الاختبار عبر USB للتأكد مما ifا كان ذلك بسبب قيود الشبكة.</string>
+    <!-- Custom loading screen -->
+    <string name="loading_screen">شاشة التحميل</string>
+    <string name="loading_screen_default">افتراضي</string>
+    <string name="loading_screen_custom">مخصص</string>
+    <string name="loading_screen_dialog_title">شاشة تحميل مخصصة</string>
+    <string name="loading_screen_select_file">اختر ملفًا</string>
+    <string name="loading_screen_remove">إزالة</string>
+    <string name="loading_screen_recommendation">الدقة الموصى بها: %1 00d7 %2</string>
+    <string name="loading_screen_supported_formats">المدعومة: صور (PNG، JPG، BMP، WEBP، GIF) \u2022 فيديو (MP4، MKV، WEBM، 3GP) \u2022 الحد الأقصى: 10 ميغابايت</string>
+    <string name="loading_screen_no_media">لم يتم تحديد وسائط مخصصة</string>
+    <string name="loading_screen_file_too_large">الملف كبير جدًا (الحد الأقصى 10 ميغابايت)</string>
+    <string name="loading_screen_unsupported_format">صيغة غير مدعومة. استخدم ملف صورة أو فيديو</string>
+    <string name="loading_screen_file_error">تعذر تحميل الملف المحدد</string>
 </resources>

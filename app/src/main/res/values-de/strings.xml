@@ -422,4 +422,17 @@
     <string name="wireless_24ghz_warning">Hinweis: Kabelloses Android Auto auf 2,4-GHz-Geräten kann zu Verzögerungen, Rucklern und Verbindungsabbrüchen führen. Bei Problemen testen Sie bitte die USB-Verbindung, um festzustellen, ob es sich um eine Netzwerkbeschränkung handelt.</string>
     <string name="fake_speed_title">Video-Sperre deaktivieren (Fake Speed)</string>
     <string name="fake_speed_description">Meldet dem Handy eine konstante niedrige Geschwindigkeit (0,5 m/s), um die Video-Sperre während der Fahrt zu umgehen. Mit Vorsicht verwenden.</string>
+    <!-- Custom loading screen -->
+    <string name="loading_screen">Ladebildschirm</string>
+    <string name="loading_screen_default">Standard</string>
+    <string name="loading_screen_custom">Benutzerdefiniert</string>
+    <string name="loading_screen_dialog_title">Benutzerdefinierter Ladebildschirm</string>
+    <string name="loading_screen_select_file">Datei auswählen</string>
+    <string name="loading_screen_remove">Entfernen</string>
+    <string name="loading_screen_recommendation">Empfohlene Auflösung: %1 00d7 %2</string>
+    <string name="loading_screen_supported_formats">Unterstützt: Bilder (PNG, JPG, BMP, WEBP, GIF) \u2022 Videos (MP4, MKV, WEBM, 3GP) \u2022 Max: 10 MB</string>
+    <string name="loading_screen_no_media">Kein benutzerdefiniertes Medium ausgewählt</string>
+    <string name="loading_screen_file_too_large">Datei ist zu groß (max. 10 MB)</string>
+    <string name="loading_screen_unsupported_format">Format nicht unterstützt. Verwenden Sie eine Bild- oder Videodatei</string>
+    <string name="loading_screen_file_error">Die ausgewählte Datei konnte nicht geladen werden</string>
 </resources>

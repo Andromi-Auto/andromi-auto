@@ -419,4 +419,17 @@
     <string name="wait_for_wifi_description">La pornire, așteaptă conectarea WiFi înainte de a porni WiFi Direct. Util dacă headunit-ul tău are nevoie de câteva secunde pentru a se conecta la WiFi după pornire.</string>
     <string name="wait_for_wifi_timeout">Limita de așteptare WiFi</string>
     <string name="wireless_24ghz_warning">Notă: Android Auto wireless pe dispozitive de 2,4 GHz poate duce la întârzieri, sacadări și deconectări. Dacă întâmpinați probleme, vă rugăm să testați prin USB pentru a confirma dacă este o limitare a rețelei.</string>
+    <!-- Custom loading screen -->
+    <string name="loading_screen">Ecran de încărcare</string>
+    <string name="loading_screen_default">Implicit</string>
+    <string name="loading_screen_custom">Personalizat</string>
+    <string name="loading_screen_dialog_title">Ecran de încărcare personalizat</string>
+    <string name="loading_screen_select_file">Selectează fișier</string>
+    <string name="loading_screen_remove">Elimină</string>
+    <string name="loading_screen_recommendation">Rezoluție recomandată: %1 00d7 %2</string>
+    <string name="loading_screen_supported_formats">Suportate: Imagini (PNG, JPG, BMP, WEBP, GIF) \u2022 Video (MP4, MKV, WEBM, 3GP) \u2022 Max: 10 MB</string>
+    <string name="loading_screen_no_media">Niciun conținut personalizat selectat</string>
+    <string name="loading_screen_file_too_large">Fișierul este prea mare (max 10 MB)</string>
+    <string name="loading_screen_unsupported_format">Format neacceptat. Utilizați un fișier imagine sau video</string>
+    <string name="loading_screen_file_error">Nu s-a putut încărca fișierul selectat</string>
 </resources>

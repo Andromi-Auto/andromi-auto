@@ -45,7 +45,13 @@ import com.andrerinas.headunitrevived.utils.HeadUnitScreenConfig
 import com.andrerinas.headunitrevived.utils.SystemUI
 import android.content.IntentFilter
 import com.andrerinas.headunitrevived.view.ProjectionViewScaler
+import android.animation.ObjectAnimator
+import android.animation.PropertyValuesHolder
+import android.widget.ImageView
+import android.widget.VideoView
+import com.bumptech.glide.Glide
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import java.io.File
 
 class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, VideoDimensionsListener {
 
@@ -70,7 +76,14 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
                 // If the decoder already rendered something, hide the overlay immediately
                 if (videoDecoder.lastFrameRenderedMs > 0) {
                     AppLog.i("Watchdog: Decoder is already rendering frames. Hiding overlay.")
-                    loadingOverlay.visibility = View.GONE
+                    loadingOverlay.animate()
+                        .alpha(0f)
+                        .setDuration(300)
+                        .withEndAction {
+                            loadingOverlay.visibility = View.GONE
+                            loadingOverlay.alpha = 1f
+                            stopCustomLoadingMedia()
+                        }.start()
                     overlayState = OverlayState.HIDDEN
                     return
                 }
@@ -337,13 +350,24 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         // Ensure loading overlay is on top of everything
         loadingOverlay?.bringToFront()
 
+        // Set up custom loading screen if configured
+        setupCustomLoadingScreen()
+
         findViewById<Button>(R.id.disconnect_button)?.setOnClickListener {
             commManager.disconnect()
         }
 
         videoDecoder.onFirstFrameListener = {
             runOnUiThread {
-                loadingOverlay?.visibility = View.GONE
+                // Fade out the overlay for a smooth transition
+                loadingOverlay?.animate()
+                    ?.alpha(0f)
+                    ?.setDuration(300)
+                    ?.withEndAction {
+                        loadingOverlay?.visibility = View.GONE
+                        loadingOverlay?.alpha = 1f // Reset alpha for potential reconnecting overlay
+                        stopCustomLoadingMedia()
+                    }?.start()
                 overlayState = OverlayState.HIDDEN
 
                 // Show one-time gesture hint
@@ -403,6 +427,14 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         AppLog.i("Showing reconnecting overlay")
         overlayState = OverlayState.RECONNECTING
         val overlay = findViewById<View>(R.id.loading_overlay) ?: return
+
+        // Ensure default content is shown, custom media is hidden
+        findViewById<View>(R.id.loading_default_content)?.visibility = View.VISIBLE
+        findViewById<View>(R.id.loading_custom_image)?.visibility = View.GONE
+        stopCustomLoadingMedia()
+        findViewById<View>(R.id.loading_custom_video)?.visibility = View.GONE
+        overlay.setBackgroundColor(Color.parseColor("#CC000000"))
+
         val title = findViewById<TextView>(R.id.overlay_text)
         val detail = findViewById<TextView>(R.id.overlay_detail)
         val button = findViewById<Button>(R.id.disconnect_button)
@@ -419,9 +451,96 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         val overlay = findViewById<View>(R.id.loading_overlay) ?: return
         val detail = findViewById<TextView>(R.id.overlay_detail)
         val button = findViewById<Button>(R.id.disconnect_button)
-        overlay.visibility = View.GONE
-        detail?.visibility = View.GONE
-        button?.visibility = View.GONE
+        overlay.animate()
+            .alpha(0f)
+            .setDuration(300)
+            .withEndAction {
+                overlay.visibility = View.GONE
+                overlay.alpha = 1f
+                detail?.visibility = View.GONE
+                button?.visibility = View.GONE
+                stopCustomLoadingMedia()
+            }.start()
+    }
+
+    private fun setupCustomLoadingScreen() {
+        val mediaPath = settings.loadingScreenMediaPath
+        val mediaType = settings.loadingScreenMediaType
+        if (mediaPath.isEmpty() || mediaType.isEmpty()) return
+
+        val file = File(mediaPath)
+        if (!file.exists()) {
+            // File was deleted externally; clear the setting
+            settings.loadingScreenMediaPath = ""
+            settings.loadingScreenMediaType = ""
+            return
+        }
+
+        val defaultContent = findViewById<View>(R.id.loading_default_content)
+        val customImage = findViewById<ImageView>(R.id.loading_custom_image)
+        val customVideo = findViewById<VideoView>(R.id.loading_custom_video)
+        val overlay = findViewById<View>(R.id.loading_overlay)
+
+        // Hide default content, make overlay fully opaque
+        defaultContent?.visibility = View.GONE
+        overlay?.setBackgroundColor(Color.BLACK)
+
+        try {
+            when (mediaType) {
+                "image" -> {
+                    customImage?.visibility = View.VISIBLE
+                    Glide.with(this).load(file).into(customImage!!)
+                    // Ken Burns effect: subtle slow zoom for static images
+                    customImage.let {
+                        val scaleAnim = ObjectAnimator.ofPropertyValuesHolder(
+                            it,
+                            PropertyValuesHolder.ofFloat("scaleX", 1.0f, 1.05f),
+                            PropertyValuesHolder.ofFloat("scaleY", 1.0f, 1.05f)
+                        )
+                        scaleAnim.duration = 8000
+                        scaleAnim.repeatMode = ObjectAnimator.REVERSE
+                        scaleAnim.repeatCount = ObjectAnimator.INFINITE
+                        scaleAnim.start()
+                    }
+                }
+                "gif" -> {
+                    customImage?.visibility = View.VISIBLE
+                    Glide.with(this).asGif().load(file).into(customImage!!)
+                }
+                "video" -> {
+                    customVideo?.visibility = View.VISIBLE
+                    customVideo?.setVideoPath(file.absolutePath)
+                    customVideo?.setOnPreparedListener { mp ->
+                        mp.isLooping = true
+                        mp.setVolume(0f, 0f)
+                    }
+                    customVideo?.setOnErrorListener { _, _, _ ->
+                        AppLog.e("Error playing custom loading video")
+                        fallbackToDefaultOverlay()
+                        true
+                    }
+                    customVideo?.start()
+                }
+                else -> return
+            }
+        } catch (e: Exception) {
+            AppLog.e("Failed to load custom loading screen: ${e.message}")
+            fallbackToDefaultOverlay()
+        }
+    }
+
+    private fun fallbackToDefaultOverlay() {
+        findViewById<View>(R.id.loading_custom_image)?.visibility = View.GONE
+        stopCustomLoadingMedia()
+        findViewById<View>(R.id.loading_custom_video)?.visibility = View.GONE
+        findViewById<View>(R.id.loading_default_content)?.visibility = View.VISIBLE
+        findViewById<View>(R.id.loading_overlay)?.setBackgroundColor(Color.parseColor("#CC000000"))
+    }
+
+    private fun stopCustomLoadingMedia() {
+        findViewById<VideoView>(R.id.loading_custom_video)?.let {
+            try { if (it.isPlaying) it.stopPlayback() } catch (_: Exception) {}
+        }
     }
 
     private fun setFullscreen() {
@@ -511,6 +630,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         if (isInPictureInPictureMode) {
             // Hide UI elements during PiP (like FPS counter, loading overlay)
             findViewById<View>(R.id.loading_overlay)?.visibility = View.GONE
+            stopCustomLoadingMedia()
             fpsTextView?.visibility = View.GONE
         } else {
             // Restore UI if needed

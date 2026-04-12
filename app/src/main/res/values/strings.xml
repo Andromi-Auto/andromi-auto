@@ -441,4 +441,18 @@
     <string name="exit_dialog_pip">Picture-in-Picture</string>
     <string name="exit_dialog_background">Move to Background</string>
     <string name="gesture_hint">Tip: Swipe from the left edge with 2 fingers to open the exit menu.</string>
+
+    <!-- Custom loading screen -->
+    <string name="loading_screen">Loading screen</string>
+    <string name="loading_screen_default">Default</string>
+    <string name="loading_screen_custom">Custom</string>
+    <string name="loading_screen_dialog_title">Custom loading screen</string>
+    <string name="loading_screen_select_file">Select file</string>
+    <string name="loading_screen_remove">Remove</string>
+    <string name="loading_screen_recommendation">Recommended resolution: %1$d \u00d7 %2$d</string>
+    <string name="loading_screen_supported_formats">Supported: Images (PNG, JPG, BMP, WEBP, GIF) \u2022 Videos (MP4, MKV, WEBM, 3GP) \u2022 Max: 10 MB</string>
+    <string name="loading_screen_no_media">No custom media selected</string>
+    <string name="loading_screen_file_too_large">File is too large (max 10 MB)</string>
+    <string name="loading_screen_unsupported_format">Unsupported format. Use an image or video file</string>
+    <string name="loading_screen_file_error">Could not load the selected file</string>
 </resources>
