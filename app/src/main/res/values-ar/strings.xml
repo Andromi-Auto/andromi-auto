@@ -435,4 +435,5 @@
     <string name="loading_screen_tap_preview">انقر للمعاينة</string>
     <string name="loading_screen_tap_to_close">انقر في أي مكان للإغلاق</string>
     <string name="loading_screen_keep_aspect_ratio">الحفاظ على نسبة العرض إلى الارتفاع</string>
+    <string name="loading_screen_recommended_aspect_ratio">نسبة العرض إلى الارتفاع الموصى بها: %1$d:%2$d</string>
 </resources>

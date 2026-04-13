@@ -439,4 +439,5 @@
     <string name="loading_screen_tap_preview">Tippen für Vorschau</string>
     <string name="loading_screen_tap_to_close">Tippen Sie irgendwo, um zu schließen</string>
     <string name="loading_screen_keep_aspect_ratio">Seitenverhältnis beibehalten</string>
+    <string name="loading_screen_recommended_aspect_ratio">Empfohlenes Seitenverhältnis: %1$d:%2$d</string>
 </resources>

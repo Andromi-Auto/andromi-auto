@@ -72,28 +72,30 @@
                         android:scaleType="centerCrop"
                         android:visibility="gone" />
 
-                    <!-- Status text overlay on preview -->
+                    <!-- Status text overlay on preview (centered, matching real overlay) -->
                     <LinearLayout
                         android:id="@+id/preview_status_text"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
                         android:visibility="gone">
 
                         <ProgressBar
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
+                            android:layout_width="18dp"
+                            android:layout_height="18dp"
                             android:indeterminate="true" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="10dp"
+                            android:layout_marginStart="8dp"
                             android:text="@string/android_auto_starting"
                             android:textColor="#CCFFFFFF"
-                            android:textSize="16sp" />
+                            android:textSize="13sp"
+                            android:shadowColor="#AA000000"
+                            android:shadowDx="1"
+                            android:shadowDy="1"
+                            android:shadowRadius="3" />
 
                     </LinearLayout>
 
@@ -105,6 +107,14 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
+                    android:textColor="#AAAAAA"
+                    android:textSize="13sp" />
+
+                <TextView
+                    android:id="@+id/aspect_ratio_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
                     android:textColor="#AAAAAA"
                     android:textSize="13sp" />
 

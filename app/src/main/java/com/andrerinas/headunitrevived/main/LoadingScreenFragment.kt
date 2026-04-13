@@ -95,11 +95,19 @@ class LoadingScreenFragment : Fragment() {
             } catch (_: Exception) {}
         }
 
-        // Resolution recommendation
+        // Resolution and aspect ratio recommendation
         try {
             val dm = resources.displayMetrics
+            val w = dm.widthPixels
+            val h = dm.heightPixels
             view.findViewById<TextView>(R.id.recommendation_text)?.text =
-                getString(R.string.loading_screen_recommendation, dm.widthPixels, dm.heightPixels)
+                getString(R.string.loading_screen_recommendation, w, h)
+
+            val gcd = gcd(w, h)
+            val ratioW = w / gcd
+            val ratioH = h / gcd
+            view.findViewById<TextView>(R.id.aspect_ratio_text)?.text =
+                getString(R.string.loading_screen_recommended_aspect_ratio, ratioW, ratioH)
         } catch (_: Exception) {}
 
         // Toolbar
@@ -432,4 +440,6 @@ class LoadingScreenFragment : Fragment() {
             fullscreenMediaPlayer = null
         } catch (_: Exception) {}
     }
+
+    private fun gcd(a: Int, b: Int): Int = if (b == 0) a else gcd(b, a % b)
 }
