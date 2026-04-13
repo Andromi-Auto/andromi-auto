@@ -431,9 +431,10 @@
     <string name="loading_screen_file_too_large">Soubor je příliš velký (max 10 MB)</string>
     <string name="loading_screen_unsupported_format">Nepodporovaný formát. Použijte soubor obrázku nebo videa</string>
     <string name="loading_screen_file_error">Nepodařilo se načíst vybraný soubor</string>
-    <string name="loading_screen_show_text">Zobrazit text "Android Auto se spouští"</string>
+    <string name="loading_screen_show_text">Zobrazit text \"Android Auto se spouští\"</string>
     <string name="loading_screen_tap_preview">Klepněte pro náhled</string>
     <string name="loading_screen_tap_to_close">Klepněte kamkoli pro zavření</string>
     <string name="loading_screen_keep_aspect_ratio">Zachovat poměr stran</string>
     <string name="loading_screen_recommended_aspect_ratio">Doporučený poměr stran: %1$d:%2$d</string>
+    <string name="loading_screen_tap_fullscreen_hint">Klepněte na náhled pro zobrazení na celou obrazovku</string>
 </resources>

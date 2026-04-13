@@ -81,20 +81,6 @@ class LoadingScreenFragment : Fragment() {
         fullscreenImage = view.findViewById(R.id.fullscreen_image)
         fullscreenStatusText = view.findViewById(R.id.fullscreen_status_text)
 
-        // Preview height: match device aspect ratio
-        previewArea?.post {
-            try {
-                val width = previewArea?.width ?: return@post
-                if (width > 0) {
-                    val dm = resources.displayMetrics
-                    val ratio = dm.heightPixels.toFloat() / dm.widthPixels.toFloat()
-                    val height = (width * ratio).toInt().coerceIn(120, 600)
-                    previewArea?.layoutParams?.height = height
-                    previewArea?.requestLayout()
-                }
-            } catch (_: Exception) {}
-        }
-
         // Resolution and aspect ratio recommendation
         try {
             val dm = resources.displayMetrics
@@ -195,16 +181,20 @@ class LoadingScreenFragment : Fragment() {
         val file = if (path.isNotEmpty()) File(path) else null
         val hasMedia = file != null && file.exists() && type.isNotEmpty()
 
+        val fullscreenHint = view?.findViewById<View>(R.id.fullscreen_hint)
+
         if (hasMedia) {
             previewPlaceholder?.visibility = View.GONE
             toggleContainer?.visibility = View.VISIBLE
             btnRemove?.visibility = View.VISIBLE
+            fullscreenHint?.visibility = View.VISIBLE
             loadImagePreview(path, type)
         } else {
             previewPlaceholder?.visibility = View.VISIBLE
             previewImage?.visibility = View.GONE
             toggleContainer?.visibility = View.GONE
             btnRemove?.visibility = View.GONE
+            fullscreenHint?.visibility = View.GONE
             if (path.isNotEmpty()) {
                 settings.loadingScreenMediaPath = ""
                 settings.loadingScreenMediaType = ""

@@ -463,4 +463,5 @@
     <string name="loading_screen_tap_to_close">Tap anywhere to close</string>
     <string name="loading_screen_keep_aspect_ratio">Keep aspect ratio</string>
     <string name="loading_screen_recommended_aspect_ratio">Recommended aspect ratio: %1$d:%2$d</string>
+    <string name="loading_screen_tap_fullscreen_hint">Tap the preview to see it fullscreen</string>
 </resources>

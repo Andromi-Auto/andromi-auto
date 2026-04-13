@@ -23,8 +23,7 @@
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"
-            android:fillViewport="true">
+            android:layout_weight="1">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -32,11 +31,36 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
-                <!-- Preview area -->
+                <!-- Info texts (always visible, before preview) -->
+                <TextView
+                    android:id="@+id/recommendation_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="#AAAAAA"
+                    android:textSize="13sp" />
+
+                <TextView
+                    android:id="@+id/aspect_ratio_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:textColor="#AAAAAA"
+                    android:textSize="13sp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="@string/loading_screen_supported_formats"
+                    android:textColor="#AAAAAA"
+                    android:textSize="13sp" />
+
+                <!-- Preview area (fixed 200dp, not recalculated) -->
                 <FrameLayout
                     android:id="@+id/preview_area"
                     android:layout_width="match_parent"
                     android:layout_height="200dp"
+                    android:layout_marginTop="12dp"
                     android:background="#FF000000">
 
                     <LinearLayout
@@ -55,14 +79,6 @@
                             android:textSize="14sp"
                             android:gravity="center" />
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
-                            android:text="@string/loading_screen_tap_preview"
-                            android:textColor="#44FFFFFF"
-                            android:textSize="12sp" />
-
                     </LinearLayout>
 
                     <ImageView
@@ -72,7 +88,7 @@
                         android:scaleType="centerCrop"
                         android:visibility="gone" />
 
-                    <!-- Status text overlay on preview (centered, matching real overlay) -->
+                    <!-- Status text overlay on preview (centered) -->
                     <LinearLayout
                         android:id="@+id/preview_status_text"
                         android:layout_width="match_parent"
@@ -101,37 +117,24 @@
 
                 </FrameLayout>
 
-                <!-- Info -->
+                <!-- Tap to fullscreen hint -->
                 <TextView
-                    android:id="@+id/recommendation_text"
+                    android:id="@+id/fullscreen_hint"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:textColor="#AAAAAA"
-                    android:textSize="13sp" />
-
-                <TextView
-                    android:id="@+id/aspect_ratio_text"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:textColor="#AAAAAA"
-                    android:textSize="13sp" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:text="@string/loading_screen_supported_formats"
-                    android:textColor="#AAAAAA"
-                    android:textSize="13sp" />
+                    android:layout_marginTop="6dp"
+                    android:text="@string/loading_screen_tap_fullscreen_hint"
+                    android:textColor="#777777"
+                    android:textSize="12sp"
+                    android:gravity="center"
+                    android:visibility="gone" />
 
                 <!-- Toggles -->
                 <LinearLayout
                     android:id="@+id/toggle_container"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
+                    android:layout_marginTop="12dp"
                     android:orientation="vertical"
                     android:visibility="gone">
 
@@ -183,12 +186,12 @@
 
                 </LinearLayout>
 
-                <!-- Buttons (max width for landscape) -->
+                <!-- Buttons -->
                 <Button
                     android:id="@+id/btn_select_file"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
+                    android:layout_marginTop="12dp"
                     android:maxWidth="400dp"
                     android:layout_gravity="center_horizontal"
                     android:text="@string/loading_screen_select_file" />
@@ -229,11 +232,9 @@
 
         <LinearLayout
             android:id="@+id/fullscreen_status_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
             android:visibility="gone">
 
             <ProgressBar
@@ -247,7 +248,11 @@
                 android:layout_marginStart="12dp"
                 android:text="@string/android_auto_starting"
                 android:textColor="#CCFFFFFF"
-                android:textSize="22sp" />
+                android:textSize="22sp"
+                android:shadowColor="#AA000000"
+                android:shadowDx="1"
+                android:shadowDy="1"
+                android:shadowRadius="4" />
 
         </LinearLayout>
 
