@@ -432,4 +432,7 @@
     <string name="loading_screen_file_too_large">ファイルが大きすぎます（最大 10 MB）</string>
     <string name="loading_screen_unsupported_format">非対応の形式です。画像または動画ファイルを使用してください</string>
     <string name="loading_screen_file_error">選択したファイルを読み込めませんでした</string>
+    <string name="loading_screen_show_text">「Android Autoは起動中です」テキストを表示</string>
+    <string name="loading_screen_tap_preview">タップでプレビュー</string>
+    <string name="loading_screen_tap_to_close">どこでもタップして閉じる</string>
 </resources>

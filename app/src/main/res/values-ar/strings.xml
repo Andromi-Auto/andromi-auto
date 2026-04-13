@@ -431,4 +431,7 @@
     <string name="loading_screen_file_too_large">الملف كبير جدًا (الحد الأقصى 10 ميغابايت)</string>
     <string name="loading_screen_unsupported_format">صيغة غير مدعومة. استخدم ملف صورة أو فيديو</string>
     <string name="loading_screen_file_error">تعذر تحميل الملف المحدد</string>
+    <string name="loading_screen_show_text">إظهار نص "جار تشغيل Android Auto"</string>
+    <string name="loading_screen_tap_preview">انقر للمعاينة</string>
+    <string name="loading_screen_tap_to_close">انقر في أي مكان للإغلاق</string>
 </resources>

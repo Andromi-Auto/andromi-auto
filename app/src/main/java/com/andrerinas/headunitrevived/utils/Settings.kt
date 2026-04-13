@@ -420,6 +420,10 @@ class Settings(context: Context) {
         get() = prefs.getString("loading-screen-media-type", "")!!
         set(value) { prefs.edit().putString("loading-screen-media-type", value).apply() }
 
+    var loadingScreenShowText: Boolean
+        get() = prefs.getBoolean("loading-screen-show-text", false)
+        set(value) { prefs.edit().putBoolean("loading-screen-show-text", value).apply() }
+
     @SuppressLint("ApplySharedPref")
     fun commit() {
         prefs.edit().commit()

@@ -432,4 +432,7 @@
     <string name="loading_screen_file_too_large">Файл завеликий (макс. 10 МБ)</string>
     <string name="loading_screen_unsupported_format">Формат не підтримується. Використовуйте файл зображення або відео</string>
     <string name="loading_screen_file_error">Не вдалося завантажити вибраний файл</string>
+    <string name="loading_screen_show_text">Показувати текст "Запуск Android Auto"</string>
+    <string name="loading_screen_tap_preview">Натисніть для попереднього перегляду</string>
+    <string name="loading_screen_tap_to_close">Натисніть будь-де, щоб закрити</string>
 </resources>

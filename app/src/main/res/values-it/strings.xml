@@ -449,4 +449,7 @@
     <string name="loading_screen_file_too_large">File troppo grande (max 10 MB)</string>
     <string name="loading_screen_unsupported_format">Formato non supportato. Usa un file immagine o video</string>
     <string name="loading_screen_file_error">Impossibile caricare il file selezionato</string>
+    <string name="loading_screen_show_text">Mostra testo "Android Auto si sta avviando"</string>
+    <string name="loading_screen_tap_preview">Tocca per anteprima</string>
+    <string name="loading_screen_tap_to_close">Tocca ovunque per chiudere</string>
 </resources>

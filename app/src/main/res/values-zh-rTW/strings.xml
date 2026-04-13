@@ -431,4 +431,7 @@
     <string name="loading_screen_file_too_large">檔案太大（最大 10 MB）</string>
     <string name="loading_screen_unsupported_format">不支援的格式。請使用圖片或影片檔案</string>
     <string name="loading_screen_file_error">無法載入所選檔案</string>
+    <string name="loading_screen_show_text">顯示「Android Auto 啟動中」文字</string>
+    <string name="loading_screen_tap_preview">點擊全螢幕預覽</string>
+    <string name="loading_screen_tap_to_close">點擊任意位置關閉</string>
 </resources>

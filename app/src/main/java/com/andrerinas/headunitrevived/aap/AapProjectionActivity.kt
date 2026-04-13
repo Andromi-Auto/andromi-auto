@@ -481,8 +481,14 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         val customVideo = findViewById<VideoView>(R.id.loading_custom_video)
         val overlay = findViewById<View>(R.id.loading_overlay)
 
-        // Hide default content, make overlay fully opaque
-        defaultContent?.visibility = View.GONE
+        // Hide default content unless user wants status text shown
+        if (settings.loadingScreenShowText) {
+            // Keep the default content visible but remove the ProgressBar background
+            // so text overlays on top of the custom media
+            defaultContent?.setBackgroundColor(Color.TRANSPARENT)
+        } else {
+            defaultContent?.visibility = View.GONE
+        }
         overlay?.setBackgroundColor(Color.BLACK)
 
         try {

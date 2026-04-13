@@ -26,17 +26,6 @@ import com.andrerinas.headunitrevived.BuildConfig
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import android.animation.ObjectAnimator
-import android.animation.PropertyValuesHolder
-import android.net.Uri
-import android.widget.FrameLayout
-import android.widget.ImageView
-import android.widget.VideoView
-import android.widget.TextView
-import com.andrerinas.headunitrevived.utils.PickMediaContract
-import com.andrerinas.headunitrevived.utils.AppLog
-import com.bumptech.glide.Glide
-import java.io.File
 
 class SettingsFragment : Fragment() {
     private lateinit var settings: Settings
@@ -85,15 +74,6 @@ class SettingsFragment : Fragment() {
     private var pendingMediaVolumeOffset: Int? = null
     private var pendingAssistantVolumeOffset: Int? = null
     private var pendingNavigationVolumeOffset: Int? = null
-
-    // Custom loading screen
-    private var pendingLoadingScreenPath: String? = null
-    private var pendingLoadingScreenType: String? = null
-    private var loadingScreenDialog: androidx.appcompat.app.AlertDialog? = null
-
-    private val loadingScreenPicker = registerForActivityResult(PickMediaContract()) { uri ->
-        uri?.let { handleLoadingScreenFileSelected(it) }
-    }
 
     private var requiresRestart = false
     private var hasChanges = false
@@ -148,8 +128,7 @@ class SettingsFragment : Fragment() {
         pendingAssistantVolumeOffset = settings.assistantVolumeOffset
         pendingNavigationVolumeOffset = settings.navigationVolumeOffset
 
-        pendingLoadingScreenPath = settings.loadingScreenMediaPath
-        pendingLoadingScreenType = settings.loadingScreenMediaType
+        // Loading screen settings are handled in LoadingScreenFragment (saves directly)
 
         // Intercept system back button
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
@@ -274,9 +253,6 @@ class SettingsFragment : Fragment() {
         pendingInsetRight?.let { settings.insetRight = it }
         pendingInsetBottom?.let { settings.insetBottom = it }
 
-        pendingLoadingScreenPath?.let { settings.loadingScreenMediaPath = it }
-        pendingLoadingScreenType?.let { settings.loadingScreenMediaType = it }
-
         settings.commit()
 
         if (requiresRestart) {
@@ -335,9 +311,7 @@ class SettingsFragment : Fragment() {
                         pendingAssistantVolumeOffset != settings.assistantVolumeOffset ||
                         pendingNavigationVolumeOffset != settings.navigationVolumeOffset ||
                         pendingKillOnDisconnect != settings.killOnDisconnect ||
-                        pendingAutoEnableHotspot != settings.autoEnableHotspot ||
-                        pendingLoadingScreenPath != settings.loadingScreenMediaPath ||
-                        pendingLoadingScreenType != settings.loadingScreenMediaType
+                        pendingAutoEnableHotspot != settings.autoEnableHotspot
 
         hasChanges = anyChange
 
@@ -602,10 +576,12 @@ class SettingsFragment : Fragment() {
         items.add(SettingItem.SettingEntry(
             stableId = "loadingScreen",
             nameResId = R.string.loading_screen,
-            value = if (pendingLoadingScreenPath.isNullOrEmpty())
+            value = if (settings.loadingScreenMediaPath.isNullOrEmpty())
                 getString(R.string.loading_screen_default)
             else getString(R.string.loading_screen_custom),
-            onClick = { showLoadingScreenDialog() }
+            onClick = {
+                findNavController().navigate(R.id.action_settingsFragment_to_loadingScreenFragment)
+            }
         ))
 
         items.add(SettingItem.SettingEntry(
@@ -1365,247 +1341,6 @@ class SettingsFragment : Fragment() {
             }
             .setNegativeButton(android.R.string.cancel, null)
             .show()
-    }
-
-    // --- Custom Loading Screen ---
-
-    private fun getLoadingMediaDir(): File {
-        val dir = File(requireContext().filesDir, "loading_media")
-        if (!dir.exists()) dir.mkdirs()
-        return dir
-    }
-
-    private fun showLoadingScreenDialog() {
-        val dialogView = LayoutInflater.from(requireContext())
-            .inflate(R.layout.dialog_loading_screen, null)
-
-        val previewContainer = dialogView.findViewById<FrameLayout>(R.id.preview_container)
-        val previewPlaceholder = dialogView.findViewById<TextView>(R.id.preview_placeholder)
-        val previewImage = dialogView.findViewById<ImageView>(R.id.preview_image)
-        val previewVideo = dialogView.findViewById<VideoView>(R.id.preview_video)
-        val recommendationText = dialogView.findViewById<TextView>(R.id.recommendation_text)
-        val btnSelect = dialogView.findViewById<android.widget.Button>(R.id.btn_select_file)
-        val btnRemove = dialogView.findViewById<android.widget.Button>(R.id.btn_remove_media)
-
-        // Set preview container to device aspect ratio
-        previewContainer.post {
-            val width = previewContainer.width
-            val dm = resources.displayMetrics
-            val aspectRatio = dm.heightPixels.toFloat() / dm.widthPixels.toFloat()
-            val height = (width * aspectRatio).toInt()
-            previewContainer.layoutParams = previewContainer.layoutParams.apply {
-                this.height = height
-            }
-            previewContainer.requestLayout()
-        }
-
-        // Show resolution recommendation based on actual screen
-        val dm = resources.displayMetrics
-        recommendationText.text = getString(R.string.loading_screen_recommendation, dm.widthPixels, dm.heightPixels)
-
-        // Load current preview
-        loadPreview(previewImage, previewVideo, previewPlaceholder)
-
-        // Show remove button if media is set
-        if (!pendingLoadingScreenPath.isNullOrEmpty()) {
-            btnRemove.visibility = View.VISIBLE
-        }
-
-        btnSelect.setOnClickListener {
-            try {
-                loadingScreenPicker.launch(Unit)
-            } catch (e: Exception) {
-                AppLog.e("Failed to launch file picker: ${e.message}")
-                Toast.makeText(context, getString(R.string.loading_screen_file_error), Toast.LENGTH_SHORT).show()
-            }
-        }
-
-        btnRemove.setOnClickListener {
-            // Delete existing file
-            val path = pendingLoadingScreenPath
-            if (!path.isNullOrEmpty()) {
-                try { File(path).delete() } catch (_: Exception) {}
-            }
-            pendingLoadingScreenPath = ""
-            pendingLoadingScreenType = ""
-            checkChanges()
-            updateSettingsList()
-
-            // Reset preview
-            previewImage.visibility = View.GONE
-            Glide.with(this).clear(previewImage)
-            previewVideo.visibility = View.GONE
-            try { if (previewVideo.isPlaying) previewVideo.stopPlayback() } catch (_: Exception) {}
-            previewPlaceholder.visibility = View.VISIBLE
-            btnRemove.visibility = View.GONE
-        }
-
-        loadingScreenDialog = MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
-            .setTitle(R.string.loading_screen_dialog_title)
-            .setView(dialogView)
-            .setPositiveButton(android.R.string.ok) { dialog, _ ->
-                // Stop video preview if playing
-                try { if (previewVideo.isPlaying) previewVideo.stopPlayback() } catch (_: Exception) {}
-                dialog.dismiss()
-            }
-            .setOnDismissListener {
-                try { if (previewVideo.isPlaying) previewVideo.stopPlayback() } catch (_: Exception) {}
-                loadingScreenDialog = null
-            }
-            .show()
-    }
-
-    private fun loadPreview(previewImage: ImageView, previewVideo: VideoView, placeholder: TextView) {
-        val path = pendingLoadingScreenPath
-        val type = pendingLoadingScreenType
-
-        if (path.isNullOrEmpty() || type.isNullOrEmpty()) {
-            placeholder.visibility = View.VISIBLE
-            previewImage.visibility = View.GONE
-            previewVideo.visibility = View.GONE
-            return
-        }
-
-        val file = File(path)
-        if (!file.exists()) {
-            placeholder.visibility = View.VISIBLE
-            previewImage.visibility = View.GONE
-            previewVideo.visibility = View.GONE
-            return
-        }
-
-        placeholder.visibility = View.GONE
-
-        when (type) {
-            "image" -> {
-                previewVideo.visibility = View.GONE
-                previewImage.visibility = View.VISIBLE
-                try {
-                    Glide.with(this).load(file).into(previewImage)
-                } catch (e: Exception) {
-                    AppLog.e("Failed to load preview image: ${e.message}")
-                    placeholder.visibility = View.VISIBLE
-                    previewImage.visibility = View.GONE
-                }
-            }
-            "gif" -> {
-                previewVideo.visibility = View.GONE
-                previewImage.visibility = View.VISIBLE
-                try {
-                    Glide.with(this).asGif().load(file).into(previewImage)
-                } catch (e: Exception) {
-                    AppLog.e("Failed to load preview GIF: ${e.message}")
-                    placeholder.visibility = View.VISIBLE
-                    previewImage.visibility = View.GONE
-                }
-            }
-            "video" -> {
-                previewImage.visibility = View.GONE
-                previewVideo.visibility = View.VISIBLE
-                try {
-                    previewVideo.setVideoPath(file.absolutePath)
-                    previewVideo.setOnPreparedListener { mp ->
-                        mp.isLooping = true
-                        mp.setVolume(0f, 0f)
-                    }
-                    previewVideo.setOnErrorListener { _, _, _ ->
-                        AppLog.e("Error playing preview video")
-                        previewVideo.visibility = View.GONE
-                        placeholder.visibility = View.VISIBLE
-                        true
-                    }
-                    previewVideo.start()
-                } catch (e: Exception) {
-                    AppLog.e("Failed to play preview video: ${e.message}")
-                    previewVideo.visibility = View.GONE
-                    placeholder.visibility = View.VISIBLE
-                }
-            }
-        }
-    }
-
-    private fun handleLoadingScreenFileSelected(uri: Uri) {
-        val ctx = context ?: return
-        val contentResolver = ctx.contentResolver
-
-        // Validate MIME type
-        val mimeType = contentResolver.getType(uri)
-        val mediaType = when {
-            mimeType == null -> null
-            mimeType == "image/gif" -> "gif"
-            mimeType.startsWith("image/") -> "image"
-            mimeType.startsWith("video/") -> "video"
-            else -> null
-        }
-        if (mediaType == null) {
-            Toast.makeText(ctx, getString(R.string.loading_screen_unsupported_format), Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        // Validate file size (10MB limit)
-        val maxSize = 10L * 1024 * 1024
-        try {
-            val size = contentResolver.openFileDescriptor(uri, "r")?.use { it.statSize } ?: -1
-            if (size > maxSize) {
-                Toast.makeText(ctx, getString(R.string.loading_screen_file_too_large), Toast.LENGTH_SHORT).show()
-                return
-            }
-        } catch (e: Exception) {
-            // If we can't check size, proceed anyway (some providers don't support statSize)
-            AppLog.w("Could not check file size: ${e.message}")
-        }
-
-        // Determine file extension
-        val extension = when {
-            mimeType == "image/gif" -> "gif"
-            mimeType == "image/png" -> "png"
-            mimeType == "image/jpeg" -> "jpg"
-            mimeType == "image/bmp" -> "bmp"
-            mimeType == "image/webp" -> "webp"
-            mimeType == "video/mp4" -> "mp4"
-            mimeType == "video/x-matroska" -> "mkv"
-            mimeType == "video/webm" -> "webm"
-            mimeType == "video/3gpp" -> "3gp"
-            mimeType?.startsWith("image/") == true -> "img"
-            mimeType?.startsWith("video/") == true -> "mp4"
-            else -> "bin"
-        }
-
-        // Copy file to internal storage
-        val dir = getLoadingMediaDir()
-        // Delete any previous file
-        dir.listFiles()?.forEach { it.delete() }
-
-        val destFile = File(dir, "loading_screen.$extension")
-        try {
-            contentResolver.openInputStream(uri)?.use { input ->
-                destFile.outputStream().use { output ->
-                    input.copyTo(output)
-                }
-            } ?: throw Exception("Could not open input stream")
-        } catch (e: Exception) {
-            AppLog.e("Failed to copy loading screen file: ${e.message}")
-            Toast.makeText(ctx, getString(R.string.loading_screen_file_error), Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        // Update pending values
-        pendingLoadingScreenPath = destFile.absolutePath
-        pendingLoadingScreenType = mediaType
-        checkChanges()
-        updateSettingsList()
-
-        // Update dialog preview if still showing
-        loadingScreenDialog?.let { dialog ->
-            val dialogView = dialog.window?.decorView ?: return@let
-            val previewImage = dialogView.findViewById<ImageView>(R.id.preview_image) ?: return@let
-            val previewVideo = dialogView.findViewById<VideoView>(R.id.preview_video) ?: return@let
-            val placeholder = dialogView.findViewById<TextView>(R.id.preview_placeholder) ?: return@let
-            val btnRemove = dialogView.findViewById<android.widget.Button>(R.id.btn_remove_media) ?: return@let
-
-            loadPreview(previewImage, previewVideo, placeholder)
-            btnRemove.visibility = View.VISIBLE
-        }
     }
 
     companion object {
