@@ -2,9 +2,12 @@ package com.andrerinas.headunitrevived.main
 
 import android.animation.ObjectAnimator
 import android.animation.PropertyValuesHolder
+import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.SurfaceHolder
+import android.view.SurfaceView
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
@@ -12,7 +15,6 @@ import android.widget.ImageView
 import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
-import android.widget.VideoView
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -29,19 +31,20 @@ class LoadingScreenFragment : Fragment() {
 
     private lateinit var settings: Settings
 
-    private lateinit var previewArea: FrameLayout
-    private lateinit var previewPlaceholder: View
-    private lateinit var previewImage: ImageView
-    private lateinit var previewVideo: VideoView
-    private lateinit var previewStatusText: View
-    private lateinit var toggleContainer: View
-    private lateinit var toggleShowText: Switch
-    private lateinit var btnSelect: View
-    private lateinit var btnRemove: View
-    private lateinit var fullscreenOverlay: FrameLayout
-    private lateinit var fullscreenImage: ImageView
-    private lateinit var fullscreenVideo: VideoView
-    private lateinit var fullscreenStatusText: View
+    private var previewArea: FrameLayout? = null
+    private var previewPlaceholder: View? = null
+    private var previewImage: ImageView? = null
+    private var previewStatusText: View? = null
+    private var toggleContainer: View? = null
+    private var toggleShowText: Switch? = null
+    private var btnRemove: View? = null
+    private var fullscreenOverlay: FrameLayout? = null
+    private var fullscreenImage: ImageView? = null
+    private var fullscreenStatusText: View? = null
+
+    // Video playback managed programmatically (not in XML to avoid inflation issues)
+    private var previewMediaPlayer: MediaPlayer? = null
+    private var fullscreenMediaPlayer: MediaPlayer? = null
 
     private val filePicker = registerForActivityResult(PickMediaContract()) { uri ->
         uri?.let { handleFileSelected(it) }
@@ -54,47 +57,59 @@ class LoadingScreenFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        try {
+            setupViews(view)
+        } catch (e: Exception) {
+            AppLog.e("LoadingScreenFragment setup failed: ${e.message}")
+            Toast.makeText(context, R.string.loading_screen_file_error, Toast.LENGTH_SHORT).show()
+            navigateBack()
+        }
+    }
+
+    private fun setupViews(view: View) {
         settings = App.provide(requireContext()).settings
 
-        // Bind views
         previewArea = view.findViewById(R.id.preview_area)
         previewPlaceholder = view.findViewById(R.id.preview_placeholder)
         previewImage = view.findViewById(R.id.preview_image)
-        previewVideo = view.findViewById(R.id.preview_video)
         previewStatusText = view.findViewById(R.id.preview_status_text)
         toggleContainer = view.findViewById(R.id.toggle_container)
         toggleShowText = view.findViewById(R.id.toggle_show_text)
-        btnSelect = view.findViewById(R.id.btn_select_file)
         btnRemove = view.findViewById(R.id.btn_remove)
         fullscreenOverlay = view.findViewById(R.id.fullscreen_overlay)
         fullscreenImage = view.findViewById(R.id.fullscreen_image)
-        fullscreenVideo = view.findViewById(R.id.fullscreen_video)
         fullscreenStatusText = view.findViewById(R.id.fullscreen_status_text)
 
-        // Set preview height to match screen aspect ratio
-        previewArea.post {
-            val width = previewArea.width
-            if (width > 0) {
-                val dm = resources.displayMetrics
-                val ratio = dm.heightPixels.toFloat() / dm.widthPixels.toFloat()
-                val height = (width * ratio).toInt().coerceIn(120, 600)
-                previewArea.layoutParams = previewArea.layoutParams.apply { this.height = height }
-            }
+        // Preview height: match device aspect ratio
+        previewArea?.post {
+            try {
+                val width = previewArea?.width ?: return@post
+                if (width > 0) {
+                    val dm = resources.displayMetrics
+                    val ratio = dm.heightPixels.toFloat() / dm.widthPixels.toFloat()
+                    val height = (width * ratio).toInt().coerceIn(120, 600)
+                    previewArea?.layoutParams?.height = height
+                    previewArea?.requestLayout()
+                }
+            } catch (_: Exception) {}
         }
 
         // Resolution recommendation
-        val dm = resources.displayMetrics
-        view.findViewById<TextView>(R.id.recommendation_text)?.text =
-            getString(R.string.loading_screen_recommendation, dm.widthPixels, dm.heightPixels)
+        try {
+            val dm = resources.displayMetrics
+            view.findViewById<TextView>(R.id.recommendation_text)?.text =
+                getString(R.string.loading_screen_recommendation, dm.widthPixels, dm.heightPixels)
+        } catch (_: Exception) {}
 
         // Toolbar
-        val toolbar = view.findViewById<MaterialToolbar>(R.id.toolbar)
-        toolbar.setNavigationOnClickListener { navigateBack() }
+        view.findViewById<MaterialToolbar>(R.id.toolbar)?.setNavigationOnClickListener {
+            navigateBack()
+        }
 
         // Back press
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                if (fullscreenOverlay.visibility == View.VISIBLE) {
+                if (fullscreenOverlay?.visibility == View.VISIBLE) {
                     hideFullscreen()
                 } else {
                     navigateBack()
@@ -103,50 +118,45 @@ class LoadingScreenFragment : Fragment() {
         })
 
         // Toggle
-        toggleShowText.isChecked = settings.loadingScreenShowText
-        toggleShowText.setOnCheckedChangeListener { _, isChecked ->
+        toggleShowText?.isChecked = settings.loadingScreenShowText
+        toggleShowText?.setOnCheckedChangeListener { _, isChecked ->
             settings.loadingScreenShowText = isChecked
             updateStatusTextVisibility()
         }
 
         // Select file
-        btnSelect.setOnClickListener {
+        view.findViewById<View>(R.id.btn_select_file)?.setOnClickListener {
             try {
                 filePicker.launch(Unit)
             } catch (e: Exception) {
-                AppLog.e("Failed to launch file picker: ${e.message}")
+                AppLog.e("File picker failed: ${e.message}")
                 Toast.makeText(context, R.string.loading_screen_file_error, Toast.LENGTH_SHORT).show()
             }
         }
 
         // Remove
-        btnRemove.setOnClickListener {
-            removeMedia()
-        }
+        btnRemove?.setOnClickListener { removeMedia() }
 
         // Preview tap → fullscreen
-        previewArea.setOnClickListener {
-            if (!settings.loadingScreenMediaPath.isNullOrEmpty()) {
+        previewArea?.setOnClickListener {
+            if (settings.loadingScreenMediaPath.isNotEmpty()) {
                 showFullscreen()
             }
         }
 
         // Fullscreen tap → close
-        fullscreenOverlay.setOnClickListener {
-            hideFullscreen()
-        }
+        fullscreenOverlay?.setOnClickListener { hideFullscreen() }
 
-        // Load current state
         refreshUI()
     }
 
     override fun onPause() {
         super.onPause()
-        stopAllVideo()
+        releaseMediaPlayers()
     }
 
     override fun onDestroyView() {
-        stopAllVideo()
+        releaseMediaPlayers()
         super.onDestroyView()
     }
 
@@ -155,8 +165,8 @@ class LoadingScreenFragment : Fragment() {
             if (!findNavController().navigateUp()) {
                 requireActivity().finish()
             }
-        } catch (e: Exception) {
-            requireActivity().finish()
+        } catch (_: Exception) {
+            try { requireActivity().finish() } catch (_: Exception) {}
         }
     }
 
@@ -165,79 +175,51 @@ class LoadingScreenFragment : Fragment() {
     private fun refreshUI() {
         val path = settings.loadingScreenMediaPath
         val type = settings.loadingScreenMediaType
-        val hasMedia = !path.isNullOrEmpty() && !type.isNullOrEmpty() && File(path).exists()
+        val file = if (path.isNotEmpty()) File(path) else null
+        val hasMedia = file != null && file.exists() && type.isNotEmpty()
 
         if (hasMedia) {
-            previewPlaceholder.visibility = View.GONE
-            toggleContainer.visibility = View.VISIBLE
-            btnRemove.visibility = View.VISIBLE
-            loadMedia(previewImage, previewVideo, path, type)
+            previewPlaceholder?.visibility = View.GONE
+            toggleContainer?.visibility = View.VISIBLE
+            btnRemove?.visibility = View.VISIBLE
+            loadImagePreview(path, type)
         } else {
-            previewPlaceholder.visibility = View.VISIBLE
-            previewImage.visibility = View.GONE
-            previewVideo.visibility = View.GONE
-            toggleContainer.visibility = View.GONE
-            btnRemove.visibility = View.GONE
-            // Clear stale settings if file doesn't exist
-            if (!path.isNullOrEmpty()) {
+            previewPlaceholder?.visibility = View.VISIBLE
+            previewImage?.visibility = View.GONE
+            toggleContainer?.visibility = View.GONE
+            btnRemove?.visibility = View.GONE
+            if (path.isNotEmpty()) {
                 settings.loadingScreenMediaPath = ""
                 settings.loadingScreenMediaType = ""
             }
         }
-
         updateStatusTextVisibility()
     }
 
     private fun updateStatusTextVisibility() {
-        val hasMedia = !settings.loadingScreenMediaPath.isNullOrEmpty()
+        val hasMedia = settings.loadingScreenMediaPath.isNotEmpty()
         val show = hasMedia && settings.loadingScreenShowText
-        previewStatusText.visibility = if (show) View.VISIBLE else View.GONE
-        fullscreenStatusText.visibility = if (show) View.VISIBLE else View.GONE
+        previewStatusText?.visibility = if (show) View.VISIBLE else View.GONE
+        fullscreenStatusText?.visibility = if (show) View.VISIBLE else View.GONE
     }
 
-    private fun loadMedia(imageView: ImageView, videoView: VideoView, path: String, type: String) {
+    private fun loadImagePreview(path: String, type: String) {
         val file = File(path)
         if (!file.exists()) return
 
-        when (type) {
-            "image" -> {
-                videoView.visibility = View.GONE
-                imageView.visibility = View.VISIBLE
-                try {
-                    Glide.with(this).load(file).into(imageView)
-                } catch (e: Exception) {
-                    AppLog.e("Failed to load image: ${e.message}")
-                }
+        // For all types, show a thumbnail/still in the ImageView
+        previewImage?.visibility = View.VISIBLE
+        try {
+            if (type == "gif") {
+                Glide.with(this).asGif().load(file).into(previewImage!!)
+            } else {
+                // For images AND videos, Glide can generate a thumbnail
+                Glide.with(this).load(file).into(previewImage!!)
             }
-            "gif" -> {
-                videoView.visibility = View.GONE
-                imageView.visibility = View.VISIBLE
-                try {
-                    Glide.with(this).asGif().load(file).into(imageView)
-                } catch (e: Exception) {
-                    AppLog.e("Failed to load GIF: ${e.message}")
-                }
-            }
-            "video" -> {
-                imageView.visibility = View.GONE
-                videoView.visibility = View.VISIBLE
-                try {
-                    videoView.setVideoPath(file.absolutePath)
-                    videoView.setOnPreparedListener { mp ->
-                        mp.isLooping = true
-                        mp.setVolume(0f, 0f)
-                    }
-                    videoView.setOnErrorListener { _, _, _ ->
-                        AppLog.e("Error playing video preview")
-                        videoView.visibility = View.GONE
-                        true
-                    }
-                    videoView.start()
-                } catch (e: Exception) {
-                    AppLog.e("Failed to play video: ${e.message}")
-                    videoView.visibility = View.GONE
-                }
-            }
+        } catch (e: Exception) {
+            AppLog.e("Failed to load preview: ${e.message}")
+            previewImage?.visibility = View.GONE
+            previewPlaceholder?.visibility = View.VISIBLE
         }
     }
 
@@ -247,7 +229,6 @@ class LoadingScreenFragment : Fragment() {
         val ctx = context ?: return
         val contentResolver = ctx.contentResolver
 
-        // Validate MIME type
         val mimeType = contentResolver.getType(uri)
         val mediaType = when {
             mimeType == null -> null
@@ -261,70 +242,59 @@ class LoadingScreenFragment : Fragment() {
             return
         }
 
-        // Validate file size (10MB)
         try {
             val size = contentResolver.openFileDescriptor(uri, "r")?.use { it.statSize } ?: -1
             if (size > 10L * 1024 * 1024) {
                 Toast.makeText(ctx, R.string.loading_screen_file_too_large, Toast.LENGTH_SHORT).show()
                 return
             }
-        } catch (e: Exception) {
-            AppLog.w("Could not check file size: ${e.message}")
-        }
+        } catch (_: Exception) {}
 
-        // Extension from MIME
         val ext = when (mimeType) {
-            "image/gif" -> "gif"
-            "image/png" -> "png"
-            "image/jpeg" -> "jpg"
-            "image/webp" -> "webp"
-            "image/bmp" -> "bmp"
-            "video/mp4" -> "mp4"
-            "video/x-matroska" -> "mkv"
-            "video/webm" -> "webm"
-            "video/3gpp" -> "3gp"
+            "image/gif" -> "gif"; "image/png" -> "png"; "image/jpeg" -> "jpg"
+            "image/webp" -> "webp"; "image/bmp" -> "bmp"
+            "video/mp4" -> "mp4"; "video/x-matroska" -> "mkv"
+            "video/webm" -> "webm"; "video/3gpp" -> "3gp"
             else -> if (mimeType?.startsWith("video/") == true) "mp4" else "img"
         }
 
-        // Copy to internal storage
         val dir = File(ctx.filesDir, "loading_media")
         if (!dir.exists()) dir.mkdirs()
-        dir.listFiles()?.forEach { it.delete() } // Remove previous
+        dir.listFiles()?.forEach { it.delete() }
 
         val destFile = File(dir, "loading_screen.$ext")
         try {
             contentResolver.openInputStream(uri)?.use { input ->
-                destFile.outputStream().use { output ->
-                    input.copyTo(output)
-                }
-            } ?: throw Exception("Could not open input stream")
+                destFile.outputStream().use { output -> input.copyTo(output) }
+            } ?: throw Exception("null input stream")
         } catch (e: Exception) {
-            AppLog.e("Failed to copy file: ${e.message}")
+            AppLog.e("Copy failed: ${e.message}")
             Toast.makeText(ctx, R.string.loading_screen_file_error, Toast.LENGTH_SHORT).show()
             return
         }
 
-        // Save settings
         settings.loadingScreenMediaPath = destFile.absolutePath
         settings.loadingScreenMediaType = mediaType
 
-        // Stop any playing video before refreshing
-        stopAllVideo()
+        releaseMediaPlayers()
+        try { previewImage?.let { Glide.with(this).clear(it) } } catch (_: Exception) {}
         refreshUI()
     }
 
     private fun removeMedia() {
         val path = settings.loadingScreenMediaPath
-        if (!path.isNullOrEmpty()) {
+        if (path.isNotEmpty()) {
             try { File(path).delete() } catch (_: Exception) {}
         }
         settings.loadingScreenMediaPath = ""
         settings.loadingScreenMediaType = ""
         settings.loadingScreenShowText = false
 
-        stopAllVideo()
-        Glide.with(this).clear(previewImage)
-        Glide.with(this).clear(fullscreenImage)
+        releaseMediaPlayers()
+        try {
+            previewImage?.let { Glide.with(this).clear(it) }
+            fullscreenImage?.let { Glide.with(this).clear(it) }
+        } catch (_: Exception) {}
         refreshUI()
     }
 
@@ -333,47 +303,117 @@ class LoadingScreenFragment : Fragment() {
     private fun showFullscreen() {
         val path = settings.loadingScreenMediaPath
         val type = settings.loadingScreenMediaType
-        if (path.isNullOrEmpty() || type.isNullOrEmpty()) return
+        if (path.isEmpty() || type.isEmpty()) return
 
-        fullscreenOverlay.visibility = View.VISIBLE
-        fullscreenOverlay.alpha = 0f
-        fullscreenOverlay.animate().alpha(1f).setDuration(200).start()
+        val file = File(path)
+        if (!file.exists()) return
 
-        loadMedia(fullscreenImage, fullscreenVideo, path, type)
+        fullscreenOverlay?.visibility = View.VISIBLE
+        fullscreenOverlay?.alpha = 0f
+        fullscreenOverlay?.animate()?.alpha(1f)?.setDuration(200)?.start()
 
-        // Ken Burns effect for static images in fullscreen
-        if (type == "image") {
-            val scaleAnim = ObjectAnimator.ofPropertyValuesHolder(
-                fullscreenImage,
-                PropertyValuesHolder.ofFloat("scaleX", 1.0f, 1.05f),
-                PropertyValuesHolder.ofFloat("scaleY", 1.0f, 1.05f)
-            )
-            scaleAnim.duration = 8000
-            scaleAnim.repeatMode = ObjectAnimator.REVERSE
-            scaleAnim.repeatCount = ObjectAnimator.INFINITE
-            scaleAnim.start()
-            fullscreenImage.tag = scaleAnim
+        try {
+            if (type == "video") {
+                // For video fullscreen, use a SurfaceView + MediaPlayer
+                fullscreenImage?.visibility = View.GONE
+                setupFullscreenVideo(file)
+            } else {
+                fullscreenImage?.visibility = View.VISIBLE
+                if (type == "gif") {
+                    Glide.with(this).asGif().load(file).into(fullscreenImage!!)
+                } else {
+                    Glide.with(this).load(file).into(fullscreenImage!!)
+                    // Ken Burns for static images
+                    val anim = ObjectAnimator.ofPropertyValuesHolder(
+                        fullscreenImage!!,
+                        PropertyValuesHolder.ofFloat("scaleX", 1.0f, 1.05f),
+                        PropertyValuesHolder.ofFloat("scaleY", 1.0f, 1.05f)
+                    ).apply {
+                        duration = 8000
+                        repeatMode = ObjectAnimator.REVERSE
+                        repeatCount = ObjectAnimator.INFINITE
+                        start()
+                    }
+                    fullscreenImage?.tag = anim
+                }
+            }
+        } catch (e: Exception) {
+            AppLog.e("Fullscreen preview failed: ${e.message}")
+            hideFullscreen()
         }
 
         updateStatusTextVisibility()
     }
 
-    private fun hideFullscreen() {
-        fullscreenOverlay.animate().alpha(0f).setDuration(200).withEndAction {
-            fullscreenOverlay.visibility = View.GONE
-            // Stop fullscreen video
-            try { if (fullscreenVideo.isPlaying) fullscreenVideo.stopPlayback() } catch (_: Exception) {}
-            fullscreenVideo.visibility = View.GONE
-            // Cancel Ken Burns
-            (fullscreenImage.tag as? ObjectAnimator)?.cancel()
-            fullscreenImage.scaleX = 1f
-            fullscreenImage.scaleY = 1f
-            Glide.with(this@LoadingScreenFragment).clear(fullscreenImage)
-        }.start()
+    private fun setupFullscreenVideo(file: File) {
+        try {
+            val surfaceView = SurfaceView(requireContext())
+            surfaceView.layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT
+            )
+            fullscreenOverlay?.addView(surfaceView, 0)
+
+            val mp = MediaPlayer()
+            fullscreenMediaPlayer = mp
+            mp.setDataSource(file.absolutePath)
+            mp.isLooping = true
+            mp.setVolume(0f, 0f)
+
+            surfaceView.holder.addCallback(object : SurfaceHolder.Callback {
+                override fun surfaceCreated(holder: SurfaceHolder) {
+                    try {
+                        mp.setDisplay(holder)
+                        mp.prepareAsync()
+                    } catch (_: Exception) {}
+                }
+                override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {}
+                override fun surfaceDestroyed(holder: SurfaceHolder) {
+                    try { mp.setDisplay(null) } catch (_: Exception) {}
+                }
+            })
+
+            mp.setOnPreparedListener { it.start() }
+            mp.setOnErrorListener { _, _, _ ->
+                AppLog.e("Fullscreen video error")
+                true
+            }
+        } catch (e: Exception) {
+            AppLog.e("Video setup failed: ${e.message}")
+        }
     }
 
-    private fun stopAllVideo() {
-        try { if (previewVideo.isPlaying) previewVideo.stopPlayback() } catch (_: Exception) {}
-        try { if (fullscreenVideo.isPlaying) fullscreenVideo.stopPlayback() } catch (_: Exception) {}
+    private fun hideFullscreen() {
+        fullscreenOverlay?.animate()?.alpha(0f)?.setDuration(200)?.withEndAction {
+            fullscreenOverlay?.visibility = View.GONE
+            // Release fullscreen media player
+            releaseFullscreenMediaPlayer()
+            // Remove any dynamically added SurfaceView
+            val overlay = fullscreenOverlay ?: return@withEndAction
+            for (i in overlay.childCount - 1 downTo 0) {
+                val child = overlay.getChildAt(i)
+                if (child is SurfaceView) overlay.removeView(child)
+            }
+            // Cancel Ken Burns
+            (fullscreenImage?.tag as? ObjectAnimator)?.cancel()
+            fullscreenImage?.scaleX = 1f
+            fullscreenImage?.scaleY = 1f
+            try { fullscreenImage?.let { Glide.with(this@LoadingScreenFragment).clear(it) } } catch (_: Exception) {}
+        }?.start()
+    }
+
+    private fun releaseMediaPlayers() {
+        releaseFullscreenMediaPlayer()
+        try {
+            previewMediaPlayer?.release()
+            previewMediaPlayer = null
+        } catch (_: Exception) {}
+    }
+
+    private fun releaseFullscreenMediaPlayer() {
+        try {
+            fullscreenMediaPlayer?.release()
+            fullscreenMediaPlayer = null
+        } catch (_: Exception) {}
     }
 }
