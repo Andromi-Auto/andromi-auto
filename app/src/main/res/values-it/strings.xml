@@ -452,4 +452,5 @@
     <string name="loading_screen_show_text">Mostra testo "Android Auto si sta avviando"</string>
     <string name="loading_screen_tap_preview">Tocca per anteprima</string>
     <string name="loading_screen_tap_to_close">Tocca ovunque per chiudere</string>
+    <string name="loading_screen_keep_aspect_ratio">Mantieni proporzioni</string>
 </resources>

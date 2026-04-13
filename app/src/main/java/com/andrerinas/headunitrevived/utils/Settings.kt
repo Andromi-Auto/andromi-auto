@@ -424,6 +424,10 @@ class Settings(context: Context) {
         get() = prefs.getBoolean("loading-screen-show-text", false)
         set(value) { prefs.edit().putBoolean("loading-screen-show-text", value).apply() }
 
+    var loadingScreenKeepAspectRatio: Boolean
+        get() = prefs.getBoolean("loading-screen-keep-aspect-ratio", true)
+        set(value) { prefs.edit().putBoolean("loading-screen-keep-aspect-ratio", value).apply() }
+
     @SuppressLint("ApplySharedPref")
     fun commit() {
         prefs.edit().commit()

@@ -37,6 +37,7 @@ class LoadingScreenFragment : Fragment() {
     private var previewStatusText: View? = null
     private var toggleContainer: View? = null
     private var toggleShowText: Switch? = null
+    private var toggleKeepAspectRatio: Switch? = null
     private var btnRemove: View? = null
     private var fullscreenOverlay: FrameLayout? = null
     private var fullscreenImage: ImageView? = null
@@ -117,11 +118,19 @@ class LoadingScreenFragment : Fragment() {
             }
         })
 
-        // Toggle
+        toggleKeepAspectRatio = view.findViewById(R.id.toggle_keep_aspect_ratio)
+
+        // Toggles
         toggleShowText?.isChecked = settings.loadingScreenShowText
         toggleShowText?.setOnCheckedChangeListener { _, isChecked ->
             settings.loadingScreenShowText = isChecked
             updateStatusTextVisibility()
+        }
+
+        toggleKeepAspectRatio?.isChecked = settings.loadingScreenKeepAspectRatio
+        toggleKeepAspectRatio?.setOnCheckedChangeListener { _, isChecked ->
+            settings.loadingScreenKeepAspectRatio = isChecked
+            updatePreviewScaleType()
         }
 
         // Select file
@@ -194,6 +203,13 @@ class LoadingScreenFragment : Fragment() {
             }
         }
         updateStatusTextVisibility()
+        updatePreviewScaleType()
+    }
+
+    private fun updatePreviewScaleType() {
+        val keepRatio = settings.loadingScreenKeepAspectRatio
+        previewImage?.scaleType = if (keepRatio) ImageView.ScaleType.FIT_CENTER else ImageView.ScaleType.FIT_XY
+        fullscreenImage?.scaleType = if (keepRatio) ImageView.ScaleType.FIT_CENTER else ImageView.ScaleType.FIT_XY
     }
 
     private fun updateStatusTextVisibility() {

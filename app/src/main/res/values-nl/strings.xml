@@ -434,4 +434,5 @@
     <string name="loading_screen_show_text">Tekst "Android Auto start op" tonen</string>
     <string name="loading_screen_tap_preview">Tik voor voorbeeld</string>
     <string name="loading_screen_tap_to_close">Tik ergens om te sluiten</string>
+    <string name="loading_screen_keep_aspect_ratio">Beeldverhouding behouden</string>
 </resources>

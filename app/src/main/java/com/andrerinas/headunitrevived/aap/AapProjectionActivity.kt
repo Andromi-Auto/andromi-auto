@@ -491,22 +491,28 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         }
         overlay?.setBackgroundColor(Color.BLACK)
 
+        // Apply aspect ratio setting
+        val keepRatio = settings.loadingScreenKeepAspectRatio
+        customImage?.scaleType = if (keepRatio) ImageView.ScaleType.FIT_CENTER else ImageView.ScaleType.FIT_XY
+
         try {
             when (mediaType) {
                 "image" -> {
                     customImage?.visibility = View.VISIBLE
                     Glide.with(this).load(file).into(customImage!!)
-                    // Ken Burns effect: subtle slow zoom for static images
-                    customImage.let {
-                        val scaleAnim = ObjectAnimator.ofPropertyValuesHolder(
-                            it,
-                            PropertyValuesHolder.ofFloat("scaleX", 1.0f, 1.05f),
-                            PropertyValuesHolder.ofFloat("scaleY", 1.0f, 1.05f)
-                        )
-                        scaleAnim.duration = 8000
-                        scaleAnim.repeatMode = ObjectAnimator.REVERSE
-                        scaleAnim.repeatCount = ObjectAnimator.INFINITE
-                        scaleAnim.start()
+                    // Ken Burns effect: subtle slow zoom for static images (only when keeping ratio)
+                    if (keepRatio) {
+                        customImage.let {
+                            val scaleAnim = ObjectAnimator.ofPropertyValuesHolder(
+                                it,
+                                PropertyValuesHolder.ofFloat("scaleX", 1.0f, 1.05f),
+                                PropertyValuesHolder.ofFloat("scaleY", 1.0f, 1.05f)
+                            )
+                            scaleAnim.duration = 8000
+                            scaleAnim.repeatMode = ObjectAnimator.REVERSE
+                            scaleAnim.repeatCount = ObjectAnimator.INFINITE
+                            scaleAnim.start()
+                        }
                     }
                 }
                 "gif" -> {
@@ -519,6 +525,15 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
                     customVideo?.setOnPreparedListener { mp ->
                         mp.isLooping = true
                         mp.setVolume(0f, 0f)
+                        // Stretch video to fill if aspect ratio is off
+                        if (!keepRatio) {
+                            try {
+                                val lp = customVideo.layoutParams
+                                lp.width = FrameLayout.LayoutParams.MATCH_PARENT
+                                lp.height = FrameLayout.LayoutParams.MATCH_PARENT
+                                customVideo.layoutParams = lp
+                            } catch (_: Exception) {}
+                        }
                     }
                     customVideo?.setOnErrorListener { _, _, _ ->
                         AppLog.e("Error playing custom loading video")

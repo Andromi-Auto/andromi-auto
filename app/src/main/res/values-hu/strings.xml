@@ -433,4 +433,5 @@
     <string name="loading_screen_show_text">"Az Android Auto indul" szöveg megjelenítése</string>
     <string name="loading_screen_tap_preview">Érintse meg az előnézethez</string>
     <string name="loading_screen_tap_to_close">Érintse meg bárhol a bezáráshoz</string>
+    <string name="loading_screen_keep_aspect_ratio">Képarány megőrzése</string>
 </resources>

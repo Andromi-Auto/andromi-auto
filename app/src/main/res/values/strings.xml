@@ -461,4 +461,5 @@
     <string name="loading_screen_show_text">Show \"Android Auto is starting\" text</string>
     <string name="loading_screen_tap_preview">Tap to preview fullscreen</string>
     <string name="loading_screen_tap_to_close">Tap anywhere to close</string>
+    <string name="loading_screen_keep_aspect_ratio">Keep aspect ratio</string>
 </resources>

@@ -116,37 +116,71 @@
                     android:textColor="#AAAAAA"
                     android:textSize="13sp" />
 
-                <!-- Toggle -->
+                <!-- Toggles -->
                 <LinearLayout
                     android:id="@+id/toggle_container"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
+                    android:orientation="vertical"
                     android:visibility="gone">
 
-                    <TextView
-                        android:layout_width="0dp"
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/loading_screen_show_text"
-                        android:textColor="?android:attr/textColorPrimary"
-                        android:textSize="15sp" />
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingTop="8dp"
+                        android:paddingBottom="8dp">
 
-                    <Switch
-                        android:id="@+id/toggle_show_text"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/loading_screen_show_text"
+                            android:textColor="?android:attr/textColorPrimary"
+                            android:textSize="15sp" />
+
+                        <Switch
+                            android:id="@+id/toggle_show_text"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingTop="8dp"
+                        android:paddingBottom="8dp">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/loading_screen_keep_aspect_ratio"
+                            android:textColor="?android:attr/textColorPrimary"
+                            android:textSize="15sp" />
+
+                        <Switch
+                            android:id="@+id/toggle_keep_aspect_ratio"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+
+                    </LinearLayout>
 
                 </LinearLayout>
 
-                <!-- Buttons -->
+                <!-- Buttons (max width for landscape) -->
                 <Button
                     android:id="@+id/btn_select_file"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
+                    android:maxWidth="400dp"
+                    android:layout_gravity="center_horizontal"
                     android:text="@string/loading_screen_select_file" />
 
                 <Button
@@ -154,6 +188,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
+                    android:maxWidth="400dp"
+                    android:layout_gravity="center_horizontal"
                     android:text="@string/loading_screen_remove"
                     android:visibility="gone"
                     android:background="?android:attr/selectableItemBackground"
