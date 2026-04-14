@@ -389,7 +389,7 @@ class LoadingScreenFragment : Fragment() {
             val mp = MediaPlayer()
             fullscreenMediaPlayer = mp
             mp.setDataSource(file.absolutePath)
-            mp.isLooping = true
+            mp.isLooping = settings.loadingScreenLoopVideo
             mp.setVolume(0f, 0f)
 
             surfaceView.holder.addCallback(object : SurfaceHolder.Callback {
