@@ -6,6 +6,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.os.Build
 import android.os.SystemClock
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.andrerinas.headunitrevived.R
 import com.andrerinas.headunitrevived.aap.protocol.proto.NavigationStatus
@@ -45,7 +46,8 @@ class AapNavigationHelper(
         val actionText: String,
         val turnSide: Int?,
         val turnNumber: Int?,
-        val turnAngle: Int?
+        val turnAngle: Int?,
+        val nextManeuver: Int?
     )
 
     fun nowElapsedRealtimeMs(): Long = SystemClock.elapsedRealtime()
@@ -60,7 +62,8 @@ class AapNavigationHelper(
             actionText = prepared.actionText,
             turnSide = prepared.turnSide,
             turnNumber = prepared.turnNumber,
-            turnAngle = prepared.turnAngle
+            turnAngle = prepared.turnAngle,
+            //nextManeuver = prepared.NextManeuver
         )
         context.applicationContext.sendBroadcast(intent)
     }
@@ -117,18 +120,18 @@ class AapNavigationHelper(
             ?: detail?.road?.takeIf { it.isNotBlank() }
             ?: "").ifBlank { "—" }
 
-        val nextEventType = state?.stepsList?.firstOrNull()?.maneuver?.type?.number
-            ?: detail?.takeIf { it.hasNextTurn() }?.nextTurn?.number
+        val nextEventType = detail?.takeIf { it.hasNextTurn() }?.nextTurn?.number
             ?: NavigationStatus.NextTurnDetail.NextEvent.UNKNOWN.number
         val turnSide = detail
             ?.takeIf { it.hasSide() }
             ?.side
             ?.number
+        val nextManeuver = state?.stepsList?.firstOrNull()?.maneuver?.type?.number
         val turnNumber = state?.stepsList?.firstOrNull()?.maneuver?.roundaboutExitNumber
             ?: detail?.takeIf { it.hasTurnNumber() }?.turnNumber
         val turnAngle = state?.stepsList?.firstOrNull()?.maneuver?.roundaboutExitAngle
             ?: detail?.takeIf { it.hasTurnAngle() }?.turnAngle
-        val actionFromDetail =  state?.stepsList?.firstOrNull()?.maneuver?.type?.let { maneuverTypeToAction(it) }
+        val actionFromDetail = state?.stepsList?.firstOrNull()?.maneuver?.type?.let { maneuverTypeToAction(it) }
             ?: detail?.takeIf { it.hasNextTurn() }?.let { nextEventToAction(it.nextTurn) }
         val actionFromState = state?.stepsList?.firstOrNull()
             ?.takeIf { it.hasManeuver() }
@@ -136,6 +139,12 @@ class AapNavigationHelper(
             ?.type
             ?.let { maneuverTypeToAction(it) }
         val actionText = actionFromDetail ?: actionFromState ?: context.getString(R.string.nav_action_unknown)
+        val totalDistanceMeters = currentPosition?.destinationDistancesList?.firstOrNull()?.distance?.meters
+        val totalTimeSeconds = currentPosition?.destinationDistancesList?.firstOrNull()?.timeToArrivalSeconds
+        val estimatedArrival = currentPosition?.destinationDistancesList?.firstOrNull()?.estimatedTimeAtArrival
+        if (state?.stepsList?.firstOrNull()?.lanesList?.isNotEmpty() ?: false) {
+            Log.w("", "has lines!")
+        }
 
         AppLog.d(
             "Nav: emit debounced eventType=$navEventType " +
@@ -154,7 +163,11 @@ class AapNavigationHelper(
             actionText = actionText,
             turnSide = turnSide,
             turnNumber = turnNumber,
-            turnAngle = turnAngle
+            turnAngle = turnAngle,
+            nextManeuver = nextManeuver,
+//            totalDistanceMeters = totalDistanceMeters,
+//            totalTimeSeconds = totalTimeSeconds,
+//            estimatedArrival = estimatedArrival
         )
     }
 
