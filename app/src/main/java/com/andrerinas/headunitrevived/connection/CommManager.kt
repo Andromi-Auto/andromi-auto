@@ -9,13 +9,16 @@ import com.andrerinas.headunitrevived.utils.AppLog
 import com.andrerinas.headunitrevived.main.BackgroundNotification
 import com.andrerinas.headunitrevived.ssl.SingleKeyKeyManager
 import com.andrerinas.headunitrevived.utils.Settings
+import com.andrerinas.headunitrevived.utils.HeadUnitScreenConfig
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import com.andrerinas.headunitrevived.decoder.AudioDecoder
 import com.andrerinas.headunitrevived.decoder.VideoDecoder
 import android.media.AudioManager
+import android.os.Build
 import com.andrerinas.headunitrevived.aap.AapMessage
 import com.andrerinas.headunitrevived.aap.protocol.messages.SensorEvent
+import com.andrerinas.headunitrevived.aap.protocol.proto.MediaPlayback
 import java.net.Socket
 
 /**
@@ -111,8 +114,14 @@ class CommManager(
     /** Callback for audio focus state changes (isPlaying). Set by AapService. */
     var onAudioFocusStateChanged: ((Boolean) -> Unit)? = null
 
+    /** Now-playing metadata from the phone (AAP media channel). Set by AapService. */
+    var onAaMediaMetadata: ((MediaPlayback.MediaMetaData) -> Unit)? = null
+    /** Playback status from the phone (AAP media channel), includes current position. */
+    var onAaPlaybackStatus: ((MediaPlayback.MediaPlaybackStatus) -> Unit)? = null
+
     /** @Volatile: written on IO thread, read on Main and IO threads. */
     @Volatile private var _transport: AapTransport? = null
+    var onUpdateUiConfigReplyReceived: (() -> Unit)? = null
     @Volatile private var _connection: AccessoryConnection? = null
 
     /**
@@ -162,6 +171,7 @@ class CommManager(
         if (_connectionState.value is ConnectionState.Connecting)
             return@withContext
 
+
         val usbManager = context.getSystemService(Context.USB_SERVICE) as UsbManager
         if (!usbManager.hasPermission(device)) {
             _connectionState.emit(ConnectionState.Error("USB permission not granted for device"))
@@ -202,6 +212,7 @@ class CommManager(
         if (_connectionState.value is ConnectionState.Connecting)
             return@withContext
 
+
         _disconnectJob?.join()
 
         try {
@@ -210,7 +221,10 @@ class CommManager(
             _connection = SocketAccessoryConnection(socket, context)
 
             if (_connection?.connect() ?: false) {
-                settings.saveLastConnection(type = Settings.CONNECTION_TYPE_WIFI, ip = socket.inetAddress?.hostAddress ?: "")
+                // [FIX] Don't overwrite NEARBY connection type with WIFI + localhost IP (::1)
+                if (socket !is NearbySocket) {
+                    settings.saveLastConnection(type = Settings.CONNECTION_TYPE_WIFI, ip = socket.inetAddress?.hostAddress ?: "")
+                }
                 _connectionState.emit(ConnectionState.Connected)
             } else {
                 _connectionState.emit(ConnectionState.Disconnected())
@@ -279,9 +293,20 @@ class CommManager(
 
                 if (_transport == null) {
                     val audioManager = context.getSystemService(Application.AUDIO_SERVICE) as AudioManager
-                    _transport = AapTransport(audioDecoder, videoDecoder, audioManager, settings, _backgroundNotification, context, externalSsl = aapSslContext)
+                    _transport = AapTransport(
+                        audioDecoder,
+                        videoDecoder,
+                        audioManager,
+                        settings,
+                        _backgroundNotification,
+                        context,
+                        externalSsl = aapSslContext,
+                        onAaMediaMetadata = { meta -> onAaMediaMetadata?.invoke(meta) },
+                        onAaPlaybackStatus = { status -> onAaPlaybackStatus?.invoke(status) }
+                    )
                     _transport!!.onQuit = { isClean -> transportedQuited(isClean) }
                     _transport!!.onAudioFocusStateChanged = { isPlaying -> onAudioFocusStateChanged?.invoke(isPlaying) }
+                    _transport!!.onUpdateUiConfigReplyReceived = { onUpdateUiConfigReplyReceived?.invoke() }
                 }
                 if (_transport?.startHandshake(_connection!!) == true) {
                     _connectionState.emit(ConnectionState.HandshakeComplete)
@@ -347,12 +372,13 @@ class CommManager(
                 val stopIntent = android.content.Intent(context, com.andrerinas.headunitrevived.aap.AapService::class.java).apply {
                     action = com.andrerinas.headunitrevived.aap.AapService.ACTION_STOP_SERVICE
                 }
+                com.andrerinas.headunitrevived.aap.AapService.killProcessOnDestroy = true
                 context.stopService(stopIntent)
-                // Finish all tasks and exit
-                val app = context.applicationContext as Application
-                val activityManager = app.getSystemService(Context.ACTIVITY_SERVICE) as android.app.ActivityManager
-                activityManager.appTasks.forEach { it.finishAndRemoveTask() }
-                System.exit(0)
+                // Finish all tasks (API 21+)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as android.app.ActivityManager
+                    activityManager.appTasks.forEach { it.finishAndRemoveTask() }
+                }
             }, 500)
         }
     }
@@ -382,6 +408,15 @@ class CommManager(
         }
     }
 
+    fun sendUpdateUiConfigRequest(left: Int, top: Int, right: Int, bottom: Int) {
+        val request = com.andrerinas.headunitrevived.aap.protocol.messages.UpdateUiConfigRequest(left, top, right, bottom)
+        AppLog.i("[UI_DEBUG_FIX] TX UpdateUiConfigRequest: L=$left T=$top R=$right B=$bottom")
+        send(request)
+        // HUR always sends VideoFocusNotification(PROJECTED, unsolicited=true) after
+        // updating the UI config. This triggers a keyframe from the phone.
+        send(com.andrerinas.headunitrevived.aap.protocol.messages.VideoFocusEvent(gain = true, unsolicited = true))
+    }
+
     // -----------------------------------------------------------------------------------------
     // Disconnect
     // -----------------------------------------------------------------------------------------
@@ -396,7 +431,10 @@ class CommManager(
     fun disconnect(sendByeBye: Boolean = true) {
         if (_connectionState.value is ConnectionState.Disconnected) return
 
+        HeadUnitScreenConfig.unlockResolution()
+
         _connectionState.value = ConnectionState.Disconnected(isUserExit = true)
+        _transport?.wasUserExit = true
         _disconnectJob = _scope.launch { doDisconnect(sendByeBye) }
         if (settings.killOnDisconnect) {
             android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
@@ -404,12 +442,13 @@ class CommManager(
                 val stopIntent = android.content.Intent(context, com.andrerinas.headunitrevived.aap.AapService::class.java).apply {
                     action = com.andrerinas.headunitrevived.aap.AapService.ACTION_STOP_SERVICE
                 }
+                com.andrerinas.headunitrevived.aap.AapService.killProcessOnDestroy = true
                 context.stopService(stopIntent)
-                // Finish all tasks and exit
-                val app = context.applicationContext as Application
-                val activityManager = app.getSystemService(Context.ACTIVITY_SERVICE) as android.app.ActivityManager
-                activityManager.appTasks.forEach { it.finishAndRemoveTask() }
-                System.exit(0)
+                // Finish all tasks (API 21+)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as android.app.ActivityManager
+                    activityManager.appTasks.forEach { it.finishAndRemoveTask() }
+                }
             }, 500)
         }
     }
@@ -440,6 +479,11 @@ class CommManager(
             // disconnect). When the transport self-quit (read error, soTimeout), the connection
             // is already dead — skip the send and the 150 ms sleep inside stop().
             if (sendByeBye) transport?.stop() else transport?.quit()
+            
+            // Explicitly stop and release decoders to prevent MediaCodec finalize() timeouts
+            videoDecoder.stop("CommManager: doDisconnect")
+            audioDecoder.stop()
+            
             connection?.disconnect()
         } catch (e: Exception) {
             AppLog.e("doDisconnect error: ${e.message}")

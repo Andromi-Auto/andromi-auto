@@ -1,4 +1,4 @@
-<resources>
+﻿<resources>
     <string name="app_name">Headunit Revived</string>
     <string name="menu">Menu</string>
     <string name="settings">Impostazioni</string>
@@ -120,6 +120,7 @@
     <string name="log_level_description">Filtra livello log durante l\'esportazione</string>
     <string name="start_log_capture">Avvia acquisizione log</string>
     <string name="start_log_capture_description">Inizia a registrare i log completi per il debug</string>
+    <string name="start_log_capture_in_silent">Impossibile avviare la registrazione: livello di registrazione silenzioso selezionato</string>
     <string name="stop_log_capture">Ferma acquisizione log</string>
     <string name="stop_log_capture_description">Registrazione in corso… tocca per fermare</string>
     <string name="export_logs">Esporta Log</string>
@@ -161,6 +162,8 @@
     <string name="usb_auto_connect_description">Connettiti automaticamente a un dispositivo USB noto all\'apertura dell\'applicazione.</string>
     <string name="auto_start_bt_label">Avvio automatico su Bluetooth</string>
     <string name="auto_start_bt_description">Apri automaticamente Headunit Revived quando si connette un dispositivo Bluetooth specifico.</string>
+    <string name="listen_for_usb_devices_label">Ascolta dispositivi USB</string>
+    <string name="listen_for_usb_devices_description">Mostra la richiesta di sistema Android quando viene collegato un dispositivo USB.</string>
     <string name="auto_start_usb_label">Avvio automatico su USB</string>
     <string name="auto_start_usb_description">Apri automaticamente l\'app e tenta la connessione quando viene collegato un dispositivo USB</string>
     <string name="auto_start_settings">Impostazioni avvio automatico</string>
@@ -230,6 +233,8 @@
     <string name="category_audio">Audio</string>
     <string name="enable_audio_sink">Audio Sink</string>
     <string name="enable_audio_sink_description">Se disabilitato, la headunit non riceverà l\'audio. Il suono verrà riprodotto dal telefono.</string>
+    <string name="separate_audio_streams">Flussi audio separati</string>
+    <string name="separate_audio_streams_description">Separa i canali audio per musica, chiamate e notifiche invece di un singolo flusso multimediale (potrebbe non funzionare correttamente su alcuni dispositivi).</string>
     <string name="use_aac_audio">Usa Audio AAC</string>
     <string name="use_aac_audio_description">Usa il codec AAC per l\'audio per risparmiare larghezza di banda (Sperimentale).</string>
     <string name="audio_volume_offset">Offset volume audio</string>
@@ -294,6 +299,7 @@
     <string name="share">Condividi</string>
     <string name="close">Chiudi</string>
     <string name="failed_export_logs">Esportazione log fallita</string>
+    <string name="failed_export_in_silent_logs">Impossibile esportare i log: livello di registrazione silenzioso selezionato</string>
     <string name="switching_to_android_auto">Passaggio ad Android Auto…</string>
     <string name="switch_failed">Passaggio fallito</string>
     <string name="requesting_usb_permission">Richiesta permesso USB…</string>
@@ -302,6 +308,7 @@
     <string name="success">Successo</string>
     <string name="failed">Fallito</string>
     <string name="failed_start_android_auto">Avvio di Android Auto fallito</string>
+    <string name="failed_self_mode_android10">La modalità Self è probabilmente bloccata da Google su Android 10 (AA 16.4+). Vedere il README.</string>
     <string name="android_auto_starting">Android Auto si sta avviando…</string>
     <string name="connection_interrupted">Connessione persa</string>
     <string name="connection_interrupted_detail">Riprovo…</string>
@@ -436,6 +443,42 @@
     <string name="wireless_24ghz_warning">Nota: Android Auto wireless su dispositivi a 2.4GHz può causare lag, scatti e disconnessioni. Se riscontri problemi, prova via USB per confermare se si tratta di un limite della rete.</string>
     <string name="fake_speed_title">Disabilita blocco video (Fake Speed)</string>
     <string name="fake_speed_description">Riporta una velocità costante bassa (0,5 m/s) al telefono per evitare che i contenuti video vengano bloccati durante la guida. Usare con cautela.</string>
+    <string name="wireless_mode_helper">Wireless Helper</string>
+    <string name="wireless_mode_native">Native</string>
+    <string name="wireless_mode_server">Headunit Server</string>
+    <string name="server_mode_label">Modalità Server</string>
+    <string name="server_mode_manual">Manuale</string>
+    <string name="server_mode_auto">Auto</string>
+    <string name="helper_strategy_label">Metodo di connessione (Helper)</string>
+    <string-array name="helper_strategies">
+        <item>WiFi Comune (NSD)</item>
+        <item>WiFi Direct (P2P)</item>
+        <item>Dispositivi nelle vicinanze (Beta)</item>
+        <item>Hotspot Telefono (Host)</item>
+        <item>Hotspot Headunit (Passivo)</item>
+    </string-array>
+
+    <string name="select_nearby_device">Seleziona dispositivo nelle vicinanze</string>
+    <string name="nearby_device_found">Dispositivo nelle vicinanze trovato</string>
+    <string name="connecting_to_nearby">Connessione a %s…</string>
+
+    <string name="exit_dialog_title">Esci da Android Auto</string>
+    <string name="exit_dialog_stop">Interrompi connessione</string>
+    <string name="exit_dialog_pip">Picture-in-Picture</string>
+    <string name="exit_dialog_background">Sposta in background</string>
+    <string name="gesture_hint">Suggerimento: Scorri dal bordo sinistro con 2 dita per aprire il menu di uscita.</string>
+    <string name="audio_latency_multiplier">Moltiplicatore di latenza audio</string>
+    <string name="audio_latency_multiplier_description">Regola la dimensione del buffer audio (Più basso = meno lag, Più alto = meno stutter)</string>
+    <string name="audio_queue_capacity">Capacità della coda audio (Backpressure)</string>
+    <string name="media_action_previous">Precedente</string>
+    <string name="media_action_play">Riproduci</string>
+    <string name="media_action_pause">Pausa</string>
+    <string name="media_action_next">Successivo</string>
+    <string name="media_session_aa_status_placeholder">Connesso</string>
+    <string name="sync_media_session_aa_metadata">Brano AA corrente nella sessione multimediale</string>
+    <string name="sync_media_session_aa_metadata_description">Mostra titolo, artista, durata e copertina dal telefono nella sessione multimediale di sistema e nella notifica multimediale</string>
+    <string name="error_usb_permission_failed">Errore di sistema: Impossibile richiedere la finestra di dialogo del permesso USB.</string>
+
     <!-- Custom loading screen -->
     <string name="loading_screen">Schermata di caricamento</string>
     <string name="loading_screen_default">Predefinita</string>

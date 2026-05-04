@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     >
 
-    <uses-sdk />
+    <uses-sdk tools:overrideLibrary="com.google.android.gms.nearby, com.google.android.gms.base, com.google.android.gms.tasks, com.google.android.gms.common" />
 
     <uses-feature
         android:name="android.hardware.usb.host"
@@ -33,6 +33,7 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.NEARBY_WIFI_DEVICES" android:usesPermissionFlags="neverForLocation" tools:targetApi="s" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
@@ -46,6 +47,7 @@
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
     <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
@@ -71,7 +73,6 @@
             android:configChanges="uiMode|orientation|screenSize|screenLayout|smallestScreenSize"
             android:hardwareAccelerated="true"
             android:launchMode="singleTask"
-            android:taskAffinity=".projection"
             android:screenOrientation="sensor"
             android:supportsPictureInPicture="true"
             android:exported="true"
@@ -82,7 +83,6 @@
         <activity
             android:name=".app.UsbAttachedActivity"
             android:directBootAware="true"
-            android:enabled="false"
             android:launchMode="singleTop"
             android:theme="@style/AppTheme.Translucent"
             android:exported="true">
@@ -94,32 +94,40 @@
                 android:resource="@xml/usb_device_filter" />
         </activity>
 
-        <activity
-            android:name=".main.SplashActivity"
-            android:exported="true"
-            android:theme="@style/SplashTheme">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
 
         <activity
             android:name=".main.MainActivity"
             android:configChanges="keyboardHidden|uiMode"
             android:launchMode="singleTask"
             android:screenOrientation="sensor"
-            android:theme="@style/AppTheme"
+            android:theme="@style/SplashTheme"
             android:exported="true">
 
+            <!-- Primary Launcher Filter -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
                 <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+
+            <!-- Navigation Role Registration (allows selecting as default nav app) -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.APP_MAPS" />
                 <category android:name="android.intent.category.APP_NAVIGATION" />
             </intent-filter>
 
-            <!-- Navigation Intent Filters -->
+            <!-- Navigation Intent Filter (handles system navigate actions) -->
+            <intent-filter>
+                <action android:name="android.intent.action.NAVIGATE" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
+
+            <!-- Navigation Intent Filters & Deep Links -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -149,15 +157,6 @@
                 <data android:scheme="http" android:host="maps.google.com" />
                 <data android:scheme="https" android:host="maps.google.com" />
             </intent-filter>
-
-            <intent-filter>
-                <action android:name="android.intent.action.NAVIGATE" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-
-            <meta-data
-                android:name="android.app.shortcuts"
-                android:resource="@xml/shortcuts" />
         </activity>
 
         <activity

@@ -1,4 +1,4 @@
-<resources>
+﻿<resources>
     <string name="app_name">Headunit Revived</string>
     <string name="menu">Menu</string>
     <string name="settings">Nastavení</string>
@@ -146,6 +146,8 @@
     <string name="usb_auto_connect_description">Automatically connect to a known USB device when the application is opened.</string>
     <string name="auto_start_bt_label">Automaticky spustit při Bluetooth</string>
     <string name="auto_start_bt_description">Automaticky otevřít Headunit Revived při připojení konkrétního Bluetooth zařízení.</string>
+    <string name="listen_for_usb_devices_label">Naslouchat zařízením USB</string>
+    <string name="listen_for_usb_devices_description">Zobrazit systémovou výzvu Androidu po připojení zařízení USB.</string>
     <string name="auto_start_usb_label">Automatické spuštění přes USB</string>
     <string name="auto_start_usb_description">Automaticky otevřít aplikaci a pokusit se o připojení při zapojení USB zařízení</string>
     <string name="auto_start_settings">Nastavení automatického spouštění</string>
@@ -162,6 +164,7 @@
     <string name="overlay_permission_title">Oprávnění pro spuštění na pozadí</string>
     <string name="overlay_permission_description">Pro automatické otevření Headunit Revived při připojení Bluetooth povolte prosím oprávnění "Zobrazit přes ostatní aplikace" na další obrazovce.</string>
     <string name="open_settings">Nastavení</string>
+    <string name="wireless_connection_settings">Bezdrátové připojení</string>
     <string name="right_hand_drive">Pravostranné řízení</string>
     <string name="right_hand_drive_description">Upravit rozhraní pro řízení na pravé straně</string>
     <string name="category_graphic">Grafické</string>
@@ -208,9 +211,14 @@
     <string name="pref_stretch_screen_summary">Ignoruje poměr stran a vyplní celý displej (odstraní černé pruhy)</string>
 
     <!-- Audio Settings -->
-    <string name="category_audio">Audio</string>
+        <string name="forced_scale">Vynucené měřítko (Legacy oprava)</string>
+    <string name="forced_scale_description">Opravuje problémy s měřítkem u některých starších zařízení používajících SurfaceView. Používejte pouze v případě, že obraz vypadá zkresleně nebo posunutě.</string>
+
+<string name="category_audio">Audio</string>
     <string name="enable_audio_sink">Povolit audio výstup (Sink)</string>
     <string name="enable_audio_sink_description">Pokud je zakázáno, hlavní jednotka nebude přijímat zvuk. Zvuk se bude přehrávat z telefonu.</string>
+    <string name="separate_audio_streams">Oddělit zvukové streamy</string>
+    <string name="separate_audio_streams_description">Odděluje zvukové kanály pro hudbu, hovory a oznámení místo jednoho multimediálního streamu (nemusí na některých zařízeních fungovat správně).</string>
     <string name="use_aac_audio">Použít AAC audio</string>
     <string name="use_aac_audio_description">Použít kodek AAC pro zvuk pro úsporu šířky pásma (experimentální).</string>
     <string name="audio_volume_offset">Posun hlasitosti</string>
@@ -275,6 +283,7 @@
     <string name="share">Sdílet</string>
     <string name="close">Zavřít</string>
     <string name="failed_export_logs">Export protokolů selhal</string>
+    <string name="failed_export_in_silent_logs">Nelze exportovat protokoly: vybrána úroveň tichého protokolování</string>
     <string name="switching_to_android_auto">Přepínání do Android Auto…</string>
     <string name="switch_failed">Přepnutí selhalo</string>
     <string name="requesting_usb_permission">Vyžadování oprávnění USB…</string>
@@ -283,6 +292,7 @@
     <string name="success">Úspěch</string>
     <string name="failed">Selhalo</string>
     <string name="failed_start_android_auto">Spuštění Android Auto selhalo</string>
+    <string name="failed_self_mode_android10">Režim Self-mode je pravděpodobně blokován společností Google v systému Android 10 (AA 16.4+). Viz README.</string>
     <string name="android_auto_starting">Android Auto se spouští…</string>
     <string name="connection_interrupted">Spojení ztraceno</string>
     <string name="connection_interrupted_detail">Opětovné připojování…</string>
@@ -323,11 +333,14 @@
     <string name="auto_optimize_desc">Spustit kontrolu systému pro nalezení nejlepšího nastavení pro vaše zařízení.</string>
     <string name="fullscreen_none">Normální (Všechny lišty viditelné)</string>
     <string name="fullscreen_immersive">Imerzivní (Všechny lišty skryté)</string>
+    <string name="fullscreen_immersive_avoid_notch">Imerzivní (Vyhnout se Notch)</string>
+    <string name="fullscreen_immersive_avoid_notch_desc">Skryje všechny lišty a přidá odsazení, aby se zabránilo zakrytí projekce výřezem (Notch).</string>
     <string name="fullscreen_status_only">Skrýt pouze stavovou lištu</string>
     <string name="log_level">Úroveň protokolování</string>
     <string name="log_level_description">Vyberte úroveň podrobnosti výstupu protokolu pro ladění.</string>
     <string name="start_log_capture">Spustit záznam protokolu</string>
     <string name="start_log_capture_description">Spustí nahrávání systémových protokolů do souboru.</string>
+    <string name="start_log_capture_in_silent">Nelze zahájit záznam: vybrána úroveň tichého protokolování</string>
     <string name="stop_log_capture">Zastavit záznam protokolu</string>
     <string name="stop_log_capture_description">Zastaví nahrávání a uloží soubor protokolu.</string>
 
@@ -418,6 +431,47 @@
     <string name="wait_for_wifi_description">Při startu počká na připojení WiFi před spuštěním WiFi Direct. Užitečné, pokud vaše headunit potřebuje několik sekund na připojení k WiFi po zapnutí.</string>
     <string name="wait_for_wifi_timeout">Časový limit čekání na WiFi</string>
     <string name="wireless_24ghz_warning">Poznámka: Bezdrátové Android Auto na 2,4GHz zařízeních může vést k lagům, sekání a odpojování. Pokud máte problémy, otestujte připojení přes USB, abyste potvrdili, zda se jedná o omezení sítě.</string>
+    <string name="supported_nativeaa">Vylepšená bezdrátová podpora</string>
+    <string name="supported_nativeaa_desc">Skvělá zpráva! Vaše zařízení podporuje režim „Native Wireless“, který poskytuje plynulejší zážitek z Android Auto. \n\nPro aktivaci potřebujeme obnovit vaši Bluetooth mezipaměť. Prosím: \n1. Odstraňte stávající spárování v telefonu \n2. Klikněte na OK pro restart Bluetooth \n3. Znovu spárujte telefon \n\nChcete nyní přepnout do režimu Native AA?"</string>
+    <string name="fake_speed_title">Zakázat blokování videa (Fake Speed)</string>
+    <string name="fake_speed_description">Hlásí telefonu konstantní nízkou rychlost (0,5 m/s), aby se zabránilo blokování video obsahu během jízdy. Používejte opatrně.</string>
+    <string name="wireless_mode_helper">Wireless Helper</string>
+    <string name="wireless_mode_native">Nativní</string>
+    <string name="wireless_mode_server">Headunit Server</string>
+    <string name="server_mode_label">Režim serveru</string>
+    <string name="server_mode_manual">Ruční</string>
+    <string name="server_mode_auto">Automaticky</string>
+
+    <string name="helper_strategy_label">Metoda připojení pomocníka</string>
+    <string-array name="helper_strategies">
+        <item>Společná WiFi (NSD)</item>
+        <item>WiFi Direct (P2P)</item>
+        <item>Zařízení v okolí (Beta)</item>
+        <item>Hotspot telefonu (Host)</item>
+        <item>Hotspot autorádia (Pasivní)</item>
+    </string-array>
+
+    <string name="select_nearby_device">Vybrat zařízení v okolí</string>
+    <string name="nearby_device_found">Nalezeno zařízení v okolí</string>
+    <string name="connecting_to_nearby">Připojování k %s…</string>
+
+    <string name="exit_dialog_title">Ukončit Android Auto</string>
+    <string name="exit_dialog_stop">Zastavit připojení</string>
+    <string name="exit_dialog_pip">Obraz v obraze (PiP)</string>
+    <string name="exit_dialog_background">Přesunout na pozadí</string>
+    <string name="gesture_hint">Tip: Přejetím 2 prsty od levého okraje otevřete nabídku ukončení.</string>
+    <string name="audio_latency_multiplier">Násobitel latence zvuku</string>
+    <string name="audio_latency_multiplier_description">Úprava velikosti zvukové vyrovnávací paměti (Nižší = menší zpoždění, Vyšší = méně sekání)</string>
+    <string name="audio_queue_capacity">Kapacita zvukové fronty (Backpressure)</string>
+    <string name="media_action_previous">Předchozí</string>
+    <string name="media_action_play">Přehrát</string>
+    <string name="media_action_pause">Pozastavit</string>
+    <string name="media_action_next">Další</string>
+    <string name="media_session_aa_status_placeholder">Připojeno</string>
+    <string name="sync_media_session_aa_metadata">Aktuální skladba AA v mediální relaci</string>
+    <string name="sync_media_session_aa_metadata_description">Zobrazovat název skladby, interpreta, délku a obal alba z telefonu v systémové mediální relaci a mediálním oznámení</string>
+    <string name="error_usb_permission_failed">Systémová chyba: Nepodařilo se vyžádat dialogové okno pro povolení USB.</string>
+
     <!-- Custom loading screen -->
     <string name="loading_screen">Načítací obrazovka</string>
     <string name="loading_screen_default">Výchozí</string>

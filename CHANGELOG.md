@@ -1,6 +1,29 @@
 # Changelog
-### v.2.2.0-beta3
+### v.2.2.2
+- Fixed: Exit on disconnect now stops the carmode too
+- Fixed: Exit intent not closing the app
+- Fixed: Orientation not working great on app switch, if you have "auto or sensor" enabled
+- Again: Steering Wheel and Keymapping got some changes, maybe this will work on more devices
+- Extend mic debugging and add NoiseSuppressor, AutomaticGainControl and AcousticEchoCanceler for better voice quality
+- Fixed an issue where the Android USB system prompt wouldn't appear for phones. The prompt is now enabled by default and can be separately disabled for USB thumb drives. It calls "Listen for USB Devices" setting and it decouples the system USB prompt from the Auto-Start behavior. This will bring back the old functionality for all and can be disabled for those who are annoyed of the popup for non Android Auto devices
+- Fixed: Rescale and UpdateUI if the useable area differs from the one negiotated. This happens on devices which lie about their navbars.
+- Add separate audio streams setting and update related functionality thanks to @Anton111111
+- Fixed: Auto-Night mode over 3 hours of in the UK and other countries, thanks to @BinarySimple17
+- Enhanced: When audio sink is off, the app no longer tries to get media focus at all
+
+### v.2.2.1
+- **Fixed a fatal error in UBS conncetions since 2.2.0. This is important so releasing this version while not fixing all planned issues**
+- Google Nearby Connection is now auto connecting if auto connect is enabled
+- UI: Added Error Message for Android 10 and below for selfmode
+- New Approach for scaling and touch to prevent offset
+- Fixing App appears multiple times in App-Drawer
+- Fixing Routines and intents not working
+
+### v.2.2.0
 - Added: Native AA. 🎉  Warning! This will only work on a limited amount of headunits! Most Android devices do not support connecting 2 Android devices via Bluetooth which is essential for this to work.
+- Added: Google Nearby Support as connection method. Needs Wireless Helper 1.6.0 or later
+- Added: Pip-Support
+- Added: 4K in select
 - Try to fix connection problems on WiFi
 - Added: Intent and routine for starting the app directly to self mode
 - Added: Force Scale Option for older devices on surface view
@@ -9,10 +32,9 @@
 - Added: 2 new WiFi-Options for a WiFi-Direct. Thanks to @andrecuellar
 - Added Japanese language 🇯🇵 thanks to @mattyann87
 - Enhanced: Media Session Announcement. Thanks to @irwanrhmn
-- Added: Pip-Support
-- Added: Google Nearby Support
-- Added: 4K in select
 - New App-Icon without text for better visibility
+- Fixed: USB modal appearing for non-Android Auto devices thanks to @andrecuellar
+- Added: Create configurable audio queue and audio buffer in settings thanks to @irwanrhmn
 
 ### v.2.1.1
 - Fixed: Layout crash on Android 4.2

@@ -1,4 +1,4 @@
-<resources>
+﻿<resources>
     <string name="app_name">Headunit Revived</string>
     <string name="menu">メニュー</string>
     <string name="settings">設定</string>
@@ -58,6 +58,7 @@
     <string name="gles_required_message">モノクロモードを利用するにはビデオ出力でグレースケールフィルターを利用するためにGLESレンダリングが必要です。GLESを有効にしますか？</string>
     <string name="enable_gles">GLESを有効にする</string>
     <string name="category_navigation">ナビゲーション</string>
+    <string name="category_wireless">ワイヤレス接続</string>
 
     <string name="reconnection_required_title">再接続が必要です</string>
     <string name="reconnection_required_message">デバイスが待機状態です。Android Autoを再度起動するためにはUSBケーブルを抜き差ししてください。</string>
@@ -100,6 +101,8 @@
     <string name="fullscreen_none">普通 (全てのバーを表示)</string>
     <string name="fullscreen_immersive">イマーシブ (全てのバーが非表示)</string>
     <string name="fullscreen_status_only">ステータスバーのみ非表示</string>
+    <string name="fullscreen_immersive_avoid_notch">イマーシブ (ノッチ回避)</string>
+    <string name="fullscreen_immersive_avoid_notch_desc">すべてのバーを非表示にし、投影がノッチやカットアウトで隠れないようにパディングを追加します。</string>
 
     <string name="usb_status">USBの状態: %s</string>
     <string name="projection_status">投影状況: %s</string>
@@ -117,6 +120,7 @@
     <string name="log_level_description">エクスポート時にログレベルをフィルタリングする</string>
     <string name="start_log_capture">ログ取得を開始する</string>
     <string name="start_log_capture_description">デバッグのためにログの記録を開始します</string>
+    <string name="start_log_capture_in_silent">記録を開始できません: サイレントログレベルが選択されています</string>
     <string name="stop_log_capture">ログ取得を停止</string>
     <string name="stop_log_capture_description">録画中です...タップして停止</string>
     <string name="export_logs">ログをエクスポート</string>
@@ -158,6 +162,8 @@
     <string name="usb_auto_connect_description">アプリケーションが開始された時に既知のUSBデバイスに接続されると自動的に接続します。</string>
     <string name="auto_start_bt_label">Bluetooth自動開始</string>
     <string name="auto_start_bt_description">特定のBluetoothデバイスが接続されたときに、Headunit Revivedを自動的に起動します。</string>
+    <string name="listen_for_usb_devices_label">USBデバイスへの反応</string>
+    <string name="listen_for_usb_devices_description">USBデバイスが接続されたときにAndroidのシステムプロンプトを表示します。</string>
     <string name="auto_start_usb_label">USBから自動起動</string>
     <string name="auto_start_usb_description">USBデバイスが接続されたら、アプリを自動的に起動して接続を試みます</string>
     <string name="auto_start_settings">自動起動設定</string>
@@ -174,6 +180,7 @@
     <string name="overlay_permission_title">バックグラウンド起動許可</string>
     <string name="overlay_permission_description">Bluetooth接続時にHeadunit Revivedが自動的に起動するようにするには、次の画面で「他のアプリの上に表示する」権限を有効にしてください。</string>
     <string name="open_settings">設定</string>
+    <string name="wireless_connection_settings">ワイヤレス接続</string>
     <string name="right_hand_drive">右ハンドル</string>
     <string name="right_hand_drive_description">右側通行用のUI配置</string>
     <string name="category_graphic">グラフィック</string>
@@ -220,9 +227,14 @@
 
 
     <!-- Audio Settings -->
+    <string name="forced_scale">強制スケール (レガシー修正)</string>
+    <string name="forced_scale_description">SurfaceViewを使用する一部の古いデバイスでのスケーリングの問題を修正します。画像が歪んだりずれたりして見える場合にのみ使用してください。</string>
+
     <string name="category_audio">オーディオ</string>
     <string name="enable_audio_sink">オーディオシンク</string>
     <string name="enable_audio_sink_description">無効にすると、ヘッドユニットは音声を受信しなくなります。音声はスマートフォンから再生されます。</string>
+    <string name="separate_audio_streams">音声ストリームの分離</string>
+    <string name="separate_audio_streams_description">単一のマルチメディアストリームの代わりに、音楽、通話、通知の音声チャネルを分離します（一部のデバイスでは正しく機能しない場合があります）。</string>
     <string name="use_aac_audio">AAC Audioを利用する</string>
     <string name="use_aac_audio_description">帯域幅を節約するために、音声にAACコーデックを使用します（実験的機能）。</string>
     <string name="audio_volume_offset">オーディオボリュームオフセット</string>
@@ -287,6 +299,7 @@
     <string name="share">シェア</string>
     <string name="close">閉じる</string>
     <string name="failed_export_logs">ログのエクスポートに失敗しました</string>
+    <string name="failed_export_in_silent_logs">ログをエクスポートできません: サイレントログレベルが選択されています</string>
     <string name="switching_to_android_auto">Android Autoに切り替え中…</string>
     <string name="switch_failed">切り替えに失敗しました</string>
     <string name="requesting_usb_permission">USBアクセス許可を要求しています…</string>
@@ -295,6 +308,7 @@
     <string name="success">成功</string>
     <string name="failed">失敗</string>
     <string name="failed_start_android_auto">Android Autoの起動に失敗しました</string>
+    <string name="failed_self_mode_android10">セルフモードはAndroid 10 (AA 16.4+) でGoogleによってブロックされている可能性があります。READMEを同封します。</string>
     <string name="android_auto_starting">Android Autoは起動中です…</string>
     <string name="connection_interrupted">切断されました</string>
     <string name="connection_interrupted_detail">再試行中…</string>
@@ -305,6 +319,8 @@
     <string name="notification_projection_active">Android Autoを起動中</string>
     <string name="shortcut_connect_title">接続</string>
     <string name="shortcut_connect_desc">最後に認識されたデバイスに接続する</string>
+    <string name="shortcut_selfmode_title">セルフモード</string>
+    <string name="shortcut_selfmode_desc">このデバイスでAndroid Autoを開始</string>
     <string name="shortcut_disconnect_title">切断</string>
     <string name="shortcut_disconnect_desc">現在のセッションを終了する</string>
     <string name="shortcut_exit_title">アプリを閉じる</string>
@@ -384,6 +400,8 @@
 
     <string name="wifi_disabled_info">お知らせ：Wi-Fiは無効になっています。</string>
 
+    <string name="bt_not_enabled">Bluetoothが無効です</string>
+
     <!-- Vehicle Info Settings -->
     <string name="vehicle_info_settings">車両情報</string>
     <string name="vehicle_info_settings_description">お使いのスマートフォン上で、車両情報の表示方法をカスタマイズできます。</string>
@@ -419,6 +437,49 @@
     <string name="wait_for_wifi_description">起動時に、Wi-Fi接続が完了するまで待ってからWi-Fi Directを開始します。ヘッドユニットの電源投入後、Wi-Fi接続に数秒かかる場合は、この設定を有効にしてください。</string>
     <string name="wait_for_wifi_timeout">WiFi待機タイムアウト</string>
     <string name="wireless_24ghz_warning">注意：2.4GHzデバイスでのワイヤレスAndroid Autoは、ラグ、カクつき、切断の原因となる場合があります。問題が発生した場合は、USB接続でテストし、ネットワークの制限かどうかを確認してください。</string>
+    <string name="supported_nativeaa">高度なワイヤレスサポート</string>
+    <string name="supported_nativeaa_desc">素晴らしいニュース！お使いのデバイスは「ネイティブワイヤレス」モードをサポートしており、よりシームレスな Android Auto 体験を提供します。\n\nこれを有効にするには、Bluetooth キャッシュをリフレッシュする必要があります。次の手順をお願いします：\n1. スマートフォンにある既存のペアリングを削除する\n2. OK をクリックして Bluetooth を再起動する\n3. スマートフォンを再度ペアリングする\n\n今すぐネイティブ AA モードに切り替えますか？</string>
+    <string name="not_supported_nativeaa">ネイティブワイヤレスはサポートされていないようです</string>
+    <string name="not_supported_nativeaa_desc">お使いのデバイスは、ネイティブワイヤレスに必要な Bluetooth または Wi-Fi 機能をサポートしていない可能性があります。とにかく試してみることもできますが、失敗した場合は、代わりに「Wireless Helper」または「Auto (Headunit Server)」モードを使用してください。</string>
+    <string name="fake_speed_title">ビデオロックの無効化 (Fake Speed)</string>
+    <string name="fake_speed_description">走行中にビデオコンテンツがブロックされるのを防ぐため、一定の低速 (0.5 m/s) をスマートフォンに報告します。注意して使用してください。</string>
+    <string name="wireless_mode_helper">Wireless Helper</string>
+    <string name="wireless_mode_native">ネイティブ</string>
+    <string name="wireless_mode_server">Headunit Server</string>
+    <string name="server_mode_label">サーバーモード</string>
+    <string name="server_mode_manual">マニュアル</string>
+    <string name="server_mode_auto">オート</string>
+
+    <string name="helper_strategy_label">ヘルパーの接続戦略</string>
+    <string-array name="helper_strategies">
+        <item>共通 Wifi (NSD)</item>
+        <item>WiFi Direct (P2P)</item>
+        <item>周辺のデバイス (ベータ)</item>
+        <item>スマホのホットスポット (ホスト)</item>
+        <item>車載機のホットスポット (パッシブ)</item>
+    </string-array>
+
+    <string name="select_nearby_device">周辺のデバイスを選択</string>
+    <string name="nearby_device_found">周辺のデバイスが見つかりました</string>
+    <string name="connecting_to_nearby">%s に接続中…</string>
+
+    <string name="exit_dialog_title">Android Auto を終了</string>
+    <string name="exit_dialog_stop">接続を停止</string>
+    <string name="exit_dialog_pip">ピクチャー・イン・ピクチャー (PiP)</string>
+    <string name="exit_dialog_background">バックグラウンドへ移動</string>
+    <string name="gesture_hint">ヒント：左端から 2 本の指でスワイプすると、終了メニューが開きます。</string>
+    <string name="audio_latency_multiplier">オーディオ遅延倍率</string>
+    <string name="audio_latency_multiplier_description">オーディオバッファサイズの調整（低 = 遅延減、高 = 音飛び減）</string>
+    <string name="audio_queue_capacity">オーディオキュー容量 (Backpressure)</string>
+    <string name="media_action_previous">前へ</string>
+    <string name="media_action_play">再生</string>
+    <string name="media_action_pause">一時停止</string>
+    <string name="media_action_next">次へ</string>
+    <string name="media_session_aa_status_placeholder">接続済み</string>
+    <string name="sync_media_session_aa_metadata">メディアセッションにAAの再生中トラックを表示</string>
+    <string name="sync_media_session_aa_metadata_description">スマートフォンの曲名、アーティスト、再生時間、アルバムアートをシステムのメディアセッションとメディア通知に表示します</string>
+    <string name="error_usb_permission_failed">システムエラー: USBパーミッションダイアログの要求に失敗しました。</string>
+
     <!-- Custom loading screen -->
     <string name="loading_screen">読み込み画面</string>
     <string name="loading_screen_default">デフォルト</string>

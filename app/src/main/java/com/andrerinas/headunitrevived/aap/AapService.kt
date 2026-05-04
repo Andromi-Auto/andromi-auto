@@ -9,6 +9,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.SharedPreferences
 import android.net.nsd.NsdManager
 import android.net.nsd.NsdServiceInfo
 import android.net.wifi.WifiManager
@@ -32,6 +33,7 @@ import com.andrerinas.headunitrevived.app.BootCompleteReceiver
 import com.andrerinas.headunitrevived.main.MainActivity
 import com.andrerinas.headunitrevived.R
 import com.andrerinas.headunitrevived.aap.protocol.messages.NightModeEvent
+import com.andrerinas.headunitrevived.aap.protocol.proto.MediaPlayback
 import com.andrerinas.headunitrevived.connection.CommManager
 import com.andrerinas.headunitrevived.connection.NetworkDiscovery
 import com.andrerinas.headunitrevived.connection.WifiDirectManager
@@ -49,22 +51,28 @@ import com.andrerinas.headunitrevived.utils.LogExporter
 import com.andrerinas.headunitrevived.utils.NightModeManager
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.SystemClock
 import java.util.concurrent.atomic.AtomicBoolean
 import android.app.NotificationManager
 import android.content.pm.ServiceInfo
 import android.graphics.PixelFormat
+import android.media.AudioAttributes
+import android.media.AudioFocusRequest
 import android.provider.Settings as AndroidSettings
 import android.view.View
 import android.view.WindowManager
-import com.andrerinas.headunitrevived.app.UsbAttachedActivity
 import android.media.AudioManager
 import com.andrerinas.headunitrevived.utils.HotspotManager
 import com.andrerinas.headunitrevived.utils.VpnControl
 import com.andrerinas.headunitrevived.utils.SilentAudioPlayer
 import com.andrerinas.headunitrevived.connection.CarKeyReceiver
 import com.andrerinas.headunitrevived.connection.NativeAaHandshakeManager
+import com.andrerinas.headunitrevived.connection.NearbyManager
+import com.andrerinas.headunitrevived.main.BackgroundNotification
 import com.andrerinas.headunitrevived.utils.Settings
+import com.andrerinas.headunitrevived.utils.protoUint32ToLong
 import java.net.ServerSocket
 
 /**
@@ -93,6 +101,7 @@ class AapService : Service(), UsbReceiver.Listener {
     private var nightModeManager: NightModeManager? = null
     private var wifiDirectManager: WifiDirectManager? = null
     private var nativeAaHandshakeManager: NativeAaHandshakeManager? = null
+    private var nearbyManager: NearbyManager? = null
     private var carKeyReceiver: CarKeyReceiver? = null
     private var silentAudioPlayer: SilentAudioPlayer? = null
     private var wirelessServer: WirelessServer? = null
@@ -100,6 +109,49 @@ class AapService : Service(), UsbReceiver.Listener {
     private var mediaSession: MediaSessionCompat? = null
     private var permanentFocusRequest: android.media.AudioFocusRequest? = null
     private var lastMediaButtonClickTime = 0L
+
+    private var lastAaMediaMetadata: MediaPlayback.MediaMetaData? = null
+    private var lastAaPlaybackPositionMs: Long = 0L
+    private var lastAaPlaybackIsPlaying: Boolean? = null
+    private var mediaSessionIsPlaying = false
+    private var mediaMetadataDecodeJob: Job? = null
+    /** Decoded on a background thread in [scheduleApplyAaMediaMetadata]; reused for notification updates on position ticks. */
+    private var cachedAaAlbumArtBitmap: Bitmap? = null
+    private var settingsPrefs: SharedPreferences? = null
+    private val settings: Settings by lazy { App.provide(this).settings }
+    private val mediaNotification by lazy { BackgroundNotification(this) }
+
+    private val settingsPreferenceListener =
+        SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+            if (key == Settings.KEY_SYNC_MEDIA_SESSION_AA_METADATA) {
+                serviceScope.launch(Dispatchers.Main) {
+                    refreshMediaSessionMetadataForPrefsChange()
+                }
+            }
+
+            if (key == Settings.KEY_LOG_LEVEL || key == Settings.KEY_LOG_CAPTURE_ENABLED) {
+                serviceScope.launch(Dispatchers.Main) {
+                    try {
+                        val newLogLevel = settings.exporterLogLevel
+                        val exporterCaptureEnabled = settings.exporterCaptureEnabled
+                        val isCapturing = LogExporter.isCapturing
+                        val currentLogLevel = LogExporter.currentLevel
+
+                        if (!exporterCaptureEnabled || newLogLevel == LogExporter.LogLevel.SILENT) {
+                            if (isCapturing) {
+                                LogExporter.stopCapture()
+                                AppLog.d("LogExporter: stopped (enabled=$exporterCaptureEnabled, level=${newLogLevel.name})")
+                            }
+                        } else if (!isCapturing || currentLogLevel != newLogLevel) {
+                            LogExporter.startCapture(this@AapService, newLogLevel)
+                            AppLog.d("LogExporter: started with level ${newLogLevel.name}")
+                        }
+                    } catch (e: Exception) {
+                        AppLog.e("LogExporter: failed to sync state", e)
+                    }
+                }
+            }
+        }
 
     /**
      * Set to `true` before calling [stopSelf] or entering [onDestroy] to suppress any
@@ -112,8 +164,12 @@ class AapService : Service(), UsbReceiver.Listener {
     private var wifiLock: WifiManager.WifiLock? = null
 
     private var wifiReadyCallback: ConnectivityManager.NetworkCallback? = null
+
     private var wifiReadyTimeoutJob: Job? = null
     private var wifiModeInitialized = false
+
+    private var activeWifiMode = -1
+    private var activeHelperStrategy = -1
 
     /**
      * Partial wake lock acquired when the service starts from boot/screen-on.
@@ -158,10 +214,12 @@ class AapService : Service(), UsbReceiver.Listener {
      */
     @Volatile
     private var userExitedAA = false
+    @Volatile private var userExitCooldownUntil = 0L
 
     private val commManager get() = App.provide(this).commManager
 
     fun updateMediaSessionState(isPlaying: Boolean) {
+        mediaSessionIsPlaying = isPlaying
         var actions = PlaybackStateCompat.ACTION_STOP or
                 PlaybackStateCompat.ACTION_SKIP_TO_NEXT or
                 PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS or
@@ -179,11 +237,153 @@ class AapService : Service(), UsbReceiver.Listener {
 
         mediaSession?.setPlaybackState(
             PlaybackStateCompat.Builder()
-                .setState(state, 0, 1.0f)
+                .setState(state, lastAaPlaybackPositionMs, if (isPlaying) 1.0f else 0.0f)
                 .setActions(actions)
                 .build()
         )
-        AppLog.d("MediaSession: State updated to ${if (isPlaying) "PLAYING" else "STOPPED"}")
+        AppLog.d(
+            "MediaSession: State updated to ${if (isPlaying) "PLAYING" else "STOPPED"}, positionMs=$lastAaPlaybackPositionMs"
+        )
+    }
+
+    private fun applyPlaceholderMediaMetadata() {
+        mediaSession?.setMetadata(
+            MediaMetadataCompat.Builder()
+                .putString(MediaMetadataCompat.METADATA_KEY_TITLE, getString(R.string.video))
+                .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, getString(R.string.media_session_aa_status_placeholder))
+                .build()
+        )
+    }
+
+    private fun refreshMediaSessionMetadataForPrefsChange() {
+        if (isDestroying) return
+        val sync = App.provide(this).settings.syncMediaSessionWithAaMetadata
+        if (!sync) {
+            applyPlaceholderMediaMetadata()
+            cachedAaAlbumArtBitmap = null
+            mediaNotification.cancel()
+        } else {
+            val last = lastAaMediaMetadata
+            if (last != null) {
+                scheduleApplyAaMediaMetadata(last)
+            } else {
+                applyPlaceholderMediaMetadata()
+                cachedAaAlbumArtBitmap = null
+                mediaNotification.cancel()
+            }
+        }
+    }
+
+    private fun onAaMediaMetadataFromPhone(meta: MediaPlayback.MediaMetaData) {
+        if (isDestroying) return
+        lastAaMediaMetadata = meta
+        if (!App.provide(this).settings.syncMediaSessionWithAaMetadata) return
+        // Avoid showing a previous track's art with new title/artist until decode finishes.
+        cachedAaAlbumArtBitmap = null
+        scheduleApplyAaMediaMetadata(meta)
+    }
+
+    private fun onAaPlaybackStatusFromPhone(status: MediaPlayback.MediaPlaybackStatus) {
+        if (isDestroying) return
+        if (status.hasPlaybackSeconds()) {
+            lastAaPlaybackPositionMs = status.playbackSeconds.protoUint32ToLong() * 1000L
+        }
+        val isPlayingFromStatus = resolveIsPlayingFromStatus(status)
+        lastAaPlaybackIsPlaying = isPlayingFromStatus
+        mediaSessionIsPlaying = isPlayingFromStatus
+
+        if (!App.provide(this).settings.syncMediaSessionWithAaMetadata) return
+        updateMediaSessionState(isPlayingFromStatus)
+        lastAaMediaMetadata?.let { updateMediaNotification(it) }
+    }
+
+    private fun resolveIsPlayingFromStatus(status: MediaPlayback.MediaPlaybackStatus): Boolean {
+        if (!status.hasState()) return lastAaPlaybackIsPlaying ?: mediaSessionIsPlaying
+        return when (val s = status.state) {
+            MediaPlayback.MediaPlaybackStatus.State.PLAYING -> true
+            MediaPlayback.MediaPlaybackStatus.State.STOPPED,
+            MediaPlayback.MediaPlaybackStatus.State.PAUSED -> false
+        }
+    }
+
+    private fun updateMediaNotification(meta: MediaPlayback.MediaMetaData) {
+        if (!App.provide(this).settings.syncMediaSessionWithAaMetadata) return
+        mediaNotification.notify(
+            metadata = meta,
+            playbackSeconds = lastAaPlaybackPositionMs / 1000L,
+            isPlaying = lastAaPlaybackIsPlaying ?: mediaSessionIsPlaying,
+            albumArtBitmap = cachedAaAlbumArtBitmap
+        )
+    }
+
+    private fun scheduleApplyAaMediaMetadata(meta: MediaPlayback.MediaMetaData) {
+        mediaMetadataDecodeJob?.cancel()
+        mediaMetadataDecodeJob = serviceScope.launch(Dispatchers.Default) {
+            val bytes = if (meta.hasAlbumArt() && !meta.albumArt.isEmpty) meta.albumArt.toByteArray() else null
+            val bitmap = bytes?.let { decodeAlbumArt(it) }
+            if (!isActive) return@launch
+            withContext(Dispatchers.Main) {
+                if (isDestroying) return@withContext
+                if (!App.provide(this@AapService).settings.syncMediaSessionWithAaMetadata) return@withContext
+                // Drop stale decode results if newer metadata arrived while we were decoding.
+                if (lastAaMediaMetadata !== meta) return@withContext
+                cachedAaAlbumArtBitmap = bitmap
+                applyAaMediaMetadataToSession(meta, bitmap)
+                updateMediaNotification(meta)
+            }
+        }
+    }
+
+    private fun decodeAlbumArt(bytes: ByteArray): Bitmap? {
+        if (bytes.isEmpty()) return null
+        return try {
+            val opts = BitmapFactory.Options()
+            opts.inJustDecodeBounds = true
+            BitmapFactory.decodeByteArray(bytes, 0, bytes.size, opts)
+            if (opts.outWidth <= 0 || opts.outHeight <= 0) {
+                opts.inJustDecodeBounds = false
+                opts.inSampleSize = 1
+                return BitmapFactory.decodeByteArray(bytes, 0, bytes.size, opts)
+            }
+            var sampleSize = 1
+            val maxDim = 720
+            while (opts.outWidth / sampleSize > maxDim || opts.outHeight / sampleSize > maxDim) {
+                sampleSize *= 2
+            }
+            opts.inJustDecodeBounds = false
+            opts.inSampleSize = sampleSize
+            BitmapFactory.decodeByteArray(bytes, 0, bytes.size, opts)
+        } catch (_: OutOfMemoryError) {
+            null
+        }
+    }
+
+    private fun applyAaMediaMetadataToSession(meta: MediaPlayback.MediaMetaData, albumArt: Bitmap?) {
+        val session = mediaSession ?: return
+        val title = when {
+            meta.hasSong() && meta.song.isNotBlank() -> meta.song
+            else -> getString(R.string.video)
+        }
+        val artist = when {
+            meta.hasArtist() && meta.artist.isNotBlank() -> meta.artist
+            else -> getString(R.string.media_session_aa_status_placeholder)
+        }
+        val b = MediaMetadataCompat.Builder()
+            .putString(MediaMetadataCompat.METADATA_KEY_TITLE, title)
+            .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, artist)
+        if (meta.hasAlbum() && meta.album.isNotBlank()) {
+            b.putString(MediaMetadataCompat.METADATA_KEY_ALBUM, meta.album)
+        }
+        if (meta.hasDurationSeconds()) {
+            val durationSec = meta.durationSeconds.protoUint32ToLong()
+            if (durationSec > 0L) {
+                b.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, durationSec * 1000L)
+            }
+        }
+        if (albumArt != null) {
+            b.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, albumArt)
+        }
+        session.setMetadata(b.build())
     }
 
     // Receives ACTION_REQUEST_NIGHT_MODE_UPDATE broadcasts sent by the key-binding handler
@@ -425,23 +625,55 @@ class AapService : Service(), UsbReceiver.Listener {
         mediaSession?.isActive = true
         updateMediaSessionState(false) // Set initial PlaybackState so system knows our actions
 
-        LogExporter.startCapture(this, LogExporter.LogLevel.DEBUG)
-        AppLog.i("Auto-started continuous log capture")
+        commManager.onAaMediaMetadata = { meta -> onAaMediaMetadataFromPhone(meta) }
+        commManager.onAaPlaybackStatus = { status -> onAaPlaybackStatusFromPhone(status) }
+        settingsPrefs = getSharedPreferences("settings", MODE_PRIVATE).also { prefs ->
+            prefs.registerOnSharedPreferenceChangeListener(settingsPreferenceListener)
+        }
+
+        val exporterLevel = App.provide(this).settings.exporterLogLevel
+        val settings = App.provide(this).settings
+        if (settings.exporterCaptureEnabled && exporterLevel != LogExporter.LogLevel.SILENT) {
+            LogExporter.startCapture(this, exporterLevel)
+        }
 
         startService(GpsLocationService.intent(this))
 
         nativeAaHandshakeManager = NativeAaHandshakeManager(this, serviceScope)
         wifiDirectManager = WifiDirectManager(this)
+        
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            try {
+                nearbyManager = NearbyManager(this, serviceScope) { socket ->
+                    val settings = App.provide(this).settings
+                    settings.saveLastConnection(Settings.CONNECTION_TYPE_NEARBY)
+                    serviceScope.launch(Dispatchers.IO) {
+                        commManager.connect(socket)
+                    }
+                }
+            } catch (e: Exception) {
+                AppLog.e("AapService: Failed to init NearbyManager: ${e.message}")
+            }
+        }
+        
         initWifiModeWithOptionalWait()
         wifiDirectManager?.setCredentialsListener { ssid, psk, ip, bssid ->
-            AppLog.i("AapService: Received WiFi credentials from manager (SSID=$ssid, IP=$ip). Updating HandshakeManager.")
-            nativeAaHandshakeManager?.updateWifiCredentials(ssid, psk, ip, bssid)
+            val settings = App.provide(this).settings
+            if (settings.wifiConnectionMode == 3) {
+                AppLog.i("AapService: Received WiFi credentials from manager (SSID=$ssid, IP=$ip). Updating and Triggering Poke.")
+                nativeAaHandshakeManager?.updateWifiCredentials(ssid, psk, ip, bssid)
+                // [FIX] Only auto-poke if the user didn't explicitly exit.
+                // If they did, they must click the "WiFi" button manually to poke.
+                if (!userExitedAA) {
+                    nativeAaHandshakeManager?.triggerPoke()
+                } else {
+                    AppLog.i("AapService: userExitedAA is true. Skipping auto-poke.")
+                }
+            } else {
+                AppLog.d("AapService: WiFi credentials received, but not in Native AA mode. Skipping HandshakeManager update.")
+            }
         }
 
-        // Start the BT handshake server if enabled
-        if (App.provide(this).settings.wifiConnectionMode == 3) {
-            nativeAaHandshakeManager?.start()
-        }
 
         carKeyReceiver = CarKeyReceiver()
         silentAudioPlayer = SilentAudioPlayer(this)
@@ -449,35 +681,6 @@ class AapService : Service(), UsbReceiver.Listener {
         initWifiMode()
         checkAlreadyConnectedUsb()
         registerNetworkMonitor()
-
-        // Grab permanent AUDIOFOCUS_GAIN at service start.
-        // This ensures the headunit owns system audio focus before any AA connection,
-        // preventing other apps from stealing it and causing AA to keep audio on the phone.
-        val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val attrs = android.media.AudioAttributes.Builder()
-                .setUsage(android.media.AudioAttributes.USAGE_MEDIA)
-                .setContentType(android.media.AudioAttributes.CONTENT_TYPE_MUSIC)
-                .build()
-            permanentFocusRequest = android.media.AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
-                .setAudioAttributes(attrs)
-                .setWillPauseWhenDucked(false)
-                .setOnAudioFocusChangeListener(AudioManager.OnAudioFocusChangeListener { focusChange ->
-                    AppLog.d("Permanent audio focus changed: $focusChange")
-                })
-                .build()
-            audioManager.requestAudioFocus(permanentFocusRequest!!)
-        } else {
-            @Suppress("DEPRECATION")
-            audioManager.requestAudioFocus(
-                AudioManager.OnAudioFocusChangeListener { focusChange ->
-                    AppLog.d("Permanent audio focus changed: $focusChange")
-                },
-                AudioManager.STREAM_MUSIC,
-                AudioManager.AUDIOFOCUS_GAIN
-            )
-        }
-        AppLog.i("Grabbed permanent AUDIOFOCUS_GAIN at service start")
     }
 
     /** Enables Android Automotive UI mode so the system uses car-optimised layouts. */
@@ -512,6 +715,9 @@ class AapService : Service(), UsbReceiver.Listener {
             commManager.connectionState.collect { state ->
                 when (state) {
                     is CommManager.ConnectionState.Connected -> onConnected()
+                    is CommManager.ConnectionState.HandshakeComplete -> {
+                        launchAapProjectionActivity()
+                    }
                     is CommManager.ConnectionState.TransportStarted -> {
                         hasEverConnected = true
                         accessoryHandshakeFailures = 0
@@ -534,6 +740,82 @@ class AapService : Service(), UsbReceiver.Listener {
     }
 
     /**
+     * Performs the permanent audio focus request used for AA audio sink.
+     *
+     * This logic was previously executed in onCreate(); it has been moved here so
+     * the caller can decide when to acquire focus (for example, immediately before
+     * starting the AA handshake) to avoid stealing audio during autostart.
+     */
+    private fun requestPermanentAudioFocus() {
+        if (!settings.enableAudioSink) {
+            AppLog.d("Audio Sink disabled - skipping permanent audio focus request.")
+            return
+        }
+
+        try {
+            val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                if (permanentFocusRequest == null) {
+                    val attrs = AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_MEDIA)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                        .build()
+                    permanentFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+                        .setAudioAttributes(attrs)
+                        .setWillPauseWhenDucked(false)
+                        .setOnAudioFocusChangeListener { focusChange ->
+                            AppLog.d("AapService: Permanent audio focus changed: $focusChange")
+                        }
+                        .build()
+                }
+                val res = audioManager.requestAudioFocus(permanentFocusRequest!!)
+                AppLog.d("AapService: requestPermanentAudioFocus: result=$res")
+            } else {
+                @Suppress("DEPRECATION")
+                val res = audioManager.requestAudioFocus(
+                    { focusChange -> AppLog.d("AapService: Permanent audio focus changed: $focusChange") },
+                    AudioManager.STREAM_MUSIC,
+                    AudioManager.AUDIOFOCUS_GAIN
+                )
+                AppLog.d("AapService: requestPermanentAudioFocus (legacy): result=$res")
+            }
+        } catch (e: Exception) {
+            AppLog.e("AapService: requestPermanentAudioFocus failed", e)
+        }
+    }
+
+    /**
+     * Releases any permanent audio focus previously requested by [requestPermanentAudioFocus].
+     *
+     * This is invoked on disconnect to return audio focus to the phone or other media
+     * apps so that playback can resume normally. Supports both the modern
+     * AudioFocusRequest API (API >= O) and the legacy abandonAudioFocus path.
+     */
+    private fun releasePermanentAudioFocus() {
+        try {
+            val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                permanentFocusRequest?.let {
+                    audioManager.abandonAudioFocusRequest(it)
+                    AppLog.d("AapService: abandoned permanent audio focus request")
+                    permanentFocusRequest = null
+                }
+            } else {
+                @Suppress("DEPRECATION")
+                try {
+                    audioManager.abandonAudioFocus(null)
+                    AppLog.d("AapService: abandoned legacy audio focus (null listener)")
+                } catch (e: Exception) {
+                    // Some devices may not accept a null listener; ignore failures
+                    AppLog.e("AapService: releasePermanentAudioFocus failed", e)
+                }
+            }
+        } catch (e: Exception) {
+            AppLog.e("AapService: Failed to abandon audio focus", e)
+        }
+    }
+
+    /**
      * Called by [CommManager.ConnectionState.Connected] observer:
      * 1. Refreshes the foreground notification.
      * 2. Activates a [MediaSessionCompat] so media keys are routed to Android Auto.
@@ -552,7 +834,9 @@ class AapService : Service(), UsbReceiver.Listener {
         acquireWifiLock()
 
         // Start silent audio hack to keep media focus (helps with steering wheel buttons)
-        silentAudioPlayer?.start()
+        if (settings.enableAudioSink) {
+            silentAudioPlayer?.start()
+        }
 
         // Register the comprehensive steering wheel key receiver
         val filter = IntentFilter().apply {
@@ -573,13 +857,21 @@ class AapService : Service(), UsbReceiver.Listener {
         // Reactivate the existing MediaSession (created in onCreate, kept alive across disconnects)
         mediaSession?.isActive = true
         updateMediaSessionState(true)
+        applyPlaceholderMediaMetadata()
 
         // Link audio focus state changes to our MediaSession state
         commManager.onAudioFocusStateChanged = { isPlaying ->
             updateMediaSessionState(isPlaying)
         }
 
+        // Acquire permanent audio focus just before starting the AA handshake so we
+        // don't steal audio during service autostart but still obtain focus when a
+        // real connection is beginning.
+        requestPermanentAudioFocus()
         serviceScope.launch { commManager.startHandshake() }
+    }
+
+    private fun launchAapProjectionActivity() {
         startActivity(AapProjectionActivity.intent(this).apply {
             putExtra(AapProjectionActivity.EXTRA_FOCUS, true)
             addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
@@ -653,11 +945,8 @@ class AapService : Service(), UsbReceiver.Listener {
                 }
             })
             setPlaybackToLocal(android.media.AudioManager.STREAM_MUSIC)
-            setMetadata(MediaMetadataCompat.Builder()
-                .putString(MediaMetadataCompat.METADATA_KEY_TITLE, "Android Auto")
-                .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, "Connected")
-                .build())
         }
+        applyPlaceholderMediaMetadata()
     }
 
     /**
@@ -673,11 +962,21 @@ class AapService : Service(), UsbReceiver.Listener {
 
         // Cleanup steering wheel and audio focus hacks
         silentAudioPlayer?.stop()
+        // Release any permanent audio focus we may have requested when connected
+        releasePermanentAudioFocus()
         try {
             carKeyReceiver?.let { unregisterReceiver(it) }
         } catch (e: Exception) {}
 
         if (!isDestroying) updateNotification()
+        mediaMetadataDecodeJob?.cancel()
+        mediaMetadataDecodeJob = null
+        lastAaMediaMetadata = null
+        lastAaPlaybackPositionMs = 0L
+        lastAaPlaybackIsPlaying = null
+        cachedAaAlbumArtBitmap = null
+        mediaNotification.cancel()
+        applyPlaceholderMediaMetadata()
         // Keep MediaSession alive across disconnect/reconnect cycles.
         // Only deactivate it — do NOT release it. A released session can no longer
         // receive media button events, which means the keymap stops working until
@@ -685,9 +984,37 @@ class AapService : Service(), UsbReceiver.Listener {
         mediaSession?.isActive = false
         updateMediaSessionState(false)
         serviceScope.launch(Dispatchers.IO) {
+            nearbyManager?.stop() // Disconnect Nearby tunnel
+            
+            val settings = App.provide(this@AapService).settings
+            if (settings.wifiConnectionMode == 3) {
+                if (state.isUserExit) {
+                    // [FIX] User voluntarily exited AA. Stop the BT handshake servers and
+                    // tear down the WiFi Direct group so the phone can't auto-reconnect.
+                    AppLog.i("AapService: Native AA user exit. Stopping handshake manager and WiFi Direct group.")
+                    nativeAaHandshakeManager?.stop()
+                } else {
+                    // Unexpected disconnect — reset and re-initialize for auto-reconnect.
+                    AppLog.i("AapService: Native AA Mode disconnected. Resetting manager and group in 1.5s...")
+                    nativeAaHandshakeManager?.stop()
+                    serviceScope.launch {
+                        delay(1500) // Give hardware time to settle before re-initializing P2P
+                        initWifiMode(force = true)
+                    }
+                }
+            }
             App.provide(this@AapService).audioDecoder.stop()
             App.provide(this@AapService).videoDecoder.stop("AapService::onDisconnect")
         }
+
+        // [FIX] Set cooldown flag for ALL user exits (not just USB).
+        // The WirelessServer checks this flag to reject instant reconnections.
+        if (state.isUserExit) {
+            userExitedAA = true
+            userExitCooldownUntil = android.os.SystemClock.elapsedRealtime() + USER_EXIT_COOLDOWN_MS
+            AppLog.i("AapService: User exit cooldown active for ${USER_EXIT_COOLDOWN_MS}ms")
+        }
+
         scheduleReconnectIfNeeded(state)
     }
 
@@ -708,16 +1035,33 @@ class AapService : Service(), UsbReceiver.Listener {
             return
         }
 
+        val settings = App.provide(this).settings
+
         if (wirelessServer != null) {
+            // Skip reconnect for user-initiated exits — the user explicitly wants to stop.
+            if (state.isUserExit) {
+                AppLog.i("AapService: User exit with wirelessServer active. Not restarting discovery.")
+                return
+            }
             AppLog.i("AapService: Disconnected. Restarting discovery loop in 2s...")
             serviceScope.launch {
                 delay(2000)
-                if (!commManager.isConnected) startDiscovery()
+                if (!commManager.isConnected) {
+                    if (settings.wifiConnectionMode == 2 && settings.helperConnectionStrategy == 2) {
+                        nearbyManager?.start()
+                    } else if (settings.wifiConnectionMode == 2 && settings.helperConnectionStrategy == 1) {
+                        val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as android.net.wifi.WifiManager
+                        if (wifiManager.isWifiEnabled) {
+                            wifiDirectManager?.makeVisible()
+                        }
+                    } else {
+                        startDiscovery()
+                    }
+                }
             }
             return
         }
 
-        val settings = App.provide(this).settings
         val lastType = settings.lastConnectionType
 
         // USB auto-reconnect: try again after a delay to give dongles time to re-enumerate.
@@ -938,41 +1282,74 @@ class AapService : Service(), UsbReceiver.Listener {
         initWifiMode()
     }
 
-    /** Starts [WirelessServer] if the user has configured server WiFi mode (mode == 2). */
-    private fun initWifiMode() {
+    /** Starts [WirelessServer] if the user has configured server WiFi mode. */
+    private fun initWifiMode(force: Boolean = false) {
         val settings = App.provide(this).settings
         val mode = settings.wifiConnectionMode
+        val strategy = settings.helperConnectionStrategy
 
-        AppLog.i("AapService: Initializing WiFi Mode: $mode")
+        if (!force && mode == activeWifiMode && strategy == activeHelperStrategy) {
+            AppLog.d("AapService: WiFi Mode $mode (Strategy: $strategy) is already initialized.")
+            return
+        }
+
+        AppLog.i("AapService: Initializing WiFi Mode: $mode (Strategy: $strategy)")
 
         // 0. Clean up existing wireless state before re-initializing
         stopWirelessServer()
         networkDiscovery?.stop()
+        nearbyManager?.stop()
+        nativeAaHandshakeManager?.stop()
 
         // Mode 1: Auto (Headunit Server), Mode 2: Helper (Wireless Launcher), Mode 3: Native AA
         if (mode == 1 || mode == 2 || mode == 3) {
             startWirelessServer()
 
-            // 1. Hotspot Logic (Only for Mode 1 and 2)
-            if ((mode == 1 || mode == 2) && settings.autoEnableHotspot) {
-                Thread {
-                    AppLog.i("AapService: Auto-enabling hotspot...")
-                    HotspotManager.setHotspotEnabled(this, true)
-                }.start()
+            // Mode 1: Headunit Server Mode
+            if (mode == 1) {
+                // Auto discovery for standard server mode via NSD/mDNS
+                startDiscovery(oneShot = false)
             }
 
-            // 2. WiFi Direct Logic (Mode 3 needs Quiet Host, Mode 1/2 needs Visibility)
-            val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as android.net.wifi.WifiManager
-            if (wifiManager.isWifiEnabled) {
-                if (mode == 3) {
-                    wifiDirectManager?.startNativeAaQuietHost()
-                } else if (mode == 1 || mode == 2) {
-                    wifiDirectManager?.makeVisible()
+            // Mode 2: Wireless Helper Mode
+            if (mode == 2) {
+                when (strategy) {
+                    0 -> startDiscovery(oneShot = false) // Common Wifi (NSD)
+                    1 -> { // WiFi Direct (P2P)
+                        val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as android.net.wifi.WifiManager
+                        if (wifiManager.isWifiEnabled) {
+                            wifiDirectManager?.makeVisible()
+                        }
+                    }
+                    2 -> { // Google Nearby
+                        nearbyManager?.start()
+                    }
+                    3, 4 -> { /* Host/Passive - just wait for connection on WirelessServer port */ }
                 }
-            } else {
-                AppLog.i("AapService: WiFi is disabled, skipping Wi-Fi Direct initialization.")
+                
+                // Hotspot logic for Helper mode if enabled
+                if (settings.autoEnableHotspot) {
+                    Thread {
+                        AppLog.i("AapService: Auto-enabling hotspot for Helper mode...")
+                        HotspotManager.setHotspotEnabled(this, true)
+                    }.start()
+                }
+            }
+
+            // Mode 3: Native AA Wireless
+            if (mode == 3) {
+                val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as android.net.wifi.WifiManager
+                if (wifiManager.isWifiEnabled) {
+                    // Start WiFi Direct as a "quiet host" (P2P Group for phone to join)
+                    wifiDirectManager?.startNativeAaQuietHost()
+                }
+                // Start the official Bluetooth handshake servers
+                nativeAaHandshakeManager?.start()
             }
         }
+        
+        activeWifiMode = mode
+        activeHelperStrategy = strategy
     }
 
     private fun acquireWifiLock() {
@@ -1038,6 +1415,13 @@ class AapService : Service(), UsbReceiver.Listener {
     override fun onDestroy() {
         AppLog.i("AapService destroying... (wakeLock held=${bootWakeLock?.isHeld == true})")
         isDestroying = true
+        mediaMetadataDecodeJob?.cancel()
+        cachedAaAlbumArtBitmap = null
+        mediaNotification.cancel()
+        commManager.onAaMediaMetadata = null
+        commManager.onAaPlaybackStatus = null
+        settingsPrefs?.unregisterOnSharedPreferenceChangeListener(settingsPreferenceListener)
+        settingsPrefs = null
         nativeAaHandshakeManager?.stop()
         releaseBootWakeLock()
 
@@ -1061,6 +1445,7 @@ class AapService : Service(), UsbReceiver.Listener {
         stopForeground(true)
         stopWirelessServer()
         wifiDirectManager?.stop()
+        nearbyManager?.stop()
         mediaSession?.isActive = false
         mediaSession?.release()
         mediaSession = null
@@ -1074,14 +1459,21 @@ class AapService : Service(), UsbReceiver.Listener {
         serviceScope.cancel()
         LogExporter.stopCapture()
         super.onDestroy()
+        if (killProcessOnDestroy) {
+            AppLog.i("AapService: killProcessOnDestroy is true. Triggering System.exit(0).")
+            System.exit(0)
+        }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         // Handle stop before re-posting the notification to avoid a flash
         if (intent?.action == ACTION_STOP_SERVICE) {
-            AppLog.i("Stop action received.")
+            AppLog.i("Stop action received. Broadcasting finish request to activities.")
+            sendBroadcast(Intent("com.andrerinas.headunitrevived.ACTION_FINISH_ACTIVITIES").apply {
+                setPackage(packageName)
+            })
             isDestroying = true
-            if (commManager.isConnected) commManager.disconnect()
+            if (commManager.isConnected) commManager.disconnect(sendByeBye = true)
             stopForeground(true)
             stopSelf()
             return START_NOT_STICKY
@@ -1124,8 +1516,27 @@ class AapService : Service(), UsbReceiver.Listener {
             ACTION_START_SELF_MODE       -> startSelfMode()
             ACTION_START_WIRELESS        -> initWifiMode()
             ACTION_START_WIRELESS_SCAN   -> {
-                val mode = App.provide(this).settings.wifiConnectionMode
-                if (mode != 3) {
+                val settings = App.provide(this).settings
+                val mode = settings.wifiConnectionMode
+                val strategy = settings.helperConnectionStrategy
+                
+                // [FIX] Reset exit flags on manual scan start
+                userExitedAA = false
+                userExitCooldownUntil = 0L
+                initWifiMode(force = true)
+
+                if (mode == 2 && strategy == 2) {
+                    AppLog.i("AapService: Force-starting Nearby discovery from UI")
+                    nearbyManager?.start()
+                } else if (mode == 2 && strategy == 1) {
+                    AppLog.i("AapService: Force-starting WiFi Direct discovery from UI")
+                    val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as android.net.wifi.WifiManager
+                    if (wifiManager.isWifiEnabled) {
+                        wifiDirectManager?.makeVisible()
+                    } else {
+                        Toast.makeText(this, getString(R.string.wifi_disabled_info), Toast.LENGTH_SHORT).show()
+                    }
+                } else if (mode != 3) {
                     startDiscovery(oneShot = (mode != 2))
                 }
             }
@@ -1134,9 +1545,19 @@ class AapService : Service(), UsbReceiver.Listener {
                 val mac = intent?.getStringExtra(EXTRA_MAC)
                 if (mac != null) {
                     AppLog.i("AapService: Received manual Native-AA poke request for $mac")
-                    // Ensure WiFi Direct is ready before poking
-                    initWifiMode()
+                    // [FIX] Reset exit flags so the subsequent connection is accepted
+                    userExitedAA = false
+                    userExitCooldownUntil = 0L
+                    // Ensure WiFi Direct and BT servers are ready before poking
+                    initWifiMode(force = true)
                     nativeAaHandshakeManager?.manualPoke(mac)
+                }
+            }
+            ACTION_NEARBY_CONNECT         -> {
+                val endpointId = intent?.getStringExtra(EXTRA_ENDPOINT_ID)
+                if (endpointId != null) {
+                    AppLog.i("AapService: Connecting to Nearby endpoint $endpointId")
+                    nearbyManager?.connectToEndpoint(endpointId)
                 }
             }
             ACTION_DISCONNECT            -> {
@@ -1249,8 +1670,13 @@ class AapService : Service(), UsbReceiver.Listener {
         val usbManager = getSystemService(Context.USB_SERVICE) as UsbManager
         val permissionIntent = UsbReceiver.createPermissionPendingIntent(this)
         AppLog.i("Requesting USB permission for ${UsbDeviceCompat(device).uniqueName}")
-        Toast.makeText(this, getString(R.string.requesting_usb_permission), Toast.LENGTH_SHORT).show()
-        usbManager.requestPermission(device, permissionIntent)
+        try {
+            Toast.makeText(this, getString(R.string.requesting_usb_permission), Toast.LENGTH_SHORT).show()
+            usbManager.requestPermission(device, permissionIntent)
+        } catch (e: Exception) {
+            AppLog.e("Failed to request USB permission: ${e.message}. This device might not support USB permission dialogs.", e)
+            Toast.makeText(this, getString(R.string.error_usb_permission_failed), Toast.LENGTH_LONG).show()
+        }
     }
 
     /**
@@ -1321,13 +1747,8 @@ class AapService : Service(), UsbReceiver.Listener {
                 val deviceName = UsbDeviceCompat(device).uniqueName
                 AppLog.i("Found device already in accessory mode: $deviceName")
                 if (!usbManager.hasPermission(device)) {
-                    AppLog.i("Accessory-mode device has no permission (re-enumerated); launching UsbAttachedActivity: $deviceName")
-                    // Launch UsbAttachedActivity to handle permission request from foreground
-                    startActivity(Intent(this, UsbAttachedActivity::class.java).apply {
-                        action = UsbManager.ACTION_USB_DEVICE_ATTACHED
-                        putExtra(UsbManager.EXTRA_DEVICE, device)
-                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    })
+                    AppLog.i("Accessory-mode device has no permission (re-enumerated); requesting permission: $deviceName")
+                    requestUsbPermission(device)
                     return
                 }
                 isSwitchingToAccessory.set(true)
@@ -1465,9 +1886,15 @@ class AapService : Service(), UsbReceiver.Listener {
      */
     private fun startWirelessServer() {
         if (wirelessServer != null) return
-        val mode = App.provide(this).settings.wifiConnectionMode
-        wirelessServer = WirelessServer().apply { start(registerNsd = (mode != 3)) }
-        if (mode != 3) {
+        val settings = App.provide(this).settings
+        val mode = settings.wifiConnectionMode
+        val strategy = settings.helperConnectionStrategy
+
+        // Only register NSD for Headunit Server (Auto) or Helper (Common Wifi NSD)
+        val shouldRegisterNsd = mode == 1 || (mode == 2 && strategy == 0)
+
+        wirelessServer = WirelessServer().apply { start(registerNsd = shouldRegisterNsd) }
+        if (shouldRegisterNsd) {
             startDiscovery()
         }
     }
@@ -1479,7 +1906,13 @@ class AapService : Service(), UsbReceiver.Listener {
      *                used for the "auto WiFi" reconnect case.
      */
     private fun startDiscovery(oneShot: Boolean = false) {
-        if (App.provide(this).settings.wifiConnectionMode == 3) return
+        val settings = App.provide(this).settings
+        val mode = settings.wifiConnectionMode
+        val strategy = settings.helperConnectionStrategy
+
+        if (mode == 3) return
+        // Allow discovery for Strategy 0 (NSD), 3 (Phone Hotspot) and 4 (Headunit Hotspot)
+        if (mode == 2 && strategy != 0 && strategy != 3 && strategy != 4) return
         if (commManager.isConnected || (wirelessServer == null && !oneShot)) return
 
         networkDiscovery?.stop()
@@ -1527,6 +1960,8 @@ class AapService : Service(), UsbReceiver.Listener {
     }
 
     private fun stopWirelessServer() {
+        activeWifiMode = -1
+        activeHelperStrategy = -1
         networkDiscovery?.stop()
         networkDiscovery = null
         wirelessServer?.stopServer()
@@ -1728,13 +2163,13 @@ class AapService : Service(), UsbReceiver.Listener {
         selfMode = true
         startWirelessServer()
 
-        serviceScope.launch(kotlinx.coroutines.Dispatchers.Main) {
+        serviceScope.launch(Dispatchers.Main) {
             val connectivityManager = getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && connectivityManager.activeNetwork == null) {
                 // Wait up to 1 second for the Dummy VPN to become the active network
                 for (i in 1..10) {
                     if (connectivityManager.activeNetwork != null) break
-                    kotlinx.coroutines.delay(100)
+                    delay(100)
                 }
             }
 
@@ -1761,20 +2196,28 @@ class AapService : Service(), UsbReceiver.Listener {
             } catch (e: Exception) {
                 AppLog.w("Activity launch failed (${e.message}). Attempting Broadcast fallback...")
                 try {
-                    val receiverIntent = Intent().apply {
-                        setClassName(
-                            "com.google.android.projection.gearhead",
-                            "com.google.android.apps.auto.wireless.setup.receiver.WirelessStartupReceiver"
-                        )
-                        action = "com.google.android.apps.auto.wireless.setup.receiver.wirelessstartup.START"
-                        putExtra("ip_address", "127.0.0.1")
-                        putExtra("projection_port", 5288)
-                        networkToUse?.let { putExtra("PARAM_SERVICE_WIFI_NETWORK", it) }
-                        fakeWifiInfo?.let { putExtra("wifi_info", it) }
-                        addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
+
+                    AppLog.w("WirelessStartupActivity not found (AA 16.4+ detected).")
+                    if (Build.VERSION.SDK_INT <= 29) {
+                        // On Android 10, if Activity is gone, Broadcast will definitely be blocked by Gearhead's version check.
+                        AppLog.e("Self-mode blocked by Google on Android 10 (AA 16.4+). Skipping broadcast fallback.")
+                        Toast.makeText(this@AapService, getString(R.string.failed_self_mode_android10), Toast.LENGTH_LONG).show()
+                    } else {
+                        val receiverIntent = Intent().apply {
+                            setClassName(
+                                "com.google.android.projection.gearhead",
+                                "com.google.android.apps.auto.wireless.setup.receiver.WirelessStartupReceiver"
+                            )
+                            action = "com.google.android.apps.auto.wireless.setup.receiver.wirelessstartup.START"
+                            putExtra("ip_address", "127.0.0.1")
+                            putExtra("projection_port", 5288)
+                            networkToUse?.let { putExtra("PARAM_SERVICE_WIFI_NETWORK", it) }
+                            fakeWifiInfo?.let { putExtra("wifi_info", it) }
+                            addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
+                        }
+                        sendBroadcast(receiverIntent)
+                        AppLog.i("Broadcast fallback sent successfully.")
                     }
-                    sendBroadcast(receiverIntent)
-                    AppLog.i("Broadcast fallback sent successfully.")
                 } catch (e2: Exception) {
                     AppLog.e("Both Activity and Broadcast triggers failed", e2)
                     Toast.makeText(this@AapService, getString(R.string.failed_start_android_auto), Toast.LENGTH_SHORT).show()
@@ -1809,6 +2252,8 @@ class AapService : Service(), UsbReceiver.Listener {
             wifiInfo
         } catch (e: Exception) { null }
     }
+
+
 
     // -------------------------------------------------------------------------
     // WirelessServer
@@ -1855,8 +2300,15 @@ class AapService : Service(), UsbReceiver.Listener {
                                 withContext(Dispatchers.IO) {
                                     try { clientSocket.close() } catch (e: Exception) {}
                                 }
+                            } else if (android.os.SystemClock.elapsedRealtime() < userExitCooldownUntil) {
+                                // [FIX] User just exited AA — reject the instant reconnection.
+                                AppLog.w("WirelessServer: Rejecting connection from ${clientSocket.inetAddress} — user exit cooldown active (${userExitCooldownUntil - System.currentTimeMillis()}ms remaining)")
+                                withContext(Dispatchers.IO) {
+                                    try { clientSocket.close() } catch (e: Exception) {}
+                                }
                             } else {
                                 AppLog.i("WirelessServer: Accepted client connection from ${clientSocket.inetAddress}. Passing to CommManager...")
+                                userExitedAA = false // Clear flag on genuine new connection
                                 commManager.connect(clientSocket)
                             }
                         }
@@ -1922,6 +2374,13 @@ class AapService : Service(), UsbReceiver.Listener {
     // -------------------------------------------------------------------------
 
     companion object {
+        /**
+         * If set to `true`, the service will call [System.exit] at the very end of [onDestroy].
+         * This is used by `killOnDisconnect` to ensure all cleanup (like Car Mode) completes
+         * before the process dies.
+         */
+        var killProcessOnDestroy: Boolean = false
+
         /** `true` while a Self Mode session is active. */
         var selfMode = false
 
@@ -1941,11 +2400,13 @@ class AapService : Service(), UsbReceiver.Listener {
         const val ACTION_START_WIRELESS_SCAN       = "com.andrerinas.headunitrevived.ACTION_START_WIRELESS_SCAN"
         const val ACTION_STOP_WIRELESS             = "com.andrerinas.headunitrevived.ACTION_STOP_WIRELESS"
         const val ACTION_NATIVE_AA_POKE            = "com.andrerinas.headunitrevived.ACTION_NATIVE_AA_POKE"
+        const val ACTION_NEARBY_CONNECT             = "com.andrerinas.headunitrevived.ACTION_NEARBY_CONNECT"
         const val ACTION_CHECK_USB                 = "com.andrerinas.headunitrevived.ACTION_CHECK_USB"
         const val ACTION_STOP_SERVICE              = "com.andrerinas.headunitrevived.ACTION_STOP_SERVICE"
         const val ACTION_DISCONNECT                = "com.andrerinas.headunitrevived.ACTION_DISCONNECT"
         const val ACTION_REQUEST_NIGHT_MODE_UPDATE = "com.andrerinas.headunitrevived.ACTION_REQUEST_NIGHT_MODE_UPDATE"
         const val ACTION_NIGHT_MODE_CHANGED      = "com.andrerinas.headunitrevived.ACTION_NIGHT_MODE_CHANGED"
+        const val ACTION_ORIENTATION_CHANGED     = "com.andrerinas.headunitrevived.ACTION_ORIENTATION_CHANGED"
         /**
          * Sent after the caller has already invoked [CommManager.connect(socket)].
          * The [observeConnectionState] flow observer handles the result — [onStartCommand]
@@ -1959,6 +2420,10 @@ class AapService : Service(), UsbReceiver.Listener {
         /** Delay before retrying USB connection after an unexpected disconnect. */
         private const val USB_RECONNECT_DELAY_MS = 3000L
 
+        /** Cooldown period after user-initiated exit. During this window, the WirelessServer
+         *  rejects incoming connections to prevent the phone from instantly reconnecting. */
+        private const val USER_EXIT_COOLDOWN_MS = 5000L
+
         /** Delay before AapService tries to handle a normal-mode USB attach as a fallback
          *  when UsbAttachedActivity doesn't fire (common on Chinese MediaTek headunits). */
         private const val USB_ATTACH_FALLBACK_DELAY_MS = 2000L
@@ -1968,5 +2433,6 @@ class AapService : Service(), UsbReceiver.Listener {
         private const val HIBERNATE_WAKE_THRESHOLD_MS = 60_000L
 
         const val EXTRA_MAC = "extra_mac"
+        const val EXTRA_ENDPOINT_ID = "extra_endpoint_id"
     }
 }

@@ -2,7 +2,10 @@ package com.andrerinas.headunitrevived.main
 
 import android.app.AlertDialog
 import android.content.Intent
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings as SystemSettings
 import android.text.InputType
 import android.view.LayoutInflater
 import android.view.View
@@ -23,6 +26,7 @@ import com.andrerinas.headunitrevived.main.settings.SettingsAdapter
 import com.andrerinas.headunitrevived.utils.Settings
 import com.andrerinas.headunitrevived.utils.LocaleHelper
 import com.andrerinas.headunitrevived.BuildConfig
+import com.andrerinas.headunitrevived.utils.LogExporter
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -38,6 +42,7 @@ class SettingsFragment : Fragment() {
     private var pendingMicSampleRate: Int? = null
     private var pendingUseGps: Boolean? = null
     private var pendingShowNavigationNotifications: Boolean? = null
+    private var pendingSyncMediaSessionAaMetadata: Boolean? = null
     private var pendingResolution: Int? = null
     private var pendingDpi: Int? = null
     private var pendingFullscreenMode: Settings.FullscreenMode? = null
@@ -47,6 +52,7 @@ class SettingsFragment : Fragment() {
     private var pendingFpsLimit: Int? = null
     private var pendingBluetoothAddress: String? = null
     private var pendingEnableAudioSink: Boolean? = null
+    private var pendingSeparateAudioStreams: Boolean? = null
     private var pendingUseAacAudio: Boolean? = null
     private var pendingMicInputSource: Int? = null
     private var pendingUseNativeSsl: Boolean? = null
@@ -58,13 +64,18 @@ class SettingsFragment : Fragment() {
     private var pendingAppLanguage: String? = null
     private var pendingFakeSpeed: Boolean? = null
     
+    private var pendingWifiConnectionMode: Int? = null
+    private var pendingHelperConnectionStrategy: Int? = null
+    private var pendingAutoEnableHotspot: Boolean? = null
+    private var pendingWaitForWifi: Boolean? = null
+    private var pendingWaitForWifiTimeout: Int? = null
+
     // Flag to determine if the projection should stretch to fill the screen
     private var pendingStretchToFill: Boolean? = null
     private var pendingForcedScale: Boolean? = null
 
     private var pendingKillOnDisconnect: Boolean? = null
-    private var pendingAutoEnableHotspot: Boolean? = null
-    
+
     // Custom Insets
     private var pendingInsetLeft: Int? = null
     private var pendingInsetTop: Int? = null
@@ -92,6 +103,7 @@ class SettingsFragment : Fragment() {
         pendingMicSampleRate = settings.micSampleRate
         pendingUseGps = settings.useGpsForNavigation
         pendingShowNavigationNotifications = settings.showNavigationNotifications
+        pendingSyncMediaSessionAaMetadata = settings.syncMediaSessionWithAaMetadata
         pendingResolution = settings.resolutionId
         pendingDpi = settings.dpiPixelDensity
         pendingFullscreenMode = settings.fullscreenMode
@@ -101,6 +113,7 @@ class SettingsFragment : Fragment() {
         pendingFpsLimit = settings.fpsLimit
         pendingBluetoothAddress = settings.bluetoothAddress
         pendingEnableAudioSink = settings.enableAudioSink
+        pendingSeparateAudioStreams = settings.separateAudioStreams
         pendingUseAacAudio = settings.useAacAudio
         pendingMicInputSource = settings.micInputSource
         pendingUseNativeSsl = settings.useNativeSsl
@@ -118,6 +131,11 @@ class SettingsFragment : Fragment() {
         pendingKillOnDisconnect = settings.killOnDisconnect
         pendingAutoEnableHotspot = settings.autoEnableHotspot
         pendingFakeSpeed = settings.fakeSpeed
+
+        pendingWifiConnectionMode = settings.wifiConnectionMode
+        pendingHelperConnectionStrategy = settings.helperConnectionStrategy
+        pendingWaitForWifi = settings.waitForWifiBeforeWifiDirect
+        pendingWaitForWifiTimeout = settings.waitForWifiTimeout
         
         pendingInsetLeft = settings.insetLeft
         pendingInsetTop = settings.insetTop
@@ -181,7 +199,7 @@ class SettingsFragment : Fragment() {
 
     private fun handleBackPress() {
         if (hasChanges) {
-            AlertDialog.Builder(requireContext())
+            MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
                 .setTitle(R.string.unsaved_changes)
                 .setMessage(R.string.unsaved_changes_message)
                 .setPositiveButton(R.string.discard) { _, _ ->
@@ -216,6 +234,7 @@ class SettingsFragment : Fragment() {
         pendingMicSampleRate?.let { settings.micSampleRate = it }
         pendingUseGps?.let { settings.useGpsForNavigation = it }
         pendingShowNavigationNotifications?.let { settings.showNavigationNotifications = it }
+        pendingSyncMediaSessionAaMetadata?.let { settings.syncMediaSessionWithAaMetadata = it }
         pendingResolution?.let { settings.resolutionId = it }
         pendingDpi?.let { settings.dpiPixelDensity = it }
         pendingFullscreenMode?.let { settings.fullscreenMode = it }
@@ -225,6 +244,7 @@ class SettingsFragment : Fragment() {
         pendingFpsLimit?.let { settings.fpsLimit = it }
         pendingBluetoothAddress?.let { settings.bluetoothAddress = it }
         pendingEnableAudioSink?.let { settings.enableAudioSink = it }
+        pendingSeparateAudioStreams?.let { settings.separateAudioStreams = it }
         pendingUseAacAudio?.let { settings.useAacAudio = it }
         pendingMicInputSource?.let { settings.micInputSource = it }
         pendingUseNativeSsl?.let { settings.useNativeSsl = it }
@@ -247,6 +267,13 @@ class SettingsFragment : Fragment() {
         pendingKillOnDisconnect?.let { settings.killOnDisconnect = it }
         pendingAutoEnableHotspot?.let { settings.autoEnableHotspot = it }
         pendingFakeSpeed?.let { settings.fakeSpeed = it }
+
+        val oldWifiMode = settings.wifiConnectionMode
+        val oldHelperStrategy = settings.helperConnectionStrategy
+        pendingWifiConnectionMode?.let { settings.wifiConnectionMode = it }
+        pendingHelperConnectionStrategy?.let { settings.helperConnectionStrategy = it }
+        pendingWaitForWifi?.let { settings.waitForWifiBeforeWifiDirect = it }
+        pendingWaitForWifiTimeout?.let { settings.waitForWifiTimeout = it }
         
         pendingInsetLeft?.let { settings.insetLeft = it }
         pendingInsetTop?.let { settings.insetTop = it }
@@ -254,6 +281,15 @@ class SettingsFragment : Fragment() {
         pendingInsetBottom?.let { settings.insetBottom = it }
 
         settings.commit()
+
+        if (oldWifiMode != settings.wifiConnectionMode || oldHelperStrategy != settings.helperConnectionStrategy) {
+            val intent = Intent(requireContext(), AapService::class.java).apply {
+                val mode = settings.wifiConnectionMode
+                action = if (mode == 1 || mode == 2 || mode == 3)
+                    AapService.ACTION_START_WIRELESS else AapService.ACTION_STOP_WIRELESS
+            }
+            requireContext().startService(intent)
+        }
 
         if (requiresRestart) {
             if (App.provide(requireContext()).commManager.isConnected) {
@@ -283,6 +319,7 @@ class SettingsFragment : Fragment() {
         val anyChange = pendingMicSampleRate != settings.micSampleRate ||
                         pendingUseGps != settings.useGpsForNavigation ||
                         pendingShowNavigationNotifications != settings.showNavigationNotifications ||
+                        pendingSyncMediaSessionAaMetadata != settings.syncMediaSessionWithAaMetadata ||
                         pendingResolution != settings.resolutionId ||
                         pendingDpi != settings.dpiPixelDensity ||
                         pendingFullscreenMode != settings.fullscreenMode ||
@@ -292,6 +329,7 @@ class SettingsFragment : Fragment() {
                         pendingFpsLimit != settings.fpsLimit ||
                         pendingBluetoothAddress != settings.bluetoothAddress ||
                         pendingEnableAudioSink != settings.enableAudioSink ||
+                        pendingSeparateAudioStreams != settings.separateAudioStreams ||
                         pendingUseAacAudio != settings.useAacAudio ||
                         pendingMicInputSource != settings.micInputSource ||
                         pendingUseNativeSsl != settings.useNativeSsl ||
@@ -311,7 +349,12 @@ class SettingsFragment : Fragment() {
                         pendingAssistantVolumeOffset != settings.assistantVolumeOffset ||
                         pendingNavigationVolumeOffset != settings.navigationVolumeOffset ||
                         pendingKillOnDisconnect != settings.killOnDisconnect ||
-                        pendingAutoEnableHotspot != settings.autoEnableHotspot
+                        pendingAutoEnableHotspot != settings.autoEnableHotspot ||
+                        pendingFakeSpeed != settings.fakeSpeed ||
+                        pendingWifiConnectionMode != settings.wifiConnectionMode ||
+                        pendingHelperConnectionStrategy != settings.helperConnectionStrategy ||
+                        pendingWaitForWifi != settings.waitForWifiBeforeWifiDirect ||
+                        pendingWaitForWifiTimeout != settings.waitForWifiTimeout
 
         hasChanges = anyChange
 
@@ -323,6 +366,7 @@ class SettingsFragment : Fragment() {
                           pendingForceSoftware != settings.forceSoftwareDecoding ||
                           pendingEnableRotary != settings.enableRotary ||
                           pendingEnableAudioSink != settings.enableAudioSink ||
+                          pendingSeparateAudioStreams != settings.separateAudioStreams ||
                           pendingUseAacAudio != settings.useAacAudio ||
                           pendingAudioLatencyMultiplier != settings.audioLatencyMultiplier ||
                           pendingAudioQueueCapacity != settings.audioQueueCapacity ||
@@ -330,7 +374,8 @@ class SettingsFragment : Fragment() {
                           pendingInsetLeft != settings.insetLeft ||
                           pendingInsetTop != settings.insetTop ||
                           pendingInsetRight != settings.insetRight ||
-                          pendingInsetBottom != settings.insetBottom
+                          pendingInsetBottom != settings.insetBottom ||
+                          pendingWifiConnectionMode != settings.wifiConnectionMode
 
         updateSaveButtonState()
     }
@@ -378,7 +423,7 @@ class SettingsFragment : Fragment() {
 
                 val currentIndex = localeCodes.indexOf(pendingAppLanguage ?: "").coerceAtLeast(0)
 
-                AlertDialog.Builder(requireContext())
+                MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
                     .setTitle(R.string.change_language)
                     .setSingleChoiceItems(languageNames.toTypedArray(), currentIndex) { dialog, which ->
                         pendingAppLanguage = localeCodes[which]
@@ -404,16 +449,149 @@ class SettingsFragment : Fragment() {
         // --- Wireless Connection ---
         items.add(SettingItem.CategoryHeader("wirelessConnection", R.string.category_wireless))
 
-        items.add(SettingItem.SettingEntry(
-            stableId = "wirelessConnectionSettings",
-            nameResId = R.string.wireless_connection_settings,
-            value = getString(R.string.wireless_mode_description),
-            onClick = {
-                try {
-                    findNavController().navigate(R.id.action_settingsFragment_to_wirelessConnectionFragment)
-                } catch (e: Exception) { }
+        // Add 2.4GHz Warning Banner
+        items.add(SettingItem.InfoBanner(
+            stableId = "wireless24ghzWarning",
+            textResId = R.string.wireless_24ghz_warning
+        ))
+
+        val wirelessModeOptions = listOf(
+            getString(R.string.wireless_mode_helper),
+            getString(R.string.wireless_mode_native),
+            getString(R.string.wireless_mode_server)
+        )
+
+        val wirelessSelectedIndex = when (pendingWifiConnectionMode) {
+            2 -> 0 // Helper
+            3 -> 1 // Native
+            0, 1 -> 2 // Server
+            else -> 2
+        }
+
+        items.add(SettingItem.SegmentedButtonSettingEntry(
+            stableId = "wifiConnectionMode",
+            nameResId = R.string.wireless_mode,
+            options = wirelessModeOptions,
+            selectedIndex = wirelessSelectedIndex,
+            onOptionSelected = { index ->
+                val newMode = when (index) {
+                    0 -> 2 // Helper
+                    1 -> 3 // Native
+                    2 -> if (pendingWifiConnectionMode == 0) 0 else 1 // Keep manual/auto choice if already in server mode
+                    else -> 1
+                }
+
+                if (newMode == 3) {
+                    // Compatibility check for Native AA
+                    if (com.andrerinas.headunitrevived.connection.NativeAaHandshakeManager.checkCompatibility()) {
+                        MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
+                            .setTitle(R.string.supported_nativeaa)
+                            .setMessage(R.string.supported_nativeaa_desc)
+                            .setPositiveButton(android.R.string.ok) { dialog, _ ->
+                                pendingWifiConnectionMode = 3
+                                checkChanges()
+                                updateSettingsList()
+                                dialog.dismiss()
+                            }
+                            .setNegativeButton(android.R.string.cancel, null)
+                            .show()
+                    } else {
+                        MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
+                            .setTitle(R.string.not_supported_nativeaa)
+                            .setMessage(R.string.not_supported_nativeaa_desc)
+                            .setPositiveButton(android.R.string.ok) { dialog, _ ->
+                                pendingWifiConnectionMode = 3
+                                checkChanges()
+                                updateSettingsList()
+                                dialog.dismiss()
+                            }
+                            .setNegativeButton(android.R.string.cancel, null)
+                            .show()
+                    }
+                } else {
+                    pendingWifiConnectionMode = newMode
+                    checkChanges()
+                    updateSettingsList()
+                }
             }
         ))
+
+        // Sub-setting for Headunit Server (Manual vs Auto)
+        if (pendingWifiConnectionMode == 0 || pendingWifiConnectionMode == 1) {
+            items.add(SettingItem.SegmentedButtonSettingEntry(
+                stableId = "serverModeSelection",
+                nameResId = R.string.server_mode_label,
+                options = listOf(getString(R.string.server_mode_manual), getString(R.string.server_mode_auto)),
+                selectedIndex = if (pendingWifiConnectionMode == 0) 0 else 1,
+                onOptionSelected = { index ->
+                    pendingWifiConnectionMode = if (index == 0) 0 else 1
+                    checkChanges()
+                    updateSettingsList()
+                }
+            ))
+
+            // Mode 1 (Auto Server) can also use the auto-hotspot feature
+            if (pendingWifiConnectionMode == 1) {
+                addHotspotToggle(items)
+            }
+        }
+
+        // Sub-setting for Wireless Helper Strategy
+        if (pendingWifiConnectionMode == 2) {
+            val helperStrategies = resources.getStringArray(R.array.helper_strategies)
+            items.add(SettingItem.SettingEntry(
+                stableId = "helperStrategy",
+                nameResId = R.string.helper_strategy_label,
+                value = helperStrategies.getOrElse(pendingHelperConnectionStrategy!!) { "" },
+                onClick = {
+                    MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
+                        .setTitle(R.string.helper_strategy_label)
+                        .setSingleChoiceItems(helperStrategies, pendingHelperConnectionStrategy!!) { dialog, which ->
+                            pendingHelperConnectionStrategy = which
+                            checkChanges()
+                            dialog.dismiss()
+                            updateSettingsList()
+                        }
+                        .show()
+                }
+            ))
+
+            // Mode 2 only shows Hotspot toggle for Strategy 4 (Headunit Hotspot)
+            if (pendingHelperConnectionStrategy == 4) {
+                addHotspotToggle(items)
+            }
+
+            if (pendingHelperConnectionStrategy == 1) { // WiFi Direct (P2P)
+                items.add(SettingItem.ToggleSettingEntry(
+                    stableId = "waitForWifi",
+                    nameResId = R.string.wait_for_wifi,
+                    descriptionResId = R.string.wait_for_wifi_description,
+                    isChecked = pendingWaitForWifi ?: false,
+                    onCheckedChanged = { isChecked ->
+                        pendingWaitForWifi = isChecked
+                        checkChanges()
+                        updateSettingsList()
+                    }
+                ))
+
+                if (pendingWaitForWifi == true) {
+                    items.add(SettingItem.SliderSettingEntry(
+                        stableId = "waitForWifiTimeout",
+                        nameResId = R.string.wait_for_wifi_timeout,
+                        value = "${pendingWaitForWifiTimeout}s",
+                        sliderValue = (pendingWaitForWifiTimeout ?: 10).toFloat(),
+                        valueFrom = 5f,
+                        valueTo = 30f,
+                        stepSize = 1f,
+                        onValueChanged = { value ->
+                            pendingWaitForWifiTimeout = value.toInt()
+                            checkChanges()
+                            updateSettingsList()
+                        }
+                    ))
+                }
+            }
+        }
 
         // --- Dark Mode ---
         items.add(SettingItem.CategoryHeader("darkMode", R.string.category_dark_mode))
@@ -534,7 +712,7 @@ class SettingsFragment : Fragment() {
             nameResId = R.string.resolution,
             value = Settings.Resolution.fromId(pendingResolution!!)?.resName ?: "",
             onClick = { _ ->
-                AlertDialog.Builder(requireContext())
+                MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
                     .setTitle(R.string.change_resolution)
                     .setSingleChoiceItems(Settings.Resolution.allRes, pendingResolution!!) { dialog, which ->
                         pendingResolution = which
@@ -635,7 +813,7 @@ class SettingsFragment : Fragment() {
             onClick = { _ ->
                 val viewModes = arrayOf(getString(R.string.surface_view), getString(R.string.texture_view), getString(R.string.gles_view))
                 val currentIdx = pendingViewMode!!.value
-                AlertDialog.Builder(requireContext())
+                MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
                     .setTitle(R.string.change_view_mode)
                     .setSingleChoiceItems(viewModes, currentIdx) { dialog, which ->
                         pendingViewMode = Settings.ViewMode.fromInt(which)!!
@@ -654,10 +832,21 @@ class SettingsFragment : Fragment() {
             onClick = { _ ->
                 val orientationOptions = resources.getStringArray(R.array.screen_orientation)
                 val currentIdx = pendingScreenOrientation!!.value
-                AlertDialog.Builder(requireContext())
+                MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
                     .setTitle(R.string.change_screen_orientation)
                     .setSingleChoiceItems(orientationOptions, currentIdx) { dialog, whiches ->
-                        pendingScreenOrientation = Settings.ScreenOrientation.fromInt(whiches)
+                        val newOrientation = Settings.ScreenOrientation.fromInt(whiches) ?: Settings.ScreenOrientation.SYSTEM
+                        pendingScreenOrientation = newOrientation
+                        
+                        // Apply immediately
+                        settings.screenOrientation = newOrientation
+                        settings.commit()
+                        
+                        requireActivity().requestedOrientation = newOrientation.androidOrientation
+                        requireContext().sendBroadcast(Intent(AapService.ACTION_ORIENTATION_CHANGED).apply {
+                            setPackage(requireContext().packageName)
+                        })
+                        
                         checkChanges()
                         dialog.dismiss()
                         updateSettingsList()
@@ -717,7 +906,7 @@ class SettingsFragment : Fragment() {
             onClick = { _ ->
                 val codecs = arrayOf("Auto", "H.264", "H.265")
                 val currentCodecIndex = codecs.indexOf(pendingVideoCodec)
-                AlertDialog.Builder(requireContext())
+                MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
                     .setTitle(R.string.video_codec)
                     .setSingleChoiceItems(codecs, currentCodecIndex) { dialog, which ->
                         pendingVideoCodec = codecs[which]
@@ -736,7 +925,7 @@ class SettingsFragment : Fragment() {
             onClick = { _ ->
                 val fpsOptions = arrayOf("30", "60")
                 val currentFpsIndex = fpsOptions.indexOf(pendingFpsLimit.toString())
-                AlertDialog.Builder(requireContext())
+                MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
                     .setTitle(R.string.fps_limit)
                     .setSingleChoiceItems(fpsOptions, currentFpsIndex) { dialog, which ->
                         pendingFpsLimit = fpsOptions[which].toInt()
@@ -792,12 +981,36 @@ class SettingsFragment : Fragment() {
         ))
 
         items.add(SettingItem.ToggleSettingEntry(
+            stableId = "separateAudioStreams",
+            nameResId = R.string.separate_audio_streams,
+            descriptionResId = R.string.separate_audio_streams_description,
+            isChecked = pendingSeparateAudioStreams ?: true,
+            onCheckedChanged = { isChecked ->
+                pendingSeparateAudioStreams = isChecked
+                checkChanges()
+                updateSettingsList()
+            }
+        ))
+
+        items.add(SettingItem.ToggleSettingEntry(
             stableId = "useAacAudio",
             nameResId = R.string.use_aac_audio,
             descriptionResId = R.string.use_aac_audio_description,
             isChecked = pendingUseAacAudio!!,
             onCheckedChanged = { isChecked ->
                 pendingUseAacAudio = isChecked
+                checkChanges()
+                updateSettingsList()
+            }
+        ))
+
+        items.add(SettingItem.ToggleSettingEntry(
+            stableId = "syncMediaSessionAaMetadata",
+            nameResId = R.string.sync_media_session_aa_metadata,
+            descriptionResId = R.string.sync_media_session_aa_metadata_description,
+            isChecked = pendingSyncMediaSessionAaMetadata!!,
+            onCheckedChanged = { isChecked ->
+                pendingSyncMediaSessionAaMetadata = isChecked
                 checkChanges()
                 updateSettingsList()
             }
@@ -811,7 +1024,7 @@ class SettingsFragment : Fragment() {
                 val currentSampleRateIndex = Settings.MicSampleRates.indexOf(pendingMicSampleRate!!)
                 val sampleRateNames = Settings.MicSampleRates.map { "${it / 1000}kHz" }.toTypedArray()
 
-                AlertDialog.Builder(requireContext())
+                MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
                     .setTitle(R.string.mic_sample_rate)
                     .setSingleChoiceItems(sampleRateNames, currentSampleRateIndex) { dialog, which ->
                         val newValue = Settings.MicSampleRates.elementAt(which)
@@ -909,7 +1122,7 @@ class SettingsFragment : Fragment() {
             }
         ))
 
-        val logLevels = com.andrerinas.headunitrevived.utils.LogExporter.LogLevel.entries
+        val logLevels = LogExporter.LogLevel.entries
         val logLevelNames = logLevels.map { it.name.lowercase().replaceFirstChar { c -> c.uppercase() } }.toTypedArray()
         items.add(SettingItem.SettingEntry(
             stableId = "logLevel",
@@ -920,7 +1133,14 @@ class SettingsFragment : Fragment() {
                 MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
                     .setTitle(R.string.log_level)
                     .setSingleChoiceItems(logLevelNames, currentIndex) { dialog, which ->
-                        settings.exporterLogLevel = logLevels[which]
+                        val newLevel = logLevels[which]
+                        settings.exporterLogLevel = newLevel
+                        if (newLevel == LogExporter.LogLevel.SILENT) {
+                            settings.exporterCaptureEnabled = false
+                            if (LogExporter.isCapturing) {
+                                LogExporter.stopCapture()
+                            }
+                        }
                         dialog.dismiss()
                         updateSettingsList()
                     }
@@ -930,14 +1150,26 @@ class SettingsFragment : Fragment() {
 
         items.add(SettingItem.SettingEntry(
             stableId = "captureLog",
-            nameResId = if (com.andrerinas.headunitrevived.utils.LogExporter.isCapturing) R.string.stop_log_capture else R.string.start_log_capture,
-            value = getString(if (com.andrerinas.headunitrevived.utils.LogExporter.isCapturing) R.string.stop_log_capture_description else R.string.start_log_capture_description),
+            nameResId = if (LogExporter.isCapturing) R.string.stop_log_capture else R.string.start_log_capture,
+            value = when {
+                settings.exporterLogLevel == LogExporter.LogLevel.SILENT -> getString(R.string.start_log_capture_description)
+                LogExporter.isCapturing -> getString(R.string.stop_log_capture_description)
+                else -> getString(R.string.start_log_capture_description)
+            },
             onClick = {
                 val context = requireContext()
-                if (com.andrerinas.headunitrevived.utils.LogExporter.isCapturing) {
-                    com.andrerinas.headunitrevived.utils.LogExporter.stopCapture()
+                val exporterLevel = settings.exporterLogLevel
+                if (exporterLevel == LogExporter.LogLevel.SILENT) {
+                    Toast.makeText(context, getString(R.string.start_log_capture_in_silent), Toast.LENGTH_LONG).show()
+                    return@SettingEntry
+                }
+
+                if (LogExporter.isCapturing) {
+                    LogExporter.stopCapture()
+                    settings.exporterCaptureEnabled = false
                 } else {
-                    com.andrerinas.headunitrevived.utils.LogExporter.startCapture(context, settings.exporterLogLevel)
+                    LogExporter.startCapture(context, exporterLevel)
+                    settings.exporterCaptureEnabled = true
                 }
                 updateSettingsList()
             }
@@ -949,10 +1181,16 @@ class SettingsFragment : Fragment() {
             value = getString(R.string.export_logs_description),
             onClick = {
                 val context = requireContext()
-                if (com.andrerinas.headunitrevived.utils.LogExporter.isCapturing) {
-                    com.andrerinas.headunitrevived.utils.LogExporter.stopCapture()
+                val exporterLevel = settings.exporterLogLevel
+                if (exporterLevel == LogExporter.LogLevel.SILENT) {
+                    Toast.makeText(context, getString(R.string.failed_export_in_silent_logs), Toast.LENGTH_LONG).show()
+                    return@SettingEntry
                 }
-                val logFile = com.andrerinas.headunitrevived.utils.LogExporter.saveLogToPublicFile(context, settings.exporterLogLevel)
+
+                if (LogExporter.isCapturing) {
+                    LogExporter.stopCapture()
+                }
+                val logFile = LogExporter.saveLogToPublicFile(context, exporterLevel)
                 updateSettingsList()
 
                 if (logFile != null) {
@@ -960,7 +1198,7 @@ class SettingsFragment : Fragment() {
                         .setTitle(R.string.logs_exported)
                         .setMessage(getString(R.string.log_saved_to, logFile.absolutePath))
                         .setPositiveButton(R.string.share) { _, _ ->
-                            com.andrerinas.headunitrevived.utils.LogExporter.shareLogFile(context, logFile)
+                            LogExporter.shareLogFile(context, logFile)
                         }
                         .setNegativeButton(R.string.close) { dialog, _ ->
                             dialog.dismiss()
@@ -1071,6 +1309,43 @@ class SettingsFragment : Fragment() {
                 dialog.dismiss()
             }
             .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    private fun showPermissionDialog() {
+        MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
+            .setTitle(R.string.hotspot_permission_title)
+            .setMessage(R.string.hotspot_permission_message)
+            .setPositiveButton(R.string.open_settings) { dialog, _ ->
+                val intent = Intent(SystemSettings.ACTION_MANAGE_WRITE_SETTINGS).apply {
+                    data = Uri.parse("package:${requireContext().packageName}")
+                }
+                startActivity(intent)
+                dialog.dismiss()
+            }
+            .setNegativeButton(R.string.cancel) { _, _ ->
+                pendingAutoEnableHotspot = false
+                checkChanges()
+                updateSettingsList()
+            }
+            .show()
+    }
+
+    private fun showExperimentalWarning() {
+        MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
+            .setTitle(R.string.hotspot_warning_title)
+            .setMessage(R.string.hotspot_warning_message)
+            .setPositiveButton(android.R.string.ok) { dialog, _ ->
+                pendingAutoEnableHotspot = true
+                checkChanges()
+                updateSettingsList()
+                dialog.dismiss()
+            }
+            .setNegativeButton(android.R.string.cancel) { _, _ ->
+                pendingAutoEnableHotspot = false
+                checkChanges()
+                updateSettingsList()
+            }
             .show()
     }
 
@@ -1226,7 +1501,7 @@ class SettingsFragment : Fragment() {
             R.string.kill_on_disconnect_enable_anyway
         }
 
-        val dialog = MaterialAlertDialogBuilder(requireContext())
+        val dialog = MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
             .setTitle(R.string.kill_on_disconnect_warning_title)
             .setMessage(message)
             .setPositiveButton(positiveTextRes) { _, _ ->
@@ -1282,6 +1557,65 @@ class SettingsFragment : Fragment() {
         // Initial connection settings are kept so they work when the car starts.
         settings.reopenOnReconnection = false
     }
+
+    private fun showHotspotPermissionDialog() {
+        MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
+            .setTitle(R.string.hotspot_permission_title)
+            .setMessage(R.string.hotspot_permission_message)
+            .setPositiveButton(R.string.open_settings) { dialog, _ ->
+                val intent = Intent(android.provider.Settings.ACTION_MANAGE_WRITE_SETTINGS).apply {
+                    data = Uri.parse("package:${requireContext().packageName}")
+                }
+                startActivity(intent)
+                dialog.dismiss()
+            }
+            .setNegativeButton(R.string.cancel) { _, _ ->
+                pendingAutoEnableHotspot = false
+                checkChanges()
+                updateSettingsList()
+            }
+            .show()
+    }
+
+    private fun showHotspotExperimentalWarning() {
+        MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
+            .setTitle(R.string.hotspot_warning_title)
+            .setMessage(R.string.hotspot_warning_message)
+            .setPositiveButton(android.R.string.ok) { dialog, _ ->
+                pendingAutoEnableHotspot = true
+                checkChanges()
+                updateSettingsList()
+                dialog.dismiss()
+            }
+            .setNegativeButton(android.R.string.cancel) { _, _ ->
+                pendingAutoEnableHotspot = false
+                checkChanges()
+                updateSettingsList()
+            }
+            .show()
+    }
+    private fun addHotspotToggle(items: MutableList<SettingItem>) {
+        items.add(SettingItem.ToggleSettingEntry(
+            stableId = "autoEnableHotspot",
+            nameResId = R.string.auto_enable_hotspot,
+            descriptionResId = R.string.auto_enable_hotspot_description,
+            isChecked = pendingAutoEnableHotspot ?: false,
+            onCheckedChanged = { isChecked ->
+                if (isChecked) {
+                    if (Build.VERSION.SDK_INT >= 23 && !SystemSettings.System.canWrite(requireContext())) {
+                        showPermissionDialog()
+                    } else {
+                        showExperimentalWarning()
+                    }
+                } else {
+                    pendingAutoEnableHotspot = false
+                    checkChanges()
+                    updateSettingsList()
+                }
+            }
+        ))
+    }
+
 
     private fun getAutoConnectSummary(): String {
         val order = settings.autoConnectPriorityOrder

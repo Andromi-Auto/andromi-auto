@@ -4,14 +4,12 @@ import android.content.Context
 import android.content.Intent
 import android.hardware.usb.UsbManager
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.Button
-import android.widget.TextView
 import android.graphics.Color
 import android.content.res.ColorStateList
-import android.widget.Toast
+import android.widget.*
+import android.view.View
+import android.view.ViewGroup
+import android.view.LayoutInflater
 import android.net.VpnService
 import androidx.activity.result.contract.ActivityResultContracts
 import android.net.ConnectivityManager
@@ -26,6 +24,7 @@ import com.andrerinas.headunitrevived.App
 import com.andrerinas.headunitrevived.R
 import com.andrerinas.headunitrevived.aap.AapProjectionActivity
 import com.andrerinas.headunitrevived.aap.AapService
+import com.andrerinas.headunitrevived.connection.NearbyManager
 import com.andrerinas.headunitrevived.connection.UsbDeviceCompat
 import android.content.res.Configuration
 import android.bluetooth.BluetoothAdapter
@@ -33,6 +32,7 @@ import android.bluetooth.BluetoothManager
 import com.andrerinas.headunitrevived.utils.AppLog
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.collect
 import com.andrerinas.headunitrevived.utils.Settings
@@ -62,6 +62,7 @@ class HomeFragment : Fragment() {
     private lateinit var self_mode_text: TextView
     private var hasAttemptedAutoConnect = false
     private var hasAttemptedSingleUsbAutoConnect = false
+    private var activeDialog: androidx.appcompat.app.AlertDialog? = null
 
     private fun updateWifiButtonFeedback(scanning: Boolean) {
         if (scanning) {
@@ -120,8 +121,9 @@ class HomeFragment : Fragment() {
                     }
                 }
                 Settings.AUTO_CONNECT_SELF_MODE -> {
-                    if (appSettings.autoStartSelfMode && !hasAutoStarted && !commManager.isConnected) {
+                    if ((appSettings.autoStartSelfMode || forceSelfModeLaunch) && !hasAutoStarted && !commManager.isConnected) {
                         hasAutoStarted = true
+                        forceSelfModeLaunch = false // Reset once processed
                         startSelfMode()
                     }
                 }
@@ -210,6 +212,10 @@ class HomeFragment : Fragment() {
                         AppLog.i("Auto-connect: USB device $lastUsbDevice not found or no permission")
                     }
                 }
+            }
+            Settings.CONNECTION_TYPE_NEARBY -> {
+                AppLog.i("Auto-connect: Last session was via Google Nearby. AapService will handle discovery.")
+                // No manual connect(ip) needed, NearbyManager in AapService manages this automatically on start.
             }
         }
     }
@@ -329,14 +335,20 @@ class HomeFragment : Fragment() {
                 2 -> { // Helper (Wireless Launcher)
                     if (commManager.isConnected) {
                         // Already connected
-                    } else if (AapService.scanningState.value) {
-                        Toast.makeText(requireContext(), getString(R.string.already_searching_phone), Toast.LENGTH_SHORT).show()
                     } else {
-                        Toast.makeText(requireContext(), getString(R.string.searching_phone), Toast.LENGTH_SHORT).show()
-                        val intent = Intent(requireContext(), AapService::class.java).apply {
-                            action = AapService.ACTION_START_WIRELESS_SCAN
+                        val strategy = App.provide(requireContext()).settings.helperConnectionStrategy
+                        if (strategy == 2) {
+                            // Nearby Devices — show live discovery dialog
+                            showNearbyDeviceSelector()
+                        } else if (AapService.scanningState.value) {
+                            Toast.makeText(requireContext(), getString(R.string.already_searching_phone), Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(requireContext(), getString(R.string.searching_phone), Toast.LENGTH_SHORT).show()
+                            val intent = Intent(requireContext(), AapService::class.java).apply {
+                                action = AapService.ACTION_START_WIRELESS_SCAN
+                            }
+                            ContextCompat.startForegroundService(requireContext(), intent)
                         }
-                        ContextCompat.startForegroundService(requireContext(), intent)
                     }
                 }
                 3 -> { // Native AA
@@ -376,6 +388,12 @@ class HomeFragment : Fragment() {
         updateTextColors()
     }
 
+    override fun onPause() {
+        super.onPause()
+        activeDialog?.dismiss()
+        activeDialog = null
+    }
+
     private fun showNativeAaDeviceSelector() {
         val adapter = if (Build.VERSION.SDK_INT >= 18) {
             (requireContext().getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager).adapter
@@ -397,7 +415,8 @@ class HomeFragment : Fragment() {
 
         val deviceNames = bondedDevices.map { it.name ?: "Unknown Device" }.toTypedArray()
         
-        MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
+        
+        activeDialog = MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
             .setTitle(R.string.select_bt_device)
             .setItems(deviceNames) { _, which ->
                 val device = bondedDevices[which]
@@ -412,6 +431,110 @@ class HomeFragment : Fragment() {
             }
             .setNegativeButton(R.string.cancel, null)
             .show()
+    }
+
+    private fun showNearbyDeviceSelector() {
+        // Ensure NearbyManager discovery is running via AapService
+        ContextCompat.startForegroundService(requireContext(),
+            Intent(requireContext(), AapService::class.java).apply {
+                action = AapService.ACTION_START_WIRELESS_SCAN
+            })
+
+        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_nearby_selection, null)
+        val listContainer = dialogView.findViewById<View>(R.id.listContainer)
+        val deviceListView = dialogView.findViewById<ListView>(R.id.deviceList)
+        val searchingText = dialogView.findViewById<TextView>(R.id.searchingText)
+        val connectingContainer = dialogView.findViewById<View>(R.id.connectingContainer)
+        val connectingText = dialogView.findViewById<TextView>(R.id.connectingText)
+        val connectionProgress = dialogView.findViewById<ProgressBar>(R.id.connectionProgress)
+
+        // Ensure the loading spinner is visible in both Light and Dark modes by forcing our brand color.
+        val brandTeal = ContextCompat.getColor(requireContext(), R.color.brand_teal)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            connectionProgress.indeterminateTintList = ColorStateList.valueOf(brandTeal)
+            connectionProgress.indeterminateTintMode = android.graphics.PorterDuff.Mode.SRC_IN
+        } else {
+            @Suppress("DEPRECATION")
+            connectionProgress.indeterminateDrawable?.setColorFilter(brandTeal, android.graphics.PorterDuff.Mode.SRC_IN)
+        }
+
+        // Custom adapter to handle rounded backgrounds like in USB/Network lists
+        val listAdapter = object : ArrayAdapter<NearbyManager.DiscoveredEndpoint>(requireContext(), R.layout.list_item_nearby) {
+            override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+                val view = convertView ?: LayoutInflater.from(context).inflate(R.layout.list_item_nearby, parent, false)
+                val endpoint = getItem(position)
+                view.findViewById<TextView>(R.id.deviceName).text = endpoint?.name ?: "Unknown"
+
+                // Apply rounded backgrounds based on position
+                val isTop = position == 0
+                val isBottom = position == count - 1
+                val bgRes = when {
+                    isTop && isBottom -> R.drawable.bg_setting_single
+                    isTop -> R.drawable.bg_setting_top
+                    isBottom -> R.drawable.bg_setting_bottom
+                    else -> R.drawable.bg_setting_middle
+                }
+                view.setBackgroundResource(bgRes)
+                return view
+            }
+        }
+        deviceListView.adapter = listAdapter
+
+        var collectJob: Job? = null
+
+        val dialog = MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
+            .setTitle(getString(R.string.searching)) // Initial title
+            .setView(dialogView)
+            .setNegativeButton(R.string.cancel, null)
+            .setOnDismissListener { 
+                collectJob?.cancel()
+                if (activeDialog == it) activeDialog = null
+            }
+            .create()
+        
+        activeDialog = dialog
+
+        deviceListView.setOnItemClickListener { _, _, which, _ ->
+            val endpoints = NearbyManager.discoveredEndpoints.value
+            if (which < endpoints.size) {
+                val endpoint = endpoints[which]
+                AppLog.i("HomeFragment: Selected Nearby device: ${endpoint.name} (${endpoint.id})")
+                
+                // UI Switch: Hide list, show connecting spinner
+                listContainer.visibility = View.GONE
+                connectingContainer.visibility = View.VISIBLE
+                connectingText.text = getString(R.string.connecting_to_nearby, endpoint.name)
+                
+                // Allow the user to see the progress
+                dialog.setCancelable(false) 
+
+                val intent = Intent(requireContext(), AapService::class.java).apply {
+                    action = AapService.ACTION_NEARBY_CONNECT
+                    putExtra(AapService.EXTRA_ENDPOINT_ID, endpoint.id)
+                }
+                ContextCompat.startForegroundService(requireContext(), intent)
+            }
+        }
+
+        dialog.show()
+
+        // Live-update the dialog list as endpoints are discovered
+        collectJob = viewLifecycleOwner.lifecycleScope.launch {
+            NearbyManager.discoveredEndpoints.collect { endpoints ->
+                listAdapter.clear()
+                listAdapter.addAll(endpoints)
+                listAdapter.notifyDataSetChanged()
+                
+                if (endpoints.isEmpty()) {
+                    dialog.setTitle(getString(R.string.searching))
+                    searchingText.visibility = View.GONE
+                } else {
+                    dialog.setTitle(getString(R.string.nearby_device_found))
+                    searchingText.visibility = View.VISIBLE
+                    searchingText.text = getString(R.string.select_nearby_device) + " (${endpoints.size})"
+                }
+            }
+        }
     }
 
     private fun updateTextColors() {
@@ -442,6 +565,7 @@ class HomeFragment : Fragment() {
 
     companion object {
         private var hasAutoStarted = false
+        var forceSelfModeLaunch = false
         fun resetAutoStart() {
             hasAutoStarted = false
         }

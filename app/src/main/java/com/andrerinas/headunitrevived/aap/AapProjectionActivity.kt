@@ -20,6 +20,7 @@ import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.core.content.ContextCompat
+import androidx.core.content.IntentCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -68,6 +69,11 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
     private var initialY = 0f
     private var isPotentialGesture = false
     private var fpsTextView: TextView? = null
+    
+    private var isOrientationReceiverRegistered = false
+    private var isNightModeReceiverRegistered = false
+    private var isFinishReceiverRegistered = false
+    private var isKeyEventReceiverRegistered = false
 
     private val videoWatchdogRunnable = object : Runnable {
         override fun run() {
@@ -158,16 +164,32 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         }
     }
 
-    private val keyCodeReceiver = object : BroadcastReceiver() {
+
+
+    private val orientationReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            val event: KeyEvent? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                intent.getParcelableExtra(KeyIntent.extraEvent, KeyEvent::class.java)
-            } else {
-                @Suppress("DEPRECATION")
-                intent.getParcelableExtra(KeyIntent.extraEvent)
+            if (intent.action == AapService.ACTION_ORIENTATION_CHANGED) {
+                AppLog.i("AapProjectionActivity: Orientation change broadcast received. Updating.")
+                applyOrientationSettings()
             }
+        }
+    }
+
+    private val keyEventReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            val event: KeyEvent? = IntentCompat.getParcelableExtra(intent, KeyIntent.extraEvent, KeyEvent::class.java)
             event?.let {
+                AppLog.i("AapProjectionActivity: Received key from broadcast: code=${it.keyCode} (isDown=${it.action == KeyEvent.ACTION_DOWN})")
                 onKeyEvent(it.keyCode, it.action == KeyEvent.ACTION_DOWN)
+            }
+        }
+    }
+
+    private val finishReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            if (intent.action == "com.andrerinas.headunitrevived.ACTION_FINISH_ACTIVITIES") {
+                AppLog.i("AapProjectionActivity: Received finish request. Closing.")
+                finish()
             }
         }
     }
@@ -178,17 +200,8 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         }
         super.onCreate(savedInstanceState)
 
-        val screenOrientation = settings.screenOrientation
-        if (screenOrientation == Settings.ScreenOrientation.AUTO) {
-            // AUTO mode: lock to current orientation at launch (existing behavior)
-            if (Build.VERSION.SDK_INT >= 18) {
-                requestedOrientation = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LOCKED
-            } else {
-                requestedOrientation = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_NOSENSOR
-            }
-        } else {
-            requestedOrientation = screenOrientation.androidOrientation
-        }
+        applyOrientationSettings()
+
 
         setContentView(R.layout.activity_headunit)
 
@@ -265,6 +278,9 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
                             }
                         }
                         is CommManager.ConnectionState.HandshakeComplete -> {
+                            // Lock the resolution so that orientation changes don't cause re-negotiation
+                            HeadUnitScreenConfig.lockResolution()
+                            
                             // Handshake done. If the surface is already ready (e.g. reconnect
                             // while the activity is in the foreground), start reading immediately.
                             // If not, onSurfaceChanged() will call startReading() when the surface
@@ -278,6 +294,9 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
                 }
             }
         }
+        
+        ContextCompat.registerReceiver(this, finishReceiver, android.content.IntentFilter("com.andrerinas.headunitrevived.ACTION_FINISH_ACTIVITIES"), ContextCompat.RECEIVER_NOT_EXPORTED)
+        isFinishReceiverRegistered = true
 
         AppLog.i("HeadUnit for Android Auto (tm) - Copyright 2011-2015 Michael A. Reid., since 2025 André Rinas All Rights Reserved...")
 
@@ -339,6 +358,14 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         setFullscreen() // Call setFullscreen here as well
 
         val loadingOverlay = findViewById<View>(R.id.loading_overlay)
+        
+        // [FIX] If we are already connected and frames are flowing (e.g. activity recreation),
+        // hide the overlay immediately to prevent the "Android Auto is starting" flicker.
+        if (commManager.isConnected && videoDecoder.lastFrameRenderedMs > 0) {
+            loadingOverlay?.visibility = View.GONE
+            overlayState = OverlayState.HIDDEN
+        }
+
         // Ensure loading overlay is on top of everything
         loadingOverlay?.bringToFront()
 
@@ -360,6 +387,10 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
                 }
             }
         }
+
+        commManager.onUpdateUiConfigReplyReceived = {
+            AppLog.i("[UI_DEBUG_FIX] UpdateUiConfig reply received. AA acknowledged new margins.")
+        }
     }
 
     override fun onPause() {
@@ -368,22 +399,40 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         watchdogHandler.removeCallbacks(watchdogRunnable)
         watchdogHandler.removeCallbacks(videoWatchdogRunnable)
         watchdogHandler.removeCallbacks(reconnectingWatchdog)
-        unregisterReceiver(keyCodeReceiver)
-        unregisterReceiver(nightModeReceiver)
+        if (isOrientationReceiverRegistered) {
+            unregisterReceiver(orientationReceiver)
+            isOrientationReceiverRegistered = false
+        }
+        if (isNightModeReceiverRegistered) {
+            unregisterReceiver(nightModeReceiver)
+            isNightModeReceiverRegistered = false
+        }
+        if (isKeyEventReceiverRegistered) {
+            unregisterReceiver(keyEventReceiver)
+            isKeyEventReceiverRegistered = false
+        }
     }
 
     override fun onResume() {
         AppLog.i("AapProjectionActivity: onResume")
         super.onResume()
+        applyStickyOrientation()
         watchdogHandler.postDelayed(watchdogRunnable, 2000)
         watchdogHandler.postDelayed(videoWatchdogRunnable, 3000)
         watchdogHandler.postDelayed(reconnectingWatchdog, 5000)
 
-        // Register key event receiver safely for Android 14+
-        ContextCompat.registerReceiver(this, keyCodeReceiver, IntentFilters.keyEvent, ContextCompat.RECEIVER_NOT_EXPORTED)
+        if (!isKeyEventReceiverRegistered) {
+            ContextCompat.registerReceiver(this, keyEventReceiver, IntentFilters.keyEvent, ContextCompat.RECEIVER_EXPORTED)
+            isKeyEventReceiverRegistered = true
+        }
+
+        // Register orientation receiver
+        ContextCompat.registerReceiver(this, orientationReceiver, IntentFilter(AapService.ACTION_ORIENTATION_CHANGED), ContextCompat.RECEIVER_NOT_EXPORTED)
+        isOrientationReceiverRegistered = true
 
         // Register night mode receiver for AA monochrome filter
         ContextCompat.registerReceiver(this, nightModeReceiver, IntentFilter(AapService.ACTION_NIGHT_MODE_CHANGED), ContextCompat.RECEIVER_NOT_EXPORTED)
+        isNightModeReceiverRegistered = true
 
         // Request current night mode state for initial desaturation
         sendBroadcast(Intent(AapService.ACTION_REQUEST_NIGHT_MODE_UPDATE).apply {
@@ -622,28 +671,49 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         }
     }
 
+    private data class ExitOption(val titleResId: Int, val iconResId: Int, val iconColor: Int)
+
     private fun showExitDialog() {
-        val items = mutableListOf(getString(R.string.exit_dialog_stop))
+        val options = mutableListOf<ExitOption>()
+        options.add(ExitOption(R.string.exit_dialog_stop, R.drawable.ic_stop, Color.RED))
         
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            items.add(getString(R.string.exit_dialog_pip))
+            options.add(ExitOption(R.string.exit_dialog_pip, R.drawable.ic_pip, Color.LTGRAY))
         }
         
-        items.add(getString(R.string.exit_dialog_background))
+        options.add(ExitOption(R.string.exit_dialog_background, R.drawable.ic_home, Color.LTGRAY))
+
+        val adapter = object : android.widget.BaseAdapter() {
+            override fun getCount(): Int = options.size
+            override fun getItem(position: Int): Any = options[position]
+            override fun getItemId(position: Int): Long = position.toLong()
+            override fun getView(position: Int, convertView: View?, parent: android.view.ViewGroup): View {
+                val view = convertView ?: layoutInflater.inflate(R.layout.dialog_exit_item, parent, false)
+                val option = options[position]
+                val iconView = view.findViewById<android.widget.ImageView>(R.id.icon)
+                val textView = view.findViewById<android.widget.TextView>(R.id.text)
+                
+                textView.setText(option.titleResId)
+                iconView.setImageResource(option.iconResId)
+                iconView.setColorFilter(option.iconColor)
+                
+                return view
+            }
+        }
 
         MaterialAlertDialogBuilder(this, R.style.DarkAlertDialog)
             .setTitle(R.string.exit_dialog_title)
-            .setItems(items.toTypedArray()) { _, which ->
-                val selected = items[which]
-                when {
-                    selected == getString(R.string.exit_dialog_stop) -> {
+            .setAdapter(adapter) { _, which ->
+                val selected = options[which]
+                when (selected.titleResId) {
+                    R.string.exit_dialog_stop -> {
                         commManager.disconnect(sendByeBye = true)
                         finish()
                     }
-                    selected == getString(R.string.exit_dialog_pip) -> {
+                    R.string.exit_dialog_pip -> {
                         enterPiP()
                     }
-                    selected == getString(R.string.exit_dialog_background) -> {
+                    R.string.exit_dialog_background -> {
                         moveToBackground()
                     }
                 }
@@ -688,7 +758,8 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
     }
 
     override fun onUserLeaveHint() {
-        // Optional: Auto-enter PiP if user presses home (like HUR 8)
+        // Optional: Auto-enter PiP if user presses home
+        
         // For now, we only enter via dialog as requested.
         super.onUserLeaveHint()
     }
@@ -727,15 +798,42 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
     }
 
     override fun onSurfaceCreated(surface: android.view.Surface) {
-        AppLog.i("[AapProjectionActivity] onSurfaceCreated")
+        AppLog.i("[UI_DEBUG] [AapProjectionActivity] onSurfaceCreated")
         // Decoder configuration is now in onSurfaceChanged
     }
 
     override fun onSurfaceChanged(surface: android.view.Surface, width: Int, height: Int) {
-        AppLog.i("[AapProjectionActivity] onSurfaceChanged. Actual surface dimensions: width=$width, height=$height")
+        AppLog.i("[UI_DEBUG] [AapProjectionActivity] onSurfaceChanged. Actual surface dimensions: width=$width, height=$height")
         isSurfaceSet = true
         
         videoDecoder.setSurface(surface)
+
+        // --- Surface Mismatch Detection ---
+        // Compare actual surface dimensions with what HeadUnitScreenConfig negotiated.
+        // If they differ (e.g. system bars appeared/disappeared), update margins.
+        val prevUsableW = HeadUnitScreenConfig.getUsableWidth()
+        val prevUsableH = HeadUnitScreenConfig.getUsableHeight()
+
+        if (HeadUnitScreenConfig.updateSurfaceDimensions(width, height)) {
+            AppLog.i("[UI_DEBUG_FIX] Surface mismatch! Expected: ${prevUsableW}x${prevUsableH}, Actual: ${width}x${height}")
+
+            // Cache the real surface size for next session
+            settings.cachedSurfaceWidth = width
+            settings.cachedSurfaceHeight = height
+            settings.cachedSurfaceSettingsHash = HeadUnitScreenConfig.computeSettingsHash(settings)
+
+            if (commManager.connectionState.value is CommManager.ConnectionState.TransportStarted) {
+                // AA is already running → send corrected per-side margins dynamically
+                commManager.sendUpdateUiConfigRequest(
+                    HeadUnitScreenConfig.getLeftMargin(),
+                    HeadUnitScreenConfig.getTopMargin(),
+                    HeadUnitScreenConfig.getRightMargin(),
+                    HeadUnitScreenConfig.getBottomMargin()
+                )
+                AppLog.i("[UI_DEBUG_FIX] AA is already running, send corrected via sendUpdateUiConfigRequest")
+            }
+            // If transport not started yet, ServiceDiscoveryResponse will use the corrected values automatically.
+        }
 
         when (commManager.connectionState.value) {
             is CommManager.ConnectionState.Connected -> {
@@ -782,6 +880,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         videoDecoder.stop("surfaceDestroyed")
     }
 
+
     override fun onVideoDimensionsChanged(width: Int, height: Int) {
         AppLog.i("[AapProjectionActivity] Received video dimensions: ${width}x$height")
         runOnUiThread {
@@ -794,29 +893,75 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         val action = TouchEvent.motionEventToAction(event) ?: return
         val ts = SystemClock.elapsedRealtime()
 
-        val containerView = findViewById<View>(R.id.container)
-        val viewWidth = containerView?.width?.takeIf { it > 0 } ?: HeadUnitScreenConfig.getUsableWidth()
-        val viewHeight = containerView?.height?.takeIf { it > 0 } ?: HeadUnitScreenConfig.getUsableHeight()
+        val videoW = HeadUnitScreenConfig.getNegotiatedWidth()
+        val videoH = HeadUnitScreenConfig.getNegotiatedHeight()
 
-        val aaWidth = HeadUnitScreenConfig.getNegotiatedWidth() - HeadUnitScreenConfig.getWidthMargin()
-        val aaHeight = HeadUnitScreenConfig.getNegotiatedHeight() - HeadUnitScreenConfig.getHeightMargin()
-
-        val horizontalCorrection = if (viewWidth > 0) aaWidth.toFloat() / viewWidth.toFloat() else 0f
-        val verticalCorrection = if (viewHeight > 0) aaHeight.toFloat() / viewHeight.toFloat() else 0f
-
-        if (horizontalCorrection <= 0 || verticalCorrection <= 0) {
-            AppLog.w("sendTouchEvent: Ignoring touch, screen config not ready yet.")
+        if (videoW <= 0 || videoH <= 0 || projectionView !is View) {
+            AppLog.w("sendTouchEvent: Ignoring touch, screen config or view not ready.")
             return
+        }
+
+        val view = projectionView as View
+        // Use the container's "Anchor" dimensions (full touch surface) as the reference, 
+        // not the potentially resized projectionView's dimensions.
+        val viewW = HeadUnitScreenConfig.getUsableWidth().toFloat()
+        val viewH = HeadUnitScreenConfig.getUsableHeight().toFloat()
+
+        if (viewW <= 0 || viewH <= 0) return
+
+        val marginW = HeadUnitScreenConfig.getWidthMargin().toFloat()
+        val marginH = HeadUnitScreenConfig.getHeightMargin().toFloat()
+
+        val uiW = videoW - marginW
+        val uiH = videoH - marginH
+
+        // Logic check: When forcedScale is active, the visual behavior of 'stretchToFill' 
+        // is inverted (True = Aspect Ratio Centered, False = Stretched to Screen).
+        // We adjust the touch mapping to match this visual reality.
+        val isStretch = if (HeadUnitScreenConfig.forcedScale) {
+            !settings.stretchToFill 
+        } else {
+            settings.stretchToFill
         }
 
         val pointerData = mutableListOf<Triple<Int, Int, Int>>()
         repeat(event.pointerCount) { pointerIndex ->
             val pointerId = event.getPointerId(pointerIndex)
-            val x = event.getX(pointerIndex)
-            val y = event.getY(pointerIndex)
+            val px = event.getX(pointerIndex)
+            val py = event.getY(pointerIndex)
+            
+            var videoX = 0f
+            var videoY = 0f
 
-            val correctedX = (x * horizontalCorrection).toInt()
-            val correctedY = (y * verticalCorrection).toInt()
+            if (isStretch) {
+                videoX = (px / viewW) * uiW
+                videoY = (py / viewH) * uiH
+            } else {
+                val uiRatio = uiW / uiH
+                val viewRatio = viewW / viewH
+
+                var displayedUiW = viewW
+                var displayedUiH = viewH
+
+                if (viewRatio > uiRatio) {
+                    displayedUiW = viewH * uiRatio
+                } else {
+                    displayedUiH = viewW / uiRatio
+                }
+
+                val uiLeft = (viewW - displayedUiW) / 2f
+                val uiTop = (viewH - displayedUiH) / 2f
+
+                val localX = px - uiLeft
+                val localY = py - uiTop
+
+                videoX = (localX / displayedUiW) * uiW
+                videoY = (localY / displayedUiH) * uiH
+            }
+
+            // Clamp to negotiated bounds to prevent out-of-bounds touches
+            val correctedX = videoX.toInt().coerceIn(0, videoW)
+            val correctedY = videoY.toInt().coerceIn(0, videoH)
 
             pointerData.add(Triple(pointerId, correctedX, correctedY))
         }
@@ -824,10 +969,23 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         commManager.send(TouchEvent(ts, action, event.actionIndex, pointerData))
     }
 
+    private fun isMediaKey(keyCode: Int): Boolean {
+        return when (keyCode) {
+            KeyEvent.KEYCODE_MEDIA_PLAY,
+            KeyEvent.KEYCODE_MEDIA_PAUSE,
+            KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE,
+            KeyEvent.KEYCODE_MEDIA_NEXT,
+            KeyEvent.KEYCODE_MEDIA_PREVIOUS,
+            KeyEvent.KEYCODE_MEDIA_STOP -> true
+            else -> false
+        }
+    }
+
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
         if (keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_VOLUME_UP || keyCode == KeyEvent.KEYCODE_VOLUME_DOWN || keyCode == KeyEvent.KEYCODE_VOLUME_MUTE) {
             return super.onKeyDown(keyCode, event)
         }
+        // Always pass keys to AA during projection, unless they are handled by super (volume/back)
         onKeyEvent(keyCode, true)
         return true
     }
@@ -841,12 +999,36 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
     }
 
     private fun onKeyEvent(keyCode: Int, isPress: Boolean) {
-        AppLog.d("AapProjectionActivity: onKeyEvent code=$keyCode, isPress=$isPress")
-        commManager.send(keyCode, isPress)
+        // Mapping: Physical (HW) -> Logical (AA)
+        val logicalCode = settings.keyCodes.entries.find { it.value == keyCode }?.key ?: keyCode
+        AppLog.i("AapProjectionActivity: onKeyEvent HW=$keyCode -> AA=$logicalCode, isPress=$isPress")
+        commManager.send(logicalCode, isPress)
+    }
+
+    private fun applyStickyOrientation() {
+        if (settings.screenOrientation == Settings.ScreenOrientation.AUTO && HeadUnitScreenConfig.isResolutionLocked) {
+            val target = if (HeadUnitScreenConfig.getNegotiatedWidth() > HeadUnitScreenConfig.getNegotiatedHeight()) {
+                android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+            } else {
+                android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+            }
+            if (requestedOrientation != target) {
+                AppLog.i("[UI_DEBUG] Sticky Orientation: Session active, forcing orientation to $target")
+                requestedOrientation = target
+            }
+        }
     }
 
     override fun onDestroy() {
         super.onDestroy()
+        if (isFinishReceiverRegistered) {
+            unregisterReceiver(finishReceiver)
+            isFinishReceiverRegistered = false
+        }
+        if (isKeyEventReceiverRegistered) {
+            unregisterReceiver(keyEventReceiver)
+            isKeyEventReceiverRegistered = false
+        }
         AppLog.i("AapProjectionActivity.onDestroy called. isFinishing=$isFinishing")
         videoDecoder.dimensionsListener = null
     }
@@ -858,6 +1040,22 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
             val aapIntent = Intent(context, AapProjectionActivity::class.java)
             aapIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             return aapIntent
+        }
+    }
+    private fun applyOrientationSettings() {
+        val screenOrientation = settings.screenOrientation
+        if (screenOrientation == Settings.ScreenOrientation.AUTO) {
+            applyStickyOrientation()
+            if (!HeadUnitScreenConfig.isResolutionLocked) {
+                // Initial start: lock to current orientation at launch
+                if (Build.VERSION.SDK_INT >= 18) {
+                    requestedOrientation = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LOCKED
+                } else {
+                    requestedOrientation = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_NOSENSOR
+                }
+            }
+        } else {
+            requestedOrientation = screenOrientation.androidOrientation
         }
     }
 }
