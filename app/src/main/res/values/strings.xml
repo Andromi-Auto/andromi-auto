@@ -148,6 +148,11 @@
     <string name="key_music">Music</string>
     <string name="key_nav">Navigation</string>
     <string name="key_night">Toggle Night Mode</string>
+    <string name="key_enter">Enter</string>
+    <string name="key_home">Home</string>
+    <string name="key_app_switch">App Switch / Recents</string>
+    <string name="key_button_a">Button A (Select)</string>
+    <string name="key_button_b">Button B (Back)</string>
 
     <!-- Language Settings -->
     <string name="app_language">App Language</string>
