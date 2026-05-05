@@ -30,6 +30,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.IntentCompat
 import com.andrerinas.headunitrevived.App
 import com.andrerinas.headunitrevived.app.BootCompleteReceiver
+import com.andrerinas.headunitrevived.app.WifiAutoStartReceiver
 import com.andrerinas.headunitrevived.main.MainActivity
 import com.andrerinas.headunitrevived.R
 import com.andrerinas.headunitrevived.aap.protocol.messages.NightModeEvent
@@ -102,6 +103,7 @@ class AapService : Service(), UsbReceiver.Listener {
     private var wifiDirectManager: WifiDirectManager? = null
     private var nativeAaHandshakeManager: NativeAaHandshakeManager? = null
     private var nearbyManager: NearbyManager? = null
+    private var wifiAutoStartReceiver: WifiAutoStartReceiver? = null
     private var carKeyReceiver: CarKeyReceiver? = null
     private var silentAudioPlayer: SilentAudioPlayer? = null
     private var wirelessServer: WirelessServer? = null
@@ -631,6 +633,9 @@ class AapService : Service(), UsbReceiver.Listener {
         setupNightMode()
         observeConnectionState()
         registerReceivers()
+        
+        // Handle immediate WiFi auto-start check (e.g. if already connected on boot/wake)
+        WifiAutoStartReceiver.checkAndStart(this)
 
         // Initialize MediaSession early and set it active immediately.
         // This ensures media button routing works even BEFORE an AA connection,
@@ -1139,6 +1144,15 @@ class AapService : Service(), UsbReceiver.Listener {
             ContextCompat.RECEIVER_EXPORTED
         )
         AppLog.i("Registered runtime MEDIA_BUTTON receiver")
+        
+        // WiFi Auto-start: Dynamic registration for reliability on Android 8+
+        wifiAutoStartReceiver = WifiAutoStartReceiver()
+        ContextCompat.registerReceiver(
+            this, wifiAutoStartReceiver,
+            IntentFilter(android.net.wifi.WifiManager.NETWORK_STATE_CHANGED_ACTION),
+            ContextCompat.RECEIVER_EXPORTED
+        )
+        AppLog.i("Registered dynamic WiFi Auto-start receiver")
 
         // Wake detection receiver: catches SCREEN_ON, SCREEN_OFF, POWER_CONNECTED,
         // and all known OEM boot/ACC intents. Enables hibernate wake detection on
@@ -1472,6 +1486,7 @@ class AapService : Service(), UsbReceiver.Listener {
         try { unregisterReceiver(usbReceiver) } catch (_: Exception) {}
         try { unregisterReceiver(mediaButtonReceiver) } catch (_: Exception) {}
         try { unregisterReceiver(wakeDetectReceiver) } catch (_: Exception) {}
+        try { wifiAutoStartReceiver?.let { unregisterReceiver(it) } } catch (_: Exception) {}
         uiModeManager.disableCarMode(0)
         serviceScope.cancel()
         LogExporter.stopCapture()

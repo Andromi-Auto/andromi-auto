@@ -16,6 +16,7 @@ import com.andrerinas.headunitrevived.decoder.AudioDecoder
 import com.andrerinas.headunitrevived.decoder.VideoDecoder
 import android.media.AudioManager
 import android.os.Build
+import android.os.SystemClock
 import com.andrerinas.headunitrevived.aap.AapMessage
 import com.andrerinas.headunitrevived.aap.protocol.messages.SensorEvent
 import com.andrerinas.headunitrevived.aap.protocol.proto.MediaPlayback
