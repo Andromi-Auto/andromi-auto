@@ -8,10 +8,16 @@ import android.net.wifi.WifiInfo
 import android.net.wifi.WifiManager
 import androidx.core.content.ContextCompat
 import com.andrerinas.headunitrevived.App
+import android.app.Notification
+import android.app.NotificationManager
+import android.app.PendingIntent
+import androidx.core.app.NotificationCompat
+import com.andrerinas.headunitrevived.R
 import com.andrerinas.headunitrevived.aap.AapService
 import com.andrerinas.headunitrevived.main.MainActivity
 import com.andrerinas.headunitrevived.utils.AppLog
 import com.andrerinas.headunitrevived.utils.Settings
+import android.os.Build
 
 class WifiAutoStartReceiver : BroadcastReceiver() {
 
@@ -66,16 +72,31 @@ class WifiAutoStartReceiver : BroadcastReceiver() {
                     AppLog.e("Failed to start AapService from background: ${e.message}")
                 }
 
-                // Attempt to start the UI
+                // Attempt to start the UI via FullScreenIntent (Required for Android 10+ background restrictions)
                 val launchIntent = Intent(context, MainActivity::class.java).apply {
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
                     putExtra(MainActivity.EXTRA_LAUNCH_SOURCE, "WiFi auto-start")
                 }
-                try {
-                    context.startActivity(launchIntent)
-                } catch (e: Exception) {
-                    AppLog.w("Could not start UI from background: ${e.message}")
-                }
+
+                val pendingIntent = PendingIntent.getActivity(
+                    context, 0, launchIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0)
+                )
+
+                val notification = NotificationCompat.Builder(context, App.bootStartChannel)
+                    .setSmallIcon(R.drawable.ic_stat_aa)
+                    .setContentTitle(context.getString(R.string.wifi_autostart_title))
+                    .setContentText(context.getString(R.string.wifi_autostart_content, currentSsid))
+                    .setPriority(NotificationCompat.PRIORITY_HIGH)
+                    .setCategory(NotificationCompat.CATEGORY_EVENT)
+                    .setAutoCancel(true)
+                    .setFullScreenIntent(pendingIntent, true)
+                    .setContentIntent(pendingIntent)
+                    .build()
+
+                val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                notificationManager.notify(99, notification)
+                AppLog.i("WifiAutoStartReceiver: Triggered FullScreenIntent notification.")
             }
         }
     }

@@ -541,6 +541,21 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
 
     private fun getMacFromShell(iface: String?): String? {
         if (iface == null) return null
+        
+        // Try reading directly from sysfs (often allowed even when ip link is not)
+        try {
+            val file = java.io.File("/sys/class/net/$iface/address")
+            if (file.exists()) {
+                val mac = file.readText().trim().lowercase()
+                if (mac.isNotEmpty() && mac != "00:00:00:00:00:00" && mac != "02:00:00:00:00:00") {
+                    AppLog.i("WifiDirectManager: MAC retrieved via sysfs: $mac")
+                    return mac
+                }
+            }
+        } catch (e: Exception) {
+            AppLog.w("WifiDirectManager: Failed to read MAC from sysfs: ${e.message}")
+        }
+
         return try {
             val process = Runtime.getRuntime().exec("ip link show $iface")
             val reader = process.inputStream.bufferedReader()

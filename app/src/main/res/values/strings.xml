@@ -492,4 +492,6 @@
     <string name="media_action_pause">Pause</string>
     <string name="media_action_next">Next</string>
     <string name="error_usb_permission_failed">System error: Failed to request USB permission dialog.</string>
+    <string name="wifi_autostart_title">WiFi Auto-Start</string>
+    <string name="wifi_autostart_content">Connected to %s. Tap to start Android Auto.</string>
 </resources>

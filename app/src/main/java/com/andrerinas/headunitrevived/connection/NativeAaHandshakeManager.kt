@@ -150,7 +150,7 @@ class NativeAaHandshakeManager(
                     val read = input.read(buf)
                     if (read == -1) break
                     
-                    val cmd = String(buf, 0, read).trim()
+                    val cmd = String(buf, 0, read, Charsets.US_ASCII).trim()
                     AppLog.d("NativeAA: HFP RX: $cmd")
                     
                     // Respond to standard HFP initialization commands
