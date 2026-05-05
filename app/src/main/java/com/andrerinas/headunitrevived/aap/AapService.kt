@@ -1562,8 +1562,18 @@ class AapService : Service(), UsbReceiver.Listener {
                     // [FIX] Reset exit flags so the subsequent connection is accepted
                     userExitedAA = false
                     userExitCooldownUntil = 0L
-                    // Ensure WiFi Direct and BT servers are ready before poking
-                    initWifiMode(force = true)
+                    
+                    val settings = App.provide(this).settings
+                    if (activeWifiMode != 3 || settings.wifiConnectionMode != 3) {
+                        AppLog.i("AapService: Initializing Native AA mode before poke...")
+                        initWifiMode(force = true)
+                    } else {
+                        AppLog.d("AapService: Already in Native AA mode, skipping re-init.")
+                        // Just ensure servers are running if they were stopped for some reason
+                        startWirelessServer() 
+                        nativeAaHandshakeManager?.start()
+                    }
+                    
                     nativeAaHandshakeManager?.manualPoke(mac)
                 }
             }

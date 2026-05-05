@@ -277,7 +277,8 @@ class NativeAaHandshakeManager(
 
             if (response.type == 2) {
                 AppLog.i("NativeAA: Phone requested security info (Ready for WiFi association).")
-                AppLog.i("NativeAA: Sending WifiInfoResponse (Type 3) with full credentials...")
+                AppLog.i("NativeAA: Sending WifiInfoResponse (Type 3) with full credentials in 500ms...")
+                delay(500)
                 sendWifiSecurityResponse(output, ssid, psk, bssid)
                 AppLog.i("NativeAA: Handshake completed successfully on Bluetooth side.")
                 // Instead of closing after 20 seconds, keep the socket open indefinitely
