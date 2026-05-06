@@ -303,6 +303,7 @@ class HomeFragment : Fragment() {
                 aapIntent.putExtra(AapProjectionActivity.EXTRA_FOCUS, true)
                 startActivity(aapIntent)
             } else {
+                (requireActivity() as? MainActivity)?.beginAutoConnect("manual self mode")
                 startSelfMode()
             }
         }
@@ -329,6 +330,7 @@ class HomeFragment : Fragment() {
                         Toast.makeText(requireContext(), getString(R.string.already_scanning), Toast.LENGTH_SHORT).show()
                     } else {
                         Toast.makeText(requireContext(), getString(R.string.searching_headunit_server), Toast.LENGTH_SHORT).show()
+                        (requireActivity() as? MainActivity)?.beginAutoConnect("manual WiFi headunit server scan")
                         val intent = Intent(requireContext(), AapService::class.java).apply {
                             action = AapService.ACTION_START_WIRELESS_SCAN
                         }
@@ -347,6 +349,7 @@ class HomeFragment : Fragment() {
                             Toast.makeText(requireContext(), getString(R.string.already_searching_phone), Toast.LENGTH_SHORT).show()
                         } else {
                             Toast.makeText(requireContext(), getString(R.string.searching_phone), Toast.LENGTH_SHORT).show()
+                            (requireActivity() as? MainActivity)?.beginAutoConnect("manual WiFi helper scan")
                             val intent = Intent(requireContext(), AapService::class.java).apply {
                                 action = AapService.ACTION_START_WIRELESS_SCAN
                             }
@@ -424,7 +427,8 @@ class HomeFragment : Fragment() {
             .setItems(deviceNames) { _, which ->
                 val device = bondedDevices[which]
                 AppLog.i("HomeFragment: Manually selected ${device.name} for Native-AA poke")
-                
+
+                (requireActivity() as? MainActivity)?.beginAutoConnect("manual Native-AA poke")
                 val intent = Intent(requireContext(), AapService::class.java).apply {
                     action = AapService.ACTION_NATIVE_AA_POKE
                     putExtra(AapService.EXTRA_MAC, device.address)
