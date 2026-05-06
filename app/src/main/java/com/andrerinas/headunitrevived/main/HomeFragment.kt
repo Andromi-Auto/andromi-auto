@@ -117,6 +117,7 @@ class HomeFragment : Fragment() {
                 Settings.AUTO_CONNECT_LAST_SESSION -> {
                     if (appSettings.autoConnectLastSession && !hasAttemptedAutoConnect && !commManager.isConnected) {
                         hasAttemptedAutoConnect = true
+                        (requireActivity() as? MainActivity)?.beginAutoConnect("auto-connect last session")
                         attemptAutoConnect()
                     }
                 }
@@ -124,12 +125,14 @@ class HomeFragment : Fragment() {
                     if ((appSettings.autoStartSelfMode || forceSelfModeLaunch) && !hasAutoStarted && !commManager.isConnected) {
                         hasAutoStarted = true
                         forceSelfModeLaunch = false // Reset once processed
+                        (requireActivity() as? MainActivity)?.beginAutoConnect("auto-start self mode")
                         startSelfMode()
                     }
                 }
                 Settings.AUTO_CONNECT_SINGLE_USB -> {
                     if (appSettings.autoConnectSingleUsbDevice && !hasAttemptedSingleUsbAutoConnect && !commManager.isConnected) {
                         hasAttemptedSingleUsbAutoConnect = true
+                        (requireActivity() as? MainActivity)?.beginAutoConnect("auto-connect single USB")
                         attemptSingleUsbAutoConnect()
                     }
                 }
