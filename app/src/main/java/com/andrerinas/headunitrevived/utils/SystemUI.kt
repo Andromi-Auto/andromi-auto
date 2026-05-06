@@ -18,6 +18,7 @@ object SystemUI {
         // Always keep screen on for Headunit functionality
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
+        // Handle Display Cutout (Notch) for Android P+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             val params = window.attributes
             params.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
@@ -26,11 +27,12 @@ object SystemUI {
 
         val controllerCompat = WindowInsetsControllerCompat(window, window.decorView)
 
-        // Handle Immersive Mode using modern Compat API
+        // Modern Edge-to-Edge for Android 11+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             window.setDecorFitsSystemWindows(false)
         }
 
+        // Apply visibility using Compat API
         when (mode) {
             Settings.FullscreenMode.IMMERSIVE, Settings.FullscreenMode.IMMERSIVE_WITH_NOTCH -> {
                 controllerCompat.hide(WindowInsetsCompat.Type.systemBars())
@@ -46,7 +48,7 @@ object SystemUI {
             }
         }
 
-        // Legacy Flags (Layout stability & Fallback for hide)
+        // Legacy Flags (Layout stability & Fallback for hiding bars)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             @Suppress("DEPRECATION")
             var flags = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or 
@@ -81,7 +83,7 @@ object SystemUI {
             window.decorView.systemUiVisibility = flags
         }
 
-        // Fix for Non-Immersive: Force black bars on older devices
+        // Visual Polish: Background colors and Light/Dark icon appearance
         if (mode != Settings.FullscreenMode.IMMERSIVE && mode != Settings.FullscreenMode.IMMERSIVE_WITH_NOTCH) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
@@ -103,7 +105,7 @@ object SystemUI {
 
         val settings = Settings(root.context)
 
-        // IMMEDIATE APPLICATION
+        // IMMEDIATE APPLICATION OF MANUAL INSETS
         val manualL = settings.insetLeft
         val manualT = settings.insetTop
         val manualR = settings.insetRight
@@ -112,23 +114,23 @@ object SystemUI {
         root.setPadding(manualL, manualT, manualR, manualB)
         HeadUnitScreenConfig.updateInsets(manualL, manualT, manualR, manualB)
 
+        // Android 4.x Legacy Fallback
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-            // Legacy Fallback for Android 4.x
             root.viewTreeObserver.addOnGlobalLayoutListener(object : android.view.ViewTreeObserver.OnGlobalLayoutListener {
                 override fun onGlobalLayout() {
                     val rect = android.graphics.Rect()
                     window.decorView.getWindowVisibleDisplayFrame(rect)
-                    
+
                     @Suppress("DEPRECATION")
                     val display = window.windowManager.defaultDisplay
                     val size = android.graphics.Point()
                     display.getSize(size)
-                    
+
                     val insetT = rect.top
                     val insetB = size.y - rect.bottom
                     val insetL = rect.left
                     val insetR = size.x - rect.right
-                    
+
                     AppLog.d("[UI_DEBUG] Legacy SystemUI: Detected Insets L$insetL T$insetT R$insetR B$insetB")
                     HeadUnitScreenConfig.updateInsets(manualL + insetL, manualT + insetT, manualR + insetR, manualB + insetB)
                     onInsetsChanged?.invoke()
@@ -140,13 +142,13 @@ object SystemUI {
         // Set up listener for dynamic system bars (API 21+)
         ViewCompat.setOnApplyWindowInsetsListener(root) { v, insetsCompat ->
             var typeMask = 0
-            
+
             when (mode) {
                 Settings.FullscreenMode.IMMERSIVE -> {
                     typeMask = 0 // Standard Immersive: Overlay everything (Notch included)
                 }
                 Settings.FullscreenMode.IMMERSIVE_WITH_NOTCH -> {
-                    // This is now the "Avoid Notch" mode (ID 3)
+                    // Avoid Notch mode (ID 3)
                     if (Build.VERSION.SDK_INT >= 28) {
                         typeMask = WindowInsetsCompat.Type.displayCutout()
                     }
@@ -170,10 +172,10 @@ object SystemUI {
             } else {
                 androidx.core.graphics.Insets.NONE
             }
-            
+
             v.setPadding(bars.left + manualL, bars.top + manualT, bars.right + manualR, bars.bottom + manualB)
             HeadUnitScreenConfig.updateInsets(bars.left + manualL, bars.top + manualT, bars.right + manualR, bars.bottom + manualB)
-            
+
             onInsetsChanged?.invoke()
             WindowInsetsCompat.CONSUMED
         }
