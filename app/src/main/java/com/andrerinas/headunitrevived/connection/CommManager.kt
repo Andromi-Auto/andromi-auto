@@ -21,6 +21,7 @@ import com.andrerinas.headunitrevived.aap.AapMessage
 import com.andrerinas.headunitrevived.aap.protocol.messages.SensorEvent
 import com.andrerinas.headunitrevived.aap.protocol.proto.MediaPlayback
 import java.net.Socket
+import android.view.KeyEvent
 
 /**
  * Central connection and transport lifecycle manager.
@@ -390,21 +391,58 @@ class CommManager(
     // send() overloads — fire-and-forget; silently dropped if not TransportStarted
     // -----------------------------------------------------------------------------------------
 
-    /** Sends a key press or release event to the phone. */
+    private val keyStates = mutableMapOf<Int, Boolean>()
+
+    /** 
+     * Sends a key press or release event to the phone with remapping and de-duplication.
+     * This is the single entry point for all key events in the application.
+     */
+    fun sendKey(keyCode: Int, isPress: Boolean) {
+        if (_connectionState.value !is ConnectionState.TransportStarted) return
+
+        // 1. Remapping (Physical -> Logical)
+        // We find the AA logical code (key) that corresponds to this hardware keyCode (value).
+        var logicalCode = settings.keyCodes.entries.find { it.value == keyCode }?.key ?: keyCode
+
+        // [FIX] BMW/Rotary Enter remapping: Most AA apps expect DPAD_CENTER (23) for selection,
+        // but physical rotary knobs often send ENTER (66). Remap 66 -> 23 to ensure selection works.
+        if (logicalCode == KeyEvent.KEYCODE_ENTER) {
+            logicalCode = KeyEvent.KEYCODE_DPAD_CENTER
+        }
+
+        // 2. State Tracking & De-duplication
+        val isCurrentlyDown = keyStates[logicalCode] ?: false
+        if (isPress == isCurrentlyDown) {
+            // Already in this state (e.g., duplicate DOWN or duplicate UP) - drop it.
+            // This catches redundant triggers from multiple receivers (CarKey, MediaSession, etc.)
+            return
+        }
+
+        // 3. Time-based Debouncing (200ms window)
+        // We use the logical code for debouncing to catch "Click Emulations" vs "Real Time" conflicts.
+        val eventKey = (logicalCode shl 1) or (if (isPress) 1 else 0)
+        val now = SystemClock.elapsedRealtime()
+        val last = lastKeyEvents[eventKey] ?: 0L
+        
+        if (now - last < 200) {
+            AppLog.d("CommManager: Debouncing logical key $logicalCode (isPress=$isPress) - dropped duplicate within ${now - last}ms")
+            return
+        }
+        
+        // Update state and timestamp
+        keyStates[logicalCode] = isPress
+        lastKeyEvents[eventKey] = now
+        
+        AppLog.i("CommManager: TX Key -> AA=$logicalCode (isPress=$isPress)")
+        _transport?.send(logicalCode, isPress)
+    }
+
+    /** 
+     * [Legacy] Internal transport send. Use sendKey() for physical button inputs.
+     * @deprecated Use sendKey(keyCode, isPress) for unified remapping and debouncing.
+     */
     fun send(keyCode: Int, isPress: Boolean) {
         if (_connectionState.value is ConnectionState.TransportStarted) {
-            // Deduplication: ignore same press/release for same key within 100ms
-            // We encode keyCode and isPress into a single key: (keyCode << 1) | (if (isPress) 1 else 0)
-            val eventKey = (keyCode shl 1) or (if (isPress) 1 else 0)
-            val now = SystemClock.elapsedRealtime()
-            val last = lastKeyEvents[eventKey] ?: 0L
-            
-            if (now - last < 100) {
-                AppLog.d("CommManager: Deduplicating key $keyCode (isPress=$isPress) - dropped duplicate within ${now - last}ms")
-                return
-            }
-            lastKeyEvents[eventKey] = now
-            
             _transport?.send(keyCode, isPress)
         }
     }
@@ -490,6 +528,7 @@ class CommManager(
         _transport = null
         _connection = null
         lastKeyEvents.clear()
+        keyStates.clear()
         try {
             // Only send ByeByeRequest when we are initiating the disconnect (e.g. user pressed
             // disconnect). When the transport self-quit (read error, soTimeout), the connection

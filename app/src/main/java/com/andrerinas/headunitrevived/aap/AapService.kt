@@ -920,8 +920,8 @@ class AapService : Service(), UsbReceiver.Listener {
                             
                             AppLog.i("MediaButtonEvent: Processing key ${keyEvent.keyCode}")
                             // Send a complete click sequence (press + release) immediately
-                            commManager.send(keyEvent.keyCode, true)
-                            commManager.send(keyEvent.keyCode, false)
+                            commManager.sendKey(keyEvent.keyCode, true)
+                            commManager.sendKey(keyEvent.keyCode, false)
                             return true
                         }
                         
@@ -936,32 +936,32 @@ class AapService : Service(), UsbReceiver.Listener {
 
                 override fun onPause() {
                     AppLog.i("MediaSession: Processing transport control action = KEYCODE_MEDIA_PAUSE")
-                    commManager.send(android.view.KeyEvent.KEYCODE_MEDIA_PAUSE, true)
-                    commManager.send(android.view.KeyEvent.KEYCODE_MEDIA_PAUSE, false)
+                    commManager.sendKey(android.view.KeyEvent.KEYCODE_MEDIA_PAUSE, true)
+                    commManager.sendKey(android.view.KeyEvent.KEYCODE_MEDIA_PAUSE, false)
                 }
 
                 override fun onPlay() {
                     AppLog.i("MediaSession: Processing transport control action = KEYCODE_MEDIA_PLAY")
-                    commManager.send(android.view.KeyEvent.KEYCODE_MEDIA_PLAY, true)
-                    commManager.send(android.view.KeyEvent.KEYCODE_MEDIA_PLAY, false)
+                    commManager.sendKey(android.view.KeyEvent.KEYCODE_MEDIA_PLAY, true)
+                    commManager.sendKey(android.view.KeyEvent.KEYCODE_MEDIA_PLAY, false)
                 }
 
                 override fun onSkipToNext() {
                     AppLog.i("MediaSession: Processing transport control action = KEYCODE_MEDIA_NEXT")
-                    commManager.send(android.view.KeyEvent.KEYCODE_MEDIA_NEXT, true)
-                    commManager.send(android.view.KeyEvent.KEYCODE_MEDIA_NEXT, false)
+                    commManager.sendKey(android.view.KeyEvent.KEYCODE_MEDIA_NEXT, true)
+                    commManager.sendKey(android.view.KeyEvent.KEYCODE_MEDIA_NEXT, false)
                 }
 
                 override fun onSkipToPrevious() {
                     AppLog.i("MediaSession: Processing transport control action = KEYCODE_MEDIA_PREVIOUS")
-                    commManager.send(android.view.KeyEvent.KEYCODE_MEDIA_PREVIOUS, true)
-                    commManager.send(android.view.KeyEvent.KEYCODE_MEDIA_PREVIOUS, false)
+                    commManager.sendKey(android.view.KeyEvent.KEYCODE_MEDIA_PREVIOUS, true)
+                    commManager.sendKey(android.view.KeyEvent.KEYCODE_MEDIA_PREVIOUS, false)
                 }
 
                 override fun onStop() {
                     AppLog.i("MediaSession: Processing transport control action = KEYCODE_MEDIA_STOP")
-                    commManager.send(android.view.KeyEvent.KEYCODE_MEDIA_STOP, true)
-                    commManager.send(android.view.KeyEvent.KEYCODE_MEDIA_STOP, false)
+                    commManager.sendKey(android.view.KeyEvent.KEYCODE_MEDIA_STOP, true)
+                    commManager.sendKey(android.view.KeyEvent.KEYCODE_MEDIA_STOP, false)
                 }
             })
             setPlaybackToLocal(android.media.AudioManager.STREAM_MUSIC)

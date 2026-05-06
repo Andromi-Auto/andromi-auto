@@ -800,24 +800,13 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         commManager.send(TouchEvent(ts, action, event.actionIndex, pointerData))
     }
 
-    private fun isMediaKey(keyCode: Int): Boolean {
-        return when (keyCode) {
-            KeyEvent.KEYCODE_MEDIA_PLAY,
-            KeyEvent.KEYCODE_MEDIA_PAUSE,
-            KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE,
-            KeyEvent.KEYCODE_MEDIA_NEXT,
-            KeyEvent.KEYCODE_MEDIA_PREVIOUS,
-            KeyEvent.KEYCODE_MEDIA_STOP -> true
-            else -> false
-        }
-    }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
         if (keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_VOLUME_UP || keyCode == KeyEvent.KEYCODE_VOLUME_DOWN || keyCode == KeyEvent.KEYCODE_VOLUME_MUTE) {
             return super.onKeyDown(keyCode, event)
         }
         // Always pass keys to AA during projection, unless they are handled by super (volume/back)
-        onKeyEvent(keyCode, true)
+        commManager.sendKey(keyCode, true)
         return true
     }
 
@@ -825,22 +814,14 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         if (keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_VOLUME_UP || keyCode == KeyEvent.KEYCODE_VOLUME_DOWN || keyCode == KeyEvent.KEYCODE_VOLUME_MUTE) {
             return super.onKeyUp(keyCode, event)
         }
-        onKeyEvent(keyCode, false)
+        commManager.sendKey(keyCode, false)
         return true
     }
 
     private fun onKeyEvent(keyCode: Int, isPress: Boolean) {
-        // Mapping: Physical (HW) -> Logical (AA)
-        var logicalCode = settings.keyCodes.entries.find { it.value == keyCode }?.key ?: keyCode
-
-        // [FIX] BMW/Rotary Enter remapping: Most AA apps expect DPAD_CENTER (23) for selection,
-        // but physical rotary knobs often send ENTER (66). Remap 66 -> 23 to ensure selection works.
-        if (logicalCode == KeyEvent.KEYCODE_ENTER) {
-            logicalCode = KeyEvent.KEYCODE_DPAD_CENTER
-        }
-
-        AppLog.i("AapProjectionActivity: onKeyEvent HW=$keyCode -> AA=$logicalCode, isPress=$isPress")
-        commManager.send(logicalCode, isPress)
+        // All key events are now funneled through CommManager for centralized 
+        // remapping, state tracking, and debouncing.
+        commManager.sendKey(keyCode, isPress)
     }
 
     private fun applyStickyOrientation() {
