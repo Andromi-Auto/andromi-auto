@@ -752,17 +752,6 @@ class SettingsFragment : Fragment() {
         ))
 
         items.add(SettingItem.SettingEntry(
-            stableId = "loadingScreen",
-            nameResId = R.string.loading_screen,
-            value = if (settings.loadingScreenMediaPath.isNullOrEmpty())
-                getString(R.string.loading_screen_default)
-            else getString(R.string.loading_screen_custom),
-            onClick = {
-                findNavController().navigate(R.id.action_settingsFragment_to_loadingScreenFragment)
-            }
-        ))
-
-        items.add(SettingItem.SettingEntry(
             stableId = "startInFullscreenMode",
             nameResId = R.string.start_in_fullscreen_mode,
             value = when (pendingFullscreenMode) {
@@ -883,6 +872,17 @@ class SettingsFragment : Fragment() {
                 }
             ))
         }
+
+        items.add(SettingItem.SettingEntry(
+            stableId = "loadingScreen",
+            nameResId = R.string.loading_screen,
+            value = if (settings.loadingScreenMediaPath.isNullOrEmpty())
+                getString(R.string.loading_screen_default)
+            else getString(R.string.loading_screen_custom),
+            onClick = {
+                findNavController().navigate(R.id.action_settingsFragment_to_loadingScreenFragment)
+            }
+        ))
 
         // --- Video Settings ---
         items.add(SettingItem.CategoryHeader("video", R.string.category_video))
