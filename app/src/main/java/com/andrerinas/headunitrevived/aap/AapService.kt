@@ -30,6 +30,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.IntentCompat
 import com.andrerinas.headunitrevived.App
 import com.andrerinas.headunitrevived.app.BootCompleteReceiver
+import com.andrerinas.headunitrevived.app.WifiAutoStartReceiver
 import com.andrerinas.headunitrevived.main.MainActivity
 import com.andrerinas.headunitrevived.R
 import com.andrerinas.headunitrevived.aap.protocol.messages.NightModeEvent
@@ -102,6 +103,7 @@ class AapService : Service(), UsbReceiver.Listener {
     private var wifiDirectManager: WifiDirectManager? = null
     private var nativeAaHandshakeManager: NativeAaHandshakeManager? = null
     private var nearbyManager: NearbyManager? = null
+    private var wifiAutoStartReceiver: WifiAutoStartReceiver? = null
     private var carKeyReceiver: CarKeyReceiver? = null
     private var silentAudioPlayer: SilentAudioPlayer? = null
     private var wirelessServer: WirelessServer? = null
@@ -637,7 +639,7 @@ class AapService : Service(), UsbReceiver.Listener {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             startForeground(1, createNotification(),
-                ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE or ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK)
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE or ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK or ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION or ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE)
         } else {
             startForeground(1, createNotification())
         }
@@ -645,6 +647,9 @@ class AapService : Service(), UsbReceiver.Listener {
         setupNightMode()
         observeConnectionState()
         registerReceivers()
+        
+        // Handle immediate WiFi auto-start check (e.g. if already connected on boot/wake)
+        WifiAutoStartReceiver.checkAndStart(this)
 
         // Initialize MediaSession early and set it active immediately.
         // This ensures media button routing works even BEFORE an AA connection,
@@ -926,8 +931,8 @@ class AapService : Service(), UsbReceiver.Listener {
                             
                             AppLog.i("MediaButtonEvent: Processing key ${keyEvent.keyCode}")
                             // Send a complete click sequence (press + release) immediately
-                            commManager.send(keyEvent.keyCode, true)
-                            commManager.send(keyEvent.keyCode, false)
+                            commManager.sendKey(keyEvent.keyCode, true)
+                            commManager.sendKey(keyEvent.keyCode, false)
                             return true
                         }
                         
@@ -942,32 +947,32 @@ class AapService : Service(), UsbReceiver.Listener {
 
                 override fun onPause() {
                     AppLog.i("MediaSession: Processing transport control action = KEYCODE_MEDIA_PAUSE")
-                    commManager.send(android.view.KeyEvent.KEYCODE_MEDIA_PAUSE, true)
-                    commManager.send(android.view.KeyEvent.KEYCODE_MEDIA_PAUSE, false)
+                    commManager.sendKey(android.view.KeyEvent.KEYCODE_MEDIA_PAUSE, true)
+                    commManager.sendKey(android.view.KeyEvent.KEYCODE_MEDIA_PAUSE, false)
                 }
 
                 override fun onPlay() {
                     AppLog.i("MediaSession: Processing transport control action = KEYCODE_MEDIA_PLAY")
-                    commManager.send(android.view.KeyEvent.KEYCODE_MEDIA_PLAY, true)
-                    commManager.send(android.view.KeyEvent.KEYCODE_MEDIA_PLAY, false)
+                    commManager.sendKey(android.view.KeyEvent.KEYCODE_MEDIA_PLAY, true)
+                    commManager.sendKey(android.view.KeyEvent.KEYCODE_MEDIA_PLAY, false)
                 }
 
                 override fun onSkipToNext() {
                     AppLog.i("MediaSession: Processing transport control action = KEYCODE_MEDIA_NEXT")
-                    commManager.send(android.view.KeyEvent.KEYCODE_MEDIA_NEXT, true)
-                    commManager.send(android.view.KeyEvent.KEYCODE_MEDIA_NEXT, false)
+                    commManager.sendKey(android.view.KeyEvent.KEYCODE_MEDIA_NEXT, true)
+                    commManager.sendKey(android.view.KeyEvent.KEYCODE_MEDIA_NEXT, false)
                 }
 
                 override fun onSkipToPrevious() {
                     AppLog.i("MediaSession: Processing transport control action = KEYCODE_MEDIA_PREVIOUS")
-                    commManager.send(android.view.KeyEvent.KEYCODE_MEDIA_PREVIOUS, true)
-                    commManager.send(android.view.KeyEvent.KEYCODE_MEDIA_PREVIOUS, false)
+                    commManager.sendKey(android.view.KeyEvent.KEYCODE_MEDIA_PREVIOUS, true)
+                    commManager.sendKey(android.view.KeyEvent.KEYCODE_MEDIA_PREVIOUS, false)
                 }
 
                 override fun onStop() {
                     AppLog.i("MediaSession: Processing transport control action = KEYCODE_MEDIA_STOP")
-                    commManager.send(android.view.KeyEvent.KEYCODE_MEDIA_STOP, true)
-                    commManager.send(android.view.KeyEvent.KEYCODE_MEDIA_STOP, false)
+                    commManager.sendKey(android.view.KeyEvent.KEYCODE_MEDIA_STOP, true)
+                    commManager.sendKey(android.view.KeyEvent.KEYCODE_MEDIA_STOP, false)
                 }
             })
             setPlaybackToLocal(android.media.AudioManager.STREAM_MUSIC)
@@ -1150,6 +1155,15 @@ class AapService : Service(), UsbReceiver.Listener {
             ContextCompat.RECEIVER_EXPORTED
         )
         AppLog.i("Registered runtime MEDIA_BUTTON receiver")
+        
+        // WiFi Auto-start: Dynamic registration for reliability on Android 8+
+        wifiAutoStartReceiver = WifiAutoStartReceiver()
+        ContextCompat.registerReceiver(
+            this, wifiAutoStartReceiver,
+            IntentFilter(android.net.wifi.WifiManager.NETWORK_STATE_CHANGED_ACTION),
+            ContextCompat.RECEIVER_EXPORTED
+        )
+        AppLog.i("Registered dynamic WiFi Auto-start receiver")
 
         // Wake detection receiver: catches SCREEN_ON, SCREEN_OFF, POWER_CONNECTED,
         // and all known OEM boot/ACC intents. Enables hibernate wake detection on
@@ -1472,9 +1486,13 @@ class AapService : Service(), UsbReceiver.Listener {
         stopWirelessServer()
         wifiDirectManager?.stop()
         nearbyManager?.stop()
-        safeMediaSessionCall {
-            it.isActive = false
-            it.release()
+        try {
+            mediaSession?.let {
+                it.isActive = false
+                it.release()
+            }
+        } catch (e: Exception) {
+            AppLog.e("Error releasing MediaSession: ${e.message}")
         }
         mediaSession = null
         commManager.destroy()
@@ -1483,6 +1501,7 @@ class AapService : Service(), UsbReceiver.Listener {
         try { unregisterReceiver(usbReceiver) } catch (_: Exception) {}
         try { unregisterReceiver(mediaButtonReceiver) } catch (_: Exception) {}
         try { unregisterReceiver(wakeDetectReceiver) } catch (_: Exception) {}
+        try { wifiAutoStartReceiver?.let { unregisterReceiver(it) } } catch (_: Exception) {}
         uiModeManager.disableCarMode(0)
         serviceScope.cancel()
         LogExporter.stopCapture()
@@ -1496,7 +1515,7 @@ class AapService : Service(), UsbReceiver.Listener {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             startForeground(1, createNotification(),
-                ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE or ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK)
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE or ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK or ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION or ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE)
         } else {
             startForeground(1, createNotification())
         }

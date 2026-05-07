@@ -29,6 +29,7 @@ class BootCompleteReceiver : BroadcastReceiver() {
         val bootEnabled = Settings.isAutoStartOnBootEnabled(context)
         val screenOnEnabled = Settings.isAutoStartOnScreenOnEnabled(context)
         val usbEnabled = Settings.isAutoStartOnUsbEnabled(context)
+        val wifiEnabled = Settings.isAutoStartOnWifiEnabled(context)
 
         if (bootEnabled) {
             AppLog.i("Boot auto-start: starting AapService with BOOT_START (trigger=$action)")
@@ -51,6 +52,11 @@ class BootCompleteReceiver : BroadcastReceiver() {
             val serviceIntent = Intent(context, AapService::class.java).apply {
                 this.action = AapService.ACTION_CHECK_USB
             }
+            ContextCompat.startForegroundService(context, serviceIntent)
+        } else if (wifiEnabled) {
+            // Start the service to listen for WiFi connectivity changes dynamically.
+            AppLog.i("Boot auto-start: WiFi auto-start enabled, starting AapService to listen for WiFi (trigger=$action)")
+            val serviceIntent = Intent(context, AapService::class.java)
             ContextCompat.startForegroundService(context, serviceIntent)
         } else {
             AppLog.i("Boot auto-start: disabled, skipping")

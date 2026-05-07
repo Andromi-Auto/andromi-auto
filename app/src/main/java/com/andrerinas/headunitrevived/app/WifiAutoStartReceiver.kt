@@ -6,20 +6,23 @@ import android.content.Intent
 import android.net.NetworkInfo
 import android.net.wifi.WifiInfo
 import android.net.wifi.WifiManager
+import androidx.core.content.ContextCompat
+import com.andrerinas.headunitrevived.App
+import android.app.Notification
+import android.app.NotificationManager
+import android.app.PendingIntent
+import androidx.core.app.NotificationCompat
+import com.andrerinas.headunitrevived.R
 import com.andrerinas.headunitrevived.aap.AapService
 import com.andrerinas.headunitrevived.main.MainActivity
 import com.andrerinas.headunitrevived.utils.AppLog
 import com.andrerinas.headunitrevived.utils.Settings
+import android.os.Build
 
 class WifiAutoStartReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action != WifiManager.NETWORK_STATE_CHANGED_ACTION) return
-
-        // Read settings from device-protected storage for maximum reliability
-        if (!Settings.isAutoStartOnWifiEnabled(context)) return
-        val targetSsid = Settings.getAutoStartWifiSsid(context)
-        if (targetSsid.isEmpty()) return
 
         val networkInfo = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
             intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO, NetworkInfo::class.java)
@@ -29,18 +32,34 @@ class WifiAutoStartReceiver : BroadcastReceiver() {
         }
 
         if (networkInfo != null && networkInfo.isConnected) {
+            checkAndStart(context)
+        }
+    }
+
+    companion object {
+        fun checkAndStart(context: Context) {
+            // Read settings from device-protected storage for maximum reliability
+            if (!Settings.isAutoStartOnWifiEnabled(context)) return
+            val targetSsid = Settings.getAutoStartWifiSsid(context).removeSurrounding("\"")
+            if (targetSsid.isEmpty()) return
+
             val wifiManager = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
             val wifiInfo: WifiInfo? = wifiManager.connectionInfo
             
             val currentSsid = wifiInfo?.ssid?.removeSurrounding("\"")
             
-            AppLog.d("WifiAutoStartReceiver: Connected to WiFi: $currentSsid (Target: $targetSsid)")
+            if (currentSsid == null || currentSsid == "<unknown ssid>") {
+                AppLog.d("WifiAutoStartReceiver: No valid SSID connected yet.")
+                return
+            }
 
-            if (currentSsid != null && currentSsid.equals(targetSsid, ignoreCase = true)) {
-                AppLog.i("MATCH! Starting AapService via WiFi Auto-start...")
+            AppLog.d("WifiAutoStartReceiver: Checking WiFi: $currentSsid (Target: $targetSsid)")
+
+            if (currentSsid.equals(targetSsid, ignoreCase = true)) {
+                AppLog.i("WifiAutoStartReceiver: MATCH! Starting AapService via WiFi Auto-start...")
 
                 // Don't trigger if already connected
-                if (com.andrerinas.headunitrevived.App.provide(context).commManager.isConnected) {
+                if (App.provide(context).commManager.isConnected) {
                     AppLog.d("WifiAutoStartReceiver: Already connected to Android Auto. Ignoring event.")
                     return
                 }
@@ -48,21 +67,36 @@ class WifiAutoStartReceiver : BroadcastReceiver() {
                 // Start the service
                 val serviceIntent = Intent(context, AapService::class.java)
                 try {
-                    androidx.core.content.ContextCompat.startForegroundService(context, serviceIntent)
+                    ContextCompat.startForegroundService(context, serviceIntent)
                 } catch (e: Exception) {
                     AppLog.e("Failed to start AapService from background: ${e.message}")
                 }
 
-                // Attempt to start the UI
+                // Attempt to start the UI via FullScreenIntent (Required for Android 10+ background restrictions)
                 val launchIntent = Intent(context, MainActivity::class.java).apply {
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
                     putExtra(MainActivity.EXTRA_LAUNCH_SOURCE, "WiFi auto-start")
                 }
-                try {
-                    context.startActivity(launchIntent)
-                } catch (e: Exception) {
-                    AppLog.w("Could not start UI from background: ${e.message}")
-                }
+
+                val pendingIntent = PendingIntent.getActivity(
+                    context, 0, launchIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0)
+                )
+
+                val notification = NotificationCompat.Builder(context, App.bootStartChannel)
+                    .setSmallIcon(R.drawable.ic_stat_aa)
+                    .setContentTitle(context.getString(R.string.wifi_autostart_title))
+                    .setContentText(context.getString(R.string.wifi_autostart_content, currentSsid))
+                    .setPriority(NotificationCompat.PRIORITY_HIGH)
+                    .setCategory(NotificationCompat.CATEGORY_EVENT)
+                    .setAutoCancel(true)
+                    .setFullScreenIntent(pendingIntent, true)
+                    .setContentIntent(pendingIntent)
+                    .build()
+
+                val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                notificationManager.notify(99, notification)
+                AppLog.i("WifiAutoStartReceiver: Triggered FullScreenIntent notification.")
             }
         }
     }

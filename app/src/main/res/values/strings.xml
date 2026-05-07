@@ -66,6 +66,9 @@
     <string name="bluetooth_address_s">Bluetooth address</string>
     <string name="enter_bluetooth_mac">Enter bluetooth MAC</string>
     <string name="reset">Reset</string>
+    <string name="reset_settings">Reset to Defaults</string>
+    <string name="reset_settings_confirm">Are you sure you want to reset all settings to their default values? This will restart the app.</string>
+    <string name="reset_settings_description">Clears all configuration, cached data and auto-connect preferences. The app will restart to apply the factory defaults.</string>
     <string name="gps_for_navigation">Gps for navigation</string>
     <string name="gps_for_navigation_description">Use Gps for navigation</string>
     <string name="enabled">Enabled</string>
@@ -129,8 +132,8 @@
     <string name="stop_log_capture_description">Recording in progress… tap to stop</string>
     <string name="export_logs">Export Logs</string>
     <string name="export_logs_description">Save logs for debugging</string>
-    <string name="use_native_ssl">Use Native SSL</string>
-    <string name="use_native_ssl_description">Use native OpenSSL library (faster on older devices). Requires restart.</string>
+
+
     <string name="not_set">Not Set</string>
     <string name="keymap_description">Change the Key-Bindings for your Headunit</string>
 
@@ -491,9 +494,32 @@
     <string name="audio_latency_multiplier">Audio Latency Multiplier</string>
     <string name="audio_latency_multiplier_description">Adjust audio buffer size (Lower = Less Lag, Higher = Less Stutter)</string>
     <string name="audio_queue_capacity">Audio Queue Capacity (Backpressure)</string>
+
+    <!-- Custom loading screen -->
+    <string name="loading_screen">Loading screen</string>
+    <string name="loading_screen_default">Default</string>
+    <string name="loading_screen_custom">Custom</string>
+    <string name="loading_screen_dialog_title">Custom loading screen</string>
+    <string name="loading_screen_select_file">Select file</string>
+    <string name="loading_screen_remove">Remove</string>
+    <string name="loading_screen_recommendation">Recommended resolution: %1$dx%2$d</string>
+    <string name="loading_screen_supported_formats">Supported: Images (PNG, JPG, BMP, WEBP, GIF) \u2022 Videos (MP4, MKV, WEBM, 3GP) \u2022 Max: 10 MB</string>
+    <string name="loading_screen_no_media">No custom media selected</string>
+    <string name="loading_screen_file_too_large">File is too large (max 10 MB)</string>
+    <string name="loading_screen_unsupported_format">Unsupported format. Use an image or video file</string>
+    <string name="loading_screen_file_error">Could not load the selected file</string>
+    <string name="loading_screen_show_text">Show \"Android Auto is starting\" text</string>
+    <string name="loading_screen_tap_preview">Tap to preview fullscreen</string>
+    <string name="loading_screen_tap_to_close">Tap anywhere to close</string>
+    <string name="loading_screen_keep_aspect_ratio">Keep aspect ratio</string>
+    <string name="loading_screen_recommended_aspect_ratio">Recommended aspect ratio: %1$d:%2$d</string>
+    <string name="loading_screen_tap_fullscreen_hint">Tap the preview to see it fullscreen</string>
+    <string name="loading_screen_loop_video">Loop short animations</string>
     <string name="media_action_previous">Previous</string>
     <string name="media_action_play">Play</string>
     <string name="media_action_pause">Pause</string>
     <string name="media_action_next">Next</string>
     <string name="error_usb_permission_failed">System error: Failed to request USB permission dialog.</string>
+    <string name="wifi_autostart_title">WiFi Auto-Start</string>
+    <string name="wifi_autostart_content">Connected to %s. Tap to start Android Auto.</string>
 </resources>

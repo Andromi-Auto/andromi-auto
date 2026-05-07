@@ -108,8 +108,8 @@
     <string name="debug_mode_description">Meer logboekregistratie inschakelen/uitschakelen</string>
     <string name="export_logs">Logs exporteren</string>
     <string name="export_logs_description">Logs opslaan voor debugging</string>
-    <string name="use_native_ssl">Gebruik Native SSL</string>
-    <string name="use_native_ssl_description">Gebruik de native OpenSSL-bibliotheek (sneller op oudere apparaten). Vereist een herstart.</string>
+
+
     <string name="not_set">Niet ingesteld</string>
     <string name="keymap_description">Wijzig de toetsencombinaties voor uw autoradio.</string>
 
@@ -490,4 +490,25 @@
     <string name="sync_media_session_aa_metadata">Huidig AA-nummer in mediasessie</string>
     <string name="sync_media_session_aa_metadata_description">Toon titel, artiest, duur en albumhoes van de telefoon in de mediasessie van het systeem en in de mediamelding</string>
     <string name="error_usb_permission_failed">Systeemfout: Aanvragen van USB-toestemmingsvenster mislukt.</string>
+
+    <!-- Custom loading screen -->
+    <string name="loading_screen">Laadscherm</string>
+    <string name="loading_screen_default">Standaard</string>
+    <string name="loading_screen_custom">Aangepast</string>
+    <string name="loading_screen_dialog_title">Aangepast laadscherm</string>
+    <string name="loading_screen_select_file">Bestand kiezen</string>
+    <string name="loading_screen_remove">Verwijderen</string>
+    <string name="loading_screen_recommendation">Aanbevolen resolutie: %1$dx%2$d</string>
+    <string name="loading_screen_supported_formats">Ondersteund: Afbeeldingen (PNG, JPG, BMP, WEBP, GIF) \u2022 Video (MP4, MKV, WEBM, 3GP) \u2022 Max: 10 MB</string>
+    <string name="loading_screen_no_media">Geen aangepast medium geselecteerd</string>
+    <string name="loading_screen_file_too_large">Bestand is te groot (max 10 MB)</string>
+    <string name="loading_screen_unsupported_format">Niet-ondersteund formaat. Gebruik een afbeelding of videobestand</string>
+    <string name="loading_screen_file_error">Kan het geselecteerde bestand niet laden</string>
+    <string name="loading_screen_show_text">Tekst \"Android Auto start op\" tonen</string>
+    <string name="loading_screen_tap_preview">Tik voor voorbeeld</string>
+    <string name="loading_screen_tap_to_close">Tik ergens om te sluiten</string>
+    <string name="loading_screen_keep_aspect_ratio">Beeldverhouding behouden</string>
+    <string name="loading_screen_recommended_aspect_ratio">Aanbevolen beeldverhouding: %1$d:%2$d</string>
+    <string name="loading_screen_tap_fullscreen_hint">Tik op het voorbeeld om het op volledig scherm te zien</string>
+    <string name="loading_screen_loop_video">Korte animaties herhalen</string>
 </resources>

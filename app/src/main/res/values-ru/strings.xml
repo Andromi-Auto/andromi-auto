@@ -109,8 +109,8 @@
     <string name="debug_mode_description">Включить расширенное логирование</string>
     <string name="export_logs">Выгрузка логов</string>
     <string name="export_logs_description">Сохранить логи для отладки</string>
-    <string name="use_native_ssl">Использовать Native SSL</string>
-    <string name="use_native_ssl_description">Использовать нативную библиотеку OpenSSL (быстрее на старых устройствах). Требуется перезапуск.</string>
+
+
     <string name="not_set">Не назначено</string>
     <string name="keymap_description">Изменить привязку клавиш для вашего ГУ</string>
 
@@ -454,6 +454,26 @@
     <string name="wait_for_wifi_description">При запуске ждать подключения WiFi перед запуском WiFi Direct. Полезно, если вашему головному устройству требуется несколько секунд для подключения к WiFi после включения.</string>
     <string name="wait_for_wifi_timeout">Тайм-аут ожидания WiFi</string>
     <string name="wireless_24ghz_warning">Примечание: Беспроводной Android Auto на устройствах 2,4 ГГц может приводить к задержкам, рывкам и разрывам соединения. Если вы столкнулись с проблемами, проверьте работу через USB, чтобы подтвердить ограничение сети.</string>
+    <!-- Custom loading screen -->
+    <string name="loading_screen">Экран загрузки</string>
+    <string name="loading_screen_default">По умолчанию</string>
+    <string name="loading_screen_custom">Пользовательский</string>
+    <string name="loading_screen_dialog_title">Пользовательский экран загрузки</string>
+    <string name="loading_screen_select_file">Выбрать файл</string>
+    <string name="loading_screen_remove">Удалить</string>
+    <string name="loading_screen_recommendation">Рекомендуемое разрешение: %1$dx%2$d</string>
+    <string name="loading_screen_supported_formats">Поддерживаемые: Изображения (PNG, JPG, BMP, WEBP, GIF) \u2022 Видео (MP4, MKV, WEBM, 3GP) \u2022 Макс: 10 МБ</string>
+    <string name="loading_screen_no_media">Пользовательский контент не выбран</string>
+    <string name="loading_screen_file_too_large">Файл слишком большой (макс. 10 МБ)</string>
+    <string name="loading_screen_unsupported_format">Неподдерживаемый формат. Используйте файл изображения или видео</string>
+    <string name="loading_screen_file_error">Не удалось загрузить выбранный файл</string>
+    <string name="loading_screen_show_text">Показывать текст \"Запуск Android Auto\"</string>
+    <string name="loading_screen_tap_preview">Нажмите для предпросмотра</string>
+    <string name="loading_screen_tap_to_close">Нажмите в любом месте, чтобы закрыть</string>
+    <string name="loading_screen_keep_aspect_ratio">Сохранять соотношение сторон</string>
+    <string name="loading_screen_recommended_aspect_ratio">Рекомендуемое соотношение сторон: %1$d:%2$d</string>
+    <string name="loading_screen_tap_fullscreen_hint">Нажмите на превью, чтобы увидеть в полный экран</string>
+    <string name="loading_screen_loop_video">Повторять короткие анимации</string>
     <string name="supported_nativeaa">Расширенная беспроводная поддержка</string>
     <string name="supported_nativeaa_desc">Отличные новости! Ваше устройство поддерживает режим «Native Wireless», который обеспечивает более плавную работу Android Auto. \n\nЧтобы включить его, нам нужно обновить кеш Bluetooth. Пожалуйста: \n1. Удалите существующее сопряжение на телефоне \n2. Нажмите ОК, чтобы перезапустить Bluetooth \n3. Снова выполните сопряжение с телефоном \n\nХотите переключиться на режим Native AA сейчас?</string>
     <string name="fake_speed_title">Отключить блокировку видео (Fake Speed)</string>

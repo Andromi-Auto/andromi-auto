@@ -170,6 +170,7 @@ class NetworkListFragment : Fragment(), NetworkDiscovery.Listener {
                 Toast.makeText(context, getString(R.string.found_connecting, ip), Toast.LENGTH_SHORT).show()
 
                 val ctx = context ?: return@runOnUiThread
+                (activity as? MainActivity)?.beginAutoConnect("manual WiFi scan-found $ip")
                 lifecycleScope.launch(Dispatchers.IO) {
                     if (socket != null && socket.isConnected)
                         App.provide(ctx).commManager.connect(socket)
@@ -317,6 +318,7 @@ class NetworkListFragment : Fragment(), NetworkDiscovery.Listener {
         override fun onClick(v: View) {
             if (v.id == android.R.id.button2) {
                 val ip = v.getTag(R.integer.key_data) as String
+                (context as? MainActivity)?.beginAutoConnect("manual WiFi list click $ip")
                 ContextCompat.startForegroundService(context, Intent(context, AapService::class.java).apply {
                     action = AapService.ACTION_CONNECT_SOCKET
                 })

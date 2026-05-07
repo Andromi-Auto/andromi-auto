@@ -109,8 +109,8 @@
     <string name="debug_mode_description">Увімкнути розширене логування</string>
     <string name="export_logs">Експортувати журнал подій</string>
     <string name="export_logs_description">Зберегти журнал подій для налагодження</string>
-    <string name="use_native_ssl">Використовувати системний SSL</string>
-    <string name="use_native_ssl_description">Використовувати системний OpenSSL (швидше на старіших пристроях). Потрібне перезавантаження.</string>
+
+
     <string name="not_set">Не задано</string>
     <string name="keymap_description">Змінити призначення клавіш для вашого пристрою</string>
 
@@ -491,4 +491,25 @@
     <string name="sync_media_session_aa_metadata">Поточний трек AA у медіасесії</string>
     <string name="sync_media_session_aa_metadata_description">Показувати з телефона назву треку, виконавця, тривалість і обкладинку в системній медіасесії та медіа-сповіщенні</string>
     <string name="error_usb_permission_failed">Системна помилка: Не вдалося запитати діалогове вікно дозволу USB.</string>
+
+    <!-- Custom loading screen -->
+    <string name="loading_screen">Екран завантаження</string>
+    <string name="loading_screen_default">За замовчуванням</string>
+    <string name="loading_screen_custom">Користувацький</string>
+    <string name="loading_screen_dialog_title">Користувацький екран завантаження</string>
+    <string name="loading_screen_select_file">Вибрати файл</string>
+    <string name="loading_screen_remove">Видалити</string>
+    <string name="loading_screen_recommendation">Рекомендована роздільна здатність: %1$dx%2$d</string>
+    <string name="loading_screen_supported_formats">Підтримувані: Зображення (PNG, JPG, BMP, WEBP, GIF) \u2022 Відео (MP4, MKV, WEBM, 3GP) \u2022 Макс: 10 МБ</string>
+    <string name="loading_screen_no_media">Користувацький контент не вибрано</string>
+    <string name="loading_screen_file_too_large">Файл завеликий (макс. 10 МБ)</string>
+    <string name="loading_screen_unsupported_format">Формат не підтримується. Використовуйте файл зображення або відео</string>
+    <string name="loading_screen_file_error">Не вдалося завантажити вибраний файл</string>
+    <string name="loading_screen_show_text">Показувати текст \"Запуск Android Auto\"</string>
+    <string name="loading_screen_tap_preview">Натисніть для попереднього перегляду</string>
+    <string name="loading_screen_tap_to_close">Натисніть будь-де, щоб закрити</string>
+    <string name="loading_screen_keep_aspect_ratio">Зберігати співвідношення сторін</string>
+    <string name="loading_screen_recommended_aspect_ratio">Рекомендоване співвідношення сторін: %1$d:%2$d</string>
+    <string name="loading_screen_tap_fullscreen_hint">Натисніть на попередній перегляд для повноекранного режиму</string>
+    <string name="loading_screen_loop_video">Повторювати короткі анімації</string>
 </resources>

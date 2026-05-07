@@ -109,8 +109,8 @@
     <string name="debug_mode_description">Włącz bardziej szczegółowe logowanie</string>
     <string name="export_logs">Eksportuj logi</string>
     <string name="export_logs_description">Zapisz logi do debugowania</string>
-    <string name="use_native_ssl">Użyj natywnego SSL</string>
-    <string name="use_native_ssl_description">Użyj natywnej bibliotei OpenSSL (szybsze na starszych urządzeniach). Wymaga restartu.</string>
+
+
     <string name="not_set">Nie ustawiono</string>
     <string name="keymap_description">Zmień przypisanie klawiszy dla Twojej jednostki</string>
 
@@ -491,4 +491,25 @@
     <string name="sync_media_session_aa_metadata">Aktualny utwór AA w sesji multimedialnej</string>
     <string name="sync_media_session_aa_metadata_description">Pokazuj tytuł, wykonawcę, czas trwania i okładkę albumu z telefonu w systemowej sesji multimedialnej oraz powiadomieniu multimedialnym</string>
     <string name="error_usb_permission_failed">Błąd systemu: Nie udało się wywołać okna uprawnień USB.</string>
+
+    <!-- Custom loading screen -->
+    <string name="loading_screen">Ekran ładowania</string>
+    <string name="loading_screen_default">Domyślny</string>
+    <string name="loading_screen_custom">Niestandardowy</string>
+    <string name="loading_screen_dialog_title">Niestandardowy ekran ładowania</string>
+    <string name="loading_screen_select_file">Wybierz plik</string>
+    <string name="loading_screen_remove">Usuń</string>
+    <string name="loading_screen_recommendation">Zalecana rozdzielczość: %1$dx%2$d</string>
+    <string name="loading_screen_supported_formats">Obsługiwane: Obrazy (PNG, JPG, BMP, WEBP, GIF) \u2022 Wideo (MP4, MKV, WEBM, 3GP) \u2022 Maks: 10 MB</string>
+    <string name="loading_screen_no_media">Nie wybrano niestandardowego pliku</string>
+    <string name="loading_screen_file_too_large">Plik jest za duży (maks. 10 MB)</string>
+    <string name="loading_screen_unsupported_format">Nieobsługiwany format. Użyj pliku obrazu lub wideo</string>
+    <string name="loading_screen_file_error">Nie można załadować wybranego pliku</string>
+    <string name="loading_screen_show_text">Pokaż tekst \"Android Auto uruchamia się\"</string>
+    <string name="loading_screen_tap_preview">Dotknij, aby wyświetlić podgląd</string>
+    <string name="loading_screen_tap_to_close">Dotknij w dowolnym miejscu, aby zamknąć</string>
+    <string name="loading_screen_keep_aspect_ratio">Zachowaj proporcje</string>
+    <string name="loading_screen_recommended_aspect_ratio">Zalecane proporcje: %1$d:%2$d</string>
+    <string name="loading_screen_tap_fullscreen_hint">Dotknij podglądu, aby zobaczyć na pełnym ekranie</string>
+    <string name="loading_screen_loop_video">Powtarzaj krótkie animacje</string>
 </resources>

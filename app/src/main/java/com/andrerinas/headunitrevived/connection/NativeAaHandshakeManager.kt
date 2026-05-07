@@ -121,13 +121,9 @@ class NativeAaHandshakeManager(
                 while (isRunning && isActive) {
                     val socket = hfpServerSocket?.accept()
                     if (socket != null) {
-                        // Just consume and close, HFP is only a "presence" signal for us
-                        scope.launch(Dispatchers.IO) {
-                            try {
-                                val buf = ByteArray(1024)
-                                socket.inputStream.read(buf)
-                            } catch (e: Exception) {}
-                            finally { try { socket.close() } catch (e: Exception) {} }
+                        AppLog.i("NativeAA: HFP connection accepted from ${socket.remoteDevice.name}. Starting responder.")
+                        scope.launch(Dispatchers.IO + CoroutineName("NativeAa-HfpResponder-${socket.remoteDevice.address}")) {
+                            handleHfp(socket)
                         }
                     }
                 }
@@ -135,7 +131,56 @@ class NativeAaHandshakeManager(
                 if (isRunning) AppLog.d("NativeAA: HFP Server socket closed: ${e.message}")
             }
         }
+    }
 
+    /**
+     * Minimal HFP responder to satisfy phones that require a stable HFP connection
+     * during the Android Auto Wireless handshake.
+     */
+    private suspend fun handleHfp(socket: BluetoothSocket) = withContext(Dispatchers.IO) {
+        try {
+            val input = socket.inputStream
+            val output = socket.outputStream
+            val buf = ByteArray(1024)
+            
+            AppLog.i("NativeAA: HFP responder active for ${socket.remoteDevice.name}")
+            
+            while (isRunning && isActive && socket.isConnected) {
+                if (input.available() > 0) {
+                    val read = input.read(buf)
+                    if (read == -1) break
+                    
+                    val cmd = String(buf, 0, read, Charsets.US_ASCII).trim()
+                    AppLog.d("NativeAA: HFP RX: $cmd")
+                    
+                    // Respond to standard HFP initialization commands
+                    when {
+                        cmd.contains("AT+BRSF") -> {
+                            output.write("+BRSF: 20\r\n".toByteArray())
+                            output.write("OK\r\n".toByteArray())
+                        }
+                        cmd.contains("AT+CIND=?") -> {
+                            output.write("+CIND: (\"service\",(0,1)),(\"call\",(0,1))\r\n".toByteArray())
+                            output.write("OK\r\n".toByteArray())
+                        }
+                        cmd.contains("AT+CIND?") -> {
+                            output.write("+CIND: 1,0\r\n".toByteArray())
+                            output.write("OK\r\n".toByteArray())
+                        }
+                        else -> {
+                            output.write("OK\r\n".toByteArray())
+                        }
+                    }
+                    output.flush()
+                }
+                delay(200)
+            }
+        } catch (e: Exception) {
+            AppLog.d("NativeAA: HFP responder error: ${e.message}")
+        } finally {
+            try { socket.close() } catch (e: Exception) {}
+            AppLog.i("NativeAA: HFP socket for ${socket.remoteDevice.address} closed.")
+        }
     }
 
     /**
@@ -174,16 +219,18 @@ class NativeAaHandshakeManager(
             for (device in devicesToPoke) {
                 if (!isRunning || !isActive) break
                 AppLog.i("NativeAA: Attempting active A2DP poke to device: ${device.name} (${device.address})...")
+                var socket: BluetoothSocket? = null
                 try {
-                    val socket = device.createRfcommSocketToServiceRecord(A2DP_SOURCE_UUID)
+                    socket = device.createRfcommSocketToServiceRecord(A2DP_SOURCE_UUID)
                     AppLog.i("NativeAA: Calling socket.connect() for ${device.name}...")
                     socket.connect()
                     AppLog.i("NativeAA: Successfully poked ${device.name}. Keeping socket alive for 15s...")
                     delay(15000)
-                    socket.close()
-                    AppLog.i("NativeAA: Poke socket for ${device.name} closed.")
                 } catch (e: Exception) {
                     AppLog.d("NativeAA: Poke for ${device.name} failed (normal if device disconnected): ${e.message}")
+                } finally {
+                    try { socket?.close() } catch (e: Exception) {}
+                    AppLog.d("NativeAA: Poke socket for ${device.name} closed in finally.")
                 }
             }
         }
@@ -208,16 +255,18 @@ class NativeAaHandshakeManager(
             pokeJob?.cancel()
             pokeJob = scope.launch(Dispatchers.IO + CoroutineName("NativeAa-ManualWakeup")) {
                 AppLog.i("NativeAA: Attempting manual A2DP poke to ${device.name}...")
+                var socket: BluetoothSocket? = null
                 try {
-                    val socket = device.createRfcommSocketToServiceRecord(A2DP_SOURCE_UUID)
+                    socket = device.createRfcommSocketToServiceRecord(A2DP_SOURCE_UUID)
                     AppLog.i("NativeAA: Calling socket.connect() for ${device.name}...")
                     socket.connect()
                     AppLog.i("NativeAA: Successfully poked ${device.name}. Keeping socket alive for 20s...")
                     delay(20000)
-                    socket.close()
-                    AppLog.i("NativeAA: Manual poke socket for ${device.name} closed.")
                 } catch (e: Exception) {
                     AppLog.d("NativeAA: Manual poke for ${device.name} failed: ${e.message}")
+                } finally {
+                    try { socket?.close() } catch (e: Exception) {}
+                    AppLog.i("NativeAA: Manual poke socket for ${device.name} closed in finally.")
                 }
             }
         } catch (e: Exception) {

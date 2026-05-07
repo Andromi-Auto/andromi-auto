@@ -59,7 +59,6 @@ class SettingsFragment : Fragment() {
     private var pendingSeparateAudioStreams: Boolean? = null
     private var pendingUseAacAudio: Boolean? = null
     private var pendingMicInputSource: Int? = null
-    private var pendingUseNativeSsl: Boolean? = null
     private var pendingEnableRotary: Boolean? = null
     private var pendingAudioLatencyMultiplier: Int? = null
     private var pendingAudioQueueCapacity: Int? = null
@@ -128,7 +127,6 @@ class SettingsFragment : Fragment() {
         pendingSeparateAudioStreams = settings.separateAudioStreams
         pendingUseAacAudio = settings.useAacAudio
         pendingMicInputSource = settings.micInputSource
-        pendingUseNativeSsl = settings.useNativeSsl
         pendingEnableRotary = settings.enableRotary
         pendingAudioLatencyMultiplier = settings.audioLatencyMultiplier
         pendingAudioQueueCapacity = settings.audioQueueCapacity
@@ -157,6 +155,8 @@ class SettingsFragment : Fragment() {
         pendingMediaVolumeOffset = settings.mediaVolumeOffset
         pendingAssistantVolumeOffset = settings.assistantVolumeOffset
         pendingNavigationVolumeOffset = settings.navigationVolumeOffset
+
+        // Loading screen settings are handled in LoadingScreenFragment (saves directly)
 
         // Intercept system back button
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
@@ -257,7 +257,6 @@ class SettingsFragment : Fragment() {
         pendingSeparateAudioStreams?.let { settings.separateAudioStreams = it }
         pendingUseAacAudio?.let { settings.useAacAudio = it }
         pendingMicInputSource?.let { settings.micInputSource = it }
-        pendingUseNativeSsl?.let { settings.useNativeSsl = it }
         pendingEnableRotary?.let { settings.enableRotary = it }
         pendingAudioLatencyMultiplier?.let { settings.audioLatencyMultiplier = it }
         pendingAudioQueueCapacity?.let { settings.audioQueueCapacity = it }
@@ -343,7 +342,6 @@ class SettingsFragment : Fragment() {
                         pendingSeparateAudioStreams != settings.separateAudioStreams ||
                         pendingUseAacAudio != settings.useAacAudio ||
                         pendingMicInputSource != settings.micInputSource ||
-                        pendingUseNativeSsl != settings.useNativeSsl ||
                         pendingEnableRotary != settings.enableRotary ||
                         pendingAudioLatencyMultiplier != settings.audioLatencyMultiplier ||
                         pendingAudioQueueCapacity != settings.audioQueueCapacity ||
@@ -381,7 +379,6 @@ class SettingsFragment : Fragment() {
                           pendingUseAacAudio != settings.useAacAudio ||
                           pendingAudioLatencyMultiplier != settings.audioLatencyMultiplier ||
                           pendingAudioQueueCapacity != settings.audioQueueCapacity ||
-                          pendingUseNativeSsl != settings.useNativeSsl ||
                           pendingInsetLeft != settings.insetLeft ||
                           pendingInsetTop != settings.insetTop ||
                           pendingInsetRight != settings.insetRight ||
@@ -864,6 +861,17 @@ class SettingsFragment : Fragment() {
             ))
         }
 
+        items.add(SettingItem.SettingEntry(
+            stableId = "loadingScreen",
+            nameResId = R.string.loading_screen,
+            value = if (settings.loadingScreenMediaPath.isNullOrEmpty())
+                getString(R.string.loading_screen_default)
+            else getString(R.string.loading_screen_custom),
+            onClick = {
+                findNavController().navigate(R.id.action_settingsFragment_to_loadingScreenFragment)
+            }
+        ))
+
         // --- Video Settings ---
         items.add(SettingItem.CategoryHeader("video", R.string.category_video))
 
@@ -1087,6 +1095,30 @@ class SettingsFragment : Fragment() {
             }
         ))
 
+        // --- Reset Settings ---
+        items.add(SettingItem.CategoryHeader("resetSettingsCategory", R.string.reset))
+        items.add(SettingItem.SettingEntry(
+            stableId = "resetSettings",
+            nameResId = R.string.reset_settings,
+            value = getString(R.string.reset_settings_description),
+            onClick = {
+                MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
+                    .setTitle(R.string.reset_settings)
+                    .setMessage(R.string.reset_settings_confirm)
+                    .setPositiveButton(R.string.reset) { _, _ ->
+                        settings.reset()
+                        
+                        // Proper App Restart
+                        val intent = requireActivity().packageManager.getLaunchIntentForPackage(requireActivity().packageName)
+                        intent?.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                        requireActivity().startActivity(intent)
+                        requireActivity().finish()
+                    }
+                    .setNegativeButton(R.string.cancel, null)
+                    .show()
+            }
+        ))
+
         // --- Debug Settings ---
         items.add(SettingItem.CategoryHeader("debug", R.string.category_debug))
 
@@ -1238,18 +1270,6 @@ class SettingsFragment : Fragment() {
                 } else {
                     Toast.makeText(context, getString(R.string.failed_export_logs), Toast.LENGTH_SHORT).show()
                 }
-            }
-        ))
-
-        items.add(SettingItem.ToggleSettingEntry(
-            stableId = "useNativeSsl",
-            nameResId = R.string.use_native_ssl,
-            descriptionResId = R.string.use_native_ssl_description,
-            isChecked = pendingUseNativeSsl!!,
-            onCheckedChanged = { isChecked ->
-                pendingUseNativeSsl = isChecked
-                checkChanges()
-                updateSettingsList()
             }
         ))
 
