@@ -129,8 +129,6 @@
     <string name="stop_log_capture_description">녹화 중… 멈추려면 탭하세요.</string>
     <string name="export_logs">로그 내보내기</string>
     <string name="export_logs_description">디버깅을 위해 로그를 저장합니다.</string>
-    <string name="use_native_ssl">Native SSL 사용</string>
-    <string name="use_native_ssl_description">Native OpenSSL 라이브러리를 사용합니다 (이전 기기에서 더 빠릅니다). 재시작 후 적용됩니다.</string>
     <string name="not_set">설정되지 않음</string>
     <string name="keymap_description">헤드유닛의 키 바인딩을 변경합니다.</string>
 
