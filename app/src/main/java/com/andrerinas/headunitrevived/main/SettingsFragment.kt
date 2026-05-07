@@ -58,7 +58,6 @@ class SettingsFragment : Fragment() {
     private var pendingSeparateAudioStreams: Boolean? = null
     private var pendingUseAacAudio: Boolean? = null
     private var pendingMicInputSource: Int? = null
-    private var pendingUseNativeSsl: Boolean? = null
     private var pendingEnableRotary: Boolean? = null
     private var pendingAudioLatencyMultiplier: Int? = null
     private var pendingAudioQueueCapacity: Int? = null
@@ -127,7 +126,6 @@ class SettingsFragment : Fragment() {
         pendingSeparateAudioStreams = settings.separateAudioStreams
         pendingUseAacAudio = settings.useAacAudio
         pendingMicInputSource = settings.micInputSource
-        pendingUseNativeSsl = settings.useNativeSsl
         pendingEnableRotary = settings.enableRotary
         pendingAudioLatencyMultiplier = settings.audioLatencyMultiplier
         pendingAudioQueueCapacity = settings.audioQueueCapacity
@@ -256,7 +254,6 @@ class SettingsFragment : Fragment() {
         pendingSeparateAudioStreams?.let { settings.separateAudioStreams = it }
         pendingUseAacAudio?.let { settings.useAacAudio = it }
         pendingMicInputSource?.let { settings.micInputSource = it }
-        pendingUseNativeSsl?.let { settings.useNativeSsl = it }
         pendingEnableRotary?.let { settings.enableRotary = it }
         pendingAudioLatencyMultiplier?.let { settings.audioLatencyMultiplier = it }
         pendingAudioQueueCapacity?.let { settings.audioQueueCapacity = it }
@@ -341,7 +338,6 @@ class SettingsFragment : Fragment() {
                         pendingSeparateAudioStreams != settings.separateAudioStreams ||
                         pendingUseAacAudio != settings.useAacAudio ||
                         pendingMicInputSource != settings.micInputSource ||
-                        pendingUseNativeSsl != settings.useNativeSsl ||
                         pendingEnableRotary != settings.enableRotary ||
                         pendingAudioLatencyMultiplier != settings.audioLatencyMultiplier ||
                         pendingAudioQueueCapacity != settings.audioQueueCapacity ||
@@ -379,7 +375,6 @@ class SettingsFragment : Fragment() {
                           pendingUseAacAudio != settings.useAacAudio ||
                           pendingAudioLatencyMultiplier != settings.audioLatencyMultiplier ||
                           pendingAudioQueueCapacity != settings.audioQueueCapacity ||
-                          pendingUseNativeSsl != settings.useNativeSsl ||
                           pendingInsetLeft != settings.insetLeft ||
                           pendingInsetTop != settings.insetTop ||
                           pendingInsetRight != settings.insetRight ||
@@ -1185,18 +1180,6 @@ class SettingsFragment : Fragment() {
                 } else {
                     Toast.makeText(context, getString(R.string.failed_export_logs), Toast.LENGTH_SHORT).show()
                 }
-            }
-        ))
-
-        items.add(SettingItem.ToggleSettingEntry(
-            stableId = "useNativeSsl",
-            nameResId = R.string.use_native_ssl,
-            descriptionResId = R.string.use_native_ssl_description,
-            isChecked = pendingUseNativeSsl!!,
-            onCheckedChanged = { isChecked ->
-                pendingUseNativeSsl = isChecked
-                checkChanges()
-                updateSettingsList()
             }
         ))
 

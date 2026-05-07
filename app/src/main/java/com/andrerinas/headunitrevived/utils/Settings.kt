@@ -378,10 +378,6 @@ class Settings(context: Context) {
         get() = prefs.getBoolean("use-aac-audio", false)
         set(value) { prefs.edit().putBoolean("use-aac-audio", value).apply() }
 
-    var useNativeSsl: Boolean
-        get() = prefs.getBoolean("use-native-ssl", false)
-        set(value) { prefs.edit().putBoolean("use-native-ssl", value).apply() }
-
     var autoStartSelfMode: Boolean
         get() = prefs.getBoolean("auto-start-self-mode", false)
         set(value) { prefs.edit().putBoolean("auto-start-self-mode", value).apply() }

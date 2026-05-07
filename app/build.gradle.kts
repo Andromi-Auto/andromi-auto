@@ -48,7 +48,6 @@ dependencies {
 
 android {
     compileSdk = 36
-    ndkVersion = "27.0.12077973"
     namespace = "com.andrerinas.headunitrevived"
 
     buildFeatures {
@@ -99,8 +98,8 @@ android {
         applicationId = "com.andrerinas.headunitrevived"
         minSdk = 16
         targetSdk = 36
-        versionCode = 64
-        versionName = "2.3.0-alpha"
+        versionCode = 66
+        versionName = "3.0.0-alpha"
         setProperty("archivesBaseName", "${applicationId}_${versionName}")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
@@ -108,12 +107,6 @@ android {
         // Store available locales in BuildConfig for runtime access
         // This is scanned at build time from values-XX directories
         buildConfigField("String", "AVAILABLE_LOCALES", "\"${availableLocales.joinToString(",")}\"")
-
-        externalNativeBuild {
-            cmake {
-                cppFlags("")
-            }
-        }
     }
 
     flavorDimensions.add("distribution")
@@ -125,12 +118,6 @@ android {
         create("github") {
             dimension = "distribution"
             // Default minSdk 16 from defaultConfig is used
-        }
-    }
-
-    externalNativeBuild {
-        cmake {
-            path = file("CMakeLists.txt")
         }
     }
 
