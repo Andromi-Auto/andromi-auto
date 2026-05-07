@@ -76,6 +76,7 @@ adb shell am start -a android.intent.action.VIEW -d "headunit://connect?ip=192.1
 - Added: Custom loading screen (image/GIF/video), thanks to @andrecuellar
 - Added: Settings-Reset Button, if you mess up something in the settings, you can now reset them to default
 - Removed: Old deprecated ssl library written in C-Code for better maintenance, stability and smaller file sizes
+- Added: Direct Logging to file without logcat, thanks to @Anton111111
 
 ### v.2.2.2
 - Fixed: Exit on disconnect now stops the carmode too
