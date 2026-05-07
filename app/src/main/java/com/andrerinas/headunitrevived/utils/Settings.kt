@@ -456,6 +456,27 @@ class Settings(context: Context) {
         get() = prefs.getInt("navigation-volume-offset", 0)
         set(value) { prefs.edit().putInt("navigation-volume-offset", value).apply() }
 
+    // Custom loading screen
+    var loadingScreenMediaPath: String
+        get() = prefs.getString("loading-screen-media-path", "")!!
+        set(value) { prefs.edit().putString("loading-screen-media-path", value).apply() }
+
+    var loadingScreenMediaType: String
+        get() = prefs.getString("loading-screen-media-type", "")!!
+        set(value) { prefs.edit().putString("loading-screen-media-type", value).apply() }
+
+    var loadingScreenShowText: Boolean
+        get() = prefs.getBoolean("loading-screen-show-text", false)
+        set(value) { prefs.edit().putBoolean("loading-screen-show-text", value).apply() }
+
+    var loadingScreenKeepAspectRatio: Boolean
+        get() = prefs.getBoolean("loading-screen-keep-aspect-ratio", true)
+        set(value) { prefs.edit().putBoolean("loading-screen-keep-aspect-ratio", value).apply() }
+
+    var loadingScreenLoopVideo: Boolean
+        get() = prefs.getBoolean("loading-screen-loop-video", true)
+        set(value) { prefs.edit().putBoolean("loading-screen-loop-video", value).apply() }
+
     @SuppressLint("ApplySharedPref")
     fun commit() {
         prefs.edit().commit()

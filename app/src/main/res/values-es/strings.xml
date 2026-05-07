@@ -485,4 +485,25 @@
     <string name="sync_media_session_aa_metadata">Pista actual de AA en la sesión multimedia</string>
     <string name="sync_media_session_aa_metadata_description">Mostrar título, artista, duración y portada del teléfono en la sesión multimedia del sistema y en la notificación multimedia</string>
     <string name="error_usb_permission_failed">Error del sistema: Fallo al solicitar el cuadro de diálogo de permiso USB.</string>
+
+        <!-- Custom loading screen -->
+    <string name="loading_screen">Pantalla de carga</string>
+    <string name="loading_screen_default">Predeterminada</string>
+    <string name="loading_screen_custom">Personalizada</string>
+    <string name="loading_screen_dialog_title">Pantalla de carga personalizada</string>
+    <string name="loading_screen_select_file">Seleccionar archivo</string>
+    <string name="loading_screen_remove">Eliminar</string>
+    <string name="loading_screen_recommendation">Resolución recomendada: %1$dx%2$d</string>
+    <string name="loading_screen_supported_formats">Soportados: Imágenes (PNG, JPG, BMP, WEBP, GIF) \u2022 Vídeos (MP4, MKV, WEBM, 3GP) \u2022 Máx: 10 MB</string>
+    <string name="loading_screen_no_media">Sin contenido personalizado</string>
+    <string name="loading_screen_file_too_large">El archivo es demasiado grande (máx 10 MB)</string>
+    <string name="loading_screen_unsupported_format">Formato no compatible. Use un archivo de imagen o vídeo</string>
+    <string name="loading_screen_file_error">No se pudo cargar el archivo seleccionado</string>
+    <string name="loading_screen_show_text">Mostrar texto \"Android Auto está iniciando\"</string>
+    <string name="loading_screen_tap_preview">Toca para vista previa</string>
+    <string name="loading_screen_tap_to_close">Toca en cualquier lugar para cerrar</string>
+    <string name="loading_screen_keep_aspect_ratio">Mantener relación de aspecto</string>
+    <string name="loading_screen_recommended_aspect_ratio">Relación de aspecto recomendada: %1$d:%2$d</string>
+    <string name="loading_screen_tap_fullscreen_hint">Toca la vista previa para verla en pantalla completa</string>
+    <string name="loading_screen_loop_video">Repetir animaciones cortas en bucle</string>
 </resources>

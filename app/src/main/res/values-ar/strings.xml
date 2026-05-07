@@ -485,4 +485,25 @@
     <string name="sync_media_session_aa_metadata">المسار الجاري من AA في جلسة الوسائط</string>
     <string name="sync_media_session_aa_metadata_description">عرض عنوان المسار والفنان والمدة وغلاف الألبوم من الهاتف في جلسة الوسائط بالنظام وإشعار الوسائط</string>
     <string name="error_usb_permission_failed">خطأ في النظام: فشل طلب مربع حوار إذن USB.</string>
+
+    <!-- Custom loading screen -->
+    <string name="loading_screen">شاشة التحميل</string>
+    <string name="loading_screen_default">افتراضي</string>
+    <string name="loading_screen_custom">مخصص</string>
+    <string name="loading_screen_dialog_title">شاشة تحميل مخصصة</string>
+    <string name="loading_screen_select_file">اختر ملفًا</string>
+    <string name="loading_screen_remove">إزالة</string>
+    <string name="loading_screen_recommendation">الدقة الموصى بها: %1$dx%2$d</string>
+    <string name="loading_screen_supported_formats">المدعومة: صور (PNG، JPG، BMP، WEBP، GIF) \u2022 فيديو (MP4، MKV، WEBM، 3GP) \u2022 الحد الأقصى: 10 ميغابايت</string>
+    <string name="loading_screen_no_media">لم يتم تحديد وسائط مخصصة</string>
+    <string name="loading_screen_file_too_large">الملف كبير جدًا (الحد الأقصى 10 ميغابايت)</string>
+    <string name="loading_screen_unsupported_format">صيغة غير مدعومة. استخدم ملف صورة أو فيديو</string>
+    <string name="loading_screen_file_error">تعذر تحميل الملف المحدد</string>
+    <string name="loading_screen_show_text">إظهار نص \"جار تشغيل Android Auto\"</string>
+    <string name="loading_screen_tap_preview">انقر للمعاينة</string>
+    <string name="loading_screen_tap_to_close">انقر في أي مكان للإغلاق</string>
+    <string name="loading_screen_keep_aspect_ratio">الحفاظ على نسبة العرض إلى الارتفاع</string>
+    <string name="loading_screen_recommended_aspect_ratio">نسبة العرض إلى الارتفاع الموصى بها: %1$d:%2$d</string>
+    <string name="loading_screen_tap_fullscreen_hint">انقر على المعاينة لعرضها بملء الشاشة</string>
+    <string name="loading_screen_loop_video">تكرار الرسوم المتحركة القصيرة</string>
 </resources>

@@ -46,7 +46,13 @@ import com.andrerinas.headunitrevived.utils.HeadUnitScreenConfig
 import com.andrerinas.headunitrevived.utils.SystemUI
 import android.content.IntentFilter
 import com.andrerinas.headunitrevived.view.ProjectionViewScaler
+import android.animation.ObjectAnimator
+import android.animation.PropertyValuesHolder
+import android.widget.ImageView
+import android.widget.VideoView
+import com.bumptech.glide.Glide
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import java.io.File
 
 class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, VideoDimensionsListener {
 
@@ -58,6 +64,14 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
     private var isSurfaceSet = false
     private var overlayState = OverlayState.STARTING
     private val watchdogHandler = android.os.Handler(android.os.Looper.getMainLooper())
+
+    /**
+     * Ken Burns scale animation applied to a static image loading screen.
+     * Stored in a field so it can be cancelled when the loading overlay is
+     * torn down or the activity is destroyed — otherwise the infinite-repeat
+     * animator keeps consuming frame callbacks even when the view is gone.
+     */
+    private var kenBurnsAnimator: ObjectAnimator? = null
 
     private var initialX = 0f
     private var initialY = 0f
@@ -76,8 +90,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
                 // If the decoder already rendered something, hide the overlay immediately
                 if (videoDecoder.lastFrameRenderedMs > 0) {
                     AppLog.i("Watchdog: Decoder is already rendering frames. Hiding overlay.")
-                    loadingOverlay.visibility = View.GONE
-                    overlayState = OverlayState.HIDDEN
+                    hideLoadingOverlay(loadingOverlay)
                     return
                 }
 
@@ -362,14 +375,16 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         // Ensure loading overlay is on top of everything
         loadingOverlay?.bringToFront()
 
+        // Set up custom loading screen if configured
+        setupCustomLoadingScreen()
+
         findViewById<Button>(R.id.disconnect_button)?.setOnClickListener {
             commManager.disconnect()
         }
 
         videoDecoder.onFirstFrameListener = {
             runOnUiThread {
-                loadingOverlay?.visibility = View.GONE
-                overlayState = OverlayState.HIDDEN
+                hideLoadingOverlay(loadingOverlay)
 
                 // Show one-time gesture hint
                 if (!settings.gestureHintShown) {
@@ -451,6 +466,15 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         AppLog.i("Showing reconnecting overlay")
         overlayState = OverlayState.RECONNECTING
         val overlay = findViewById<View>(R.id.loading_overlay) ?: return
+
+        // Ensure default content is shown, custom media is hidden
+        findViewById<View>(R.id.loading_default_content)?.visibility = View.VISIBLE
+        findViewById<View>(R.id.loading_custom_image)?.visibility = View.GONE
+        findViewById<View>(R.id.loading_custom_text_overlay)?.visibility = View.GONE
+        stopCustomLoadingMedia()
+        findViewById<View>(R.id.loading_custom_video)?.visibility = View.GONE
+        overlay.setBackgroundColor(Color.parseColor("#CC000000"))
+
         val title = findViewById<TextView>(R.id.overlay_text)
         val detail = findViewById<TextView>(R.id.overlay_detail)
         val button = findViewById<Button>(R.id.disconnect_button)
@@ -470,6 +494,173 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         overlay.visibility = View.GONE
         detail?.visibility = View.GONE
         button?.visibility = View.GONE
+        stopCustomLoadingMedia()
+    }
+
+    private fun setupCustomLoadingScreen() {
+        // Apply any context-specific status text handed over by MainActivity
+        // (e.g. "Connecting to Pixel 8…") to BOTH the default-content text and
+        // the custom-media text overlay. Done before the early-return paths so
+        // the override applies whether or not custom media is configured. Read
+        // once and cleared so the value can't leak into a later connection.
+        val handover = pendingStatusText
+        pendingStatusText = null
+        if (handover != null) {
+            findViewById<TextView>(R.id.overlay_text)?.text = handover
+            findViewById<TextView>(R.id.loading_custom_text)?.text = handover
+        }
+
+        val mediaPath = settings.loadingScreenMediaPath
+        val mediaType = settings.loadingScreenMediaType
+        if (mediaPath.isEmpty() || mediaType.isEmpty()) return
+
+        val file = File(mediaPath)
+        if (!file.exists()) {
+            settings.loadingScreenMediaPath = ""
+            settings.loadingScreenMediaType = ""
+            return
+        }
+
+        val defaultContent = findViewById<View>(R.id.loading_default_content)
+        val customTextOverlay = findViewById<View>(R.id.loading_custom_text_overlay)
+        val customImage = findViewById<ImageView>(R.id.loading_custom_image)
+        val customVideo = findViewById<VideoView>(R.id.loading_custom_video)
+        val overlay = findViewById<View>(R.id.loading_overlay)
+
+        // Always hide the default content when custom media is active
+        defaultContent?.visibility = View.GONE
+        overlay?.setBackgroundColor(Color.BLACK)
+
+        // Show the dedicated custom text overlay if the user wants status text
+        if (settings.loadingScreenShowText) {
+            customTextOverlay?.visibility = View.VISIBLE
+        }
+
+        val keepRatio = settings.loadingScreenKeepAspectRatio
+        customImage?.scaleType = if (keepRatio) ImageView.ScaleType.FIT_CENTER else ImageView.ScaleType.FIT_XY
+
+        try {
+            when (mediaType) {
+                "image" -> {
+                    customImage?.visibility = View.VISIBLE
+                    customImage?.let { Glide.with(this).load(file).into(it) }
+                    if (keepRatio) {
+                        customImage?.let { imageView ->
+                            kenBurnsAnimator?.cancel()
+                            val scaleAnim = ObjectAnimator.ofPropertyValuesHolder(
+                                imageView,
+                                PropertyValuesHolder.ofFloat("scaleX", 1.0f, 1.05f),
+                                PropertyValuesHolder.ofFloat("scaleY", 1.0f, 1.05f)
+                            )
+                            scaleAnim.duration = 8000
+                            scaleAnim.repeatMode = ObjectAnimator.REVERSE
+                            scaleAnim.repeatCount = ObjectAnimator.INFINITE
+                            scaleAnim.start()
+                            kenBurnsAnimator = scaleAnim
+                        }
+                    }
+                }
+                "gif" -> {
+                    customImage?.visibility = View.VISIBLE
+                    customImage?.let { Glide.with(this).asGif().load(file).into(it) }
+                }
+                "video" -> {
+                    customVideo?.visibility = View.VISIBLE
+                    customVideo?.setVideoPath(file.absolutePath)
+                    customVideo?.setOnPreparedListener { mp ->
+                        mp.isLooping = settings.loadingScreenLoopVideo
+                        mp.setVolume(0f, 0f)
+
+                        if (keepRatio) {
+                            // Resize VideoView to match video's actual aspect ratio (like YouTube)
+                            try {
+                                val vw = mp.videoWidth
+                                val vh = mp.videoHeight
+                                if (vw > 0 && vh > 0) {
+                                    val cw = overlay?.width ?: return@setOnPreparedListener
+                                    val ch = overlay?.height ?: return@setOnPreparedListener
+                                    val videoRatio = vw.toFloat() / vh
+                                    val containerRatio = cw.toFloat() / ch
+                                    val lp = customVideo.layoutParams as FrameLayout.LayoutParams
+                                    if (videoRatio > containerRatio) {
+                                        // Wider video → fit to width, bars top/bottom
+                                        lp.width = cw
+                                        lp.height = (cw / videoRatio).toInt()
+                                    } else {
+                                        // Taller video → fit to height, bars left/right
+                                        lp.height = ch
+                                        lp.width = (ch * videoRatio).toInt()
+                                    }
+                                    lp.gravity = android.view.Gravity.CENTER
+                                    customVideo.layoutParams = lp
+                                }
+                            } catch (e: Exception) {
+                                AppLog.w("Could not resize video: ${e.message}")
+                            }
+                        }
+                    }
+                    customVideo?.setOnErrorListener { _, _, _ ->
+                        AppLog.e("Error playing custom loading video")
+                        fallbackToDefaultOverlay()
+                        true
+                    }
+                    customVideo?.start()
+                }
+                else -> return
+            }
+        } catch (e: Exception) {
+            AppLog.e("Failed to load custom loading screen: ${e.message}")
+            fallbackToDefaultOverlay()
+        }
+    }
+
+    private fun hideLoadingOverlay(loadingOverlay: View?) {
+        overlayState = OverlayState.HIDDEN
+
+        // CRITICAL: Stop custom video FIRST — VideoView/SurfaceView has its own
+        // rendering layer that ignores parent alpha animations and can stay visible
+        // even when the parent is animated to alpha=0
+        stopCustomLoadingMedia()
+        findViewById<View>(R.id.loading_custom_video)?.visibility = View.GONE
+        findViewById<View>(R.id.loading_custom_image)?.visibility = View.GONE
+        findViewById<View>(R.id.loading_custom_text_overlay)?.visibility = View.GONE
+
+        // Now hide the overlay — if no custom video, do a smooth fade
+        val hasCustomVideo = settings.loadingScreenMediaType == "video"
+        if (hasCustomVideo) {
+            // Direct hide — animation won't work with SurfaceView
+            loadingOverlay?.visibility = View.GONE
+        } else {
+            // Smooth fade for images/GIFs
+            loadingOverlay?.animate()
+                ?.alpha(0f)
+                ?.setDuration(300)
+                ?.withEndAction {
+                    loadingOverlay?.visibility = View.GONE
+                    loadingOverlay?.alpha = 1f
+                }?.start()
+                ?: run { loadingOverlay?.visibility = View.GONE }
+        }
+    }
+
+    private fun fallbackToDefaultOverlay() {
+        findViewById<View>(R.id.loading_custom_image)?.visibility = View.GONE
+        stopCustomLoadingMedia()
+        findViewById<View>(R.id.loading_custom_video)?.visibility = View.GONE
+        findViewById<View>(R.id.loading_custom_text_overlay)?.visibility = View.GONE
+        findViewById<View>(R.id.loading_default_content)?.visibility = View.VISIBLE
+        findViewById<View>(R.id.loading_overlay)?.setBackgroundColor(Color.parseColor("#CC000000"))
+    }
+
+    private fun stopCustomLoadingMedia() {
+        kenBurnsAnimator?.cancel()
+        kenBurnsAnimator = null
+        findViewById<VideoView>(R.id.loading_custom_video)?.let {
+            try {
+                if (it.isPlaying) it.stopPlayback()
+                it.suspend()
+            } catch (_: Exception) {}
+        }
     }
 
     private fun setFullscreen() {
@@ -580,6 +771,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         if (isInPictureInPictureMode) {
             // Hide UI elements during PiP (like FPS counter, loading overlay)
             findViewById<View>(R.id.loading_overlay)?.visibility = View.GONE
+            stopCustomLoadingMedia()
             fpsTextView?.visibility = View.GONE
         } else {
             // Restore UI if needed
@@ -848,12 +1040,27 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
             unregisterReceiver(keyEventReceiver)
             isKeyEventReceiverRegistered = false
         }
+        // Defensive cleanup: if the activity is destroyed while the loading
+        // overlay is still up (early connection failure, system kill,
+        // configuration change before first frame), the VideoView's surface
+        // and the Ken Burns animator outlive the view hierarchy briefly.
+        // stopCustomLoadingMedia releases both.
+        stopCustomLoadingMedia()
         AppLog.i("AapProjectionActivity.onDestroy called. isFinishing=$isFinishing")
         videoDecoder.dimensionsListener = null
     }
 
     companion object {
         const val EXTRA_FOCUS = "focus"
+
+        /**
+         * Optional one-shot override for the loading-screen status text. Set by
+         * MainActivity when it begins an auto-connect with a context-specific
+         * label (e.g. "Connecting to Pixel 8…" from the Nearby selector). Read
+         * and cleared by [setupCustomLoadingScreen] on the next launch so the
+         * value can't leak into a subsequent connection attempt.
+         */
+        @Volatile var pendingStatusText: String? = null
 
         fun intent(context: Context): Intent {
             val aapIntent = Intent(context, AapProjectionActivity::class.java)

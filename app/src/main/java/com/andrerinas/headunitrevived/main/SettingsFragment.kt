@@ -155,6 +155,8 @@ class SettingsFragment : Fragment() {
         pendingAssistantVolumeOffset = settings.assistantVolumeOffset
         pendingNavigationVolumeOffset = settings.navigationVolumeOffset
 
+        // Loading screen settings are handled in LoadingScreenFragment (saves directly)
+
         // Intercept system back button
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
@@ -856,6 +858,17 @@ class SettingsFragment : Fragment() {
                 }
             ))
         }
+
+        items.add(SettingItem.SettingEntry(
+            stableId = "loadingScreen",
+            nameResId = R.string.loading_screen,
+            value = if (settings.loadingScreenMediaPath.isNullOrEmpty())
+                getString(R.string.loading_screen_default)
+            else getString(R.string.loading_screen_custom),
+            onClick = {
+                findNavController().navigate(R.id.action_settingsFragment_to_loadingScreenFragment)
+            }
+        ))
 
         // --- Video Settings ---
         items.add(SettingItem.CategoryHeader("video", R.string.category_video))

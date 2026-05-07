@@ -487,6 +487,27 @@
     <string name="audio_latency_multiplier">Audio Latency Multiplier</string>
     <string name="audio_latency_multiplier_description">Adjust audio buffer size (Lower = Less Lag, Higher = Less Stutter)</string>
     <string name="audio_queue_capacity">Audio Queue Capacity (Backpressure)</string>
+
+    <!-- Custom loading screen -->
+    <string name="loading_screen">Loading screen</string>
+    <string name="loading_screen_default">Default</string>
+    <string name="loading_screen_custom">Custom</string>
+    <string name="loading_screen_dialog_title">Custom loading screen</string>
+    <string name="loading_screen_select_file">Select file</string>
+    <string name="loading_screen_remove">Remove</string>
+    <string name="loading_screen_recommendation">Recommended resolution: %1$dx%2$d</string>
+    <string name="loading_screen_supported_formats">Supported: Images (PNG, JPG, BMP, WEBP, GIF) \u2022 Videos (MP4, MKV, WEBM, 3GP) \u2022 Max: 10 MB</string>
+    <string name="loading_screen_no_media">No custom media selected</string>
+    <string name="loading_screen_file_too_large">File is too large (max 10 MB)</string>
+    <string name="loading_screen_unsupported_format">Unsupported format. Use an image or video file</string>
+    <string name="loading_screen_file_error">Could not load the selected file</string>
+    <string name="loading_screen_show_text">Show \"Android Auto is starting\" text</string>
+    <string name="loading_screen_tap_preview">Tap to preview fullscreen</string>
+    <string name="loading_screen_tap_to_close">Tap anywhere to close</string>
+    <string name="loading_screen_keep_aspect_ratio">Keep aspect ratio</string>
+    <string name="loading_screen_recommended_aspect_ratio">Recommended aspect ratio: %1$d:%2$d</string>
+    <string name="loading_screen_tap_fullscreen_hint">Tap the preview to see it fullscreen</string>
+    <string name="loading_screen_loop_video">Loop short animations</string>
     <string name="media_action_previous">Previous</string>
     <string name="media_action_play">Play</string>
     <string name="media_action_pause">Pause</string>

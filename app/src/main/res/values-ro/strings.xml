@@ -486,4 +486,25 @@
     <string name="sync_media_session_aa_metadata">Piesa curentă AA în sesiunea media</string>
     <string name="sync_media_session_aa_metadata_description">Afișează titlul piesei, artistul, durata și coperta albumului de pe telefon în sesiunea media a sistemului și în notificarea media</string>
     <string name="error_usb_permission_failed">Eroare de sistem: Nu s-a putut solicita caseta de dialog pentru permisiunea USB.</string>
+
+    <!-- Custom loading screen -->
+    <string name="loading_screen">Ecran de încărcare</string>
+    <string name="loading_screen_default">Implicit</string>
+    <string name="loading_screen_custom">Personalizat</string>
+    <string name="loading_screen_dialog_title">Ecran de încărcare personalizat</string>
+    <string name="loading_screen_select_file">Selectează fișier</string>
+    <string name="loading_screen_remove">Elimină</string>
+    <string name="loading_screen_recommendation">Rezoluție recomandată: %1$dx%2$d</string>
+    <string name="loading_screen_supported_formats">Suportate: Imagini (PNG, JPG, BMP, WEBP, GIF) \u2022 Video (MP4, MKV, WEBM, 3GP) \u2022 Max: 10 MB</string>
+    <string name="loading_screen_no_media">Niciun conținut personalizat selectat</string>
+    <string name="loading_screen_file_too_large">Fișierul este prea mare (max 10 MB)</string>
+    <string name="loading_screen_unsupported_format">Format neacceptat. Utilizați un fișier imagine sau video</string>
+    <string name="loading_screen_file_error">Nu s-a putut încărca fișierul selectat</string>
+    <string name="loading_screen_show_text">Afișează textul \"Android Auto pornește\"</string>
+    <string name="loading_screen_tap_preview">Atingeți pentru previzualizare</string>
+    <string name="loading_screen_tap_to_close">Atingeți oriunde pentru a închide</string>
+    <string name="loading_screen_keep_aspect_ratio">Păstrează raportul de aspect</string>
+    <string name="loading_screen_recommended_aspect_ratio">Raport de aspect recomandat: %1$d:%2$d</string>
+    <string name="loading_screen_tap_fullscreen_hint">Atingeți previzualizarea pentru a o vedea pe tot ecranul</string>
+    <string name="loading_screen_loop_video">Repetă animațiile scurte în buclă</string>
 </resources>

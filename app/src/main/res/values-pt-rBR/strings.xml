@@ -486,4 +486,25 @@
     <string name="sync_media_session_aa_metadata">Faixa atual do AA na sessão de mídia</string>
     <string name="sync_media_session_aa_metadata_description">Mostrar título, artista, duração e capa do álbum do telefone na sessão de mídia do sistema e na notificação de mídia</string>
     <string name="error_usb_permission_failed">Erro do sistema: Falha ao solicitar a caixa de diálogo de permissão USB.</string>
+
+    <!-- Custom loading screen -->
+    <string name="loading_screen">Tela de carregamento</string>
+    <string name="loading_screen_default">Padrão</string>
+    <string name="loading_screen_custom">Personalizada</string>
+    <string name="loading_screen_dialog_title">Tela de carregamento personalizada</string>
+    <string name="loading_screen_select_file">Selecionar arquivo</string>
+    <string name="loading_screen_remove">Remover</string>
+    <string name="loading_screen_recommendation">Resolução recomendada: %1$dx%2$d</string>
+    <string name="loading_screen_supported_formats">Suportados: Imagens (PNG, JPG, BMP, WEBP, GIF) \u2022 Vídeos (MP4, MKV, WEBM, 3GP) \u2022 Máx: 10 MB</string>
+    <string name="loading_screen_no_media">Nenhuma mídia personalizada selecionada</string>
+    <string name="loading_screen_file_too_large">O arquivo é muito grande (máx 10 MB)</string>
+    <string name="loading_screen_unsupported_format">Formato não suportado. Use um arquivo de imagem ou vídeo</string>
+    <string name="loading_screen_file_error">Não foi possível carregar o arquivo selecionado</string>
+    <string name="loading_screen_show_text">Mostrar texto \"Android Auto está iniciando\"</string>
+    <string name="loading_screen_tap_preview">Toque para pré-visualizar</string>
+    <string name="loading_screen_tap_to_close">Toque em qualquer lugar para fechar</string>
+    <string name="loading_screen_keep_aspect_ratio">Manter proporção</string>
+    <string name="loading_screen_recommended_aspect_ratio">Proporção recomendada: %1$d:%2$d</string>
+    <string name="loading_screen_tap_fullscreen_hint">Toque na pré-visualização para vê-la em tela cheia</string>
+    <string name="loading_screen_loop_video">Repetir animações curtas em loop</string>
 </resources>
