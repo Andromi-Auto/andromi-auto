@@ -46,22 +46,24 @@ class StreamVideoExtractor : MediaExtractorInterface {
         sampleFlags = 0
         mFormat = MediaFormat.createVideoFormat("video/avc", width, height)
 
-        // --- REVISED MEDIATEK TWEAKS ---
+        // --- SAFE PERFORMANCE TWEAKS ---
         try {
-            // Instead of forcing Baseline, we remove the hard constraint.
-            // We still hint for real-time performance which helps the MediaTek scheduler.
+            // 1. Remove KEY_PROFILE to allow the decoder to auto-detect High/Main profiles.
 
-            // Bumped to 2MB (2097152 bytes) to handle high-bitrate 720p60 frames safely
+            // 2. Set a safe, generous buffer for 720p 60fps.
+            // 2MB (2097152) is standard for high-bitrate 720p to prevent overflow.
             mFormat?.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, 2097152)
 
+            // 3. Keep the Priority and Operating Rate hints (Android 6.0+)
+            // These don't break compatibility; they just tell the OS to "run fast."
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                mFormat?.setInteger(MediaFormat.KEY_PRIORITY, 0) // Real-time priority
-                // Increase operating rate hint to 60fps
+                mFormat?.setInteger(MediaFormat.KEY_PRIORITY, 0) // 0 = Real-time
                 mFormat?.setInteger(MediaFormat.KEY_OPERATING_RATE, 60)
             }
         } catch (e: Exception) {
-            AppLog.e("Failed to apply MediaFormat tweaks: ${e.message}")
+            AppLog.e("Failed to apply safe MediaFormat tweaks: ${e.message}")
         }
+        // --------------------------------
 
         mSampleOffset = findSPS()
         if (mSampleOffset == -1) {
