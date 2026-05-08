@@ -46,23 +46,22 @@ class StreamVideoExtractor : MediaExtractorInterface {
         sampleFlags = 0
         mFormat = MediaFormat.createVideoFormat("video/avc", width, height)
 
-        // --- INJECT MEDIATEK TWEAKS HERE ---
+        // --- REVISED MEDIATEK TWEAKS ---
         try {
-            // 1. Force Baseline Profile for lower latency decoding
-            mFormat?.setInteger(MediaFormat.KEY_PROFILE, android.media.MediaCodecInfo.CodecProfileLevel.AVCProfileBaseline)
+            // Instead of forcing Baseline, we remove the hard constraint.
+            // We still hint for real-time performance which helps the MediaTek scheduler.
 
-            // 2. Force a smaller max input buffer (1MB) so the chip doesn't get lazy
-            mFormat?.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, 1048576)
+            // Bumped to 2MB (2097152 bytes) to handle high-bitrate 720p60 frames safely
+            mFormat?.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, 2097152)
 
-            // 3. Force Real-Time CPU/GPU priority (requires Android 6.0+)
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                mFormat?.setInteger(MediaFormat.KEY_PRIORITY, 0)
+                mFormat?.setInteger(MediaFormat.KEY_PRIORITY, 0) // Real-time priority
+                // Increase operating rate hint to 60fps
                 mFormat?.setInteger(MediaFormat.KEY_OPERATING_RATE, 60)
             }
         } catch (e: Exception) {
-            AppLog.e("Failed to apply MediaTek specific MediaFormat tweaks: ${e.message}")
+            AppLog.e("Failed to apply MediaFormat tweaks: ${e.message}")
         }
-        // -----------------------------------
 
         mSampleOffset = findSPS()
         if (mSampleOffset == -1) {
