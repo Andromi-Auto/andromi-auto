@@ -27,6 +27,8 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
     private var isGroupOwner = false
     private var isConnected = false
     private val handler = Handler(Looper.getMainLooper())
+    private var localDeviceAddress: String? = null
+    private var lastKnownBssid: String? = null
 
     private var onCredentialsReady: ((ssid: String, psk: String, ip: String, bssid: String) -> Unit)? = null
 
@@ -56,9 +58,10 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
                     }
                     device?.let {
                         if (com.andrerinas.headunitrevived.App.provide(context).settings.wifiConnectionMode != 3) {
-                            AppLog.i("WifiDirectManager: Local name: ${it.deviceName}")
+                            AppLog.i("WifiDirectManager: Local name: ${it.deviceName}, Address: ${it.deviceAddress}")
                         }
                         AapService.wifiDirectName.value = it.deviceName
+                        localDeviceAddress = it.deviceAddress
                     }
                 }
                 WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION -> {
@@ -79,6 +82,20 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
             if (context.packageManager.hasSystemFeature(android.content.pm.PackageManager.FEATURE_WIFI_DIRECT)) {
                 manager?.let { mgr ->
                     channel = mgr.initialize(context, context.mainLooper, null)
+                    
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        channel?.let { ch ->
+                            mgr.requestDeviceInfo(ch) { device ->
+                                device?.let {
+                                    if (it.deviceAddress != "02:00:00:00:00:00") {
+                                        AppLog.i("WifiDirectManager: requestDeviceInfo success: ${it.deviceAddress}")
+                                        localDeviceAddress = it.deviceAddress
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                     val filter = IntentFilter().apply {
                         addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION)
                         addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION)
@@ -96,6 +113,20 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
         if (info.groupFormed) {
             isConnected = true
             isGroupOwner = info.isGroupOwner
+            
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                channel?.let { ch ->
+                    manager?.requestDeviceInfo(ch) { device ->
+                        device?.let {
+                            if (it.deviceAddress != "02:00:00:00:00:00") {
+                                AppLog.d("WifiDirectManager: Updated localDeviceAddress: ${it.deviceAddress}")
+                                localDeviceAddress = it.deviceAddress
+                            }
+                        }
+                    }
+                }
+            }
+
             val goIp = info.groupOwnerAddress?.hostAddress ?: "unknown"
             AppLog.i("WifiDirectManager: Group formed. Owner: $isGroupOwner, GO IP: $goIp")
 
@@ -129,8 +160,38 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
             groupInfoRetries = 0
             val ssid = group.networkName
             val psk = group.passphrase ?: ""
-            val bssid = getWifiDirectMac(group.`interface`)
+            var bssid = getWifiDirectMac(group.`interface`)
             val isOwner = group.isGroupOwner
+
+            // [FIX] Robust BSSID detection for masked MACs (00:00 or 02:00)
+            if (bssid == "00:00:00:00:00:00" || bssid == "02:00:00:00:00:00") {
+                // Fallback 1: Use last known valid BSSID
+                if (!lastKnownBssid.isNullOrEmpty() && lastKnownBssid != "00:00:00:00:00:00" && lastKnownBssid != "02:00:00:00:00:00") {
+                    AppLog.i("WifiDirectManager: BSSID masked, using lastKnownBssid: $lastKnownBssid")
+                    bssid = lastKnownBssid!!
+                }
+                // Fallback 2: Use captured localDeviceAddress (from THIS_DEVICE_CHANGED or requestDeviceInfo)
+                else if (!localDeviceAddress.isNullOrEmpty() && localDeviceAddress != "00:00:00:00:00:00" && localDeviceAddress != "02:00:00:00:00:00") {
+                    AppLog.i("WifiDirectManager: BSSID masked, using localDeviceAddress: $localDeviceAddress")
+                    bssid = localDeviceAddress!!
+                } 
+                // Fallback 3: Use group.owner.deviceAddress
+                else {
+                    val ownerAddr = group.owner?.deviceAddress
+                    if (!ownerAddr.isNullOrEmpty() && ownerAddr != "00:00:00:00:00:00" && ownerAddr != "02:00:00:00:00:00") {
+                        AppLog.i("WifiDirectManager: BSSID masked, using group.owner.deviceAddress: $ownerAddr")
+                        bssid = ownerAddr
+                    } 
+                    // Fallback 4: Shell command "ip link"
+                    else {
+                        val shellMac = getMacFromShell(group.`interface`)
+                        if (shellMac != null) {
+                            AppLog.i("WifiDirectManager: BSSID masked, using shell fallback: $shellMac")
+                            bssid = shellMac
+                        }
+                    }
+                }
+            }
 
             // Try to get frequency via reflection (hidden field in WifiP2pGroup)
             var frequency = 0
@@ -176,7 +237,9 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
                 groupInfoRetries++
                 AppLog.w("WifiDirectManager: Group info was null! Retrying in 1s (Attempt $groupInfoRetries/20)...")
                 handler.postDelayed({
-                    manager?.requestGroupInfo(channel, this)
+                    channel?.let { ch ->
+                        manager?.requestGroupInfo(ch, this)
+                    }
                 }, 1000L)
             } else {
                 AppLog.e("WifiDirectManager: FATAL: Group info remained null after 20 retries.")
@@ -281,7 +344,10 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
 
     @SuppressLint("MissingPermission")
     private fun createNewGroup(retryCount: Int) {
-        manager?.createGroup(channel, object : WifiP2pManager.ActionListener {
+        val mgr = manager ?: return
+        val ch = channel ?: return
+        
+        mgr.createGroup(ch, object : WifiP2pManager.ActionListener {
             override fun onSuccess() {
                 AppLog.i("WifiDirectManager: P2P Group created.")
                 isGroupOwner = true
@@ -305,10 +371,13 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
 
     @SuppressLint("MissingPermission")
     private fun startDiscovery() {
-        manager?.discoverPeers(channel, object : WifiP2pManager.ActionListener {
-            override fun onSuccess() { AppLog.d("WifiDirectManager: Discovery active") }
-            override fun onFailure(reason: Int) { AppLog.w("WifiDirectManager: Discovery failed: $reason") }
-        })
+        val ch = channel
+        if (ch != null) {
+            manager?.discoverPeers(ch, object : WifiP2pManager.ActionListener {
+                override fun onSuccess() { AppLog.d("WifiDirectManager: Discovery active") }
+                override fun onFailure(reason: Int) { AppLog.w("WifiDirectManager: Discovery failed: $reason") }
+            })
+        }
     }
 
     /**
@@ -468,6 +537,43 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
                 }
             }
         })
+    }
+
+    private fun getMacFromShell(iface: String?): String? {
+        if (iface == null) return null
+        
+        // Try reading directly from sysfs (often allowed even when ip link is not)
+        try {
+            val file = java.io.File("/sys/class/net/$iface/address")
+            if (file.exists()) {
+                val mac = file.readText().trim().lowercase()
+                if (mac.isNotEmpty() && mac != "00:00:00:00:00:00" && mac != "02:00:00:00:00:00") {
+                    AppLog.i("WifiDirectManager: MAC retrieved via sysfs: $mac")
+                    return mac
+                }
+            }
+        } catch (e: Exception) {
+            AppLog.w("WifiDirectManager: Failed to read MAC from sysfs: ${e.message}")
+        }
+
+        return try {
+            val process = Runtime.getRuntime().exec("ip link show $iface")
+            val reader = process.inputStream.bufferedReader()
+            var line: String?
+            var mac: String? = null
+            while (reader.readLine().also { line = it } != null) {
+                // Look for "link/ether aa:bb:cc:dd:ee:ff"
+                val match = Regex("link/ether (([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2})").find(line ?: "")
+                if (match != null) {
+                    mac = match.groupValues[1]
+                    break
+                }
+            }
+            process.waitFor()
+            if (mac == "00:00:00:00:00:00" || mac == "02:00:00:00:00:00") null else mac
+        } catch (e: Exception) {
+            null
+        }
     }
 
     fun stop() {

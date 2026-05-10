@@ -30,6 +30,9 @@ import com.andrerinas.headunitrevived.utils.LogExporter
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import androidx.activity.result.contract.ActivityResultContracts
+import android.content.pm.PackageManager
+import com.andrerinas.headunitrevived.connection.NativeAaHandshakeManager
 
 class SettingsFragment : Fragment() {
     private lateinit var settings: Settings
@@ -39,7 +42,6 @@ class SettingsFragment : Fragment() {
     private var saveButton: MaterialButton? = null
 
     // Local state to hold changes before saving
-    private var pendingMicSampleRate: Int? = null
     private var pendingUseGps: Boolean? = null
     private var pendingShowNavigationNotifications: Boolean? = null
     private var pendingSyncMediaSessionAaMetadata: Boolean? = null
@@ -54,7 +56,6 @@ class SettingsFragment : Fragment() {
     private var pendingEnableAudioSink: Boolean? = null
     private var pendingSeparateAudioStreams: Boolean? = null
     private var pendingUseAacAudio: Boolean? = null
-    private var pendingMicInputSource: Int? = null
     private var pendingUseNativeSsl: Boolean? = null
     private var pendingEnableRotary: Boolean? = null
     private var pendingAudioLatencyMultiplier: Int? = null
@@ -90,6 +91,14 @@ class SettingsFragment : Fragment() {
     private var hasChanges = false
     private val SAVE_ITEM_ID = 1001
 
+    private val bluetoothPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+        if (isGranted) {
+            handleNativeAaSelection()
+        } else {
+            Toast.makeText(requireContext(), R.string.bt_permission_denied, Toast.LENGTH_LONG).show()
+        }
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.fragment_settings, container, false)
     }
@@ -100,7 +109,6 @@ class SettingsFragment : Fragment() {
         settings = App.provide(requireContext()).settings
 
         // Initialize local state with current values
-        pendingMicSampleRate = settings.micSampleRate
         pendingUseGps = settings.useGpsForNavigation
         pendingShowNavigationNotifications = settings.showNavigationNotifications
         pendingSyncMediaSessionAaMetadata = settings.syncMediaSessionWithAaMetadata
@@ -115,7 +123,6 @@ class SettingsFragment : Fragment() {
         pendingEnableAudioSink = settings.enableAudioSink
         pendingSeparateAudioStreams = settings.separateAudioStreams
         pendingUseAacAudio = settings.useAacAudio
-        pendingMicInputSource = settings.micInputSource
         pendingUseNativeSsl = settings.useNativeSsl
         pendingEnableRotary = settings.enableRotary
         pendingAudioLatencyMultiplier = settings.audioLatencyMultiplier
@@ -229,7 +236,6 @@ class SettingsFragment : Fragment() {
     private fun saveSettings() {
         val languageChanged = pendingAppLanguage != settings.appLanguage
 
-        pendingMicSampleRate?.let { settings.micSampleRate = it }
         pendingUseGps?.let { settings.useGpsForNavigation = it }
         pendingShowNavigationNotifications?.let { settings.showNavigationNotifications = it }
         pendingSyncMediaSessionAaMetadata?.let { settings.syncMediaSessionWithAaMetadata = it }
@@ -244,7 +250,6 @@ class SettingsFragment : Fragment() {
         pendingEnableAudioSink?.let { settings.enableAudioSink = it }
         pendingSeparateAudioStreams?.let { settings.separateAudioStreams = it }
         pendingUseAacAudio?.let { settings.useAacAudio = it }
-        pendingMicInputSource?.let { settings.micInputSource = it }
         pendingUseNativeSsl?.let { settings.useNativeSsl = it }
         pendingEnableRotary?.let { settings.enableRotary = it }
         pendingAudioLatencyMultiplier?.let { settings.audioLatencyMultiplier = it }
@@ -255,6 +260,7 @@ class SettingsFragment : Fragment() {
         pendingMediaVolumeOffset?.let { settings.mediaVolumeOffset = it }
         pendingAssistantVolumeOffset?.let { settings.assistantVolumeOffset = it }
         pendingNavigationVolumeOffset?.let { settings.navigationVolumeOffset = it }
+
 
         pendingAppLanguage?.let { settings.appLanguage = it }
 
@@ -314,8 +320,7 @@ class SettingsFragment : Fragment() {
 
     private fun checkChanges() {
         // Check for any changes
-        val anyChange = pendingMicSampleRate != settings.micSampleRate ||
-                        pendingUseGps != settings.useGpsForNavigation ||
+        val anyChange = pendingUseGps != settings.useGpsForNavigation ||
                         pendingShowNavigationNotifications != settings.showNavigationNotifications ||
                         pendingSyncMediaSessionAaMetadata != settings.syncMediaSessionWithAaMetadata ||
                         pendingResolution != settings.resolutionId ||
@@ -329,7 +334,6 @@ class SettingsFragment : Fragment() {
                         pendingEnableAudioSink != settings.enableAudioSink ||
                         pendingSeparateAudioStreams != settings.separateAudioStreams ||
                         pendingUseAacAudio != settings.useAacAudio ||
-                        pendingMicInputSource != settings.micInputSource ||
                         pendingUseNativeSsl != settings.useNativeSsl ||
                         pendingEnableRotary != settings.enableRotary ||
                         pendingAudioLatencyMultiplier != settings.audioLatencyMultiplier ||
@@ -480,31 +484,11 @@ class SettingsFragment : Fragment() {
                 }
 
                 if (newMode == 3) {
-                    // Compatibility check for Native AA
-                    if (com.andrerinas.headunitrevived.connection.NativeAaHandshakeManager.checkCompatibility()) {
-                        MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
-                            .setTitle(R.string.supported_nativeaa)
-                            .setMessage(R.string.supported_nativeaa_desc)
-                            .setPositiveButton(android.R.string.ok) { dialog, _ ->
-                                pendingWifiConnectionMode = 3
-                                checkChanges()
-                                updateSettingsList()
-                                dialog.dismiss()
-                            }
-                            .setNegativeButton(android.R.string.cancel, null)
-                            .show()
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && 
+                        ContextCompat.checkSelfPermission(requireContext(), android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+                        bluetoothPermissionLauncher.launch(android.Manifest.permission.BLUETOOTH_CONNECT)
                     } else {
-                        MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
-                            .setTitle(R.string.not_supported_nativeaa)
-                            .setMessage(R.string.not_supported_nativeaa_desc)
-                            .setPositiveButton(android.R.string.ok) { dialog, _ ->
-                                pendingWifiConnectionMode = 3
-                                checkChanges()
-                                updateSettingsList()
-                                dialog.dismiss()
-                            }
-                            .setNegativeButton(android.R.string.cancel, null)
-                            .show()
+                        handleNativeAaSelection()
                     }
                 } else {
                     pendingWifiConnectionMode = newMode
@@ -1004,44 +988,11 @@ class SettingsFragment : Fragment() {
         ))
 
         items.add(SettingItem.SettingEntry(
-            stableId = "micSampleRate",
-            nameResId = R.string.mic_sample_rate,
-            value = "${pendingMicSampleRate!! / 1000}kHz",
+            stableId = "micSettings",
+            nameResId = R.string.microphone_settings,
+            value = getString(R.string.microphone_settings_description),
             onClick = { _ ->
-                val currentSampleRateIndex = Settings.MicSampleRates.indexOf(pendingMicSampleRate!!)
-                val sampleRateNames = Settings.MicSampleRates.map { "${it / 1000}kHz" }.toTypedArray()
-
-                MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
-                    .setTitle(R.string.mic_sample_rate)
-                    .setSingleChoiceItems(sampleRateNames, currentSampleRateIndex) { dialog, which ->
-                        val newValue = Settings.MicSampleRates.elementAt(which)
-                        pendingMicSampleRate = newValue
-                        checkChanges()
-                        dialog.dismiss()
-                        updateSettingsList()
-                    }
-                    .show()
-            }
-        ))
-
-        val micSources = resources.getStringArray(R.array.mic_input_sources)
-        val micSourceValues = intArrayOf(0, 1, 6, 7, 100) // DEFAULT, MIC, VOICE_RECOGNITION, VOICE_COMMUNICATION, BT_SCO
-        val currentSourceIndex = micSourceValues.indexOf(pendingMicInputSource ?: 0).coerceAtLeast(0)
-
-        items.add(SettingItem.SettingEntry(
-            stableId = "micInputSource",
-            nameResId = R.string.mic_input_source,
-            value = micSources[currentSourceIndex],
-            onClick = {
-                MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
-                    .setTitle(R.string.mic_input_source)
-                    .setSingleChoiceItems(micSources, currentSourceIndex) { dialog, which ->
-                        pendingMicInputSource = micSourceValues[which]
-                        checkChanges()
-                        updateSettingsList()
-                        dialog.dismiss()
-                    }
-                    .show()
+                findNavController().navigate(R.id.action_settingsFragment_to_micSettingsFragment)
             }
         ))
 
@@ -1662,6 +1613,34 @@ class SettingsFragment : Fragment() {
             }
             .setNegativeButton(android.R.string.cancel, null)
             .show()
+    }
+
+    private fun handleNativeAaSelection() {
+        if (NativeAaHandshakeManager.checkCompatibility(requireContext())) {
+            MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
+                .setTitle(R.string.supported_nativeaa)
+                .setMessage(R.string.supported_nativeaa_desc)
+                .setPositiveButton(android.R.string.ok) { dialog, _ ->
+                    pendingWifiConnectionMode = 3
+                    checkChanges()
+                    updateSettingsList()
+                    dialog.dismiss()
+                }
+                .setNegativeButton(android.R.string.cancel, null)
+                .show()
+        } else {
+            MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
+                .setTitle(R.string.not_supported_nativeaa)
+                .setMessage(R.string.not_supported_nativeaa_desc)
+                .setPositiveButton(android.R.string.ok) { dialog, _ ->
+                    pendingWifiConnectionMode = 3
+                    checkChanges()
+                    updateSettingsList()
+                    dialog.dismiss()
+                }
+                .setNegativeButton(android.R.string.cancel, null)
+                .show()
+        }
     }
 
     companion object {

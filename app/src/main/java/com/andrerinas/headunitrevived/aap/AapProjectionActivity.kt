@@ -159,8 +159,6 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         }
     }
 
-
-
     private val orientationReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             if (intent.action == AapService.ACTION_ORIENTATION_CHANGED) {
@@ -190,9 +188,6 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            enableEdgeToEdge()
-        }
         super.onCreate(savedInstanceState)
 
         applyOrientationSettings()
@@ -387,6 +382,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
     }
 
     override fun onPause() {
+        isForeground = false
         AppLog.i("AapProjectionActivity: onPause")
         super.onPause()
         watchdogHandler.removeCallbacks(watchdogRunnable)
@@ -407,12 +403,14 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
     }
 
     override fun onResume() {
-        AppLog.i("AapProjectionActivity: onResume")
         super.onResume()
+        isForeground = true
+        AppLog.i("AapProjectionActivity: onResume")
         applyStickyOrientation()
         watchdogHandler.postDelayed(watchdogRunnable, 2000)
         watchdogHandler.postDelayed(videoWatchdogRunnable, 3000)
         watchdogHandler.postDelayed(reconnectingWatchdog, 5000)
+
 
         if (!isKeyEventReceiverRegistered) {
             ContextCompat.registerReceiver(this, keyEventReceiver, IntentFilters.keyEvent, ContextCompat.RECEIVER_EXPORTED)
@@ -434,6 +432,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
 
         setFullscreen()
     }
+
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
@@ -558,14 +557,38 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
     private fun enterPiP() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             try {
-                val params = android.app.PictureInPictureParams.Builder()
-                    // Default aspect ratio for AA (usually 16:9 or 16:10)
-                    .setAspectRatio(android.util.Rational(videoDecoder.videoWidth.coerceAtLeast(1), videoDecoder.videoHeight.coerceAtLeast(1)))
-                    .build()
-                enterPictureInPictureMode(params)
+                var width = videoDecoder.videoWidth.coerceAtLeast(1).toFloat()
+                var height = videoDecoder.videoHeight.coerceAtLeast(1).toFloat()
+                val ratio = width / height
+                
+                // Android supports PiP aspect ratios between 1/2.39 (0.418) and 2.39.
+                // If we exceed this (e.g. on ultrawide headunits), PiP entry will fail.
+                if (ratio > 2.39f) {
+                    AppLog.i("PiP: Aspect ratio $ratio is too wide, clamping to 2.39")
+                    width = height * 2.39f
+                } else if (ratio < 0.418f) {
+                    AppLog.i("PiP: Aspect ratio $ratio is too narrow, clamping to 0.418")
+                    height = width / 0.418f
+                }
+
+                val paramsBuilder = android.app.PictureInPictureParams.Builder()
+                    .setAspectRatio(android.util.Rational(width.toInt(), height.toInt()))
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    // Smooth transition for Android 12+
+                    paramsBuilder.setAutoEnterEnabled(true)
+                    paramsBuilder.setSeamlessResizeEnabled(true)
+                }
+
+                App.isPiPActive = true
+                enterPictureInPictureMode(paramsBuilder.build())
             } catch (e: Exception) {
                 AppLog.e("Failed to enter PiP mode: ${e.message}")
+                e.printStackTrace()
+                Toast.makeText(this, "PiP failed: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
             }
+        } else {
+            AppLog.w("PiP mode not supported on this Android version (SDK < 26)")
         }
     }
 
@@ -578,6 +601,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
 
     override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean, newConfig: android.content.res.Configuration) {
         super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
+        App.isPiPActive = isInPictureInPictureMode
         if (isInPictureInPictureMode) {
             // Hide UI elements during PiP (like FPS counter, loading overlay)
             findViewById<View>(R.id.loading_overlay)?.visibility = View.GONE
@@ -801,24 +825,13 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         commManager.send(TouchEvent(ts, action, event.actionIndex, pointerData))
     }
 
-    private fun isMediaKey(keyCode: Int): Boolean {
-        return when (keyCode) {
-            KeyEvent.KEYCODE_MEDIA_PLAY,
-            KeyEvent.KEYCODE_MEDIA_PAUSE,
-            KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE,
-            KeyEvent.KEYCODE_MEDIA_NEXT,
-            KeyEvent.KEYCODE_MEDIA_PREVIOUS,
-            KeyEvent.KEYCODE_MEDIA_STOP -> true
-            else -> false
-        }
-    }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
         if (keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_VOLUME_UP || keyCode == KeyEvent.KEYCODE_VOLUME_DOWN || keyCode == KeyEvent.KEYCODE_VOLUME_MUTE) {
             return super.onKeyDown(keyCode, event)
         }
         // Always pass keys to AA during projection, unless they are handled by super (volume/back)
-        onKeyEvent(keyCode, true)
+        commManager.sendKey(keyCode, true)
         return true
     }
 
@@ -826,15 +839,14 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         if (keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_VOLUME_UP || keyCode == KeyEvent.KEYCODE_VOLUME_DOWN || keyCode == KeyEvent.KEYCODE_VOLUME_MUTE) {
             return super.onKeyUp(keyCode, event)
         }
-        onKeyEvent(keyCode, false)
+        commManager.sendKey(keyCode, false)
         return true
     }
 
     private fun onKeyEvent(keyCode: Int, isPress: Boolean) {
-        // Mapping: Physical (HW) -> Logical (AA)
-        val logicalCode = settings.keyCodes.entries.find { it.value == keyCode }?.key ?: keyCode
-        AppLog.i("AapProjectionActivity: onKeyEvent HW=$keyCode -> AA=$logicalCode, isPress=$isPress")
-        commManager.send(logicalCode, isPress)
+        // All key events are now funneled through CommManager for centralized 
+        // remapping, state tracking, and debouncing.
+        commManager.sendKey(keyCode, isPress)
     }
 
     private fun applyStickyOrientation() {
@@ -862,11 +874,13 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
             isKeyEventReceiverRegistered = false
         }
         AppLog.i("AapProjectionActivity.onDestroy called. isFinishing=$isFinishing")
+        App.isPiPActive = false
         videoDecoder.dimensionsListener = null
     }
 
     companion object {
         const val EXTRA_FOCUS = "focus"
+        @Volatile var isForeground = false
 
         fun intent(context: Context): Intent {
             val aapIntent = Intent(context, AapProjectionActivity::class.java)
