@@ -54,10 +54,9 @@ import javax.net.ssl.SSLEngineResult
  * @param onAaPlaybackStatus Optional callback when the phone sends playback status/position.
  * @param externalSsl Optional singleton [AapSslContext] whose internal [javax.net.ssl.SSLContext]
  *   (and its `ClientSessionContext` session cache) survives across [AapTransport] recreations.
- *   When provided on the Java-SSL path, JSSE can resume the previous TLS session on reconnect,
- *   skipping 4–6 round-trips and saving 1–3 s of handshake time. Pass `null` to create a
- *   fresh [AapSslContext] per transport (no session resumption). Ignored when native SSL is
- *   active (`settings.useNativeSsl = true`).
+ *   When provided, JSSE can resume the previous TLS session on reconnect, skipping 4–6
+ *   round-trips and saving 1–3 s of handshake time. Pass `null` to create a fresh
+ *   [AapSslContext] per transport (no session resumption).
  */
 class AapTransport(
         audioDecoder: AudioDecoder,
@@ -71,22 +70,7 @@ class AapTransport(
         private val externalSsl: AapSslContext? = null)
     : MicRecorder.Listener {
 
-    val ssl: AapSsl = if (settings.useNativeSsl) {
-        try {
-            AppLog.i("Using Native SSL implementation")
-            AapSslNative()
-        } catch (e: Throwable) {
-            AppLog.e("Failed to instantiate Native SSL, falling back to Java SSL", e)
-            // Use the shared context when available so session resumption works on fallback.
-            externalSsl ?: AapSslContext(SingleKeyKeyManager(context))
-        }
-    } else {
-        AppLog.i("Using Java SSL implementation")
-        // externalSsl is the singleton AapSslContext from AppComponent whose SSLContext
-        // (and its ClientSessionContext session cache) survives across transport recreations,
-        // enabling TLS session resumption on reconnect.
-        externalSsl ?: AapSslContext(SingleKeyKeyManager(context))
-    }
+    val ssl: AapSsl = externalSsl ?: AapSslContext(SingleKeyKeyManager(context))
 
     internal val aapAudio: AapAudio
     internal val aapVideo: AapVideo

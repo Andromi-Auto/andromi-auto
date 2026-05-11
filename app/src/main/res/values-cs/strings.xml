@@ -109,8 +109,8 @@
     <string name="debug_mode_description">Povolit podrobnější protokolování (logging)</string>
     <string name="export_logs">Exportovat protokoly</string>
     <string name="export_logs_description">Uložit protokoly pro účely ladění</string>
-    <string name="use_native_ssl">Použít nativní SSL</string>
-    <string name="use_native_ssl_description">Použít nativní knihovnu OpenSSL (rychlejší na starších zařízeních). Vyžaduje restart.</string>
+
+
     <string name="not_set">Nenastaveno</string>
     <string name="keymap_description">Změnit přiřazení kláves pro vaši jednotku</string>
 
@@ -173,6 +173,7 @@
     <string name="auto_start_screen_on_description">Otevřít aplikaci pokaždé, když se zapne obrazovka. Ideální pro autorádia, která se nikdy úplně nevypnou nebo používají rychlé spuštění, kde ostatní možnosti automatického spuštění nefungují. Nedoporučeno pro telefony nebo tablety.</string>
     <string name="select_bt_device">Vybrat Bluetooth zařízení</string>
     <string name="bt_device_not_set">Nenastaveno</string>
+    <string name="bt_permission_denied">Oprávnění Bluetooth zamítnuto</string>
     <string name="bt_permission_denied_title">Vyžadováno oprávnění Bluetooth</string>
     <string name="bt_permission_denied_message">Pro výběr spárovaných zařízení je vyžadováno oprávnění Bluetooth. Povolte ho prosím v nastavení aplikace.</string>
     <string name="overlay_permission_title">Oprávnění pro spuštění na pozadí</string>
@@ -352,8 +353,12 @@
     <string name="fullscreen_status_only">Skrýt pouze stavovou lištu</string>
     <string name="log_level">Úroveň protokolování</string>
     <string name="log_level_description">Vyberte úroveň podrobnosti výstupu protokolu pro ladění.</string>
+    <string name="log_source">Zdroj logů</string>
+    <string name="log_source_logcat">Logcat</string>
+    <string name="log_source_applog_file">Přímo do souboru</string>
     <string name="start_log_capture">Spustit záznam protokolu</string>
     <string name="start_log_capture_description">Spustí nahrávání systémových protokolů do souboru.</string>
+    <string name="start_log_capture_in_applog_file">Zprávy Log se zapisují do souboru pouze během aktivního záznamu</string>
     <string name="start_log_capture_in_silent">Nelze zahájit záznam: vybrána úroveň tichého protokolování</string>
     <string name="stop_log_capture">Zastavit záznam protokolu</string>
     <string name="stop_log_capture_description">Zastaví nahrávání a uloží soubor protokolu.</string>
@@ -485,4 +490,25 @@
     <string name="sync_media_session_aa_metadata">Aktuální skladba AA v mediální relaci</string>
     <string name="sync_media_session_aa_metadata_description">Zobrazovat název skladby, interpreta, délku a obal alba z telefonu v systémové mediální relaci a mediálním oznámení</string>
     <string name="error_usb_permission_failed">Systémová chyba: Nepodařilo se vyžádat dialogové okno pro povolení USB.</string>
+
+    <!-- Custom loading screen -->
+    <string name="loading_screen">Načítací obrazovka</string>
+    <string name="loading_screen_default">Výchozí</string>
+    <string name="loading_screen_custom">Vlastní</string>
+    <string name="loading_screen_dialog_title">Vlastní načítací obrazovka</string>
+    <string name="loading_screen_select_file">Vybrat soubor</string>
+    <string name="loading_screen_remove">Odebrat</string>
+    <string name="loading_screen_recommendation">Doporučené rozlišení: %1$dx%2$d</string>
+    <string name="loading_screen_supported_formats">Podporované: Obrázky (PNG, JPG, BMP, WEBP, GIF) \u2022 Videa (MP4, MKV, WEBM, 3GP) \u2022 Max: 10 MB</string>
+    <string name="loading_screen_no_media">Není vybrán vlastní obsah</string>
+    <string name="loading_screen_file_too_large">Soubor je příliš velký (max 10 MB)</string>
+    <string name="loading_screen_unsupported_format">Nepodporovaný formát. Použijte soubor obrázku nebo videa</string>
+    <string name="loading_screen_file_error">Nepodařilo se načíst vybraný soubor</string>
+    <string name="loading_screen_show_text">Zobrazit text \"Android Auto se spouští\"</string>
+    <string name="loading_screen_tap_preview">Klepněte pro náhled</string>
+    <string name="loading_screen_tap_to_close">Klepněte kamkoli pro zavření</string>
+    <string name="loading_screen_keep_aspect_ratio">Zachovat poměr stran</string>
+    <string name="loading_screen_recommended_aspect_ratio">Doporučený poměr stran: %1$d:%2$d</string>
+    <string name="loading_screen_tap_fullscreen_hint">Klepněte na náhled pro zobrazení na celou obrazovku</string>
+    <string name="loading_screen_loop_video">Opakovat krátké animace</string>
 </resources>

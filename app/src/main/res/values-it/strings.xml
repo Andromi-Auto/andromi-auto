@@ -118,15 +118,19 @@
     <string name="debug_mode_description">Attiva più log</string>
     <string name="log_level">Livello Log</string>
     <string name="log_level_description">Filtra livello log durante l\'esportazione</string>
+    <string name="log_source">Origine dei log</string>
+    <string name="log_source_logcat">Logcat</string>
+    <string name="log_source_applog_file">Direttamente su file</string>
     <string name="start_log_capture">Avvia acquisizione log</string>
     <string name="start_log_capture_description">Inizia a registrare i log completi per il debug</string>
+    <string name="start_log_capture_in_applog_file">I messaggi Log vengono scritti su file solo durante la cattura attiva</string>
     <string name="start_log_capture_in_silent">Impossibile avviare la registrazione: livello di registrazione silenzioso selezionato</string>
     <string name="stop_log_capture">Ferma acquisizione log</string>
     <string name="stop_log_capture_description">Registrazione in corso… tocca per fermare</string>
     <string name="export_logs">Esporta Log</string>
     <string name="export_logs_description">Salva i log per il debug</string>
-    <string name="use_native_ssl">Usa SSL Nativo</string>
-    <string name="use_native_ssl_description">Usa la libreria nativa OpenSSL (più veloce sui dispositivi più vecchi). Richiede il riavvio.</string>
+
+
     <string name="not_set">Non impostato</string>
     <string name="keymap_description">Cambia le associazioni dei tasti per la tua Headunit</string>
 
@@ -189,6 +193,7 @@
     <string name="auto_start_screen_on_description">Apri l\'app ogni volta che lo schermo si accende. Ideale per head unit che non si spengono mai completamente o utilizzano modalità di avvio rapido dove le altre opzioni di avvio automatico non funzionano. Non raccomandato per telefoni o tablet.</string>
     <string name="select_bt_device">Seleziona dispositivo Bluetooth</string>
     <string name="bt_device_not_set">Non impostato</string>
+    <string name="bt_permission_denied">Permesso Bluetooth negato</string>
     <string name="bt_permission_denied_title">Permesso Bluetooth richiesto</string>
     <string name="bt_permission_denied_message">Il permesso Bluetooth è necessario per selezionare i dispositivi associati. Per favore, concedilo nelle impostazioni dell\'app.</string>
     <string name="overlay_permission_title">Permesso avvio in background</string>
@@ -492,4 +497,25 @@
     <string name="sync_media_session_aa_metadata">Brano AA corrente nella sessione multimediale</string>
     <string name="sync_media_session_aa_metadata_description">Mostra titolo, artista, durata e copertina dal telefono nella sessione multimediale di sistema e nella notifica multimediale</string>
     <string name="error_usb_permission_failed">Errore di sistema: Impossibile richiedere la finestra di dialogo del permesso USB.</string>
+
+    <!-- Custom loading screen -->
+    <string name="loading_screen">Schermata di caricamento</string>
+    <string name="loading_screen_default">Predefinita</string>
+    <string name="loading_screen_custom">Personalizzata</string>
+    <string name="loading_screen_dialog_title">Schermata di caricamento personalizzata</string>
+    <string name="loading_screen_select_file">Seleziona file</string>
+    <string name="loading_screen_remove">Rimuovi</string>
+    <string name="loading_screen_recommendation">Risoluzione consigliata: %1$dx%2$d</string>
+    <string name="loading_screen_supported_formats">Supportati: Immagini (PNG, JPG, BMP, WEBP, GIF) \u2022 Video (MP4, MKV, WEBM, 3GP) \u2022 Max: 10 MB</string>
+    <string name="loading_screen_no_media">Nessun contenuto personalizzato selezionato</string>
+    <string name="loading_screen_file_too_large">File troppo grande (max 10 MB)</string>
+    <string name="loading_screen_unsupported_format">Formato non supportato. Usa un file immagine o video</string>
+    <string name="loading_screen_file_error">Impossibile caricare il file selezionato</string>
+    <string name="loading_screen_show_text">Mostra testo \\"Android Auto si sta avviando\\"</string>
+    <string name="loading_screen_tap_preview">Tocca per anteprima</string>
+    <string name="loading_screen_tap_to_close">Tocca ovunque per chiudere</string>
+    <string name="loading_screen_keep_aspect_ratio">Mantieni proporzioni</string>
+    <string name="loading_screen_recommended_aspect_ratio">Proporzioni consigliate: %1$d:%2$d</string>
+    <string name="loading_screen_tap_fullscreen_hint">Tocca l\'anteprima per vederla a schermo intero</string>
+    <string name="loading_screen_loop_video">Ripeti animazioni brevi in loop</string>
 </resources>

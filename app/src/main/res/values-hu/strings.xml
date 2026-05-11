@@ -108,8 +108,8 @@
     <string name="debug_mode_description">Naplózás ki- és bekapcsolása.</string>
     <string name="export_logs">Naplók exportálása</string>
     <string name="export_logs_description">Naplók mentése hibakereséshez.</string>
-    <string name="use_native_ssl">Natív SSL használata</string>
-    <string name="use_native_ssl_description">Natív OpenSSL könyvtár használata (régebbi eszközökön gyorsabb).</string>
+
+
     <string name="not_set">Nincs beállítva</string>
     <string name="keymap_description">A fejegység gombkiosztásának módosítása.</string>
 
@@ -172,6 +172,7 @@
     <string name="auto_start_screen_on_description">Az alkalmazás megnyitása minden alkalommal, amikor a képernyő bekapcsol. Ideális olyan autórádiókhoz, amelyek soha nem kapcsolnak ki teljesen, vagy gyorsindítási módot használnak, ahol a többi automatikus indítási lehetőség nem működik. Telefonokhoz és táblagépekhez nem ajánlott.</string>
     <string name="select_bt_device">Bluetooth eszköz kiválasztása</string>
     <string name="bt_device_not_set">Nincs beállítva</string>
+    <string name="bt_permission_denied">Bluetooth-engedély megtagadva</string>
     <string name="bt_permission_denied_title">Bluetooth-engedély szükséges</string>
     <string name="bt_permission_denied_message">A párosított eszközök kiválasztásához Bluetooth-engedély szükséges. Kérjük, engedélyezze az alkalmazás beállításaiban.</string>
     <string name="overlay_permission_title">Háttérben indítás engedélye</string>
@@ -351,8 +352,12 @@
     <string name="fullscreen_status_only">Csak az állapotsor elrejtése</string>
     <string name="log_level">Naplózási szint</string>
     <string name="log_level_description">A hibaelhárításhoz szükséges részletesség beállítása.</string>
+    <string name="log_source">Naplóforrás</string>
+    <string name="log_source_logcat">Logcat</string>
+    <string name="log_source_applog_file">Közvetlenül fájlba</string>
     <string name="start_log_capture">Naplózás indítása</string>
     <string name="start_log_capture_description">Rögzíti a rendszernaplókat egy helyi fájlba a hibaelhárításhoz.</string>
+    <string name="start_log_capture_in_applog_file">Az Log üzenetek csak aktív rögzítés közben íródnak fájlba</string>
     <string name="start_log_capture_in_silent">Nem lehet elindítani a rögzítést: Csendes naplózási szint kiválasztva</string>
     <string name="stop_log_capture">Naplózás leállítása</string>
     <string name="stop_log_capture_description">Leállítja a naplózást és menti a fájlt.</string>
@@ -484,4 +489,25 @@
     <string name="sync_media_session_aa_metadata">AA aktuális szám a médialejátszási munkamenetben</string>
     <string name="sync_media_session_aa_metadata_description">A telefonról származó számcímet, előadót, időtartamot és borítót jelenítse meg a rendszer médialejátszási munkamenetében és médiás értesítésben</string>
     <string name="error_usb_permission_failed">Rendszerhiba: Nem sikerült lekérni az USB engedélykérő ablakot.</string>
+
+    <!-- Custom loading screen -->
+    <string name="loading_screen">Betöltő képernyő</string>
+    <string name="loading_screen_default">Alapértelmezett</string>
+    <string name="loading_screen_custom">Egyéni</string>
+    <string name="loading_screen_dialog_title">Egyéni betöltő képernyő</string>
+    <string name="loading_screen_select_file">Fájl kiválasztása</string>
+    <string name="loading_screen_remove">Eltávolítás</string>
+    <string name="loading_screen_recommendation">Ajánlott felbontás: %1$dx%2$d</string>
+    <string name="loading_screen_supported_formats">Támogatott: Képek (PNG, JPG, BMP, WEBP, GIF) \u2022 Videók (MP4, MKV, WEBM, 3GP) \u2022 Max: 10 MB</string>
+    <string name="loading_screen_no_media">Nincs egyéni tartalom kiválasztva</string>
+    <string name="loading_screen_file_too_large">A fájl túl nagy (max 10 MB)</string>
+    <string name="loading_screen_unsupported_format">Nem támogatott formátum. Használjon kép- vagy videófájlt</string>
+    <string name="loading_screen_file_error">A kiválasztott fájl nem tölthető be</string>
+    <string name="loading_screen_show_text">\"Az Android Auto indul\" szöveg megjelenítése</string>
+    <string name="loading_screen_tap_preview">Érintse meg az előnézethez</string>
+    <string name="loading_screen_tap_to_close">Érintse meg bárhol a bezáráshoz</string>
+    <string name="loading_screen_keep_aspect_ratio">Képarány megőrzése</string>
+    <string name="loading_screen_recommended_aspect_ratio">Ajánlott képarány: %1$d:%2$d</string>
+    <string name="loading_screen_tap_fullscreen_hint">Érintse meg az előnézetet a teljes képernyős megjelenítéshez</string>
+    <string name="loading_screen_loop_video">Rövid animációk ismétlése</string>
 </resources>

@@ -11,7 +11,7 @@ import com.andrerinas.headunitrevived.aap.protocol.proto.Control
 import com.andrerinas.headunitrevived.app.UsbAttachedActivity
 import com.andrerinas.headunitrevived.connection.UsbDeviceCompat
 
-class Settings(context: Context) {
+class Settings(private val context: Context) {
 
     private val _prefs: SharedPreferences? by lazy {
         try {
@@ -141,6 +141,15 @@ class Settings(context: Context) {
     var exporterLogLevel: LogExporter.LogLevel
         get() = LogExporter.LogLevel.entries.getOrElse(prefs.getInt(KEY_LOG_LEVEL, LogExporter.LogLevel.INFO.ordinal)) { LogExporter.LogLevel.INFO }
         set(value) { prefs.edit().putInt(KEY_LOG_LEVEL, value.ordinal).apply() }
+
+    enum class LogSource {
+        LOGCAT,
+        APPLOG_FILE
+    }
+
+    var logSource: LogSource
+        get() = LogSource.entries.getOrElse(prefs.getInt(KEY_LOG_SOURCE, LogSource.LOGCAT.ordinal)) { LogSource.LOGCAT }
+        set(value) { prefs.edit().putInt(KEY_LOG_SOURCE, value.ordinal).apply() }
 
     /** Whether log capture should be active across restarts. Default: false (disabled). */
     var exporterCaptureEnabled: Boolean
@@ -472,9 +481,43 @@ class Settings(context: Context) {
         get() = prefs.getInt("navigation-volume-offset", 0)
         set(value) { prefs.edit().putInt("navigation-volume-offset", value).apply() }
 
+    // Custom loading screen
+    var loadingScreenMediaPath: String
+        get() = prefs.getString("loading-screen-media-path", "")!!
+        set(value) { prefs.edit().putString("loading-screen-media-path", value).apply() }
+
+    var loadingScreenMediaType: String
+        get() = prefs.getString("loading-screen-media-type", "")!!
+        set(value) { prefs.edit().putString("loading-screen-media-type", value).apply() }
+
+    var loadingScreenShowText: Boolean
+        get() = prefs.getBoolean("loading-screen-show-text", false)
+        set(value) { prefs.edit().putBoolean("loading-screen-show-text", value).apply() }
+
+    var loadingScreenKeepAspectRatio: Boolean
+        get() = prefs.getBoolean("loading-screen-keep-aspect-ratio", true)
+        set(value) { prefs.edit().putBoolean("loading-screen-keep-aspect-ratio", value).apply() }
+
+    var loadingScreenLoopVideo: Boolean
+        get() = prefs.getBoolean("loading-screen-loop-video", true)
+        set(value) { prefs.edit().putBoolean("loading-screen-loop-video", value).apply() }
+
     @SuppressLint("ApplySharedPref")
     fun commit() {
         prefs.edit().commit()
+    }
+
+    @SuppressLint("ApplySharedPref")
+    fun reset() {
+        prefs.edit().clear().commit()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            syncAutoStartOnBootToDeviceStorage(context, false)
+            syncAutoStartOnScreenOnToDeviceStorage(context, false)
+            syncAutoStartOnUsbToDeviceStorage(context, false)
+            syncAutoStartOnWifiToDeviceStorage(context, false)
+            syncListenForUsbDevicesToDeviceStorage(context, true)
+            syncAutoStartBtMacToDeviceStorage(context, "")
+        }
     }
 
     enum class Resolution(val id: Int, val resName: String, val width: Int, val height: Int, val codec: Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType?) {
@@ -553,6 +596,7 @@ class Settings(context: Context) {
 
         /** SharedPreferences key; also used by [AapService] for change listener. */
         const val KEY_LOG_LEVEL = "log-level"
+        const val KEY_LOG_SOURCE = "log-source"
         /** Persist whether log capture should be active across restarts. */
         const val KEY_LOG_CAPTURE_ENABLED = "log-capture-enabled"
 

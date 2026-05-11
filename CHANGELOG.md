@@ -1,4 +1,10 @@
 # Changelog
+### v.3.0.0-alpha
+- Added: Custom loading screen (image/GIF/video), thanks to @andrecuellar
+- Added: Settings-Reset Button, if you mess up something in the settings, you can now reset them to default
+- Removed: Old deprecated ssl library written in C-Code for better maintenance, stability and smaller file sizes
+- Added: Direct Logging to file without logcat, thanks to @Anton111111
+
 ### v.2.3.0-beta
 - Added some new buttons for keymap
 - Fixed 3 Fatal errors

@@ -23,6 +23,7 @@ import com.andrerinas.headunitrevived.R
 import com.andrerinas.headunitrevived.aap.AapService
 import com.andrerinas.headunitrevived.main.settings.SettingItem
 import com.andrerinas.headunitrevived.main.settings.SettingsAdapter
+import com.andrerinas.headunitrevived.utils.AppLog
 import com.andrerinas.headunitrevived.utils.Settings
 import com.andrerinas.headunitrevived.utils.LocaleHelper
 import com.andrerinas.headunitrevived.BuildConfig
@@ -56,7 +57,7 @@ class SettingsFragment : Fragment() {
     private var pendingEnableAudioSink: Boolean? = null
     private var pendingSeparateAudioStreams: Boolean? = null
     private var pendingUseAacAudio: Boolean? = null
-    private var pendingUseNativeSsl: Boolean? = null
+    private var pendingMicInputSource: Int? = null
     private var pendingEnableRotary: Boolean? = null
     private var pendingAudioLatencyMultiplier: Int? = null
     private var pendingAudioQueueCapacity: Int? = null
@@ -123,7 +124,7 @@ class SettingsFragment : Fragment() {
         pendingEnableAudioSink = settings.enableAudioSink
         pendingSeparateAudioStreams = settings.separateAudioStreams
         pendingUseAacAudio = settings.useAacAudio
-        pendingUseNativeSsl = settings.useNativeSsl
+        pendingMicInputSource = settings.micInputSource
         pendingEnableRotary = settings.enableRotary
         pendingAudioLatencyMultiplier = settings.audioLatencyMultiplier
         pendingAudioQueueCapacity = settings.audioQueueCapacity
@@ -152,6 +153,8 @@ class SettingsFragment : Fragment() {
         pendingMediaVolumeOffset = settings.mediaVolumeOffset
         pendingAssistantVolumeOffset = settings.assistantVolumeOffset
         pendingNavigationVolumeOffset = settings.navigationVolumeOffset
+
+        // Loading screen settings are handled in LoadingScreenFragment (saves directly)
 
         // Intercept system back button
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
@@ -250,7 +253,7 @@ class SettingsFragment : Fragment() {
         pendingEnableAudioSink?.let { settings.enableAudioSink = it }
         pendingSeparateAudioStreams?.let { settings.separateAudioStreams = it }
         pendingUseAacAudio?.let { settings.useAacAudio = it }
-        pendingUseNativeSsl?.let { settings.useNativeSsl = it }
+        pendingMicInputSource?.let { settings.micInputSource = it }
         pendingEnableRotary?.let { settings.enableRotary = it }
         pendingAudioLatencyMultiplier?.let { settings.audioLatencyMultiplier = it }
         pendingAudioQueueCapacity?.let { settings.audioQueueCapacity = it }
@@ -285,6 +288,7 @@ class SettingsFragment : Fragment() {
         pendingInsetBottom?.let { settings.insetBottom = it }
 
         settings.commit()
+        AppLog.init(settings, requireContext().applicationContext)
 
         if (oldWifiMode != settings.wifiConnectionMode || oldHelperStrategy != settings.helperConnectionStrategy) {
             val intent = Intent(requireContext(), AapService::class.java).apply {
@@ -334,7 +338,7 @@ class SettingsFragment : Fragment() {
                         pendingEnableAudioSink != settings.enableAudioSink ||
                         pendingSeparateAudioStreams != settings.separateAudioStreams ||
                         pendingUseAacAudio != settings.useAacAudio ||
-                        pendingUseNativeSsl != settings.useNativeSsl ||
+                        pendingMicInputSource != settings.micInputSource ||
                         pendingEnableRotary != settings.enableRotary ||
                         pendingAudioLatencyMultiplier != settings.audioLatencyMultiplier ||
                         pendingAudioQueueCapacity != settings.audioQueueCapacity ||
@@ -372,7 +376,6 @@ class SettingsFragment : Fragment() {
                           pendingUseAacAudio != settings.useAacAudio ||
                           pendingAudioLatencyMultiplier != settings.audioLatencyMultiplier ||
                           pendingAudioQueueCapacity != settings.audioQueueCapacity ||
-                          pendingUseNativeSsl != settings.useNativeSsl ||
                           pendingInsetLeft != settings.insetLeft ||
                           pendingInsetTop != settings.insetTop ||
                           pendingInsetRight != settings.insetRight ||
@@ -855,6 +858,17 @@ class SettingsFragment : Fragment() {
             ))
         }
 
+        items.add(SettingItem.SettingEntry(
+            stableId = "loadingScreen",
+            nameResId = R.string.loading_screen,
+            value = if (settings.loadingScreenMediaPath.isNullOrEmpty())
+                getString(R.string.loading_screen_default)
+            else getString(R.string.loading_screen_custom),
+            onClick = {
+                findNavController().navigate(R.id.action_settingsFragment_to_loadingScreenFragment)
+            }
+        ))
+
         // --- Video Settings ---
         items.add(SettingItem.CategoryHeader("video", R.string.category_video))
 
@@ -1045,6 +1059,30 @@ class SettingsFragment : Fragment() {
             }
         ))
 
+        // --- Reset Settings ---
+        items.add(SettingItem.CategoryHeader("resetSettingsCategory", R.string.reset))
+        items.add(SettingItem.SettingEntry(
+            stableId = "resetSettings",
+            nameResId = R.string.reset_settings,
+            value = getString(R.string.reset_settings_description),
+            onClick = {
+                MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
+                    .setTitle(R.string.reset_settings)
+                    .setMessage(R.string.reset_settings_confirm)
+                    .setPositiveButton(R.string.reset) { _, _ ->
+                        settings.reset()
+
+                        // Proper App Restart
+                        val intent = requireActivity().packageManager.getLaunchIntentForPackage(requireActivity().packageName)
+                        intent?.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                        requireActivity().startActivity(intent)
+                        requireActivity().finish()
+                    }
+                    .setNegativeButton(R.string.cancel, null)
+                    .show()
+            }
+        ))
+
         // --- Debug Settings ---
         items.add(SettingItem.CategoryHeader("debug", R.string.category_debug))
 
@@ -1075,7 +1113,9 @@ class SettingsFragment : Fragment() {
                         settings.exporterLogLevel = newLevel
                         if (newLevel == LogExporter.LogLevel.SILENT) {
                             settings.exporterCaptureEnabled = false
-                            if (LogExporter.isCapturing) {
+                            if (settings.logSource == Settings.LogSource.APPLOG_FILE) {
+                                AppLog.init(settings, requireContext().applicationContext)
+                            } else if (LogExporter.isCapturing) {
                                 LogExporter.stopCapture()
                             }
                         }
@@ -1086,9 +1126,44 @@ class SettingsFragment : Fragment() {
             }
         ))
 
+        val logSources = Settings.LogSource.entries
+        val logSourceNames = logSources.map {
+            when (it) {
+                Settings.LogSource.LOGCAT -> getString(R.string.log_source_logcat)
+                Settings.LogSource.APPLOG_FILE -> getString(R.string.log_source_applog_file)
+            }
+        }.toTypedArray()
+        items.add(SettingItem.SettingEntry(
+            stableId = "logSource",
+            nameResId = R.string.log_source,
+            value = when (settings.logSource) {
+                Settings.LogSource.LOGCAT -> getString(R.string.log_source_logcat)
+                Settings.LogSource.APPLOG_FILE -> getString(R.string.log_source_applog_file)
+            },
+            onClick = {
+                val currentIndex = logSources.indexOf(settings.logSource)
+                MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
+                    .setTitle(R.string.log_source)
+                    .setSingleChoiceItems(logSourceNames, currentIndex) { dialog, which ->
+                        val newSource = logSources[which]
+                        settings.logSource = newSource
+                        if (newSource == Settings.LogSource.APPLOG_FILE && LogExporter.isCapturing) {
+                            LogExporter.stopCapture()
+                        }
+                        AppLog.init(settings, requireContext().applicationContext)
+                        if (newSource == Settings.LogSource.APPLOG_FILE && settings.exporterCaptureEnabled && !AppLog.isCapturing) {
+                            settings.exporterCaptureEnabled = false
+                        }
+                        dialog.dismiss()
+                        updateSettingsList()
+                    }
+                    .show()
+            }
+        ))
+
         items.add(SettingItem.SettingEntry(
             stableId = "captureLog",
-            nameResId = if (LogExporter.isCapturing) R.string.stop_log_capture else R.string.start_log_capture,
+            nameResId = if (if (settings.logSource == Settings.LogSource.APPLOG_FILE) AppLog.isCapturing else LogExporter.isCapturing) R.string.stop_log_capture else R.string.start_log_capture,
             value = when {
                 settings.exporterLogLevel == LogExporter.LogLevel.SILENT -> getString(R.string.start_log_capture_description)
                 LogExporter.isCapturing -> getString(R.string.stop_log_capture_description)
@@ -1102,12 +1177,21 @@ class SettingsFragment : Fragment() {
                     return@SettingEntry
                 }
 
-                if (LogExporter.isCapturing) {
-                    LogExporter.stopCapture()
-                    settings.exporterCaptureEnabled = false
+                if (settings.logSource == Settings.LogSource.APPLOG_FILE) {
+                    val shouldStart = !AppLog.isCapturing
+                    settings.exporterCaptureEnabled = shouldStart
+                    AppLog.init(settings, context.applicationContext)
+                    if (shouldStart && !AppLog.isCapturing) {
+                        settings.exporterCaptureEnabled = false
+                    }
                 } else {
-                    LogExporter.startCapture(context, exporterLevel)
-                    settings.exporterCaptureEnabled = true
+                    if (LogExporter.isCapturing) {
+                        LogExporter.stopCapture()
+                        settings.exporterCaptureEnabled = false
+                    } else {
+                        LogExporter.startCapture(context, exporterLevel)
+                        settings.exporterCaptureEnabled = true
+                    }
                 }
                 updateSettingsList()
             }
@@ -1125,7 +1209,12 @@ class SettingsFragment : Fragment() {
                     return@SettingEntry
                 }
 
-                if (LogExporter.isCapturing) {
+                if (settings.logSource == Settings.LogSource.APPLOG_FILE) {
+                    if (AppLog.isCapturing) {
+                        settings.exporterCaptureEnabled = false
+                        AppLog.init(settings, context.applicationContext)
+                    }
+                } else if (LogExporter.isCapturing) {
                     LogExporter.stopCapture()
                 }
                 val logFile = LogExporter.saveLogToPublicFile(context, exporterLevel)
@@ -1145,18 +1234,6 @@ class SettingsFragment : Fragment() {
                 } else {
                     Toast.makeText(context, getString(R.string.failed_export_logs), Toast.LENGTH_SHORT).show()
                 }
-            }
-        ))
-
-        items.add(SettingItem.ToggleSettingEntry(
-            stableId = "useNativeSsl",
-            nameResId = R.string.use_native_ssl,
-            descriptionResId = R.string.use_native_ssl_description,
-            isChecked = pendingUseNativeSsl!!,
-            onCheckedChanged = { isChecked ->
-                pendingUseNativeSsl = isChecked
-                checkChanges()
-                updateSettingsList()
             }
         ))
 
