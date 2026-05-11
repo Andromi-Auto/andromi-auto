@@ -18,7 +18,6 @@ import android.widget.FrameLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
-import androidx.activity.enableEdgeToEdge
 import androidx.core.content.ContextCompat
 import androidx.core.content.IntentCompat
 import androidx.lifecycle.Lifecycle
@@ -44,6 +43,7 @@ import com.andrerinas.headunitrevived.utils.Settings
 import com.andrerinas.headunitrevived.view.OverlayTouchView
 import com.andrerinas.headunitrevived.utils.HeadUnitScreenConfig
 import com.andrerinas.headunitrevived.utils.SystemUI
+import com.andrerinas.headunitrevived.aap.AapService
 import android.content.IntentFilter
 import com.andrerinas.headunitrevived.view.ProjectionViewScaler
 import android.animation.ObjectAnimator
@@ -179,7 +179,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
                 })
             }
 
-            updateDesaturation(com.andrerinas.headunitrevived.utils.NightModeManager.isNight(context))
+            updateDesaturation(com.andrerinas.headunitrevived.utils.NightMode(settings, false).current)
 
             if (settings.showFpsCounter && fpsTextView == null) {
                 setupFpsCounter()
@@ -255,32 +255,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         setContentView(R.layout.activity_headunit)
 
         if (settings.showFpsCounter) {
-            val container = findViewById<FrameLayout>(R.id.container)
-            fpsTextView = TextView(this).apply {
-                setTextColor(Color.YELLOW)
-                textSize = 12f
-                setTypeface(null, Typeface.BOLD)
-                setBackgroundColor(Color.parseColor("#80000000"))
-                setPadding(10, 5, 10, 5)
-                text = "FPS: --"
-                // Lift it above everything
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    elevation = 100f
-                    translationZ = 100f
-                }
-            }
-            val params = FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.WRAP_CONTENT,
-                FrameLayout.LayoutParams.WRAP_CONTENT
-            ).apply {
-                gravity = Gravity.TOP or Gravity.START
-                setMargins(20, 20, 0, 0)
-            }
-            container.addView(fpsTextView, params)
-
-            videoDecoder.onFpsChanged = { fps ->
-                runOnUiThread { fpsTextView?.text = "FPS: $fps" }
-            }
+            setupFpsCounter()
         }
 
         videoDecoder.dimensionsListener = this
@@ -349,42 +324,8 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
 
         AppLog.i("HeadUnit for Android Auto (tm) - Copyright 2011-2015 Michael A. Reid., since 2025 André Rinas All Rights Reserved...")
 
-        val container = findViewById<android.widget.FrameLayout>(R.id.container)
-        val displayMetrics = resources.displayMetrics
-
-        if (settings.viewMode == Settings.ViewMode.TEXTURE) {
-            AppLog.i("Using TextureView")
-            val textureView = TextureProjectionView(this)
-            textureView.layoutParams = FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.MATCH_PARENT,
-                FrameLayout.LayoutParams.MATCH_PARENT
-            )
-            projectionView = textureView
-            container.setBackgroundColor(android.graphics.Color.BLACK)
-        } else if (settings.viewMode == Settings.ViewMode.GLES) {
-            AppLog.i("Using GlProjectionView")
-            val glView = com.andrerinas.headunitrevived.view.GlProjectionView(this)
-            glView.layoutParams = FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.MATCH_PARENT,
-                FrameLayout.LayoutParams.MATCH_PARENT
-            )
-            projectionView = glView
-            container.setBackgroundColor(Color.BLACK)
-        } else {
-            AppLog.i("Using SurfaceView")
-            projectionView = ProjectionView(this)
-            (projectionView as View).layoutParams = FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.MATCH_PARENT,
-                FrameLayout.LayoutParams.MATCH_PARENT
-            )
-        }
-        // Use the same screen conf for both views for negotiation
-        HeadUnitScreenConfig.init(this, displayMetrics, settings)
-
-        val view = projectionView as View
-        container.addView(view)
-
-        projectionView.addCallback(this)
+        val container = findViewById<FrameLayout>(R.id.container)
+        setupProjectionView()
 
         val overlayView = OverlayTouchView(this)
         overlayView.layoutParams = FrameLayout.LayoutParams(
@@ -1175,6 +1116,74 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
             }
         } else {
             requestedOrientation = screenOrientation.androidOrientation
+        }
+    }
+
+    private fun setupProjectionView() {
+        val container = findViewById<FrameLayout>(R.id.container)
+        val displayMetrics = resources.displayMetrics
+
+        if (settings.viewMode == Settings.ViewMode.TEXTURE) {
+            AppLog.i("Using TextureView")
+            val textureView = TextureProjectionView(this)
+            textureView.layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT
+            )
+            projectionView = textureView
+            container.setBackgroundColor(Color.BLACK)
+        } else if (settings.viewMode == Settings.ViewMode.GLES) {
+            AppLog.i("Using GlProjectionView")
+            val glView = com.andrerinas.headunitrevived.view.GlProjectionView(this)
+            glView.layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT
+            )
+            projectionView = glView
+            container.setBackgroundColor(Color.BLACK)
+        } else {
+            AppLog.i("Using SurfaceView")
+            projectionView = ProjectionView(this)
+            (projectionView as View).layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT
+            )
+        }
+        // Use the same screen conf for both views for negotiation
+        HeadUnitScreenConfig.init(this, displayMetrics, settings)
+
+        val view = projectionView as View
+        container.addView(view)
+
+        projectionView.addCallback(this)
+    }
+
+    private fun setupFpsCounter() {
+        val container = findViewById<FrameLayout>(R.id.container)
+        fpsTextView = TextView(this).apply {
+            setTextColor(Color.YELLOW)
+            textSize = 12f
+            setTypeface(null, Typeface.BOLD)
+            setBackgroundColor(Color.parseColor("#80000000"))
+            setPadding(10, 5, 10, 5)
+            text = "FPS: --"
+            // Lift it above everything
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                elevation = 100f
+                translationZ = 100f
+            }
+        }
+        val params = FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.WRAP_CONTENT,
+            FrameLayout.LayoutParams.WRAP_CONTENT
+        ).apply {
+            gravity = Gravity.TOP or Gravity.START
+            setMargins(20, 20, 0, 0)
+        }
+        container.addView(fpsTextView, params)
+
+        videoDecoder.onFpsChanged = { fps ->
+            runOnUiThread { fpsTextView?.text = "FPS: $fps" }
         }
     }
 }

@@ -600,6 +600,10 @@ class Settings(private val context: Context) {
         /** Persist whether log capture should be active across restarts. */
         const val KEY_LOG_CAPTURE_ENABLED = "log-capture-enabled"
 
+        const val KEY_MEDIA_VOLUME_OFFSET = "media-volume-offset"
+        const val KEY_ASSISTANT_VOLUME_OFFSET = "assistant-volume-offset"
+        const val KEY_NAVIGATION_VOLUME_OFFSET = "navigation-volume-offset"
+
         const val AUTO_CONNECT_LAST_SESSION = "last-session"
         const val AUTO_CONNECT_SELF_MODE = "self-mode"
         const val AUTO_CONNECT_SINGLE_USB = "single-usb"

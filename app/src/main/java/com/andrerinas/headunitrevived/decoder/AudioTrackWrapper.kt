@@ -42,6 +42,7 @@ class AudioTrackWrapper(
     @Volatile
     private var stopRequested = false
 
+    @Volatile
     private var currentGain: Float = gain
 
     // Track frames written for better draining
@@ -69,7 +70,11 @@ class AudioTrackWrapper(
             while (isRunning || pcmQueue.isNotEmpty()) {
                 try {
                     val chunk = pcmQueue.poll(50, TimeUnit.MILLISECONDS) ?: continue
-                    val result = audioTrack.write(chunk, 0, chunk.size)
+                    
+                    // Apply gain in software to support "Boost" (> 1.0)
+                    val processedChunk = applyGain(chunk)
+                    
+                    val result = audioTrack.write(processedChunk, 0, processedChunk.size)
                     if (result > 0) {
                         framesWritten += result / bytesPerFrame
                     }
@@ -346,6 +351,38 @@ class AudioTrackWrapper(
         } catch (e: InterruptedException) {
             AppLog.w("Interrupted while offering audio data to queue")
         }
+    }
+
+    fun setGain(gain: Float) {
+        AppLog.d("AudioTrackWrapper: updating gain to $gain")
+        currentGain = gain.coerceIn(0.0f, 2.0f)
+    }
+
+    private fun applyGain(pcmData: ByteArray): ByteArray {
+        val gain = currentGain
+        if (gain == 1.0f) return pcmData
+        if (gain == 0.0f) return ByteArray(pcmData.size)
+
+        // Assuming 16-bit PCM (most common for AA)
+        val shortBuffer = java.nio.ByteBuffer.wrap(pcmData)
+            .order(java.nio.ByteOrder.LITTLE_ENDIAN)
+            .asShortBuffer()
+        
+        val pcmShorts = ShortArray(shortBuffer.capacity())
+        shortBuffer.get(pcmShorts)
+
+        for (i in pcmShorts.indices) {
+            val sample = pcmShorts[i].toFloat() * gain
+            pcmShorts[i] = sample.coerceIn(Short.MIN_VALUE.toFloat(), Short.MAX_VALUE.toFloat()).toInt().toShort()
+        }
+
+        val result = ByteArray(pcmData.size)
+        java.nio.ByteBuffer.wrap(result)
+            .order(java.nio.ByteOrder.LITTLE_ENDIAN)
+            .asShortBuffer()
+            .put(pcmShorts)
+        
+        return result
     }
 
     fun stopPlayback() {

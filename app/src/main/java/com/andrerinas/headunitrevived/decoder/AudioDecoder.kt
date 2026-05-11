@@ -27,6 +27,10 @@ class AudioDecoder {
         audioTracks.put(chan, null)
     }
 
+    fun setGain(channel: Int, gain: Float) {
+        audioTracks.get(channel)?.setGain(gain)
+    }
+
     fun start(channel: Int, stream: Int, sampleRate: Int, numberOfBits: Int, numberOfChannels: Int, isAac: Boolean = false, gain: Float = 1.0f, audioLatencyMultiplier: Int = 8, audioQueueCapacity: Int = 0) {
         val thread = AudioTrackWrapper(stream, sampleRate, numberOfBits, numberOfChannels, isAac, gain, audioLatencyMultiplier, audioQueueCapacity)
         audioTracks.put(channel, thread)

@@ -14,8 +14,11 @@ import com.andrerinas.headunitrevived.R
 import com.andrerinas.headunitrevived.main.settings.SettingItem
 import com.andrerinas.headunitrevived.main.settings.SettingsAdapter
 import com.andrerinas.headunitrevived.utils.Settings
-import com.google.android.material.appbar.MaterialToolbar
+import com.andrerinas.headunitrevived.utils.AppLog
+import android.widget.Toast
+import com.andrerinas.headunitrevived.utils.LogExporter
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.appbar.MaterialToolbar
 
 class QuickSettingsFragment : DialogFragment() {
 
@@ -37,7 +40,7 @@ class QuickSettingsFragment : DialogFragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setStyle(STYLE_NORMAL, R.style.FullScreenDialog)
+        setStyle(STYLE_NORMAL, R.style.AppTheme_Fullscreen)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -52,7 +55,7 @@ class QuickSettingsFragment : DialogFragment() {
         originalStretch = settings.stretchToFill
         originalScale = settings.forcedScale
 
-        toolbar = view.findViewById(R.id.toolbar)
+        toolbar = view.findViewById<MaterialToolbar>(R.id.toolbar)
         toolbar.setNavigationOnClickListener { dismiss() }
 
         settingsAdapter = SettingsAdapter()
@@ -83,13 +86,20 @@ class QuickSettingsFragment : DialogFragment() {
             onClick = { showAudioLatencyDialog() }
         ))
 
+        items.add(SettingItem.SettingEntry(
+            stableId = "audioQueueCapacity",
+            nameResId = R.string.audio_queue_capacity,
+            value = if (settings.audioQueueCapacity == 0) "Unbounded (Legacy)" else "${settings.audioQueueCapacity} chunks",
+            onClick = { showAudioQueueCapacityDialog() }
+        ))
+
         // --- Display Section ---
         items.add(SettingItem.CategoryHeader("graphic", R.string.category_graphic))
         
         val nightModeTitles = resources.getStringArray(R.array.night_mode)
         items.add(SettingItem.SettingEntry(
             stableId = "nightMode",
-            nameResId = R.string.night_mode_label,
+            nameResId = R.string.night_mode,
             value = nightModeTitles[settings.nightMode.value],
             onClick = { showNightModeDialog() }
         ))
@@ -162,6 +172,12 @@ class QuickSettingsFragment : DialogFragment() {
             onClick = { triggerLogExport() }
         ))
 
+        items.add(SettingItem.ActionButton(
+            stableId = "dismiss",
+            textResId = R.string.close,
+            onClick = { dismiss() }
+        ))
+
         settingsAdapter.submitList(items)
     }
 
@@ -175,8 +191,53 @@ class QuickSettingsFragment : DialogFragment() {
     }
 
     private fun showAudioOffsetsDialog() {
-        // Reuse dialog logic from SettingsFragment (best would be to move it to a shared helper)
-        // For now, let's assume we can trigger a simplified version
+        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_audio_offsets, null)
+        
+        val seekMedia = dialogView.findViewById<android.widget.SeekBar>(R.id.seek_media)
+        val seekAssistant = dialogView.findViewById<android.widget.SeekBar>(R.id.seek_assistant)
+        val seekNavigation = dialogView.findViewById<android.widget.SeekBar>(R.id.seek_navigation)
+        
+        val textMedia = dialogView.findViewById<android.widget.TextView>(R.id.text_media_val)
+        val textAssistant = dialogView.findViewById<android.widget.TextView>(R.id.text_assistant_val)
+        val textNavigation = dialogView.findViewById<android.widget.TextView>(R.id.text_navigation_val)
+
+        seekMedia.progress = (settings.mediaVolumeOffset / 2) + 50
+        seekAssistant.progress = (settings.assistantVolumeOffset / 2) + 50
+        seekNavigation.progress = (settings.navigationVolumeOffset / 2) + 50
+
+        val updateLabels = {
+            textMedia.text = "${(seekMedia.progress * 2)}%"
+            textAssistant.text = "${(seekAssistant.progress * 2)}%"
+            textNavigation.text = "${(seekNavigation.progress * 2)}%"
+        }
+        updateLabels()
+
+        val listener = object : android.widget.SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: android.widget.SeekBar?, progress: Int, fromUser: Boolean) {
+                updateLabels()
+            }
+            override fun onStartTrackingTouch(seekBar: android.widget.SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: android.widget.SeekBar?) {}
+        }
+
+        seekMedia.setOnSeekBarChangeListener(listener)
+        seekAssistant.setOnSeekBarChangeListener(listener)
+        seekNavigation.setOnSeekBarChangeListener(listener)
+
+        MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
+            .setTitle(R.string.audio_volume_offset)
+            .setView(dialogView)
+            .setPositiveButton(android.R.string.ok) { dialog, _ ->
+                settings.mediaVolumeOffset = (seekMedia.progress - 50) * 2
+                settings.assistantVolumeOffset = (seekAssistant.progress - 50) * 2
+                settings.navigationVolumeOffset = (seekNavigation.progress - 50) * 2
+                settings.commit()
+                notifyChange()
+                updateSettingsList()
+                dialog.dismiss()
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
     }
 
     private fun showAudioLatencyDialog() {
@@ -195,12 +256,31 @@ class QuickSettingsFragment : DialogFragment() {
             .show()
     }
 
+    private fun showAudioQueueCapacityDialog() {
+        val options = arrayOf("10 chunks (Low Latency)", "20 chunks (Balanced)", "50 chunks (High Latency)", "Unbounded (Max)")
+        val values = intArrayOf(10, 20, 50, 0)
+        val currentIdx = values.indexOf(settings.audioQueueCapacity).coerceAtLeast(0)
+
+        MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
+            .setTitle(R.string.audio_queue_capacity)
+            .setSingleChoiceItems(options, currentIdx) { dialog, which ->
+                settings.audioQueueCapacity = values[which]
+                settings.commit()
+                notifyChange(needsAudioRestart = true)
+                dialog.dismiss()
+                updateSettingsList()
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
+    }
+
     private fun showNightModeDialog() {
         val nightModeTitles = resources.getStringArray(R.array.night_mode)
         MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
-            .setTitle(R.string.night_mode_label)
+            .setTitle(R.string.night_mode)
             .setSingleChoiceItems(nightModeTitles, settings.nightMode.value) { dialog, which ->
-                settings.nightMode = Settings.NightMode.fromInt(which)
+                val newMode = Settings.NightMode.fromInt(which) ?: Settings.NightMode.AUTO
+                settings.nightMode = newMode
                 settings.commit()
                 notifyChange(sensorRefresh = true)
                 dialog.dismiss()
@@ -226,6 +306,38 @@ class QuickSettingsFragment : DialogFragment() {
     }
 
     private fun triggerLogExport() {
-        // Implementation for log export
+        val context = requireContext()
+        val exporterLevel = settings.exporterLogLevel
+        if (exporterLevel == LogExporter.LogLevel.SILENT) {
+            Toast.makeText(context, getString(R.string.failed_export_in_silent_logs), Toast.LENGTH_LONG).show()
+            return
+        }
+
+        if (settings.logSource == Settings.LogSource.APPLOG_FILE) {
+            if (AppLog.isCapturing) {
+                settings.exporterCaptureEnabled = false
+                AppLog.init(settings, context.applicationContext)
+            }
+        } else if (LogExporter.isCapturing) {
+            LogExporter.stopCapture()
+        }
+        
+        val logFile = LogExporter.saveLogToPublicFile(context, exporterLevel)
+        updateSettingsList()
+
+        if (logFile != null) {
+            MaterialAlertDialogBuilder(context, R.style.DarkAlertDialog)
+                .setTitle(R.string.logs_exported)
+                .setMessage(getString(R.string.log_saved_to, logFile.absolutePath))
+                .setPositiveButton(R.string.share) { _, _ ->
+                    LogExporter.shareLogFile(context, logFile)
+                }
+                .setNegativeButton(R.string.close) { dialog, _ ->
+                    dialog.dismiss()
+                }
+                .show()
+        } else {
+            Toast.makeText(context, getString(R.string.failed_export_logs), Toast.LENGTH_SHORT).show()
+        }
     }
 }

@@ -151,6 +151,12 @@ class AapService : Service(), UsbReceiver.Listener {
                     }
                 }
             }
+            
+            if (key == Settings.KEY_MEDIA_VOLUME_OFFSET || key == Settings.KEY_ASSISTANT_VOLUME_OFFSET || key == Settings.KEY_NAVIGATION_VOLUME_OFFSET) {
+                serviceScope.launch(Dispatchers.Main) {
+                    commManager.updateAudioGains()
+                }
+            }
         }
 
     private fun syncLogBackendState() {
@@ -424,6 +430,19 @@ class AapService : Service(), UsbReceiver.Listener {
             if (intent.action == ACTION_REQUEST_NIGHT_MODE_UPDATE) {
                 AppLog.i("Received request to resend night mode state")
                 nightModeManager?.resendCurrentState()
+            }
+        }
+    }
+
+    private val sensorRefreshReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            if (intent.action == ACTION_REFRESH_SENSORS) {
+                AppLog.i("AapService: Received request to refresh all sensors")
+                // Re-send current states
+                nightModeManager?.resendCurrentState()
+            } else if (intent.action == ACTION_RESTART_AUDIO) {
+                AppLog.i("AapService: Received request to restart audio")
+                commManager.restartAudio()
             }
         }
     }
@@ -1142,6 +1161,11 @@ class AapService : Service(), UsbReceiver.Listener {
             ContextCompat.RECEIVER_NOT_EXPORTED
         )
         ContextCompat.registerReceiver(
+            this, sensorRefreshReceiver,
+            IntentFilter(ACTION_REFRESH_SENSORS).apply { addAction(ACTION_RESTART_AUDIO) },
+            ContextCompat.RECEIVER_NOT_EXPORTED
+        )
+        ContextCompat.registerReceiver(
             this, usbReceiver,
             UsbReceiver.createFilter(),
             ContextCompat.RECEIVER_NOT_EXPORTED
@@ -1498,7 +1522,10 @@ class AapService : Service(), UsbReceiver.Listener {
         mediaSession = null
         commManager.destroy()
         nightModeManager?.stop()
-        try { unregisterReceiver(nightModeUpdateReceiver) } catch (_: Exception) {}
+        try {
+            unregisterReceiver(nightModeUpdateReceiver)
+            unregisterReceiver(sensorRefreshReceiver)
+        } catch (_: Exception) {}
         try { unregisterReceiver(usbReceiver) } catch (_: Exception) {}
         try { unregisterReceiver(mediaButtonReceiver) } catch (_: Exception) {}
         try { unregisterReceiver(wakeDetectReceiver) } catch (_: Exception) {}
@@ -2456,12 +2483,13 @@ class AapService : Service(), UsbReceiver.Listener {
         const val ACTION_NATIVE_AA_POKE            = "com.andrerinas.headunitrevived.ACTION_NATIVE_AA_POKE"
         const val ACTION_NEARBY_CONNECT             = "com.andrerinas.headunitrevived.ACTION_NEARBY_CONNECT"
         const val ACTION_CHECK_USB                 = "com.andrerinas.headunitrevived.ACTION_CHECK_USB"
-        const val ACTION_STOP_SERVICE              = "com.andrerinas.headunitrevived.ACTION_STOP_SERVICE"
+        const val ACTION_STOP_SERVICE              = "com.andrerinas.headunitrevived.aap.action.STOP_SERVICE"
         const val ACTION_DISCONNECT                = "com.andrerinas.headunitrevived.ACTION_DISCONNECT"
-        const val ACTION_REQUEST_NIGHT_MODE_UPDATE = "com.andrerinas.headunitrevived.ACTION_REQUEST_NIGHT_MODE_UPDATE"
+        const val ACTION_REQUEST_NIGHT_MODE_UPDATE = "com.andrerinas.headunitrevived.aap.action.REQUEST_NIGHT_MODE_UPDATE"
         const val ACTION_NIGHT_MODE_CHANGED      = "com.andrerinas.headunitrevived.ACTION_NIGHT_MODE_CHANGED"
         const val ACTION_ORIENTATION_CHANGED     = "com.andrerinas.headunitrevived.ACTION_ORIENTATION_CHANGED"
-        const val ACTION_REFRESH_SENSORS         = "com.andrerinas.headunitrevived.ACTION_REFRESH_SENSORS"
+        const val ACTION_REFRESH_SENSORS         = "com.andrerinas.headunitrevived.aap.action.REFRESH_SENSORS"
+        const val ACTION_RESTART_AUDIO           = "com.andrerinas.headunitrevived.aap.action.RESTART_AUDIO"
         /**
          * Sent after the caller has already invoked [CommManager.connect(socket)].
          * The [observeConnectionState] flow observer handles the result — [onStartCommand]

@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#DD000000"
+    android:background="?attr/colorSurface"
     android:padding="8dp">
 
     <com.google.android.material.appbar.MaterialToolbar
@@ -13,8 +13,8 @@
         android:layout_height="?attr/actionBarSize"
         app:title="@string/exit_dialog_settings"
         app:navigationIcon="@drawable/ic_close_white"
-        app:titleTextColor="#FFFFFF"
-        app:navigationIconTint="#FFFFFF" />
+        app:titleTextColor="?attr/colorOnSurface"
+        app:navigationIconTint="?attr/colorOnSurface" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/settingsRecyclerView"

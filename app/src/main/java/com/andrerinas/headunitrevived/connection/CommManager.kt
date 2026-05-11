@@ -468,6 +468,14 @@ class CommManager(
         send(com.andrerinas.headunitrevived.aap.protocol.messages.VideoFocusEvent(gain = true, unsolicited = true))
     }
 
+    fun updateAudioGains() {
+        _transport?.aapAudio?.updateGains()
+    }
+
+    fun restartAudio() {
+        _transport?.aapAudio?.restartAudio()
+    }
+
     // -----------------------------------------------------------------------------------------
     // Disconnect
     // -----------------------------------------------------------------------------------------
