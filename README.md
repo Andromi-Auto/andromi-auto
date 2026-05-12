@@ -82,7 +82,7 @@ adb shell am start -a android.intent.action.VIEW -d "headunit://connect?ip=192.1
 - Moved Mic settings to own fragment and added 3 new options for the new mic enhancement from version 2.2.2, which defaults to off for better compatibility
 - Merged PR #481 - Apply MediaTek 60fps and audio optimizations, thanks to @mrkontrast-coder
 - Some rewrite of the AudioTrackWrapper, to enhance stability and minimize stutters
-- Merged PR #490 - Add UI scale settings, thanks to @Anton111111
+- Merged PR #490 - Add UI scale settings, thanks to @Anton11111
 
 ### v.2.2.2
 - Fixed: Exit on disconnect now stops the carmode too

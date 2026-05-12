@@ -83,17 +83,9 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
                 manager?.let { mgr ->
                     channel = mgr.initialize(context, context.mainLooper, null)
                     
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                        channel?.let { ch ->
-                            mgr.requestDeviceInfo(ch) { device ->
-                                device?.let {
-                                    if (it.deviceAddress != "02:00:00:00:00:00") {
-                                        AppLog.i("WifiDirectManager: requestDeviceInfo success: ${it.deviceAddress}")
-                                        localDeviceAddress = it.deviceAddress
-                                    }
-                                }
-                            }
-                        }
+                    WifiDirectCompat.requestDeviceInfo(manager, channel) { address ->
+                        AppLog.i("WifiDirectManager: requestDeviceInfo success: $address")
+                        localDeviceAddress = address
                     }
 
                     val filter = IntentFilter().apply {
@@ -114,17 +106,9 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
             isConnected = true
             isGroupOwner = info.isGroupOwner
             
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                channel?.let { ch ->
-                    manager?.requestDeviceInfo(ch) { device ->
-                        device?.let {
-                            if (it.deviceAddress != "02:00:00:00:00:00") {
-                                AppLog.d("WifiDirectManager: Updated localDeviceAddress: ${it.deviceAddress}")
-                                localDeviceAddress = it.deviceAddress
-                            }
-                        }
-                    }
-                }
+            WifiDirectCompat.requestDeviceInfo(manager, channel) { address ->
+                AppLog.d("WifiDirectManager: Updated localDeviceAddress: $address")
+                localDeviceAddress = address
             }
 
             val goIp = info.groupOwnerAddress?.hostAddress ?: "unknown"
