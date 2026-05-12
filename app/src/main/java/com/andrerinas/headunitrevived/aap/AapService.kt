@@ -175,6 +175,7 @@ class AapService : Service(), UsbReceiver.Listener {
     private var accessoryHandshakeFailures = 0
     private var networkCallback: ConnectivityManager.NetworkCallback? = null
     private var wifiLock: WifiManager.WifiLock? = null
+    private var isCarKeyReceiverRegistered = false
 
     private var wifiReadyCallback: ConnectivityManager.NetworkCallback? = null
 
@@ -862,19 +863,23 @@ class AapService : Service(), UsbReceiver.Listener {
         }
 
         // Register the comprehensive steering wheel key receiver
-        val filter = IntentFilter().apply {
-            priority = 1000
-            CarKeyReceiver.ACTIONS.forEach { addAction(it) }
-        }
-        try {
-            ContextCompat.registerReceiver(
-                this,
-                carKeyReceiver,
-                filter,
-                ContextCompat.RECEIVER_EXPORTED
-            )
-        } catch (e: Exception) {
-            AppLog.e("AapService: Failed to register CarKeyReceiver", e)
+        if (!isCarKeyReceiverRegistered) {
+            val filter = IntentFilter().apply {
+                priority = 1000
+                CarKeyReceiver.ACTIONS.forEach { addAction(it) }
+            }
+            try {
+                ContextCompat.registerReceiver(
+                    this,
+                    carKeyReceiver,
+                    filter,
+                    ContextCompat.RECEIVER_EXPORTED
+                )
+                isCarKeyReceiverRegistered = true
+                AppLog.d("AapService: CarKeyReceiver registered")
+            } catch (e: Exception) {
+                AppLog.e("AapService: Failed to register CarKeyReceiver", e)
+            }
         }
 
         // Reactivate the existing MediaSession (created in onCreate, kept alive across disconnects)
@@ -985,9 +990,15 @@ class AapService : Service(), UsbReceiver.Listener {
         silentAudioPlayer?.stop()
         // Release any permanent audio focus we may have requested when connected
         releasePermanentAudioFocus()
-        try {
-            carKeyReceiver?.let { unregisterReceiver(it) }
-        } catch (e: Exception) {}
+        if (isCarKeyReceiverRegistered) {
+            try {
+                carKeyReceiver?.let { unregisterReceiver(it) }
+            } catch (e: Exception) {
+                AppLog.e("AapService: Failed to unregister CarKeyReceiver", e)
+            } finally {
+                isCarKeyReceiverRegistered = false
+            }
+        }
 
         if (!isDestroying) updateNotification()
         mediaMetadataDecodeJob?.cancel()
@@ -1491,6 +1502,10 @@ class AapService : Service(), UsbReceiver.Listener {
         try { unregisterReceiver(usbReceiver) } catch (_: Exception) {}
         try { unregisterReceiver(mediaButtonReceiver) } catch (_: Exception) {}
         try { unregisterReceiver(wakeDetectReceiver) } catch (_: Exception) {}
+        if (isCarKeyReceiverRegistered) {
+            try { carKeyReceiver?.let { unregisterReceiver(it) } } catch (_: Exception) {}
+            isCarKeyReceiverRegistered = false
+        }
         try { wifiAutoStartReceiver?.let { unregisterReceiver(it) } } catch (_: Exception) {}
         uiModeManager.disableCarMode(0)
         serviceScope.cancel()
