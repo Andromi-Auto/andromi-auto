@@ -1379,11 +1379,10 @@ class AapService : Service(), UsbReceiver.Listener {
 
             // Mode 3: Native AA Wireless
             if (mode == 3) {
-                val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as android.net.wifi.WifiManager
-                if (wifiManager.isWifiEnabled) {
-                    // Start WiFi Direct as a "quiet host" (P2P Group for phone to join)
-                    wifiDirectManager?.startNativeAaQuietHost()
-                }
+                // Start WiFi Direct as a "quiet host" (P2P Group for phone to join)
+                // We let WifiDirectManager handle the WiFi state (enabling if needed)
+                wifiDirectManager?.startNativeAaQuietHost()
+                
                 // Start the official Bluetooth handshake servers
                 nativeAaHandshakeManager?.start()
             }
@@ -1963,6 +1962,18 @@ class AapService : Service(), UsbReceiver.Listener {
      * @param oneShot if `true`, does not reschedule after the scan finishes —
      *                used for the "auto WiFi" reconnect case.
      */
+    /**
+     * Triggers a refresh of the WiFi Direct "quiet host" state.
+     * Called by NativeAaHandshakeManager if it's waiting for credentials that haven't arrived yet.
+     */
+    fun triggerWifiDirectRefresh() {
+        AppLog.i("AapService: WiFi Direct refresh requested.")
+        val mode = App.provide(this).settings.wifiConnectionMode
+        if (mode == 3) {
+            wifiDirectManager?.startNativeAaQuietHost()
+        }
+    }
+
     private fun startDiscovery(oneShot: Boolean = false) {
         val settings = App.provide(this).settings
         val mode = settings.wifiConnectionMode

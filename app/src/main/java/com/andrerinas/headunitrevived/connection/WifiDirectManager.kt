@@ -22,7 +22,7 @@ import java.net.Socket
 
 class WifiDirectManager(private val context: Context) : WifiP2pManager.ConnectionInfoListener, WifiP2pManager.GroupInfoListener {
 
-    private val manager: WifiP2pManager? = context.getSystemService(Context.WIFI_P2P_SERVICE) as? WifiP2pManager
+    private var manager: WifiP2pManager? = context.getSystemService(Context.WIFI_P2P_SERVICE) as? WifiP2pManager
     private var channel: WifiP2pManager.Channel? = null
     private var isGroupOwner = false
     private var isConnected = false
@@ -80,6 +80,7 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
     init {
         try {
             if (context.packageManager.hasSystemFeature(android.content.pm.PackageManager.FEATURE_WIFI_DIRECT)) {
+                AppLog.i("WifiDirectManager: Device supports WiFi Direct. Initializing...")
                 manager?.let { mgr ->
                     channel = mgr.initialize(context, context.mainLooper, null)
                     
@@ -93,10 +94,16 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
                         addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION)
                     }
                     ContextCompat.registerReceiver(context, receiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED)
+                } ?: run {
+                    AppLog.e("WifiDirectManager: WIFI_P2P_SERVICE manager is NULL!")
                 }
+            } else {
+                AppLog.e("WifiDirectManager: Device does NOT report FEATURE_WIFI_DIRECT!")
             }
         } catch (e: SecurityException) {
             AppLog.w("WifiDirectManager: WiFi Direct unavailable — permission denied: ${e.message}")
+        } catch (e: Exception) {
+            AppLog.e("WifiDirectManager: Unexpected error in init", e)
         }
     }
 
@@ -201,15 +208,16 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
                     try {
                         var ip = getWifiDirectIp(group.`interface`)
                         var retries = 0
-                        while (ip == null && retries < 15) {
-                            AppLog.d("WifiDirectManager: Waiting for IP on interface ${group.`interface`} (Attempt ${retries + 1}/15)...")
+                        while (ip == null && retries < 10) {
+                            AppLog.d("WifiDirectManager: Waiting for IP on interface ${group.`interface`} (Attempt ${retries + 1}/10)...")
                             Thread.sleep(1000)
                             ip = getWifiDirectIp(group.`interface`)
                             retries++
                         }
 
+                        // For Native AA, we almost always expect 192.168.49.1 if we are GO
                         val finalIp = ip ?: "192.168.49.1"
-                        AppLog.i("WifiDirectManager: SUCCESS - Providing credentials to HandshakeManager. SSID=$ssid, IP=$finalIp")
+                        AppLog.i("WifiDirectManager: SUCCESS - Providing credentials to listener. SSID=$ssid, IP=$finalIp, BSSID=$bssid")
                         onCredentialsReady?.invoke(ssid, psk, finalIp, bssid)
                     } catch (e: Exception) {
                         AppLog.e("WifiDirectManager: Error in credential delivery thread", e)
@@ -396,12 +404,28 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
 
     @SuppressLint("MissingPermission")
     fun startNativeAaQuietHost() {
-        val mgr = manager
-        val ch = channel
+        var mgr = manager
+        var ch = channel
 
         if (mgr == null || ch == null) {
-            AppLog.e("WifiDirectManager: Cannot start Quiet Host - manager ($mgr) or channel ($ch) is null!")
-            return
+            AppLog.w("WifiDirectManager: manager ($mgr) or channel ($ch) is null. Attempting re-init...")
+            try {
+                val newManager = context.getSystemService(Context.WIFI_P2P_SERVICE) as? WifiP2pManager
+                val newChannel = newManager?.initialize(context, context.mainLooper, null)
+                if (newManager != null && newChannel != null) {
+                    manager = newManager
+                    channel = newChannel
+                    mgr = newManager
+                    ch = newChannel
+                    AppLog.i("WifiDirectManager: Re-init successful and fields updated.")
+                } else {
+                    AppLog.e("WifiDirectManager: Re-init failed. Cannot start Quiet Host.")
+                    return
+                }
+            } catch (e: Exception) {
+                AppLog.e("WifiDirectManager: Exception during re-init", e)
+                return
+            }
         }
 
         // Ensure WiFi is enabled (Required for P2P)

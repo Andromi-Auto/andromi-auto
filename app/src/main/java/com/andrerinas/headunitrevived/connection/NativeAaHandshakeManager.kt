@@ -297,7 +297,10 @@ class NativeAaHandshakeManager(
             // Wait up to 60 seconds for credentials (P2P group creation can be slow)
             var attempts = 0
             while ((currentSsid == null || currentIp == null) && attempts < 120 && isRunning && isActive) {
-                if (attempts % 10 == 0 && attempts > 0) {
+                if (attempts % 20 == 0 && attempts > 0) {
+                    AppLog.w("NativeAA: Still waiting for credentials after ${attempts / 2}s. Requesting P2P refresh...")
+                    context.triggerWifiDirectRefresh()
+                } else if (attempts % 10 == 0 && attempts > 0) {
                     AppLog.d("NativeAA: Still waiting... SSID=${currentSsid != null}, IP=${currentIp != null} (Attempt $attempts/120)")
                 }
                 delay(500)
@@ -314,33 +317,33 @@ class NativeAaHandshakeManager(
             val psk = currentPsk ?: ""
             val bssid = currentBssid ?: ""
 
-            AppLog.i("NativeAA: Initializing Handshake Sequence...")
-            AppLog.i("  - Group SSID: $ssid")
-            AppLog.i("  - Group IP: $ip")
-            AppLog.i("  - Group BSSID: $bssid")
-            AppLog.i("  - Group PSK: ${if (psk.isNotEmpty()) "****" else "<empty>"}")
+            AppLog.i("NativeAA: Starting Handshake Exchange:")
+            AppLog.i("  > Target SSID: $ssid")
+            AppLog.i("  > Target IP:   $ip:5288")
+            AppLog.i("  > BSSID:       $bssid")
 
-            AppLog.i("NativeAA: Sending WifiStartRequest (Type 1) to $ip:5288")
+            AppLog.i("NativeAA: [TX] Sending WifiStartRequest (Type 1)")
             sendWifiStartRequest(output, ip, 5288)
 
             AppLog.i("NativeAA: Waiting for response from phone...")
             val response = readProtobuf(input)
-            AppLog.i("NativeAA: Received response Type ${response.type} from phone (size: ${response.payload.size})")
+            AppLog.i("NativeAA: [RX] Received Type ${response.type} (Payload size: ${response.payload.size})")
 
             if (response.type == 2) {
-                AppLog.i("NativeAA: Phone requested security info (Ready for WiFi association).")
-                AppLog.i("NativeAA: Sending WifiInfoResponse (Type 3) with full credentials in 500ms...")
+                AppLog.i("NativeAA: Phone ready for WiFi association. Delivering credentials...")
+                AppLog.i("NativeAA: [TX] Sending WifiInfoResponse (Type 3) with full credentials in 500ms...")
                 delay(500)
                 sendWifiSecurityResponse(output, ssid, psk, bssid)
                 AppLog.i("NativeAA: Handshake completed successfully on Bluetooth side.")
-                // Instead of closing after 20 seconds, keep the socket open indefinitely
-                // as long as the phone remains connected.
+                
+                // Keep the socket open to maintain the handshake session
+                AppLog.i("NativeAA: Maintaining Bluetooth session...")
                 while (isRunning && isActive && socket.isConnected) {
-                    delay(2000)
+                    delay(5000)
                 }
-                AppLog.i("NativeAA: Handshake coroutine finishing (isRunning=$isRunning, isConnected=${socket.isConnected})")
+                AppLog.i("NativeAA: Handshake session ending (isRunning=$isRunning, isConnected=${socket.isConnected})")
             } else {
-                AppLog.w("NativeAA: Unexpected response type from phone: ${response.type}. Expected Type 2.")
+                AppLog.w("NativeAA: Handshake failed - Unexpected response type ${response.type}. Expected Type 2.")
             }
 
         } catch (e: Exception) {
