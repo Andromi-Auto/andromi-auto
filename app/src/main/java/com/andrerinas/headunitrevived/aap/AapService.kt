@@ -1957,12 +1957,6 @@ class AapService : Service(), UsbReceiver.Listener {
     }
 
     /**
-     * Starts an NSD (mDNS) scan for Android Auto Wireless services on the local network.
-     *
-     * @param oneShot if `true`, does not reschedule after the scan finishes —
-     *                used for the "auto WiFi" reconnect case.
-     */
-    /**
      * Triggers a refresh of the WiFi Direct "quiet host" state.
      * Called by NativeAaHandshakeManager if it's waiting for credentials that haven't arrived yet.
      */
@@ -1974,6 +1968,12 @@ class AapService : Service(), UsbReceiver.Listener {
         }
     }
 
+    /**
+     * Starts an NSD (mDNS) scan for Android Auto Wireless services on the local network.
+     *
+     * @param oneShot if `true`, does not reschedule after the scan finishes —
+     *                used for the "auto WiFi" reconnect case.
+     */
     private fun startDiscovery(oneShot: Boolean = false) {
         val settings = App.provide(this).settings
         val mode = settings.wifiConnectionMode

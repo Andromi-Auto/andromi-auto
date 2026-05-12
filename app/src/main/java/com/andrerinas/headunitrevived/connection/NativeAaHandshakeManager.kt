@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothServerSocket
 import android.bluetooth.BluetoothSocket
 import android.content.Context
+import com.andrerinas.headunitrevived.aap.AapService
 import com.andrerinas.headunitrevived.aap.protocol.proto.Wireless
 import com.andrerinas.headunitrevived.utils.AppLog
 import kotlinx.coroutines.*
@@ -22,7 +23,7 @@ import java.util.*
  * This class implements the RFCOMM server protocol to exchange WiFi credentials with the phone.
  */
 class NativeAaHandshakeManager(
-    private val context: Context,
+    private val context: AapService,
     private val scope: CoroutineScope
 ) {
     companion object {
