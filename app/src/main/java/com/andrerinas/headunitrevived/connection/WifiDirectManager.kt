@@ -174,6 +174,20 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
     @SuppressLint("MissingPermission")
     override fun onGroupInfoAvailable(group: android.net.wifi.p2p.WifiP2pGroup?) {
         if (group != null) {
+            // [FIX] Check if Location Services (GPS) are enabled. 
+            // On Android 10+, BSSID is often masked if GPS is OFF.
+            try {
+                val lm = context.getSystemService(android.content.Context.LOCATION_SERVICE) as android.location.LocationManager
+                val isGpsEnabled = lm.isProviderEnabled(android.location.LocationManager.GPS_PROVIDER)
+                val isNetworkEnabled = lm.isProviderEnabled(android.location.LocationManager.NETWORK_PROVIDER)
+                AppLog.i("WifiDirectManager: System Location Check: GPS=$isGpsEnabled, Network=$isNetworkEnabled")
+                if (!isGpsEnabled && !isNetworkEnabled) {
+                    AppLog.w("WifiDirectManager: WARNING - Location Services are DISABLED. BSSID will likely be masked (00:00...)!")
+                }
+            } catch (e: Exception) {
+                AppLog.w("WifiDirectManager: Failed to check Location Services status: ${e.message}")
+            }
+
             groupInfoRetries = 0
             val ssid = group.networkName
             val psk = group.passphrase ?: ""
