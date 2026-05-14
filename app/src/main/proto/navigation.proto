@@ -62,7 +62,7 @@ message NextTurnDetail
         STRAIGHT = 0x0e;
         FERRY_BOAT = 0x10;
         FERRY_TRAIN = 0x11;
-        DESTINATION = 0x13;
+DESTINATION = 0x12;
     }
 
     required string road = 1;
