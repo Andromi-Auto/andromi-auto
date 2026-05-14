@@ -61,10 +61,10 @@ class AapNavigation(
                 try {
                     val detail = message.parse(NavigationStatus.NextTurnDetail.newBuilder()).buildPartial()
                     snapshot.nextTurnDetail = AapNavigationHelper.TimedMessage(detail, helper.nowElapsedRealtimeMs())
-                    val road = detail.road.takeIf { it.isNotBlank() }
-                    road?.takeIf { it.isNotBlank() }?.let {
-                        snapshot.currentStreet = AapNavigationHelper.TimedMessage(it, helper.nowElapsedRealtimeMs())
-                    }
+val road = detail.road.takeIf { it.isNotBlank() }
+road?.let {
+    snapshot.currentStreet = AapNavigationHelper.TimedMessage(it, helper.nowElapsedRealtimeMs())
+}
                     AppLog.d(
                         "Nav: NextTurnDetail road=${detail.road} " +
                             "hasNextTurn=${detail.hasNextTurn()} nextTurn=${detail.nextTurn}"
