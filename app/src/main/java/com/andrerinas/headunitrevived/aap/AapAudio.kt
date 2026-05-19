@@ -21,6 +21,7 @@ internal class AapAudio(
     private var audioFocusRequest: AudioFocusRequest? = null
     private var legacyFocusListener: AudioManager.OnAudioFocusChangeListener? = null
 
+    @Volatile
     private var isDucked = false
     private val handler = Handler(Looper.getMainLooper())
     private val unduckRunnable = Runnable {
