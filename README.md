@@ -73,6 +73,7 @@ adb shell am start -a android.intent.action.VIEW -d "headunit://connect?ip=192.1
 - Added Static Audio Focus Toggle to prevent audio focus loss on some devices
 - Fixing samsung routines and modes
 - Fixing wrong orientation on start if holding the phone wrong. Now uses the orientation from settings
+- Try to fix usb errors with AAwireless Dongles
 
 ### v.2.3.0
 - Added some new buttons for keymap
