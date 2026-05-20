@@ -84,14 +84,39 @@ class SocketAccessoryConnection(private val ip: String, private val port: Int, p
                 val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                   val net = cm.activeNetwork
+                    var netToBind: android.net.Network? = null
+                    try {
+                        val wifiNetwork = cm.allNetworks.firstOrNull { network ->
+                            val caps = cm.getNetworkCapabilities(network)
+                            caps != null && caps.hasTransport(android.net.NetworkCapabilities.TRANSPORT_WIFI)
+                        }
+                        if (wifiNetwork != null) {
+                            netToBind = wifiNetwork
+                            AppLog.i("Found active WiFi/P2P network in allNetworks: $wifiNetwork")
+                        } else {
+                            val activeNet = cm.activeNetwork
+                            if (activeNet != null) {
+                                val caps = cm.getNetworkCapabilities(activeNet)
+                                if (caps != null && caps.hasTransport(android.net.NetworkCapabilities.TRANSPORT_CELLULAR)) {
+                                    AppLog.i("Active network is cellular. Skipping binding to prevent EHOSTUNREACH.")
+                                } else {
+                                    netToBind = activeNet
+                                    AppLog.i("Active network is not cellular: $activeNet. Using for binding.")
+                                }
+                            }
+                        }
+                    } catch (e: Exception) {
+                        AppLog.w("Error scanning networks for binding", e)
+                        // Fallback to active network on failure
+                        netToBind = cm.activeNetwork
+                    }
 
-                    if (net != null) {
+                    if (netToBind != null) {
                         try {
-                            net.bindSocket(transport)
-                            AppLog.i("Bound socket to active network: $net")
+                            netToBind.bindSocket(transport)
+                            AppLog.i("Bound socket to network: $netToBind")
                         } catch (e: Exception) {
-                            AppLog.w("Failed to bind socket to network", e)
+                            AppLog.w("Failed to bind socket to network $netToBind", e)
                         }
                     }
                 } else {
