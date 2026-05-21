@@ -895,4 +895,8 @@ class Settings(context: Context) {
         get() = prefs.getString("last-nearby-device-name", "")!!
         set(value) = prefs.edit().putString("last-nearby-device-name", value).apply()
 
+    var bluetoothManagerServiceName: String
+        get() = prefs.getString("bluetooth-manager-service-name", "bluetooth_manager")!!
+        set(value) = prefs.edit().putString("bluetooth-manager-service-name", value).apply()
+
 }

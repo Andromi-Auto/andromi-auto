@@ -25,6 +25,7 @@ import com.andrerinas.headunitrevived.main.settings.SettingsAdapter
 import com.andrerinas.headunitrevived.aap.AapService
 import com.andrerinas.headunitrevived.utils.AppLog
 import com.andrerinas.headunitrevived.utils.Settings
+import com.andrerinas.headunitrevived.utils.BluetoothHelper
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -398,12 +399,7 @@ class AutoStartFragment : Fragment() {
             return
         }
 
-        val adapter = if (Build.VERSION.SDK_INT >= 18) {
-            (requireContext().getSystemService(Context.BLUETOOTH_SERVICE) as android.bluetooth.BluetoothManager).adapter
-        } else {
-            @Suppress("DEPRECATION")
-            android.bluetooth.BluetoothAdapter.getDefaultAdapter()
-        }
+        val adapter = BluetoothHelper.getBluetoothAdapter(requireContext())
 
         if (adapter == null || !adapter.isEnabled) {
             val enableIntent = Intent(android.bluetooth.BluetoothAdapter.ACTION_REQUEST_ENABLE)

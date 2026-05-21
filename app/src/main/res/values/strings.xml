@@ -508,4 +508,9 @@
     <string name="error_usb_permission_failed">System error: Failed to request USB permission dialog.</string>
     <string name="wifi_autostart_title">WiFi Auto-Start</string>
     <string name="wifi_autostart_content">Connected to %s. Tap to start Android Auto.</string>
+
+    <!-- Bluetooth Adapter Selection -->
+    <string name="bluetooth_adapter_label">Bluetooth Adapter</string>
+    <string name="bluetooth_adapter_description">Select the Bluetooth adapter/controller to use for the handshake. Useful for dual Bluetooth systems.</string>
+    <string name="select_bt_adapter">Select Bluetooth Adapter</string>
 </resources>

@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothServerSocket
 import android.bluetooth.BluetoothSocket
 import android.content.Context
 import com.andrerinas.headunitrevived.aap.AapService
+import com.andrerinas.headunitrevived.utils.BluetoothHelper
 import com.andrerinas.headunitrevived.aap.protocol.proto.Wireless
 import com.andrerinas.headunitrevived.utils.AppLog
 import kotlinx.coroutines.*
@@ -39,7 +40,7 @@ class NativeAaHandshakeManager(
                     return false
                 }
             }
-            val adapter = BluetoothAdapter.getDefaultAdapter() ?: return false
+            val adapter = BluetoothHelper.getBluetoothAdapter(context) ?: return false
             if (!adapter.isEnabled) return false
             return try {
                 val socket = adapter.listenUsingRfcommWithServiceRecord("Compatibility Check", AA_UUID)
@@ -87,7 +88,7 @@ class NativeAaHandshakeManager(
         }
 
         isRunning = true
-        val adapter = BluetoothAdapter.getDefaultAdapter()
+        val adapter = BluetoothHelper.getBluetoothAdapter(context)
         if (adapter == null || !adapter.isEnabled) {
             AppLog.e("NativeAA: Bluetooth adapter not available or disabled")
             return
@@ -196,7 +197,7 @@ class NativeAaHandshakeManager(
                 return
             }
         }
-        val adapter = BluetoothAdapter.getDefaultAdapter() ?: return
+        val adapter = BluetoothHelper.getBluetoothAdapter(context) ?: return
         val settings = com.andrerinas.headunitrevived.App.provide(context).settings
         val lastMac = settings.autoStartBluetoothDeviceMac
 
@@ -248,7 +249,7 @@ class NativeAaHandshakeManager(
                 return
             }
         }
-        val adapter = android.bluetooth.BluetoothAdapter.getDefaultAdapter() ?: return
+        val adapter = BluetoothHelper.getBluetoothAdapter(context) ?: return
         try {
             val device = adapter.getRemoteDevice(address)
             AppLog.i("NativeAA: Manual poke requested for ${device.name} ($address)")

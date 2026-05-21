@@ -18,6 +18,7 @@ import com.andrerinas.headunitrevived.aap.AapService
 import com.andrerinas.headunitrevived.main.settings.SettingItem
 import com.andrerinas.headunitrevived.main.settings.SettingsAdapter
 import com.andrerinas.headunitrevived.utils.Settings
+import com.andrerinas.headunitrevived.utils.BluetoothHelper
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.andrerinas.headunitrevived.connection.NativeAaHandshakeManager
@@ -36,6 +37,7 @@ class WirelessConnectionFragment : Fragment(R.layout.fragment_wireless_connectio
     private var pendingAutoEnableHotspot: Boolean? = null
     private var pendingWaitForWifi: Boolean? = null
     private var pendingWaitForWifiTimeout: Int? = null
+    private var pendingBluetoothManagerServiceName: String? = null
     
     private var hasChanges = false
     private val SAVE_ITEM_ID = 1001
@@ -59,6 +61,7 @@ class WirelessConnectionFragment : Fragment(R.layout.fragment_wireless_connectio
         pendingAutoEnableHotspot = settings.autoEnableHotspot
         pendingWaitForWifi = settings.waitForWifiBeforeWifiDirect
         pendingWaitForWifiTimeout = settings.waitForWifiTimeout
+        pendingBluetoothManagerServiceName = settings.bluetoothManagerServiceName
 
         toolbar = view.findViewById(R.id.toolbar)
         recyclerView = view.findViewById(R.id.settingsRecyclerView)
@@ -134,6 +137,33 @@ class WirelessConnectionFragment : Fragment(R.layout.fragment_wireless_connectio
                     .show()
             }
         ))
+
+        if (pendingWifiConnectionMode == 3) {
+            val currentServiceName = pendingBluetoothManagerServiceName ?: "bluetooth_manager"
+            items.add(SettingItem.SettingEntry(
+                stableId = "bluetoothAdapterServiceName",
+                nameResId = R.string.bluetooth_adapter_label,
+                value = BluetoothHelper.getAdapterDescription(requireContext(), currentServiceName),
+                onClick = { _ ->
+                    val serviceNames = BluetoothHelper.listBluetoothServices()
+                    val displayNames = serviceNames.map { name ->
+                        BluetoothHelper.getAdapterDescription(requireContext(), name)
+                    }.toTypedArray()
+                    
+                    val selectedIndex = serviceNames.indexOf(currentServiceName).coerceAtLeast(0)
+                    
+                    MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
+                        .setTitle(R.string.select_bt_adapter)
+                        .setSingleChoiceItems(displayNames, selectedIndex) { dialog, which ->
+                            dialog.dismiss()
+                            pendingBluetoothManagerServiceName = serviceNames[which]
+                            checkChanges()
+                            updateSettingsList()
+                        }
+                        .show()
+                }
+            ))
+        }
 
         if (pendingWifiConnectionMode == 1 || pendingWifiConnectionMode == 2) {
             items.add(SettingItem.ToggleSettingEntry(
@@ -269,7 +299,8 @@ class WirelessConnectionFragment : Fragment(R.layout.fragment_wireless_connectio
         val anyChange = pendingWifiConnectionMode != settings.wifiConnectionMode ||
                         pendingAutoEnableHotspot != settings.autoEnableHotspot ||
                         pendingWaitForWifi != settings.waitForWifiBeforeWifiDirect ||
-                        pendingWaitForWifiTimeout != settings.waitForWifiTimeout
+                        pendingWaitForWifiTimeout != settings.waitForWifiTimeout ||
+                        pendingBluetoothManagerServiceName != settings.bluetoothManagerServiceName
         
         if (hasChanges != anyChange) {
             hasChanges = anyChange
@@ -284,6 +315,7 @@ class WirelessConnectionFragment : Fragment(R.layout.fragment_wireless_connectio
         settings.autoEnableHotspot = pendingAutoEnableHotspot!!
         settings.waitForWifiBeforeWifiDirect = pendingWaitForWifi!!
         settings.waitForWifiTimeout = pendingWaitForWifiTimeout!!
+        settings.bluetoothManagerServiceName = pendingBluetoothManagerServiceName!!
 
         settings.commit()
 
