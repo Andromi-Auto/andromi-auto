@@ -72,6 +72,30 @@ class AudioMixer(
     private val tempChannelBuffer = ShortArray(FRAMES_PER_CYCLE)
     private val outputBuffer = ShortArray(FRAMES_PER_CYCLE)
 
+    // Reusable buffers for the feed thread(s) to avoid GC allocation pressure.
+    // Since feed() is called from different AudioWriteThread instances concurrently,
+    // we use ThreadLocal to ensure thread safety without synchronization overhead.
+    private val feedInputBuffer = ThreadLocal<ShortArray>()
+    private val feedOutputBuffer = ThreadLocal<ShortArray>()
+
+    private fun getFeedInputBuffer(minSize: Int): ShortArray {
+        var arr = feedInputBuffer.get()
+        if (arr == null || arr.size < minSize) {
+            arr = ShortArray(maxOf(minSize, 4096))
+            feedInputBuffer.set(arr)
+        }
+        return arr
+    }
+
+    private fun getFeedOutputBuffer(minSize: Int): ShortArray {
+        var arr = feedOutputBuffer.get()
+        if (arr == null || arr.size < minSize) {
+            arr = ShortArray(maxOf(minSize, 12288))
+            feedOutputBuffer.set(arr)
+        }
+        return arr
+    }
+
     /**
      * Start the mixer — creates the AudioTrack and starts the mixing thread.
      */
@@ -201,7 +225,7 @@ class AudioMixer(
         if (inputShortsSize <= 0) return
 
         // 1. Convert bytes (little-endian) to shorts
-        val inputShorts = ShortArray(inputShortsSize)
+        val inputShorts = getFeedInputBuffer(inputShortsSize)
         for (i in 0 until inputShortsSize) {
             val idx = offset + i * 2
             val lo = data[idx].toInt() and 0xFF
@@ -215,7 +239,8 @@ class AudioMixer(
             buffer.write(inputShorts, inputShortsSize)
         } else if (config.sampleRate == 16000 && config.channelCount == 1) {
             // Highly optimized path: 16kHz mono to 48kHz stereo (ratio = 3)
-            val outputShorts = ShortArray(inputShortsSize * 3 * 2)
+            val outputShortsSize = inputShortsSize * 3 * 2
+            val outputShorts = getFeedOutputBuffer(outputShortsSize)
             var outIdx = 0
             for (i in 0 until inputShortsSize) {
                 val current = inputShorts[i].toInt()
@@ -228,33 +253,36 @@ class AudioMixer(
                     outputShorts[outIdx++] = interpolated // Right
                 }
             }
-            buffer.write(outputShorts, outputShorts.size)
+            buffer.write(outputShorts, outputShortsSize)
         } else {
             // Generic linear resampling and channel configuration fallback
-            val ratio = OUTPUT_SAMPLE_RATE / config.sampleRate
+            val invRatio = config.sampleRate.toFloat() / OUTPUT_SAMPLE_RATE.toFloat()
+            val ratio = OUTPUT_SAMPLE_RATE.toFloat() / config.sampleRate.toFloat()
             val inputChannels = config.channelCount
             val inputFrames = inputShortsSize / inputChannels
-            val outputFrames = inputFrames * ratio
-            val outputShorts = ShortArray(outputFrames * OUTPUT_CHANNELS)
+            val outputFrames = (inputFrames * ratio).toInt()
+            val outputShortsSize = outputFrames * OUTPUT_CHANNELS
+            val outputShorts = getFeedOutputBuffer(outputShortsSize)
 
             var outIdx = 0
-            for (i in 0 until inputFrames) {
-                val currentL = inputShorts[i * inputChannels].toInt()
-                val nextL = if (i + 1 < inputFrames) inputShorts[(i + 1) * inputChannels].toInt() else currentL
+            for (outFrame in 0 until outputFrames) {
+                val inFrameExact = outFrame * invRatio
+                val inFrameLow = inFrameExact.toInt()
+                val fraction = inFrameExact - inFrameLow
+                val inFrameHigh = if (inFrameLow + 1 < inputFrames) inFrameLow + 1 else inFrameLow
 
-                val currentR = if (inputChannels == 2) inputShorts[i * 2 + 1].toInt() else currentL
-                val nextR = if (inputChannels == 2 && i + 1 < inputFrames) inputShorts[(i + 1) * 2 + 1].toInt() else currentR
+                val currentL = inputShorts[inFrameLow * inputChannels].toInt()
+                val nextL = inputShorts[inFrameHigh * inputChannels].toInt()
+                val interpolatedL = (currentL + (nextL - currentL) * fraction).toInt().coerceIn(-32768, 32767).toShort()
 
-                for (j in 0 until ratio) {
-                    val fraction = j.toFloat() / ratio
-                    val interpolatedL = (currentL + (nextL - currentL) * fraction).toInt().coerceIn(-32768, 32767).toShort()
-                    val interpolatedR = (currentR + (nextR - currentR) * fraction).toInt().coerceIn(-32768, 32767).toShort()
+                val currentR = if (inputChannels == 2) inputShorts[inFrameLow * 2 + 1].toInt() else currentL
+                val nextR = if (inputChannels == 2) inputShorts[inFrameHigh * 2 + 1].toInt() else nextL
+                val interpolatedR = (currentR + (nextR - currentR) * fraction).toInt().coerceIn(-32768, 32767).toShort()
 
-                    outputShorts[outIdx++] = interpolatedL
-                    outputShorts[outIdx++] = interpolatedR
-                }
+                outputShorts[outIdx++] = interpolatedL
+                outputShorts[outIdx++] = interpolatedR
             }
-            buffer.write(outputShorts, outputShorts.size)
+            buffer.write(outputShorts, outputShortsSize)
         }
     }
 
@@ -286,6 +314,22 @@ class AudioMixer(
     // ========================================================================
 
     /**
+     * Soft-clipping function to prevent digital distortion (hard clipping) when 
+     * multiple channels are mixed together. Compresses signals exceeding ~ -4dB (20480).
+     */
+    private fun softClip(s: Int): Short {
+        val clippedS = s.coerceIn(-98304, 98304)
+        if (clippedS > 20480) {
+            val diff = clippedS - 20480
+            return (20480 + (diff * 12287) / (diff + 24574)).toShort()
+        } else if (clippedS < -20480) {
+            val diff = -clippedS - 20480
+            return (-(20480 + (diff * 12287) / (diff + 24574))).toShort()
+        }
+        return clippedS.toShort()
+    }
+
+    /**
      * Main mixing loop — runs on the dedicated thread.
      * Every MIX_INTERVAL_MS, drains all channel circular buffers,
      * mixes into a single buffer, and writes to the AudioTrack.
@@ -314,9 +358,9 @@ class AudioMixer(
                 }
             }
 
-            // Clip and write output (always write to keep the AudioTrack active)
+            // Apply soft clipping and write output (always write to keep the AudioTrack active)
             for (i in mixBuffer.indices) {
-                outputBuffer[i] = mixBuffer[i].coerceIn(-32768, 32767).toShort()
+                outputBuffer[i] = softClip(mixBuffer[i])
             }
 
             val track = audioTrack

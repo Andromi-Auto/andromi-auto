@@ -86,13 +86,26 @@ class SocketAccessoryConnection(private val ip: String, private val port: Int, p
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     var netToBind: android.net.Network? = null
                     try {
-                        val wifiNetwork = cm.allNetworks.firstOrNull { network ->
-                            val caps = cm.getNetworkCapabilities(network)
-                            caps != null && caps.hasTransport(android.net.NetworkCapabilities.TRANSPORT_WIFI)
+                        val request = android.net.NetworkRequest.Builder()
+                            .addTransportType(android.net.NetworkCapabilities.TRANSPORT_WIFI)
+                            .build()
+                        val latch = java.util.concurrent.CountDownLatch(1)
+                        var wifiNetwork: android.net.Network? = null
+                        val callback = object : ConnectivityManager.NetworkCallback() {
+                            override fun onAvailable(network: android.net.Network) {
+                                wifiNetwork = network
+                                latch.countDown()
+                            }
                         }
+                        cm.registerNetworkCallback(request, callback)
+                        latch.await(750, java.util.concurrent.TimeUnit.MILLISECONDS)
+                        try {
+                            cm.unregisterNetworkCallback(callback)
+                        } catch (_: Exception) {}
+
                         if (wifiNetwork != null) {
                             netToBind = wifiNetwork
-                            AppLog.i("Found active WiFi/P2P network in allNetworks: $wifiNetwork")
+                            AppLog.i("Found active WiFi/P2P network via callback: $wifiNetwork")
                         } else {
                             val activeNet = cm.activeNetwork
                             if (activeNet != null) {
