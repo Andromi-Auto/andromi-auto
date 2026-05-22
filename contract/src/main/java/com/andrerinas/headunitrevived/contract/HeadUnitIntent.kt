@@ -173,7 +173,7 @@ class NavigationUpdateIntent(
         /**
          * Signature-level permission required to receive or send [NavigationUpdateIntent] broadcasts.
          * Senders must call sendBroadcast(intent, BROADCAST_PERMISSION).
-         * Receivers must declare this permission with protectionLevel="signature".
+         * Receivers must request this permission using <uses-permission> and should enforce it in their manifest declaration.
          */
         const val BROADCAST_PERMISSION = "${HeadUnit.packageName}.permission.NAVIGATION_UPDATE"
     }
