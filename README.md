@@ -67,7 +67,7 @@ adb shell am start -a android.intent.action.VIEW -d "headunit://connect?ip=192.1
 - **Self-mode on Android 10 (Q) and below:** Google has disabled the automatic wireless projection startup for Android 10 and below in Android Auto versions 16.4 and higher. While Self-mode still works on newer Android versions, it is normally impossible to trigger projection on Android 10 and below directly with recent Google app updates. **Workaround:** You can still use Self-mode on these devices by starting the built-in Android Auto Headunit Server and connecting via Wi-Fi mode (loopback). See the [Troubleshooting Guide](https://github.com/andreknieriem/headunit-revived/wiki/Troubleshooting#self-mode-on-android-10-q-and-below) for step-by-step instructions.
 
 ## Changelog
-### v.2.3.1-alpha
+### v.2.3.1
 - Fixed a connection lost on for example borders
 - Binding socket to wifi network if available to prevent connection drops on carrier lost
 - Added Static Audio Focus Toggle to prevent audio focus loss on some devices
@@ -75,6 +75,7 @@ adb shell am start -a android.intent.action.VIEW -d "headunit://connect?ip=192.1
 - Fixing wrong orientation on start if holding the phone wrong. Now uses the orientation from settings
 - Try to fix usb errors with AAwireless Dongles
 - Added Audio Mixer to mix different audio tracks, thanks to @jeffdapaz for the idea
+- Added Autostart on BT for multiple devices
 
 ### v.2.3.0
 - Added some new buttons for keymap
@@ -429,8 +430,8 @@ After that you need to set the env variables depending on your OS:
 MAC:
 open ~/.zshrc or ~/.bashrc
 
-`sudo nano ~/.zshrc or sudo nano ~/.bashrc`   
-`export HEADUNIT_KEYSTORE_PASSWORD="YOUR_KEYSTORE_PASSWORD"  
+`sudo nano ~/.zshrc or sudo nano ~/.bashrc`
+`export HEADUNIT_KEYSTORE_PASSWORD="YOUR_KEYSTORE_PASSWORD"
 export HEADUNIT_KEY_PASSWORD="YOUR_KEY_PASSWORD"`
 
 ## Original Headunit

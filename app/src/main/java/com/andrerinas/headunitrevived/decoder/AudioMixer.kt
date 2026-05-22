@@ -60,6 +60,9 @@ class AudioMixer(
     // Per-channel PCM circular buffers
     private val channelBuffers = ConcurrentHashMap<Int, ShortCircularBuffer>()
 
+    // Per-channel pre-rolling state
+    private val channelPreRolling = ConcurrentHashMap<Int, Boolean>()
+
     // Per-channel gain (0.0 to 1.0+)
     private val channelGains = ConcurrentHashMap<Int, Float>()
 
@@ -184,6 +187,7 @@ class AudioMixer(
         audioTrack = null
 
         channelBuffers.clear()
+        channelPreRolling.clear()
         channelConfigs.clear()
         channelGains.clear()
 
@@ -196,6 +200,7 @@ class AudioMixer(
     fun registerChannel(channel: Int, sampleRate: Int, channelCount: Int) {
         channelConfigs[channel] = ChannelConfig(sampleRate, channelCount)
         channelBuffers.putIfAbsent(channel, ShortCircularBuffer(96000)) // fits ~1s at 48kHz stereo
+        channelPreRolling[channel] = true
         channelGains.putIfAbsent(channel, 1.0f)
 
         AppLog.i("$TAG: Registered channel $channel (sampleRate=$sampleRate, channels=$channelCount)")
@@ -207,6 +212,7 @@ class AudioMixer(
     fun unregisterChannel(channel: Int) {
         channelConfigs.remove(channel)
         channelBuffers.remove(channel)
+        channelPreRolling.remove(channel)
         channelGains.remove(channel)
         AppLog.i("$TAG: Unregistered channel $channel")
     }
@@ -338,8 +344,6 @@ class AudioMixer(
         android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO)
 
         while (running.get()) {
-            val startTime = System.nanoTime()
-
             // Clear mix buffer
             mixBuffer.fill(0)
             var hasData = false
@@ -347,14 +351,31 @@ class AudioMixer(
             // Process each registered channel
             for ((channel, buffer) in channelBuffers) {
                 val gain = channelGains[channel] ?: 1.0f
+                var isPreRolling = channelPreRolling[channel] ?: true
 
-                // Read exactly FRAMES_PER_CYCLE shorts from circular buffer
-                val read = buffer.read(tempChannelBuffer, 0, FRAMES_PER_CYCLE)
-                if (read > 0) {
-                    hasData = true
-                    for (i in 0 until read) {
-                        mixBuffer[i] += (tempChannelBuffer[i] * gain).toInt()
+                if (isPreRolling) {
+                    // Check if buffer has accumulated enough samples (e.g., 3 frames = 60ms) to start playing
+                    if (buffer.size() >= FRAMES_PER_CYCLE * 3) {
+                        channelPreRolling[channel] = false
+                        isPreRolling = false
+                    } else {
+                        // Keep pre-rolling, play silence for this channel
+                        continue
                     }
+                }
+
+                // Double check if we still have enough samples for a complete cycle to prevent underruns
+                if (buffer.size() >= FRAMES_PER_CYCLE) {
+                    val read = buffer.read(tempChannelBuffer, 0, FRAMES_PER_CYCLE)
+                    if (read > 0) {
+                        hasData = true
+                        for (i in 0 until read) {
+                            mixBuffer[i] += (tempChannelBuffer[i] * gain).toInt()
+                        }
+                    }
+                } else {
+                    // Buffer underrun: enter pre-rolling state again to let the buffer refill
+                    channelPreRolling[channel] = true
                 }
             }
 
@@ -364,25 +385,23 @@ class AudioMixer(
             }
 
             val track = audioTrack
+            var written = 0
             if (track != null) {
                 try {
-                    track.write(outputBuffer, 0, FRAMES_PER_CYCLE)
+                    written = track.write(outputBuffer, 0, FRAMES_PER_CYCLE)
                 } catch (e: Exception) {
                     AppLog.e(TAG, "Error writing to AudioTrack", e)
                 }
             }
 
-            // Sleep dynamically based on execution time
-            val elapsedMs = (System.nanoTime() - startTime) / 1_000_000L
-            val sleepTime = MIX_INTERVAL_MS - elapsedMs
-            if (sleepTime > 0) {
+            // If write fails, track is null, or not playing, sleep to prevent a busy loop.
+            // If it succeeds and is playing, track.write() blocks and acts as our hardware clock regulator.
+            if (written <= 0 || track?.playState != AudioTrack.PLAYSTATE_PLAYING) {
                 try {
-                    Thread.sleep(sleepTime)
+                    Thread.sleep(MIX_INTERVAL_MS)
                 } catch (_: InterruptedException) {
                     break
                 }
-            } else {
-                Thread.yield()
             }
         }
     }

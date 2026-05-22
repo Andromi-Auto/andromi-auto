@@ -5,8 +5,9 @@
 - Added Static Audio Focus Toggle to prevent audio focus loss on some devices
 - Fixing samsung routines and modes
 - Fixing wrong orientation on start if holding the phone wrong. Now uses the orientation from settings
--  Try to fix usb errors with AAwireless Dongles
+- Fixing usb errors with AAwireless Dongles
 - Added Audio Mixer to mix different audio tracks, thanks to @jeffdapaz for the idea
+- Added Autostart on BT for multiple devices
 
 ### v.2.3.0
 - Added some new buttons for keymap
