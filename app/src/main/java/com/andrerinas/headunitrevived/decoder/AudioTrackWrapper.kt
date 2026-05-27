@@ -51,17 +51,30 @@ class AudioTrackWrapper(
         val track = audioTrack
         if (track != null) {
             try {
+                val hwGain = gain.coerceAtMost(1.0f)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    track.setVolume(gain)
+                    track.setVolume(hwGain)
                 } else {
                     @Suppress("DEPRECATION")
-                    track.setStereoVolume(gain, gain)
+                    track.setStereoVolume(hwGain, hwGain)
                 }
             } catch (e: Exception) {
                 AppLog.e("Failed to set volume on AudioTrack", e)
             }
         } else {
             mixer?.setChannelGain(channelId, gain)
+        }
+    }
+
+    private fun applyGain(buffer: ByteArray) {
+        if (currentGain <= 1.0f) return
+        for (i in 0 until buffer.size - 1 step 2) {
+            val low = buffer[i].toInt() and 0xFF
+            val high = buffer[i + 1].toInt() // High byte handles sign
+            val sample = (high shl 8) or low
+            val modifiedSample = (sample * currentGain).toInt().coerceIn(-32768, 32767)
+            buffer[i] = (modifiedSample and 0xFF).toByte()
+            buffer[i + 1] = (modifiedSample shr 8).toByte()
         }
     }
 
@@ -105,6 +118,7 @@ class AudioTrackWrapper(
                         mixer.feed(channelId, chunk, 0, chunk.size)
                         framesWritten += chunk.size / bytesPerFrame
                     } else {
+                        applyGain(chunk)
                         val result = audioTrack?.write(chunk, 0, chunk.size) ?: 0
                         if (result > 0) {
                             framesWritten += result / bytesPerFrame
