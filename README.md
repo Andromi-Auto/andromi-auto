@@ -76,6 +76,7 @@ adb shell am start -a android.intent.action.VIEW -d "headunit://connect?ip=192.1
 - Try to fix usb errors with AAwireless Dongles
 - Added Audio Mixer to mix different audio tracks, thanks to @jeffdapaz for the idea
 - Added Autostart on BT for multiple devices
+- Fixed Microphone input source was wrong mapped
 
 ### v.2.3.0
 - Added some new buttons for keymap

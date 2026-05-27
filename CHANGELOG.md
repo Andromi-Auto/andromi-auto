@@ -8,6 +8,7 @@
 - Fixing usb errors with AAwireless Dongles
 - Added Audio Mixer to mix different audio tracks, thanks to @jeffdapaz for the idea
 - Added Autostart on BT for multiple devices
+- Fixed Microphone input source was wrong mapped
 
 ### v.2.3.0
 - Added some new buttons for keymap
