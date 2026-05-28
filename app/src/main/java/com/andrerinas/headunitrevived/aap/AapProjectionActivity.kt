@@ -55,6 +55,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
     private lateinit var projectionView: IProjectionView
     private val videoDecoder: VideoDecoder by lazy { App.provide(this).videoDecoder }
     private val settings: Settings by lazy { Settings(this) }
+    private val cachedKeyCodes: Map<Int, Int> by lazy { settings.keyCodes }
     private var isSurfaceSet = false
     private var overlayState = OverlayState.STARTING
     private val watchdogHandler = android.os.Handler(android.os.Looper.getMainLooper())
@@ -847,9 +848,17 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
             return super.dispatchKeyEvent(event)
         }
 
-        // 1. Let the system handle volume and back keys
-        if (event.keyCode == KeyEvent.KEYCODE_BACK || 
-            event.keyCode == KeyEvent.KEYCODE_VOLUME_UP || 
+        // 1. Let the system handle volume keys and unmapped back keys.
+        // If Back was explicitly learned in Keymap and transport is running,
+        // route it through CommManager so it can be remapped and sent to Android Auto.
+        if (commManager.connectionState.value is CommManager.ConnectionState.TransportStarted &&
+            ProjectionKeyPolicy.shouldRouteBackKeyToProjection(cachedKeyCodes, event.keyCode)) {
+            commManager.sendKey(event.keyCode, action == KeyEvent.ACTION_DOWN)
+            return true
+        }
+
+        if (event.keyCode == KeyEvent.KEYCODE_BACK ||
+            event.keyCode == KeyEvent.KEYCODE_VOLUME_UP ||
             event.keyCode == KeyEvent.KEYCODE_VOLUME_DOWN || 
             event.keyCode == KeyEvent.KEYCODE_VOLUME_MUTE) {
             return super.dispatchKeyEvent(event)
