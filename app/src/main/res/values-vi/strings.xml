@@ -418,7 +418,7 @@
     <string name="kill_on_disconnect">Đóng ứng dụng khi ngắt kết nối</string>
     <string name="kill_on_disconnect_description">Tự động đóng ứng dụng khi Android Auto ngắt kết nối</string>
     <string name="kill_on_disconnect_warning_title">Cảnh báo</string>
-    <string name="kill_on_disconnect_warning">Các cài đặt kết nối lại sau sẽ xung đột với việc đóng ứng dụng khi ngắt kết nối:\n\n%1$s\n\nCài đặt kết nối ban đầu (tự kết nối, tự khởi động) vẫn hoạt động khi headunit bật. Tuy nhiên, sau lần ngắt đầu tiên ứng dụng sẽ đóng ngay thay vì cố kết nối lại.\n\nLưu ý: Một số headunit độ chế không bao giờ tắt hẳn — chúng ngủ đông giống điện thoại khoá màn hình nhưng không thực sự tắt nguồn. Khi bật tuỳ chọn này, ứng dụng sẽ đóng sau lần ngắt đầu tiên và có thể không tự mở lại ở chu kỳ đánh lửa kế tiếp.\n\nBạn có muốn tắt các cài đặt kết nối lại nêu trên?</string>
+    <string name="kill_on_disconnect_warning">Các cài đặt kết nối lại sau sẽ xung đột với việc đóng ứng dụng khi ngắt kết nối:\n\n%1$s\n\nCài đặt kết nối ban đầu (tự kết nối, tự khởi động) vẫn hoạt động khi headunit bật. Tuy nhiên, sau lần ngắt đầu tiên ứng dụng sẽ đóng ngay thay vì cố kết nối lại.\n\nLưu ý: Một số headunit độ chế không bao giờ tắt hẳn — chúng ngủ đông giống điện thoại khoá màn hình nhưng không thực sự tắt nguồn. Khi bật tuỳ chọn này, ứng dụng sẽ đóng sau lần ngắt đầu tiên và có thể không tự mở lại ở lần khởi động xe tiếp theo.\n\nBạn có muốn tắt các cài đặt kết nối lại nêu trên?</string>
     <string name="kill_on_disconnect_disable_and_enable">Tắt và bật</string>
     <string name="kill_on_disconnect_enable_anyway">Vẫn bật</string>
     <string name="kill_on_disconnect_conflicts_disabled">Đã tắt các cài đặt xung đột</string>
