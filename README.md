@@ -77,6 +77,8 @@ adb shell am start -a android.intent.action.VIEW -d "headunit://connect?ip=192.1
 - Added Audio Mixer to mix different audio tracks, thanks to @jeffdapaz for the idea
 - Added Autostart on BT for multiple devices
 - Fixed Microphone input source was wrong mapped
+- Added Vietnamese translation 🇻🇳 thanks to @minhtuanact
+- Merged PR #549 - implement back key routing and add keymap for back key, thanks to @JanRi3D
 
 ### v.2.3.0
 - Added some new buttons for keymap
