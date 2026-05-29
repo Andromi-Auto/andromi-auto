@@ -9,6 +9,8 @@ import com.andrerinas.headunitrevived.BuildConfig
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
+import java.math.BigDecimal
+import java.math.BigInteger
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -193,6 +195,9 @@ object SettingsBackupManager {
         if (root.optString("format") != FORMAT) {
             throw IllegalArgumentException("Unsupported settings backup format")
         }
+        if (root.optInt("version", VERSION) > VERSION) {
+            throw IllegalArgumentException("Unsupported settings backup version")
+        }
 
         val settings = root.optJSONObject("settings")
             ?: throw IllegalArgumentException("Settings backup is missing settings")
@@ -322,10 +327,31 @@ object SettingsBackupManager {
     private fun parseImportValue(value: Any, type: ValueType): Any? {
         return when (type) {
             ValueType.BOOLEAN -> value as? Boolean
-            ValueType.INT -> value as? Int
+            ValueType.INT -> parseInt(value)
             ValueType.STRING -> value as? String
             ValueType.STRING_SET -> parseStringSet(value)
         }
+    }
+
+    private fun parseInt(value: Any): Int? {
+        val longValue = when (value) {
+            is Int -> return value
+            is Long -> value
+            is Short -> value.toLong()
+            is Byte -> value.toLong()
+            is BigInteger -> if (value.bitLength() <= Int.SIZE_BITS - 1) value.toLong() else return null
+            is BigDecimal -> runCatching { value.longValueExact() }.getOrNull() ?: return null
+            is Double -> {
+                if (value.isNaN() || value.isInfinite() || value % 1.0 != 0.0) return null
+                value.toLong()
+            }
+            is Float -> {
+                if (value.isNaN() || value.isInfinite() || value % 1.0f != 0.0f) return null
+                value.toLong()
+            }
+            else -> return null
+        }
+        return if (longValue in Int.MIN_VALUE.toLong()..Int.MAX_VALUE.toLong()) longValue.toInt() else null
     }
 
     private fun parseStringSet(value: Any): Set<String>? {

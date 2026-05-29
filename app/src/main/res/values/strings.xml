@@ -330,9 +330,9 @@
     <string name="import_settings_downloads">Import from Downloads</string>
     <string name="import_settings_app_folder">Import from app backup folder</string>
     <string name="settings_exported">Settings exported</string>
-    <string name="settings_backup_saved_to">Settings backup saved to:\n%s</string>
-    <string name="settings_export_failed">Settings export failed: %s</string>
-    <string name="settings_import_failed">Settings import failed: %s</string>
+    <string name="settings_backup_saved_to">Settings backup saved to:\n%1$s</string>
+    <string name="settings_export_failed">Settings export failed: %1$s</string>
+    <string name="settings_import_failed">Settings import failed: %1$s</string>
     <string name="settings_imported">Settings imported: %1$d applied, %2$d skipped</string>
     <string name="import_settings_discard_pending">Importing a backup will discard your unsaved settings changes. Continue?</string>
     <string name="storage_permission_denied_backup">Storage permission denied. Downloads could not be used.</string>

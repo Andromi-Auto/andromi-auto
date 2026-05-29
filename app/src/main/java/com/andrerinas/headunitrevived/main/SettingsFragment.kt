@@ -37,7 +37,12 @@ import androidx.activity.result.contract.ActivityResultContracts
 import android.content.pm.PackageManager
 import com.andrerinas.headunitrevived.connection.NativeAaHandshakeManager
 import com.andrerinas.headunitrevived.utils.BluetoothHelper
+import androidx.lifecycle.lifecycleScope
 import java.io.File
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class SettingsFragment : Fragment() {
     private lateinit var settings: Settings
@@ -1397,20 +1402,32 @@ class SettingsFragment : Fragment() {
     }
 
     private fun exportSettingsToUri(uri: Uri) {
-        try {
-            SettingsBackupManager.exportToUri(requireContext(), uri)
-            Toast.makeText(requireContext(), R.string.settings_exported, Toast.LENGTH_LONG).show()
-        } catch (e: Exception) {
-            Toast.makeText(requireContext(), getString(R.string.settings_export_failed, e.localizedMessage ?: ""), Toast.LENGTH_LONG).show()
+        val appContext = requireContext().applicationContext
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                withContext(Dispatchers.IO) {
+                    SettingsBackupManager.exportToUri(appContext, uri)
+                }
+                Toast.makeText(requireContext(), R.string.settings_exported, Toast.LENGTH_LONG).show()
+            } catch (e: Exception) {
+                if (e is CancellationException) throw e
+                Toast.makeText(requireContext(), getString(R.string.settings_export_failed, e.localizedMessage ?: ""), Toast.LENGTH_LONG).show()
+            }
         }
     }
 
     private fun exportSettingsLegacy() {
-        try {
-            val file = SettingsBackupManager.exportToLegacyFile(requireContext())
-            showSettingsExportedDialog(file)
-        } catch (e: Exception) {
-            Toast.makeText(requireContext(), getString(R.string.settings_export_failed, e.localizedMessage ?: ""), Toast.LENGTH_LONG).show()
+        val appContext = requireContext().applicationContext
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val file = withContext(Dispatchers.IO) {
+                    SettingsBackupManager.exportToLegacyFile(appContext)
+                }
+                showSettingsExportedDialog(file)
+            } catch (e: Exception) {
+                if (e is CancellationException) throw e
+                Toast.makeText(requireContext(), getString(R.string.settings_export_failed, e.localizedMessage ?: ""), Toast.LENGTH_LONG).show()
+            }
         }
     }
 
@@ -1432,11 +1449,17 @@ class SettingsFragment : Fragment() {
     }
 
     private fun exportSettingsDownloads() {
-        try {
-            val file = SettingsBackupManager.exportToDownloadsFile(requireContext())
-            showSettingsExportedDialog(file)
-        } catch (e: Exception) {
-            Toast.makeText(requireContext(), getString(R.string.settings_export_failed, e.localizedMessage ?: ""), Toast.LENGTH_LONG).show()
+        val appContext = requireContext().applicationContext
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val file = withContext(Dispatchers.IO) {
+                    SettingsBackupManager.exportToDownloadsFile(appContext)
+                }
+                showSettingsExportedDialog(file)
+            } catch (e: Exception) {
+                if (e is CancellationException) throw e
+                Toast.makeText(requireContext(), getString(R.string.settings_export_failed, e.localizedMessage ?: ""), Toast.LENGTH_LONG).show()
+            }
         }
     }
 
@@ -1450,11 +1473,17 @@ class SettingsFragment : Fragment() {
     }
 
     private fun shareNewSettingsBackup() {
-        try {
-            val file = SettingsBackupManager.exportToLegacyFile(requireContext())
-            shareSettingsBackup(file)
-        } catch (e: Exception) {
-            Toast.makeText(requireContext(), getString(R.string.settings_export_failed, e.localizedMessage ?: ""), Toast.LENGTH_LONG).show()
+        val appContext = requireContext().applicationContext
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val file = withContext(Dispatchers.IO) {
+                    SettingsBackupManager.exportToLegacyFile(appContext)
+                }
+                shareSettingsBackup(file)
+            } catch (e: Exception) {
+                if (e is CancellationException) throw e
+                Toast.makeText(requireContext(), getString(R.string.settings_export_failed, e.localizedMessage ?: ""), Toast.LENGTH_LONG).show()
+            }
         }
     }
 
@@ -1516,7 +1545,7 @@ class SettingsFragment : Fragment() {
     private fun launchImportSettingsPicker() {
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                importSettingsLauncher.launch(SettingsBackupManager.DOCUMENT_PICKER_MIME_TYPES.copyOf())
+                importSettingsLauncher.launch(SettingsBackupManager.IMPORT_MIME_TYPES.copyOf())
             } else {
                 legacyImportSettingsLauncher.launch(SettingsBackupManager.MIME_TYPE)
             }
@@ -1603,22 +1632,34 @@ class SettingsFragment : Fragment() {
     }
 
     private fun importSettingsFromUri(uri: Uri) {
+        val appContext = requireContext().applicationContext
         val snapshot = createImportSnapshot()
-        try {
-            val result = SettingsBackupManager.importFromUri(requireContext(), uri)
-            handleImportedSettings(snapshot, result)
-        } catch (e: Exception) {
-            Toast.makeText(requireContext(), getString(R.string.settings_import_failed, e.localizedMessage ?: ""), Toast.LENGTH_LONG).show()
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val result = withContext(Dispatchers.IO) {
+                    SettingsBackupManager.importFromUri(appContext, uri)
+                }
+                handleImportedSettings(snapshot, result)
+            } catch (e: Exception) {
+                if (e is CancellationException) throw e
+                Toast.makeText(requireContext(), getString(R.string.settings_import_failed, e.localizedMessage ?: ""), Toast.LENGTH_LONG).show()
+            }
         }
     }
 
     private fun importSettingsFromFile(file: File) {
+        val appContext = requireContext().applicationContext
         val snapshot = createImportSnapshot()
-        try {
-            val result = SettingsBackupManager.importFromFile(requireContext(), file)
-            handleImportedSettings(snapshot, result)
-        } catch (e: Exception) {
-            Toast.makeText(requireContext(), getString(R.string.settings_import_failed, e.localizedMessage ?: ""), Toast.LENGTH_LONG).show()
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val result = withContext(Dispatchers.IO) {
+                    SettingsBackupManager.importFromFile(appContext, file)
+                }
+                handleImportedSettings(snapshot, result)
+            } catch (e: Exception) {
+                if (e is CancellationException) throw e
+                Toast.makeText(requireContext(), getString(R.string.settings_import_failed, e.localizedMessage ?: ""), Toast.LENGTH_LONG).show()
+            }
         }
     }
 
@@ -1641,7 +1682,7 @@ class SettingsFragment : Fragment() {
         applyWirelessSideEffects(snapshot)
 
         if (SettingsBackupManager.requiresProjectionRestart(result.changedKeys) && App.provide(requireContext()).commManager.isConnected) {
-            Toast.makeText(context, getString(R.string.stopping_service), Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), getString(R.string.stopping_service), Toast.LENGTH_SHORT).show()
             val stopServiceIntent = Intent(requireContext(), AapService::class.java).apply {
                 action = AapService.ACTION_STOP_SERVICE
             }
