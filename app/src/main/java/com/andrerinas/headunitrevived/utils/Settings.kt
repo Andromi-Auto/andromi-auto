@@ -15,7 +15,7 @@ class Settings(private val context: Context) {
 
     private val _prefs: SharedPreferences? by lazy {
         try {
-            context.getSharedPreferences("settings", Context.MODE_PRIVATE)
+            context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         } catch (e: Exception) {
             null
         }
@@ -580,7 +580,8 @@ class Settings(private val context: Context) {
         NIGHT(2),
         MANUAL_TIME(3),
         LIGHT_SENSOR(4),
-        SCREEN_BRIGHTNESS(5);
+        SCREEN_BRIGHTNESS(5),
+        CAR_SIGNAL(6);
 
         companion object {
             private val map = NightMode.values().associateBy(NightMode::value)
@@ -623,6 +624,8 @@ class Settings(private val context: Context) {
         }
 
     companion object {
+        const val PREFS_NAME = "settings"
+
         const val CONNECTION_TYPE_WIFI = "wifi"
         const val CONNECTION_TYPE_USB = "usb"
         const val CONNECTION_TYPE_NEARBY = "nearby"
@@ -663,7 +666,7 @@ class Settings(private val context: Context) {
                 val deviceContext = context.createDeviceProtectedStorageContext()
                 deviceContext.getSharedPreferences(DEVICE_PREFS_NAME, Context.MODE_PRIVATE)
             } else {
-                context.getSharedPreferences("settings", Context.MODE_PRIVATE)
+                context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             }
             return prefs.getBoolean(KEY_AUTO_START_ON_BOOT, false)
         }
@@ -694,7 +697,7 @@ class Settings(private val context: Context) {
                 val deviceContext = context.createDeviceProtectedStorageContext()
                 deviceContext.getSharedPreferences(DEVICE_PREFS_NAME, Context.MODE_PRIVATE)
             } else {
-                context.getSharedPreferences("settings", Context.MODE_PRIVATE)
+                context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             }
             return prefs.getBoolean(KEY_AUTO_START_ON_SCREEN_ON, false)
         }
@@ -725,7 +728,7 @@ class Settings(private val context: Context) {
                 val deviceContext = context.createDeviceProtectedStorageContext()
                 deviceContext.getSharedPreferences(DEVICE_PREFS_NAME, Context.MODE_PRIVATE)
             } else {
-                context.getSharedPreferences("settings", Context.MODE_PRIVATE)
+                context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             }
             return prefs.getBoolean(KEY_AUTO_START_ON_USB, false)
         }
@@ -748,7 +751,7 @@ class Settings(private val context: Context) {
                 val deviceContext = context.createDeviceProtectedStorageContext()
                 deviceContext.getSharedPreferences(DEVICE_PREFS_NAME, Context.MODE_PRIVATE)
             } else {
-                context.getSharedPreferences("settings", Context.MODE_PRIVATE)
+                context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             }
             return prefs.getBoolean(KEY_AUTO_START_ON_WIFI, false)
         }
@@ -768,7 +771,7 @@ class Settings(private val context: Context) {
                 val deviceContext = context.createDeviceProtectedStorageContext()
                 deviceContext.getSharedPreferences(DEVICE_PREFS_NAME, Context.MODE_PRIVATE)
             } else {
-                context.getSharedPreferences("settings", Context.MODE_PRIVATE)
+                context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             }
             return prefs.getString(KEY_AUTO_START_WIFI_SSID, "") ?: ""
         }
@@ -788,7 +791,7 @@ class Settings(private val context: Context) {
                 val deviceContext = context.createDeviceProtectedStorageContext()
                 deviceContext.getSharedPreferences(DEVICE_PREFS_NAME, Context.MODE_PRIVATE)
             } else {
-                context.getSharedPreferences("settings", Context.MODE_PRIVATE)
+                context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             }
             return prefs.getBoolean(KEY_LISTEN_FOR_USB_DEVICES, true) // Default is TRUE
         }
@@ -830,7 +833,7 @@ class Settings(private val context: Context) {
                 val deviceContext = context.createDeviceProtectedStorageContext()
                 deviceContext.getSharedPreferences(DEVICE_PREFS_NAME, Context.MODE_PRIVATE)
             } else {
-                context.getSharedPreferences("settings", Context.MODE_PRIVATE)
+                context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             }
             return prefs.getString(KEY_AUTO_START_BT_MAC, "") ?: ""
         }
@@ -929,7 +932,8 @@ class Settings(private val context: Context) {
         AUTO_SUNRISE(4),
         MANUAL_TIME(5),
         LIGHT_SENSOR(6),
-        SCREEN_BRIGHTNESS(7);
+        SCREEN_BRIGHTNESS(7),
+        CAR_SIGNAL(8);
 
         companion object {
             private val map = values().associateBy(AppTheme::value)
