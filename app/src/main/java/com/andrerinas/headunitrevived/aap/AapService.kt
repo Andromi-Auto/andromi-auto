@@ -1640,6 +1640,10 @@ class AapService : Service(), UsbReceiver.Listener {
     // -------------------------------------------------------------------------
 
     override fun onUsbAttach(device: UsbDevice) {
+        if (!UsbDeviceCompat.isAndroidDevice(device)) {
+            AppLog.i("Ignoring non-Android USB device attached in service (VID: ${device.vendorId}): ${device.deviceName}")
+            return
+        }
         userExitedAA = false
         if (UsbDeviceCompat.isInAccessoryMode(device)) {
             // Device already in AOA mode (re-enumerated after UsbAttachedActivity switched it).
@@ -1689,6 +1693,10 @@ class AapService : Service(), UsbReceiver.Listener {
     }
 
     override fun onUsbPermission(granted: Boolean, connect: Boolean, device: UsbDevice) {
+        if (!UsbDeviceCompat.isAndroidDevice(device)) {
+            AppLog.i("Ignoring USB permission callback for non-Android device (VID: ${device.vendorId}): ${device.deviceName}")
+            return
+        }
         val deviceName = UsbDeviceCompat(device).uniqueName
         if (granted) {
             AppLog.i("USB permission granted for $deviceName")
@@ -1794,12 +1802,12 @@ class AapService : Service(), UsbReceiver.Listener {
             isSwitchingToAccessory.get()) return
 
         val usbManager = getSystemService(Context.USB_SERVICE) as UsbManager
-        val deviceList = usbManager.deviceList
+        val deviceList = usbManager.deviceList.values.filter { UsbDeviceCompat.isAndroidDevice(it) }
 
         // Check for devices already in accessory mode first.
         // After AOA switch the device re-enumerates and appears as a new USB device — we must
         // request permission for this new device before openDevice(), or SecurityException occurs.
-        for (device in deviceList.values) {
+        for (device in deviceList) {
             if (UsbDeviceCompat.isInAccessoryMode(device)) {
                 val deviceName = UsbDeviceCompat(device).uniqueName
                 AppLog.i("Found device already in accessory mode: $deviceName")
@@ -1822,7 +1830,7 @@ class AapService : Service(), UsbReceiver.Listener {
 
         // Last-session mode: reconnect to a known/allowed device
         if (lastSession) {
-            for (device in deviceList.values) {
+            for (device in deviceList) {
                 val deviceCompat = UsbDeviceCompat(device)
                 if (settings.isConnectingDevice(deviceCompat)) {
                     if (usbManager.hasPermission(device)) {
@@ -1852,7 +1860,7 @@ class AapService : Service(), UsbReceiver.Listener {
 
         // USB auto-start mode: attempt AOA switch for any single non-accessory device
         if (usbAutoStart) {
-            val nonAccessoryDevices = deviceList.values.filter { !UsbDeviceCompat.isInAccessoryMode(it) }
+            val nonAccessoryDevices = deviceList.filter { !UsbDeviceCompat.isInAccessoryMode(it) }
             if (nonAccessoryDevices.size == 1) {
                 performSingleUsbConnect(nonAccessoryDevices[0])
                 return
@@ -1865,7 +1873,7 @@ class AapService : Service(), UsbReceiver.Listener {
         // don't prevent auto-connect. Falls back to counting all devices when
         // no devices have been explicitly allowed (fresh install).
         if (singleUsb) {
-            val nonAccessoryDevices = deviceList.values.filter { !UsbDeviceCompat.isInAccessoryMode(it) }
+            val nonAccessoryDevices = deviceList.filter { !UsbDeviceCompat.isInAccessoryMode(it) }
             val allowed = settings.allowedDevices
             val candidates = if (allowed.isNotEmpty()) {
                 nonAccessoryDevices.filter { allowed.contains(UsbDeviceCompat(it).uniqueName) }
@@ -1884,7 +1892,7 @@ class AapService : Service(), UsbReceiver.Listener {
         // Fallback: if force=true and we have a single Google VID device in normal mode,
         // switch it to accessory mode. This handles cases where UsbAttachedActivity didn't fire.
         if (force) {
-            val nonAccessoryDevices = deviceList.values.filter { !UsbDeviceCompat.isInAccessoryMode(it) }
+            val nonAccessoryDevices = deviceList.filter { !UsbDeviceCompat.isInAccessoryMode(it) }
             val googleDevices = nonAccessoryDevices.filter { it.vendorId == 0x18D1 }
             if (googleDevices.size == 1) {
                 AppLog.i("Fallback: force=true and found single Google normal-mode device ${UsbDeviceCompat(googleDevices[0]).uniqueName}. Switching to accessory mode.")

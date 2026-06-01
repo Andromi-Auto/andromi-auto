@@ -85,5 +85,64 @@ class UsbDeviceCompat(val wrappedDevice: UsbDevice) {
             return dev_vend_id == UsbDeviceCompat.USB_VID_GOO &&
                     (dev_prod_id == UsbDeviceCompat.USB_PID_ACC || dev_prod_id == UsbDeviceCompat.USB_PID_ACC_ADB)
         }
+
+        private val ANDROID_VENDORS = setOf(
+            USB_VID_GOO, // Google (0x18D1)
+            USB_VID_HTC, // HTC (0x0BB4)
+            USB_VID_SAM, // Samsung (0x04E8)
+            USB_VID_O1A, // O1A (0xFFF6)
+            USB_VID_SON, // Sony Ericsson (0x0FCE)
+            USB_VID_LGE, // LG (0x1004)
+            USB_VID_MOT, // Motorola (0x22B8)
+            USB_VID_ACE, // Acer (0x0502)
+            USB_VID_ZTE, // ZTE (0x19D2)
+            USB_VID_XIA, // Xiaomi (0x2717)
+            USB_VID_ASU, // Asus (0x0B05)
+            USB_VID_MEI, // Meizu (0x2A45)
+            USB_VID_WIL, // Wileyfox (0x4EE7)
+            0x22D9,      // Oppo/OnePlus/Realme
+            0x2D95,      // Vivo
+            0x17EF,      // Lenovo
+            0x1EBF,      // OnePlus (alternate)
+            0x1782,      // Spreadtrum / Multilaser
+            0x0E8D,      // MediaTek
+            0x2E04,      // HMD Global (Nokia)
+            0x05C6,      // Qualcomm/LG reference designs
+            0x0FCA,      // Blackberry
+            0x2207,      // Fuzhou Rockchip
+            0x2E17,      // Essential
+            // Added from 51-android.rules
+            0x413C,      // Dell
+            0x0489,      // Foxconn
+            0x04C5,      // Fujitsu
+            0x091E,      // Garmin-Asus
+            0x201E,      // Haier
+            0x109B,      // Hisense
+            0x24E3,      // K-Touch
+            0x2116,      // KT Tech
+            0x0482,      // Kyocera
+            0x0409,      // NEC
+            0x2080,      // Nook
+            0x0955,      // Nvidia
+            0x2257,      // OTGV
+            0x10A9,      // Pantech
+            0x1D4D,      // Pegatron
+            0x0471,      // Philips
+            0x04DA,      // PMC-Sierra
+            0x1F53,      // SK Telesys
+            0x04DD,      // Sharp
+            0x054C,      // Sony (main)
+            0x2340,      // Teleepoch
+            0x0930,      // Toshiba
+            0x0414,      // Gigabyte
+            0x1949       // Amazon
+        )
+
+        fun isAndroidDevice(device: UsbDevice): Boolean {
+            if (isInAccessoryMode(device)) return true
+            // Explicitly ignore Apple devices (0x05AC) to prevent CarPlay interference
+            if (device.vendorId == 0x05AC) return false
+            return ANDROID_VENDORS.contains(device.vendorId)
+        }
     }
 }
