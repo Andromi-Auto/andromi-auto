@@ -138,14 +138,16 @@
     </FrameLayout>
 
     <!-- Auto-connect status pill: non-blocking indicator shown during
-         automatic background connection attempts. Stays out of the way so the
-         home buttons remain tappable; user can tap the pill to cancel. -->
+         automatic background connection attempts. Anchored to bottom-center
+         to avoid overlapping with the top wifi_direct_info pill and the
+         bottom-right Exit button. Home buttons remain tappable; user can
+         tap the pill to cancel. -->
     <LinearLayout
         android:id="@+id/auto_connect_pill"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="top|center_horizontal"
-        android:layout_marginTop="16dp"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="16dp"
         android:paddingHorizontal="14dp"
         android:paddingVertical="6dp"
         android:background="@drawable/bg_pill_translucent"
