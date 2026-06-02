@@ -1,5 +1,5 @@
 # Changelog
-### v.3.0.0-alpha
+### v.3.0.0-beta1
 - Added: Custom loading screen (image/GIF/video), thanks to @andrecuellar
 - Added: Settings-Reset Button, if you mess up something in the settings, you can now reset them to default
 - Removed: Old deprecated ssl library written in C-Code for better maintenance, stability and smaller file sizes
