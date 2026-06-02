@@ -44,6 +44,7 @@ class AudioTrackWrapper(
     @Volatile
     private var stopRequested = false
 
+    @Volatile
     private var currentGain: Float = gain
 
     fun setVolume(gain: Float) {
@@ -398,6 +399,13 @@ class AudioTrackWrapper(
             AppLog.w("Interrupted while offering audio data to queue")
         }
     }
+
+    fun setGain(gain: Float) {
+        AppLog.d("AudioTrackWrapper: updating gain to $gain")
+        currentGain = gain.coerceIn(0.0f, 2.0f)
+    }
+
+
 
     fun stopPlayback() {
         isRunning = false

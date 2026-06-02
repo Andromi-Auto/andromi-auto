@@ -70,6 +70,10 @@ class AudioDecoder {
         audioTracks.put(channel, thread)
     }
 
+    fun setGain(channel: Int, gain: Float) {
+        audioTracks.get(channel)?.setGain(gain)
+    }
+
     companion object {
         const val SAMPLE_RATE_HZ_48 = 48000
         const val SAMPLE_RATE_HZ_16 = 16000

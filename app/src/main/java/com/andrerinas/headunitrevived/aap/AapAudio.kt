@@ -16,7 +16,7 @@ import com.andrerinas.headunitrevived.utils.Settings
 internal class AapAudio(
         private val audioDecoder: AudioDecoder,
         private val audioManager: AudioManager,
-        settings: Settings) {
+        private val settings: Settings) {
 
     private val staticAudioFocus = settings.staticAudioFocus
     private val separateAudioStreams = settings.separateAudioStreams
@@ -202,6 +202,21 @@ internal class AapAudio(
             handler.removeCallbacks(unduckRunnable)
             handler.postDelayed(unduckRunnable, UNDUCK_DELAY_MS)
         }
+    }
+
+    fun updateGains() {
+        val mediaGain = (1.0f + (settings.mediaVolumeOffset / 100.0f)).coerceIn(0.0f, 2.0f)
+        val assistantGain = (1.0f + (settings.assistantVolumeOffset / 100.0f)).coerceIn(0.0f, 2.0f)
+        val navGain = (1.0f + (settings.navigationVolumeOffset / 100.0f)).coerceIn(0.0f, 2.0f)
+
+        audioDecoder.setGain(Channel.ID_AUD, mediaGain)
+        audioDecoder.setGain(Channel.ID_AU1, assistantGain)
+        audioDecoder.setGain(Channel.ID_AU2, navGain)
+    }
+
+    fun restartAudio() {
+        AppLog.i("AapAudio: Restarting all audio tracks")
+        audioDecoder.stop()
     }
 
     fun stopAudio(channel: Int) {

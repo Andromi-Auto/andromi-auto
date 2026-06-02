@@ -1,4 +1,16 @@
 # Changelog
+### v.3.0.0-alpha
+- Added: Custom loading screen (image/GIF/video), thanks to @andrecuellar
+- Added: Settings-Reset Button, if you mess up something in the settings, you can now reset them to default
+- Removed: Old deprecated ssl library written in C-Code for better maintenance, stability and smaller file sizes
+- Added: Direct Logging to file without logcat, thanks to @Anton111111
+- try to fix connection lost on carrier lost again
+- keep usb disconnection for 8s alive, for maybe restarts of usb dongles
+- Implement car headlight signal mode (ILL+) for night theme management, thanks to @minhtuanact
+- Added settings export and import functionality with backup options, thanks to @JanRi3D
+- Added whitelist to usb connection for not interrupting with iPhones and other usb devices
+- Added QR Code for easy connection with wireless helper
+
 ### v.2.3.1
 - Fixed a connection lost on for example borders
 - Binding socket to wifi network if available to prevent connection drops on carrier lost

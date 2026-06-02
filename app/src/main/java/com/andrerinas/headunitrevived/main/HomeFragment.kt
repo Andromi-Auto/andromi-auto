@@ -127,6 +127,7 @@ class HomeFragment : Fragment() {
                 Settings.AUTO_CONNECT_LAST_SESSION -> {
                     if (appSettings.autoConnectLastSession && !hasAttemptedAutoConnect && !commManager.isConnected) {
                         hasAttemptedAutoConnect = true
+                        (requireActivity() as? MainActivity)?.beginAutoConnect("auto-connect last session")
                         attemptAutoConnect()
                     }
                 }
@@ -134,12 +135,14 @@ class HomeFragment : Fragment() {
                     if ((appSettings.autoStartSelfMode || forceSelfModeLaunch) && !hasAutoStarted && !commManager.isConnected) {
                         hasAutoStarted = true
                         forceSelfModeLaunch = false // Reset once processed
+                        (requireActivity() as? MainActivity)?.beginAutoConnect("auto-start self mode")
                         startSelfMode()
                     }
                 }
                 Settings.AUTO_CONNECT_SINGLE_USB -> {
                     if (appSettings.autoConnectSingleUsbDevice && !hasAttemptedSingleUsbAutoConnect && !commManager.isConnected) {
                         hasAttemptedSingleUsbAutoConnect = true
+                        (requireActivity() as? MainActivity)?.beginAutoConnect("auto-connect single USB")
                         attemptSingleUsbAutoConnect()
                     }
                 }
@@ -317,6 +320,7 @@ class HomeFragment : Fragment() {
                 aapIntent.putExtra(AapProjectionActivity.EXTRA_FOCUS, true)
                 startActivity(aapIntent)
             } else {
+                (requireActivity() as? MainActivity)?.beginAutoConnect("manual self mode")
                 startSelfMode()
             }
         }
@@ -343,6 +347,7 @@ class HomeFragment : Fragment() {
                         Toast.makeText(requireContext(), getString(R.string.already_scanning), Toast.LENGTH_SHORT).show()
                     } else {
                         Toast.makeText(requireContext(), getString(R.string.searching_headunit_server), Toast.LENGTH_SHORT).show()
+                        (requireActivity() as? MainActivity)?.beginAutoConnect("manual WiFi headunit server scan")
                         val intent = Intent(requireContext(), AapService::class.java).apply {
                             action = AapService.ACTION_START_WIRELESS_SCAN
                         }
@@ -354,13 +359,29 @@ class HomeFragment : Fragment() {
                         // Already connected
                     } else {
                         val strategy = App.provide(requireContext()).settings.helperConnectionStrategy
-                        if (strategy == 2) {
+                        if (strategy == 4) {
+                            if (!AapService.scanningState.value) {
+                                (requireActivity() as? MainActivity)?.beginAutoConnect("manual WiFi helper scan")
+                                val intent = Intent(requireContext(), AapService::class.java).apply {
+                                    action = AapService.ACTION_START_WIRELESS_SCAN
+                                }
+                                ContextCompat.startForegroundService(requireContext(), intent)
+                            }
+                            if (App.provide(requireContext()).settings.autoEnableHotspot) {
+                                com.andrerinas.headunitrevived.utils.ShareHotspotQrDialog.show(
+                                    requireContext()
+                                )
+                            } else {
+                                Toast.makeText(requireContext(), getString(R.string.searching_phone), Toast.LENGTH_SHORT).show()
+                            }
+                        } else if (strategy == 2) {
                             // Nearby Devices — show live discovery dialog
                             showNearbyDeviceSelector()
                         } else if (AapService.scanningState.value) {
                             Toast.makeText(requireContext(), getString(R.string.already_searching_phone), Toast.LENGTH_SHORT).show()
                         } else {
                             Toast.makeText(requireContext(), getString(R.string.searching_phone), Toast.LENGTH_SHORT).show()
+                            (requireActivity() as? MainActivity)?.beginAutoConnect("manual WiFi helper scan")
                             val intent = Intent(requireContext(), AapService::class.java).apply {
                                 action = AapService.ACTION_START_WIRELESS_SCAN
                             }
@@ -438,7 +459,8 @@ class HomeFragment : Fragment() {
             .setItems(deviceNames) { _, which ->
                 val device = bondedDevices[which]
                 AppLog.i("HomeFragment: Manually selected ${device.name} for Native-AA poke")
-                
+
+                (requireActivity() as? MainActivity)?.beginAutoConnect("manual Native-AA poke")
                 val intent = Intent(requireContext(), AapService::class.java).apply {
                     action = AapService.ACTION_NATIVE_AA_POKE
                     putExtra(AapService.EXTRA_MAC, device.address)
@@ -458,11 +480,8 @@ class HomeFragment : Fragment() {
             })
 
         val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_nearby_selection, null)
-        val listContainer = dialogView.findViewById<View>(R.id.listContainer)
         val deviceListView = dialogView.findViewById<ListView>(R.id.deviceList)
         val searchingText = dialogView.findViewById<TextView>(R.id.searchingText)
-        val connectingContainer = dialogView.findViewById<View>(R.id.connectingContainer)
-        val connectingText = dialogView.findViewById<TextView>(R.id.connectingText)
         val connectionProgress = dialogView.findViewById<ProgressBar>(R.id.connectionProgress)
 
         // Ensure the loading spinner is visible in both Light and Dark modes by forcing our brand color.
@@ -516,14 +535,17 @@ class HomeFragment : Fragment() {
             if (which < endpoints.size) {
                 val endpoint = endpoints[which]
                 AppLog.i("HomeFragment: Selected Nearby device: ${endpoint.name} (${endpoint.id})")
-                
-                // UI Switch: Hide list, show connecting spinner
-                listContainer.visibility = View.GONE
-                connectingContainer.visibility = View.VISIBLE
-                connectingText.text = getString(R.string.connecting_to_nearby, endpoint.name)
-                
-                // Allow the user to see the progress
-                dialog.setCancelable(false) 
+
+                // Hand off to the auto-connect overlay so the user gets the same
+                // visual treatment as every other connection path. Pass the
+                // endpoint name so the loading screen can show "Connecting to
+                // <device>…" instead of the generic status text.
+                val statusText = getString(R.string.connecting_to_nearby, endpoint.name)
+                dialog.dismiss()
+                (requireActivity() as? MainActivity)?.beginAutoConnect(
+                    "manual Nearby select ${endpoint.name}",
+                    statusText
+                )
 
                 val intent = Intent(requireContext(), AapService::class.java).apply {
                     action = AapService.ACTION_NEARBY_CONNECT
