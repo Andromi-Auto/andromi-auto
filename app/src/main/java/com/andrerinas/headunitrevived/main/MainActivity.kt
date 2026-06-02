@@ -57,7 +57,6 @@ class MainActivity : BaseActivity() {
 
     private var autoConnectWatchdog: Job? = null
     private var autoConnectKenBurnsAnim: ObjectAnimator? = null
-    private var hasAdvancedToActiveState = false
 
     /**
      * Visual mode for an in-progress auto-connect attempt. PILL is a small,
@@ -67,14 +66,6 @@ class MainActivity : BaseActivity() {
      * the user explicitly triggered with a button.
      */
     enum class ConnectionUiMode { PILL, OVERLAY }
-    /**
-     * Optional override for the loading-screen status text (e.g. "Connecting to
-     * Pixel 8…" from the Nearby selector). When `null`, the default
-     * `R.string.android_auto_starting` is used. Stored on the activity so the
-     * value survives the show/recreate cycle as long as the static
-     * [autoConnectInProgress] flag is set.
-     */
-    private var autoConnectStatusText: String? = null
 
     private val finishReceiver = object : android.content.BroadcastReceiver() {
         override fun onReceive(context: android.content.Context, intent: Intent) {
@@ -913,6 +904,25 @@ class MainActivity : BaseActivity() {
          * mode the original [beginAutoConnect] caller asked for.
          */
         @Volatile var autoConnectMode: ConnectionUiMode = ConnectionUiMode.OVERLAY
+
+        /**
+         * Optional override for the status text (e.g. "Connecting to Pixel 8…"
+         * from the Nearby selector). When `null`, the default
+         * `R.string.android_auto_starting` is used. Kept on the companion so
+         * the customized text isn't lost if the activity is recreated mid
+         * attempt.
+         */
+        @Volatile var autoConnectStatusText: String? = null
+
+        /**
+         * Tracks whether the connection attempt has reached an active state
+         * (Connecting/Connected/StartingTransport). Used by the connection
+         * observer to distinguish a genuine mid-attempt Disconnect (failure)
+         * from the initial Disconnected state on app launch (expected). Kept
+         * on the companion so a recreated activity does not lose this signal
+         * and mistakenly treat a real failure as the initial state.
+         */
+        @Volatile var hasAdvancedToActiveState: Boolean = false
 
         const val ACTION_RECREATE_MAIN = "com.andrerinas.headunitrevived.ACTION_RECREATE_MAIN"
     }

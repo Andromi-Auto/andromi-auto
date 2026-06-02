@@ -1657,13 +1657,11 @@ class AapService : Service(), UsbReceiver.Listener {
             }
             ACTION_DISCONNECT            -> {
                 AppLog.i("Disconnect action received.")
-                // isConnected covers Connected/StartingTransport/HandshakeComplete/
-                // TransportStarted, but a pending attempt in the Connecting state
-                // also needs to be cancellable so the UI cancel paths work before
-                // the handshake completes.
-                if (commManager.connectionState.value !is CommManager.ConnectionState.Disconnected) {
-                    commManager.disconnect()
-                }
+                // disconnect() has its own early-return when already Disconnected,
+                // and unlike the previous isConnected guard it also covers the
+                // Connecting state, so the UI cancel paths work before handshake
+                // completes.
+                commManager.disconnect()
             }
             ACTION_CONNECT_SOCKET        -> {
                 // Caller already invoked commManager.connect(socket); the connectionState
