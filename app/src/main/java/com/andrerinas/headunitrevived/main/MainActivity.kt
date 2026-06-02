@@ -248,12 +248,23 @@ class MainActivity : BaseActivity() {
     @JvmOverloads
     fun beginAutoConnect(reason: String, mode: ConnectionUiMode, customStatusText: String? = null) {
         if (autoConnectInProgress) return
+        val commManager = App.provide(this).commManager
         // If we are already past the connection phase, no indicator is needed.
-        if (App.provide(this).commManager.isConnected) return
+        if (commManager.isConnected) return
         AppLog.i("Auto-connect: begin ($reason, mode=$mode)")
         autoConnectInProgress = true
         autoConnectMode = mode
-        hasAdvancedToActiveState = false
+        // Seed hasAdvancedToActiveState from the current connection state. If
+        // something else (e.g. AapService responding to a USB attach) already
+        // moved the state into Connecting before we got here, the StateFlow
+        // will not re-emit it, so the observer would never flip the flag to
+        // true on its own. Without this seed, a subsequent failure transition
+        // to Disconnected would be misread as the initial Disconnected on
+        // launch and ignored until the 30 s watchdog kicks in.
+        val currentState = commManager.connectionState.value
+        hasAdvancedToActiveState = currentState is CommManager.ConnectionState.Connecting ||
+                currentState is CommManager.ConnectionState.Connected ||
+                currentState is CommManager.ConnectionState.StartingTransport
         autoConnectStatusText = customStatusText
         // Hand the status text off to AapProjectionActivity so its own loading
         // screen continues to show the same context-specific label after the

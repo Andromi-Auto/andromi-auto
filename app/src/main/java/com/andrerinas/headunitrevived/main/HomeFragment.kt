@@ -127,11 +127,12 @@ class HomeFragment : Fragment() {
                 Settings.AUTO_CONNECT_LAST_SESSION -> {
                     if (appSettings.autoConnectLastSession && !hasAttemptedAutoConnect && !commManager.isConnected) {
                         hasAttemptedAutoConnect = true
-                        (requireActivity() as? MainActivity)?.beginAutoConnect(
-                            "auto-connect last session",
-                            MainActivity.ConnectionUiMode.PILL
-                        )
-                        attemptAutoConnect()
+                        if (attemptAutoConnect()) {
+                            (requireActivity() as? MainActivity)?.beginAutoConnect(
+                                "auto-connect last session",
+                                MainActivity.ConnectionUiMode.PILL
+                            )
+                        }
                     }
                 }
                 Settings.AUTO_CONNECT_SELF_MODE -> {
@@ -148,11 +149,12 @@ class HomeFragment : Fragment() {
                 Settings.AUTO_CONNECT_SINGLE_USB -> {
                     if (appSettings.autoConnectSingleUsbDevice && !hasAttemptedSingleUsbAutoConnect && !commManager.isConnected) {
                         hasAttemptedSingleUsbAutoConnect = true
-                        (requireActivity() as? MainActivity)?.beginAutoConnect(
-                            "auto-connect single USB",
-                            MainActivity.ConnectionUiMode.PILL
-                        )
-                        attemptSingleUsbAutoConnect()
+                        if (attemptSingleUsbAutoConnect()) {
+                            (requireActivity() as? MainActivity)?.beginAutoConnect(
+                                "auto-connect single USB",
+                                MainActivity.ConnectionUiMode.PILL
+                            )
+                        }
                     }
                 }
             }
@@ -189,29 +191,38 @@ class HomeFragment : Fragment() {
         startSelfModeInternal()
     }
 
-    private fun attemptAutoConnect() {
+    /**
+     * Tries to start an auto-reconnect to the last session.
+     *
+     * @return `true` if a connection attempt was actually dispatched (so the
+     *   caller should surface the pill), `false` if nothing was started (e.g.
+     *   Native AA mode, no last session, missing USB device or permission).
+     *   Returning a flag prevents the pill from being shown for 30 s when no
+     *   work was queued.
+     */
+    private fun attemptAutoConnect(): Boolean {
         val appSettings = App.provide(requireContext()).settings
 
         // [FIX] Skip manual WiFi connection if Native AA is selected.
         // Native AA handles its own handshake via Bluetooth/P2P.
         if (appSettings.wifiConnectionMode == 3) {
             AppLog.i("HomeFragment: Native AA mode active. Skipping manual auto-connect attempt.")
-            return
+            return false
         }
 
         if (!appSettings.autoConnectLastSession ||
             !appSettings.hasAcceptedDisclaimer ||
             commManager.isConnected) {
-            return
+            return false
         }
 
         val connectionType = appSettings.lastConnectionType
         if (connectionType.isEmpty()) {
             AppLog.i("Auto-connect: No last session to reconnect to")
-            return
+            return false
         }
 
-        when (connectionType) {
+        return when (connectionType) {
             Settings.CONNECTION_TYPE_WIFI -> {
                 val ip = appSettings.lastConnectionIp
                 if (ip.isNotEmpty()) {
@@ -222,7 +233,8 @@ class HomeFragment : Fragment() {
                     ContextCompat.startForegroundService(requireContext(), Intent(requireContext(), AapService::class.java).apply {
                         action = AapService.ACTION_CONNECT_SOCKET
                     })
-                }
+                    true
+                } else false
             }
             Settings.CONNECTION_TYPE_USB -> {
                 val lastUsbDevice = appSettings.lastConnectionUsbDevice
@@ -237,29 +249,39 @@ class HomeFragment : Fragment() {
                         ContextCompat.startForegroundService(requireContext(), Intent(requireContext(), AapService::class.java).apply {
                             action = AapService.ACTION_CHECK_USB
                         })
+                        true
                     } else {
                         AppLog.i("Auto-connect: USB device $lastUsbDevice not found or no permission")
+                        false
                     }
-                }
+                } else false
             }
             Settings.CONNECTION_TYPE_NEARBY -> {
                 AppLog.i("Auto-connect: Last session was via Google Nearby. AapService will handle discovery.")
                 // No manual connect(ip) needed, NearbyManager in AapService manages this automatically on start.
+                true
             }
+            else -> false
         }
     }
 
-    private fun attemptSingleUsbAutoConnect() {
+    /**
+     * @return `true` if a single-USB connection attempt was dispatched,
+     *   `false` if guards (setting disabled, disclaimer pending, already
+     *   connected) blocked it. Same intent as [attemptAutoConnect].
+     */
+    private fun attemptSingleUsbAutoConnect(): Boolean {
         val appSettings = App.provide(requireContext()).settings
         if (!appSettings.autoConnectSingleUsbDevice ||
             !appSettings.hasAcceptedDisclaimer ||
-            commManager.isConnected) return
+            commManager.isConnected) return false
 
         AppLog.i("HomeFragment: Requesting single-USB auto-connect via AapService")
         ContextCompat.startForegroundService(requireContext(),
             Intent(requireContext(), AapService::class.java).apply {
                 action = AapService.ACTION_CHECK_USB
             })
+        return true
     }
 
     private val originalBackgrounds = mapOf(
