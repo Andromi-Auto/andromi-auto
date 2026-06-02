@@ -58,6 +58,15 @@ class MainActivity : BaseActivity() {
     private var autoConnectWatchdog: Job? = null
     private var autoConnectKenBurnsAnim: ObjectAnimator? = null
     private var hasAdvancedToActiveState = false
+
+    /**
+     * Visual mode for an in-progress auto-connect attempt. PILL is a small,
+     * non-blocking status indicator at the top of the home screen used for
+     * fully automatic background attempts so the home buttons stay tappable.
+     * OVERLAY is the full-screen custom loading screen used for connections
+     * the user explicitly triggered with a button.
+     */
+    enum class ConnectionUiMode { PILL, OVERLAY }
     /**
      * Optional override for the loading-screen status text (e.g. "Connecting to
      * Pixel 8…" from the Nearby selector). When `null`, the default
@@ -170,6 +179,14 @@ class MainActivity : BaseActivity() {
 
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
+                // While the full-screen overlay is up, treat Back as cancel so the
+                // user isn't trapped if a manual connection attempt hangs. Pill
+                // mode is non-blocking, so Back falls through to its normal
+                // navigation behavior there.
+                if (autoConnectInProgress && autoConnectMode == ConnectionUiMode.OVERLAY) {
+                    cancelAutoConnect()
+                    return
+                }
                 if (navController.navigateUp()) {
                     return
                 } else if (System.currentTimeMillis() - lastBackPressTime < 2000) {
@@ -208,30 +225,43 @@ class MainActivity : BaseActivity() {
         // call beginAutoConnect() directly from their entry points.
         if (savedInstanceState == null &&
             intent?.getStringExtra(EXTRA_LAUNCH_SOURCE) == "USB auto-start") {
-            beginAutoConnect("USB auto-start")
+            beginAutoConnect("USB auto-start", ConnectionUiMode.PILL)
+        }
+
+        // Wire cancel affordances. Pill click and overlay cancel button both
+        // route through the same cancellation path.
+        findViewById<View>(R.id.auto_connect_pill)?.setOnClickListener {
+            cancelAutoConnect()
+        }
+        findViewById<View>(R.id.auto_connect_loading_cancel)?.setOnClickListener {
+            cancelAutoConnect()
         }
 
         observeConnectionStateForOverlay()
     }
 
     /**
-     * Mark that an automatic connection attempt has started and surface the loading
-     * overlay over the home screen. Called from HomeFragment auto-connect paths and
-     * from MainActivity itself when launched via USB auto-attach.
+     * Mark that an automatic connection attempt has started and surface a status
+     * indicator over the home screen. Called from HomeFragment auto-connect paths
+     * and from MainActivity itself when launched via USB auto-attach.
      *
      * @param reason Diagnostic label written to the log.
-     * @param customStatusText Optional override for the loading-screen status text.
-     *        If provided and the user has the show-text option enabled, this string
-     *        is shown instead of the generic "Android Auto is starting…". Used by
-     *        the Nearby selector to surface the picked device name.
+     * @param mode PILL for non-blocking background attempts (home buttons stay
+     *        usable), OVERLAY for user-initiated attempts (full-screen custom
+     *        loading screen with cancel button).
+     * @param customStatusText Optional override for the status text. If provided
+     *        and the user has the show-text option enabled, this string is shown
+     *        instead of the generic "Android Auto is starting…". Used by the
+     *        Nearby selector to surface the picked device name.
      */
     @JvmOverloads
-    fun beginAutoConnect(reason: String, customStatusText: String? = null) {
+    fun beginAutoConnect(reason: String, mode: ConnectionUiMode, customStatusText: String? = null) {
         if (autoConnectInProgress) return
-        // If we are already past the connection phase, no overlay is needed.
+        // If we are already past the connection phase, no indicator is needed.
         if (App.provide(this).commManager.isConnected) return
-        AppLog.i("Auto-connect overlay: begin ($reason)")
+        AppLog.i("Auto-connect: begin ($reason, mode=$mode)")
         autoConnectInProgress = true
+        autoConnectMode = mode
         hasAdvancedToActiveState = false
         autoConnectStatusText = customStatusText
         // Hand the status text off to AapProjectionActivity so its own loading
@@ -240,7 +270,34 @@ class MainActivity : BaseActivity() {
         // this on its first launch; we always overwrite it here (even with
         // null) so a stale value from a prior attempt can't leak across.
         AapProjectionActivity.pendingStatusText = customStatusText
-        showAutoConnectOverlay()
+        showAutoConnectUi()
+    }
+
+    /**
+     * Dispatches to the pill or overlay show-method based on [autoConnectMode].
+     */
+    private fun showAutoConnectUi() {
+        when (autoConnectMode) {
+            ConnectionUiMode.PILL -> showAutoConnectPill()
+            ConnectionUiMode.OVERLAY -> showAutoConnectOverlay()
+        }
+    }
+
+    /**
+     * Cancels an in-progress auto-connect attempt, regardless of whether it
+     * has reached the Connecting state yet. Safe to call even if no attempt is
+     * pending. Invoked by pill tap, overlay cancel button, and back-press when
+     * the overlay is up.
+     */
+    private fun cancelAutoConnect() {
+        if (!autoConnectInProgress) return
+        AppLog.i("Auto-connect: cancelled by user")
+        // disconnect() handles all states including the Connecting state where
+        // ACTION_DISCONNECT in AapService used to be a no-op. Setting state to
+        // Disconnected here also feeds the observer, but we end the UI
+        // immediately rather than waiting for the round-trip.
+        App.provide(this).commManager.disconnect()
+        endAutoConnect(success = false)
     }
 
     /**
@@ -262,11 +319,11 @@ class MainActivity : BaseActivity() {
                         is CommManager.ConnectionState.Connected,
                         is CommManager.ConnectionState.StartingTransport -> {
                             hasAdvancedToActiveState = true
-                            // The overlay should already be visible (set when auto-connect
+                            // The pill/overlay should already be visible (set when auto-connect
                             // was requested); ensure it is in case the request raced with
-                            // setContentView.
+                            // setContentView or the activity was recreated mid-attempt.
                             if (autoConnectInProgress) {
-                                showAutoConnectOverlay()
+                                showAutoConnectUi()
                             }
                         }
                         is CommManager.ConnectionState.HandshakeComplete,
@@ -309,10 +366,12 @@ class MainActivity : BaseActivity() {
         if (!success) {
             // Failure path: AAP is not going to launch, so clear the handover
             // value so it can't appear on a later, unrelated connection. On
-            // success we leave it alone — AAP either already consumed it in
+            // success we leave it alone, AAP either already consumed it in
             // onCreate or is about to.
             AapProjectionActivity.pendingStatusText = null
         }
+        // Pill cleanup is cheap and safe to run regardless of mode.
+        hideAutoConnectPill()
         if (success) {
             // On success the projection activity will cover our overlay almost
             // immediately. Hiding without an animation avoids the fade competing
@@ -324,6 +383,31 @@ class MainActivity : BaseActivity() {
         } else {
             hideAutoConnectOverlay()
         }
+    }
+
+    private fun showAutoConnectPill() {
+        // Watchdog backstop applies to pill mode too so the indicator can't
+        // get stuck if the connection attempt never produces an event.
+        if (autoConnectWatchdog?.isActive != true) {
+            startAutoConnectWatchdog()
+        }
+
+        val pill = findViewById<View>(R.id.auto_connect_pill) ?: return
+        val pillText = findViewById<android.widget.TextView>(R.id.auto_connect_pill_text)
+        pillText?.text = autoConnectStatusText ?: getString(R.string.android_auto_starting)
+        if (pill.visibility == View.VISIBLE) return
+
+        pill.visibility = View.VISIBLE
+        pill.bringToFront()
+        // Suppress the launch splash if it is still up so the pill is visible
+        // immediately on auto-connect from a cold start.
+        findViewById<View>(R.id.splash_overlay)?.visibility = View.GONE
+    }
+
+    private fun hideAutoConnectPill() {
+        val pill = findViewById<View>(R.id.auto_connect_pill) ?: return
+        if (pill.visibility != View.VISIBLE) return
+        pill.visibility = View.GONE
     }
 
     private fun startAutoConnectWatchdog() {
@@ -582,10 +666,10 @@ class MainActivity : BaseActivity() {
 
     override fun onStop() {
         super.onStop()
-        // Free media resources whenever the activity is backgrounded — covers user
+        // Free media resources whenever the activity is backgrounded. Covers user
         // pressing Home, AapProjectionActivity coming to front (success), and
         // navigating to SettingsActivity. The connection itself keeps running in
-        // AapService; this only tears down the visual overlay. The watchdog is
+        // AapService; this only tears down the visual indicator. The watchdog is
         // intentionally NOT cancelled here so the flag is still cleared if every
         // remaining state transition happens while the activity is stopped.
         if (findViewById<View>(R.id.auto_connect_loading_overlay)?.visibility == View.VISIBLE) {
@@ -594,6 +678,9 @@ class MainActivity : BaseActivity() {
             autoConnectKenBurnsAnim = null
             findViewById<View>(R.id.auto_connect_loading_overlay)?.visibility = View.GONE
         }
+        // Pill has no media resources but should also be hidden so it doesn't
+        // briefly flash on resume before the observer re-applies the UI.
+        findViewById<View>(R.id.auto_connect_pill)?.visibility = View.GONE
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -814,11 +901,19 @@ class MainActivity : BaseActivity() {
         private const val AUTO_CONNECT_WATCHDOG_MS = 30_000L
 
         /**
-         * `true` while the loading overlay should be (or is) covering the home
+         * `true` while the loading indicator should be (or is) covering the home
          * screen during an automatic connection attempt. Set by entry points
          * that initiate an auto-connect; cleared by [endAutoConnect].
          */
         @Volatile var autoConnectInProgress: Boolean = false
+
+        /**
+         * Visual mode for the in-progress attempt. Kept on the companion so a
+         * recreated activity (e.g. after rotation) can re-apply the same UI
+         * mode the original [beginAutoConnect] caller asked for.
+         */
+        @Volatile var autoConnectMode: ConnectionUiMode = ConnectionUiMode.OVERLAY
+
         const val ACTION_RECREATE_MAIN = "com.andrerinas.headunitrevived.ACTION_RECREATE_MAIN"
     }
 }

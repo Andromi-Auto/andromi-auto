@@ -127,7 +127,10 @@ class HomeFragment : Fragment() {
                 Settings.AUTO_CONNECT_LAST_SESSION -> {
                     if (appSettings.autoConnectLastSession && !hasAttemptedAutoConnect && !commManager.isConnected) {
                         hasAttemptedAutoConnect = true
-                        (requireActivity() as? MainActivity)?.beginAutoConnect("auto-connect last session")
+                        (requireActivity() as? MainActivity)?.beginAutoConnect(
+                            "auto-connect last session",
+                            MainActivity.ConnectionUiMode.PILL
+                        )
                         attemptAutoConnect()
                     }
                 }
@@ -135,14 +138,20 @@ class HomeFragment : Fragment() {
                     if ((appSettings.autoStartSelfMode || forceSelfModeLaunch) && !hasAutoStarted && !commManager.isConnected) {
                         hasAutoStarted = true
                         forceSelfModeLaunch = false // Reset once processed
-                        (requireActivity() as? MainActivity)?.beginAutoConnect("auto-start self mode")
+                        (requireActivity() as? MainActivity)?.beginAutoConnect(
+                            "auto-start self mode",
+                            MainActivity.ConnectionUiMode.PILL
+                        )
                         startSelfMode()
                     }
                 }
                 Settings.AUTO_CONNECT_SINGLE_USB -> {
                     if (appSettings.autoConnectSingleUsbDevice && !hasAttemptedSingleUsbAutoConnect && !commManager.isConnected) {
                         hasAttemptedSingleUsbAutoConnect = true
-                        (requireActivity() as? MainActivity)?.beginAutoConnect("auto-connect single USB")
+                        (requireActivity() as? MainActivity)?.beginAutoConnect(
+                            "auto-connect single USB",
+                            MainActivity.ConnectionUiMode.PILL
+                        )
                         attemptSingleUsbAutoConnect()
                     }
                 }
@@ -320,7 +329,10 @@ class HomeFragment : Fragment() {
                 aapIntent.putExtra(AapProjectionActivity.EXTRA_FOCUS, true)
                 startActivity(aapIntent)
             } else {
-                (requireActivity() as? MainActivity)?.beginAutoConnect("manual self mode")
+                (requireActivity() as? MainActivity)?.beginAutoConnect(
+                    "manual self mode",
+                    MainActivity.ConnectionUiMode.OVERLAY
+                )
                 startSelfMode()
             }
         }
@@ -347,7 +359,10 @@ class HomeFragment : Fragment() {
                         Toast.makeText(requireContext(), getString(R.string.already_scanning), Toast.LENGTH_SHORT).show()
                     } else {
                         Toast.makeText(requireContext(), getString(R.string.searching_headunit_server), Toast.LENGTH_SHORT).show()
-                        (requireActivity() as? MainActivity)?.beginAutoConnect("manual WiFi headunit server scan")
+                        (requireActivity() as? MainActivity)?.beginAutoConnect(
+                            "manual WiFi headunit server scan",
+                            MainActivity.ConnectionUiMode.OVERLAY
+                        )
                         val intent = Intent(requireContext(), AapService::class.java).apply {
                             action = AapService.ACTION_START_WIRELESS_SCAN
                         }
@@ -361,7 +376,10 @@ class HomeFragment : Fragment() {
                         val strategy = App.provide(requireContext()).settings.helperConnectionStrategy
                         if (strategy == 4) {
                             if (!AapService.scanningState.value) {
-                                (requireActivity() as? MainActivity)?.beginAutoConnect("manual WiFi helper scan")
+                                (requireActivity() as? MainActivity)?.beginAutoConnect(
+                                    "manual WiFi helper scan",
+                                    MainActivity.ConnectionUiMode.OVERLAY
+                                )
                                 val intent = Intent(requireContext(), AapService::class.java).apply {
                                     action = AapService.ACTION_START_WIRELESS_SCAN
                                 }
@@ -381,7 +399,10 @@ class HomeFragment : Fragment() {
                             Toast.makeText(requireContext(), getString(R.string.already_searching_phone), Toast.LENGTH_SHORT).show()
                         } else {
                             Toast.makeText(requireContext(), getString(R.string.searching_phone), Toast.LENGTH_SHORT).show()
-                            (requireActivity() as? MainActivity)?.beginAutoConnect("manual WiFi helper scan")
+                            (requireActivity() as? MainActivity)?.beginAutoConnect(
+                                "manual WiFi helper scan",
+                                MainActivity.ConnectionUiMode.OVERLAY
+                            )
                             val intent = Intent(requireContext(), AapService::class.java).apply {
                                 action = AapService.ACTION_START_WIRELESS_SCAN
                             }
@@ -460,7 +481,10 @@ class HomeFragment : Fragment() {
                 val device = bondedDevices[which]
                 AppLog.i("HomeFragment: Manually selected ${device.name} for Native-AA poke")
 
-                (requireActivity() as? MainActivity)?.beginAutoConnect("manual Native-AA poke")
+                (requireActivity() as? MainActivity)?.beginAutoConnect(
+                    "manual Native-AA poke",
+                    MainActivity.ConnectionUiMode.OVERLAY
+                )
                 val intent = Intent(requireContext(), AapService::class.java).apply {
                     action = AapService.ACTION_NATIVE_AA_POKE
                     putExtra(AapService.EXTRA_MAC, device.address)
@@ -544,6 +568,7 @@ class HomeFragment : Fragment() {
                 dialog.dismiss()
                 (requireActivity() as? MainActivity)?.beginAutoConnect(
                     "manual Nearby select ${endpoint.name}",
+                    MainActivity.ConnectionUiMode.OVERLAY,
                     statusText
                 )
 
