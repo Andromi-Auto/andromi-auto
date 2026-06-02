@@ -31,7 +31,10 @@ internal class AapMessageHandlerType(
         // High priority for the smoothest possible display.
         if (message.channel == Channel.ID_VID) {
              if (aapVideo.process(message)) {
-                 // ACK is now sent asynchronously by videoDecoder.onFrameRendered
+                 // Send ACK AFTER processing
+                 if (msgType == 0 || msgType == 1) {
+                     transport.sendMediaAck(message.channel)
+                 }
                  return
              }
         }
