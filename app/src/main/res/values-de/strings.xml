@@ -540,4 +540,12 @@
     <string name="bluetooth_adapter_label">Bluetooth-Adapter</string>
     <string name="bluetooth_adapter_description">Wähle den Bluetooth-Adapter/Controller für den Handshake aus. Nützlich bei Systemen mit zwei Bluetooth-Modulen.</string>
     <string name="select_bt_adapter">Bluetooth-Adapter auswählen</string>
+    <!-- QR Code Generator -->
+    <string name="share_hotspot_qr_title">Wireless Helper konfigurieren</string>
+    <string name="share_hotspot_qr_desc">Zeige QR-Code für automatische Verbindung am Handy</string>
+    <string name="hotspot_ssid_hint">Hotspot SSID</string>
+    <string name="hotspot_pass_hint">Hotspot Passwort</string>
+    <string name="hotspot_qr_description">Wireless Helper Konfigurations-QR-Code</string>
+    <string name="scan_with_wireless_helper">Scanne diesen QR-Code mit dem QR-Scanner im Wireless Helper auf deinem Handy.</string>
+    <string name="share_hotspot_qr_error">Hotspot-Zugangsdaten konnten nicht abgerufen werden. Bitte stelle sicher, dass der Hotspot und der Standort aktiviert sind.</string>
 </resources>

@@ -1003,4 +1003,12 @@ class Settings(private val context: Context) {
         get() = prefs.getString("bluetooth-manager-service-name", "bluetooth_manager")!!
         set(value) = prefs.edit().putString("bluetooth-manager-service-name", value).apply()
 
+    var hotspotSsid: String
+        get() = prefs.getString("hotspot-ssid", "")!!
+        set(value) = prefs.edit().putString("hotspot-ssid", value).apply()
+
+    var hotspotPassword: String
+        get() = prefs.getString("hotspot-password", "")!!
+        set(value) = prefs.edit().putString("hotspot-password", value).apply()
+
 }

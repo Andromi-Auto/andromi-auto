@@ -49,6 +49,9 @@ dependencies {
     // Glide for image/GIF loading (custom loading screen)
     implementation("com.github.bumptech.glide:glide:4.16.0")
     kapt("com.github.bumptech.glide:compiler:4.16.0")
+
+    // ZXing for QR Code generation
+    implementation("com.google.zxing:core:3.5.3")
 }
 
 android {

@@ -78,6 +78,7 @@ class SettingsFragment : Fragment() {
     private var pendingScreenOrientation: Settings.ScreenOrientation? = null
     private var pendingAppLanguage: String? = null
     private var pendingFakeSpeed: Boolean? = null
+    private var pendingUseNativeSsl: Boolean? = null
 
     private var pendingWifiConnectionMode: Int? = null
     private var pendingHelperConnectionStrategy: Int? = null
@@ -168,6 +169,7 @@ class SettingsFragment : Fragment() {
         pendingStaticAudioFocus = settings.staticAudioFocus
         pendingSeparateAudioStreams = settings.separateAudioStreams
         pendingUseAacAudio = settings.useAacAudio
+        pendingUseNativeSsl = settings.useNativeSsl
         pendingMicInputSource = settings.micInputSource
         pendingEnableRotary = settings.enableRotary
         pendingAudioLatencyMultiplier = settings.audioLatencyMultiplier
@@ -356,6 +358,7 @@ class SettingsFragment : Fragment() {
         pendingStaticAudioFocus?.let { settings.staticAudioFocus = it }
         pendingSeparateAudioStreams?.let { settings.separateAudioStreams = it }
         pendingUseAacAudio?.let { settings.useAacAudio = it }
+        pendingUseNativeSsl?.let { settings.useNativeSsl = it }
         pendingMicInputSource?.let { settings.micInputSource = it }
         pendingEnableRotary?.let { settings.enableRotary = it }
         pendingAudioLatencyMultiplier?.let { settings.audioLatencyMultiplier = it }
@@ -469,6 +472,7 @@ class SettingsFragment : Fragment() {
                         pendingHelperConnectionStrategy != settings.helperConnectionStrategy ||
                         pendingWaitForWifi != settings.waitForWifiBeforeWifiDirect ||
                         pendingWaitForWifiTimeout != settings.waitForWifiTimeout ||
+                        pendingUseNativeSsl != settings.useNativeSsl ||
                         pendingBluetoothManagerServiceName != settings.bluetoothManagerServiceName
 
         hasChanges = anyChange
@@ -484,6 +488,7 @@ class SettingsFragment : Fragment() {
                           pendingStaticAudioFocus != settings.staticAudioFocus ||
                           pendingSeparateAudioStreams != settings.separateAudioStreams ||
                           pendingUseAacAudio != settings.useAacAudio ||
+                          pendingUseNativeSsl != settings.useNativeSsl ||
                           pendingAudioLatencyMultiplier != settings.audioLatencyMultiplier ||
                           pendingAudioQueueCapacity != settings.audioQueueCapacity ||
                           pendingInsetLeft != settings.insetLeft ||
@@ -691,6 +696,14 @@ class SettingsFragment : Fragment() {
             // Mode 2 only shows Hotspot toggle for Strategy 4 (Headunit Hotspot)
             if (pendingHelperConnectionStrategy == 4) {
                 addHotspotToggle(items)
+                items.add(SettingItem.SettingEntry(
+                    stableId = "shareHotspotQr",
+                    nameResId = R.string.share_hotspot_qr_title,
+                    value = getString(R.string.share_hotspot_qr_desc),
+                    onClick = { _ ->
+                        com.andrerinas.headunitrevived.utils.ShareHotspotQrDialog.show(requireContext())
+                    }
+                ))
             }
 
             if (pendingHelperConnectionStrategy == 1) { // WiFi Direct (P2P)
@@ -1026,6 +1039,18 @@ class SettingsFragment : Fragment() {
             isChecked = pendingForceSoftware!!,
             onCheckedChanged = { isChecked ->
                 pendingForceSoftware = isChecked
+                checkChanges()
+                updateSettingsList()
+            }
+        ))
+
+        items.add(SettingItem.ToggleSettingEntry(
+            stableId = "useNativeSsl",
+            nameResId = R.string.use_native_ssl,
+            descriptionResId = R.string.use_native_ssl_description,
+            isChecked = pendingUseNativeSsl ?: false,
+            onCheckedChanged = { isChecked ->
+                pendingUseNativeSsl = isChecked
                 checkChanges()
                 updateSettingsList()
             }

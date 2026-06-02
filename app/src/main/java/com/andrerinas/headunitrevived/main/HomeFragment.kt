@@ -359,7 +359,22 @@ class HomeFragment : Fragment() {
                         // Already connected
                     } else {
                         val strategy = App.provide(requireContext()).settings.helperConnectionStrategy
-                        if (strategy == 2) {
+                        if (strategy == 4) {
+                            if (!AapService.scanningState.value) {
+                                (requireActivity() as? MainActivity)?.beginAutoConnect("manual WiFi helper scan")
+                                val intent = Intent(requireContext(), AapService::class.java).apply {
+                                    action = AapService.ACTION_START_WIRELESS_SCAN
+                                }
+                                ContextCompat.startForegroundService(requireContext(), intent)
+                            }
+                            if (App.provide(requireContext()).settings.autoEnableHotspot) {
+                                com.andrerinas.headunitrevived.utils.ShareHotspotQrDialog.show(
+                                    requireContext()
+                                )
+                            } else {
+                                Toast.makeText(requireContext(), getString(R.string.searching_phone), Toast.LENGTH_SHORT).show()
+                            }
+                        } else if (strategy == 2) {
                             // Nearby Devices — show live discovery dialog
                             showNearbyDeviceSelector()
                         } else if (AapService.scanningState.value) {
