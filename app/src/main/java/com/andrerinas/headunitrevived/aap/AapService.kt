@@ -717,9 +717,10 @@ class AapService : Service(), UsbReceiver.Listener {
             if (appSettings.wifiConnectionMode == 3) {
                 AppLog.i("AapService: Received WiFi credentials from manager (SSID=$ssid, IP=$ip). Updating and Triggering Poke.")
                 nativeAaHandshakeManager?.updateWifiCredentials(ssid, psk, ip, bssid)
-                // [FIX] Only auto-poke if the user didn't explicitly exit.
-                // If they did, they must click the "WiFi" button manually to poke.
-                if (!userExitedAA) {
+                if (commManager.isConnected ||
+                    commManager.connectionState.value is CommManager.ConnectionState.Connecting) {
+                    AppLog.i("AapService: USB/other session already active. Skipping auto-poke to avoid pulling phone into wireless flow.")
+                } else if (!userExitedAA) {
                     nativeAaHandshakeManager?.triggerPoke()
                 } else {
                     AppLog.i("AapService: userExitedAA is true. Skipping auto-poke.")

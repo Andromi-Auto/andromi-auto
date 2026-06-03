@@ -206,6 +206,13 @@ class NativeAaHandshakeManager(
             AppLog.d("NativeAA: triggerPoke() delay starting (2s)...")
             delay(2000) // Small safety delay before connecting
 
+            val comm = com.andrerinas.headunitrevived.App.provide(context).commManager
+            if (comm.isConnected ||
+                comm.connectionState.value is com.andrerinas.headunitrevived.connection.CommManager.ConnectionState.Connecting) {
+                AppLog.i("NativeAA: USB/other session became active during poke delay. Skipping poke.")
+                return@launch
+            }
+
             val devicesToPoke = if (lastMacs.isNotEmpty()) {
                 lastMacs.mapNotNull { mac ->
                     try {
@@ -226,6 +233,10 @@ class NativeAaHandshakeManager(
 
             for (device in devicesToPoke) {
                 if (!isRunning || !isActive) break
+                if (comm.isConnected) {
+                    AppLog.i("NativeAA: USB/other session became active mid-poke. Stopping poke loop.")
+                    break
+                }
                 AppLog.i("NativeAA: Attempting active A2DP poke to device: ${device.name} (${device.address})...")
                 var socket: BluetoothSocket? = null
                 try {
@@ -286,7 +297,15 @@ class NativeAaHandshakeManager(
         try {
             val device = socket.remoteDevice
             AppLog.i("NativeAA: Handling handshake for ${device.name} (${device.address})")
-            
+
+            val comm = com.andrerinas.headunitrevived.App.provide(context).commManager
+            if (comm.isConnected ||
+                comm.connectionState.value is com.andrerinas.headunitrevived.connection.CommManager.ConnectionState.Connecting) {
+                AppLog.i("NativeAA: USB/other session already active. Aborting BT handshake so phone does not start a parallel wireless attempt.")
+                try { socket.close() } catch (_: Exception) {}
+                return@withContext
+            }
+
             val macs = settings.autoStartBluetoothDeviceMacs
             if (!macs.contains(device.address)) {
                 AppLog.i("NativeAA: Saving ${device.address} (${device.name}) to the list of auto-start devices.")
