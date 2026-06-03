@@ -67,7 +67,7 @@ adb shell am start -a android.intent.action.VIEW -d "headunit://connect?ip=192.1
 - **Self-mode on Android 10 (Q) and below:** Google has disabled the automatic wireless projection startup for Android 10 and below in Android Auto versions 16.4 and higher. While Self-mode still works on newer Android versions, it is normally impossible to trigger projection on Android 10 and below directly with recent Google app updates. **Workaround:** You can still use Self-mode on these devices by starting the built-in Android Auto Headunit Server and connecting via Wi-Fi mode (loopback). See the [Troubleshooting Guide](https://github.com/andreknieriem/headunit-revived/wiki/Troubleshooting#self-mode-on-android-10-q-and-below) for step-by-step instructions.
 
 ## Changelog
-### v.3.0.0-alpha
+### v.3.0.0-beta
 - Added: Custom loading screen (image/GIF/video), thanks to @andrecuellar
 - Added: Settings-Reset Button, if you mess up something in the settings, you can now reset them to default
 - Removed: Old deprecated ssl library written in C-Code for better maintenance, stability and smaller file sizes
@@ -78,6 +78,8 @@ adb shell am start -a android.intent.action.VIEW -d "headunit://connect?ip=192.1
 - Added settings export and import functionality with backup options, thanks to @JanRi3D
 - Added whitelist to usb connection for not interrupting with iPhones and other usb devices
 - Added QR Code for easy connection with wireless helper
+- Fixed: BT auto-connect dragging phone into wireless flow during USB session, thanks @andrecuellar
+- Persist Auto-Optimize wizard settings synchronously, thanks @andrecuellar
 
 ### v.2.3.1
 - Fixed a connection lost on for example borders
