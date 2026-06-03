@@ -516,6 +516,7 @@ class SettingsFragment : Fragment() {
                 com.andrerinas.headunitrevived.utils.SetupWizard(requireContext()) {
                     reloadPendingStateFromSettings()
                     checkChanges()
+                    updateSettingsList()
                     requireActivity().recreate()
                 }.start()
             }
