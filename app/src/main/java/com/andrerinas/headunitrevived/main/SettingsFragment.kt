@@ -514,6 +514,9 @@ class SettingsFragment : Fragment() {
             value = getString(R.string.auto_optimize_desc),
             onClick = { _ ->
                 com.andrerinas.headunitrevived.utils.SetupWizard(requireContext()) {
+                    reloadPendingStateFromSettings()
+                    checkChanges()
+                    updateSettingsList()
                     requireActivity().recreate()
                 }.start()
             }
