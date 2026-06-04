@@ -201,7 +201,8 @@ class HomeFragment : Fragment() {
      *   work was queued.
      */
     private fun attemptAutoConnect(): Boolean {
-        val appSettings = App.provide(requireContext()).settings
+        val ctx = context ?: return false
+        val appSettings = App.provide(ctx).settings
 
         // [FIX] Skip manual WiFi connection if Native AA is selected.
         // Native AA handles its own handshake via Bluetooth/P2P.
