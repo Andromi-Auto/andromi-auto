@@ -34,8 +34,8 @@ class UsbDeviceCompat(val wrappedDevice: UsbDevice) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 val manufacturer = device.manufacturerName?.takeIf { it.isNotBlank() }
                 val product = device.productName?.takeIf { it.isNotBlank() }
-                if (manufacturer != null && product != null) {
-                    return "$manufacturer $product"
+                if (manufacturer != null || product != null) {
+                    return listOfNotNull(manufacturer, product).joinToString(" ")
                 }
             }
 
