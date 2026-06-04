@@ -39,6 +39,8 @@ import kotlinx.coroutines.flow.collect
 import com.andrerinas.headunitrevived.utils.Settings
 import com.andrerinas.headunitrevived.utils.VpnControl
 import com.andrerinas.headunitrevived.utils.BluetoothHelper
+import com.andrerinas.headunitrevived.connection.UsbReceiver
+import com.andrerinas.headunitrevived.connection.UsbAccessoryMode
 
 class HomeFragment : Fragment() {
 
@@ -362,9 +364,53 @@ class HomeFragment : Fragment() {
         }
 
         usb.setOnClickListener {
-            val controller = findNavController()
-            if (controller.currentDestination?.id == R.id.homeFragment) {
-                controller.navigate(R.id.action_homeFragment_to_usbListFragment)
+            // Already connected to Android Auto - just show projection
+            if (commManager.isConnected) {
+                val aapIntent = Intent(requireContext(), AapProjectionActivity::class.java)
+                aapIntent.putExtra(AapProjectionActivity.EXTRA_FOCUS, true)
+                startActivity(aapIntent)
+                return@setOnClickListener
+            }
+
+            // Get list of Android USB devices
+            val usbManager = requireContext().getSystemService(Context.USB_SERVICE) as UsbManager
+            val androidDevices = usbManager.deviceList.values
+                .filter { UsbDeviceCompat.isAndroidDevice(it) }
+
+            // If exactly one device found - auto-connect
+            if (androidDevices.size == 1) {
+                val device = UsbDeviceCompat(androidDevices[0])
+                AppLog.i("USB button: Single device found - ${device.uniqueName}, auto-connecting")
+                (requireActivity() as? MainActivity)?.beginAutoConnect("USB button auto-connect")
+
+                if (device.isInAccessoryMode) {
+                    ContextCompat.startForegroundService(requireContext(),
+                        Intent(requireContext(), AapService::class.java).apply {
+                            action = AapService.ACTION_CHECK_USB
+                        })
+                } else {
+                    if (usbManager.hasPermission(device.wrappedDevice)) {
+                        val usbMode = UsbAccessoryMode(usbManager)
+                        if (usbMode.connectAndSwitch(device.wrappedDevice)) {
+                            Toast.makeText(requireContext(), R.string.switching_to_android_auto, Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(requireContext(), R.string.switch_failed, Toast.LENGTH_SHORT).show()
+                        }
+                    } else {
+                        Toast.makeText(requireContext(), R.string.requesting_usb_permission, Toast.LENGTH_SHORT).show()
+                        ContextCompat.startForegroundService(requireContext(), Intent(requireContext(), AapService::class.java))
+                        usbManager.requestPermission(
+                            device.wrappedDevice,
+                            UsbReceiver.createPermissionPendingIntent(requireContext())
+                        )
+                    }
+                }
+            } else {
+                // 0 or multiple devices - open the list
+                val controller = findNavController()
+                if (controller.currentDestination?.id == R.id.homeFragment) {
+                    controller.navigate(R.id.action_homeFragment_to_usbListFragment)
+                }
             }
         }
 
