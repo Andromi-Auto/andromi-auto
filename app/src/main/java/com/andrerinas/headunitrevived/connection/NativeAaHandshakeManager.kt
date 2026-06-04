@@ -55,6 +55,7 @@ class NativeAaHandshakeManager(
     }
 
     private val settings = com.andrerinas.headunitrevived.App.provide(context).settings
+    private val commManager = com.andrerinas.headunitrevived.App.provide(context).commManager
     private var aaServerSocket: BluetoothServerSocket? = null
     private var hfpServerSocket: BluetoothServerSocket? = null
     private var isRunning = false
@@ -206,6 +207,12 @@ class NativeAaHandshakeManager(
             AppLog.d("NativeAA: triggerPoke() delay starting (2s)...")
             delay(2000) // Small safety delay before connecting
 
+            if (commManager.isConnected ||
+                commManager.connectionState.value is CommManager.ConnectionState.Connecting) {
+                AppLog.i("NativeAA: USB/other session became active during poke delay. Skipping poke.")
+                return@launch
+            }
+
             val devicesToPoke = if (lastMacs.isNotEmpty()) {
                 lastMacs.mapNotNull { mac ->
                     try {
@@ -226,6 +233,10 @@ class NativeAaHandshakeManager(
 
             for (device in devicesToPoke) {
                 if (!isRunning || !isActive) break
+                if (commManager.isConnected) {
+                    AppLog.i("NativeAA: USB/other session became active mid-poke. Stopping poke loop.")
+                    break
+                }
                 AppLog.i("NativeAA: Attempting active A2DP poke to device: ${device.name} (${device.address})...")
                 var socket: BluetoothSocket? = null
                 try {
@@ -286,7 +297,14 @@ class NativeAaHandshakeManager(
         try {
             val device = socket.remoteDevice
             AppLog.i("NativeAA: Handling handshake for ${device.name} (${device.address})")
-            
+
+            if (commManager.isConnected ||
+                commManager.connectionState.value is CommManager.ConnectionState.Connecting) {
+                AppLog.i("NativeAA: USB/other session already active. Aborting BT handshake so phone does not start a parallel wireless attempt.")
+                try { socket.close() } catch (_: Exception) {}
+                return@withContext
+            }
+
             val macs = settings.autoStartBluetoothDeviceMacs
             if (!macs.contains(device.address)) {
                 AppLog.i("NativeAA: Saving ${device.address} (${device.name}) to the list of auto-start devices.")
