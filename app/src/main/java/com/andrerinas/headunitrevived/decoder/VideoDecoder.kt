@@ -185,6 +185,13 @@ class VideoDecoder(private val settings: Settings) {
             legacyFrameBuffer = null
             codecBufferInfo = null
             codecConfigured = false
+            if (!reason.startsWith("restart")) {
+                vps = null
+                sps = null
+                pps = null
+                mWidth = 0
+                mHeight = 0
+            }
             // Keep VPS/SPS/PPS cached so we can re-inject them on restart
             lastFrameRenderedMs = 0L
             AppLog.i("Decoder stopped: $reason")

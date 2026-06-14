@@ -210,6 +210,7 @@ class AudioTrackWrapper(
     }
 
     override fun run() {
+        Process.setThreadPriority(Process.THREAD_PRIORITY_AUDIO)
         // FIX 3: This thread only decodes / dispatches to pcmQueue.
         // Actual AudioTrack writes happen in writeThread (URGENT_AUDIO priority).
         // PCM writes are very fast (just queue enqueue), so no need for URGENT_AUDIO here.

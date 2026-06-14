@@ -309,15 +309,24 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
                                 AppLog.i("AapProjectionActivity: Unexpected disconnect. Showing reconnecting overlay and waiting up to ${timeoutMs / 1000}s for recovery.")
                                 showReconnectingOverlay()
 
+                                // Re-initialize the first frame listener to hide the reconnecting overlay when video starts flowing
+                                videoDecoder.onFirstFrameListener = {
+                                    runOnUiThread {
+                                        hideReconnectingOverlay()
+                                    }
+                                }
+
                                 watchdogHandler.removeCallbacks(exitRunnable)
                                 watchdogHandler.postDelayed(exitRunnable, timeoutMs)
                             }
                         }
                         is CommManager.ConnectionState.HandshakeComplete -> {
                             watchdogHandler.removeCallbacks(exitRunnable)
-                            if (overlayState == OverlayState.RECONNECTING) {
-                                hideReconnectingOverlay()
-                            }
+
+                            // Restart the video watchdog so it can request keyframes for the new session
+                            watchdogHandler.removeCallbacks(videoWatchdogRunnable)
+                            watchdogHandler.postDelayed(videoWatchdogRunnable, 1000)
+
                             // Lock the resolution so that orientation changes don't cause re-negotiation
                             HeadUnitScreenConfig.lockResolution()
 
@@ -331,9 +340,6 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
                         }
                         is CommManager.ConnectionState.TransportStarted -> {
                             watchdogHandler.removeCallbacks(exitRunnable)
-                            if (overlayState == OverlayState.RECONNECTING) {
-                                hideReconnectingOverlay()
-                            }
                         }
                         else -> {}
                     }
