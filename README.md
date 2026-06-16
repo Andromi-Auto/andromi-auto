@@ -84,7 +84,7 @@ adb shell am start -a android.intent.action.VIEW -d "headunit://connect?ip=192.1
 - Fixed: USB device list duplicates and Android Auto projection launch on Android 10+, thanks to @jeancarloscc
 - Enhanced: Google Nearby. It was buggy with 2 FPS video
 - Fixed: Navigation Button mapping now working
--
+
 ### v.2.3.1
 - Fixed a connection lost on for example borders
 - Binding socket to wifi network if available to prevent connection drops on carrier lost
