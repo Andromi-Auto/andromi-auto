@@ -1207,7 +1207,8 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
             )
         }
         // Use the same screen conf for both views for negotiation
-        HeadUnitScreenConfig.init(this, displayMetrics, settings)
+        val targetContext = HeadUnitScreenConfig.getTargetDisplayContext(this, settings)
+        HeadUnitScreenConfig.init(targetContext, targetContext.resources.displayMetrics, settings)
 
         val view = projectionView as View
         container.addView(view)

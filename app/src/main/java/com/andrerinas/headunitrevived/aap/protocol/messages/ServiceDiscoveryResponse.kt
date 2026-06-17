@@ -20,9 +20,10 @@ class ServiceDiscoveryResponse(private val context: Context)
     companion object {
         private fun makeProto(context: Context): Message {
             val settings = App.provide(context).settings
+            val targetContext = HeadUnitScreenConfig.getTargetDisplayContext(context, settings)
 
-            // Initialize HeadUnitScreenConfig with actual physical screen dimensions
-            HeadUnitScreenConfig.init(context, context.resources.displayMetrics, settings)
+            // Initialize HeadUnitScreenConfig with target physical screen dimensions
+            HeadUnitScreenConfig.init(targetContext, targetContext.resources.displayMetrics, settings)
 
             val services = mutableListOf<Control.Service>()
 

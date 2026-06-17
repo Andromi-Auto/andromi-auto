@@ -202,6 +202,10 @@
     <string name="right_hand_drive_description">Benutzeroberfläche für Rechtsverkehr ausrichten</string>
     <string name="wireless_connection_settings">Kabellose Verbindung</string>
     <string name="category_graphic">Grafik</string>
+    <string name="projection_display">Projektions-Bildschirm</string>
+    <string name="projection_display_default">Hauptbildschirm</string>
+    <string name="projection_display_secondary">Zweitbildschirm / Externer Bildschirm</string>
+    <string name="projection_display_description">Auswahl, auf welchem Bildschirm die Android Auto Projektion gestartet werden soll (z.B. HDMI- oder DeX-Bildschirm).</string>
     <string name="custom_insets">Benutzerdefinierte Ränder</string>
     <string name="inset_top">Oben</string>
     <string name="inset_bottom">Unten</string>

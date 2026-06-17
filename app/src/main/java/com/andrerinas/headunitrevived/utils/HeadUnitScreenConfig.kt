@@ -456,5 +456,37 @@ object HeadUnitScreenConfig {
         }
     }
 
+    fun getTargetDisplayId(context: Context, settings: Settings): Int {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            return android.view.Display.DEFAULT_DISPLAY
+        }
+        if (settings.projectionDisplayType == Settings.ProjectionDisplayType.DEFAULT) {
+            return android.view.Display.DEFAULT_DISPLAY
+        }
+        val displayManager = context.getSystemService(Context.DISPLAY_SERVICE) as? android.hardware.display.DisplayManager
+            ?: return android.view.Display.DEFAULT_DISPLAY
+        val displays = displayManager.displays
+        val targetDisplay = displays.firstOrNull { it.displayId != android.view.Display.DEFAULT_DISPLAY }
+        return targetDisplay?.displayId ?: android.view.Display.DEFAULT_DISPLAY
+    }
+
+    fun getTargetDisplayContext(context: Context, settings: Settings): Context {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            return context
+        }
+        val targetDisplayId = getTargetDisplayId(context, settings)
+        if (targetDisplayId == android.view.Display.DEFAULT_DISPLAY) {
+            return context
+        }
+        val displayManager = context.getSystemService(Context.DISPLAY_SERVICE) as? android.hardware.display.DisplayManager
+            ?: return context
+        val targetDisplay = displayManager.getDisplay(targetDisplayId)
+        return if (targetDisplay != null) {
+            context.createDisplayContext(targetDisplay)
+        } else {
+            context
+        }
+    }
+
     private const val SURFACE_MISMATCH_TOLERANCE = 4
 }

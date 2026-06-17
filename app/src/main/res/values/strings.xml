@@ -204,6 +204,10 @@
     <string name="right_hand_drive_description">Position UI for right-side driving</string>
     <string name="wireless_connection_settings">Wireless Connection</string>
     <string name="category_graphic">Graphic</string>
+    <string name="projection_display">Projection Display</string>
+    <string name="projection_display_default">Primary / Default Display</string>
+    <string name="projection_display_secondary">Secondary / External Display</string>
+    <string name="projection_display_description">Select where the Android Auto projection screen should be launched (e.g. HDMI or DeX screen).</string>
     <string name="custom_insets">Custom Insets (Margins)</string>
     <string name="inset_top">Top</string>
     <string name="inset_bottom">Bottom</string>

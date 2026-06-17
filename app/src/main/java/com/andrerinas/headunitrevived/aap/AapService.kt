@@ -47,6 +47,7 @@ import com.andrerinas.headunitrevived.connection.UsbDeviceCompat
 import com.andrerinas.headunitrevived.connection.UsbReceiver
 import com.andrerinas.headunitrevived.location.GpsLocationService
 import com.andrerinas.headunitrevived.utils.AppLog
+import com.andrerinas.headunitrevived.utils.HeadUnitScreenConfig
 import com.andrerinas.headunitrevived.utils.LocaleHelper
 import com.andrerinas.headunitrevived.utils.LogExporter
 import com.andrerinas.headunitrevived.utils.NightModeManager
@@ -935,27 +936,45 @@ class AapService : Service(), UsbReceiver.Listener {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
         }
 
+        val targetDisplayId = HeadUnitScreenConfig.getTargetDisplayId(this, settings)
+        val optionsBundle = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && targetDisplayId != android.view.Display.DEFAULT_DISPLAY) {
+            val options = android.app.ActivityOptions.makeBasic()
+            options.setLaunchDisplayId(targetDisplayId)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                val displayManager = getSystemService(Context.DISPLAY_SERVICE) as? android.hardware.display.DisplayManager
+                val targetDisplay = displayManager?.getDisplay(targetDisplayId)
+                if (targetDisplay != null) {
+                    val size = android.graphics.Point()
+                    targetDisplay.getRealSize(size)
+                    options.setLaunchBounds(android.graphics.Rect(0, 0, size.x, size.y))
+                }
+            }
+            options.toBundle()
+        } else {
+            null
+        }
+
         val canOverlay = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && AndroidSettings.canDrawOverlays(this)
         when (ActivityLaunchPolicy.chooseLaunchStrategy(Build.VERSION.SDK_INT, canOverlay)) {
             ActivityLaunchPolicy.LaunchStrategy.DIRECT -> {
-                try { startActivity(intent) }
+                try { startActivity(intent, optionsBundle) }
                 catch (e: Exception) { AppLog.e("Projection launch failed: ${e.message}") }
             }
             ActivityLaunchPolicy.LaunchStrategy.OVERLAY -> {
-                if (!launchViaOverlayTrampoline(intent)) {
+                if (!launchViaOverlayTrampoline(intent, optionsBundle)) {
                     AppLog.w("Projection overlay trampoline failed, trying direct")
-                    try { startActivity(intent) }
+                    try { startActivity(intent, optionsBundle) }
                     catch (e: Exception) { AppLog.e("Projection direct fallback failed: ${e.message}") }
                 }
             }
-            ActivityLaunchPolicy.LaunchStrategy.NOTIFICATION -> launchProjectionViaNotification(intent)
+            ActivityLaunchPolicy.LaunchStrategy.NOTIFICATION -> launchProjectionViaNotification(intent, optionsBundle)
         }
     }
 
-    private fun launchProjectionViaNotification(launchIntent: Intent) {
+    private fun launchProjectionViaNotification(launchIntent: Intent, optionsBundle: android.os.Bundle? = null) {
         val piFlags = PendingIntent.FLAG_UPDATE_CURRENT or
             (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0)
-        val fullScreenPi = PendingIntent.getActivity(this, PROJECTION_LAUNCH_NOTIFICATION_ID, launchIntent, piFlags)
+        val fullScreenPi = PendingIntent.getActivity(this, PROJECTION_LAUNCH_NOTIFICATION_ID, launchIntent, piFlags, optionsBundle)
 
         val notification = NotificationCompat.Builder(this, App.bootStartChannel)
             .setSmallIcon(R.drawable.ic_stat_aa)
@@ -2254,7 +2273,7 @@ class AapService : Service(), UsbReceiver.Listener {
         return launchViaOverlayTrampoline(launchIntent)
     }
 
-    private fun launchViaOverlayTrampoline(launchIntent: Intent): Boolean {
+    private fun launchViaOverlayTrampoline(launchIntent: Intent, optionsBundle: android.os.Bundle? = null): Boolean {
         val wm = getSystemService(WINDOW_SERVICE) as WindowManager
         val overlayType = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
@@ -2272,7 +2291,7 @@ class AapService : Service(), UsbReceiver.Listener {
         val view = View(this)
         return try {
             wm.addView(view, params)
-            startActivity(launchIntent)
+            startActivity(launchIntent, optionsBundle)
             AppLog.i("Overlay trampoline: startActivity succeeded")
             true
         } catch (e: Exception) {

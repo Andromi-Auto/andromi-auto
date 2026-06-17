@@ -1011,4 +1011,23 @@ class Settings(private val context: Context) {
         get() = prefs.getString("hotspot-password", "")!!
         set(value) = prefs.edit().putString("hotspot-password", value).apply()
 
+    enum class ProjectionDisplayType(val value: Int) {
+        DEFAULT(0),
+        SECONDARY(1);
+
+        companion object {
+            private val map = values().associateBy(ProjectionDisplayType::value)
+            fun fromInt(value: Int) = map[value] ?: DEFAULT
+        }
+    }
+
+    var projectionDisplayType: ProjectionDisplayType
+        get() {
+            val value = prefs.getInt("projection-display-type", 0)
+            return ProjectionDisplayType.fromInt(value)
+        }
+        set(type) {
+            prefs.edit().putInt("projection-display-type", type.value).apply()
+        }
+
 }
