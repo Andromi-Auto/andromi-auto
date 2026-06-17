@@ -910,7 +910,7 @@ class SettingsFragment : Fragment() {
                 )
                 MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
                     .setTitle(R.string.projection_display)
-                    .setSingleChoiceItems(displayOptions, pendingProjectionDisplayType!!.value) { dialog, which ->
+                    .setSingleChoiceItems(displayOptions, pendingProjectionDisplayType?.value ?: 0) { dialog, which ->
                         pendingProjectionDisplayType = Settings.ProjectionDisplayType.fromInt(which)
                         checkChanges()
                         dialog.dismiss()
