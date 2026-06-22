@@ -60,6 +60,7 @@ class SettingsFragment : Fragment() {
     private var pendingSyncMediaSessionAaMetadata: Boolean? = null
     private var pendingResolution: Int? = null
     private var pendingDpi: Int? = null
+    private var pendingPixelAspectRatioE4: Int? = null
     private var pendingFullscreenMode: Settings.FullscreenMode? = null
     private var pendingViewMode: Settings.ViewMode? = null
     private var pendingForceSoftware: Boolean? = null
@@ -159,6 +160,7 @@ class SettingsFragment : Fragment() {
         pendingSyncMediaSessionAaMetadata = settings.syncMediaSessionWithAaMetadata
         pendingResolution = settings.resolutionId
         pendingDpi = settings.dpiPixelDensity
+        pendingPixelAspectRatioE4 = settings.pixelAspectRatioE4
         pendingFullscreenMode = settings.fullscreenMode
         pendingViewMode = settings.viewMode
         pendingForceSoftware = settings.forceSoftwareDecoding
@@ -242,6 +244,7 @@ class SettingsFragment : Fragment() {
         pendingSyncMediaSessionAaMetadata = settings.syncMediaSessionWithAaMetadata
         pendingResolution = settings.resolutionId
         pendingDpi = settings.dpiPixelDensity
+        pendingPixelAspectRatioE4 = settings.pixelAspectRatioE4
         pendingFullscreenMode = settings.fullscreenMode
         pendingViewMode = settings.viewMode
         pendingForceSoftware = settings.forceSoftwareDecoding
@@ -348,6 +351,7 @@ class SettingsFragment : Fragment() {
         pendingSyncMediaSessionAaMetadata?.let { settings.syncMediaSessionWithAaMetadata = it }
         pendingResolution?.let { settings.resolutionId = it }
         pendingDpi?.let { settings.dpiPixelDensity = it }
+        pendingPixelAspectRatioE4?.let { settings.pixelAspectRatioE4 = it }
         pendingFullscreenMode?.let { settings.fullscreenMode = it }
         pendingViewMode?.let { settings.viewMode = it }
         pendingForceSoftware?.let { settings.forceSoftwareDecoding = it }
@@ -439,6 +443,7 @@ class SettingsFragment : Fragment() {
                         pendingSyncMediaSessionAaMetadata != settings.syncMediaSessionWithAaMetadata ||
                         pendingResolution != settings.resolutionId ||
                         pendingDpi != settings.dpiPixelDensity ||
+                        pendingPixelAspectRatioE4 != settings.pixelAspectRatioE4 ||
                         pendingFullscreenMode != settings.fullscreenMode ||
                         pendingViewMode != settings.viewMode ||
                         pendingForceSoftware != settings.forceSoftwareDecoding ||
@@ -482,6 +487,7 @@ class SettingsFragment : Fragment() {
                           pendingVideoCodec != settings.videoCodec ||
                           pendingFpsLimit != settings.fpsLimit ||
                           pendingDpi != settings.dpiPixelDensity ||
+                          pendingPixelAspectRatioE4 != settings.pixelAspectRatioE4 ||
                           pendingForceSoftware != settings.forceSoftwareDecoding ||
                           pendingEnableRotary != settings.enableRotary ||
                           pendingEnableAudioSink != settings.enableAudioSink ||
@@ -883,6 +889,24 @@ class SettingsFragment : Fragment() {
                     initialValue = pendingDpi ?: 0,
                     onConfirm = { newVal ->
                         pendingDpi = newVal
+                        checkChanges()
+                        updateSettingsList()
+                    }
+                )
+            }
+        ))
+
+        items.add(SettingItem.SettingEntry(
+            stableId = "pixelAspectRatioE4",
+            nameResId = R.string.pixel_aspect_ratio,
+            value = (pendingPixelAspectRatioE4 ?: 10000).toString(),
+            onClick = { _ ->
+                showNumericInputDialog(
+                    title = getString(R.string.enter_pixel_aspect_ratio_value),
+                    message = null,
+                    initialValue = pendingPixelAspectRatioE4 ?: 10000,
+                    onConfirm = { newVal ->
+                        pendingPixelAspectRatioE4 = newVal
                         checkChanges()
                         updateSettingsList()
                     }

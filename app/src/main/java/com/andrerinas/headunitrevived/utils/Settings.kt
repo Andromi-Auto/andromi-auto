@@ -191,6 +191,12 @@ class Settings(private val context: Context) {
             prefs.edit().putInt("dpi-pixel-density", value).apply()
         }
 
+    var pixelAspectRatioE4: Int
+        get() = prefs.getInt("pixel-aspect-ratio-e4", 10000) // Default 10000 = 1.0 (square pixels)
+        set(value) {
+            prefs.edit().putInt("pixel-aspect-ratio-e4", value).apply()
+        }
+
     var fakeSpeed: Boolean
         get() = prefs.getBoolean("fake_speed", true)
         set(value) {
