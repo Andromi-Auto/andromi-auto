@@ -30,9 +30,7 @@ object HeadUnitScreenConfig {
     var isResolutionLocked: Boolean = false
         private set
 
-    private var currentResolutionId: Int = 0
-    private var currentDpiPixelDensity: Int = 0
-    private var currentScreenOrientation: Settings.ScreenOrientation = Settings.ScreenOrientation.SYSTEM
+    private lateinit var currentSettings: Settings // Store settings instance
 
     // System Insets (Bars/Cutouts)
     var systemInsetLeft: Int = 0
@@ -53,47 +51,34 @@ object HeadUnitScreenConfig {
         stretchToFill = settings.stretchToFill
         forcedScale = settings.forcedScale && settings.viewMode == Settings.ViewMode.SURFACE
 
-        var realW = displayMetrics.widthPixels
-        var realH = displayMetrics.heightPixels
-        var usableW = displayMetrics.widthPixels
-        var usableH = displayMetrics.heightPixels
+        val realW: Int
+        val realH: Int
+        val usableW: Int
+        val usableH: Int
 
-        val activity = getActivity(context)
-        if (activity != null) {
-            try {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) { // API 30+
-                    val windowManager = activity.getSystemService(android.view.WindowManager::class.java)
-                    if (windowManager != null) {
-                        val bounds = windowManager.currentWindowMetrics.bounds
-                        // On API 30+, bounds on an Activity context often return the usable area.
-                        // We use the displayMetrics as a fallback for the physical area.
-                        usableW = bounds.width()
-                        usableH = bounds.height()
-                    }
-                } else { // Older APIs
-                    @Suppress("DEPRECATION")
-                    val windowManager = activity.getSystemService(Context.WINDOW_SERVICE) as? android.view.WindowManager
-                    if (windowManager != null) {
-                        val display = windowManager.defaultDisplay
-                        val size = android.graphics.Point()
-                        @Suppress("DEPRECATION")
-                        display.getRealSize(size)
-                        realW = size.x
-                        realH = size.y
-                        
-                        @Suppress("DEPRECATION")
-                        display.getSize(size)
-                        usableW = size.x
-                        usableH = size.y
-                    }
-                }
-            } catch (e: Exception) {
-                AppLog.w("HeadUnitScreenConfig: Failed to query WindowManager bounds, falling back to displayMetrics: ${e.message}")
-                realW = displayMetrics.widthPixels
-                realH = displayMetrics.heightPixels
-                usableW = displayMetrics.widthPixels
-                usableH = displayMetrics.heightPixels
-            }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) { // API 30+
+            val windowManager = context.getSystemService(android.view.WindowManager::class.java)
+            val bounds = windowManager.currentWindowMetrics.bounds
+            // On API 30+, bounds on an Activity context often return the usable area.
+            // We use the displayMetrics as a fallback for the physical area.
+            realW = displayMetrics.widthPixels
+            realH = displayMetrics.heightPixels
+            usableW = bounds.width()
+            usableH = bounds.height()
+        } else { // Older APIs
+            @Suppress("DEPRECATION")
+            val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as android.view.WindowManager
+            val display = windowManager.defaultDisplay
+            val size = android.graphics.Point()
+            @Suppress("DEPRECATION")
+            display.getRealSize(size)
+            realW = size.x
+            realH = size.y
+            
+            @Suppress("DEPRECATION")
+            display.getSize(size)
+            usableW = size.x
+            usableH = size.y
         }
 
         val finalRealW: Int
@@ -138,9 +123,7 @@ object HeadUnitScreenConfig {
 
         isInitialized = true
         lastSettingsHash = currentHash
-        currentResolutionId = settings.resolutionId
-        currentDpiPixelDensity = settings.dpiPixelDensity
-        currentScreenOrientation = settings.screenOrientation
+        currentSettings = settings
 
         // Determine if we are planning to hide the bars (Immersive)
         val immersive = settings.fullscreenMode == Settings.FullscreenMode.IMMERSIVE || 
@@ -212,7 +195,7 @@ object HeadUnitScreenConfig {
             screenHeightPx = realScreenHeightPx
         }
 
-        val selectedResolution = Settings.Resolution.fromId(currentResolutionId)
+        val selectedResolution = Settings.Resolution.fromId(currentSettings.resolutionId)
         val isPortraitDisplay = screenHeightPx > screenWidthPx
 
         // 1. Determine base negotiated resolution
@@ -371,8 +354,8 @@ object HeadUnitScreenConfig {
     }
 
     fun getDensityDpi(): Int {
-        return if (isInitialized && currentDpiPixelDensity != 0) {
-            currentDpiPixelDensity
+        return if (this::currentSettings.isInitialized && currentSettings.dpiPixelDensity != 0) {
+            currentSettings.dpiPixelDensity
         } else {
             densityDpi
         }
@@ -396,7 +379,7 @@ object HeadUnitScreenConfig {
         val finalSurfaceW: Int
         val finalSurfaceH: Int
 
-        val screenOrientation = if (isInitialized) currentScreenOrientation else Settings.ScreenOrientation.SYSTEM
+        val screenOrientation = if (this::currentSettings.isInitialized) currentSettings.screenOrientation else Settings.ScreenOrientation.SYSTEM
         if (screenOrientation == Settings.ScreenOrientation.LANDSCAPE || 
             screenOrientation == Settings.ScreenOrientation.LANDSCAPE_REVERSE) {
             finalSurfaceW = Math.max(surfaceW, surfaceH)
@@ -471,66 +454,6 @@ object HeadUnitScreenConfig {
             AppLog.i("[UI_DEBUG] HeadUnitScreenConfig: Unlocking resolution (was $negotiatedResolutionType)")
             isResolutionLocked = false
         }
-    }
-
-    fun getTargetDisplayId(context: Context, settings: Settings): Int {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            return android.view.Display.DEFAULT_DISPLAY
-        }
-        if (settings.projectionDisplayType == Settings.ProjectionDisplayType.DEFAULT) {
-            val activeDisplayId = com.andrerinas.headunitrevived.App.getActiveActivityDisplayId()
-            if (activeDisplayId != null) {
-                return activeDisplayId
-            }
-            return android.view.Display.DEFAULT_DISPLAY
-        }
-        val displayManager = context.getSystemService(Context.DISPLAY_SERVICE) as? android.hardware.display.DisplayManager
-            ?: return android.view.Display.DEFAULT_DISPLAY
-        val displays = displayManager.displays
-        val targetDisplay = displays.firstOrNull { it.displayId != android.view.Display.DEFAULT_DISPLAY }
-        return targetDisplay?.displayId ?: android.view.Display.DEFAULT_DISPLAY
-    }
-
-    fun getTargetDisplayContext(context: Context, settings: Settings): Context {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            return context
-        }
-        val targetDisplayId = getTargetDisplayId(context, settings)
-        
-        val currentDisplayId = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            try { context.display.displayId } catch (e: Exception) { null }
-        } else {
-            @Suppress("DEPRECATION")
-            val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as? android.view.WindowManager
-            try { windowManager?.defaultDisplay?.displayId } catch (e: Exception) { null }
-        }
-        
-        if (currentDisplayId == targetDisplayId) {
-            return context
-        }
-        
-        if (targetDisplayId == android.view.Display.DEFAULT_DISPLAY) {
-            return context
-        }
-        val displayManager = context.getSystemService(Context.DISPLAY_SERVICE) as? android.hardware.display.DisplayManager
-            ?: return context
-        val targetDisplay = displayManager.getDisplay(targetDisplayId)
-        return if (targetDisplay != null) {
-            context.createDisplayContext(targetDisplay)
-        } else {
-            context
-        }
-    }
-
-    private fun getActivity(context: Context): android.app.Activity? {
-        var ctx = context
-        while (ctx is android.content.ContextWrapper) {
-            if (ctx is android.app.Activity) {
-                return ctx
-            }
-            ctx = ctx.baseContext
-        }
-        return null
     }
 
     private const val SURFACE_MISMATCH_TOLERANCE = 4

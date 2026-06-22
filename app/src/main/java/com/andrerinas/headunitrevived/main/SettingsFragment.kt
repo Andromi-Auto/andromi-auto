@@ -60,7 +60,6 @@ class SettingsFragment : Fragment() {
     private var pendingSyncMediaSessionAaMetadata: Boolean? = null
     private var pendingResolution: Int? = null
     private var pendingDpi: Int? = null
-    private var pendingProjectionDisplayType: Settings.ProjectionDisplayType? = null
     private var pendingFullscreenMode: Settings.FullscreenMode? = null
     private var pendingViewMode: Settings.ViewMode? = null
     private var pendingForceSoftware: Boolean? = null
@@ -159,7 +158,6 @@ class SettingsFragment : Fragment() {
         pendingSyncMediaSessionAaMetadata = settings.syncMediaSessionWithAaMetadata
         pendingResolution = settings.resolutionId
         pendingDpi = settings.dpiPixelDensity
-        pendingProjectionDisplayType = settings.projectionDisplayType
         pendingFullscreenMode = settings.fullscreenMode
         pendingViewMode = settings.viewMode
         pendingForceSoftware = settings.forceSoftwareDecoding
@@ -242,7 +240,6 @@ class SettingsFragment : Fragment() {
         pendingSyncMediaSessionAaMetadata = settings.syncMediaSessionWithAaMetadata
         pendingResolution = settings.resolutionId
         pendingDpi = settings.dpiPixelDensity
-        pendingProjectionDisplayType = settings.projectionDisplayType
         pendingFullscreenMode = settings.fullscreenMode
         pendingViewMode = settings.viewMode
         pendingForceSoftware = settings.forceSoftwareDecoding
@@ -348,7 +345,6 @@ class SettingsFragment : Fragment() {
         pendingSyncMediaSessionAaMetadata?.let { settings.syncMediaSessionWithAaMetadata = it }
         pendingResolution?.let { settings.resolutionId = it }
         pendingDpi?.let { settings.dpiPixelDensity = it }
-        pendingProjectionDisplayType?.let { settings.projectionDisplayType = it }
         pendingFullscreenMode?.let { settings.fullscreenMode = it }
         pendingViewMode?.let { settings.viewMode = it }
         pendingForceSoftware?.let { settings.forceSoftwareDecoding = it }
@@ -472,8 +468,7 @@ class SettingsFragment : Fragment() {
                         pendingHelperConnectionStrategy != settings.helperConnectionStrategy ||
                         pendingWaitForWifi != settings.waitForWifiBeforeWifiDirect ||
                         pendingWaitForWifiTimeout != settings.waitForWifiTimeout ||
-                        pendingBluetoothManagerServiceName != settings.bluetoothManagerServiceName ||
-                        pendingProjectionDisplayType != settings.projectionDisplayType
+                        pendingBluetoothManagerServiceName != settings.bluetoothManagerServiceName
 
         hasChanges = anyChange
 
@@ -494,8 +489,7 @@ class SettingsFragment : Fragment() {
                           pendingInsetTop != settings.insetTop ||
                           pendingInsetRight != settings.insetRight ||
                           pendingInsetBottom != settings.insetBottom ||
-                          pendingWifiConnectionMode != settings.wifiConnectionMode ||
-                          pendingProjectionDisplayType != settings.projectionDisplayType
+                          pendingWifiConnectionMode != settings.wifiConnectionMode
 
         updateSaveButtonState()
     }
@@ -890,29 +884,7 @@ class SettingsFragment : Fragment() {
             }
         ))
 
-        items.add(SettingItem.SettingEntry(
-            stableId = "projectionDisplayType",
-            nameResId = R.string.projection_display,
-            value = when (pendingProjectionDisplayType) {
-                Settings.ProjectionDisplayType.SECONDARY -> getString(R.string.projection_display_secondary)
-                else -> getString(R.string.projection_display_default)
-            },
-            onClick = { _ ->
-                val displayOptions = arrayOf(
-                    getString(R.string.projection_display_default),
-                    getString(R.string.projection_display_secondary)
-                )
-                MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
-                    .setTitle(R.string.projection_display)
-                    .setSingleChoiceItems(displayOptions, pendingProjectionDisplayType?.value ?: 0) { dialog, which ->
-                        pendingProjectionDisplayType = Settings.ProjectionDisplayType.fromInt(which)
-                        checkChanges()
-                        dialog.dismiss()
-                        updateSettingsList()
-                    }
-                    .show()
-            }
-        ))
+
 
         items.add(SettingItem.SettingEntry(
             stableId = "customInsets",
