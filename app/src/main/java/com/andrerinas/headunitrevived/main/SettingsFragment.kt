@@ -2079,7 +2079,7 @@ class SettingsFragment : Fragment() {
         inputRight.onFocusChangeListener = focusListener
         inputBottom.onFocusChangeListener = focusListener
 
-        MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
+        val dialog = MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
             .setTitle(R.string.custom_insets)
             .setView(dialogView)
             .setPositiveButton(android.R.string.ok) { dialog, _ ->
@@ -2123,7 +2123,13 @@ class SettingsFragment : Fragment() {
 
                 dialog.dismiss()
             }
-            .show()
+            .create()
+
+        dialog.window?.clearFlags(
+            android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or 
+            android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
+        )
+        dialog.show()
     }
 
     private fun showUiScaleDialog() {
@@ -2427,7 +2433,7 @@ class SettingsFragment : Fragment() {
         params.setMargins(margin, 8, margin, 8)
         container.addView(editView, params)
 
-        MaterialAlertDialogBuilder(context, R.style.DarkAlertDialog)
+        val dialog = MaterialAlertDialogBuilder(context, R.style.DarkAlertDialog)
             .setTitle(title)
             .apply { if (message != null) setMessage(message) }
             .setView(container)
@@ -2437,7 +2443,14 @@ class SettingsFragment : Fragment() {
                 dialog.dismiss()
             }
             .setNegativeButton(android.R.string.cancel, null)
-            .show()
+            .create()
+
+        dialog.window?.clearFlags(
+            android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or 
+            android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
+        )
+        dialog.show()
+        editView.requestFocus()
     }
 
     private fun handleNativeAaSelection() {
