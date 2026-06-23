@@ -33,21 +33,7 @@ class App : Application() {
         super.onCreate()
         instance = this
 
-        registerActivityLifecycleCallbacks(object : ActivityLifecycleCallbacks {
-            override fun onActivityCreated(activity: android.app.Activity, savedInstanceState: android.os.Bundle?) {}
-            override fun onActivityStarted(activity: android.app.Activity) {}
-            override fun onActivityResumed(activity: android.app.Activity) {
-                activeActivityRef = java.lang.ref.WeakReference(activity)
-            }
-            override fun onActivityPaused(activity: android.app.Activity) {
-                if (activeActivityRef.get() === activity) {
-                    activeActivityRef = java.lang.ref.WeakReference(null)
-                }
-            }
-            override fun onActivityStopped(activity: android.app.Activity) {}
-            override fun onActivitySaveInstanceState(activity: android.app.Activity, outState: android.os.Bundle) {}
-            override fun onActivityDestroyed(activity: android.app.Activity) {}
-        })
+
         
         // Enable vector drawable support on older Android versions
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
@@ -136,17 +122,6 @@ class App : Application() {
         var instance: App? = null
             private set
 
-        private var activeActivityRef = java.lang.ref.WeakReference<android.app.Activity>(null)
-
-        fun getActiveActivityDisplayId(): Int? {
-            val activity = activeActivityRef.get() ?: return null
-            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                try { activity.display?.displayId } catch (e: Exception) { null }
-            } else {
-                @Suppress("DEPRECATION")
-                try { activity.windowManager.defaultDisplay.displayId } catch (e: Exception) { null }
-            }
-        }
 
         fun get(context: Context): App {
             return context.applicationContext as App

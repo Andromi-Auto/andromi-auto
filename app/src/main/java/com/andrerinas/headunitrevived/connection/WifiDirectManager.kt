@@ -745,7 +745,7 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
 
     fun stop() {
         AppLog.i("WifiDirectManager: Stopping and cleaning up...")
-        handler.removeCallbacks(discoveryRunnable)
+        handler.removeCallbacksAndMessages(null)
         AapService.scanningState.value = false
         try { context.unregisterReceiver(receiver) } catch (e: Exception) {}
         if (isGroupOwner) {

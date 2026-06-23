@@ -137,8 +137,7 @@ object SettingsBackupManager {
         "wait-for-wifi-before-wifi-direct" to ValueType.BOOLEAN,
         "wait-for-wifi-timeout" to ValueType.INT,
         "helper-connection-strategy" to ValueType.INT,
-        "bluetooth-manager-service-name" to ValueType.STRING,
-        "projection-display-type" to ValueType.INT
+        "bluetooth-manager-service-name" to ValueType.STRING
     )
 
     private val projectionRestartKeys = setOf(
@@ -159,8 +158,7 @@ object SettingsBackupManager {
         "inset-top",
         "inset-right",
         "inset-bottom",
-        "wifi-connection-mode",
-        "projection-display-type"
+        "wifi-connection-mode"
     )
 
     fun defaultFileName(): String {
