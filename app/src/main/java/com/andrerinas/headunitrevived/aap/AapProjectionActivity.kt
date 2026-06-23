@@ -56,6 +56,8 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.andrerinas.headunitrevived.main.QuickSettingsFragment
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import java.io.File
+import java.util.concurrent.Executors
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.abs
 
 class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, VideoDimensionsListener {
@@ -89,9 +91,15 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
     private var currentFps: Int? = null
     private val performanceHandler = android.os.Handler(android.os.Looper.getMainLooper())
     private val performanceSampler = PerformanceSampler()
+    private val performanceExecutor = Executors.newSingleThreadExecutor { runnable ->
+        Thread(runnable, "PerformanceSampler").apply {
+            priority = Thread.MIN_PRIORITY
+        }
+    }
+    private val performanceSampleInFlight = AtomicBoolean(false)
     private val performanceOverlayRunnable = object : Runnable {
         override fun run() {
-            updatePerformanceOverlay()
+            requestPerformanceOverlayUpdate()
             performanceHandler.postDelayed(this, 1000L)
         }
     }
@@ -1151,8 +1159,10 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         // stopCustomLoadingMedia releases both.
         stopCustomLoadingMedia()
         stopPerformanceOverlayUpdates()
+        performanceExecutor.shutdownNow()
         AppLog.i("AapProjectionActivity.onDestroy called. isFinishing=$isFinishing")
         App.isPiPActive = false
+        videoDecoder.onFpsChanged = null
         videoDecoder.softwareYuvFrameSink = null
         videoDecoder.dimensionsListener = null
     }
@@ -1262,7 +1272,6 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
 
         videoDecoder.onFpsChanged = { fps ->
             currentFps = fps
-            runOnUiThread { updatePerformanceOverlay() }
         }
         startPerformanceOverlayUpdates()
     }
@@ -1276,21 +1285,45 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         performanceHandler.removeCallbacks(performanceOverlayRunnable)
     }
 
-    private fun updatePerformanceOverlay() {
+    private fun requestPerformanceOverlayUpdate() {
+        if (!performanceSampleInFlight.compareAndSet(false, true)) return
+
+        val fpsSnapshot = currentFps
+        val lastFrameSnapshot = videoDecoder.lastFrameRenderedMs
+        try {
+            performanceExecutor.execute {
+                try {
+                    val text = buildPerformanceOverlayText(fpsSnapshot, lastFrameSnapshot)
+                    runOnUiThread {
+                        if (!isFinishing && fpsTextView?.visibility == View.VISIBLE) {
+                            fpsTextView?.text = text
+                        }
+                    }
+                } catch (e: Exception) {
+                    AppLog.w("Performance overlay update failed: ${e.message}")
+                } finally {
+                    performanceSampleInFlight.set(false)
+                }
+            }
+        } catch (e: java.util.concurrent.RejectedExecutionException) {
+            performanceSampleInFlight.set(false)
+        }
+    }
+
+    private fun buildPerformanceOverlayText(fpsSnapshot: Int?, lastFrameSnapshot: Long): String {
         val metrics = performanceSampler.sample()
-        val lastFrame = videoDecoder.lastFrameRenderedMs
-        val frameAgeText = if (lastFrame > 0L) {
-            "${SystemClock.elapsedRealtime() - lastFrame}ms"
+        val frameAgeText = if (lastFrameSnapshot > 0L) {
+            "${SystemClock.elapsedRealtime() - lastFrameSnapshot}ms"
         } else {
             "--"
         }
-        val fpsText = currentFps?.toString() ?: "--"
+        val fpsText = fpsSnapshot?.toString() ?: "--"
         val appCpuText = metrics.appCpuPercent?.let { "${it}%" } ?: "--"
         val totalCpuText = metrics.totalCpuPercent?.let { "${it}%" }
             ?: metrics.loadAverage?.let { String.format(java.util.Locale.US, "%.2f load", it) }
             ?: "--"
         val tempText = metrics.temperatureC?.let { "${it}C" } ?: "--"
-        fpsTextView?.text = "FPS: $fpsText\nCPU: app $appCpuText / sys $totalCpuText\nTemp: $tempText\nFrame: $frameAgeText"
+        return "FPS: $fpsText\nCPU: app $appCpuText / sys $totalCpuText\nTemp: $tempText\nFrame: $frameAgeText"
     }
 
     private class PerformanceSampler {

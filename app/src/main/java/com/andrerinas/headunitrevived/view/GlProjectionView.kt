@@ -14,6 +14,9 @@ import com.andrerinas.headunitrevived.utils.AppLog
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.FloatBuffer
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 
@@ -71,6 +74,9 @@ class GlProjectionView(context: Context) : GLSurfaceView(context), IProjectionVi
         vPlane: ByteBuffer,
         vStride: Int
     ): Boolean {
+        if (renderer.renderYuv420FrameDirect(width, height, yPlane, yStride, uPlane, uStride, vPlane, vStride)) {
+            return true
+        }
         return renderer.queueYuv420Frame(width, height, yPlane, yStride, uPlane, uStride, vPlane, vStride)
     }
 
@@ -135,10 +141,13 @@ class GlProjectionView(context: Context) : GLSurfaceView(context), IProjectionVi
             uniform sampler2D uTexture;
             uniform sampler2D vTexture;
             uniform float uDesaturation;
+            uniform float yTextureScaleX;
+            uniform float uTextureScaleX;
+            uniform float vTextureScaleX;
             void main() {
-                float y = 1.164383 * (texture2D(yTexture, vTextureCoord).r - 0.0625);
-                float u = texture2D(uTexture, vTextureCoord).r - 0.5;
-                float v = texture2D(vTexture, vTextureCoord).r - 0.5;
+                float y = 1.164383 * (texture2D(yTexture, vec2(vTextureCoord.x * yTextureScaleX, vTextureCoord.y)).r - 0.0625);
+                float u = texture2D(uTexture, vec2(vTextureCoord.x * uTextureScaleX, vTextureCoord.y)).r - 0.5;
+                float v = texture2D(vTexture, vec2(vTextureCoord.x * vTextureScaleX, vTextureCoord.y)).r - 0.5;
                 vec3 rgb;
                 rgb.r = y + 1.792741 * v;
                 rgb.g = y - 0.213249 * u - 0.532909 * v;
@@ -185,6 +194,9 @@ class GlProjectionView(context: Context) : GLSurfaceView(context), IProjectionVi
         private var yTextureHandle = 0
         private var uTextureHandle = 0
         private var vTextureHandle = 0
+        private var yTextureScaleHandle = 0
+        private var uTextureScaleHandle = 0
+        private var vTextureScaleHandle = 0
 
         @Volatile
         private var desaturation = 0.0f
@@ -198,14 +210,23 @@ class GlProjectionView(context: Context) : GLSurfaceView(context), IProjectionVi
         private var pendingYuvFrame = false
         private var yuvWidth = 0
         private var yuvHeight = 0
-        private var uploadedYuvWidth = 0
-        private var uploadedYuvHeight = 0
+        private val uploadedPlaneWidths = IntArray(3)
+        private val uploadedPlaneHeights = IntArray(3)
+        private var yTextureScaleX = 1f
+        private var uTextureScaleX = 1f
+        private var vTextureScaleX = 1f
         private var yPlaneBuffer: ByteBuffer? = null
         private var uPlaneBuffer: ByteBuffer? = null
         private var vPlaneBuffer: ByteBuffer? = null
         private var loggedFirstYuvFrame = false
+        private var loggedFirstDirectYuvFrame = false
         private var loggedFirstYuvUpload = false
         private var loggedFirstYuvDraw = false
+        private val directPending = 0
+        private val directRunning = 1
+        private val directDone = 2
+        private val directCancelled = 3
+        private val directUploadTimeoutMs = 50L
 
         fun getSurface(): Surface? = surface
 
@@ -236,6 +257,73 @@ class GlProjectionView(context: Context) : GLSurfaceView(context), IProjectionVi
             }
             requestRender()
             return true
+        }
+
+        fun renderYuv420FrameDirect(
+            width: Int,
+            height: Int,
+            yPlane: ByteBuffer,
+            yStride: Int,
+            uPlane: ByteBuffer,
+            uStride: Int,
+            vPlane: ByteBuffer,
+            vStride: Int
+        ): Boolean {
+            if (width <= 0 || height <= 0) return false
+            val chromaWidth = width / 2
+            val chromaHeight = height / 2
+            if (yStride < width || uStride < chromaWidth || vStride < chromaWidth) return false
+            if (!hasPlaneCapacity(yPlane, yStride, height) ||
+                !hasPlaneCapacity(uPlane, uStride, chromaHeight) ||
+                !hasPlaneCapacity(vPlane, vStride, chromaHeight)) {
+                return false
+            }
+
+            val state = AtomicInteger(directPending)
+            val completed = CountDownLatch(1)
+            val accepted = BooleanArray(1)
+            val ySource = yPlane.duplicate()
+            val uSource = uPlane.duplicate()
+            val vSource = vPlane.duplicate()
+
+            return try {
+                queueEvent {
+                    if (!state.compareAndSet(directPending, directRunning)) {
+                        completed.countDown()
+                        return@queueEvent
+                    }
+                    try {
+                        accepted[0] = uploadDirectYuvFrame(
+                            width,
+                            height,
+                            ySource,
+                            yStride,
+                            uSource,
+                            uStride,
+                            vSource,
+                            vStride
+                        )
+                    } catch (e: Exception) {
+                        AppLog.e("GlProjectionView: direct YUV upload failed", e)
+                        accepted[0] = false
+                    } finally {
+                        state.set(directDone)
+                        completed.countDown()
+                    }
+                }
+                requestRender()
+
+                if (!completed.await(directUploadTimeoutMs, TimeUnit.MILLISECONDS)) {
+                    if (state.compareAndSet(directPending, directCancelled)) {
+                        return false
+                    }
+                    completed.await()
+                }
+                accepted[0]
+            } catch (e: Exception) {
+                AppLog.w("GlProjectionView: direct YUV upload unavailable: ${e.message}")
+                false
+            }
         }
 
         private fun ensureYuvBuffers(width: Int, height: Int) {
@@ -271,6 +359,51 @@ class GlProjectionView(context: Context) : GLSurfaceView(context), IProjectionVi
                 dest.put(duplicate)
             }
             dest.position(0)
+        }
+
+        private fun hasPlaneCapacity(buffer: ByteBuffer, stride: Int, height: Int): Boolean {
+            return stride > 0 && height > 0 && buffer.capacity() >= stride * height
+        }
+
+        private fun uploadDirectYuvFrame(
+            width: Int,
+            height: Int,
+            yPlane: ByteBuffer,
+            yStride: Int,
+            uPlane: ByteBuffer,
+            uStride: Int,
+            vPlane: ByteBuffer,
+            vStride: Int
+        ): Boolean {
+            val chromaWidth = width / 2
+            val chromaHeight = height / 2
+            if (yuvProgram == 0 || yuvTextureIds.any { it == 0 }) return false
+
+            yPlane.position(0)
+            yPlane.limit(yStride * height)
+            uPlane.position(0)
+            uPlane.limit(uStride * chromaHeight)
+            vPlane.position(0)
+            vPlane.limit(vStride * chromaHeight)
+
+            GLES20.glPixelStorei(GLES20.GL_UNPACK_ALIGNMENT, 1)
+            uploadYuvPlane(0, yuvTextureIds[0], yPlane, yStride, height)
+            uploadYuvPlane(1, yuvTextureIds[1], uPlane, uStride, chromaHeight)
+            uploadYuvPlane(2, yuvTextureIds[2], vPlane, vStride, chromaHeight)
+
+            yuvWidth = width
+            yuvHeight = height
+            yTextureScaleX = width.toFloat() / yStride.toFloat()
+            uTextureScaleX = chromaWidth.toFloat() / uStride.toFloat()
+            vTextureScaleX = chromaWidth.toFloat() / vStride.toFloat()
+            hasYuvFrame = true
+            pendingYuvFrame = false
+
+            if (!loggedFirstDirectYuvFrame) {
+                loggedFirstDirectYuvFrame = true
+                AppLog.i("GlProjectionView: first direct YUV420 upload ${width}x$height strides=$yStride/$uStride/$vStride")
+            }
+            return true
         }
 
         fun release() {
@@ -329,6 +462,9 @@ class GlProjectionView(context: Context) : GLSurfaceView(context), IProjectionVi
             yTextureHandle = GLES20.glGetUniformLocation(yuvProgram, "yTexture")
             uTextureHandle = GLES20.glGetUniformLocation(yuvProgram, "uTexture")
             vTextureHandle = GLES20.glGetUniformLocation(yuvProgram, "vTexture")
+            yTextureScaleHandle = GLES20.glGetUniformLocation(yuvProgram, "yTextureScaleX")
+            uTextureScaleHandle = GLES20.glGetUniformLocation(yuvProgram, "uTextureScaleX")
+            vTextureScaleHandle = GLES20.glGetUniformLocation(yuvProgram, "vTextureScaleX")
             AppLog.i("GlProjectionView: YUV handles pos=$yuvPositionHandle tex=$yuvTextureHandle mvp=$yuvMVPMatrixHandle st=$yuvSTMatrixHandle y=$yTextureHandle u=$uTextureHandle v=$vTextureHandle")
 
             GLES20.glGenTextures(3, yuvTextureIds, 0)
@@ -430,8 +566,9 @@ class GlProjectionView(context: Context) : GLSurfaceView(context), IProjectionVi
                     uploadYuvPlane(0, yuvTextureIds[0], yPlaneBuffer!!, width, height)
                     uploadYuvPlane(1, yuvTextureIds[1], uPlaneBuffer!!, width / 2, height / 2)
                     uploadYuvPlane(2, yuvTextureIds[2], vPlaneBuffer!!, width / 2, height / 2)
-                    uploadedYuvWidth = width
-                    uploadedYuvHeight = height
+                    yTextureScaleX = 1f
+                    uTextureScaleX = 1f
+                    vTextureScaleX = 1f
                     pendingYuvFrame = false
                     if (!loggedFirstYuvUpload) {
                         loggedFirstYuvUpload = true
@@ -465,6 +602,9 @@ class GlProjectionView(context: Context) : GLSurfaceView(context), IProjectionVi
             Matrix.setIdentityM(sSTMatrix, 0)
             GLES20.glUniformMatrix4fv(yuvSTMatrixHandle, 1, false, sSTMatrix, 0)
             GLES20.glUniform1f(yuvDesaturationHandle, desaturation)
+            GLES20.glUniform1f(yTextureScaleHandle, yTextureScaleX)
+            GLES20.glUniform1f(uTextureScaleHandle, uTextureScaleX)
+            GLES20.glUniform1f(vTextureScaleHandle, vTextureScaleX)
             GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4)
             if (!loggedFirstYuvDraw) {
                 loggedFirstYuvDraw = true
@@ -476,7 +616,7 @@ class GlProjectionView(context: Context) : GLSurfaceView(context), IProjectionVi
             buffer.position(0)
             GLES20.glActiveTexture(GLES20.GL_TEXTURE0 + index)
             GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId)
-            if (uploadedYuvWidth != yuvWidth || uploadedYuvHeight != yuvHeight) {
+            if (uploadedPlaneWidths[index] != width || uploadedPlaneHeights[index] != height) {
                 GLES20.glTexImage2D(
                     GLES20.GL_TEXTURE_2D,
                     0,
@@ -488,6 +628,8 @@ class GlProjectionView(context: Context) : GLSurfaceView(context), IProjectionVi
                     GLES20.GL_UNSIGNED_BYTE,
                     buffer
                 )
+                uploadedPlaneWidths[index] = width
+                uploadedPlaneHeights[index] = height
             } else {
                 GLES20.glTexSubImage2D(
                     GLES20.GL_TEXTURE_2D,
@@ -531,5 +673,6 @@ class GlProjectionView(context: Context) : GLSurfaceView(context), IProjectionVi
                 AppLog.e("GlProjectionView: $label program link failed: ${GLES20.glGetProgramInfoLog(programId)}")
             }
         }
+
     }
 }
