@@ -155,7 +155,7 @@
     <string name="auto_start_wifi_label">Автозапуск при Wi‑Fi</string>
     <string name="auto_start_wifi_description">Автоматически открывать Headunit Revived при подключении к определенной Wi‑Fi сети (SSID).</string>
     <string name="auto_start_wifi_ssid_label">SSID Wi‑Fi</string>
-    <string name="auto_start_wifi_ssid_description">Подключаться только при сопряжении с этой Wi‑Fi сетью (SSID)</string>
+    <string name="auto_start_wifi_ssid_description">Подключаться только при подключении к этой Wi‑Fi сети (SSID)</string>
     <string name="auto_start_wifi_warning">Устаревшая функция: может работать нестабильно на Android 8+ из-за фоновых ограничений. Убедитесь, что приложение исключено из оптимизации батареи.</string>
     <string name="enter_wifi_ssid">Введите SSID Wi‑Fi</string>
     <string name="wifi_ssid_not_set">Не задано</string>
@@ -493,7 +493,7 @@
         <item>Wi‑Fi Direct (P2P)</item>
         <item>Google Nearby (Beta)</item>
         <item>Точка доступа телефона (Host)</item>
-        <item>Точка доступа головного устройства (пассивный)</item>
+        <item>Точка доступа головного устройства (пассивная)</item>
     </string-array>
 
     <string name="select_nearby_device">Выберите устройство поблизости</string>
