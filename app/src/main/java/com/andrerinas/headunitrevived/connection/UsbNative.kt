@@ -2,6 +2,7 @@ package com.andrerinas.headunitrevived.connection
 
 import android.hardware.usb.UsbDeviceConnection
 import com.andrerinas.headunitrevived.utils.AppLog
+import java.nio.ByteBuffer
 
 class UsbNative {
     private var contextPtr: Long = 0
@@ -65,7 +66,7 @@ class UsbNative {
         }
     }
 
-    fun read(buffer: ByteArray, timeout: Int): Int {
+    fun read(buffer: ByteBuffer, timeout: Int): Int {
         if (handlePtr == 0L) return -1
         return try {
             nativeRead(handlePtr, buffer, epIn, timeout)
@@ -119,7 +120,7 @@ class UsbNative {
     private external fun detachKernel(handle: Long, iface: Int): Int
     private external fun claimInterface(handle: Long, iface: Int): Int
     private external fun nativeWrite(handle: Long, data: ByteArray, length: Int, endpoint: Int, timeout: Int): Int
-    private external fun nativeRead(handle: Long, jbuf: ByteArray, endpoint: Int, timeout: Int): Int
+    private external fun nativeRead(handle: Long, jbuf: ByteBuffer, endpoint: Int, timeout: Int): Int
     private external fun nativeResetDevice(handle: Long)
     private external fun closeDevice(handle: Long)
     private external fun exitContext(ctx: Long)

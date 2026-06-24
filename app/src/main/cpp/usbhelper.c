@@ -25,6 +25,10 @@ Java_com_andrerinas_headunitrevived_connection_UsbNative_initContext(JNIEnv *env
 JNIEXPORT jlong JNICALL
 Java_com_andrerinas_headunitrevived_connection_UsbNative_wrapDevice(JNIEnv *env, jobject thiz, jlong ctx_ptr, jint fd) {
     libusb_context *ctx = (libusb_context *)ctx_ptr;
+    if (!ctx) {
+        LOGE("wrapDevice: context is NULL");
+        return 0;
+    }
     libusb_device_handle *handle = NULL;
     int r = libusb_wrap_sys_device(ctx, (intptr_t)fd, &handle);
     if (r < 0) {
@@ -38,6 +42,10 @@ Java_com_andrerinas_headunitrevived_connection_UsbNative_wrapDevice(JNIEnv *env,
 JNIEXPORT jint JNICALL
 Java_com_andrerinas_headunitrevived_connection_UsbNative_detachKernel(JNIEnv *env, jobject thiz, jlong handle_ptr, jint interface_num) {
     libusb_device_handle *handle = (libusb_device_handle *)handle_ptr;
+    if (!handle) {
+        LOGE("detachKernel: handle is NULL");
+        return -1;
+    }
     int r = libusb_detach_kernel_driver(handle, interface_num);
     if (r < 0 && r != LIBUSB_ERROR_NOT_FOUND) {
         LOGE("libusb_detach_kernel_driver failed: %d", r);
@@ -48,6 +56,10 @@ Java_com_andrerinas_headunitrevived_connection_UsbNative_detachKernel(JNIEnv *en
 JNIEXPORT jint JNICALL
 Java_com_andrerinas_headunitrevived_connection_UsbNative_claimInterface(JNIEnv *env, jobject thiz, jlong handle_ptr, jint interface_num) {
     libusb_device_handle *handle = (libusb_device_handle *)handle_ptr;
+    if (!handle) {
+        LOGE("claimInterface: handle is NULL");
+        return -1;
+    }
     int r = libusb_claim_interface(handle, interface_num);
     if (r < 0) {
         LOGE("libusb_claim_interface failed: %d", r);
@@ -58,6 +70,10 @@ Java_com_andrerinas_headunitrevived_connection_UsbNative_claimInterface(JNIEnv *
 JNIEXPORT jint JNICALL
 Java_com_andrerinas_headunitrevived_connection_UsbNative_nativeWrite(JNIEnv *env, jobject thiz, jlong handle_ptr, jbyteArray data, jint length, jint endpoint, jint timeout) {
     libusb_device_handle *handle = (libusb_device_handle *)handle_ptr;
+    if (!handle) {
+        LOGE("nativeWrite: handle is NULL");
+        return -1;
+    }
     jsize array_len = (*env)->GetArrayLength(env, data);
     if (length > array_len) {
         length = array_len;
@@ -80,19 +96,26 @@ Java_com_andrerinas_headunitrevived_connection_UsbNative_nativeWrite(JNIEnv *env
 }
 
 JNIEXPORT jint JNICALL
-Java_com_andrerinas_headunitrevived_connection_UsbNative_nativeRead(JNIEnv *env, jobject thiz, jlong handle_ptr, jbyteArray jbuf, jint endpoint, jint timeout) {
+Java_com_andrerinas_headunitrevived_connection_UsbNative_nativeRead(JNIEnv *env, jobject thiz, jlong handle_ptr, jobject jbuf, jint endpoint, jint timeout) {
     libusb_device_handle *handle = (libusb_device_handle *)handle_ptr;
-    jsize buf_size = (*env)->GetArrayLength(env, jbuf);
-    jbyte *buffer = (*env)->GetByteArrayElements(env, jbuf, NULL);
+    if (!handle) {
+        LOGE("nativeRead: handle is NULL");
+        return -1;
+    }
+    void *buffer = (*env)->GetDirectBufferAddress(env, jbuf);
     if (!buffer) {
-        LOGE("nativeRead: GetByteArrayElements returned NULL");
+        LOGE("nativeRead: GetDirectBufferAddress returned NULL");
         return -2;
+    }
+    jlong capacity = (*env)->GetDirectBufferCapacity(env, jbuf);
+    if (capacity <= 0) {
+        LOGE("nativeRead: GetDirectBufferCapacity returned <= 0");
+        return -3;
     }
     
     int transferred = 0;
-    int r = libusb_bulk_transfer(handle, (unsigned char)endpoint, (unsigned char *)buffer, buf_size, &transferred, timeout);
+    int r = libusb_bulk_transfer(handle, (unsigned char)endpoint, (unsigned char *)buffer, (int)capacity, &transferred, timeout);
     
-    (*env)->ReleaseByteArrayElements(env, jbuf, buffer, 0);
     if (r < 0) {
         if (r != LIBUSB_ERROR_TIMEOUT) {
             LOGE("libusb_bulk_transfer read failed: %d", r);
@@ -106,19 +129,25 @@ Java_com_andrerinas_headunitrevived_connection_UsbNative_nativeRead(JNIEnv *env,
 JNIEXPORT void JNICALL
 Java_com_andrerinas_headunitrevived_connection_UsbNative_nativeResetDevice(JNIEnv *env, jobject thiz, jlong handle_ptr) {
     libusb_device_handle *handle = (libusb_device_handle *)handle_ptr;
-    libusb_reset_device(handle);
+    if (handle) {
+        libusb_reset_device(handle);
+    }
 }
 
 JNIEXPORT void JNICALL
 Java_com_andrerinas_headunitrevived_connection_UsbNative_closeDevice(JNIEnv *env, jobject thiz, jlong handle_ptr) {
     libusb_device_handle *handle = (libusb_device_handle *)handle_ptr;
-    libusb_close(handle);
+    if (handle) {
+        libusb_close(handle);
+    }
 }
 
 JNIEXPORT void JNICALL
 Java_com_andrerinas_headunitrevived_connection_UsbNative_exitContext(JNIEnv *env, jobject thiz, jlong ctx_ptr) {
     libusb_context *ctx = (libusb_context *)ctx_ptr;
-    libusb_exit(ctx);
+    if (ctx) {
+        libusb_exit(ctx);
+    }
 }
 
 JNIEXPORT jint JNICALL
