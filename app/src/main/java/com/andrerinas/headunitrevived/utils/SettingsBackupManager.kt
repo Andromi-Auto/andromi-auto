@@ -138,8 +138,8 @@ object SettingsBackupManager {
         "wait-for-wifi-timeout" to ValueType.INT,
         "helper-connection-strategy" to ValueType.INT,
         "bluetooth-manager-service-name" to ValueType.STRING,
-        "projection-display-type" to ValueType.INT,
-        "use-libusb" to ValueType.BOOLEAN
+        "use-libusb" to ValueType.BOOLEAN,
+        "bluetooth-manager-service-name" to ValueType.STRING
     )
 
     private val projectionRestartKeys = setOf(
@@ -161,7 +161,6 @@ object SettingsBackupManager {
         "inset-right",
         "inset-bottom",
         "wifi-connection-mode",
-        "projection-display-type",
         "use-libusb"
     )
 
