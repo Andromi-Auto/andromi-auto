@@ -8,6 +8,7 @@
 - Fixed keyboard input on Android < 6 Devices
 - Enhanced WiFi Direct-Mode
 - Enhanced File Selector for some devices
+- Fixed some fatal errors, showing in play console
 
 ### v.3.0.0
 - Added: Custom loading screen (image/GIF/video), thanks to @andrecuellar
