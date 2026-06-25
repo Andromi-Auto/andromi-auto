@@ -566,6 +566,7 @@
     <string name="loading_screen_tap_to_close">Kapatmak için herhangi bir yere dokun</string>
     <string name="loading_screen_show_text">\"Android Auto başlatılıyor\" metnini göster</string>
     <string name="loading_screen_keep_aspect_ratio">En boy oranını koru</string>
+    <string name="loading_screen_scale">Ölçek</string>
     <string name="loading_screen_loop_video">Kısa animasyonları döngüye al</string>
     <string name="loading_screen_recommendation">Önerilen çözünürlük: %1$dx%2$d</string>
     <string name="loading_screen_recommended_aspect_ratio">Önerilen en boy oranı: %1$d:%2$d</string>

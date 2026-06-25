@@ -565,6 +565,24 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         }
 
         val keepRatio = settings.loadingScreenKeepAspectRatio
+        val scalePercent = settings.loadingScreenScalePercent
+        val scale = scalePercent / 100f
+
+        if (overlay != null && customImage != null) {
+            overlay.post {
+                val cw = overlay.width
+                val ch = overlay.height
+                if (cw > 0 && ch > 0) {
+                    val lp = customImage.layoutParams as? FrameLayout.LayoutParams
+                    if (lp != null) {
+                        lp.width = (cw * scale).toInt()
+                        lp.height = (ch * scale).toInt()
+                        lp.gravity = android.view.Gravity.CENTER
+                        customImage.layoutParams = lp
+                    }
+                }
+            }
+        }
         customImage?.scaleType = if (keepRatio) ImageView.ScaleType.FIT_CENTER else ImageView.ScaleType.FIT_XY
 
         try {
@@ -599,32 +617,38 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
                         mp.isLooping = settings.loadingScreenLoopVideo
                         mp.setVolume(0f, 0f)
 
-                        if (keepRatio) {
-                            // Resize VideoView to match video's actual aspect ratio (like YouTube)
-                            try {
-                                val vw = mp.videoWidth
-                                val vh = mp.videoHeight
-                                if (vw > 0 && vh > 0) {
-                                    val cw = overlay?.width ?: return@setOnPreparedListener
-                                    val ch = overlay?.height ?: return@setOnPreparedListener
-                                    val videoRatio = vw.toFloat() / vh
-                                    val containerRatio = cw.toFloat() / ch
+                        try {
+                            val vw = mp.videoWidth
+                            val vh = mp.videoHeight
+                            if (overlay != null) {
+                                val cw = overlay.width
+                                val ch = overlay.height
+                                if (cw > 0 && ch > 0) {
                                     val lp = customVideo.layoutParams as FrameLayout.LayoutParams
-                                    if (videoRatio > containerRatio) {
-                                        // Wider video → fit to width, bars top/bottom
-                                        lp.width = cw
-                                        lp.height = (cw / videoRatio).toInt()
+                                    if (keepRatio && vw > 0 && vh > 0) {
+                                        val videoRatio = vw.toFloat() / vh
+                                        val containerRatio = cw.toFloat() / ch
+                                        val baseWidth: Int
+                                        val baseHeight: Int
+                                        if (videoRatio > containerRatio) {
+                                            baseWidth = cw
+                                            baseHeight = (cw / videoRatio).toInt()
+                                        } else {
+                                            baseHeight = ch
+                                            baseWidth = (ch * videoRatio).toInt()
+                                        }
+                                        lp.width = (baseWidth * scale).toInt()
+                                        lp.height = (baseHeight * scale).toInt()
                                     } else {
-                                        // Taller video → fit to height, bars left/right
-                                        lp.height = ch
-                                        lp.width = (ch * videoRatio).toInt()
+                                        lp.width = (cw * scale).toInt()
+                                        lp.height = (ch * scale).toInt()
                                     }
                                     lp.gravity = android.view.Gravity.CENTER
                                     customVideo.layoutParams = lp
                                 }
-                            } catch (e: Exception) {
-                                AppLog.w("Could not resize video: ${e.message}")
                             }
+                        } catch (e: Exception) {
+                            AppLog.w("Could not resize video: ${e.message}")
                         }
                     }
                     customVideo?.setOnErrorListener { _, _, _ ->

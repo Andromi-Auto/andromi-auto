@@ -570,6 +570,7 @@
     <string name="loading_screen_tap_to_close">Chạm vào bất kỳ đâu để đóng</string>
     <string name="loading_screen_show_text">Hiển thị dòng chữ \"Android Auto đang khởi động\"</string>
     <string name="loading_screen_keep_aspect_ratio">Giữ tỷ lệ khung hình</string>
+    <string name="loading_screen_scale">Tỷ lệ</string>
     <string name="loading_screen_loop_video">Lặp lại các hoạt ảnh ngắn</string>
     <string name="loading_screen_recommendation">Độ phân giải đề xuất: %1$dx%2$d</string>
     <string name="loading_screen_recommended_aspect_ratio">Tỷ lệ khung hình đề xuất: %1$d:%2$d</string>

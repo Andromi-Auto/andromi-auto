@@ -10,6 +10,8 @@ import android.widget.*
 import android.view.View
 import android.view.ViewGroup
 import android.view.LayoutInflater
+import android.view.ViewTreeObserver
+import androidx.constraintlayout.widget.ConstraintLayout
 import android.net.VpnService
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.activity.result.contract.ActivityResultContracts
@@ -101,6 +103,12 @@ class HomeFragment : Fragment() {
         wifi_text_view = view.findViewById(R.id.wifi_text)
         exitButton = view.findViewById(R.id.exit_button)
         self_mode_text = view.findViewById(R.id.self_mode_text)
+
+        // Portrait layout: cap grid width so square buttons never overflow
+        // into the WiFi-pill or Exit-button areas on compact/square devices.
+        if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            constrainPortraitGridWidth(view)
+        }
 
         setupListeners()
         updateProjectionButtonText()
@@ -519,6 +527,59 @@ class HomeFragment : Fragment() {
             }
             true
         }
+    }
+
+    /**
+     * Portrait-only: after the first layout pass we know the exact pixel
+     * dimensions of the screen and the reserved areas (WiFi-pill spacer at
+     * the top, Exit button at the bottom).  We calculate the largest square
+     * button that fits in a 2-row grid and constrain the grid's max-width
+     * accordingly.  This prevents overflow on square / wide-portrait tablets
+     * while allowing full-width buttons on tall phones.
+     *
+     * Formula:
+     *   availableH  = containerH − topSpacerH − exitButtonH
+     *   maxBtnSize  = min(containerW / 2, availableH / 2) − cell-padding
+     *   maxGridW    = maxBtnSize * 2 + cell-padding * 4   (2 cols, padding each side)
+     */
+    private fun constrainPortraitGridWidth(rootView: View) {
+        val gridLayout = rootView.findViewById<android.widget.LinearLayout>(R.id.main_buttons_layout)
+            ?: return
+        gridLayout.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+            override fun onGlobalLayout() {
+                gridLayout.viewTreeObserver.removeOnGlobalLayoutListener(this)
+
+                val container = gridLayout.parent as? View ?: return
+                val containerW = container.width
+                val containerH = container.height
+                if (containerW == 0 || containerH == 0) return
+
+                // Reserved vertical space: 64 dp top-spacer + ~56 dp exit button (margin incl.)
+                val density = resources.displayMetrics.density
+                val reservedDp = (64 + 56) * density
+                // Extra per-row overhead: label (~20 sp≈20dp) + top margin (6 dp) + cell padding top+bottom (24 dp)
+                val rowOverheadDp = 50 * density
+
+                val availableH = containerH - reservedDp
+                // Max button edge that fits in one row without labels overflowing
+                val maxBtnFromH = ((availableH / 2f) - rowOverheadDp).toInt()
+                val maxBtnFromW = containerW / 2
+                val maxBtn = minOf(maxBtnFromH, maxBtnFromW)
+
+                if (maxBtn <= 0) return
+
+                // Grid max-width = 2 buttons + 4 × cell-horizontal-padding (12 dp each side)
+                val cellPadH = (12 * 2 * 2 * density).toInt() // 2 cols × 2 sides × 12 dp
+                val maxGridW = maxBtn * 2 + cellPadH
+
+                // Only shrink, never grow beyond what the existing constraints allow
+                if (maxGridW < containerW) {
+                    val params = gridLayout.layoutParams as? ConstraintLayout.LayoutParams ?: return
+                    params.matchConstraintMaxWidth = maxGridW
+                    gridLayout.layoutParams = params
+                }
+            }
+        })
     }
 
     private fun updateProjectionButtonText() {

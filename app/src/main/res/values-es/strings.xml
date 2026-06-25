@@ -510,6 +510,7 @@
     <string name="loading_screen_tap_preview">Toca para vista previa</string>
     <string name="loading_screen_tap_to_close">Toca en cualquier lugar para cerrar</string>
     <string name="loading_screen_keep_aspect_ratio">Mantener relación de aspecto</string>
+    <string name="loading_screen_scale">Escala</string>
     <string name="loading_screen_recommended_aspect_ratio">Relación de aspecto recomendada: %1$d:%2$d</string>
     <string name="loading_screen_tap_fullscreen_hint">Toca la vista previa para verla en pantalla completa</string>
     <string name="loading_screen_loop_video">Repetir animaciones cortas en bucle</string>
