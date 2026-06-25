@@ -452,9 +452,8 @@ class LoadingScreenFragment : Fragment() {
         }
 
         val dir = File(ctx.filesDir, "loading_media")
-        dir.listFiles()?.forEach { try { it.delete() } catch (e: Exception) {} }
+        dir.listFiles()?.forEach { it.delete() }
         val destFile = File(dir, "loading_screen_${System.currentTimeMillis()}.$ext")
-
         // The media file can be up to 10 MB and may live on slow storage (SD
         // card, cloud-backed document provider). Run the size probe, the
         // previous-media cleanup and the actual copy on Dispatchers.IO so the
