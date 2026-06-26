@@ -20,20 +20,20 @@ set(FFMPEG_LIBS
     "${FFMPEG_LIB_DIR}/libswscale.so"
 )
 
-set(HUR_FFMPEG_READY FALSE)
-if(EXISTS "${FFMPEG_INCLUDE_DIR}/libavcodec/avcodec.h")
-    if(EXISTS "${FFMPEG_INCLUDE_DIR}/libavutil/imgutils.h")
-        if(EXISTS "${FFMPEG_INCLUDE_DIR}/libswscale/swscale.h")
-            if(EXISTS "${FFMPEG_LIB_DIR}/libavcodec.so")
-                if(EXISTS "${FFMPEG_LIB_DIR}/libavutil.so")
-                    if(EXISTS "${FFMPEG_LIB_DIR}/libswscale.so")
-                        set(HUR_FFMPEG_READY TRUE)
-                    endif()
-                endif()
-            endif()
-        endif()
+set(HUR_FFMPEG_REQUIRED_FILES
+    "${FFMPEG_INCLUDE_DIR}/libavcodec/avcodec.h"
+    "${FFMPEG_INCLUDE_DIR}/libavutil/imgutils.h"
+    "${FFMPEG_INCLUDE_DIR}/libswscale/swscale.h"
+    ${FFMPEG_LIBS}
+)
+
+set(HUR_FFMPEG_READY TRUE)
+foreach(required_file IN LISTS HUR_FFMPEG_REQUIRED_FILES)
+    if(NOT EXISTS "${required_file}")
+        set(HUR_FFMPEG_READY FALSE)
+        break()
     endif()
-endif()
+endforeach()
 
 message(STATUS "HUR FFmpeg for ${ANDROID_ABI}: ${HUR_FFMPEG_READY} (${FFMPEG_LIB_DIR})")
 
