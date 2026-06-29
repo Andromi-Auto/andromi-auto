@@ -13,6 +13,7 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.Switch
+import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
@@ -49,6 +50,8 @@ class LoadingScreenFragment : Fragment() {
     private var fullscreenOverlay: FrameLayout? = null
     private var fullscreenImage: ImageView? = null
     private var fullscreenStatusText: View? = null
+    private var sliderScale: SeekBar? = null
+    private var txtScaleValue: TextView? = null
 
     // Video playback managed programmatically (not in XML to avoid inflation issues)
     private var previewMediaPlayer: MediaPlayer? = null
@@ -140,6 +143,30 @@ class LoadingScreenFragment : Fragment() {
         toggleKeepAspectRatio = view.findViewById(R.id.toggle_keep_aspect_ratio)
         toggleLoopContainer = view.findViewById(R.id.toggle_loop_container)
         toggleLoopVideo = view.findViewById(R.id.toggle_loop_video)
+
+        sliderScale = view.findViewById<SeekBar>(R.id.slider_scale)
+        txtScaleValue = view.findViewById<TextView>(R.id.txt_scale_value)
+
+        val currentScale = settings.loadingScreenScalePercent
+        txtScaleValue?.text = "$currentScale%"
+        sliderScale?.progress = currentScale
+        sliderScale?.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                var actualProgress = progress
+                if (actualProgress < 10) {
+                    actualProgress = 10
+                    if (fromUser) {
+                        sliderScale?.progress = 10
+                        return
+                    }
+                }
+                settings.loadingScreenScalePercent = actualProgress
+                txtScaleValue?.text = "$actualProgress%"
+                applyPreviewScale()
+            }
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+        })
 
         // Toggles
         toggleShowText?.isChecked = settings.loadingScreenShowText
@@ -277,15 +304,17 @@ class LoadingScreenFragment : Fragment() {
                     // added SurfaceView, mirroring setupFullscreenVideo. Glide
                     // would otherwise only show a static first-frame thumbnail.
                     previewImage?.visibility = View.GONE
-                    setupPreviewVideo(file, keepRatio)
+                    setupPreviewVideo(file)
                 }
                 "gif" -> {
                     previewImage?.visibility = View.VISIBLE
                     previewImage?.let { Glide.with(this).asGif().load(file).into(it) }
+                    applyPreviewScale()
                 }
                 else -> {
                     previewImage?.visibility = View.VISIBLE
                     previewImage?.let { Glide.with(this).load(file).into(it) }
+                    applyPreviewScale()
                     // Ken Burns matches the live loading screen for static
                     // images, so the user actually sees the slow zoom they're
                     // configuring rather than a frozen frame.
@@ -314,7 +343,7 @@ class LoadingScreenFragment : Fragment() {
         }
     }
 
-    private fun setupPreviewVideo(file: File, keepRatio: Boolean) {
+    private fun setupPreviewVideo(file: File) {
         val area = previewArea ?: return
         try {
             val surfaceView = SurfaceView(requireContext())
@@ -347,28 +376,7 @@ class LoadingScreenFragment : Fragment() {
             })
 
             mp.setOnPreparedListener { player ->
-                if (keepRatio) {
-                    try {
-                        val vw = player.videoWidth
-                        val vh = player.videoHeight
-                        val cw = area.width
-                        val ch = area.height
-                        if (vw > 0 && vh > 0 && cw > 0 && ch > 0) {
-                            val videoRatio = vw.toFloat() / vh
-                            val containerRatio = cw.toFloat() / ch
-                            val lp = surfaceView.layoutParams as FrameLayout.LayoutParams
-                            if (videoRatio > containerRatio) {
-                                lp.width = cw
-                                lp.height = (cw / videoRatio).toInt()
-                            } else {
-                                lp.height = ch
-                                lp.width = (ch * videoRatio).toInt()
-                            }
-                            lp.gravity = android.view.Gravity.CENTER
-                            surfaceView.layoutParams = lp
-                        }
-                    } catch (_: Exception) {}
-                }
+                applyPreviewScale()
                 try { player.start() } catch (_: Exception) {}
             }
             mp.setOnErrorListener { _, _, _ ->
@@ -447,9 +455,8 @@ class LoadingScreenFragment : Fragment() {
         }
 
         val dir = File(ctx.filesDir, "loading_media")
-        dir.listFiles()?.forEach { try { it.delete() } catch (e: Exception) {} }
+        dir.listFiles()?.forEach { it.delete() }
         val destFile = File(dir, "loading_screen_${System.currentTimeMillis()}.$ext")
-
         // The media file can be up to 10 MB and may live on slow storage (SD
         // card, cloud-backed document provider). Run the size probe, the
         // previous-media cleanup and the actual copy on Dispatchers.IO so the
@@ -662,6 +669,7 @@ class LoadingScreenFragment : Fragment() {
                     }
                     fullscreenImage?.tag = anim
                 }
+                fullscreenOverlay?.post { applyFullscreenScale() }
             }
         } catch (e: Exception) {
             AppLog.e("Fullscreen preview failed: ${e.message}")
@@ -700,30 +708,7 @@ class LoadingScreenFragment : Fragment() {
             })
 
             mp.setOnPreparedListener { player ->
-                // Resize surface to respect aspect ratio if needed
-                if (settings.loadingScreenKeepAspectRatio) {
-                    try {
-                        val vw = player.videoWidth
-                        val vh = player.videoHeight
-                        if (vw > 0 && vh > 0) {
-                            val container = fullscreenOverlay ?: return@setOnPreparedListener
-                            val cw = container.width
-                            val ch = container.height
-                            val videoRatio = vw.toFloat() / vh
-                            val containerRatio = cw.toFloat() / ch
-                            val lp = surfaceView.layoutParams as FrameLayout.LayoutParams
-                            if (videoRatio > containerRatio) {
-                                lp.width = cw
-                                lp.height = (cw / videoRatio).toInt()
-                            } else {
-                                lp.height = ch
-                                lp.width = (ch * videoRatio).toInt()
-                            }
-                            lp.gravity = android.view.Gravity.CENTER
-                            surfaceView.layoutParams = lp
-                        }
-                    } catch (_: Exception) {}
-                }
+                applyFullscreenScale()
                 player.start()
             }
             mp.setOnErrorListener { _, _, _ ->
@@ -752,6 +737,113 @@ class LoadingScreenFragment : Fragment() {
             fullscreenImage?.scaleY = 1f
             try { fullscreenImage?.let { Glide.with(this@LoadingScreenFragment).clear(it) } } catch (_: Exception) {}
         }?.start()
+    }
+
+    private fun applyPreviewScale() {
+        val area = previewArea ?: return
+        val scale = settings.loadingScreenScalePercent / 100f
+        val cw = area.width
+        val ch = area.height
+        if (cw <= 0 || ch <= 0) return
+
+        previewImage?.let { iv ->
+            val lp = iv.layoutParams as? FrameLayout.LayoutParams
+            if (lp != null) {
+                lp.width = (cw * scale).toInt()
+                lp.height = (ch * scale).toInt()
+                lp.gravity = android.view.Gravity.CENTER
+                iv.layoutParams = lp
+            }
+        }
+
+        previewSurfaceView?.let { sv ->
+            val lp = sv.layoutParams as? FrameLayout.LayoutParams
+            if (lp != null) {
+                val mp = previewMediaPlayer
+                val keepRatio = settings.loadingScreenKeepAspectRatio
+                if (keepRatio && mp != null) {
+                    try {
+                        val vw = mp.videoWidth
+                        val vh = mp.videoHeight
+                        if (vw > 0 && vh > 0) {
+                            val videoRatio = vw.toFloat() / vh
+                            val containerRatio = cw.toFloat() / ch
+                            val baseWidth: Int
+                            val baseHeight: Int
+                            if (videoRatio > containerRatio) {
+                                baseWidth = cw
+                                baseHeight = (cw / videoRatio).toInt()
+                            } else {
+                                baseHeight = ch
+                                baseWidth = (ch * videoRatio).toInt()
+                            }
+                            lp.width = (baseWidth * scale).toInt()
+                            lp.height = (baseHeight * scale).toInt()
+                        }
+                    } catch (_: Exception) {}
+                } else {
+                    lp.width = (cw * scale).toInt()
+                    lp.height = (ch * scale).toInt()
+                }
+                lp.gravity = android.view.Gravity.CENTER
+                sv.layoutParams = lp
+            }
+        }
+    }
+
+    private fun applyFullscreenScale() {
+        val overlay = fullscreenOverlay ?: return
+        val scale = settings.loadingScreenScalePercent / 100f
+        val cw = overlay.width
+        val ch = overlay.height
+        if (cw <= 0 || ch <= 0) return
+
+        fullscreenImage?.let { iv ->
+            val lp = iv.layoutParams as? FrameLayout.LayoutParams
+            if (lp != null) {
+                lp.width = (cw * scale).toInt()
+                lp.height = (ch * scale).toInt()
+                lp.gravity = android.view.Gravity.CENTER
+                iv.layoutParams = lp
+            }
+        }
+
+        for (i in 0 until overlay.childCount) {
+            val child = overlay.getChildAt(i)
+            if (child is SurfaceView) {
+                val lp = child.layoutParams as? FrameLayout.LayoutParams
+                if (lp != null) {
+                    val mp = fullscreenMediaPlayer
+                    val keepRatio = settings.loadingScreenKeepAspectRatio
+                    if (keepRatio && mp != null) {
+                        try {
+                            val vw = mp.videoWidth
+                            val vh = mp.videoHeight
+                            if (vw > 0 && vh > 0) {
+                                val videoRatio = vw.toFloat() / vh
+                                val containerRatio = cw.toFloat() / ch
+                                val baseWidth: Int
+                                val baseHeight: Int
+                                if (videoRatio > containerRatio) {
+                                    baseWidth = cw
+                                    baseHeight = (cw / videoRatio).toInt()
+                                } else {
+                                    baseHeight = ch
+                                    baseWidth = (ch * videoRatio).toInt()
+                                }
+                                lp.width = (baseWidth * scale).toInt()
+                                lp.height = (baseHeight * scale).toInt()
+                            }
+                        } catch (_: Exception) {}
+                    } else {
+                        lp.width = (cw * scale).toInt()
+                        lp.height = (ch * scale).toInt()
+                    }
+                    lp.gravity = android.view.Gravity.CENTER
+                    child.layoutParams = lp
+                }
+            }
+        }
     }
 
     private fun releaseMediaPlayers() {

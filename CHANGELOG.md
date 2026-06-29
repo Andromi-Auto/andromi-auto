@@ -1,4 +1,9 @@
 # Changelog
+### v.3.1.0
+- Added libusb as alternative to the native usb stack for better compatibility with some devices
+- Fixed Layout in Portrait Mode in nearly square devices
+- Added Scale Slider for loading screen media
+
 ### v.3.0.1
 - Fixed: App Exit on Disconnect
 - Enhanced: USB Workflow. This will hopefully eliminate some random usb disconnects

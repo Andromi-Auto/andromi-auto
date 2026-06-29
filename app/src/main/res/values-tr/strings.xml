@@ -566,6 +566,7 @@
     <string name="loading_screen_tap_to_close">Kapatmak için herhangi bir yere dokun</string>
     <string name="loading_screen_show_text">\"Android Auto başlatılıyor\" metnini göster</string>
     <string name="loading_screen_keep_aspect_ratio">En boy oranını koru</string>
+    <string name="loading_screen_scale">Ölçek</string>
     <string name="loading_screen_loop_video">Kısa animasyonları döngüye al</string>
     <string name="loading_screen_recommendation">Önerilen çözünürlük: %1$dx%2$d</string>
     <string name="loading_screen_recommended_aspect_ratio">Önerilen en boy oranı: %1$d:%2$d</string>
@@ -573,4 +574,7 @@
     <string name="loading_screen_file_error">Seçili dosya yüklenemedi</string>
     <string name="loading_screen_file_too_large">Dosya çok büyük (maks 10 MB)</string>
     <string name="loading_screen_unsupported_format">Desteklenmeyen biçim. Bir görsel veya video dosyası kullanın</string>
+    <!-- Native USB Driver -->
+    <string name="use_libusb">Yerel USB Sürücüsünü Kullan</string>
+    <string name="use_libusb_description">İletişim için libusb kullanın. Android\'in standart USB API\'sini kullanmak için devre dışı bırakın.</string>
 </resources>

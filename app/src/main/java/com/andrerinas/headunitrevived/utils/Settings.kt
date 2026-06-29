@@ -538,6 +538,10 @@ class Settings(private val context: Context) {
         get() = prefs.getBoolean("loading-screen-loop-video", true)
         set(value) { prefs.edit().putBoolean("loading-screen-loop-video", value).apply() }
 
+    var loadingScreenScalePercent: Int
+        get() = prefs.getInt("loading-screen-scale-percent", 100)
+        set(value) { prefs.edit().putInt("loading-screen-scale-percent", value).apply() }
+
     @SuppressLint("ApplySharedPref")
     fun commit() {
         prefs.edit().commit()
@@ -1011,6 +1015,8 @@ class Settings(private val context: Context) {
         get() = prefs.getString("hotspot-password", "")!!
         set(value) = prefs.edit().putString("hotspot-password", value).apply()
 
-
+    var useLibusb: Boolean
+        get() = prefs.getBoolean("use-libusb", false)
+        set(value) = prefs.edit().putBoolean("use-libusb", value).apply()
 
 }

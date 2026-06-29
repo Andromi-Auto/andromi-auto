@@ -557,6 +557,7 @@
     <string name="loading_screen_tap_preview">Tap to preview fullscreen</string>
     <string name="loading_screen_tap_to_close">Tap anywhere to close</string>
     <string name="loading_screen_keep_aspect_ratio">Keep aspect ratio</string>
+    <string name="loading_screen_scale">Scale</string>
     <string name="loading_screen_recommended_aspect_ratio">Recommended aspect ratio: %1$d:%2$d</string>
     <string name="loading_screen_tap_fullscreen_hint">Tap the preview to see it fullscreen</string>
     <string name="loading_screen_loop_video">Loop short animations</string>
@@ -582,4 +583,6 @@
     <string name="hotspot_qr_description">Wireless Helper Configuration QR Code</string>
     <string name="scan_with_wireless_helper">Scan this QR Code using the QR Scanner in Wireless Helper on your phone.</string>
     <string name="share_hotspot_qr_error">Could not retrieve active Wi-Fi hotspot credentials. Please ensure your hotspot is turned on and Location is enabled.</string>
+    <string name="use_libusb">Use Native USB Driver</string>
+    <string name="use_libusb_description">Use libusb for communication. Disable to use Android\'s standard USB API.</string>
 </resources>
