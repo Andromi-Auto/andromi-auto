@@ -697,8 +697,6 @@ class AapService : Service(), UsbReceiver.Listener {
         AppLog.init(settings, this)
         syncLogBackendState()
 
-        startService(GpsLocationService.intent(this))
-
         nativeAaHandshakeManager = NativeAaHandshakeManager(this, serviceScope)
         wifiDirectManager = WifiDirectManager(this)
         
@@ -760,7 +758,6 @@ class AapService : Service(), UsbReceiver.Listener {
             }
             sendBroadcast(intent)
         }
-        nightModeManager?.start()
     }
 
     /**
@@ -928,6 +925,12 @@ class AapService : Service(), UsbReceiver.Listener {
         // don't steal audio during service autostart but still obtain focus when a
         // real connection is beginning.
         requestPermanentAudioFocus()
+
+        // Start GpsLocationService and NightModeManager sensor tracking
+        AppLog.i("AapService: Starting GpsLocationService and NightModeManager since connection is established")
+        startService(GpsLocationService.intent(this))
+        nightModeManager?.start()
+
         serviceScope.launch { commManager.startHandshake() }
     }
 
@@ -1058,6 +1061,11 @@ class AapService : Service(), UsbReceiver.Listener {
     private fun onDisconnected(state: CommManager.ConnectionState.Disconnected) {
         isSwitchingToAccessory.set(false)
         releaseWifiLock()
+
+        // Stop GpsLocationService and NightModeManager sensor tracking
+        AppLog.i("AapService: Stopping GpsLocationService and NightModeManager since connection is disconnected")
+        stopService(GpsLocationService.intent(this))
+        nightModeManager?.stop()
 
         // Release any permanent audio focus we may have requested when connected
         releasePermanentAudioFocus()
@@ -1573,6 +1581,7 @@ class AapService : Service(), UsbReceiver.Listener {
         mediaSession = null
         commManager.destroy()
         nightModeManager?.stop()
+        stopService(GpsLocationService.intent(this))
         try {
             unregisterReceiver(nightModeUpdateReceiver)
             unregisterReceiver(sensorRefreshReceiver)

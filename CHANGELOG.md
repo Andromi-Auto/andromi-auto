@@ -1,4 +1,7 @@
 # Changelog
+### v.3.1.1-alpha
+- Reduce pressure on sensor events like night and gps and start/stop these events in onConnected, onDisconnect and onDestroy
+
 ### v.3.1.0
 - Added libusb as alternative to the native usb stack for better compatibility with some devices
 - Fixed Layout in Portrait Mode in nearly square devices
