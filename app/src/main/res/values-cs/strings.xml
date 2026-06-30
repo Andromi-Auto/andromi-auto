@@ -581,4 +581,8 @@
     <!-- Native USB Driver -->
     <string name="use_libusb">Použít nativní USB ovladač</string>
     <string name="use_libusb_description">Použít libusb pro komunikaci. Vypnutím použijete standardní USB API pro Android.</string>
+
+    <string name="software_video_decoder">Zdroj softwarového dekodéru</string>
+    <string name="software_video_decoder_bundled">Integrovaný FFmpeg</string>
+    <string name="software_video_decoder_device">MediaCodec zařízení</string>
 </resources>

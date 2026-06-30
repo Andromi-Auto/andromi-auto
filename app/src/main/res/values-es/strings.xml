@@ -589,4 +589,8 @@
     <!-- Native USB Driver -->
     <string name="use_libusb">Usar controlador USB nativo</string>
     <string name="use_libusb_description">Usa libusb para la comunicación. Desactívalo para usar la API USB estándar de Android.</string>
+
+    <string name="software_video_decoder">Origen del decodificador de software</string>
+    <string name="software_video_decoder_bundled">FFmpeg integrado</string>
+    <string name="software_video_decoder_device">MediaCodec del dispositivo</string>
 </resources>

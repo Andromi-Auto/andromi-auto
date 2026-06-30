@@ -589,4 +589,8 @@
     <!-- Native USB Driver -->
     <string name="use_libusb">ネイティブUSBドライバーを使用する</string>
     <string name="use_libusb_description">通信にlibusbを使用します。Androidの標準USB APIを使用するには無効にしてください。</string>
+
+    <string name="software_video_decoder">ソフトウェアデコーダのソース</string>
+    <string name="software_video_decoder_bundled">内蔵FFmpeg</string>
+    <string name="software_video_decoder_device">デバイスのMediaCodec</string>
 </resources>

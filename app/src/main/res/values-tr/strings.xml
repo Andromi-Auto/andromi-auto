@@ -577,4 +577,8 @@
     <!-- Native USB Driver -->
     <string name="use_libusb">Yerel USB Sürücüsünü Kullan</string>
     <string name="use_libusb_description">İletişim için libusb kullanın. Android\'in standart USB API\'sini kullanmak için devre dışı bırakın.</string>
+
+    <string name="software_video_decoder">Yazılım Kod Çözücü Kaynağı</string>
+    <string name="software_video_decoder_bundled">Yerleşik FFmpeg</string>
+    <string name="software_video_decoder_device">Cihaz MediaCodec</string>
 </resources>

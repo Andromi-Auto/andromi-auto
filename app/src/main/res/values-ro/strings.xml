@@ -582,4 +582,8 @@
     <!-- Native USB Driver -->
     <string name="use_libusb">Utilizați driverul USB nativ</string>
     <string name="use_libusb_description">Utilizează libusb pentru comunicare. Dezactivați pentru a utiliza API-ul USB standard Android.</string>
+
+    <string name="software_video_decoder">Sursă decodor software</string>
+    <string name="software_video_decoder_bundled">FFmpeg integrat</string>
+    <string name="software_video_decoder_device">MediaCodec dispozitiv</string>
 </resources>

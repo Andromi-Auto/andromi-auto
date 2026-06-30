@@ -588,4 +588,8 @@
     <!-- Native USB Driver -->
     <string name="use_libusb">네이티브 USB 드라이버 사용</string>
     <string name="use_libusb_description">통신에 libusb를 사용합니다. Android의 표준 USB API를 사용하려면 비활성화하세요.</string>
+
+    <string name="software_video_decoder">소프트웨어 디코더 소스</string>
+    <string name="software_video_decoder_bundled">내장 FFmpeg</string>
+    <string name="software_video_decoder_device">기기 MediaCodec</string>
 </resources>

@@ -1069,35 +1069,37 @@ class SettingsFragment : Fragment() {
             }
         ))
 
-        items.add(SettingItem.SettingEntry(
-            stableId = "softwareVideoDecoder",
-            nameResId = R.string.software_video_decoder,
-            value = when (pendingSoftwareVideoDecoder) {
-                Settings.SoftwareVideoDecoder.DEVICE_MEDIACODEC -> getString(R.string.software_video_decoder_device)
-                Settings.SoftwareVideoDecoder.BUNDLED_FFMPEG -> getString(R.string.software_video_decoder_bundled)
-                null -> ""
-            },
-            onClick = { _ ->
-                val decoders = arrayOf(
-                    getString(R.string.software_video_decoder_bundled),
-                    getString(R.string.software_video_decoder_device)
-                )
-                val decoderValues = arrayOf(
-                    Settings.SoftwareVideoDecoder.BUNDLED_FFMPEG,
-                    Settings.SoftwareVideoDecoder.DEVICE_MEDIACODEC
-                )
-                val currentDecoderIndex = decoderValues.indexOf(pendingSoftwareVideoDecoder).coerceAtLeast(0)
-                MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
-                    .setTitle(R.string.software_video_decoder)
-                    .setSingleChoiceItems(decoders, currentDecoderIndex) { dialog, which ->
-                        pendingSoftwareVideoDecoder = decoderValues[which]
-                        checkChanges()
-                        dialog.dismiss()
-                        updateSettingsList()
-                    }
-                    .show()
-            }
-        ))
+        if (pendingForceSoftware == true) {
+            items.add(SettingItem.SettingEntry(
+                stableId = "softwareVideoDecoder",
+                nameResId = R.string.software_video_decoder,
+                value = when (pendingSoftwareVideoDecoder) {
+                    Settings.SoftwareVideoDecoder.DEVICE_MEDIACODEC -> getString(R.string.software_video_decoder_device)
+                    Settings.SoftwareVideoDecoder.BUNDLED_FFMPEG -> getString(R.string.software_video_decoder_bundled)
+                    null -> ""
+                },
+                onClick = { _ ->
+                    val decoders = arrayOf(
+                        getString(R.string.software_video_decoder_bundled),
+                        getString(R.string.software_video_decoder_device)
+                    )
+                    val decoderValues = arrayOf(
+                        Settings.SoftwareVideoDecoder.BUNDLED_FFMPEG,
+                        Settings.SoftwareVideoDecoder.DEVICE_MEDIACODEC
+                    )
+                    val currentDecoderIndex = decoderValues.indexOf(pendingSoftwareVideoDecoder).coerceAtLeast(0)
+                    MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
+                        .setTitle(R.string.software_video_decoder)
+                        .setSingleChoiceItems(decoders, currentDecoderIndex) { dialog, which ->
+                            pendingSoftwareVideoDecoder = decoderValues[which]
+                            checkChanges()
+                            dialog.dismiss()
+                            updateSettingsList()
+                        }
+                        .show()
+                }
+            ))
+        }
 
         items.add(SettingItem.SettingEntry(
             stableId = "videoCodec",

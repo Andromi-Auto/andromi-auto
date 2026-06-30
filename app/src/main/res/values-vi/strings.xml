@@ -587,4 +587,8 @@
     <!-- Native USB Driver -->
     <string name="use_libusb">Sử dụng trình điều khiển USB gốc</string>
     <string name="use_libusb_description">Sử dụng libusb để giao tiếp. Tắt để sử dụng API USB tiêu chuẩn của Android.</string>
+
+    <string name="software_video_decoder">Nguồn bộ giải mã phần mềm</string>
+    <string name="software_video_decoder_bundled">FFmpeg tích hợp</string>
+    <string name="software_video_decoder_device">MediaCodec thiết bị</string>
 </resources>

@@ -581,4 +581,8 @@
     <!-- Native USB Driver -->
     <string name="use_libusb">استخدام برنامج تشغيل USB الأصلي</string>
     <string name="use_libusb_description">استخدم libusb للاتصال. قم بتعطيله لاستخدام واجهة برمجة تطبيقات USB القياسية لنظام Android.</string>
+
+    <string name="software_video_decoder">مصدر برنامج فك الترميز</string>
+    <string name="software_video_decoder_bundled">FFmpeg مدمج</string>
+    <string name="software_video_decoder_device">MediaCodec للجهاز</string>
 </resources>
