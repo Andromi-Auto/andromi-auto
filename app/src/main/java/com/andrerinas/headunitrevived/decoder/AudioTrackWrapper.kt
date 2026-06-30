@@ -28,6 +28,16 @@ class AudioTrackWrapper(
     private val channelId: Int = -1
 ) : Thread() {
 
+    private data class AudioChunk(
+        val data: ByteArray,
+        val size: Int
+    )
+
+    companion object {
+        private const val AUDIO_BUFFER_POOL_LIMIT = 16
+        private const val MIN_POOLED_AUDIO_BUFFER_SIZE = 4096
+    }
+
     private val audioTrack: AudioTrack?
     private var decoder: MediaCodec? = null
     private var codecHandlerThread: HandlerThread? = null
@@ -37,9 +47,10 @@ class AudioTrackWrapper(
 
     // Limit queue capacity to provide backpressure to the network thread if audio playback is slow
     private val dataQueue = if (audioQueueCapacity > 0)
-        LinkedBlockingQueue<ByteArray>(audioQueueCapacity)
+        LinkedBlockingQueue<AudioChunk>(audioQueueCapacity)
     else
-        LinkedBlockingQueue<ByteArray>()
+        LinkedBlockingQueue<AudioChunk>()
+    private val audioBufferPool = LinkedBlockingQueue<ByteArray>()
 
     @Volatile
     private var isRunning = true
@@ -67,9 +78,9 @@ class AudioTrackWrapper(
         }
     }
 
-    private fun applyGain(buffer: ByteArray) {
+    private fun applyGain(buffer: ByteArray, size: Int) {
         if (currentGain <= 1.0f) return
-        for (i in 0 until buffer.size - 1 step 2) {
+        for (i in 0 until size - 1 step 2) {
             val low = buffer[i].toInt() and 0xFF
             val high = buffer[i + 1].toInt() // High byte handles sign
             val sample = (high shl 8) or low
@@ -198,12 +209,16 @@ class AudioTrackWrapper(
     }
 
     private fun writeToTrack(buffer: ByteArray) {
+        writeToTrack(buffer, buffer.size)
+    }
+
+    private fun writeToTrack(buffer: ByteArray, size: Int) {
         if (mixer != null) {
-            mixer.feed(channelId, buffer, 0, buffer.size)
-            framesWritten += buffer.size / bytesPerFrame
+            mixer.feed(channelId, buffer, 0, size)
+            framesWritten += size / bytesPerFrame
         } else {
-            applyGain(buffer)
-            val result = audioTrack?.write(buffer, 0, buffer.size) ?: 0
+            applyGain(buffer, size)
+            val result = audioTrack?.write(buffer, 0, size) ?: 0
             if (result > 0) {
                 framesWritten += result / bytesPerFrame
             }
@@ -217,21 +232,25 @@ class AudioTrackWrapper(
         while (isRunning || dataQueue.isNotEmpty()) {
             try {
                 // Use poll to avoid blocking indefinitely if isRunning becomes false
-                val buffer = dataQueue.poll(200, TimeUnit.MILLISECONDS)
-                if (buffer != null) {
-                    if (isAac && decoder != null) {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                            queueInput(buffer)
+                val chunk = dataQueue.poll(200, TimeUnit.MILLISECONDS)
+                if (chunk != null) {
+                    try {
+                        if (isAac && decoder != null) {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                                queueInput(chunk.data, chunk.size)
+                            } else {
+                                decodeSync(chunk.data, chunk.size)
+                            }
                         } else {
-                            decodeSync(buffer)
+                            // PCM path - direct write in this high-priority thread
+                            writeToTrack(chunk.data, chunk.size)
                         }
-                    } else {
-                        // PCM path - direct write in this high-priority thread
-                        writeToTrack(buffer)
+                    } finally {
+                        recycleAudioBuffer(chunk.data)
                     }
                 }
             } catch (e: InterruptedException) {
-                dataQueue.clear()
+                drainQueuedAudio()
                 break
             } catch (e: Exception) {
                 AppLog.e("Error in AudioTrackWrapper run loop", e)
@@ -243,15 +262,15 @@ class AudioTrackWrapper(
     }
 
     @Suppress("DEPRECATION")
-    private fun decodeSync(inputData: ByteArray) {
+    private fun decodeSync(inputData: ByteArray, size: Int) {
         try {
             val dec = this.decoder ?: return
             val inputIndex = dec.dequeueInputBuffer(200000)
             if (inputIndex >= 0) {
                 val inputBuffer = dec.inputBuffers[inputIndex]
                 inputBuffer.clear()
-                inputBuffer.put(inputData)
-                dec.queueInputBuffer(inputIndex, 0, inputData.size, 0, 0)
+                inputBuffer.put(inputData, 0, size)
+                dec.queueInputBuffer(inputIndex, 0, size, 0, 0)
             }
 
             val info = MediaCodec.BufferInfo()
@@ -271,7 +290,7 @@ class AudioTrackWrapper(
     }
 
     @Throws(InterruptedException::class)
-    private fun queueInput(inputData: ByteArray) {
+    private fun queueInput(inputData: ByteArray, size: Int) {
         try {
             // Wait for input buffer (with timeout to avoid deadlock if codec dies)
             // Restore to 200ms to prevent dropping frames under load
@@ -286,8 +305,8 @@ class AudioTrackWrapper(
                 }
 
                 inputBuffer?.clear()
-                inputBuffer?.put(inputData)
-                decoder?.queueInputBuffer(inputIndex, 0, inputData.size, 0, 0)
+                inputBuffer?.put(inputData, 0, size)
+                decoder?.queueInputBuffer(inputIndex, 0, size, 0, 0)
             } else {
                 AppLog.w("AAC Input Buffer timeout (200ms) - dropping frame")
             }
@@ -382,12 +401,18 @@ class AudioTrackWrapper(
     fun write(buffer: ByteArray, offset: Int, size: Int) {
         if (!isRunning) return
 
+        var data: ByteArray? = null
         try {
-            val success = dataQueue.offer(buffer.copyOfRange(offset, offset + size), 5, TimeUnit.MILLISECONDS)
+            data = obtainAudioBuffer(size)
+            System.arraycopy(buffer, offset, data, 0, size)
+            val success = dataQueue.offer(AudioChunk(data, size), 5, TimeUnit.MILLISECONDS)
             if (!success) {
+                recycleAudioBuffer(data)
                 AppLog.w("Audio queue is full, dropping audio frame to prevent stalling")
             }
         } catch (e: InterruptedException) {
+            data?.let { recycleAudioBuffer(it) }
+            Thread.currentThread().interrupt()
             AppLog.w("Interrupted while putting audio data to queue")
         }
     }
@@ -403,6 +428,9 @@ class AudioTrackWrapper(
     }
 
     private fun cleanup() {
+        drainQueuedAudio()
+        audioBufferPool.clear()
+
         // 1. Stop the decoder to stop producing new output buffers
         try {
             decoder?.stop()
@@ -473,6 +501,26 @@ class AudioTrackWrapper(
             codecHandlerThread = null
         } catch (e: Exception) {
             AppLog.e("Error quitting codec thread", e)
+        }
+    }
+
+    private fun obtainAudioBuffer(size: Int): ByteArray {
+        while (true) {
+            val pooled = audioBufferPool.poll() ?: return ByteArray(maxOf(size, MIN_POOLED_AUDIO_BUFFER_SIZE))
+            if (pooled.size >= size) return pooled
+        }
+    }
+
+    private fun recycleAudioBuffer(buffer: ByteArray) {
+        if (audioBufferPool.size < AUDIO_BUFFER_POOL_LIMIT) {
+            audioBufferPool.offer(buffer)
+        }
+    }
+
+    private fun drainQueuedAudio() {
+        while (true) {
+            val chunk = dataQueue.poll() ?: break
+            recycleAudioBuffer(chunk.data)
         }
     }
 }

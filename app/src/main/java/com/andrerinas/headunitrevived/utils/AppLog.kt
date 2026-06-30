@@ -135,60 +135,57 @@ object AppLog {
     val LOG_DEBUG get() = LOG_LEVEL <= Log.DEBUG
 
     fun i(msg: String) {
-        log(Log.INFO, format(msg))
+        if (isLoggable(Log.INFO)) log(Log.INFO, format(msg))
     }
 
     fun i(msg: String, vararg params: Any) {
-        log(Log.INFO, format(msg, *params))
+        if (isLoggable(Log.INFO)) log(Log.INFO, format(msg, *params))
     }
 
     fun e(msg: String?) {
-        loge(format(msg ?: "Unknown error"), null)
+        if (isLoggable(Log.ERROR)) loge(format(msg ?: "Unknown error"), null)
     }
 
     fun e(msg: String, tr: Throwable) {
-        loge(format(msg), tr)
+        if (isLoggable(Log.ERROR)) loge(format(msg), tr)
     }
 
     fun e(tr: Throwable) {
-        loge(tr.message ?: "Unknown error", tr)
+        if (isLoggable(Log.ERROR)) loge(tr.message ?: "Unknown error", tr)
     }
 
 
     fun e(msg: String?, vararg params: Any) {
-        loge(format(msg ?: "Unknown error", *params), null)
+        if (isLoggable(Log.ERROR)) loge(format(msg ?: "Unknown error", *params), null)
     }
 
     fun v(msg: String, vararg params: Any) {
-        log(Log.VERBOSE, format(msg, *params))
+        if (isLoggable(Log.VERBOSE)) log(Log.VERBOSE, format(msg, *params))
     }
 
     fun d(msg: String, vararg params: Any) {
-        log(Log.DEBUG, format(msg, *params))
+        if (isLoggable(Log.DEBUG)) log(Log.DEBUG, format(msg, *params))
     }
 
     fun d(msg: String) {
-        log(Log.DEBUG, format(msg))
+        if (isLoggable(Log.DEBUG)) log(Log.DEBUG, format(msg))
     }
 
     fun w(msg: String) {
-        log(Log.WARN, format(msg))
+        if (isLoggable(Log.WARN)) log(Log.WARN, format(msg))
     }
 
     fun w(msg: String, vararg params: Any) {
-        log(Log.WARN, format(msg, *params))
+        if (isLoggable(Log.WARN)) log(Log.WARN, format(msg, *params))
     }
 
     private fun log(priority: Int, msg: String) {
-        if (priority >= LOG_LEVEL) {
-            LOGGER.println(priority, TAG, msg)
-        }
+        LOGGER.println(priority, TAG, msg)
     }
 
+    private fun isLoggable(priority: Int): Boolean = priority >= LOG_LEVEL
+
     private fun loge(message: String, tr: Throwable?) {
-        if (LOG_LEVEL > Log.ERROR) {
-            return
-        }
         val trace = if (LOGGER is Logger.Android) Log.getStackTraceString(tr) else ""
         LOGGER.println(Log.ERROR, TAG, message + '\n' + trace)
     }
@@ -230,4 +227,3 @@ object AppLog {
         }
     }
 }
-

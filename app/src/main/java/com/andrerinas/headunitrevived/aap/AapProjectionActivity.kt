@@ -31,6 +31,7 @@ import com.andrerinas.headunitrevived.app.SurfaceActivity
 import com.andrerinas.headunitrevived.connection.CommManager
 import com.andrerinas.headunitrevived.contract.KeyIntent
 import kotlinx.coroutines.launch
+import com.andrerinas.headunitrevived.decoder.SoftwareYuvFrameSink
 import com.andrerinas.headunitrevived.decoder.VideoDecoder
 import com.andrerinas.headunitrevived.decoder.VideoDimensionsListener
 import com.andrerinas.headunitrevived.utils.AppLog
@@ -55,6 +56,8 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.andrerinas.headunitrevived.main.QuickSettingsFragment
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import java.io.File
+import java.util.concurrent.Executors
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.abs
 
 class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, VideoDimensionsListener {
@@ -85,6 +88,21 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
     // instead of persisting to Settings. This keeps toggles local to the Activity lifecycle.
     private var activityFullscreenOverride: Settings.FullscreenMode? = null
     private var fpsTextView: TextView? = null
+    private var currentFps: Int? = null
+    private val performanceHandler = android.os.Handler(android.os.Looper.getMainLooper())
+    private val performanceSampler = PerformanceSampler()
+    private val performanceExecutor = Executors.newSingleThreadExecutor { runnable ->
+        Thread(runnable, "PerformanceSampler").apply {
+            priority = Thread.MIN_PRIORITY
+        }
+    }
+    private val performanceSampleInFlight = AtomicBoolean(false)
+    private val performanceOverlayRunnable = object : Runnable {
+        override fun run() {
+            requestPerformanceOverlayUpdate()
+            performanceHandler.postDelayed(this, 1000L)
+        }
+    }
 
     private var isOrientationReceiverRegistered = false
     private var isNightModeReceiverRegistered = false
@@ -198,8 +216,10 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
                 setupFpsCounter()
             } else if (!settings.showFpsCounter && fpsTextView != null) {
                 fpsTextView?.visibility = View.GONE
+                stopPerformanceOverlayUpdates()
             } else if (settings.showFpsCounter && fpsTextView != null) {
                 fpsTextView?.visibility = View.VISIBLE
+                startPerformanceOverlayUpdates()
             }
         }
     }
@@ -209,6 +229,8 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
             AppLog.i("Recreating projection view due to settings change...")
             val container = findViewById<FrameLayout>(R.id.container)
             if (::projectionView.isInitialized) {
+                videoDecoder.softwareYuvFrameSink = null
+                videoDecoder.stop("projectionViewRecreate")
                 container.removeView(projectionView as View)
             }
             isSurfaceSet = false
@@ -672,6 +694,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
 
     private fun hideLoadingOverlay(loadingOverlay: View?) {
         overlayState = OverlayState.HIDDEN
+        AppLog.i("Hiding loading overlay after first video frame")
 
         // CRITICAL: Stop custom video FIRST — VideoView/SurfaceView has its own
         // rendering layer that ignores parent alpha animations and can stay visible
@@ -1163,8 +1186,12 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         // and the Ken Burns animator outlive the view hierarchy briefly.
         // stopCustomLoadingMedia releases both.
         stopCustomLoadingMedia()
+        stopPerformanceOverlayUpdates()
+        performanceExecutor.shutdownNow()
         AppLog.i("AapProjectionActivity.onDestroy called. isFinishing=$isFinishing")
         App.isPiPActive = false
+        videoDecoder.onFpsChanged = null
+        videoDecoder.softwareYuvFrameSink = null
         videoDecoder.dimensionsListener = null
     }
 
@@ -1219,7 +1246,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
             container.setBackgroundColor(Color.BLACK)
         } else if (settings.viewMode == Settings.ViewMode.GLES) {
             AppLog.i("Using GlProjectionView")
-            val glView = com.andrerinas.headunitrevived.view.GlProjectionView(this)
+            val glView = GlProjectionView(this)
             glView.layoutParams = FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT,
                 FrameLayout.LayoutParams.MATCH_PARENT
@@ -1239,6 +1266,10 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
 
         val view = projectionView as View
         container.addView(view)
+        videoDecoder.softwareYuvFrameSink = projectionView as? SoftwareYuvFrameSink
+        if (videoDecoder.softwareYuvFrameSink != null) {
+            AppLog.i("Using GLES YUV sink for bundled software HEVC")
+        }
 
         projectionView.addCallback(this)
     }
@@ -1251,7 +1282,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
             setTypeface(null, Typeface.BOLD)
             setBackgroundColor(Color.parseColor("#80000000"))
             setPadding(10, 5, 10, 5)
-            text = "FPS: --"
+            text = "FPS: --\nCPU: -- / --\nTemp: --\nFrame: --"
             // Lift it above everything
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 elevation = 100f
@@ -1268,7 +1299,154 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         container.addView(fpsTextView, params)
 
         videoDecoder.onFpsChanged = { fps ->
-            runOnUiThread { fpsTextView?.text = "FPS: $fps" }
+            currentFps = fps
+        }
+        startPerformanceOverlayUpdates()
+    }
+
+    private fun startPerformanceOverlayUpdates() {
+        performanceHandler.removeCallbacks(performanceOverlayRunnable)
+        performanceOverlayRunnable.run()
+    }
+
+    private fun stopPerformanceOverlayUpdates() {
+        performanceHandler.removeCallbacks(performanceOverlayRunnable)
+    }
+
+    private fun requestPerformanceOverlayUpdate() {
+        if (!performanceSampleInFlight.compareAndSet(false, true)) return
+
+        val fpsSnapshot = currentFps
+        val lastFrameSnapshot = videoDecoder.lastFrameRenderedMs
+        try {
+            performanceExecutor.execute {
+                try {
+                    val text = buildPerformanceOverlayText(fpsSnapshot, lastFrameSnapshot)
+                    runOnUiThread {
+                        if (!isFinishing && fpsTextView?.visibility == View.VISIBLE) {
+                            fpsTextView?.text = text
+                        }
+                    }
+                } catch (e: Exception) {
+                    AppLog.w("Performance overlay update failed: ${e.message}")
+                } finally {
+                    performanceSampleInFlight.set(false)
+                }
+            }
+        } catch (e: java.util.concurrent.RejectedExecutionException) {
+            performanceSampleInFlight.set(false)
+        }
+    }
+
+    private fun buildPerformanceOverlayText(fpsSnapshot: Int?, lastFrameSnapshot: Long): String {
+        val metrics = performanceSampler.sample()
+        val frameAgeText = if (lastFrameSnapshot > 0L) {
+            "${SystemClock.elapsedRealtime() - lastFrameSnapshot}ms"
+        } else {
+            "--"
+        }
+        val fpsText = fpsSnapshot?.toString() ?: "--"
+        val appCpuText = metrics.appCpuPercent?.let { "${it}%" } ?: "--"
+        val totalCpuText = metrics.totalCpuPercent?.let { "${it}%" }
+            ?: metrics.loadAverage?.let { String.format(java.util.Locale.US, "%.2f load", it) }
+            ?: "--"
+        val tempText = metrics.temperatureC?.let { "${it}C" } ?: "--"
+        return "FPS: $fpsText\nCPU: app $appCpuText / sys $totalCpuText\nTemp: $tempText\nFrame: $frameAgeText"
+    }
+
+    private class PerformanceSampler {
+        private data class TotalCpuSnapshot(
+            val totalJiffies: Long,
+            val idleJiffies: Long
+        )
+
+        data class Metrics(
+            val appCpuPercent: Int?,
+            val totalCpuPercent: Int?,
+            val loadAverage: Double?,
+            val temperatureC: Int?
+        )
+
+        private var previousTotalCpu: TotalCpuSnapshot? = null
+        private var previousProcessCpuMs: Long? = null
+        private var previousElapsedMs: Long? = null
+
+        fun sample(): Metrics {
+            val nowElapsedMs = SystemClock.elapsedRealtime()
+            val nowProcessCpuMs = android.os.Process.getElapsedCpuTime()
+            val previousProcess = previousProcessCpuMs
+            val previousElapsed = previousElapsedMs
+            previousProcessCpuMs = nowProcessCpuMs
+            previousElapsedMs = nowElapsedMs
+
+            val appCpu = if (previousProcess != null && previousElapsed != null) {
+                val cpuDelta = (nowProcessCpuMs - previousProcess).coerceAtLeast(0L)
+                val elapsedDelta = (nowElapsedMs - previousElapsed).coerceAtLeast(1L)
+                ((cpuDelta.toDouble() / elapsedDelta) * 100.0).toInt().coerceAtLeast(0)
+            } else {
+                null
+            }
+
+            val currentTotalCpu = readTotalCpuSnapshot()
+            val previousTotal = previousTotalCpu
+            previousTotalCpu = currentTotalCpu
+            val totalCpu = if (currentTotalCpu != null && previousTotal != null) {
+                val totalDelta = (currentTotalCpu.totalJiffies - previousTotal.totalJiffies).coerceAtLeast(1L)
+                val idleDelta = (currentTotalCpu.idleJiffies - previousTotal.idleJiffies).coerceAtLeast(0L)
+                (((totalDelta - idleDelta).toDouble() / totalDelta) * 100.0).toInt().coerceIn(0, 100)
+            } else {
+                null
+            }
+
+            return Metrics(appCpu, totalCpu, readLoadAverage(), readTemperatureC())
+        }
+
+        private fun readTotalCpuSnapshot(): TotalCpuSnapshot? {
+            return try {
+                val cpuLine = File("/proc/stat").useLines { lines ->
+                    lines.firstOrNull { it.startsWith("cpu ") }
+                } ?: return null
+                val cpuValues = cpuLine.trim().split(Regex("\\s+")).drop(1).mapNotNull { it.toLongOrNull() }
+                if (cpuValues.size < 5) return null
+                val idle = cpuValues.getOrElse(3) { 0L } + cpuValues.getOrElse(4) { 0L }
+                val total = cpuValues.take(8).sum()
+                TotalCpuSnapshot(total, idle)
+            } catch (e: Exception) {
+                null
+            }
+        }
+
+        private fun readLoadAverage(): Double? {
+            return try {
+                File("/proc/loadavg")
+                    .readText()
+                    .trim()
+                    .split(Regex("\\s+"))
+                    .firstOrNull()
+                    ?.toDoubleOrNull()
+            } catch (e: Exception) {
+                null
+            }
+        }
+
+        private fun readTemperatureC(): Int? {
+            return try {
+                val thermalRoot = File("/sys/class/thermal")
+                val values = thermalRoot.listFiles()
+                    ?.filter { it.name.startsWith("thermal_zone") }
+                    ?.mapNotNull { zone ->
+                        val raw = zone.resolve("temp").readText().trim().toIntOrNull() ?: return@mapNotNull null
+                        when {
+                            raw in 10000..125000 -> raw / 1000
+                            raw in 10..125 -> raw
+                            else -> null
+                        }
+                    }
+                    .orEmpty()
+                values.maxOrNull()
+            } catch (e: Exception) {
+                null
+            }
         }
     }
 }
