@@ -1420,11 +1420,16 @@ class AapService : Service(), UsbReceiver.Listener {
 
         AppLog.i("AapService: Initializing WiFi Mode: $mode (Strategy: $strategy)")
 
-        // 0. Clean up existing wireless state before re-initializing
         stopWirelessServer()
         networkDiscovery?.stop()
         nearbyManager?.stop()
         nativeAaHandshakeManager?.stop()
+
+        val usesWifiDirect = (mode == 3) || (mode == 2 && strategy == 1)
+        if (!usesWifiDirect) {
+            AppLog.i("AapService: New mode does not use WiFi Direct. Stopping WifiDirectManager...")
+            wifiDirectManager?.stop()
+        }
 
         // Mode 1: Auto (Headunit Server), Mode 2: Helper (Wireless Launcher), Mode 3: Native AA
         if (mode == 1 || mode == 2 || mode == 3) {

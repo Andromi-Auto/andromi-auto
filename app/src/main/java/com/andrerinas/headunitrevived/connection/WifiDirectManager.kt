@@ -41,6 +41,7 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
     // The discoveryRunnable uses this instead of isConnected so advertisements keep retrying
     // even after the group forms on boot when the chip may have been BUSY initially.
     private var isClientConnected = false
+    @Volatile private var isGroupCreatingOrCreated = false
     private val handler = Handler(Looper.getMainLooper())
     private var localDeviceAddress: String? = null
     private var lastKnownBssid: String? = null
@@ -81,7 +82,7 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
                         val isConnectingOrConnected = commManager.isConnected ||
                             commManager.connectionState.value is com.andrerinas.headunitrevived.connection.CommManager.ConnectionState.Connecting
 
-                        if (!isConnected && !isConnectingOrConnected) {
+                        if (!isConnected && !isConnectingOrConnected && !isGroupCreatingOrCreated) {
                             if (appSettings.wifiConnectionMode == 2 && appSettings.helperConnectionStrategy == 1) {
                                 AppLog.i("WifiDirectManager: P2P enabled, auto-starting WiFi Direct visibility")
                                 makeVisible()
@@ -90,6 +91,10 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
                                 startNativeAaQuietHost()
                             }
                         }
+                    } else {
+                        isGroupCreatingOrCreated = false
+                        isConnected = false
+                        isClientConnected = false
                     }
                 }
                 WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION -> {
@@ -125,6 +130,7 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
                         isConnected = false
                         isClientConnected = false
                         lastNativeGroupStatusMessage = null
+                        isGroupCreatingOrCreated = false
                     }
                 }
             }
@@ -406,7 +412,7 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
     }
 
     private fun getWifiDirectMac(ifaceName: String?): String {
-        AppLog.i("WifiDirectManager: getWifiDirectMac for interface: ${ifaceName ?: "any"}")
+        AppLog.d("WifiDirectManager: getWifiDirectMac for interface: ${ifaceName ?: "any"}")
         try {
             val interfaces = java.net.NetworkInterface.getNetworkInterfaces()
             while (interfaces.hasMoreElements()) {
@@ -420,7 +426,7 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
                     sb.toString()
                 } else "null"
                 
-                AppLog.i("WifiDirectManager: Found interface: ${iface.name}, MAC: $macStr")
+                AppLog.d("WifiDirectManager: Found interface: ${iface.name}, MAC: $macStr")
 
                 // If we have a name, it must match.
                 if (ifaceName != null && iface.name != ifaceName) continue
@@ -432,7 +438,7 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
                 }
 
                 if (macStr != "null" && macStr != "00:00:00:00:00:00" && macStr != "02:00:00:00:00:00") {
-                    AppLog.i("WifiDirectManager: Selected MAC for ${iface.name}: $macStr")
+                    AppLog.d("WifiDirectManager: Selected MAC for ${iface.name}: $macStr")
                     return macStr
                 }
             }
@@ -471,6 +477,7 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
 
     @SuppressLint("MissingPermission")
     fun makeVisible() {
+        registerReceiverIfNeeded()
         val mgr = manager ?: return
         val ch = channel ?: return
 
@@ -479,8 +486,11 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
         if (!wifiManager.isWifiEnabled) {
             AppLog.w("WifiDirectManager: WiFi is disabled. Cannot start P2P discovery.")
             Toast.makeText(context, context.getString(R.string.wifi_disabled_info), Toast.LENGTH_LONG).show()
+            isGroupCreatingOrCreated = false
             return
         }
+
+        isGroupCreatingOrCreated = true
 
         // Reflection Hack to set name
         try {
@@ -527,6 +537,7 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
                     handler.postDelayed({ createNewGroup(retryCount + 1) }, 2000L)
                 } else {
                     AppLog.e("WifiDirectManager: createGroup failed: $reason")
+                    isGroupCreatingOrCreated = false
                 }
             }
         })
@@ -596,6 +607,8 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
 
     @SuppressLint("MissingPermission")
     fun startNativeAaQuietHost() {
+        registerReceiverIfNeeded()
+        isGroupCreatingOrCreated = true
         var mgr = manager
         var ch = channel
 
@@ -613,10 +626,12 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
                     registerReceiverIfNeeded()
                 } else {
                     AppLog.e("WifiDirectManager: Re-init failed. Cannot start Quiet Host.")
+                    isGroupCreatingOrCreated = false
                     return
                 }
             } catch (e: Exception) {
                 AppLog.e("WifiDirectManager: Exception during re-init", e)
+                isGroupCreatingOrCreated = false
                 return
             }
         }
@@ -631,10 +646,16 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
             } else {
                 showToast("Native AA requires Wi-Fi. Please turn it on.")
                 // We return for now, the user must turn it on. In the future we could open settings.
+                isGroupCreatingOrCreated = false
                 return
             }
             // Wait a bit for WiFi to wake up
-            handler.postDelayed({ startNativeAaQuietHost() }, 2000L)
+            handler.postDelayed({
+                if (isGroupCreatingOrCreated) {
+                    isGroupCreatingOrCreated = false
+                    startNativeAaQuietHost()
+                }
+            }, 2000L)
             return
         }
 
@@ -743,6 +764,7 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
                     })
                 } else {
                     AppLog.e("WifiDirectManager: createQuietGroup failed completely! Reason: $reasonStr")
+                    isGroupCreatingOrCreated = false
                 }
             }
         })
@@ -846,6 +868,7 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
 
     fun stop() {
         AppLog.i("WifiDirectManager: Stopping and cleaning up...")
+        isGroupCreatingOrCreated = false
         handler.removeCallbacksAndMessages(null)
         isClientConnected = false
         nativeGroupCreationMode = NATIVE_GROUP_MODE_UNKNOWN

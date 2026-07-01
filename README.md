@@ -66,6 +66,7 @@ adb shell am start -a android.intent.action.VIEW -d "headunit://connect?ip=192.1
 ### v.3.1.1-alpha
 - Reduce pressure on sensor events like night and gps and start/stop these events in onConnected, onDisconnect and onDestroy
 - Merged ffmpeg PR #625 by @mmwtl. This added ffmpeg software decoder for h265, which old devives could benefit a lot. Thank you!
+- Wi-Fi Direct changes. Prevent duplicate start, graceful resets, cleaned up stale groups
 
 ### v.3.1.0
 - Added libusb as alternative to the native usb stack for better compatibility with some devices
