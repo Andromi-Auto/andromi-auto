@@ -40,6 +40,7 @@ import android.content.pm.PackageManager
 import com.andrerinas.headunitrevived.connection.NativeAaHandshakeManager
 import com.andrerinas.headunitrevived.utils.BluetoothHelper
 import androidx.lifecycle.lifecycleScope
+import com.andrerinas.headunitrevived.utils.DialogUtils
 import java.io.File
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -60,6 +61,7 @@ class SettingsFragment : Fragment() {
     private var pendingSyncMediaSessionAaMetadata: Boolean? = null
     private var pendingResolution: Int? = null
     private var pendingDpi: Int? = null
+    private var pendingStaticBSSID: String? = null
     private var pendingFullscreenMode: Settings.FullscreenMode? = null
     private var pendingViewMode: Settings.ViewMode? = null
     private var pendingForceSoftware: Boolean? = null
@@ -159,6 +161,7 @@ class SettingsFragment : Fragment() {
         pendingSyncMediaSessionAaMetadata = settings.syncMediaSessionWithAaMetadata
         pendingResolution = settings.resolutionId
         pendingDpi = settings.dpiPixelDensity
+        pendingStaticBSSID = settings.staticBSSID
         pendingFullscreenMode = settings.fullscreenMode
         pendingViewMode = settings.viewMode
         pendingForceSoftware = settings.forceSoftwareDecoding
@@ -348,6 +351,7 @@ class SettingsFragment : Fragment() {
         pendingSyncMediaSessionAaMetadata?.let { settings.syncMediaSessionWithAaMetadata = it }
         pendingResolution?.let { settings.resolutionId = it }
         pendingDpi?.let { settings.dpiPixelDensity = it }
+        pendingStaticBSSID?.let { settings.staticBSSID = it }
         pendingFullscreenMode?.let { settings.fullscreenMode = it }
         pendingViewMode?.let { settings.viewMode = it }
         pendingForceSoftware?.let { settings.forceSoftwareDecoding = it }
@@ -439,6 +443,7 @@ class SettingsFragment : Fragment() {
                         pendingSyncMediaSessionAaMetadata != settings.syncMediaSessionWithAaMetadata ||
                         pendingResolution != settings.resolutionId ||
                         pendingDpi != settings.dpiPixelDensity ||
+                        pendingStaticBSSID != settings.staticBSSID ||
                         pendingFullscreenMode != settings.fullscreenMode ||
                         pendingViewMode != settings.viewMode ||
                         pendingForceSoftware != settings.forceSoftwareDecoding ||
@@ -481,7 +486,8 @@ class SettingsFragment : Fragment() {
         requiresRestart = pendingResolution != settings.resolutionId ||
                           pendingVideoCodec != settings.videoCodec ||
                           pendingFpsLimit != settings.fpsLimit ||
-                          pendingDpi != settings.dpiPixelDensity ||
+                            pendingDpi != settings.dpiPixelDensity ||
+            pendingStaticBSSID != settings.staticBSSID ||
                           pendingForceSoftware != settings.forceSoftwareDecoding ||
                           pendingEnableRotary != settings.enableRotary ||
                           pendingEnableAudioSink != settings.enableAudioSink ||
@@ -754,6 +760,37 @@ class SettingsFragment : Fragment() {
                 }
             }
         }
+
+        items.add(SettingItem.SettingEntry(
+            stableId = "staticBSSID",
+            nameResId = R.string.static_bssid_title,
+            value = if (pendingStaticBSSID == 0.toString()) getString(R.string.auto) else pendingStaticBSSID.toString(),
+            onClick = { _ ->
+                DialogUtils.showTextInputDialog(
+                    requireContext(),
+                    R.string.static_bssid_enter_value,
+                    pendingStaticBSSID,
+                    { newVal ->
+                        pendingStaticBSSID = newVal
+                        checkChanges()
+                        updateSettingsList()
+                    }
+                )
+
+
+//                _ ->
+//                showNumericInputDialog(
+//                    title = getString(R.string.static_bssid_enter_value),
+//                    message = null,
+//                    initialValue = pendingStaticBSSID ?: 0,
+//                    onConfirm = { newVal ->
+//                        pendingStaticBSSID = newVal
+//                        checkChanges()
+//                        updateSettingsList()
+//                    }
+//                )
+            }
+        ))
 
         // --- Dark Mode ---
         items.add(SettingItem.CategoryHeader("darkMode", R.string.category_dark_mode))
@@ -2118,7 +2155,7 @@ class SettingsFragment : Fragment() {
             .create()
 
         dialog.window?.clearFlags(
-            android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or 
+            android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
             android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
         )
         dialog.show()
@@ -2438,7 +2475,7 @@ class SettingsFragment : Fragment() {
             .create()
 
         dialog.window?.clearFlags(
-            android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or 
+            android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
             android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
         )
         dialog.show()
