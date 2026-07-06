@@ -257,16 +257,18 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
                 }
             }
             discoveredInterface = iface
-            val isBssidSet =  appSettings.staticBSSID != "0"
+            val isBssidSet = appSettings.staticBSSID != "0"
 
-            var bssid = if (appSettings.staticBSSID.equals("0")) {
+            var bssid = if (appSettings.staticBSSID == "0" || appSettings.staticBSSID == null) {
                 getWifiDirectMac(iface)
             } else {
                 appSettings.staticBSSID
             }
             if (isBssidSet) {
                 AppLog.i("WifiDirectManager: Initial BSSID from App settings: $bssid")
-            } else AppLog.i("WifiDirectManager: Initial BSSID from scan: $bssid")
+            } else {
+                AppLog.i("WifiDirectManager: Initial BSSID from scan: $bssid")
+            }
 
 
 
