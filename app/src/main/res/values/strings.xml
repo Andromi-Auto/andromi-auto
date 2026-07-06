@@ -205,6 +205,10 @@
     <string name="wireless_connection_settings">Wireless Connection</string>
     <string name="category_graphic">Graphic</string>
 
+    <string name="static_bssid_title">Static BSSID</string>
+    <string name="static_bssid_enter_value">Enter BSSID (XX:XX:XX:XX:XX:XX)</string>
+    <string name="static_bssid_desc">Manually set the BSSID for the wireless handshake if auto-detection is blocked by system permissions</string>
+
     <string name="custom_insets">Custom Insets (Margins)</string>
     <string name="inset_top">Top</string>
     <string name="inset_bottom">Bottom</string>
