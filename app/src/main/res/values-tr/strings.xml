@@ -581,4 +581,6 @@
     <string name="software_video_decoder">Yazılım Kod Çözücü Kaynağı</string>
     <string name="software_video_decoder_bundled">Yerleşik FFmpeg</string>
     <string name="software_video_decoder_device">Cihaz MediaCodec</string>
+
+    <string name="btn_show_qr">QR Kodunu Göster</string>
 </resources>

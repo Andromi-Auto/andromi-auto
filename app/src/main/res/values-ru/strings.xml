@@ -584,4 +584,6 @@
     <!-- Native USB Driver -->
     <string name="use_libusb">Использовать нативный USB-драйвер</string>
     <string name="use_libusb_description">Использовать libusb для связи. Отключите для использования стандартного USB API Android.</string>
+
+    <string name="btn_show_qr">Показать QR-код</string>
 </resources>

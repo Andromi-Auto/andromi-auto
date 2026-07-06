@@ -588,4 +588,6 @@
     <string name="share_hotspot_qr_error">Could not retrieve active Wi-Fi hotspot credentials. Please ensure your hotspot is turned on and Location is enabled.</string>
     <string name="use_libusb">Use Native USB Driver</string>
     <string name="use_libusb_description">Use libusb for communication. Disable to use Android\'s standard USB API.</string>
+
+    <string name="btn_show_qr">Show QR Code</string>
 </resources>

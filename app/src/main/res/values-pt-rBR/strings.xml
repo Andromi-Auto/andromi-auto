@@ -586,4 +586,6 @@
     <string name="software_video_decoder">Origem do decodificador de software</string>
     <string name="software_video_decoder_bundled">FFmpeg integrado</string>
     <string name="software_video_decoder_device">MediaCodec do dispositivo</string>
+
+    <string name="btn_show_qr">Mostrar código QR</string>
 </resources>

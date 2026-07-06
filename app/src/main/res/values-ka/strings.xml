@@ -572,4 +572,6 @@
     <string name="software_video_decoder">პროგრამული დეკოდერის წყარო</string>
     <string name="software_video_decoder_bundled">ჩაშენებული FFmpeg</string>
     <string name="software_video_decoder_device">მოწყობილობის MediaCodec</string>
+
+    <string name="btn_show_qr">QR კოდის ჩვენება</string>
 </resources>

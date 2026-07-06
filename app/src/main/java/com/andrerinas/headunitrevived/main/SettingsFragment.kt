@@ -719,14 +719,6 @@ class SettingsFragment : Fragment() {
             // Mode 2 only shows Hotspot toggle for Strategy 4 (Headunit Hotspot)
             if (pendingHelperConnectionStrategy == 4) {
                 addHotspotToggle(items)
-                items.add(SettingItem.SettingEntry(
-                    stableId = "shareHotspotQr",
-                    nameResId = R.string.share_hotspot_qr_title,
-                    value = getString(R.string.share_hotspot_qr_desc),
-                    onClick = { _ ->
-                        com.andrerinas.headunitrevived.utils.ShareHotspotQrDialog.show(requireContext())
-                    }
-                ))
             }
 
             if (pendingHelperConnectionStrategy == 1) { // WiFi Direct (P2P)

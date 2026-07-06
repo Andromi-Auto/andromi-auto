@@ -590,4 +590,6 @@
     <string name="software_video_decoder">Software-Decoder-Quelle</string>
     <string name="software_video_decoder_bundled">Integriertes FFmpeg</string>
     <string name="software_video_decoder_device">Geräte-MediaCodec</string>
+
+    <string name="btn_show_qr">QR-Code anzeigen</string>
 </resources>
