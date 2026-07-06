@@ -40,6 +40,7 @@ import android.content.pm.PackageManager
 import com.andrerinas.headunitrevived.connection.NativeAaHandshakeManager
 import com.andrerinas.headunitrevived.utils.BluetoothHelper
 import androidx.lifecycle.lifecycleScope
+import com.andrerinas.headunitrevived.utils.DialogUtils
 import java.io.File
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -60,6 +61,7 @@ class SettingsFragment : Fragment() {
     private var pendingSyncMediaSessionAaMetadata: Boolean? = null
     private var pendingResolution: Int? = null
     private var pendingDpi: Int? = null
+    private var pendingStaticBSSID: String? = null
     private var pendingFullscreenMode: Settings.FullscreenMode? = null
     private var pendingViewMode: Settings.ViewMode? = null
     private var pendingForceSoftware: Boolean? = null
@@ -160,6 +162,7 @@ class SettingsFragment : Fragment() {
         pendingSyncMediaSessionAaMetadata = settings.syncMediaSessionWithAaMetadata
         pendingResolution = settings.resolutionId
         pendingDpi = settings.dpiPixelDensity
+        pendingStaticBSSID = settings.staticBSSID
         pendingFullscreenMode = settings.fullscreenMode
         pendingViewMode = settings.viewMode
         pendingForceSoftware = settings.forceSoftwareDecoding
@@ -351,6 +354,7 @@ class SettingsFragment : Fragment() {
         pendingSyncMediaSessionAaMetadata?.let { settings.syncMediaSessionWithAaMetadata = it }
         pendingResolution?.let { settings.resolutionId = it }
         pendingDpi?.let { settings.dpiPixelDensity = it }
+        pendingStaticBSSID?.let { settings.staticBSSID = it }
         pendingFullscreenMode?.let { settings.fullscreenMode = it }
         pendingViewMode?.let { settings.viewMode = it }
         pendingForceSoftware?.let { settings.forceSoftwareDecoding = it }
@@ -443,6 +447,7 @@ class SettingsFragment : Fragment() {
                         pendingSyncMediaSessionAaMetadata != settings.syncMediaSessionWithAaMetadata ||
                         pendingResolution != settings.resolutionId ||
                         pendingDpi != settings.dpiPixelDensity ||
+                        pendingStaticBSSID != settings.staticBSSID ||
                         pendingFullscreenMode != settings.fullscreenMode ||
                         pendingViewMode != settings.viewMode ||
                         pendingForceSoftware != settings.forceSoftwareDecoding ||
@@ -486,7 +491,8 @@ class SettingsFragment : Fragment() {
         requiresRestart = pendingResolution != settings.resolutionId ||
                           pendingVideoCodec != settings.videoCodec ||
                           pendingFpsLimit != settings.fpsLimit ||
-                          pendingDpi != settings.dpiPixelDensity ||
+                            pendingDpi != settings.dpiPixelDensity ||
+            pendingStaticBSSID != settings.staticBSSID ||
                           pendingForceSoftware != settings.forceSoftwareDecoding ||
                           pendingSoftwareVideoDecoder != settings.softwareVideoDecoder ||
                           pendingEnableRotary != settings.enableRotary ||
@@ -752,6 +758,24 @@ class SettingsFragment : Fragment() {
                 }
             }
         }
+
+        items.add(SettingItem.SettingEntry(
+            stableId = "staticBSSID",
+            nameResId = R.string.static_bssid_title,
+            value = if (pendingStaticBSSID == "0" || pendingStaticBSSID == null) getString(R.string.auto) else pendingStaticBSSID,
+            onClick = { _ ->
+                DialogUtils.showTextInputDialog(
+                    requireContext(),
+                    R.string.static_bssid_enter_value,
+                    if (pendingStaticBSSID == "0") "" else pendingStaticBSSID,
+                    { newVal ->
+                        pendingStaticBSSID = if (newVal.isNullOrBlank()) "0" else newVal.trim()
+                        checkChanges()
+                        updateSettingsList()
+                    }
+                )
+            }
+        ))
 
         // --- Dark Mode ---
         items.add(SettingItem.CategoryHeader("darkMode", R.string.category_dark_mode))
