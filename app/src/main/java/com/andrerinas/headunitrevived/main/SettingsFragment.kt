@@ -764,31 +764,18 @@ class SettingsFragment : Fragment() {
         items.add(SettingItem.SettingEntry(
             stableId = "staticBSSID",
             nameResId = R.string.static_bssid_title,
-            value = if (pendingStaticBSSID == 0.toString()) getString(R.string.auto) else pendingStaticBSSID.toString(),
+            value = if (pendingStaticBSSID == "0" || pendingStaticBSSID == null) getString(R.string.auto) else pendingStaticBSSID,
             onClick = { _ ->
                 DialogUtils.showTextInputDialog(
                     requireContext(),
                     R.string.static_bssid_enter_value,
-                    pendingStaticBSSID,
+                    if (pendingStaticBSSID == "0") "" else pendingStaticBSSID,
                     { newVal ->
-                        pendingStaticBSSID = newVal
+                        pendingStaticBSSID = if (newVal.isNullOrBlank()) "0" else newVal.trim()
                         checkChanges()
                         updateSettingsList()
                     }
                 )
-
-
-//                _ ->
-//                showNumericInputDialog(
-//                    title = getString(R.string.static_bssid_enter_value),
-//                    message = null,
-//                    initialValue = pendingStaticBSSID ?: 0,
-//                    onConfirm = { newVal ->
-//                        pendingStaticBSSID = newVal
-//                        checkChanges()
-//                        updateSettingsList()
-//                    }
-//                )
             }
         ))
 
