@@ -40,7 +40,6 @@ import android.content.pm.PackageManager
 import com.andrerinas.headunitrevived.connection.NativeAaHandshakeManager
 import com.andrerinas.headunitrevived.utils.BluetoothHelper
 import androidx.lifecycle.lifecycleScope
-import com.andrerinas.headunitrevived.utils.DialogUtils
 import java.io.File
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -759,15 +758,16 @@ class SettingsFragment : Fragment() {
             }
         }
 
+        val bssid = pendingStaticBSSID
         items.add(SettingItem.SettingEntry(
             stableId = "staticBSSID",
             nameResId = R.string.static_bssid_title,
-            value = if (pendingStaticBSSID == "0" || pendingStaticBSSID == null) getString(R.string.auto) else pendingStaticBSSID,
+            value = if (bssid == "0" || bssid == null) getString(R.string.auto) else bssid,
             onClick = { _ ->
-                DialogUtils.showTextInputDialog(
+                showTextInputDialog(
                     requireContext(),
                     R.string.static_bssid_enter_value,
-                    if (pendingStaticBSSID == "0") "" else pendingStaticBSSID,
+                    if (bssid == "0" || bssid == null) "" else bssid,
                     { newVal ->
                         pendingStaticBSSID = if (newVal.isNullOrBlank()) "0" else newVal.trim()
                         checkChanges()
@@ -2486,6 +2486,44 @@ class SettingsFragment : Fragment() {
             .setPositiveButton(android.R.string.ok) { dialog, _ ->
                 val newVal = (editView.text.toString().toIntOrNull() ?: 0).coerceAtLeast(0)
                 onConfirm(newVal)
+                dialog.dismiss()
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .create()
+
+        dialog.window?.clearFlags(
+            android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+            android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
+        )
+        dialog.show()
+        editView.requestFocus()
+    }
+
+    private fun showTextInputDialog(
+        context: Context,
+        titleResId: Int,
+        initialValue: String,
+        onConfirm: (String) -> Unit
+    ) {
+        val editView = EditText(context).apply {
+            inputType = InputType.TYPE_CLASS_TEXT
+            setText(initialValue)
+        }
+
+        val container = android.widget.FrameLayout(context)
+        val params = android.widget.FrameLayout.LayoutParams(
+            android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
+            android.widget.FrameLayout.LayoutParams.WRAP_CONTENT
+        )
+        val margin = (24 * context.resources.displayMetrics.density).toInt()
+        params.setMargins(margin, 8, margin, 8)
+        container.addView(editView, params)
+
+        val dialog = MaterialAlertDialogBuilder(context, R.style.DarkAlertDialog)
+            .setTitle(titleResId)
+            .setView(container)
+            .setPositiveButton(android.R.string.ok) { dialog, _ ->
+                onConfirm(editView.text.toString())
                 dialog.dismiss()
             }
             .setNegativeButton(android.R.string.cancel, null)
