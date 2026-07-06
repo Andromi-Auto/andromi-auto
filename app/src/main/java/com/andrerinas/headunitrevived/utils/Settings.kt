@@ -191,7 +191,7 @@ class Settings(private val context: Context) {
             prefs.edit().putInt("dpi-pixel-density", value).apply()
         }
 
-    var staticBSSID : String?
+    var staticBSSID: String?
         get() = try { prefs.getString("static-bssid", "0") } catch (e: Exception) { "0" } // Default 0 for Auto
         set(value) {
             prefs.edit().putString("static-bssid", value).apply()
