@@ -223,6 +223,8 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
             }
         } else {
             AppLog.d("WifiDirectManager: onConnectionInfoAvailable: group not formed yet")
+            isConnected = false
+            isGroupOwner = false
         }
     }
 
@@ -528,6 +530,8 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
 
     @SuppressLint("MissingPermission")
     private fun removeGroupAndCreate() {
+        isGroupOwner = false
+        isConnected = false
         manager?.removeGroup(channel, object : WifiP2pManager.ActionListener {
             override fun onSuccess() { delayedCreateGroup(0) }
             override fun onFailure(reason: Int) { delayedCreateGroup(0) }
@@ -542,6 +546,11 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
     private fun createNewGroup(retryCount: Int) {
         val mgr = manager ?: return
         val ch = channel ?: return
+
+        if (isConnected || isGroupOwner) {
+            AppLog.d("WifiDirectManager: Group already active/created (isConnected=$isConnected, isGroupOwner=$isGroupOwner). Skipping createGroup retry.")
+            return
+        }
 
         mgr.createGroup(ch, object : WifiP2pManager.ActionListener {
             override fun onSuccess() {
@@ -900,5 +909,7 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
                 override fun onFailure(reason: Int) { AppLog.d("WifiDirectManager: Final group removal failed: $reason") }
             })
         }
+        isGroupOwner = false
+        isConnected = false
     }
 }
