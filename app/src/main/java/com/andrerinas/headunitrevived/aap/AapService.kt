@@ -1295,11 +1295,12 @@ class AapService : Service(), UsbReceiver.Listener {
                 AppLog.i("NetworkMonitor: Network available: $network")
 
                 // force start scan, now that we are connected
-                if (networkDiscovery != null) {
-                    serviceScope.launch {
-                        delay(500)
-                        networkDiscovery?.interruptScan()
-                        networkDiscovery?.startScan()
+                serviceScope.launch {
+                    delay(500)
+                    val discovery = networkDiscovery
+                    if (discovery != null) {
+                        discovery.stop()
+                        discovery.startScan()
                     }
                 }
             }

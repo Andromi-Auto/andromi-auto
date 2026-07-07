@@ -33,6 +33,7 @@ import com.andrerinas.headunitrevived.BuildConfig
 import com.andrerinas.headunitrevived.utils.LogExporter
 import com.andrerinas.headunitrevived.utils.SettingsBackupManager
 import com.andrerinas.headunitrevived.utils.DialogUtils
+import com.andrerinas.headunitrevived.utils.SetupWizard
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -525,7 +526,7 @@ class SettingsFragment : Fragment() {
             nameResId = R.string.auto_optimize,
             value = getString(R.string.auto_optimize_desc),
             onClick = { _ ->
-                com.andrerinas.headunitrevived.utils.SetupWizard(requireContext()) {
+                SetupWizard(requireContext()) {
                     reloadPendingStateFromSettings()
                     checkChanges()
                     updateSettingsList()
