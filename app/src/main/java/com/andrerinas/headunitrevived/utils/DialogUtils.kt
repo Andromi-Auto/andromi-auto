@@ -2,17 +2,15 @@ package com.andrerinas.headunitrevived.utils
 
 import android.R
 import android.content.Context
-import android.os.Build
 import android.util.TypedValue
 import android.view.WindowManager
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.annotation.RequiresApi
+import androidx.core.content.ContextCompat
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 object DialogUtils {
-    @RequiresApi(Build.VERSION_CODES.M)
     fun showTextInputDialog(
         context: Context,
         titleResId: Int,
@@ -22,7 +20,6 @@ object DialogUtils {
         showTextInputDialogWithMessage(context, titleResId, null, currentValue, onResult)
     }
 
-    @RequiresApi(Build.VERSION_CODES.M)
     fun showTextInputDialogWithMessage(
         context: Context,
         titleResId: Int,
@@ -44,7 +41,7 @@ object DialogUtils {
                     textColorAttr,
                     true,
                 )
-                setTextColor(context.resources.getColor(textColorAttr.resourceId, context.theme))
+                setTextColor(ContextCompat.getColor(context, textColorAttr.resourceId))
                 textSize = 13f
                 setPadding(0, 0, 0, 24)
             }

@@ -32,6 +32,7 @@ import com.andrerinas.headunitrevived.utils.LocaleHelper
 import com.andrerinas.headunitrevived.BuildConfig
 import com.andrerinas.headunitrevived.utils.LogExporter
 import com.andrerinas.headunitrevived.utils.SettingsBackupManager
+import com.andrerinas.headunitrevived.utils.DialogUtils
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -764,7 +765,7 @@ class SettingsFragment : Fragment() {
             nameResId = R.string.static_bssid_title,
             value = if (bssid == "0" || bssid == null) getString(R.string.auto) else bssid,
             onClick = { _ ->
-                showTextInputDialog(
+                DialogUtils.showTextInputDialog(
                     requireContext(),
                     R.string.static_bssid_enter_value,
                     if (bssid == "0" || bssid == null) "" else bssid,
