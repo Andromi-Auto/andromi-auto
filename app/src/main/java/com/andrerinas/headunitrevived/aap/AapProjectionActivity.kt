@@ -88,6 +88,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
     // instead of persisting to Settings. This keeps toggles local to the Activity lifecycle.
     private var activityFullscreenOverride: Settings.FullscreenMode? = null
     private var fpsTextView: TextView? = null
+    private var touchOverlayView: OverlayTouchView? = null
     private var currentFps: Int? = null
     private val performanceHandler = android.os.Handler(android.os.Looper.getMainLooper())
     private val performanceSampler = PerformanceSampler()
@@ -378,6 +379,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         setupProjectionView()
 
         val overlayView = OverlayTouchView(this)
+        this.touchOverlayView = overlayView
         overlayView.layoutParams = FrameLayout.LayoutParams(
             FrameLayout.LayoutParams.MATCH_PARENT,
             FrameLayout.LayoutParams.MATCH_PARENT
@@ -506,9 +508,9 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
-
         if (hasFocus) {
             setFullscreen() // Reapply fullscreen mode if window gains focus
+            touchOverlayView?.requestFocus()
         }
     }
 
@@ -545,6 +547,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         detail?.visibility = View.GONE
         button?.visibility = View.GONE
         stopCustomLoadingMedia()
+        touchOverlayView?.requestFocus()
     }
 
     private fun setupCustomLoadingScreen() {
@@ -709,6 +712,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         if (hasCustomVideo) {
             // Direct hide — animation won't work with SurfaceView
             loadingOverlay?.visibility = View.GONE
+            touchOverlayView?.requestFocus()
         } else {
             // Smooth fade for images/GIFs
             loadingOverlay?.animate()
@@ -717,9 +721,14 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
                 ?.withEndAction {
                     loadingOverlay?.visibility = View.GONE
                     loadingOverlay?.alpha = 1f
+                    touchOverlayView?.requestFocus()
                 }?.start()
-                ?: run { loadingOverlay?.visibility = View.GONE }
+                ?: run { 
+                    loadingOverlay?.visibility = View.GONE 
+                    touchOverlayView?.requestFocus()
+                }
         }
+        touchOverlayView?.requestFocus()
     }
 
     private fun fallbackToDefaultOverlay() {
