@@ -1467,8 +1467,8 @@ class AapService : Service(), UsbReceiver.Listener {
                     3, 4 -> { /* Host/Passive - just wait for connection on WirelessServer port */ }
                 }
 
-                // Hotspot logic for Helper mode if enabled
-                if (settings.autoEnableHotspot) {
+                // Hotspot logic for Helper mode if enabled (only for Strategy 4: Headunit Hotspot)
+                if (settings.autoEnableHotspot && strategy == 4) {
                     Thread {
                         AppLog.i("AapService: Auto-enabling hotspot for Helper mode...")
                         HotspotManager.setHotspotEnabled(this, true)
