@@ -680,7 +680,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
             return
         if (intent.getBooleanExtra("applied_vd_fix", false))
             return
-        if (display == null || !display.name.startsWith("DUDU-launcher-split"))
+        if (display?.name?.startsWith("DUDU-launcher-split") != true)
             return
 
         intent.putExtra("applied_vd_fix", true) // avoid infinite-loop
