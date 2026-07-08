@@ -687,9 +687,12 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
 
         AppLog.i("Detected VirtualDisplay: Recreating projection to fix stuck picture shortly")
 
-        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-            recreate()
-        }, 1000)
+        lifecycleScope.launch {
+            kotlinx.coroutines.delay(1000)
+            if (!isFinishing && !isDestroyed) {
+                recreate()
+            }
+        }
     }
 
     private fun hideLoadingOverlay(loadingOverlay: View?) {
