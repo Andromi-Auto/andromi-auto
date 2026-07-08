@@ -670,6 +670,28 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         }
     }
 
+    private fun applyVirtualDisplayFix() {
+        // fixes projected picture being frozen within DUDU PiP
+        // does not fix the root cause, where there is a redraw (or something?) of the whole launcher
+        //  right before the first frame is shown
+        // there is also no public API to get the type of the display
+        // if this also causes issues with other virtual displays, try to obtain #getType() via reflection
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R)
+            return
+        if (intent.getBooleanExtra("applied_vd_fix", false))
+            return
+        if (display == null || !display.name.startsWith("DUDU-launcher-split"))
+            return
+
+        intent.putExtra("applied_vd_fix", true) // avoid infinite-loop
+
+        AppLog.i("Detected VirtualDisplay: Recreating projection to fix stuck picture shortly")
+
+        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+            recreate()
+        }, 1000)
+    }
+
     private fun hideLoadingOverlay(loadingOverlay: View?) {
         overlayState = OverlayState.HIDDEN
 
@@ -697,6 +719,8 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
                 }?.start()
                 ?: run { loadingOverlay?.visibility = View.GONE }
         }
+
+        applyVirtualDisplayFix()
     }
 
     private fun fallbackToDefaultOverlay() {
