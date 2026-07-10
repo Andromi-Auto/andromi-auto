@@ -325,7 +325,7 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
             var frequency = 0
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 // For Android 10 (API 29) and above, use the official public API
-                frequency = group.frequency
+                frequency = WifiDirectCompat.getGroupFrequency(group)
             } else {
                 try {
                     // Try several common field names used by different OEMs
