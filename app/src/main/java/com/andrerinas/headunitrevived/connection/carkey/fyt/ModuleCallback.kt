@@ -14,7 +14,6 @@ interface ModuleCallback : IInterface {
         const val TRANSACTION_UPDATE = 1;
     }
 
-    @Throws(RemoteException::class)
     fun update(updateCode: Int, ints: IntArray?, floats: FloatArray?, strings: Array<String>?)
 
 
@@ -83,7 +82,7 @@ interface ModuleCallback : IInterface {
                 data.writeIntArray(ints)
                 data.writeFloatArray(floats)
                 data.writeStringArray(strings)
-                this.mRemote.transact(TRANSACTION_UPDATE, data, null, 1)
+                this.mRemote.transact(TRANSACTION_UPDATE, data, null, 0)
             } finally {
                 data.recycle()
             }

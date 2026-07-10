@@ -16,16 +16,12 @@ interface RemoteModule : IInterface {
         const val TRANSACTION_UNREGISTER = 4
     }
 
-    @Throws(RemoteException::class)
     fun cmd(cmdCode: Int, ints: IntArray? = null, floats: FloatArray? = null, strings: Array<String>? = null)
 
-    @Throws(RemoteException::class)
     fun get(getCode: Int, ints: IntArray? = null, floats: FloatArray? = null, strings: Array<String>? = null): ModuleObject?
 
-    @Throws(RemoteException::class)
     fun register(callback: ModuleCallback, updateCode: Int, update: Int)
 
-    @Throws(RemoteException::class)
     fun unregister(callback: ModuleCallback, updateCode: Int)
 
 
@@ -130,7 +126,7 @@ interface RemoteModule : IInterface {
                 data.writeIntArray(ints)
                 data.writeFloatArray(floats)
                 data.writeStringArray(strings)
-                this.mRemote.transact(TRANSACTION_CMD, data, reply, 1)
+                this.mRemote.transact(TRANSACTION_CMD, data, reply, 0)
                 reply.readException()
             } finally {
                 reply.recycle()
@@ -184,7 +180,7 @@ interface RemoteModule : IInterface {
                 data.writeStrongBinder(callback.asBinder())
                 data.writeInt(updateCode)
                 data.writeInt(update)
-                this.mRemote.transact(TRANSACTION_REGISTER, data, reply, 1)
+                this.mRemote.transact(TRANSACTION_REGISTER, data, reply, 0)
                 reply.readException()
             } finally {
                 reply.recycle()
@@ -202,7 +198,7 @@ interface RemoteModule : IInterface {
                 data.writeInterfaceToken(DESCRIPTOR)
                 data.writeStrongBinder(callback.asBinder())
                 data.writeInt(updateCode)
-                this.mRemote.transact(TRANSACTION_UNREGISTER, data, reply, 1)
+                this.mRemote.transact(TRANSACTION_UNREGISTER, data, reply, 0)
                 reply.readException()
             } finally {
                 reply.recycle()

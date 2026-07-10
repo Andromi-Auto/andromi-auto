@@ -764,7 +764,7 @@ class SettingsFragment : Fragment() {
         items.add(SettingItem.SettingEntry(
             stableId = "staticBSSID",
             nameResId = R.string.static_bssid_title,
-            value = if (pendingStaticBSSID == "0" || pendingStaticBSSID == null) getString(R.string.auto) else pendingStaticBSSID,
+            value = if (pendingStaticBSSID == "0" || pendingStaticBSSID == null) getString(R.string.auto) else pendingStaticBSSID!!,
             onClick = { _ ->
                 DialogUtils.showTextInputDialog(
                     requireContext(),
