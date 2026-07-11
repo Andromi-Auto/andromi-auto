@@ -26,9 +26,21 @@ internal class AapAudio(
     private val audioLatencyMultiplier = settings.audioLatencyMultiplier
     private val useAacAudio = settings.useAacAudio
     private val audioQueueCapacity = settings.audioQueueCapacity
+    private val enableAudioSink = settings.enableAudioSink
 
     private var audioFocusRequest: AudioFocusRequest? = null
     private var legacyFocusListener: AudioManager.OnAudioFocusChangeListener? = null
+
+    // Dynamic-mode playback focus: some phones never send an AudioFocusRequestNotification(GAIN)
+    // when media starts (the always-grant handshake makes them assume the head unit always holds
+    // focus), so relying on the protocol notification alone leaves the car radio playing alongside
+    // AA audio. Instead we hold system audio focus for as long as any AA audio channel is actively
+    // playing and release it when the last one stops. Static mode manages focus permanently and is
+    // left untouched.
+    private val activeAudioChannels = mutableSetOf<Int>()
+    private val playbackFocusListener = AudioManager.OnAudioFocusChangeListener {
+        AppLog.i("AapAudio: playback audio focus changed: $it")
+    }
 
     @Volatile
     private var isDucked = false
@@ -127,6 +139,7 @@ internal class AapAudio(
 
     fun releaseAllFocus() {
         AppLog.i("AapAudio: Releasing all audio focus.")
+        synchronized(activeAudioChannels) { activeAudioChannels.clear() }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             audioFocusRequest?.let { audioManager.abandonAudioFocusRequest(it) }
             audioFocusRequest = null
@@ -176,6 +189,46 @@ internal class AapAudio(
 
         AppLog.i("AudioDecoder.start: channel=$channel, stream=$stream, gain=$gain, sampleRate=${config.sampleRate}, numberOfBits=${config.numberOfBits}, numberOfChannels=${config.numberOfChannels}, isAac=$useAacAudio, latencyMultiplier=$effectiveMultiplier, queueCapacity=$audioQueueCapacity")
         audioDecoder.start(channel, stream, config.sampleRate, config.numberOfBits, config.numberOfChannels, useAacAudio, gain, effectiveMultiplier, audioQueueCapacity, staticAudioFocus)
+        onAudioPlaybackStarted(channel)
+    }
+
+    /**
+     * Acquires system audio focus when the first AA audio channel starts playing (dynamic mode).
+     * No-op in static mode (permanent focus already held) or when the audio sink is disabled.
+     */
+    private fun onAudioPlaybackStarted(channel: Int) {
+        if (staticAudioFocus || !enableAudioSink || !Channel.isAudio(channel)) return
+        val shouldAcquire: Boolean
+        synchronized(activeAudioChannels) {
+            val wasEmpty = activeAudioChannels.isEmpty()
+            activeAudioChannels.add(channel)
+            shouldAcquire = wasEmpty
+        }
+        if (shouldAcquire) {
+            // Use GAIN_TRANSIENT, not GAIN: a permanent GAIN sends other players (e.g. the car
+            // radio) a permanent AUDIOFOCUS_LOSS, so they stop and do NOT resume when we later
+            // abandon focus. TRANSIENT sends AUDIOFOCUS_LOSS_TRANSIENT so they pause and resume
+            // once AA audio stops and we release focus.
+            AppLog.i("AapAudio: AA audio started (${Channel.name(channel)}) - acquiring transient system audio focus")
+            requestFocusChange(AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT, playbackFocusListener)
+        }
+    }
+
+    /**
+     * Releases system audio focus once the last active AA audio channel stops (dynamic mode),
+     * letting other local sources (e.g. the car radio) resume.
+     */
+    private fun onAudioPlaybackStopped(channel: Int) {
+        if (staticAudioFocus || !enableAudioSink || !Channel.isAudio(channel)) return
+        val shouldRelease: Boolean
+        synchronized(activeAudioChannels) {
+            activeAudioChannels.remove(channel)
+            shouldRelease = activeAudioChannels.isEmpty()
+        }
+        if (shouldRelease) {
+            AppLog.i("AapAudio: last AA audio channel stopped - releasing system audio focus")
+            releaseAllFocus()
+        }
     }
 
     fun precreateAudioTrack(channel: Int) {
@@ -228,6 +281,7 @@ internal class AapAudio(
             unduckMedia()
         } else {
             audioDecoder.stop(channel)
+            onAudioPlaybackStopped(channel)
         }
     }
 
