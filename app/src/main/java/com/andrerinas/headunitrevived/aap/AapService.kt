@@ -804,10 +804,21 @@ class AapService : Service(), UsbReceiver.Listener {
      * This logic was previously executed in onCreate(); it has been moved here so
      * the caller can decide when to acquire focus (for example, immediately before
      * starting the AA handshake) to avoid stealing audio during autostart.
+     *
+     * The permanent AUDIOFOCUS_GAIN is only appropriate for Static Audio Focus mode,
+     * where the phone must believe focus is always held. In the default (dynamic) mode
+     * focus is instead acquired on demand via the AA protocol
+     * (AapControl.audioFocusRequest -> AapAudio.requestFocusChange), so grabbing a
+     * permanent gain here would needlessly evict other media (e.g. the car radio) the
+     * moment the phone connects, before AA plays anything.
      */
     private fun requestPermanentAudioFocus() {
         if (!settings.enableAudioSink) {
             AppLog.d("Audio Sink disabled - skipping permanent audio focus request.")
+            return
+        }
+        if (!settings.staticAudioFocus) {
+            AppLog.d("Static Audio Focus disabled - skipping permanent audio focus request; focus will be acquired on demand.")
             return
         }
 
