@@ -341,7 +341,7 @@ class CommManager(
      * This ordering guarantees no video frame is ever decoded before a render target exists.
      *
      * On success:
-     * 1. Claims audio focus for `STREAM_MUSIC`.
+     * 1. In Static Audio Focus mode, claims permanent audio focus for `STREAM_MUSIC`.
      * 2. Starts the [AapTransport] read loop.
      * 3. Emits [ConnectionState.TransportStarted].
      */
@@ -349,11 +349,18 @@ class CommManager(
         if (_connectionState.value !is ConnectionState.HandshakeComplete) return@withContext
 
         try {
-            _transport?.aapAudio?.requestFocusChange(
-                AudioManager.STREAM_MUSIC,
-                AudioManager.AUDIOFOCUS_GAIN,
-                AudioManager.OnAudioFocusChangeListener { }
-            )
+            // Only grab permanent AUDIOFOCUS_GAIN in Static Audio Focus mode, matching the
+            // gating in AapService.requestPermanentAudioFocus and AapControl.audioFocusRequest.
+            // In the default (dynamic) mode focus is acquired on demand via the AA protocol, so
+            // an unconditional grab here would evict other media (e.g. the car radio) the moment
+            // the phone connects, before AA plays anything.
+            if (settings.enableAudioSink && settings.staticAudioFocus) {
+                _transport?.aapAudio?.requestFocusChange(
+                    AudioManager.STREAM_MUSIC,
+                    AudioManager.AUDIOFOCUS_GAIN,
+                    AudioManager.OnAudioFocusChangeListener { }
+                )
+            }
             _transport?.startReading()
             _connectionState.emit(ConnectionState.TransportStarted)
         } catch (e: Exception) {
