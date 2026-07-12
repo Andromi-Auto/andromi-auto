@@ -940,14 +940,14 @@ class SettingsFragment : Fragment() {
         items.add(SettingItem.SettingEntry(
             stableId = "pixelAspectRatioE4",
             nameResId = R.string.pixel_aspect_ratio,
-            value = (pendingPixelAspectRatioE4 ?: 10000).toString(),
+            value = if ((pendingPixelAspectRatioE4 ?: 10000) <= 0) "10000" else pendingPixelAspectRatioE4.toString(),
             onClick = { _ ->
                 showNumericInputDialog(
                     title = getString(R.string.enter_pixel_aspect_ratio_value),
                     message = null,
-                    initialValue = pendingPixelAspectRatioE4 ?: 10000,
+                    initialValue = if ((pendingPixelAspectRatioE4 ?: 10000) <= 0) 10000 else pendingPixelAspectRatioE4!!,
                     onConfirm = { newVal ->
-                        pendingPixelAspectRatioE4 = newVal
+                        pendingPixelAspectRatioE4 = if (newVal <= 0) 10000 else newVal
                         checkChanges()
                         updateSettingsList()
                     }
