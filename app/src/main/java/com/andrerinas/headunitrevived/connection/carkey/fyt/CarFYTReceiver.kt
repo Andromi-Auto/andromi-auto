@@ -202,7 +202,7 @@ class CarFYTReceiver : CarKeyReceiver {
 
             Log.i("MEOW", "REG CODE: $regCode")
 
-            if (regCode == 0)
+            /*if (regCode == 0)
                 r9 = 3
             else if (regCode == 2)
                 r9 = 6
@@ -211,11 +211,11 @@ class CarFYTReceiver : CarKeyReceiver {
             else if (regCode == 4)
                 r9 = 5
             else
-                r9 = 3
+                r9 = 3*/
 
 
             //// XXXXX
-            data = Parcel.obtain()
+            /*data = Parcel.obtain()
             reply = Parcel.obtain()
 
             try {
@@ -237,12 +237,13 @@ class CarFYTReceiver : CarKeyReceiver {
                 complexTransactSystem(214, intArrayOf(1), null) // driveMode ?
                 complexTransactSystem(219, intArrayOf(0), null) // like that already
                 complexTransactSystem(223, intArrayOf(1), null) // audio media ?
-            }
+            }*/
 
-            modules[0]!!.cmd(0, intArrayOf(10))
-            modules[0]!!.cmd(133, intArrayOf(3), null, null);
+            //modules[0]!!.cmd(0, intArrayOf(10))
+            //modules[0]!!.cmd(133, intArrayOf(3), null, null)
+            //modules[0]!!.cmd(182, intArrayOf(3, 4), null, null)
 
-
+            SystemProperties.set("sys.carlink.type", "2")
             Log.i("MEOW", ":) OK START")
 
 
@@ -257,10 +258,11 @@ class CarFYTReceiver : CarKeyReceiver {
         fun observe(moduleCode: Int, codes: IntArray) {
             val module = this.toolkit!!.getRemoteModule(moduleCode)
             modules[moduleCode] = module!!
+            val callback = AAPCallback(context, moduleCode)
 
             for (code in codes)
                 module!!.register(
-                    AAPCallback(context, moduleCode),
+                    callback,
                     code,
                     1, /* 1 = register, 0 = unregister */
                 )
@@ -301,16 +303,16 @@ class CarFYTReceiver : CarKeyReceiver {
 // link.stateType == 4 && link.value == 10
 // ServiceConnection.m1029c(CarLinkService.this.getServiceConnection(), 0, 133, new int[]{3}, null, null, 24);
                 // CarLinkService#onHandle
-                if (moduleCode == 0 && updateCode == 133) {
+                /*if (moduleCode == 0 && updateCode == 133) {
                     ints?.size?.let {
                         if (it >= 1)
                             ints[0]
                     }
-                }
+                }*/
 
                 if (moduleCode == 0) {
                     when (updateCode) {
-                        0 -> {
+                        /*0 -> {
                             if (ints == null || ints.isEmpty())
                                 return
 
@@ -372,6 +374,11 @@ class CarFYTReceiver : CarKeyReceiver {
                             /*
 
                              */
+                        }*/
+
+                        133 -> {
+                            val key = ints!![0]
+                            Log.i("MEOW", "CLICK $key")
                         }
                     }
                 }

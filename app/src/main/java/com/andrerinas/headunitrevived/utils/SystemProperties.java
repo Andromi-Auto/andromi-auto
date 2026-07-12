@@ -21,6 +21,9 @@ package com.andrerinas.headunitrevived.utils;
  */
 
 import android.text.TextUtils;
+import android.util.Log;
+
+import java.io.DataOutputStream;
 
 /**
  * Gives access to the system properties store. The system properties store contains a list of
@@ -113,6 +116,20 @@ public class SystemProperties {
             return (Long) SP.getMethod("getLong", String.class, long.class).invoke(null, key, def);
         } catch (Exception e) {
             return def;
+        }
+    }
+
+    public static void set(String key, String value) {
+        try {
+            Process process = Runtime.getRuntime().exec("su");
+            DataOutputStream os = new DataOutputStream(process.getOutputStream());
+            // Execute the native setprop command
+            os.writeBytes("setprop " + key + " " + value + "\n");
+            os.writeBytes("exit\n");
+            os.flush();
+            process.waitFor();
+        } catch (Exception e) {
+            Log.e("MEOW", "SystemProperties#set", e);
         }
     }
 
