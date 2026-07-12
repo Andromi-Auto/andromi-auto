@@ -63,6 +63,14 @@ adb shell am start -a android.intent.action.VIEW -d "headunit://connect?ip=192.1
 - more customization options for the UI and the app itself
 
 ## Changelog
+### v.3.2.0-alpha
+- Don't grab audio focus on connect in dynamic mode, thanks to @bnayahu
+- Acquire transient audio focus while AA audio plays, thanks to @bnayahu
+- Add GitHub Actions CI (build + unit tests), thanks to @bnayahu
+- Fix picture stuck if used within DUDU's PiP, thanks to @MrEAlderson
+- Fix(wifi): use public API for frequency, thanks to @DerTeufel
+- Added pixel aspect ratio setting, thanks to @axel92b
+
 ### v.3.1.1
 - Reduce pressure on sensor events like night and gps and start/stop these events in onConnected, onDisconnect and onDestroy
 - Merged ffmpeg PR #625 by @mmwtl. This added ffmpeg software decoder for h265, which old devives could benefit a lot. Thank you!
