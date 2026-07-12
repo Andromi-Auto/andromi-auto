@@ -366,7 +366,7 @@
     <string name="share">공유</string>
     <string name="close">닫기</string>
     <string name="failed_export_logs">로그 내보내기 실패</string>
-    <string name="failed_export_in_silent_logs">로그를 내보낼 수 없습니다. 로그 레벨이 Silent로 설정되어 있습니다</string>
+    <string name="failed_export_in_silent_logs">로그를 내보낼 수 없습니다. 로그 레벨이 Silent로 설정되어 있습니다.</string>
     <string name="switching_to_android_auto">Android Auto로 전환 중…</string>
     <string name="switch_failed">전환 실패</string>
     <string name="requesting_usb_permission">USB 권한 요청 중…</string>
