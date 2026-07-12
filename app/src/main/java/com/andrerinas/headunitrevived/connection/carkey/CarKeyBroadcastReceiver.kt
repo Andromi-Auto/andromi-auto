@@ -79,8 +79,6 @@ class CarKeyBroadcastReceiver : BroadcastReceiver(), CarKeyReceiver {
             abortBroadcast()
         }
 
-        val commManager = App.provide(context).commManager
-
         // 1. Standard Media Button extraction (already has KeyEvent with proper DOWN/UP)
         if (action == "android.intent.action.MEDIA_BUTTON" || action == "hy.intent.action.MEDIA_BUTTON"
             || action == "com.tencent.qqmusiccar.action.MEDIA_BUTTON_INNER_ONKEY"
@@ -88,9 +86,9 @@ class CarKeyBroadcastReceiver : BroadcastReceiver(), CarKeyReceiver {
             val event = IntentCompat.getParcelableExtra(intent, Intent.EXTRA_KEY_EVENT, KeyEvent::class.java)
             if (event != null) {
                 if (event.action == KeyEvent.ACTION_DOWN && event.repeatCount == 0) {
-                    handleKey(context, commManager, event.keyCode, true)
+                    handleKey(context, event.keyCode, true)
                 } else if (event.action == KeyEvent.ACTION_UP) {
-                    handleKey(context, commManager, event.keyCode, false)
+                    handleKey(context, event.keyCode, false)
                 }
             }
             return
@@ -101,32 +99,32 @@ class CarKeyBroadcastReceiver : BroadcastReceiver(), CarKeyReceiver {
             // --- Protocols with proper DOWN/UP separation ---
             "com.microntek.irkeyDown", "com.microntek.irkeyUp" -> {
                 val keyCode = intent.getIntExtra("keyCode", -1)
-                if (keyCode != -1) handleKey(context, commManager, keyCode, action.endsWith("keyDown"))
+                if (keyCode != -1) handleKey(context, keyCode, action.endsWith("keyDown"))
             }
             "android.intent.action.C3_HARDKEY" -> {
                 val keyCode = intent.getIntExtra("android.intent.extra.c3_hardkey_keycode", -1)
                 val c3Action = intent.getIntExtra("android.intent.extra.c3_hardkey_action", -1)
-                if (keyCode != -1 && c3Action != -1) handleKey(context, commManager, keyCode, c3Action == 0)
+                if (keyCode != -1 && c3Action != -1) handleKey(context, keyCode, c3Action == 0)
             }
 
             // --- Protocols that fire once (no DOWN/UP) → use virtual IDs for mapping ---
             "com.nwd.action.ACTION_KEY_VALUE" -> {
                 val value = intent.getByteExtra("extra_key_value", 0).toInt()
-                if (value != 0) handleClick(context, commManager, 1000 + value)
+                if (value != 0) handleClick(context, 1000 + value)
             }
             "com.winca.service.Setting.KEY_ACTION" ->
                 intent.getIntExtra("com.winca.service.Setting.KEY_ACTION_EXTRA", -1)
-                    .takeIf { it != -1 }?.let { handleClick(context, commManager, it) }
+                    .takeIf { it != -1 }?.let { handleClick(context, it) }
             "IKeyClick.KEY_CLICK" ->
                 intent.getIntExtra("CLICK_KEY", -1)
-                    .takeIf { it != -1 }?.let { handleClick(context, commManager, it) }
-            "com.eryanet.music.prev" -> handleClick(context, commManager, 2001)
-            "com.eryanet.music.next" -> handleClick(context, commManager, 2002)
-            "com.eryanet.media.playorpause" -> handleClick(context, commManager, 2003)
-            "com.eryanet.media.play" -> handleClick(context, commManager, 2004)
-            "com.eryanet.media.pause" -> handleClick(context, commManager, 2005)
-            "com.bz.action.phone.pickup" -> handleClick(context, commManager, 3001)
-            "com.bz.action.phone.hangup" -> handleClick(context, commManager, 3002)
+                    .takeIf { it != -1 }?.let { handleClick(context, it) }
+            "com.eryanet.music.prev" -> handleClick(context, 2001)
+            "com.eryanet.music.next" -> handleClick(context, 2002)
+            "com.eryanet.media.playorpause" -> handleClick(context, 2003)
+            "com.eryanet.media.play" -> handleClick(context, 2004)
+            "com.eryanet.media.pause" -> handleClick(context, 2005)
+            "com.bz.action.phone.pickup" -> handleClick(context, 3001)
+            "com.bz.action.phone.hangup" -> handleClick(context, 3002)
         }
     }
 }

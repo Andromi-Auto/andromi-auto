@@ -12,10 +12,14 @@ import android.os.Looper
 import android.os.Parcel
 import android.util.Log
 import android.widget.Toast
+import com.andrerinas.headunitrevived.App
 import com.andrerinas.headunitrevived.connection.carkey.CarKeyReceiver
 import com.andrerinas.headunitrevived.utils.AppLog
+import com.andrerinas.headunitrevived.utils.SUExecutor
 import com.andrerinas.headunitrevived.utils.SystemProperties
 import com.andrerinas.headunitrevived.utils.SystemService
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 // based of decompilation of "com.syu.steer_HD.apk"
 // this mainly adds support for uis7870 (dudu 7, tested)
@@ -30,8 +34,14 @@ class CarFYTReceiver : CarKeyReceiver {
 
         AppLog.i("CarKeyReceiver: Detected FYT device!")
 
-        this.connection = IPCConnection(context)
+        val suExecutor = App.provide(context).suExecutor
+        this.connection = IPCConnection(context, suExecutor, ::handleClick)
         connection!!.connect()
+
+        // ask for root early
+        Handler(Looper.getMainLooper()).post {
+            suExecutor.checkPermissionOnBoot()
+        }
     }
 
     override fun unregister() {
@@ -44,7 +54,10 @@ class CarFYTReceiver : CarKeyReceiver {
 
 
     // reference: com.syu.ipcself.Conn, com.syu.steer.ipc.Ipc_NewNotifyPage
-    private class IPCConnection(val context: Context) : ServiceConnection {
+    private class IPCConnection(
+        val context: Context,
+        val suExecutor: SUExecutor,
+        val handleClick: (Context, Int) -> Unit) : ServiceConnection {
 
         private val PACKAGE_NAME = "com.syu.ms"
         private val CLASS_NAME = "app.ToolkitService"
@@ -93,6 +106,7 @@ class CarFYTReceiver : CarKeyReceiver {
             this.handler = null
             this.toolkit = null
             this.modules.clear()
+            suExecutor.setProp("sys.carlink.type", "0") // removes key focus from app
         }
 
         override fun onServiceConnected(name: ComponentName, binder: IBinder) {
@@ -118,12 +132,12 @@ class CarFYTReceiver : CarKeyReceiver {
             //    module!!.register(callback, i, 1)
 
             // CarLinkService f1203S, f1204T, f1205U
-            observe(0, intArrayOf(0, 1, 50, 43, 4, 138, 133, 60, 166, 167, 168))
-            observe(2, intArrayOf(6, 7, 15, 14, 31, 9))
-            observe(7, intArrayOf(1003))
+            //observe(0, intArrayOf(0, 1, 50, 43, 4, 138, 133, 60, 166, 167, 168))
+            //observe(2, intArrayOf(6, 7, 15, 14, 31, 9))
+            //observe(7, intArrayOf(1003))
+            observe(0, intArrayOf(133))
 
-
-            val systemBind: IBinder = SystemService.get("CarplayServer")
+            /*val systemBind: IBinder = SystemService.get("CarplayServer")
             //carplayServer.linkToDeath(this, 0)
             val parcelObtain = Parcel.obtain()
             val parcelObtain2 = Parcel.obtain()
@@ -150,11 +164,11 @@ class CarFYTReceiver : CarKeyReceiver {
             """.trimIndent(),
                     Toast.LENGTH_SHORT,
                 ).show()
-            }
+            }*/
 
 
             /// xx
-            fun transactSystem(code: Int, data: Parcel, reply: Parcel): Boolean {
+            /*fun transactSystem(code: Int, data: Parcel, reply: Parcel): Boolean {
                 return systemBind.transact((code shl 8) or 2, data, reply, 0)
             }
 
@@ -200,7 +214,7 @@ class CarFYTReceiver : CarKeyReceiver {
             }
 
 
-            Log.i("MEOW", "REG CODE: $regCode")
+            Log.i("MEOW", "REG CODE: $regCode")*/
 
             /*if (regCode == 0)
                 r9 = 3
@@ -243,7 +257,7 @@ class CarFYTReceiver : CarKeyReceiver {
             //modules[0]!!.cmd(133, intArrayOf(3), null, null)
             //modules[0]!!.cmd(182, intArrayOf(3, 4), null, null)
 
-            SystemProperties.set("sys.carlink.type", "2")
+            suExecutor.setProp("sys.carlink.type", "2")
             Log.i("MEOW", ":) OK START")
 
 
@@ -258,7 +272,7 @@ class CarFYTReceiver : CarKeyReceiver {
         fun observe(moduleCode: Int, codes: IntArray) {
             val module = this.toolkit!!.getRemoteModule(moduleCode)
             modules[moduleCode] = module!!
-            val callback = AAPCallback(context, moduleCode)
+            val callback = AAPCallback(moduleCode)
 
             for (code in codes)
                 module!!.register(
@@ -275,7 +289,7 @@ class CarFYTReceiver : CarKeyReceiver {
             attemptConnect()
         }
 
-        private class AAPCallback(val context: Context, val moduleCode: Int) :
+        private inner class AAPCallback(val moduleCode: Int) :
             ModuleCallback.Stub() {
 
             var rAppId: Int? = null
@@ -379,6 +393,7 @@ class CarFYTReceiver : CarKeyReceiver {
                         133 -> {
                             val key = ints!![0]
                             Log.i("MEOW", "CLICK $key")
+                            handleClick(context, key)
                         }
                     }
                 }

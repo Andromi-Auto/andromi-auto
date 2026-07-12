@@ -73,6 +73,7 @@ import com.andrerinas.headunitrevived.connection.NativeAaHandshakeManager
 import com.andrerinas.headunitrevived.connection.NearbyManager
 import com.andrerinas.headunitrevived.connection.carkey.CarKeysManager
 import com.andrerinas.headunitrevived.main.BackgroundNotification
+import com.andrerinas.headunitrevived.utils.SUExecutor
 import com.andrerinas.headunitrevived.utils.Settings
 import com.andrerinas.headunitrevived.utils.protoUint32ToLong
 import java.net.ServerSocket

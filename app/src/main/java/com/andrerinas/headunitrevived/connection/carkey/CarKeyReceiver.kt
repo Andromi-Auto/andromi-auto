@@ -3,6 +3,7 @@ package com.andrerinas.headunitrevived.connection.carkey
 import android.content.Context
 import android.content.Intent
 import android.view.KeyEvent
+import com.andrerinas.headunitrevived.App
 import com.andrerinas.headunitrevived.connection.CommManager
 import com.andrerinas.headunitrevived.connection.carkey.fyt.CarFYTReceiver
 import com.andrerinas.headunitrevived.contract.KeyIntent
@@ -28,7 +29,8 @@ interface CarKeyReceiver {
 
 
     /** Single key press or release — broadcasts for learning and projection handling. */
-    fun handleKey(context: Context, commManager: CommManager, keyCode: Int, isDown: Boolean) {
+
+    private fun handleKey(context: Context, commManager: CommManager, keyCode: Int, isDown: Boolean) {
         AppLog.d("CarKeyReceiver: Broadcasting key event: code=$keyCode, isDown=$isDown")
         context.sendBroadcast(
             Intent(KeyIntent.action).apply {
@@ -44,10 +46,17 @@ interface CarKeyReceiver {
         commManager.sendKey(keyCode, isDown)
     }
 
+    fun handleKey(context: Context, keyCode: Int, isDown: Boolean) {
+        handleKey(context, App.provide(context).commManager, keyCode, isDown)
+    }
+
     /** Full click (DOWN + UP) — broadcasts both events for learning AND sends to AA. */
-    fun handleClick(context: Context, commManager: CommManager, keyCode: Int) {
+    private fun handleClick(context: Context, commManager: CommManager, keyCode: Int) {
         handleKey(context, commManager, keyCode, true)
         handleKey(context, commManager, keyCode, false)
     }
 
+    fun handleClick(context: Context, keyCode: Int) {
+        handleClick(context, App.provide(context).commManager, keyCode)
+    }
 }

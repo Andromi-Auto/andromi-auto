@@ -52,6 +52,10 @@ dependencies {
 
     // ZXing for QR Code generation
     implementation("com.google.zxing:core:3.5.3")
+
+    // Shizuku for root / shell access
+    implementation("dev.rikka.shizuku:api:13.1.5")
+    implementation("dev.rikka.shizuku:provider:13.1.5")
 }
 
 android {
@@ -61,6 +65,7 @@ android {
 
     buildFeatures {
         buildConfig = true
+        aidl = true // needed for shizuku
     }
 
     externalNativeBuild {

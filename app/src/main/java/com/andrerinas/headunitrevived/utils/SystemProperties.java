@@ -119,20 +119,6 @@ public class SystemProperties {
         }
     }
 
-    public static void set(String key, String value) {
-        try {
-            Process process = Runtime.getRuntime().exec("su");
-            DataOutputStream os = new DataOutputStream(process.getOutputStream());
-            // Execute the native setprop command
-            os.writeBytes("setprop " + key + " " + value + "\n");
-            os.writeBytes("exit\n");
-            os.flush();
-            process.waitFor();
-        } catch (Exception e) {
-            Log.e("MEOW", "SystemProperties#set", e);
-        }
-    }
-
     private static Class<?> getSystemPropertiesClass() {
         try {
             return Class.forName("android.os.SystemProperties");
