@@ -17,6 +17,7 @@
     <string name="usb">USB</string>
     <string name="wifi">WiFi</string>
     <string name="dpi">Pixel density (DPI)</string>
+    <string name="pixel_aspect_ratio">Pixel aspect ratio</string>
     <string name="mic_sample_rate">Mic sample rate</string>
     <string name="keymap">Keymap</string>
     <string name="night_mode">Dark Mode (Android Auto)</string>
@@ -92,6 +93,7 @@
     <string name="orientation_portrait">Portrait (90°)</string>
     <string name="orientation_portrait_reverse">Portrait Reverse (270°)</string>
     <string name="enter_dpi_value">Enter DPI value (0 for auto)</string>
+    <string name="enter_pixel_aspect_ratio_value">Pixel aspect ratio x10000 (10000 = square pixels)</string>
     <string name="custom_margin">Custom Margin</string>
     <string name="custom_margin_description">Set custom display margins (0 for auto)</string>
     <string name="enter_custom_margins">Enter custom margins (0 for auto)</string>
