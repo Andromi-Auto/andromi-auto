@@ -40,6 +40,7 @@ import android.content.pm.PackageManager
 import com.andrerinas.headunitrevived.connection.NativeAaHandshakeManager
 import com.andrerinas.headunitrevived.utils.BluetoothHelper
 import androidx.lifecycle.lifecycleScope
+import com.andrerinas.headunitrevived.AppComponent
 import com.andrerinas.headunitrevived.utils.DialogUtils
 import java.io.File
 import kotlinx.coroutines.CancellationException
@@ -507,6 +508,7 @@ class SettingsFragment : Fragment() {
     }
 
     private fun updateSettingsList() {
+        val app = App.provide(requireContext())
         val scrollState = settingsRecyclerView.layoutManager?.onSaveInstanceState()
         val items = mutableListOf<SettingItem>()
 
@@ -1127,6 +1129,14 @@ class SettingsFragment : Fragment() {
 
         // --- Input Settings ---
         items.add(SettingItem.CategoryHeader("input", R.string.category_input))
+
+        // Add warning banner for missing SU
+        if (app.carKeysManager.isSUNeeded() && !app.suExecutor.checkPermission()) {
+            items.add(SettingItem.InfoBanner(
+                stableId = "suNeededKeyMapWarning",
+                textResId = R.string.su_needed_keymaps_warning
+            ))
+        }
 
         items.add(SettingItem.SettingEntry(
             stableId = "keymap",

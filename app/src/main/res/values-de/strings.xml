@@ -586,4 +586,5 @@
     <string name="settings_reset_failed">Zurücksetzen der Einstellungen fehlgeschlagen: %1$s</string>
     <string name="use_libusb">Nativen USB-Treiber nutzen</string>
     <string name="use_libusb_description">Nutzt libusb für die USB-Verbindung. Deaktivieren, um die Android-Standard-USB-API zu nutzen.</string>
+    <string name="su_needed_keymaps_warning">Warnung: Dein Headunit muss entweder gerooted sein oder Shizuku installiert haben. Falls das der Fall ist, musst du die SU-Privilegien erlauben, sobald danach gefragt wird. Lenkradtasten werden keine Funktion haben, solange dies nicht behoben ist.</string>
 </resources>

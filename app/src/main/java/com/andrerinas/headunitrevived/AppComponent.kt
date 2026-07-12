@@ -4,6 +4,7 @@ import android.app.NotificationManager
 import android.content.Context
 import android.net.wifi.WifiManager
 import com.andrerinas.headunitrevived.connection.CommManager
+import com.andrerinas.headunitrevived.connection.carkey.CarKeysManager
 import com.andrerinas.headunitrevived.decoder.AudioDecoder
 import com.andrerinas.headunitrevived.decoder.VideoDecoder
 import com.andrerinas.headunitrevived.utils.SUExecutor
@@ -22,5 +23,7 @@ class AppComponent(private val app: App) {
 
     val commManager = CommManager(app, settings, audioDecoder, videoDecoder)
 
-    val suExecutor: SUExecutor = SUExecutor()
+    val suExecutor = SUExecutor()
+
+    val carKeysManager = CarKeysManager()
 }

@@ -65,21 +65,17 @@ class ProjectionView @JvmOverloads constructor(
     override fun setVideoSize(width: Int, height: Int) {
         if (videoWidth == width && videoHeight == height) return
         AppLog.i("Video size set to ${width}x$height")
+
         videoWidth = width
         videoHeight = height
 
-        if (HeadUnitScreenConfig.forcedScale) {
-            val settings = App.provide(context).settings
-            if (settings.stretchToFill) {
-                holder.setSizeFromLayout()
-            } else {
-                AppLog.i("FORCED SCALE: Setting fixed size to ${width}x$height")
-                holder.setFixedSize(width, height)
-            }
-        } else {
-            holder.setSizeFromLayout()
-        }
+        // ALWAYS lock the Surface buffer to the exact video dimensions.
+        // This allows the Hardware Composer (HWC) to handle the scaling,
+        // eliminating Mali driver overhead and gralloc buffer spam.
+        holder.setFixedSize(width, height)
 
+        // The View's layout size will still dictate how it looks on screen,
+        // and your scaler can continue to adjust the view's scaleX/scaleY.
         ProjectionViewScaler.updateScale(this, videoWidth, videoHeight)
     }
 

@@ -11,6 +11,7 @@ import android.os.IBinder
 import android.os.Looper
 import android.os.Parcel
 import android.util.Log
+import android.view.KeyEvent
 import android.widget.Toast
 import com.andrerinas.headunitrevived.App
 import com.andrerinas.headunitrevived.connection.carkey.CarKeyReceiver
@@ -28,14 +29,19 @@ class CarFYTReceiver : CarKeyReceiver {
 
     private var connection: IPCConnection? = null
 
+    override val isSupported: Boolean get() {
+        return SystemProperties.exists("ro.fyt.platform") ||
+            SystemProperties.exists("syu.fyt.platform")
+    }
+
+    override val isSUNeeded = true
+
     override fun register(context: Context) {
-        if (!isSupported())
-            return
 
         AppLog.i("CarKeyReceiver: Detected FYT device!")
 
         val suExecutor = App.provide(context).suExecutor
-        this.connection = IPCConnection(context, suExecutor, ::handleClick)
+        this.connection = IPCConnection(context, suExecutor, this)
         connection!!.connect()
 
         // ask for root early
@@ -48,16 +54,12 @@ class CarFYTReceiver : CarKeyReceiver {
         connection?.disconnect()
     }
 
-    private fun isSupported(): Boolean {
-        return SystemProperties.exists("ro.fyt.platform") || SystemProperties.exists("syu.fyt.platform")
-    }
-
 
     // reference: com.syu.ipcself.Conn, com.syu.steer.ipc.Ipc_NewNotifyPage
     private class IPCConnection(
         val context: Context,
         val suExecutor: SUExecutor,
-        val handleClick: (Context, Int) -> Unit) : ServiceConnection {
+        val receiver: CarFYTReceiver) : ServiceConnection {
 
         private val PACKAGE_NAME = "com.syu.ms"
         private val CLASS_NAME = "app.ToolkitService"
@@ -391,9 +393,19 @@ class CarFYTReceiver : CarKeyReceiver {
                         }*/
 
                         133 -> {
+                            if (ints?.size == 0)
+                                return
+
                             val key = ints!![0]
-                            Log.i("MEOW", "CLICK $key")
-                            handleClick(context, key)
+                            Log.i("CarFYT", "Clicked key $key")
+
+                            // assistant
+                            if (key == 576) {
+                                receiver.toggleVoiceAssistant(context)
+                                return
+                            }
+
+                            receiver.handleClick(context, key)
                         }
                     }
                 }

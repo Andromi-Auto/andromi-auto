@@ -42,6 +42,9 @@ class CarKeyBroadcastReceiver : BroadcastReceiver(), CarKeyReceiver {
 
     private var context: Context? = null
 
+    override val isSupported = true
+    override val isSUNeeded = false
+
     override fun register(context: Context) {
         this.context = context
 

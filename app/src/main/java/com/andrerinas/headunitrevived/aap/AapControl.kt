@@ -82,7 +82,7 @@ internal class AapControlMedia(
             status = Media.Config.ConfigStatus.HEADUNIT
             // Use 30 for maxUnacked on wireless to avoid stalls due to jitter, 16 for USB.
             maxUnacked = if (aapTransport.isWireless) 30 else 16
-            
+
             addConfigurationIndices(0)
         }.build()
         AppLog.i("Config response: %s", configResponse)
@@ -186,7 +186,7 @@ internal class AapControlSensor(private val aapTransport: AapTransport, private 
 
         aapTransport.send(msg)
         aapTransport.startSensor(request.type.number)
-        
+
         if (request.type == Sensors.SensorType.NIGHT) {
             AppLog.i("Night sensor requested. Triggering immediate update.")
             val intent = Intent(AapService.ACTION_REQUEST_NIGHT_MODE_UPDATE)
@@ -278,7 +278,7 @@ internal class AapControlService(
 
     private fun byebyeRequest(request: Control.ByeByeRequest, channel: Int): Int {
         AppLog.i("!!! RECEIVED BYEBYE REQUEST FROM PHONE !!! Reason: ${request.reason}")
-        
+
         val msg = AapMessage(channel, Control.ControlMsgType.MESSAGE_BYEBYE_RESPONSE_VALUE, Control.ByeByeResponse.newBuilder().build())
         AppLog.i("Sending BYEYERESPONSE")
         aapTransport.send(msg)
@@ -289,10 +289,15 @@ internal class AapControlService(
     }
 
     private fun voiceSessionNotification(request: Control.VoiceSessionNotification): Int {
-        if (request.status == Control.VoiceSessionNotification.VoiceSessionStatus.VOICE_STATUS_START)
+        if (request.status == Control.VoiceSessionNotification.VoiceSessionStatus.VOICE_STATUS_START) {
             AppLog.i("Voice Session Notification: START")
-        else if (request.status == Control.VoiceSessionNotification.VoiceSessionStatus.VOICE_STATUS_STOP)
+            aapTransport.isAssistantActive = true
+
+        } else if (request.status == Control.VoiceSessionNotification.VoiceSessionStatus.VOICE_STATUS_STOP) {
             AppLog.i("Voice Session Notification: STOP")
+            aapTransport.isAssistantActive = false
+        }
+
         return 0
     }
 

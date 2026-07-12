@@ -5,34 +5,42 @@ import com.andrerinas.headunitrevived.utils.AppLog
 
 class CarKeysManager {
 
-    private val receivers: Array<CarKeyReceiver> = CarKeyReceiver.newDefaultReceivers()
-    private var isRegistered: Boolean = false
+    private val all: Array<CarKeyReceiver> = CarKeyReceiver.newDefaultReceivers()
+    private val registered: MutableCollection<CarKeyReceiver> = ArrayList()
 
     fun registerReceivers(context: Context) {
-        if (isRegistered)
+        if (registered.isNotEmpty())
             return
 
-        isRegistered = true
-
         try {
-            receivers.forEach { receiver -> receiver.register(context) }
+            for (r in all) {
+                if (!r.isSupported)
+                    continue
 
-            AppLog.d("AapService: CarKeyReceiver registered")
+                r.register(context)
+                registered.add(r)
+            }
+
+            AppLog.d("AapService: ${registered.size} CarKeyReceivers registered")
         } catch (e: Exception) {
             AppLog.e("AapService: Failed to register CarKeyReceivers", e)
         }
     }
 
     fun unregisterReceivers() {
-        if (!isRegistered)
+        if (registered.isEmpty())
             return
 
         try {
-            receivers.forEach { receiver -> receiver.unregister() }
+            registered.forEach { it.unregister() }
         } catch (e: Exception) {
             AppLog.e("AapService: Failed to unregister CarKeyReceiver", e)
         } finally {
-            isRegistered = false
+            registered.clear()
         }
+    }
+
+    fun isSUNeeded(): Boolean {
+        return registered.any { it.isSUNeeded }
     }
 }

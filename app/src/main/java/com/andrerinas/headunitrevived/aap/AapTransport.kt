@@ -85,13 +85,14 @@ class AapTransport(
     private var connection: AccessoryConnection? = null
     private var aapRead: AapRead? = null
     var isQuittingAllowed: Boolean = false
-    
+
     val isWireless: Boolean
         get() = connection is com.andrerinas.headunitrevived.connection.SocketAccessoryConnection
     var ignoreNextStopRequest: Boolean = false
     /** Set by [AapControl] when VIDEO_FOCUS_NATIVE triggers a stop (user tapped Exit). */
     @Volatile var wasUserExit: Boolean = false
     @Volatile var onQuit: ((Boolean) -> Unit)? = null
+    var isAssistantActive = false
     var onAudioFocusStateChanged: ((Boolean) -> Unit)? = null
     var onUpdateUiConfigReplyReceived: (() -> Unit)? = null
     private var pollHandler: Handler? = null
@@ -100,9 +101,9 @@ class AapTransport(
         if (readInstance == null) {
             return@Callback false
         }
-        
+
         val ret = readInstance.read()
-        
+
         if (ret < 0) {
             AppLog.i("Quitting because ret < 0 ($ret)")
             this.quit(clean = (ret == -2))
@@ -114,7 +115,7 @@ class AapTransport(
                 it.sendEmptyMessage(MSG_POLL)
             }
         }
-        
+
         return@Callback true
     }
     private var sendHandler: Handler? = null
@@ -205,7 +206,7 @@ class AapTransport(
         } catch (e: InterruptedException) {
             AppLog.e("Failed to join threads", e)
         }
-        
+
         aapRead = null
         ssl.release()
         pollHandler = null
@@ -278,7 +279,7 @@ class AapTransport(
             if (!connection.isSingleMessage) {
                 SystemClock.sleep(500)
             }
-            
+
             val buffer = ByteArray(Messages.DEF_BUFFER_LENGTH)
 
             // Drain any stale data left in the USB pipe from a previous session

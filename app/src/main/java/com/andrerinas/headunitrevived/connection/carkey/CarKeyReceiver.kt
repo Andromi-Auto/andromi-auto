@@ -21,6 +21,10 @@ interface CarKeyReceiver {
         }
     }
 
+    val isSupported: Boolean
+
+    val isSUNeeded: Boolean
+
     @Throws(Exception::class)
     fun register(context: Context)
 
@@ -58,5 +62,9 @@ interface CarKeyReceiver {
 
     fun handleClick(context: Context, keyCode: Int) {
         handleClick(context, App.provide(context).commManager, keyCode)
+    }
+
+    fun toggleVoiceAssistant(context: Context) {
+        App.provide(context).commManager.sendToggleVoiceAssistant()
     }
 }

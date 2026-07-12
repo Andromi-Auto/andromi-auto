@@ -106,7 +106,6 @@ class AapService : Service(), UsbReceiver.Listener {
     private var nativeAaHandshakeManager: NativeAaHandshakeManager? = null
     private var nearbyManager: NearbyManager? = null
     private var wifiAutoStartReceiver: WifiAutoStartReceiver? = null
-    private var carKeysManager: CarKeysManager? = null
     private var wirelessServer: WirelessServer? = null
     private var networkDiscovery: NetworkDiscovery? = null
     private var mediaSession: MediaSessionCompat? = null
@@ -737,8 +736,6 @@ class AapService : Service(), UsbReceiver.Listener {
         }
 
 
-        carKeysManager = CarKeysManager()
-
         checkAlreadyConnectedUsb()
         registerNetworkMonitor()
     }
@@ -896,7 +893,7 @@ class AapService : Service(), UsbReceiver.Listener {
         // Silent audio hack removed to prevent mixing/resampling stuttering issues
 
         // Register the comprehensive steering wheel key receiver
-        carKeysManager!!.registerReceivers(this)
+        App.provide(this).carKeysManager.registerReceivers(this)
 
         // Reactivate the existing MediaSession (created in onCreate, kept alive across disconnects)
         safeMediaSessionCall { it.isActive = true }
@@ -1045,7 +1042,7 @@ class AapService : Service(), UsbReceiver.Listener {
 
         // Release any permanent audio focus we may have requested when connected
         releasePermanentAudioFocus()
-        carKeysManager!!.unregisterReceivers()
+        App.provide(this).carKeysManager.unregisterReceivers()
 
         if (!isDestroying) updateNotification()
         mediaMetadataDecodeJob?.cancel()
@@ -1565,7 +1562,7 @@ class AapService : Service(), UsbReceiver.Listener {
         try { unregisterReceiver(usbReceiver) } catch (_: Exception) {}
         try { unregisterReceiver(mediaButtonReceiver) } catch (_: Exception) {}
         try { unregisterReceiver(wakeDetectReceiver) } catch (_: Exception) {}
-        carKeysManager?.unregisterReceivers()
+        App.provide(this).carKeysManager.unregisterReceivers()
         try { wifiAutoStartReceiver?.let { unregisterReceiver(it) } } catch (_: Exception) {}
         uiModeManager.disableCarMode(0)
         serviceScope.cancel()
