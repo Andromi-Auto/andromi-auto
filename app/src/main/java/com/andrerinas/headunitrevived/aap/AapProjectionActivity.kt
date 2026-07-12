@@ -31,6 +31,7 @@ import com.andrerinas.headunitrevived.app.SurfaceActivity
 import com.andrerinas.headunitrevived.connection.CommManager
 import com.andrerinas.headunitrevived.contract.KeyIntent
 import kotlinx.coroutines.launch
+import com.andrerinas.headunitrevived.decoder.SoftwareYuvFrameSink
 import com.andrerinas.headunitrevived.decoder.VideoDecoder
 import com.andrerinas.headunitrevived.decoder.VideoDimensionsListener
 import com.andrerinas.headunitrevived.utils.AppLog
@@ -55,6 +56,8 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.andrerinas.headunitrevived.main.QuickSettingsFragment
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import java.io.File
+import java.util.concurrent.Executors
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.abs
 
 class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, VideoDimensionsListener {
@@ -85,6 +88,22 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
     // instead of persisting to Settings. This keeps toggles local to the Activity lifecycle.
     private var activityFullscreenOverride: Settings.FullscreenMode? = null
     private var fpsTextView: TextView? = null
+    private var touchOverlayView: OverlayTouchView? = null
+    private var currentFps: Int? = null
+    private val performanceHandler = android.os.Handler(android.os.Looper.getMainLooper())
+    private val performanceSampler = PerformanceSampler()
+    private val performanceExecutor = Executors.newSingleThreadExecutor { runnable ->
+        Thread(runnable, "PerformanceSampler").apply {
+            priority = Thread.MIN_PRIORITY
+        }
+    }
+    private val performanceSampleInFlight = AtomicBoolean(false)
+    private val performanceOverlayRunnable = object : Runnable {
+        override fun run() {
+            requestPerformanceOverlayUpdate()
+            performanceHandler.postDelayed(this, 1000L)
+        }
+    }
 
     private var isOrientationReceiverRegistered = false
     private var isNightModeReceiverRegistered = false
@@ -198,8 +217,10 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
                 setupFpsCounter()
             } else if (!settings.showFpsCounter && fpsTextView != null) {
                 fpsTextView?.visibility = View.GONE
+                stopPerformanceOverlayUpdates()
             } else if (settings.showFpsCounter && fpsTextView != null) {
                 fpsTextView?.visibility = View.VISIBLE
+                startPerformanceOverlayUpdates()
             }
         }
     }
@@ -209,6 +230,8 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
             AppLog.i("Recreating projection view due to settings change...")
             val container = findViewById<FrameLayout>(R.id.container)
             if (::projectionView.isInitialized) {
+                videoDecoder.softwareYuvFrameSink = null
+                videoDecoder.stop("projectionViewRecreate")
                 container.removeView(projectionView as View)
             }
             isSurfaceSet = false
@@ -297,9 +320,9 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
                                 AppLog.w("AapProjectionActivity: Disconnected unexpectedly.")
                                 Toast.makeText(this@AapProjectionActivity, getString(R.string.wifi_disconnect_toast), Toast.LENGTH_LONG).show()
                             }
-                            // Only finish immediately if the user explicitly exited or it was a clean close.
-                            if (state.isUserExit || state.isClean) {
-                                AppLog.i("AapProjectionActivity: Finishing because state isUserExit=${state.isUserExit}, isClean=${state.isClean}")
+                            // Only finish immediately if the user explicitly exited, it was a clean close, or killOnDisconnect is enabled.
+                            if (state.isUserExit || state.isClean || settings.killOnDisconnect) {
+                                AppLog.i("AapProjectionActivity: Finishing because state isUserExit=${state.isUserExit}, isClean=${state.isClean}, killOnDisconnect=${settings.killOnDisconnect}")
                                 hideReconnectingOverlay()
                                 finish()
                             } else {
@@ -356,6 +379,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         setupProjectionView()
 
         val overlayView = OverlayTouchView(this)
+        this.touchOverlayView = overlayView
         overlayView.layoutParams = FrameLayout.LayoutParams(
             FrameLayout.LayoutParams.MATCH_PARENT,
             FrameLayout.LayoutParams.MATCH_PARENT
@@ -484,9 +508,9 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
-
         if (hasFocus) {
             setFullscreen() // Reapply fullscreen mode if window gains focus
+            touchOverlayView?.requestFocus()
         }
     }
 
@@ -523,6 +547,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         detail?.visibility = View.GONE
         button?.visibility = View.GONE
         stopCustomLoadingMedia()
+        touchOverlayView?.requestFocus()
     }
 
     private fun setupCustomLoadingScreen() {
@@ -565,6 +590,26 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         }
 
         val keepRatio = settings.loadingScreenKeepAspectRatio
+        val scalePercent = settings.loadingScreenScalePercent
+        val scale = scalePercent / 100f
+
+        val ov = overlay
+        val img = customImage
+        if (ov != null && img != null) {
+            ov.post {
+                val cw = ov.width
+                val ch = ov.height
+                if (cw > 0 && ch > 0) {
+                    val lp = img.layoutParams as? FrameLayout.LayoutParams
+                    if (lp != null) {
+                        lp.width = (cw * scale).toInt()
+                        lp.height = (ch * scale).toInt()
+                        lp.gravity = android.view.Gravity.CENTER
+                        img.layoutParams = lp
+                    }
+                }
+            }
+        }
         customImage?.scaleType = if (keepRatio) ImageView.ScaleType.FIT_CENTER else ImageView.ScaleType.FIT_XY
 
         try {
@@ -599,32 +644,40 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
                         mp.isLooping = settings.loadingScreenLoopVideo
                         mp.setVolume(0f, 0f)
 
-                        if (keepRatio) {
-                            // Resize VideoView to match video's actual aspect ratio (like YouTube)
-                            try {
-                                val vw = mp.videoWidth
-                                val vh = mp.videoHeight
-                                if (vw > 0 && vh > 0) {
-                                    val cw = overlay?.width ?: return@setOnPreparedListener
-                                    val ch = overlay?.height ?: return@setOnPreparedListener
-                                    val videoRatio = vw.toFloat() / vh
-                                    val containerRatio = cw.toFloat() / ch
-                                    val lp = customVideo.layoutParams as FrameLayout.LayoutParams
-                                    if (videoRatio > containerRatio) {
-                                        // Wider video → fit to width, bars top/bottom
-                                        lp.width = cw
-                                        lp.height = (cw / videoRatio).toInt()
+                        try {
+                            val vw = mp.videoWidth
+                            val vh = mp.videoHeight
+                            val ov = overlay
+                            val cv = customVideo
+                            if (ov != null && cv != null) {
+                                val cw = ov.width
+                                val ch = ov.height
+                                if (cw > 0 && ch > 0) {
+                                    val lp = cv.layoutParams as FrameLayout.LayoutParams
+                                    if (keepRatio && vw > 0 && vh > 0) {
+                                        val videoRatio = vw.toFloat() / vh
+                                        val containerRatio = cw.toFloat() / ch
+                                        val baseWidth: Int
+                                        val baseHeight: Int
+                                        if (videoRatio > containerRatio) {
+                                            baseWidth = cw
+                                            baseHeight = (cw / videoRatio).toInt()
+                                        } else {
+                                            baseHeight = ch
+                                            baseWidth = (ch * videoRatio).toInt()
+                                        }
+                                        lp.width = (baseWidth * scale).toInt()
+                                        lp.height = (baseHeight * scale).toInt()
                                     } else {
-                                        // Taller video → fit to height, bars left/right
-                                        lp.height = ch
-                                        lp.width = (ch * videoRatio).toInt()
+                                        lp.width = (cw * scale).toInt()
+                                        lp.height = (ch * scale).toInt()
                                     }
                                     lp.gravity = android.view.Gravity.CENTER
-                                    customVideo.layoutParams = lp
+                                    cv.layoutParams = lp
                                 }
-                            } catch (e: Exception) {
-                                AppLog.w("Could not resize video: ${e.message}")
                             }
+                        } catch (e: Exception) {
+                            AppLog.w("Could not resize video: ${e.message}")
                         }
                     }
                     customVideo?.setOnErrorListener { _, _, _ ->
@@ -642,8 +695,34 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         }
     }
 
+    private fun applyVirtualDisplayFix() {
+        // fixes projected picture being frozen within DUDU PiP
+        // does not fix the root cause, where there is a redraw (or something?) of the whole launcher
+        //  right before the first frame is shown
+        // there is also no public API to get the type of the display
+        // if this also causes issues with other virtual displays, try to obtain #getType() via reflection
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R)
+            return
+        if (intent.getBooleanExtra("applied_vd_fix", false))
+            return
+        if (display?.name?.startsWith("DUDU-launcher-split") != true)
+            return
+
+        intent.putExtra("applied_vd_fix", true) // avoid infinite-loop
+
+        AppLog.i("Detected VirtualDisplay: Recreating projection to fix stuck picture shortly")
+
+        lifecycleScope.launch {
+            kotlinx.coroutines.delay(1000)
+            if (!isFinishing && !isDestroyed) {
+                recreate()
+            }
+        }
+    }
+
     private fun hideLoadingOverlay(loadingOverlay: View?) {
         overlayState = OverlayState.HIDDEN
+        AppLog.i("Hiding loading overlay after first video frame")
 
         // CRITICAL: Stop custom video FIRST — VideoView/SurfaceView has its own
         // rendering layer that ignores parent alpha animations and can stay visible
@@ -658,6 +737,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         if (hasCustomVideo) {
             // Direct hide — animation won't work with SurfaceView
             loadingOverlay?.visibility = View.GONE
+            touchOverlayView?.requestFocus()
         } else {
             // Smooth fade for images/GIFs
             loadingOverlay?.animate()
@@ -666,9 +746,16 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
                 ?.withEndAction {
                     loadingOverlay?.visibility = View.GONE
                     loadingOverlay?.alpha = 1f
+                    touchOverlayView?.requestFocus()
                 }?.start()
-                ?: run { loadingOverlay?.visibility = View.GONE }
+                ?: run { 
+                    loadingOverlay?.visibility = View.GONE 
+                    touchOverlayView?.requestFocus()
+                }
         }
+
+        applyVirtualDisplayFix()
+        touchOverlayView?.requestFocus()
     }
 
     private fun fallbackToDefaultOverlay() {
@@ -1135,8 +1222,12 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         // and the Ken Burns animator outlive the view hierarchy briefly.
         // stopCustomLoadingMedia releases both.
         stopCustomLoadingMedia()
+        stopPerformanceOverlayUpdates()
+        performanceExecutor.shutdownNow()
         AppLog.i("AapProjectionActivity.onDestroy called. isFinishing=$isFinishing")
         App.isPiPActive = false
+        videoDecoder.onFpsChanged = null
+        videoDecoder.softwareYuvFrameSink = null
         videoDecoder.dimensionsListener = null
     }
 
@@ -1191,7 +1282,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
             container.setBackgroundColor(Color.BLACK)
         } else if (settings.viewMode == Settings.ViewMode.GLES) {
             AppLog.i("Using GlProjectionView")
-            val glView = com.andrerinas.headunitrevived.view.GlProjectionView(this)
+            val glView = GlProjectionView(this)
             glView.layoutParams = FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT,
                 FrameLayout.LayoutParams.MATCH_PARENT
@@ -1211,6 +1302,10 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
 
         val view = projectionView as View
         container.addView(view)
+        videoDecoder.softwareYuvFrameSink = projectionView as? SoftwareYuvFrameSink
+        if (videoDecoder.softwareYuvFrameSink != null) {
+            AppLog.i("Using GLES YUV sink for bundled software HEVC")
+        }
 
         projectionView.addCallback(this)
     }
@@ -1223,7 +1318,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
             setTypeface(null, Typeface.BOLD)
             setBackgroundColor(Color.parseColor("#80000000"))
             setPadding(10, 5, 10, 5)
-            text = "FPS: --"
+            text = "FPS: --\nCPU: -- / --\nTemp: --\nFrame: --"
             // Lift it above everything
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 elevation = 100f
@@ -1240,7 +1335,154 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         container.addView(fpsTextView, params)
 
         videoDecoder.onFpsChanged = { fps ->
-            runOnUiThread { fpsTextView?.text = "FPS: $fps" }
+            currentFps = fps
+        }
+        startPerformanceOverlayUpdates()
+    }
+
+    private fun startPerformanceOverlayUpdates() {
+        performanceHandler.removeCallbacks(performanceOverlayRunnable)
+        performanceOverlayRunnable.run()
+    }
+
+    private fun stopPerformanceOverlayUpdates() {
+        performanceHandler.removeCallbacks(performanceOverlayRunnable)
+    }
+
+    private fun requestPerformanceOverlayUpdate() {
+        if (!performanceSampleInFlight.compareAndSet(false, true)) return
+
+        val fpsSnapshot = currentFps
+        val lastFrameSnapshot = videoDecoder.lastFrameRenderedMs
+        try {
+            performanceExecutor.execute {
+                try {
+                    val text = buildPerformanceOverlayText(fpsSnapshot, lastFrameSnapshot)
+                    runOnUiThread {
+                        if (!isFinishing && fpsTextView?.visibility == View.VISIBLE) {
+                            fpsTextView?.text = text
+                        }
+                    }
+                } catch (e: Exception) {
+                    AppLog.w("Performance overlay update failed: ${e.message}")
+                } finally {
+                    performanceSampleInFlight.set(false)
+                }
+            }
+        } catch (e: java.util.concurrent.RejectedExecutionException) {
+            performanceSampleInFlight.set(false)
+        }
+    }
+
+    private fun buildPerformanceOverlayText(fpsSnapshot: Int?, lastFrameSnapshot: Long): String {
+        val metrics = performanceSampler.sample()
+        val frameAgeText = if (lastFrameSnapshot > 0L) {
+            "${SystemClock.elapsedRealtime() - lastFrameSnapshot}ms"
+        } else {
+            "--"
+        }
+        val fpsText = fpsSnapshot?.toString() ?: "--"
+        val appCpuText = metrics.appCpuPercent?.let { "${it}%" } ?: "--"
+        val totalCpuText = metrics.totalCpuPercent?.let { "${it}%" }
+            ?: metrics.loadAverage?.let { String.format(java.util.Locale.US, "%.2f load", it) }
+            ?: "--"
+        val tempText = metrics.temperatureC?.let { "${it}C" } ?: "--"
+        return "FPS: $fpsText\nCPU: app $appCpuText / sys $totalCpuText\nTemp: $tempText\nFrame: $frameAgeText"
+    }
+
+    private class PerformanceSampler {
+        private data class TotalCpuSnapshot(
+            val totalJiffies: Long,
+            val idleJiffies: Long
+        )
+
+        data class Metrics(
+            val appCpuPercent: Int?,
+            val totalCpuPercent: Int?,
+            val loadAverage: Double?,
+            val temperatureC: Int?
+        )
+
+        private var previousTotalCpu: TotalCpuSnapshot? = null
+        private var previousProcessCpuMs: Long? = null
+        private var previousElapsedMs: Long? = null
+
+        fun sample(): Metrics {
+            val nowElapsedMs = SystemClock.elapsedRealtime()
+            val nowProcessCpuMs = android.os.Process.getElapsedCpuTime()
+            val previousProcess = previousProcessCpuMs
+            val previousElapsed = previousElapsedMs
+            previousProcessCpuMs = nowProcessCpuMs
+            previousElapsedMs = nowElapsedMs
+
+            val appCpu = if (previousProcess != null && previousElapsed != null) {
+                val cpuDelta = (nowProcessCpuMs - previousProcess).coerceAtLeast(0L)
+                val elapsedDelta = (nowElapsedMs - previousElapsed).coerceAtLeast(1L)
+                ((cpuDelta.toDouble() / elapsedDelta) * 100.0).toInt().coerceAtLeast(0)
+            } else {
+                null
+            }
+
+            val currentTotalCpu = readTotalCpuSnapshot()
+            val previousTotal = previousTotalCpu
+            previousTotalCpu = currentTotalCpu
+            val totalCpu = if (currentTotalCpu != null && previousTotal != null) {
+                val totalDelta = (currentTotalCpu.totalJiffies - previousTotal.totalJiffies).coerceAtLeast(1L)
+                val idleDelta = (currentTotalCpu.idleJiffies - previousTotal.idleJiffies).coerceAtLeast(0L)
+                (((totalDelta - idleDelta).toDouble() / totalDelta) * 100.0).toInt().coerceIn(0, 100)
+            } else {
+                null
+            }
+
+            return Metrics(appCpu, totalCpu, readLoadAverage(), readTemperatureC())
+        }
+
+        private fun readTotalCpuSnapshot(): TotalCpuSnapshot? {
+            return try {
+                val cpuLine = File("/proc/stat").useLines { lines ->
+                    lines.firstOrNull { it.startsWith("cpu ") }
+                } ?: return null
+                val cpuValues = cpuLine.trim().split(Regex("\\s+")).drop(1).mapNotNull { it.toLongOrNull() }
+                if (cpuValues.size < 5) return null
+                val idle = cpuValues.getOrElse(3) { 0L } + cpuValues.getOrElse(4) { 0L }
+                val total = cpuValues.take(8).sum()
+                TotalCpuSnapshot(total, idle)
+            } catch (e: Exception) {
+                null
+            }
+        }
+
+        private fun readLoadAverage(): Double? {
+            return try {
+                File("/proc/loadavg")
+                    .readText()
+                    .trim()
+                    .split(Regex("\\s+"))
+                    .firstOrNull()
+                    ?.toDoubleOrNull()
+            } catch (e: Exception) {
+                null
+            }
+        }
+
+        private fun readTemperatureC(): Int? {
+            return try {
+                val thermalRoot = File("/sys/class/thermal")
+                val values = thermalRoot.listFiles()
+                    ?.filter { it.name.startsWith("thermal_zone") }
+                    ?.mapNotNull { zone ->
+                        val raw = zone.resolve("temp").readText().trim().toIntOrNull() ?: return@mapNotNull null
+                        when {
+                            raw in 10000..125000 -> raw / 1000
+                            raw in 10..125 -> raw
+                            else -> null
+                        }
+                    }
+                    .orEmpty()
+                values.maxOrNull()
+            } catch (e: Exception) {
+                null
+            }
         }
     }
 }

@@ -1,4 +1,27 @@
 # Changelog
+### v.3.1.1
+- Reduce pressure on sensor events like night and gps and start/stop these events in onConnected, onDisconnect and onDestroy
+- Merged ffmpeg PR #625 by @mmwtl. This added ffmpeg software decoder for h265, which old devives could benefit a lot. Thank you!
+- Wi-Fi Direct changes. Prevent duplicate start, graceful resets, cleaned up stale groups
+- Remove Automatic Play Integrity Checks, so Playstore won't check the license and link to the playstore in headunits
+- Added manual bssid for native Mode. This should help for users where the bssid is hidden for the app, thanks to @rakshan-kumr
+- Added immediately network scan with wifi connection, thanks to @MrEAlderson for the PR
+
+### v.3.1.0
+- Added libusb as alternative to the native usb stack for better compatibility with some devices
+- Fixed Layout in Portrait Mode in nearly square devices
+- Added Scale Slider for loading screen media
+
+### v.3.0.1
+- Fixed: App Exit on Disconnect
+- Enhanced: USB Workflow. This will hopefully eliminate some random usb disconnects
+- Fixed keyboard input on Android < 6 Devices
+- Enhanced Wi-Fi Direct-Mode
+- Added: Bundled FFmpeg HEVC decoder with decoder source setting and FPS/performance overlay
+- Enhanced: HEVC GLES/YUV rendering latency, audio buffering, and Wi-Fi Direct fallback reliability
+- Enhanced File Selector for some devices
+- Fixed some fatal errors, showing in play console
+
 ### v.3.0.0
 - Added: Custom loading screen (image/GIF/video), thanks to @andrecuellar
 - Added: Settings-Reset Button, if you mess up something in the settings, you can now reset them to default
@@ -22,7 +45,7 @@
 
 ### v.2.3.1
 - Fixed a connection lost on for example borders
-- Binding socket to wifi network if available to prevent connection drops on carrier lost
+- Binding socket to Wi-Fi network if available to prevent connection drops on carrier lost
 - Added Static Audio Focus Toggle to prevent audio focus loss on some devices
 - Fixing samsung routines and modes
 - Fixing wrong orientation on start if holding the phone wrong. Now uses the orientation from settings

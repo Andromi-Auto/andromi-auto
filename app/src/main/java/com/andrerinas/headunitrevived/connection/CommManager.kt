@@ -158,7 +158,8 @@ class CommManager(
      * Used by AapService to decide whether a USB detach event should trigger a disconnect.
      */
     fun isConnectedToUsbDevice(device: UsbDevice): Boolean =
-        (_connection as? UsbAccessoryConnection)?.isDeviceRunning(device) == true
+        (_connection as? UsbAccessoryConnection)?.isDeviceRunning(device) == true ||
+        (_connection as? LibusbAccessoryConnection)?.isDeviceRunning(device) == true
 
     // -----------------------------------------------------------------------------------------
     // connect() overloads — one for each transport type
@@ -190,7 +191,11 @@ class CommManager(
         try {
             _connectionState.emit(ConnectionState.Connecting)
             _connection?.disconnect()
-            _connection = UsbAccessoryConnection(usbManager, device)
+            _connection = if (settings.useLibusb) {
+                LibusbAccessoryConnection(usbManager, device)
+            } else {
+                UsbAccessoryConnection(usbManager, device)
+            }
 
             if (_connection?.connect() ?: false) {
                 settings.saveLastConnection(type = Settings.CONNECTION_TYPE_USB, usbDevice = UsbDeviceCompat.getUniqueName(device))
@@ -336,7 +341,7 @@ class CommManager(
      * This ordering guarantees no video frame is ever decoded before a render target exists.
      *
      * On success:
-     * 1. Claims audio focus for `STREAM_MUSIC`.
+     * 1. In Static Audio Focus mode, claims permanent audio focus for `STREAM_MUSIC`.
      * 2. Starts the [AapTransport] read loop.
      * 3. Emits [ConnectionState.TransportStarted].
      */
@@ -344,12 +349,23 @@ class CommManager(
         if (_connectionState.value !is ConnectionState.HandshakeComplete) return@withContext
 
         try {
-            _transport?.aapAudio?.requestFocusChange(
-                AudioManager.STREAM_MUSIC,
-                AudioManager.AUDIOFOCUS_GAIN,
-                AudioManager.OnAudioFocusChangeListener { }
-            )
-            _transport?.startReading()
+            // Capture the @Volatile _transport once: it can be cleared concurrently by a
+            // disconnect, so a stable local reference avoids racing reads and lets us bail out
+            // early instead of emitting TransportStarted when no reading actually started.
+            val transport = _transport ?: return@withContext
+            // Only grab permanent AUDIOFOCUS_GAIN in Static Audio Focus mode, matching the
+            // gating in AapService.requestPermanentAudioFocus and AapControl.audioFocusRequest.
+            // In the default (dynamic) mode focus is acquired on demand via the AA protocol, so
+            // an unconditional grab here would evict other media (e.g. the car radio) the moment
+            // the phone connects, before AA plays anything.
+            if (settings.enableAudioSink && settings.staticAudioFocus) {
+                transport.aapAudio?.requestFocusChange(
+                    AudioManager.STREAM_MUSIC,
+                    AudioManager.AUDIOFOCUS_GAIN,
+                    AudioManager.OnAudioFocusChangeListener { }
+                )
+            }
+            transport.startReading()
             _connectionState.emit(ConnectionState.TransportStarted)
         } catch (e: Exception) {
             _connectionState.emit(ConnectionState.Error("Start reading failed: ${e.message}"))
@@ -371,6 +387,9 @@ class CommManager(
         // Transport already quit on its own — no ByeByeRequest needed (connection is dead).
         _disconnectJob = _scope.launch { doDisconnect(sendByeBye = false) }
         if (settings.killOnDisconnect) {
+            context.sendBroadcast(android.content.Intent("com.andrerinas.headunitrevived.ACTION_FINISH_ACTIVITIES").apply {
+                setPackage(context.packageName)
+            })
             android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
                 // Stop the foreground service first to remove the notification
                 val stopIntent = android.content.Intent(context, com.andrerinas.headunitrevived.aap.AapService::class.java).apply {
@@ -393,7 +412,7 @@ class CommManager(
 
     private val keyStates = mutableMapOf<Int, Boolean>()
 
-    /** 
+    /**
      * Sends a key press or release event to the phone with remapping and de-duplication.
      * This is the single entry point for all key events in the application.
      */
@@ -406,7 +425,7 @@ class CommManager(
         // Check if the physical keyCode is mapped to a logical action in settings.
         // If not mapped, we use the original keyCode as the logical code.
         var logicalCode = settings.keyCodes.entries.find { it.value == keyCode }?.key ?: keyCode
-        
+
         // 2. Proprietary Key Filtering
         // If the key is proprietary (internal ID > 1000) and NOT mapped, we drop it.
         // These keys are intended to be learned/mapped in the Keymap settings.
@@ -434,24 +453,24 @@ class CommManager(
         val now = SystemClock.elapsedRealtime()
         if (isPress) {
             val lastPressTime = lastKeyEvents[logicalCode] ?: 0L
-            
+
             // Media keys often trigger multiple redundant intents on China headunits.
             // Use a longer debounce (600ms) for media actions, 300ms for others.
             val debounceMs = if (isMediaKey(logicalCode)) 600L else 300L
-            
+
             if (now - lastPressTime < debounceMs) {
                 AppLog.i("CommManager: Debouncing logical key $logicalCode (DOWN) - dropped duplicate trigger within ${now - lastPressTime}ms")
                 return
             }
             lastKeyEvents[logicalCode] = now
         }
-        
+
         AppLog.i("CommManager: TX Key -> AA=$logicalCode (isPress=$isPress)")
         _transport?.send(logicalCode, isPress)
     }
 
     private fun isMediaKey(code: Int): Boolean {
-        return code == KeyEvent.KEYCODE_MEDIA_NEXT || 
+        return code == KeyEvent.KEYCODE_MEDIA_NEXT ||
                code == KeyEvent.KEYCODE_MEDIA_PREVIOUS ||
                code == KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE ||
                code == KeyEvent.KEYCODE_MEDIA_PLAY ||
@@ -461,7 +480,7 @@ class CommManager(
                code == KeyEvent.KEYCODE_MEDIA_REWIND
     }
 
-    /** 
+    /**
      * [Legacy] Internal transport send. Use sendKey() for physical button inputs.
      * @deprecated Use sendKey(keyCode, isPress) for unified remapping and debouncing.
      */
@@ -489,7 +508,7 @@ class CommManager(
         val request = com.andrerinas.headunitrevived.aap.protocol.messages.UpdateUiConfigRequest(left, top, right, bottom)
         AppLog.i("[UI_DEBUG_FIX] TX UpdateUiConfigRequest: L=$left T=$top R=$right B=$bottom")
         send(request)
-        // HUR always sends VideoFocusNotification(PROJECTED, unsolicited=true) after
+        // Always sends VideoFocusNotification(PROJECTED, unsolicited=true) after
         // updating the UI config. This triggers a keyframe from the phone.
         send(com.andrerinas.headunitrevived.aap.protocol.messages.VideoFocusEvent(gain = true, unsolicited = true))
     }
@@ -524,6 +543,9 @@ class CommManager(
         }
         _disconnectJob = _scope.launch { doDisconnect(sendByeBye) }
         if (settings.killOnDisconnect) {
+            context.sendBroadcast(android.content.Intent("com.andrerinas.headunitrevived.ACTION_FINISH_ACTIVITIES").apply {
+                setPackage(context.packageName)
+            })
             android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
                 // Stop the foreground service first to remove the notification
                 val stopIntent = android.content.Intent(context, com.andrerinas.headunitrevived.aap.AapService::class.java).apply {
@@ -568,11 +590,11 @@ class CommManager(
             // disconnect). When the transport self-quit (read error, soTimeout), the connection
             // is already dead — skip the send and the 150 ms sleep inside stop().
             if (sendByeBye) transport?.stop() else transport?.quit()
-            
+
             // Explicitly stop and release decoders to prevent MediaCodec finalize() timeouts
             videoDecoder.stop("CommManager: doDisconnect")
             audioDecoder.stop()
-            
+
             connection?.disconnect()
         } catch (e: Exception) {
             AppLog.e("doDisconnect error: ${e.message}")

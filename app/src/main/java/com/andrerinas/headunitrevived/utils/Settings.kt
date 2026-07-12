@@ -195,6 +195,10 @@ class Settings(private val context: Context) {
         get() = prefs.getInt("pixel-aspect-ratio-e4", 10000) // Default 10000 = 1.0 (square pixels)
         set(value) {
             prefs.edit().putInt("pixel-aspect-ratio-e4", value).apply()
+    var staticBSSID: String?
+        get() = try { prefs.getString("static-bssid", "0") } catch (e: Exception) { "0" } // Default 0 for Auto
+        set(value) {
+            prefs.edit().putString("static-bssid", value).apply()
         }
 
     var fakeSpeed: Boolean
@@ -278,6 +282,13 @@ class Settings(private val context: Context) {
     var forceSoftwareDecoding: Boolean
         get() = prefs.getBoolean("force-software-decoding", false)
         set(value) { prefs.edit().putBoolean("force-software-decoding", value).apply() }
+
+    var softwareVideoDecoder: SoftwareVideoDecoder
+        get() {
+            val value = prefs.getInt("software-video-decoder", SoftwareVideoDecoder.BUNDLED_FFMPEG.value)
+            return SoftwareVideoDecoder.fromInt(value) ?: SoftwareVideoDecoder.BUNDLED_FFMPEG
+        }
+        set(value) { prefs.edit().putInt("software-video-decoder", value.value).apply() }
 
     var rightHandDrive: Boolean
         get() = prefs.getBoolean("right-hand-drive", false)
@@ -398,7 +409,7 @@ class Settings(private val context: Context) {
     var audioLatencyMultiplier: Int
         get() = prefs.getInt("audio-latency-multiplier", 8)
         set(value) { prefs.edit().putInt("audio-latency-multiplier", value).apply() }
-    
+
     var audioQueueCapacity: Int
         get() = prefs.getInt("audio-queue-capacity", 0)
         set(value) { prefs.edit().putInt("audio-queue-capacity", value).apply() }
@@ -446,7 +457,7 @@ class Settings(private val context: Context) {
     var autoStartWifiSsid: String
         get() = prefs.getString("auto-start-wifi-ssid", "")!!
         set(value) { prefs.edit().putString("auto-start-wifi-ssid", value).apply() }
-        
+
     var listenForUsbDevices: Boolean
         get() = prefs.getBoolean("listen-for-usb-devices", true)
         set(value) { prefs.edit().putBoolean("listen-for-usb-devices", value).apply() }
@@ -544,6 +555,10 @@ class Settings(private val context: Context) {
         get() = prefs.getBoolean("loading-screen-loop-video", true)
         set(value) { prefs.edit().putBoolean("loading-screen-loop-video", value).apply() }
 
+    var loadingScreenScalePercent: Int
+        get() = prefs.getInt("loading-screen-scale-percent", 100)
+        set(value) { prefs.edit().putInt("loading-screen-scale-percent", value).apply() }
+
     @SuppressLint("ApplySharedPref")
     fun commit() {
         prefs.edit().commit()
@@ -577,6 +592,16 @@ class Settings(private val context: Context) {
                 get() = values().map { it.resName }.toTypedArray()
             val allResolutions: Array<Resolution>
                 get() = values()
+        }
+    }
+
+    enum class SoftwareVideoDecoder(val value: Int) {
+        DEVICE_MEDIACODEC(0),
+        BUNDLED_FFMPEG(1);
+
+        companion object {
+            private val map = values().associateBy(SoftwareVideoDecoder::value)
+            fun fromInt(value: Int) = map[value]
         }
     }
 
@@ -791,7 +816,7 @@ class Settings(private val context: Context) {
                     .apply()
             }
         }
-        
+
         fun isListenForUsbDevicesEnabled(context: Context): Boolean {
             val prefs = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 val deviceContext = context.createDeviceProtectedStorageContext()
@@ -1016,5 +1041,9 @@ class Settings(private val context: Context) {
     var hotspotPassword: String
         get() = prefs.getString("hotspot-password", "")!!
         set(value) = prefs.edit().putString("hotspot-password", value).apply()
+
+    var useLibusb: Boolean
+        get() = prefs.getBoolean("use-libusb", false)
+        set(value) = prefs.edit().putBoolean("use-libusb", value).apply()
 
 }

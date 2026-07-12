@@ -80,6 +80,7 @@ object SettingsBackupManager {
         "margin-bottom" to ValueType.INT,
         "fullscreen-mode" to ValueType.INT,
         "force-software-decoding" to ValueType.BOOLEAN,
+        "software-video-decoder" to ValueType.INT,
         "right-hand-drive" to ValueType.BOOLEAN,
         "vehicle-display-name" to ValueType.STRING,
         "vehicle-make" to ValueType.STRING,
@@ -138,7 +139,8 @@ object SettingsBackupManager {
         "wait-for-wifi-before-wifi-direct" to ValueType.BOOLEAN,
         "wait-for-wifi-timeout" to ValueType.INT,
         "helper-connection-strategy" to ValueType.INT,
-        "bluetooth-manager-service-name" to ValueType.STRING
+        "bluetooth-manager-service-name" to ValueType.STRING,
+        "use-libusb" to ValueType.BOOLEAN
     )
 
     private val projectionRestartKeys = setOf(
@@ -148,6 +150,7 @@ object SettingsBackupManager {
         "dpi-pixel-density",
         "pixel-aspect-ratio-e4",
         "force-software-decoding",
+        "software-video-decoder",
         "enable-rotary",
         "enable-audio-sink",
         "static-audio-focus",
@@ -160,7 +163,8 @@ object SettingsBackupManager {
         "inset-top",
         "inset-right",
         "inset-bottom",
-        "wifi-connection-mode"
+        "wifi-connection-mode",
+        "use-libusb"
     )
 
     fun defaultFileName(): String {

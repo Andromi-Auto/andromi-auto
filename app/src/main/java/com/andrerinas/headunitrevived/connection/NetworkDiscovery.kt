@@ -27,7 +27,7 @@ class NetworkDiscovery(private val context: Context, private val listener: Liste
     }
 
     private var scanJob: Job? = null
-    private val reportedIps = java.util.Collections.synchronizedSet(mutableSetOf<String>())
+    private val reportedIps = Collections.synchronizedSet(mutableSetOf<String>())
 
     fun startScan() {
         if (scanJob?.isActive == true) return
@@ -154,7 +154,7 @@ class NetworkDiscovery(private val context: Context, private val listener: Liste
             }
             return true
         }
-        
+
         // Check Port 5277 (Standard Headunit)
         val serverSocket = checkPort(ip, 5277, timeout = 300)
         if (serverSocket != null) {
@@ -166,7 +166,7 @@ class NetworkDiscovery(private val context: Context, private val listener: Liste
             }
             return true
         }
-        
+
         return false
     }
 
@@ -186,7 +186,7 @@ class NetworkDiscovery(private val context: Context, private val listener: Liste
             while (interfaces.hasMoreElements()) {
                 val iface = interfaces.nextElement()
                 if (iface.isLoopback || !iface.isUp) continue
-                
+
                 val addresses = iface.inetAddresses
                 while (addresses.hasMoreElements()) {
                     val addr = addresses.nextElement()
@@ -211,7 +211,7 @@ class NetworkDiscovery(private val context: Context, private val listener: Liste
              val interfaces = Collections.list(NetworkInterface.getNetworkInterfaces())
              for (networkInterface in interfaces) {
                  if (!networkInterface.isUp || networkInterface.isLoopback) continue
-                 
+
                  for (addr in Collections.list(networkInterface.inetAddresses)) {
                      if (addr is Inet4Address) {
                          val host = addr.hostAddress
@@ -229,8 +229,10 @@ class NetworkDiscovery(private val context: Context, private val listener: Liste
     }
 
     fun stop() {
+        if (scanJob == null || scanJob?.isActive == false) return
         scanJob?.cancel()
         scanJob = null
+        AppLog.i("NetworkDiscovery: Scan interrupted")
     }
 
     private fun isEmulator(): Boolean {

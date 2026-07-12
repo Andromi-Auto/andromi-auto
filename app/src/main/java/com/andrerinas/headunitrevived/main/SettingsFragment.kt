@@ -32,6 +32,8 @@ import com.andrerinas.headunitrevived.utils.LocaleHelper
 import com.andrerinas.headunitrevived.BuildConfig
 import com.andrerinas.headunitrevived.utils.LogExporter
 import com.andrerinas.headunitrevived.utils.SettingsBackupManager
+import com.andrerinas.headunitrevived.utils.DialogUtils
+import com.andrerinas.headunitrevived.utils.SetupWizard
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -61,9 +63,11 @@ class SettingsFragment : Fragment() {
     private var pendingResolution: Int? = null
     private var pendingDpi: Int? = null
     private var pendingPixelAspectRatioE4: Int? = null
+    private var pendingStaticBSSID: String? = null
     private var pendingFullscreenMode: Settings.FullscreenMode? = null
     private var pendingViewMode: Settings.ViewMode? = null
     private var pendingForceSoftware: Boolean? = null
+    private var pendingSoftwareVideoDecoder: Settings.SoftwareVideoDecoder? = null
     private var pendingVideoCodec: String? = null
     private var pendingFpsLimit: Int? = null
     private var pendingBluetoothAddress: String? = null
@@ -74,12 +78,12 @@ class SettingsFragment : Fragment() {
     private var pendingMicInputSource: Int? = null
     private var pendingEnableRotary: Boolean? = null
     private var pendingAudioLatencyMultiplier: Int? = null
+    private var pendingUseLibusb: Boolean? = null
     private var pendingAudioQueueCapacity: Int? = null
     private var pendingShowFpsCounter: Boolean? = null
     private var pendingScreenOrientation: Settings.ScreenOrientation? = null
     private var pendingAppLanguage: String? = null
     private var pendingFakeSpeed: Boolean? = null
-    private var pendingUseNativeSsl: Boolean? = null
 
     private var pendingWifiConnectionMode: Int? = null
     private var pendingHelperConnectionStrategy: Int? = null
@@ -161,9 +165,11 @@ class SettingsFragment : Fragment() {
         pendingResolution = settings.resolutionId
         pendingDpi = settings.dpiPixelDensity
         pendingPixelAspectRatioE4 = settings.pixelAspectRatioE4
+        pendingStaticBSSID = settings.staticBSSID
         pendingFullscreenMode = settings.fullscreenMode
         pendingViewMode = settings.viewMode
         pendingForceSoftware = settings.forceSoftwareDecoding
+        pendingSoftwareVideoDecoder = settings.softwareVideoDecoder
         pendingVideoCodec = settings.videoCodec
         pendingFpsLimit = settings.fpsLimit
         pendingBluetoothAddress = settings.bluetoothAddress
@@ -171,7 +177,6 @@ class SettingsFragment : Fragment() {
         pendingStaticAudioFocus = settings.staticAudioFocus
         pendingSeparateAudioStreams = settings.separateAudioStreams
         pendingUseAacAudio = settings.useAacAudio
-        pendingUseNativeSsl = settings.useNativeSsl
         pendingMicInputSource = settings.micInputSource
         pendingEnableRotary = settings.enableRotary
         pendingAudioLatencyMultiplier = settings.audioLatencyMultiplier
@@ -187,6 +192,7 @@ class SettingsFragment : Fragment() {
         pendingKillOnDisconnect = settings.killOnDisconnect
         pendingAutoEnableHotspot = settings.autoEnableHotspot
         pendingFakeSpeed = settings.fakeSpeed
+        pendingUseLibusb = settings.useLibusb
 
         pendingWifiConnectionMode = settings.wifiConnectionMode
         pendingHelperConnectionStrategy = settings.helperConnectionStrategy
@@ -248,6 +254,7 @@ class SettingsFragment : Fragment() {
         pendingFullscreenMode = settings.fullscreenMode
         pendingViewMode = settings.viewMode
         pendingForceSoftware = settings.forceSoftwareDecoding
+        pendingSoftwareVideoDecoder = settings.softwareVideoDecoder
         pendingVideoCodec = settings.videoCodec
         pendingFpsLimit = settings.fpsLimit
         pendingBluetoothAddress = settings.bluetoothAddress
@@ -255,7 +262,6 @@ class SettingsFragment : Fragment() {
         pendingStaticAudioFocus = settings.staticAudioFocus
         pendingSeparateAudioStreams = settings.separateAudioStreams
         pendingUseAacAudio = settings.useAacAudio
-        pendingUseNativeSsl = settings.useNativeSsl
         pendingEnableRotary = settings.enableRotary
         pendingAudioLatencyMultiplier = settings.audioLatencyMultiplier
         pendingAudioQueueCapacity = settings.audioQueueCapacity
@@ -267,6 +273,7 @@ class SettingsFragment : Fragment() {
         pendingKillOnDisconnect = settings.killOnDisconnect
         pendingAutoEnableHotspot = settings.autoEnableHotspot
         pendingFakeSpeed = settings.fakeSpeed
+        pendingUseLibusb = settings.useLibusb
         pendingWifiConnectionMode = settings.wifiConnectionMode
         pendingHelperConnectionStrategy = settings.helperConnectionStrategy
         pendingWaitForWifi = settings.waitForWifiBeforeWifiDirect
@@ -352,9 +359,11 @@ class SettingsFragment : Fragment() {
         pendingResolution?.let { settings.resolutionId = it }
         pendingDpi?.let { settings.dpiPixelDensity = it }
         pendingPixelAspectRatioE4?.let { settings.pixelAspectRatioE4 = it }
+        pendingStaticBSSID?.let { settings.staticBSSID = it }
         pendingFullscreenMode?.let { settings.fullscreenMode = it }
         pendingViewMode?.let { settings.viewMode = it }
         pendingForceSoftware?.let { settings.forceSoftwareDecoding = it }
+        pendingSoftwareVideoDecoder?.let { settings.softwareVideoDecoder = it }
         pendingVideoCodec?.let { settings.videoCodec = it }
         pendingFpsLimit?.let { settings.fpsLimit = it }
         pendingBluetoothAddress?.let { settings.bluetoothAddress = it }
@@ -362,7 +371,6 @@ class SettingsFragment : Fragment() {
         pendingStaticAudioFocus?.let { settings.staticAudioFocus = it }
         pendingSeparateAudioStreams?.let { settings.separateAudioStreams = it }
         pendingUseAacAudio?.let { settings.useAacAudio = it }
-        pendingUseNativeSsl?.let { settings.useNativeSsl = it }
         pendingMicInputSource?.let { settings.micInputSource = it }
         pendingEnableRotary?.let { settings.enableRotary = it }
         pendingAudioLatencyMultiplier?.let { settings.audioLatencyMultiplier = it }
@@ -384,6 +392,7 @@ class SettingsFragment : Fragment() {
         pendingKillOnDisconnect?.let { settings.killOnDisconnect = it }
         pendingAutoEnableHotspot?.let { settings.autoEnableHotspot = it }
         pendingFakeSpeed?.let { settings.fakeSpeed = it }
+        pendingUseLibusb?.let { settings.useLibusb = it }
 
         val oldWifiMode = settings.wifiConnectionMode
         val oldHelperStrategy = settings.helperConnectionStrategy
@@ -444,9 +453,11 @@ class SettingsFragment : Fragment() {
                         pendingResolution != settings.resolutionId ||
                         pendingDpi != settings.dpiPixelDensity ||
                         pendingPixelAspectRatioE4 != settings.pixelAspectRatioE4 ||
+                        pendingStaticBSSID != settings.staticBSSID ||
                         pendingFullscreenMode != settings.fullscreenMode ||
                         pendingViewMode != settings.viewMode ||
                         pendingForceSoftware != settings.forceSoftwareDecoding ||
+                        pendingSoftwareVideoDecoder != settings.softwareVideoDecoder ||
                         pendingVideoCodec != settings.videoCodec ||
                         pendingFpsLimit != settings.fpsLimit ||
                         pendingBluetoothAddress != settings.bluetoothAddress ||
@@ -477,8 +488,8 @@ class SettingsFragment : Fragment() {
                         pendingHelperConnectionStrategy != settings.helperConnectionStrategy ||
                         pendingWaitForWifi != settings.waitForWifiBeforeWifiDirect ||
                         pendingWaitForWifiTimeout != settings.waitForWifiTimeout ||
-                        pendingUseNativeSsl != settings.useNativeSsl ||
-                        pendingBluetoothManagerServiceName != settings.bluetoothManagerServiceName
+                        pendingBluetoothManagerServiceName != settings.bluetoothManagerServiceName ||
+                        pendingUseLibusb != settings.useLibusb
 
         hasChanges = anyChange
 
@@ -488,20 +499,23 @@ class SettingsFragment : Fragment() {
                           pendingFpsLimit != settings.fpsLimit ||
                           pendingDpi != settings.dpiPixelDensity ||
                           pendingPixelAspectRatioE4 != settings.pixelAspectRatioE4 ||
+                            pendingDpi != settings.dpiPixelDensity ||
+            pendingStaticBSSID != settings.staticBSSID ||
                           pendingForceSoftware != settings.forceSoftwareDecoding ||
+                          pendingSoftwareVideoDecoder != settings.softwareVideoDecoder ||
                           pendingEnableRotary != settings.enableRotary ||
                           pendingEnableAudioSink != settings.enableAudioSink ||
                           pendingStaticAudioFocus != settings.staticAudioFocus ||
                           pendingSeparateAudioStreams != settings.separateAudioStreams ||
                           pendingUseAacAudio != settings.useAacAudio ||
-                          pendingUseNativeSsl != settings.useNativeSsl ||
                           pendingAudioLatencyMultiplier != settings.audioLatencyMultiplier ||
                           pendingAudioQueueCapacity != settings.audioQueueCapacity ||
                           pendingInsetLeft != settings.insetLeft ||
                           pendingInsetTop != settings.insetTop ||
                           pendingInsetRight != settings.insetRight ||
                           pendingInsetBottom != settings.insetBottom ||
-                          pendingWifiConnectionMode != settings.wifiConnectionMode
+                          pendingWifiConnectionMode != settings.wifiConnectionMode ||
+                          pendingUseLibusb != settings.useLibusb
 
         updateSaveButtonState()
     }
@@ -519,7 +533,7 @@ class SettingsFragment : Fragment() {
             nameResId = R.string.auto_optimize,
             value = getString(R.string.auto_optimize_desc),
             onClick = { _ ->
-                com.andrerinas.headunitrevived.utils.SetupWizard(requireContext()) {
+                SetupWizard(requireContext()) {
                     reloadPendingStateFromSettings()
                     checkChanges()
                     updateSettingsList()
@@ -584,6 +598,20 @@ class SettingsFragment : Fragment() {
                 showUiScaleDialog()
             }
         ))
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+            items.add(SettingItem.ToggleSettingEntry(
+                stableId = "useLibusb",
+                nameResId = R.string.use_libusb,
+                descriptionResId = R.string.use_libusb_description,
+                isChecked = pendingUseLibusb ?: false,
+                onCheckedChanged = { isChecked ->
+                    pendingUseLibusb = isChecked
+                    checkChanges()
+                    updateSettingsList()
+                }
+            ))
+        }
 
         // --- Wireless Connection ---
         items.add(SettingItem.CategoryHeader("wirelessConnection", R.string.category_wireless))
@@ -705,14 +733,6 @@ class SettingsFragment : Fragment() {
             // Mode 2 only shows Hotspot toggle for Strategy 4 (Headunit Hotspot)
             if (pendingHelperConnectionStrategy == 4) {
                 addHotspotToggle(items)
-                items.add(SettingItem.SettingEntry(
-                    stableId = "shareHotspotQr",
-                    nameResId = R.string.share_hotspot_qr_title,
-                    value = getString(R.string.share_hotspot_qr_desc),
-                    onClick = { _ ->
-                        com.andrerinas.headunitrevived.utils.ShareHotspotQrDialog.show(requireContext())
-                    }
-                ))
             }
 
             if (pendingHelperConnectionStrategy == 1) { // WiFi Direct (P2P)
@@ -746,6 +766,25 @@ class SettingsFragment : Fragment() {
                 }
             }
         }
+
+        val bssid = pendingStaticBSSID
+        items.add(SettingItem.SettingEntry(
+            stableId = "staticBSSID",
+            nameResId = R.string.static_bssid_title,
+            value = if (bssid == "0" || bssid == null) getString(R.string.auto) else bssid,
+            onClick = { _ ->
+                DialogUtils.showTextInputDialog(
+                    requireContext(),
+                    R.string.static_bssid_enter_value,
+                    if (bssid == "0" || bssid == null) "" else bssid,
+                    { newVal ->
+                        pendingStaticBSSID = if (newVal.isNullOrBlank()) "0" else newVal.trim()
+                        checkChanges()
+                        updateSettingsList()
+                    }
+                )
+            }
+        ))
 
         // --- Dark Mode ---
         items.add(SettingItem.CategoryHeader("darkMode", R.string.category_dark_mode))
@@ -895,6 +934,8 @@ class SettingsFragment : Fragment() {
                 )
             }
         ))
+
+
 
         items.add(SettingItem.SettingEntry(
             stableId = "pixelAspectRatioE4",
@@ -1071,17 +1112,37 @@ class SettingsFragment : Fragment() {
             }
         ))
 
-        items.add(SettingItem.ToggleSettingEntry(
-            stableId = "useNativeSsl",
-            nameResId = R.string.use_native_ssl,
-            descriptionResId = R.string.use_native_ssl_description,
-            isChecked = pendingUseNativeSsl ?: false,
-            onCheckedChanged = { isChecked ->
-                pendingUseNativeSsl = isChecked
-                checkChanges()
-                updateSettingsList()
-            }
-        ))
+        if (pendingForceSoftware == true) {
+            items.add(SettingItem.SettingEntry(
+                stableId = "softwareVideoDecoder",
+                nameResId = R.string.software_video_decoder,
+                value = when (pendingSoftwareVideoDecoder) {
+                    Settings.SoftwareVideoDecoder.DEVICE_MEDIACODEC -> getString(R.string.software_video_decoder_device)
+                    Settings.SoftwareVideoDecoder.BUNDLED_FFMPEG -> getString(R.string.software_video_decoder_bundled)
+                    null -> ""
+                },
+                onClick = { _ ->
+                    val decoders = arrayOf(
+                        getString(R.string.software_video_decoder_bundled),
+                        getString(R.string.software_video_decoder_device)
+                    )
+                    val decoderValues = arrayOf(
+                        Settings.SoftwareVideoDecoder.BUNDLED_FFMPEG,
+                        Settings.SoftwareVideoDecoder.DEVICE_MEDIACODEC
+                    )
+                    val currentDecoderIndex = decoderValues.indexOf(pendingSoftwareVideoDecoder).coerceAtLeast(0)
+                    MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
+                        .setTitle(R.string.software_video_decoder)
+                        .setSingleChoiceItems(decoders, currentDecoderIndex) { dialog, which ->
+                            pendingSoftwareVideoDecoder = decoderValues[which]
+                            checkChanges()
+                            dialog.dismiss()
+                            updateSettingsList()
+                        }
+                        .show()
+                }
+            ))
+        }
 
         items.add(SettingItem.SettingEntry(
             stableId = "videoCodec",
@@ -2091,7 +2152,7 @@ class SettingsFragment : Fragment() {
         inputRight.onFocusChangeListener = focusListener
         inputBottom.onFocusChangeListener = focusListener
 
-        MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
+        val dialog = MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
             .setTitle(R.string.custom_insets)
             .setView(dialogView)
             .setPositiveButton(android.R.string.ok) { dialog, _ ->
@@ -2135,7 +2196,13 @@ class SettingsFragment : Fragment() {
 
                 dialog.dismiss()
             }
-            .show()
+            .create()
+
+        dialog.window?.clearFlags(
+            android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+            android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
+        )
+        dialog.show()
     }
 
     private fun showUiScaleDialog() {
@@ -2439,7 +2506,7 @@ class SettingsFragment : Fragment() {
         params.setMargins(margin, 8, margin, 8)
         container.addView(editView, params)
 
-        MaterialAlertDialogBuilder(context, R.style.DarkAlertDialog)
+        val dialog = MaterialAlertDialogBuilder(context, R.style.DarkAlertDialog)
             .setTitle(title)
             .apply { if (message != null) setMessage(message) }
             .setView(container)
@@ -2449,7 +2516,52 @@ class SettingsFragment : Fragment() {
                 dialog.dismiss()
             }
             .setNegativeButton(android.R.string.cancel, null)
-            .show()
+            .create()
+
+        dialog.window?.clearFlags(
+            android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+            android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
+        )
+        dialog.show()
+        editView.requestFocus()
+    }
+
+    private fun showTextInputDialog(
+        context: Context,
+        titleResId: Int,
+        initialValue: String,
+        onConfirm: (String) -> Unit
+    ) {
+        val editView = EditText(context).apply {
+            inputType = InputType.TYPE_CLASS_TEXT
+            setText(initialValue)
+        }
+
+        val container = android.widget.FrameLayout(context)
+        val params = android.widget.FrameLayout.LayoutParams(
+            android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
+            android.widget.FrameLayout.LayoutParams.WRAP_CONTENT
+        )
+        val margin = (24 * context.resources.displayMetrics.density).toInt()
+        params.setMargins(margin, 8, margin, 8)
+        container.addView(editView, params)
+
+        val dialog = MaterialAlertDialogBuilder(context, R.style.DarkAlertDialog)
+            .setTitle(titleResId)
+            .setView(container)
+            .setPositiveButton(android.R.string.ok) { dialog, _ ->
+                onConfirm(editView.text.toString())
+                dialog.dismiss()
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .create()
+
+        dialog.window?.clearFlags(
+            android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+            android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
+        )
+        dialog.show()
+        editView.requestFocus()
     }
 
     private fun handleNativeAaSelection() {
