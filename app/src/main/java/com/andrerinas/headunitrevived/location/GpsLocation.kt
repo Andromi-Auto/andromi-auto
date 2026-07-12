@@ -23,7 +23,7 @@ class GpsLocation constructor(private val context: Context): LocationListener {
         AppLog.i("Request location updates")
         if (PermissionChecker.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PermissionChecker.PERMISSION_GRANTED
                 && locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 500, 0.0f, this)
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 400, 5.0f, this)
             val location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
             AppLog.i("Last known location:  ${location?.toString() ?: "Unknown"}")
             requested = true

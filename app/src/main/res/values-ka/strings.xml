@@ -568,4 +568,10 @@
     <!-- Native USB Driver -->
     <string name="use_libusb">USB-ის ნატივი დრაივერის გამოყენება</string>
     <string name="use_libusb_description">libusb-ის გამოყენება კავშირისთვის. გამორთეთ Android-ის სტანდარტული USB API-ის გამოსაყენებლად.</string>
+
+    <string name="software_video_decoder">პროგრამული დეკოდერის წყარო</string>
+    <string name="software_video_decoder_bundled">ჩაშენებული FFmpeg</string>
+    <string name="software_video_decoder_device">მოწყობილობის MediaCodec</string>
+
+    <string name="btn_show_qr">QR კოდის ჩვენება</string>
 </resources>

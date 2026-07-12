@@ -15,12 +15,9 @@ import com.andrerinas.headunitrevived.aap.protocol.Channel
 import com.andrerinas.headunitrevived.aap.protocol.messages.KeyCodeEvent
 import com.andrerinas.headunitrevived.aap.protocol.messages.MediaAck
 import com.andrerinas.headunitrevived.aap.protocol.messages.Messages
-import com.andrerinas.headunitrevived.aap.protocol.messages.NightModeEvent
 import com.andrerinas.headunitrevived.aap.protocol.messages.ScrollWheelEvent
 import com.andrerinas.headunitrevived.aap.protocol.messages.SensorEvent
-import com.andrerinas.headunitrevived.aap.protocol.messages.TouchEvent
-import com.andrerinas.headunitrevived.aap.protocol.proto.Input
-import com.andrerinas.headunitrevived.aap.protocol.proto.Sensors
+import com.andrerinas.headunitrevived.utils.LegacyOptimizer
 import com.andrerinas.headunitrevived.connection.AccessoryConnection
 import com.andrerinas.headunitrevived.contract.ProjectionActivityRequest
 import com.andrerinas.headunitrevived.decoder.AudioDecoder
@@ -85,7 +82,7 @@ class AapTransport(
     private var connection: AccessoryConnection? = null
     private var aapRead: AapRead? = null
     var isQuittingAllowed: Boolean = false
-    
+
     val isWireless: Boolean
         get() = connection is com.andrerinas.headunitrevived.connection.SocketAccessoryConnection
     var ignoreNextStopRequest: Boolean = false
@@ -100,9 +97,9 @@ class AapTransport(
         if (readInstance == null) {
             return@Callback false
         }
-        
+
         val ret = readInstance.read()
-        
+
         if (ret < 0) {
             AppLog.i("Quitting because ret < 0 ($ret)")
             this.quit(clean = (ret == -2))
@@ -114,7 +111,7 @@ class AapTransport(
                 it.sendEmptyMessage(MSG_POLL)
             }
         }
-        
+
         return@Callback true
     }
     private var sendHandler: Handler? = null
@@ -195,6 +192,7 @@ class AapTransport(
         pollThread?.quit()
         sendThread?.quit()
         aapAudio.releaseAllFocus()
+        aapVideo.release()
 
         videoDecoder.onDecoderError = null
 
@@ -205,7 +203,7 @@ class AapTransport(
         } catch (e: InterruptedException) {
             AppLog.e("Failed to join threads", e)
         }
-        
+
         aapRead = null
         ssl.release()
         pollHandler = null
@@ -229,12 +227,12 @@ class AapTransport(
         sendThread = HandlerThread("AapTransport:Handler::Send", Process.THREAD_PRIORITY_AUDIO)
         sendThread!!.start()
         sendHandler = Handler(sendThread!!.looper, sendHandlerCallback)
-        sendHandler?.post { com.andrerinas.headunitrevived.utils.LegacyOptimizer.setHighPriority() }
+        sendHandler?.post { LegacyOptimizer.setHighPriority() }
 
         pollThread = HandlerThread("AapTransport:Handler::Poll", Process.THREAD_PRIORITY_AUDIO)
         pollThread!!.start()
         pollHandler = Handler(pollThread!!.looper, pollHandlerCallback)
-        pollHandler?.post { com.andrerinas.headunitrevived.utils.LegacyOptimizer.setHighPriority() }
+        pollHandler?.post { LegacyOptimizer.setHighPriority() }
 
         // No sleep needed here: Handler(thread.looper, ...) already blocks internally until the
         // HandlerThread's Looper is ready (via HandlerThread.getLooper() → wait/notifyAll).
@@ -278,7 +276,7 @@ class AapTransport(
             if (!connection.isSingleMessage) {
                 SystemClock.sleep(500)
             }
-            
+
             val buffer = ByteArray(Messages.DEF_BUFFER_LENGTH)
 
             // Drain any stale data left in the USB pipe from a previous session
