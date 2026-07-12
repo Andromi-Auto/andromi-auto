@@ -582,4 +582,10 @@
     <!-- Native USB Driver -->
     <string name="use_libusb">Usar driver USB nativo</string>
     <string name="use_libusb_description">Usa libusb para comunicação. Desative para usar a API USB padrão do Android.</string>
+
+    <string name="software_video_decoder">Origem do decodificador de software</string>
+    <string name="software_video_decoder_bundled">FFmpeg integrado</string>
+    <string name="software_video_decoder_device">MediaCodec do dispositivo</string>
+
+    <string name="btn_show_qr">Mostrar código QR</string>
 </resources>

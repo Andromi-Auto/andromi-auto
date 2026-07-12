@@ -27,7 +27,7 @@ class NetworkDiscovery(private val context: Context, private val listener: Liste
     }
 
     private var scanJob: Job? = null
-    private val reportedIps = java.util.Collections.synchronizedSet(mutableSetOf<String>())
+    private val reportedIps = Collections.synchronizedSet(mutableSetOf<String>())
 
     fun startScan() {
         if (scanJob?.isActive == true) return
@@ -55,14 +55,6 @@ class NetworkDiscovery(private val context: Context, private val listener: Liste
                 }
             }
         }
-    }
-
-    fun interruptScan() {
-        if (scanJob == null || scanJob?.isActive == false) return
-
-        scanJob?.cancel(null)
-
-        AppLog.i("NetworkDiscovery: Scan interrupted")
     }
 
     private suspend fun scanGateways(): Boolean {
@@ -237,8 +229,10 @@ class NetworkDiscovery(private val context: Context, private val listener: Liste
     }
 
     fun stop() {
+        if (scanJob == null || scanJob?.isActive == false) return
         scanJob?.cancel()
         scanJob = null
+        AppLog.i("NetworkDiscovery: Scan interrupted")
     }
 
     private fun isEmulator(): Boolean {

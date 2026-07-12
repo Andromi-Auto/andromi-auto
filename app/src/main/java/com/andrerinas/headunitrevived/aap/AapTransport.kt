@@ -15,12 +15,9 @@ import com.andrerinas.headunitrevived.aap.protocol.Channel
 import com.andrerinas.headunitrevived.aap.protocol.messages.KeyCodeEvent
 import com.andrerinas.headunitrevived.aap.protocol.messages.MediaAck
 import com.andrerinas.headunitrevived.aap.protocol.messages.Messages
-import com.andrerinas.headunitrevived.aap.protocol.messages.NightModeEvent
 import com.andrerinas.headunitrevived.aap.protocol.messages.ScrollWheelEvent
 import com.andrerinas.headunitrevived.aap.protocol.messages.SensorEvent
-import com.andrerinas.headunitrevived.aap.protocol.messages.TouchEvent
-import com.andrerinas.headunitrevived.aap.protocol.proto.Input
-import com.andrerinas.headunitrevived.aap.protocol.proto.Sensors
+import com.andrerinas.headunitrevived.utils.LegacyOptimizer
 import com.andrerinas.headunitrevived.connection.AccessoryConnection
 import com.andrerinas.headunitrevived.contract.ProjectionActivityRequest
 import com.andrerinas.headunitrevived.decoder.AudioDecoder
@@ -196,6 +193,7 @@ class AapTransport(
         pollThread?.quit()
         sendThread?.quit()
         aapAudio.releaseAllFocus()
+        aapVideo.release()
 
         videoDecoder.onDecoderError = null
 
@@ -230,12 +228,12 @@ class AapTransport(
         sendThread = HandlerThread("AapTransport:Handler::Send", Process.THREAD_PRIORITY_AUDIO)
         sendThread!!.start()
         sendHandler = Handler(sendThread!!.looper, sendHandlerCallback)
-        sendHandler?.post { com.andrerinas.headunitrevived.utils.LegacyOptimizer.setHighPriority() }
+        sendHandler?.post { LegacyOptimizer.setHighPriority() }
 
         pollThread = HandlerThread("AapTransport:Handler::Poll", Process.THREAD_PRIORITY_AUDIO)
         pollThread!!.start()
         pollHandler = Handler(pollThread!!.looper, pollHandlerCallback)
-        pollHandler?.post { com.andrerinas.headunitrevived.utils.LegacyOptimizer.setHighPriority() }
+        pollHandler?.post { LegacyOptimizer.setHighPriority() }
 
         // No sleep needed here: Handler(thread.looper, ...) already blocks internally until the
         // HandlerThread's Looper is ready (via HandlerThread.getLooper() → wait/notifyAll).

@@ -60,10 +60,17 @@ adb shell am start -a android.intent.action.VIEW -d "headunit://connect?ip=192.1
 - **WiFi-Direct needs long to connect:** A user finds that this is related to Google Assistant instead of Gemini for AA. If you use Gemini on newer AA versions it just runs smooth again. No idea why this happens.
 
 ## Planned
-- add libusb as alternative to the native usb stack for better compatibility with some devices
 - more customization options for the UI and the app itself
 
 ## Changelog
+### v.3.1.1
+- Reduce pressure on sensor events like night and gps and start/stop these events in onConnected, onDisconnect and onDestroy
+- Merged ffmpeg PR #625 by @mmwtl. This added ffmpeg software decoder for h265, which old devives could benefit a lot. Thank you!
+- Wi-Fi Direct changes. Prevent duplicate start, graceful resets, cleaned up stale groups
+- Remove Automatic Play Integrity Checks, so Playstore won't check the license and link to the playstore in headunits
+- Added manual bssid for native Mode. This should help for users where the bssid is hidden for the app, thanks to @rakshan-kumr
+- Added immediately network scan with wifi connection, thanks to @MrEAlderson for the PR
+
 ### v.3.1.0
 - Added libusb as alternative to the native usb stack for better compatibility with some devices
 - Fixed Layout in Portrait Mode in nearly square devices

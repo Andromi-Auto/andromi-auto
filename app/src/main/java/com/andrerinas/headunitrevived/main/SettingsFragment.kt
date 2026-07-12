@@ -32,6 +32,8 @@ import com.andrerinas.headunitrevived.utils.LocaleHelper
 import com.andrerinas.headunitrevived.BuildConfig
 import com.andrerinas.headunitrevived.utils.LogExporter
 import com.andrerinas.headunitrevived.utils.SettingsBackupManager
+import com.andrerinas.headunitrevived.utils.DialogUtils
+import com.andrerinas.headunitrevived.utils.SetupWizard
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -40,7 +42,6 @@ import android.content.pm.PackageManager
 import com.andrerinas.headunitrevived.connection.NativeAaHandshakeManager
 import com.andrerinas.headunitrevived.utils.BluetoothHelper
 import androidx.lifecycle.lifecycleScope
-import com.andrerinas.headunitrevived.AppComponent
 import com.andrerinas.headunitrevived.utils.DialogUtils
 import java.io.File
 import kotlinx.coroutines.CancellationException
@@ -66,6 +67,7 @@ class SettingsFragment : Fragment() {
     private var pendingFullscreenMode: Settings.FullscreenMode? = null
     private var pendingViewMode: Settings.ViewMode? = null
     private var pendingForceSoftware: Boolean? = null
+    private var pendingSoftwareVideoDecoder: Settings.SoftwareVideoDecoder? = null
     private var pendingVideoCodec: String? = null
     private var pendingFpsLimit: Int? = null
     private var pendingBluetoothAddress: String? = null
@@ -166,6 +168,7 @@ class SettingsFragment : Fragment() {
         pendingFullscreenMode = settings.fullscreenMode
         pendingViewMode = settings.viewMode
         pendingForceSoftware = settings.forceSoftwareDecoding
+        pendingSoftwareVideoDecoder = settings.softwareVideoDecoder
         pendingVideoCodec = settings.videoCodec
         pendingFpsLimit = settings.fpsLimit
         pendingBluetoothAddress = settings.bluetoothAddress
@@ -249,6 +252,7 @@ class SettingsFragment : Fragment() {
         pendingFullscreenMode = settings.fullscreenMode
         pendingViewMode = settings.viewMode
         pendingForceSoftware = settings.forceSoftwareDecoding
+        pendingSoftwareVideoDecoder = settings.softwareVideoDecoder
         pendingVideoCodec = settings.videoCodec
         pendingFpsLimit = settings.fpsLimit
         pendingBluetoothAddress = settings.bluetoothAddress
@@ -356,6 +360,7 @@ class SettingsFragment : Fragment() {
         pendingFullscreenMode?.let { settings.fullscreenMode = it }
         pendingViewMode?.let { settings.viewMode = it }
         pendingForceSoftware?.let { settings.forceSoftwareDecoding = it }
+        pendingSoftwareVideoDecoder?.let { settings.softwareVideoDecoder = it }
         pendingVideoCodec?.let { settings.videoCodec = it }
         pendingFpsLimit?.let { settings.fpsLimit = it }
         pendingBluetoothAddress?.let { settings.bluetoothAddress = it }
@@ -448,6 +453,7 @@ class SettingsFragment : Fragment() {
                         pendingFullscreenMode != settings.fullscreenMode ||
                         pendingViewMode != settings.viewMode ||
                         pendingForceSoftware != settings.forceSoftwareDecoding ||
+                        pendingSoftwareVideoDecoder != settings.softwareVideoDecoder ||
                         pendingVideoCodec != settings.videoCodec ||
                         pendingFpsLimit != settings.fpsLimit ||
                         pendingBluetoothAddress != settings.bluetoothAddress ||
@@ -490,6 +496,7 @@ class SettingsFragment : Fragment() {
                             pendingDpi != settings.dpiPixelDensity ||
             pendingStaticBSSID != settings.staticBSSID ||
                           pendingForceSoftware != settings.forceSoftwareDecoding ||
+                          pendingSoftwareVideoDecoder != settings.softwareVideoDecoder ||
                           pendingEnableRotary != settings.enableRotary ||
                           pendingEnableAudioSink != settings.enableAudioSink ||
                           pendingStaticAudioFocus != settings.staticAudioFocus ||
@@ -521,7 +528,7 @@ class SettingsFragment : Fragment() {
             nameResId = R.string.auto_optimize,
             value = getString(R.string.auto_optimize_desc),
             onClick = { _ ->
-                com.andrerinas.headunitrevived.utils.SetupWizard(requireContext()) {
+                SetupWizard(requireContext()) {
                     reloadPendingStateFromSettings()
                     checkChanges()
                     updateSettingsList()
@@ -721,14 +728,6 @@ class SettingsFragment : Fragment() {
             // Mode 2 only shows Hotspot toggle for Strategy 4 (Headunit Hotspot)
             if (pendingHelperConnectionStrategy == 4) {
                 addHotspotToggle(items)
-                items.add(SettingItem.SettingEntry(
-                    stableId = "shareHotspotQr",
-                    nameResId = R.string.share_hotspot_qr_title,
-                    value = getString(R.string.share_hotspot_qr_desc),
-                    onClick = { _ ->
-                        com.andrerinas.headunitrevived.utils.ShareHotspotQrDialog.show(requireContext())
-                    }
-                ))
             }
 
             if (pendingHelperConnectionStrategy == 1) { // WiFi Direct (P2P)
@@ -763,15 +762,16 @@ class SettingsFragment : Fragment() {
             }
         }
 
+        val bssid = pendingStaticBSSID
         items.add(SettingItem.SettingEntry(
             stableId = "staticBSSID",
             nameResId = R.string.static_bssid_title,
-            value = if (pendingStaticBSSID == "0" || pendingStaticBSSID == null) getString(R.string.auto) else pendingStaticBSSID!!,
+            value = if (bssid == "0" || bssid == null) getString(R.string.auto) else bssid,
             onClick = { _ ->
                 DialogUtils.showTextInputDialog(
                     requireContext(),
                     R.string.static_bssid_enter_value,
-                    if (pendingStaticBSSID == "0") "" else pendingStaticBSSID,
+                    if (bssid == "0" || bssid == null) "" else bssid,
                     { newVal ->
                         pendingStaticBSSID = if (newVal.isNullOrBlank()) "0" else newVal.trim()
                         checkChanges()
@@ -1089,6 +1089,38 @@ class SettingsFragment : Fragment() {
             }
         ))
 
+        if (pendingForceSoftware == true) {
+            items.add(SettingItem.SettingEntry(
+                stableId = "softwareVideoDecoder",
+                nameResId = R.string.software_video_decoder,
+                value = when (pendingSoftwareVideoDecoder) {
+                    Settings.SoftwareVideoDecoder.DEVICE_MEDIACODEC -> getString(R.string.software_video_decoder_device)
+                    Settings.SoftwareVideoDecoder.BUNDLED_FFMPEG -> getString(R.string.software_video_decoder_bundled)
+                    null -> ""
+                },
+                onClick = { _ ->
+                    val decoders = arrayOf(
+                        getString(R.string.software_video_decoder_bundled),
+                        getString(R.string.software_video_decoder_device)
+                    )
+                    val decoderValues = arrayOf(
+                        Settings.SoftwareVideoDecoder.BUNDLED_FFMPEG,
+                        Settings.SoftwareVideoDecoder.DEVICE_MEDIACODEC
+                    )
+                    val currentDecoderIndex = decoderValues.indexOf(pendingSoftwareVideoDecoder).coerceAtLeast(0)
+                    MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
+                        .setTitle(R.string.software_video_decoder)
+                        .setSingleChoiceItems(decoders, currentDecoderIndex) { dialog, which ->
+                            pendingSoftwareVideoDecoder = decoderValues[which]
+                            checkChanges()
+                            dialog.dismiss()
+                            updateSettingsList()
+                        }
+                        .show()
+                }
+            ))
+        }
+
         items.add(SettingItem.SettingEntry(
             stableId = "videoCodec",
             nameResId = R.string.video_codec,
@@ -1129,14 +1161,6 @@ class SettingsFragment : Fragment() {
 
         // --- Input Settings ---
         items.add(SettingItem.CategoryHeader("input", R.string.category_input))
-
-        // Add warning banner for missing SU
-        if (app.carKeysManager.isSUNeeded() && !app.suExecutor.checkPermission()) {
-            items.add(SettingItem.InfoBanner(
-                stableId = "suNeededKeyMapWarning",
-                textResId = R.string.su_needed_keymaps_warning
-            ))
-        }
 
         items.add(SettingItem.SettingEntry(
             stableId = "keymap",
@@ -2466,6 +2490,44 @@ class SettingsFragment : Fragment() {
             .setPositiveButton(android.R.string.ok) { dialog, _ ->
                 val newVal = (editView.text.toString().toIntOrNull() ?: 0).coerceAtLeast(0)
                 onConfirm(newVal)
+                dialog.dismiss()
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .create()
+
+        dialog.window?.clearFlags(
+            android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+            android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
+        )
+        dialog.show()
+        editView.requestFocus()
+    }
+
+    private fun showTextInputDialog(
+        context: Context,
+        titleResId: Int,
+        initialValue: String,
+        onConfirm: (String) -> Unit
+    ) {
+        val editView = EditText(context).apply {
+            inputType = InputType.TYPE_CLASS_TEXT
+            setText(initialValue)
+        }
+
+        val container = android.widget.FrameLayout(context)
+        val params = android.widget.FrameLayout.LayoutParams(
+            android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
+            android.widget.FrameLayout.LayoutParams.WRAP_CONTENT
+        )
+        val margin = (24 * context.resources.displayMetrics.density).toInt()
+        params.setMargins(margin, 8, margin, 8)
+        container.addView(editView, params)
+
+        val dialog = MaterialAlertDialogBuilder(context, R.style.DarkAlertDialog)
+            .setTitle(titleResId)
+            .setView(container)
+            .setPositiveButton(android.R.string.ok) { dialog, _ ->
+                onConfirm(editView.text.toString())
                 dialog.dismiss()
             }
             .setNegativeButton(android.R.string.cancel, null)

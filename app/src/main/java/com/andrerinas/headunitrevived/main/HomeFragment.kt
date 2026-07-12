@@ -479,13 +479,9 @@ class HomeFragment : Fragment() {
                                 }
                                 ContextCompat.startForegroundService(requireContext(), intent)
                             }
-                            if (App.provide(requireContext()).settings.autoEnableHotspot) {
-                                com.andrerinas.headunitrevived.utils.ShareHotspotQrDialog.show(
-                                    requireContext()
-                                )
-                            } else {
-                                Toast.makeText(requireContext(), getString(R.string.searching_phone), Toast.LENGTH_SHORT).show()
-                            }
+                            com.andrerinas.headunitrevived.utils.ShareHotspotQrDialog.show(
+                                requireContext()
+                            )
                         } else if (strategy == 2) {
                             // Nearby Devices — show live discovery dialog
                             showNearbyDeviceSelector()

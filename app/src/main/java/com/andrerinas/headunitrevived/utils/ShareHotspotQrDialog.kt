@@ -8,6 +8,7 @@ import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.ImageView
+import android.widget.Switch
 import android.widget.TextView
 import com.andrerinas.headunitrevived.R
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -20,11 +21,14 @@ object ShareHotspotQrDialog {
         val layoutQrContainer = dialogView.findViewById<View>(R.id.layout_qr_container)
         val imgQr = dialogView.findViewById<ImageView>(R.id.img_qr_code)
         val tvError = dialogView.findViewById<TextView>(R.id.tv_qr_error_message)
+        val switchShowQr = dialogView.findViewById<Switch>(R.id.switch_show_qr)
+        val tvScanInstruction = dialogView.findViewById<View>(R.id.tv_scan_instruction)
 
         val handler = Handler(Looper.getMainLooper())
         var retries = 0
 
         fun loadAndRender() {
+            if (switchShowQr == null || !switchShowQr.isChecked) return
             val systemConfig = getSystemHotspotConfig(context)
             if (systemConfig != null && systemConfig.first.isNotEmpty()) {
                 val ssid = systemConfig.first
@@ -36,8 +40,10 @@ object ShareHotspotQrDialog {
                     val bitmap = QrCodeGenerator.generateQrCode(uri, 500)
                     if (bitmap != null) {
                         imgQr.setImageBitmap(bitmap)
-                        layoutQrContainer.visibility = View.VISIBLE
-                        tvError.visibility = View.GONE
+                        if (switchShowQr.isChecked) {
+                            layoutQrContainer.visibility = View.VISIBLE
+                            tvError.visibility = View.GONE
+                        }
                         return
                     }
                 } catch (e: Exception) {
@@ -49,14 +55,24 @@ object ShareHotspotQrDialog {
                 retries++
                 handler.postDelayed({ loadAndRender() }, 1000)
             } else {
-                imgQr.setImageDrawable(null)
-                layoutQrContainer.visibility = View.GONE
-                tvError.text = context.getString(R.string.share_hotspot_qr_error)
-                tvError.visibility = View.VISIBLE
+                if (switchShowQr.isChecked) {
+                    imgQr.setImageDrawable(null)
+                    layoutQrContainer.visibility = View.GONE
+                    tvError.text = context.getString(R.string.share_hotspot_qr_error)
+                    tvError.visibility = View.VISIBLE
+                }
             }
         }
 
-        loadAndRender()
+        switchShowQr.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                tvScanInstruction.visibility = View.VISIBLE
+                loadAndRender()
+            } else {
+                layoutQrContainer.visibility = View.GONE
+                tvScanInstruction.visibility = View.GONE
+            }
+        }
 
         MaterialAlertDialogBuilder(context, R.style.DarkAlertDialog)
             .setTitle(R.string.share_hotspot_qr_title)
