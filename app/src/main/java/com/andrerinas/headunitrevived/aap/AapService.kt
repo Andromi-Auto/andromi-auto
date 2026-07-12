@@ -697,8 +697,6 @@ class AapService : Service(), UsbReceiver.Listener {
         AppLog.init(settings, this)
         syncLogBackendState()
 
-        startService(GpsLocationService.intent(this))
-
         nativeAaHandshakeManager = NativeAaHandshakeManager(this, serviceScope)
         wifiDirectManager = WifiDirectManager(this)
 
@@ -760,7 +758,6 @@ class AapService : Service(), UsbReceiver.Listener {
             }
             sendBroadcast(intent)
         }
-        nightModeManager?.start()
     }
 
     /**
@@ -928,6 +925,12 @@ class AapService : Service(), UsbReceiver.Listener {
         // don't steal audio during service autostart but still obtain focus when a
         // real connection is beginning.
         requestPermanentAudioFocus()
+
+        // Start GpsLocationService and NightModeManager sensor tracking
+        AppLog.i("AapService: Starting GpsLocationService and NightModeManager since connection is established")
+        startService(GpsLocationService.intent(this))
+        nightModeManager?.start()
+
         serviceScope.launch { commManager.startHandshake() }
     }
 
@@ -1058,6 +1061,11 @@ class AapService : Service(), UsbReceiver.Listener {
     private fun onDisconnected(state: CommManager.ConnectionState.Disconnected) {
         isSwitchingToAccessory.set(false)
         releaseWifiLock()
+
+        // Stop GpsLocationService and NightModeManager sensor tracking
+        AppLog.i("AapService: Stopping GpsLocationService and NightModeManager since connection is disconnected")
+        stopService(GpsLocationService.intent(this))
+        nightModeManager?.stop()
 
         // Release any permanent audio focus we may have requested when connected
         releasePermanentAudioFocus()
@@ -1287,11 +1295,12 @@ class AapService : Service(), UsbReceiver.Listener {
                 AppLog.i("NetworkMonitor: Network available: $network")
 
                 // force start scan, now that we are connected
-                if (networkDiscovery != null) {
-                    serviceScope.launch {
-                        delay(500)
-                        networkDiscovery?.interruptScan()
-                        networkDiscovery?.startScan()
+                serviceScope.launch {
+                    delay(500)
+                    val discovery = networkDiscovery
+                    if (discovery != null) {
+                        discovery.stop()
+                        discovery.startScan()
                     }
                 }
             }
@@ -1421,11 +1430,16 @@ class AapService : Service(), UsbReceiver.Listener {
 
         AppLog.i("AapService: Initializing WiFi Mode: $mode (Strategy: $strategy)")
 
-        // 0. Clean up existing wireless state before re-initializing
         stopWirelessServer()
         networkDiscovery?.stop()
         nearbyManager?.stop()
         nativeAaHandshakeManager?.stop()
+
+        val usesWifiDirect = (mode == 3) || (mode == 2 && strategy == 1)
+        if (!usesWifiDirect) {
+            AppLog.i("AapService: New mode does not use WiFi Direct. Stopping WifiDirectManager...")
+            wifiDirectManager?.stop()
+        }
 
         // Mode 1: Auto (Headunit Server), Mode 2: Helper (Wireless Launcher), Mode 3: Native AA
         if (mode == 1 || mode == 2 || mode == 3) {
@@ -1453,8 +1467,8 @@ class AapService : Service(), UsbReceiver.Listener {
                     3, 4 -> { /* Host/Passive - just wait for connection on WirelessServer port */ }
                 }
 
-                // Hotspot logic for Helper mode if enabled
-                if (settings.autoEnableHotspot) {
+                // Hotspot logic for Helper mode if enabled (only for Strategy 4: Headunit Hotspot)
+                if (settings.autoEnableHotspot && strategy == 4) {
                     Thread {
                         AppLog.i("AapService: Auto-enabling hotspot for Helper mode...")
                         HotspotManager.setHotspotEnabled(this, true)
@@ -1582,6 +1596,7 @@ class AapService : Service(), UsbReceiver.Listener {
         mediaSession = null
         commManager.destroy()
         nightModeManager?.stop()
+        stopService(GpsLocationService.intent(this))
         try {
             unregisterReceiver(nightModeUpdateReceiver)
             unregisterReceiver(sensorRefreshReceiver)

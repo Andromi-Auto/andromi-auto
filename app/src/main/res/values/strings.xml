@@ -220,6 +220,9 @@
     <string name="category_video">Video</string>
     <string name="force_software_decoding">Force Software Decoding</string>
     <string name="force_software_decoding_description">May fix issues on some devices, but is less performant</string>
+    <string name="software_video_decoder">Software Decoder Source</string>
+    <string name="software_video_decoder_bundled">Bundled FFmpeg</string>
+    <string name="software_video_decoder_device">Device MediaCodec</string>
     <string name="wireless_mode">Wireless Mode</string>
     <string name="wireless_mode_description">Select how the app connects wirelessly (Manual list, Auto-search for Phone, or Wireless Launcher mode)</string>
     <string-array name="wireless_connection_modes">
@@ -589,4 +592,6 @@
     <string name="share_hotspot_qr_error">Could not retrieve active Wi-Fi hotspot credentials. Please ensure your hotspot is turned on and Location is enabled.</string>
     <string name="use_libusb">Use Native USB Driver</string>
     <string name="use_libusb_description">Use libusb for communication. Disable to use Android\'s standard USB API.</string>
+
+    <string name="btn_show_qr">Show QR Code</string>
 </resources>

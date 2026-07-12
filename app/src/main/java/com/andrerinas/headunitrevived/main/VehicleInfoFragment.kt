@@ -318,7 +318,7 @@ class VehicleInfoFragment : Fragment() {
             .create()
 
         dialog.window?.clearFlags(
-            android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or 
+            android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
             android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
         )
         dialog.show()
@@ -344,7 +344,7 @@ class VehicleInfoFragment : Fragment() {
             .create()
 
         dialog.window?.clearFlags(
-            android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or 
+            android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
             android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
         )
         dialog.show()
