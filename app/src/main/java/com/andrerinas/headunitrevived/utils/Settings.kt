@@ -191,6 +191,10 @@ class Settings(private val context: Context) {
             prefs.edit().putInt("dpi-pixel-density", value).apply()
         }
 
+    var pixelAspectRatioE4: Int
+        get() = prefs.getInt("pixel-aspect-ratio-e4", 10000) // Default 10000 = 1.0 (square pixels)
+        set(value) {
+            prefs.edit().putInt("pixel-aspect-ratio-e4", value).apply()
     var staticBSSID: String?
         get() = try { prefs.getString("static-bssid", "0") } catch (e: Exception) { "0" } // Default 0 for Auto
         set(value) {
