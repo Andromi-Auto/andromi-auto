@@ -346,18 +346,25 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
 
             // Try to get frequency via reflection (hidden field in WifiP2pGroup)
             var frequency = 0
-            try {
-                // Try several common field names used by different OEMs
-                val fieldNames = arrayOf("frequency", "mFrequency")
-                for (name in fieldNames) {
-                    try {
-                        val field = group.javaClass.getDeclaredField(name)
-                        field.isAccessible = true
-                        frequency = field.getInt(group)
-                        if (frequency > 0) break
-                    } catch (e: Exception) {}
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                // For Android 10 (API 29) and above, use the official public API via WifiDirectCompat
+                frequency = WifiDirectCompat.getGroupFrequency(group)
+            } else {
+                try {
+                    // Try several common field names used by different OEMs
+                    val fieldNames = arrayOf("frequency", "mFrequency")
+                    for (name in fieldNames) {
+                        try {
+                            val field = group.javaClass.getDeclaredField(name)
+                            field.isAccessible = true
+                            frequency = field.getInt(group)
+                            if (frequency > 0) break
+                        } catch (e: Exception) {
+                        }
+                    }
+                } catch (e: Exception) {
                 }
-            } catch (e: Exception) {}
+            }
 
             val band = if (frequency > 4000) "5GHz" else if (frequency > 0) "2.4GHz" else "unknown"
             AppLog.i("WifiDirectManager: onGroupInfoAvailable: SSID: $ssid, BSSID: $bssid, GO: $isOwner, IFACE: ${iface ?: "null"}, Freq: $frequency MHz ($band)")
