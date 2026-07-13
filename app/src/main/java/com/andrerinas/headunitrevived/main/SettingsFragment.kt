@@ -42,7 +42,6 @@ import android.content.pm.PackageManager
 import com.andrerinas.headunitrevived.connection.NativeAaHandshakeManager
 import com.andrerinas.headunitrevived.utils.BluetoothHelper
 import androidx.lifecycle.lifecycleScope
-import com.andrerinas.headunitrevived.utils.DialogUtils
 import java.io.File
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
