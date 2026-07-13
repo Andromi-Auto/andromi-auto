@@ -123,8 +123,8 @@ class CarFYTReceiver : CarKeyReceiver {
         }
 
         fun observe(moduleCode: Int, codes: IntArray) {
-            val module = this.toolkit!!.getRemoteModule(moduleCode)
-            modules[moduleCode] = module!!
+            val module = this.toolkit!!.getRemoteModule(moduleCode) ?: return
+            modules[moduleCode] = module
             val callback = AAPCallback(moduleCode)
 
             for (code in codes)
