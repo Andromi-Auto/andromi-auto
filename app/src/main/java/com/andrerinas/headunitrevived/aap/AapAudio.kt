@@ -31,6 +31,9 @@ internal class AapAudio(
     private var audioFocusRequest: AudioFocusRequest? = null
     private var legacyFocusListener: AudioManager.OnAudioFocusChangeListener? = null
 
+    private var playbackFocusRequest: AudioFocusRequest? = null
+    private var legacyPlaybackFocusListener: AudioManager.OnAudioFocusChangeListener? = null
+
     // Dynamic-mode playback focus: some phones never send an AudioFocusRequestNotification(GAIN)
     // when media starts (the always-grant handshake makes them assume the head unit always holds
     // focus), so relying on the protocol notification alone leaves the car radio playing alongside
@@ -137,16 +140,62 @@ internal class AapAudio(
         return result
     }
 
+    private fun requestPlaybackFocus() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val audioAttributes = AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_MEDIA)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                    .build()
+
+            playbackFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT)
+                    .setAudioAttributes(audioAttributes)
+                    .setWillPauseWhenDucked(false)
+                    .setOnAudioFocusChangeListener(playbackFocusListener)
+                    .build()
+            
+            val result = audioManager.requestAudioFocus(playbackFocusRequest!!)
+            AppLog.i("AapAudio: Playback transient focus request result: ${if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) "GRANTED" else "FAILED ($result)"}")
+        } else {
+            @Suppress("DEPRECATION")
+            legacyPlaybackFocusListener = playbackFocusListener
+            @Suppress("DEPRECATION")
+            val result = audioManager.requestAudioFocus(playbackFocusListener, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT)
+            AppLog.i("AapAudio: Playback transient focus request result (legacy): ${if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) "GRANTED" else "FAILED"}")
+        }
+    }
+
+    private fun releasePlaybackFocus() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            playbackFocusRequest?.let { 
+                AppLog.i("AapAudio: Releasing playback transient audio focus")
+                audioManager.abandonAudioFocusRequest(it) 
+            }
+            playbackFocusRequest = null
+        } else {
+            @Suppress("DEPRECATION")
+            legacyPlaybackFocusListener?.let { 
+                AppLog.i("AapAudio: Releasing playback transient audio focus (legacy)")
+                audioManager.abandonAudioFocus(it) 
+            }
+            legacyPlaybackFocusListener = null
+        }
+    }
+
     fun releaseAllFocus() {
         AppLog.i("AapAudio: Releasing all audio focus.")
         synchronized(activeAudioChannels) { activeAudioChannels.clear() }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             audioFocusRequest?.let { audioManager.abandonAudioFocusRequest(it) }
             audioFocusRequest = null
+            playbackFocusRequest?.let { audioManager.abandonAudioFocusRequest(it) }
+            playbackFocusRequest = null
         } else {
             @Suppress("DEPRECATION")
             legacyFocusListener?.let { audioManager.abandonAudioFocus(it) }
             legacyFocusListener = null
+            @Suppress("DEPRECATION")
+            legacyPlaybackFocusListener?.let { audioManager.abandonAudioFocus(it) }
+            legacyPlaybackFocusListener = null
         }
     }
 
@@ -210,7 +259,7 @@ internal class AapAudio(
             // abandon focus. TRANSIENT sends AUDIOFOCUS_LOSS_TRANSIENT so they pause and resume
             // once AA audio stops and we release focus.
             AppLog.i("AapAudio: AA audio started (${Channel.name(channel)}) - acquiring transient system audio focus")
-            requestFocusChange(AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT, playbackFocusListener)
+            requestPlaybackFocus()
         }
     }
 
@@ -226,8 +275,8 @@ internal class AapAudio(
             shouldRelease = activeAudioChannels.isEmpty()
         }
         if (shouldRelease) {
-            AppLog.i("AapAudio: last AA audio channel stopped - releasing system audio focus")
-            releaseAllFocus()
+            AppLog.i("AapAudio: last AA audio channel stopped - releasing transient system audio focus")
+            releasePlaybackFocus()
         }
     }
 
