@@ -52,6 +52,7 @@ class CarFYTReceiver : CarKeyReceiver {
 
     override fun unregister() {
         connection?.disconnect()
+        connection = null
     }
 
 
