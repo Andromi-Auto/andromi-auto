@@ -147,13 +147,14 @@ internal class AapAudio(
                     .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
                     .build()
 
-            playbackFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT)
+            val request = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT)
                     .setAudioAttributes(audioAttributes)
                     .setWillPauseWhenDucked(false)
                     .setOnAudioFocusChangeListener(playbackFocusListener)
                     .build()
+            playbackFocusRequest = request
             
-            val result = audioManager.requestAudioFocus(playbackFocusRequest!!)
+            val result = audioManager.requestAudioFocus(request)
             AppLog.i("AapAudio: Playback transient focus request result: ${if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) "GRANTED" else "FAILED ($result)"}")
         } else {
             @Suppress("DEPRECATION")
@@ -241,25 +242,19 @@ internal class AapAudio(
         onAudioPlaybackStarted(channel)
     }
 
-    /**
-     * Acquires system audio focus when the first AA audio channel starts playing (dynamic mode).
-     * No-op in static mode (permanent focus already held) or when the audio sink is disabled.
-     */
     private fun onAudioPlaybackStarted(channel: Int) {
         if (staticAudioFocus || !enableAudioSink || !Channel.isAudio(channel)) return
-        val shouldAcquire: Boolean
         synchronized(activeAudioChannels) {
             val wasEmpty = activeAudioChannels.isEmpty()
             activeAudioChannels.add(channel)
-            shouldAcquire = wasEmpty
-        }
-        if (shouldAcquire) {
-            // Use GAIN_TRANSIENT, not GAIN: a permanent GAIN sends other players (e.g. the car
-            // radio) a permanent AUDIOFOCUS_LOSS, so they stop and do NOT resume when we later
-            // abandon focus. TRANSIENT sends AUDIOFOCUS_LOSS_TRANSIENT so they pause and resume
-            // once AA audio stops and we release focus.
-            AppLog.i("AapAudio: AA audio started (${Channel.name(channel)}) - acquiring transient system audio focus")
-            requestPlaybackFocus()
+            if (wasEmpty) {
+                // Use GAIN_TRANSIENT, not GAIN: a permanent GAIN sends other players (e.g. the car
+                // radio) a permanent AUDIOFOCUS_LOSS, so they stop and do NOT resume when we later
+                // abandon focus. TRANSIENT sends AUDIOFOCUS_LOSS_TRANSIENT so they pause and resume
+                // once AA audio stops and we release focus.
+                AppLog.i("AapAudio: AA audio started (${Channel.name(channel)}) - acquiring transient system audio focus")
+                requestPlaybackFocus()
+            }
         }
     }
 
@@ -269,14 +264,12 @@ internal class AapAudio(
      */
     private fun onAudioPlaybackStopped(channel: Int) {
         if (staticAudioFocus || !enableAudioSink || !Channel.isAudio(channel)) return
-        val shouldRelease: Boolean
         synchronized(activeAudioChannels) {
             activeAudioChannels.remove(channel)
-            shouldRelease = activeAudioChannels.isEmpty()
-        }
-        if (shouldRelease) {
-            AppLog.i("AapAudio: last AA audio channel stopped - releasing transient system audio focus")
-            releasePlaybackFocus()
+            if (activeAudioChannels.isEmpty()) {
+                AppLog.i("AapAudio: last AA audio channel stopped - releasing transient system audio focus")
+                releasePlaybackFocus()
+            }
         }
     }
 
