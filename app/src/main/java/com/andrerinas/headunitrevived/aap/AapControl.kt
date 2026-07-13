@@ -307,10 +307,13 @@ internal class AapControlService(
     }
 
     private fun voiceSessionNotification(request: Control.VoiceSessionNotification): Int {
-        if (request.status == Control.VoiceSessionNotification.VoiceSessionStatus.VOICE_STATUS_START)
+        if (request.status == Control.VoiceSessionNotification.VoiceSessionStatus.VOICE_STATUS_START) {
             AppLog.i("Voice Session Notification: START")
-        else if (request.status == Control.VoiceSessionNotification.VoiceSessionStatus.VOICE_STATUS_STOP)
+            aapTransport.isAssistantActive = true
+        } else if (request.status == Control.VoiceSessionNotification.VoiceSessionStatus.VOICE_STATUS_STOP) {
             AppLog.i("Voice Session Notification: STOP")
+            aapTransport.isAssistantActive = false
+        }
         return 0
     }
 
