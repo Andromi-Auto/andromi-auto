@@ -52,6 +52,7 @@ class CarFYTReceiver : CarKeyReceiver {
 
     override fun unregister() {
         connection?.disconnect()
+        connection = null
     }
 
 
@@ -104,6 +105,7 @@ class CarFYTReceiver : CarKeyReceiver {
             }*/
 
             this.handler!!.removeCallbacksAndMessages(null)
+            this.handler!!.looper.quit()
             context.unbindService(this)
             this.handler = null
             this.toolkit = null
@@ -121,8 +123,8 @@ class CarFYTReceiver : CarKeyReceiver {
         }
 
         fun observe(moduleCode: Int, codes: IntArray) {
-            val module = this.toolkit!!.getRemoteModule(moduleCode)
-            modules[moduleCode] = module!!
+            val module = this.toolkit!!.getRemoteModule(moduleCode) ?: return
+            modules[moduleCode] = module
             val callback = AAPCallback(moduleCode)
 
             for (code in codes)
