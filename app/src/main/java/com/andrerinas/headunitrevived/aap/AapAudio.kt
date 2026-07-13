@@ -31,7 +31,9 @@ internal class AapAudio(
     private var audioFocusRequest: AudioFocusRequest? = null
     private var legacyFocusListener: AudioManager.OnAudioFocusChangeListener? = null
 
+    @Volatile
     private var playbackFocusRequest: AudioFocusRequest? = null
+    @Volatile
     private var legacyPlaybackFocusListener: AudioManager.OnAudioFocusChangeListener? = null
 
     // Dynamic-mode playback focus: some phones never send an AudioFocusRequestNotification(GAIN)
