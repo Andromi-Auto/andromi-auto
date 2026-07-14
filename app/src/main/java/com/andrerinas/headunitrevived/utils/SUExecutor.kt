@@ -118,16 +118,7 @@ class SUExecutor {
         }
 
         override fun checkPermission(): Boolean {
-            return try {
-                val result = Shell.getShell()
-                    .newJob()
-                    .add("id")
-                    .exec()
-
-                result.isSuccess
-            } catch (_: Exception) {
-                false
-            }
+            return Shell.isAppGrantedRoot() ?: false
         }
 
         override fun runShell(cmd: String): Int {
