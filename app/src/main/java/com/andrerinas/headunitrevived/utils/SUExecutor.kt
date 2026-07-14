@@ -1,7 +1,6 @@
 package com.andrerinas.headunitrevived.utils
 
 import android.content.ComponentName
-import android.content.Context
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.os.Build
@@ -10,13 +9,15 @@ import android.os.Looper
 import android.util.Log
 import com.andrerinas.headunitrevived.BuildConfig
 import com.andrerinas.headunitrevived.IShizuku
-import java.io.DataOutputStream
+import com.topjohnwu.superuser.Shell
 import rikka.shizuku.Shizuku
 
 class SUExecutor {
 
     private val all: Collection<SUImplementation> = buildList {
-        add(RootImpl())
+        // libsu min sdk
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
+            add(RootImpl())
 
         // Shizuku min sdk
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
@@ -118,9 +119,12 @@ class SUExecutor {
 
         override fun checkPermission(): Boolean {
             return try {
-                val p = ProcessBuilder("su", "-c", "id").start()
+                val result = Shell.getShell()
+                    .newJob()
+                    .add("id")
+                    .exec()
 
-                p.waitFor() == 0
+                result.isSuccess
             } catch (_: Exception) {
                 false
             }
@@ -128,13 +132,12 @@ class SUExecutor {
 
         override fun runShell(cmd: String): Int {
             return try {
-                val process = Runtime.getRuntime().exec("su")
-                val os = DataOutputStream(process.outputStream)
-                os.writeBytes("$cmd\n")
-                os.writeBytes("exit\n")
-                os.flush()
+                val result = Shell.getShell()
+                    .newJob()
+                    .add(cmd)
+                    .exec()
 
-                process.waitFor()
+                result.code
             } catch (e: Exception) {
                 Log.e("SUExecutor", "#runShell failed", e)
                 -1
