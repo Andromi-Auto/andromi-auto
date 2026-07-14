@@ -37,7 +37,6 @@ class CarFYTReceiver : CarKeyReceiver {
     override val isSUNeeded = true
 
     override fun register(context: Context) {
-
         AppLog.i("CarKeyReceiver: Detected FYT device!")
 
         val suExecutor = App.provide(context).suExecutor
@@ -118,21 +117,29 @@ class CarFYTReceiver : CarKeyReceiver {
 
             this.toolkit = RemoteToolkit.Stub.asInterface(binder)
 
-            observe(0, intArrayOf(133))
+            if (!observe(0, intArrayOf(133))) {
+                AppLog.w("CarKeyReceiver: Failed to bind into module 0. Not observing keys")
+                return
+            }
+
+            // obtain key focus
             suExecutor.setProp("sys.carlink.type", "2")
         }
 
-        fun observe(moduleCode: Int, codes: IntArray) {
-            val module = this.toolkit!!.getRemoteModule(moduleCode) ?: return
+        fun observe(moduleCode: Int, codes: IntArray): Boolean {
+            val module = this.toolkit!!.getRemoteModule(moduleCode) ?: return false
             modules[moduleCode] = module
             val callback = AAPCallback(moduleCode)
 
-            for (code in codes)
-                module!!.register(
+            for (code in codes) {
+                module.register(
                     callback,
                     code,
                     1, /* 1 = register, 0 = unregister */
                 )
+            }
+
+            return true
         }
 
         override fun onServiceDisconnected(p0: ComponentName) {
@@ -159,7 +166,7 @@ class CarFYTReceiver : CarKeyReceiver {
                                 return
 
                             val key = ints!![0]
-                            Log.i("CarKeyReceiver", "Clicked key $key")
+                            AppLog.i("CarKeyReceiver: Clicked key $key")
 
                             // assistant
                             if (key == 576) {

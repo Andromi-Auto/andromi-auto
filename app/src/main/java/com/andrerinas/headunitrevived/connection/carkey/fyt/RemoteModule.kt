@@ -140,7 +140,7 @@ interface RemoteModule : IInterface {
             ints: IntArray?,
             floats: FloatArray?,
             strings: Array<String>?,
-        ): ModuleObject {
+        ): ModuleObject? {
             val result: ModuleObject?
             val data = Parcel.obtain()
             val reply = Parcel.obtain()
@@ -163,7 +163,7 @@ interface RemoteModule : IInterface {
                 } else {
                     result = null
                 }
-                return result!!
+                return result
             } finally {
                 reply.recycle()
                 data.recycle()
