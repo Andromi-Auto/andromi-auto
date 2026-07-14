@@ -39,9 +39,6 @@ open class BaseActivity : AppCompatActivity() {
                 recreate()
             }
         }
-
-        val p = ProcessBuilder("su", "-c", "id").start()
-        p.waitFor()
     }
 
     override fun onResume() {
