@@ -313,7 +313,14 @@ class CommManager(
                         onAaMediaMetadata = { meta -> onAaMediaMetadata?.invoke(meta) },
                         onAaPlaybackStatus = { status -> onAaPlaybackStatus?.invoke(status) }
                     )
-                    _transport!!.onQuit = { isClean -> try { transportedQuited(isClean) } finally { _transport = null } }
+                    _transport!!.onQuit = { isClean ->
+                        val oldTransport = _transport
+                        _transport = null
+
+                        if (oldTransport != null) {
+                            transportedQuited(isClean)
+                        }
+                    }
                     _transport!!.onAudioFocusStateChanged = { isPlaying -> onAudioFocusStateChanged?.invoke(isPlaying) }
                     _transport!!.onUpdateUiConfigReplyReceived = { onUpdateUiConfigReplyReceived?.invoke() }
                 }
