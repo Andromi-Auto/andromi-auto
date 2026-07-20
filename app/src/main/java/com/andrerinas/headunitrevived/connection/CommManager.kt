@@ -518,8 +518,10 @@ class CommManager(
         if (_connectionState.value != ConnectionState.TransportStarted)
             return
 
+        val transport = _transport ?: return
+
         // close
-        if (_transport!!.isAssistantActive) {
+        if (transport.isAssistantActive) {
             sendKey(KeyEvent.KEYCODE_BACK, true)
             sendKey(KeyEvent.KEYCODE_BACK, false)
             loseFocus() // otherwise button stays marked
@@ -532,9 +534,10 @@ class CommManager(
     }
 
     fun loseFocus() {
+        val transport = _transport ?: return
         val ts = SystemClock.elapsedRealtime()
 
-        _transport!!.send(TouchEvent(
+        transport.send(TouchEvent(
             ts,
             PointerAction.TOUCH_ACTION_DOWN,
             0,

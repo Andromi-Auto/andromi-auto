@@ -157,6 +157,11 @@ class SUExecutor {
         }
 
         override fun checkPermission(): Boolean {
+            val granted = Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED && !Shizuku.isPreV11()
+            if (granted && !this.hasPermission) {
+                this.hasPermission = true
+                this.connection.bind()
+            }
             return this.hasPermission
         }
 

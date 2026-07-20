@@ -67,6 +67,7 @@ class CarFYTReceiver : CarKeyReceiver {
         private var handler: Handler? = null
         private var toolkit: RemoteToolkit? = null
         private val modules = HashMap<Int, RemoteModule>()
+        private var isBinding = false
 
         fun connect() {
             if (this.handler != null)
@@ -83,14 +84,17 @@ class CarFYTReceiver : CarKeyReceiver {
         }
 
         private fun attemptConnect() {
-            if (this.handler == null || this.toolkit != null)
+            if (this.handler == null || this.toolkit != null || isBinding)
                 return;
 
             val intent = Intent()
             intent.setClassName(PACKAGE_NAME, CLASS_NAME)
 
-            context.bindService(intent, this, Context.BIND_AUTO_CREATE)
-            handler!!.postDelayed(this::attemptConnect, 2000)
+            if (context.bindService(intent, this, Context.BIND_AUTO_CREATE)) {
+                isBinding = true
+            } else {
+                handler!!.postDelayed(this::attemptConnect, 2000)
+            }
         }
 
         fun disconnect() {
@@ -110,6 +114,7 @@ class CarFYTReceiver : CarKeyReceiver {
             } catch (e: IllegalArgumentException) {
                 // Ignore if not registered/bound
             }
+            this.isBinding = false
             this.handler = null
             this.toolkit = null
             this.modules.clear()
@@ -118,6 +123,7 @@ class CarFYTReceiver : CarKeyReceiver {
 
         override fun onServiceConnected(name: ComponentName, binder: IBinder) {
             AppLog.i("CarKeyReceiver: Connected with FYT Service")
+            isBinding = false
 
             this.toolkit = RemoteToolkit.Stub.asInterface(binder)
 
@@ -148,9 +154,8 @@ class CarFYTReceiver : CarKeyReceiver {
 
         override fun onServiceDisconnected(p0: ComponentName) {
             AppLog.i("CarKeyReceiver: Disconnected from FYT Service")
-
+            isBinding = false
             this.toolkit = null
-            attemptConnect()
         }
 
         private inner class AAPCallback(val moduleCode: Int) :

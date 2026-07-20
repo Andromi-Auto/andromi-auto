@@ -46,6 +46,7 @@ class AudioTrackWrapper(
     private val freeInputBuffers = LinkedBlockingQueue<Int>()
     private val writeExecutor = Executors.newSingleThreadExecutor()
     private val writeSemaphore = java.util.concurrent.Semaphore(3)
+    private var equalizer: Equalizer? = null
 
     // Limit queue capacity to provide backpressure to the network thread if audio playback is slow
     private val dataQueue = if (audioQueueCapacity > 0)
@@ -423,8 +424,10 @@ class AudioTrackWrapper(
     private fun attachHwDspEqualizerQuietly(sessionId: Int) {
         if (sessionId != AudioManager.AUDIO_SESSION_ID_GENERATE && sessionId > 0) {
             try {
-                val equalizer = Equalizer(0, sessionId)
-                equalizer.enabled = true
+                equalizer?.release()
+                val eq = Equalizer(0, sessionId)
+                eq.enabled = true
+                equalizer = eq
                 AppLog.i("Attached dummy Equalizer to audioSessionId $sessionId to trigger HW DSP")
             } catch (t: Throwable) {
                 // Ignore if Equalizer or AudioEffect is unsupported on device
