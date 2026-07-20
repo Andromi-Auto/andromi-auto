@@ -464,6 +464,10 @@ class Settings(private val context: Context) {
         get() = prefs.getBoolean("listen-for-usb-devices", true)
         set(value) { prefs.edit().putBoolean("listen-for-usb-devices", value).apply() }
 
+    var showToastMessages: Boolean
+        get() = prefs.getBoolean("show-toast-messages", true)
+        set(value) { prefs.edit().putBoolean("show-toast-messages", value).apply() }
+
     var reopenOnReconnection: Boolean
         get() = prefs.getBoolean("reopen-on-reconnection", true)
         set(value) { prefs.edit().putBoolean("reopen-on-reconnection", value).apply() }

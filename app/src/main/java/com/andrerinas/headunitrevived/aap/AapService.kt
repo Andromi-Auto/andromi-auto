@@ -33,6 +33,8 @@ import com.andrerinas.headunitrevived.app.BootCompleteReceiver
 import com.andrerinas.headunitrevived.app.WifiAutoStartReceiver
 import com.andrerinas.headunitrevived.main.MainActivity
 import com.andrerinas.headunitrevived.R
+import com.andrerinas.headunitrevived.utils.AppLog
+import com.andrerinas.headunitrevived.utils.ToastUtils
 import com.andrerinas.headunitrevived.aap.protocol.messages.NightModeEvent
 import com.andrerinas.headunitrevived.aap.protocol.proto.MediaPlayback
 import com.andrerinas.headunitrevived.connection.CommManager
@@ -46,7 +48,6 @@ import com.andrerinas.headunitrevived.connection.UsbAccessoryMode
 import com.andrerinas.headunitrevived.connection.UsbDeviceCompat
 import com.andrerinas.headunitrevived.connection.UsbReceiver
 import com.andrerinas.headunitrevived.location.GpsLocationService
-import com.andrerinas.headunitrevived.utils.AppLog
 import com.andrerinas.headunitrevived.utils.HeadUnitScreenConfig
 import com.andrerinas.headunitrevived.utils.LocaleHelper
 import com.andrerinas.headunitrevived.utils.LogExporter
@@ -1671,7 +1672,7 @@ class AapService : Service(), UsbReceiver.Listener {
                     if (wifiManager.isWifiEnabled) {
                         wifiDirectManager?.makeVisible()
                     } else {
-                        Toast.makeText(this, getString(R.string.wifi_disabled_info), Toast.LENGTH_SHORT).show()
+                        ToastUtils.showToast(this, getString(R.string.wifi_disabled_info), Toast.LENGTH_SHORT)
                     }
                 } else if (mode != 3) {
                     startDiscovery(oneShot = (mode != 2))
@@ -1822,7 +1823,7 @@ class AapService : Service(), UsbReceiver.Listener {
             }
         } else {
             AppLog.w("USB permission denied for $deviceName")
-            Toast.makeText(this, getString(R.string.usb_permission_denied), Toast.LENGTH_LONG).show()
+            ToastUtils.showToast(this, getString(R.string.usb_permission_denied), Toast.LENGTH_LONG)
         }
     }
 
@@ -1831,11 +1832,11 @@ class AapService : Service(), UsbReceiver.Listener {
         val permissionIntent = UsbReceiver.createPermissionPendingIntent(this)
         AppLog.i("Requesting USB permission for ${UsbDeviceCompat(device).uniqueName}")
         try {
-            Toast.makeText(this, getString(R.string.requesting_usb_permission), Toast.LENGTH_SHORT).show()
+            ToastUtils.showToast(this, getString(R.string.requesting_usb_permission), Toast.LENGTH_SHORT)
             usbManager.requestPermission(device, permissionIntent)
         } catch (e: Exception) {
             AppLog.e("Failed to request USB permission: ${e.message}. This device might not support USB permission dialogs.", e)
-            Toast.makeText(this, getString(R.string.error_usb_permission_failed), Toast.LENGTH_LONG).show()
+            ToastUtils.showToast(this, getString(R.string.error_usb_permission_failed), Toast.LENGTH_LONG)
         }
     }
 
@@ -2390,7 +2391,7 @@ class AapService : Service(), UsbReceiver.Listener {
                     if (Build.VERSION.SDK_INT <= 29) {
                         // On Android 10, if Activity is gone, Broadcast will definitely be blocked by Gearhead's version check.
                         AppLog.e("Self-mode blocked by Google on Android 10 (AA 16.4+). Skipping broadcast fallback.")
-                        Toast.makeText(this@AapService, getString(R.string.failed_self_mode_android10), Toast.LENGTH_LONG).show()
+                        ToastUtils.showToast(this@AapService, getString(R.string.failed_self_mode_android10), Toast.LENGTH_LONG)
                     } else {
                         val receiverIntent = Intent().apply {
                             setClassName(
@@ -2409,7 +2410,7 @@ class AapService : Service(), UsbReceiver.Listener {
                     }
                 } catch (e2: Exception) {
                     AppLog.e("Both Activity and Broadcast triggers failed", e2)
-                    Toast.makeText(this@AapService, getString(R.string.failed_start_android_auto), Toast.LENGTH_SHORT).show()
+                    ToastUtils.showToast(this@AapService, getString(R.string.failed_start_android_auto), Toast.LENGTH_SHORT)
                 }
             }
         }

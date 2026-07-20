@@ -81,6 +81,7 @@ class SettingsFragment : Fragment() {
     private var pendingUseLibusb: Boolean? = null
     private var pendingAudioQueueCapacity: Int? = null
     private var pendingShowFpsCounter: Boolean? = null
+    private var pendingShowToastMessages: Boolean? = null
     private var pendingScreenOrientation: Settings.ScreenOrientation? = null
     private var pendingAppLanguage: String? = null
     private var pendingFakeSpeed: Boolean? = null
@@ -182,6 +183,7 @@ class SettingsFragment : Fragment() {
         pendingAudioLatencyMultiplier = settings.audioLatencyMultiplier
         pendingAudioQueueCapacity = settings.audioQueueCapacity
         pendingShowFpsCounter = settings.showFpsCounter
+        pendingShowToastMessages = settings.showToastMessages
         pendingScreenOrientation = settings.screenOrientation
         pendingAppLanguage = settings.appLanguage
 
@@ -266,6 +268,7 @@ class SettingsFragment : Fragment() {
         pendingAudioLatencyMultiplier = settings.audioLatencyMultiplier
         pendingAudioQueueCapacity = settings.audioQueueCapacity
         pendingShowFpsCounter = settings.showFpsCounter
+        pendingShowToastMessages = settings.showToastMessages
         pendingScreenOrientation = settings.screenOrientation
         pendingAppLanguage = settings.appLanguage
         pendingStretchToFill = settings.stretchToFill
@@ -376,6 +379,7 @@ class SettingsFragment : Fragment() {
         pendingAudioLatencyMultiplier?.let { settings.audioLatencyMultiplier = it }
         pendingAudioQueueCapacity?.let { settings.audioQueueCapacity = it }
         pendingShowFpsCounter?.let { settings.showFpsCounter = it }
+        pendingShowToastMessages?.let { settings.showToastMessages = it }
         pendingScreenOrientation?.let { settings.screenOrientation = it }
 
         pendingMediaVolumeOffset?.let { settings.mediaVolumeOffset = it }
@@ -470,6 +474,7 @@ class SettingsFragment : Fragment() {
                         pendingAudioLatencyMultiplier != settings.audioLatencyMultiplier ||
                         pendingAudioQueueCapacity != settings.audioQueueCapacity ||
                         pendingShowFpsCounter != settings.showFpsCounter ||
+                        pendingShowToastMessages != settings.showToastMessages ||
                         pendingScreenOrientation != settings.screenOrientation ||
                         pendingAppLanguage != settings.appLanguage ||
                         pendingStretchToFill != settings.stretchToFill ||
@@ -596,6 +601,18 @@ class SettingsFragment : Fragment() {
             value = "${getString(R.string.ui_scale_home)}: ${pendingUiScaleHomePercent ?: 100}% · ${getString(R.string.ui_scale_settings)}: ${pendingUiScaleSettingsPercent ?: 100}%",
             onClick = { _ ->
                 showUiScaleDialog()
+            }
+        ))
+
+        items.add(SettingItem.ToggleSettingEntry(
+            stableId = "showToastMessages",
+            nameResId = R.string.show_toast_messages,
+            descriptionResId = R.string.show_toast_messages_description,
+            isChecked = pendingShowToastMessages ?: true,
+            onCheckedChanged = { isChecked ->
+                pendingShowToastMessages = isChecked
+                checkChanges()
+                updateSettingsList()
             }
         ))
 

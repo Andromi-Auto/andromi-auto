@@ -18,6 +18,7 @@ import androidx.core.content.ContextCompat
 import com.andrerinas.headunitrevived.App
 import com.andrerinas.headunitrevived.R
 import com.andrerinas.headunitrevived.aap.AapService
+import com.andrerinas.headunitrevived.utils.ToastUtils
 import com.andrerinas.headunitrevived.utils.AppLog
 import com.andrerinas.headunitrevived.utils.Settings
 import java.net.InetSocketAddress
@@ -512,7 +513,7 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
         val wifiManager = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as android.net.wifi.WifiManager
         if (!wifiManager.isWifiEnabled) {
             AppLog.w("WifiDirectManager: WiFi is disabled. Cannot start P2P discovery.")
-            Toast.makeText(context, context.getString(R.string.wifi_disabled_info), Toast.LENGTH_LONG).show()
+            ToastUtils.showToast(context, context.getString(R.string.wifi_disabled_info), Toast.LENGTH_LONG)
             isGroupCreatingOrCreated = false
             return
         }
@@ -839,7 +840,7 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
 
     private fun showToast(message: String) {
         handler.post {
-            Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+            ToastUtils.showToast(context, message, Toast.LENGTH_LONG)
         }
     }
 
