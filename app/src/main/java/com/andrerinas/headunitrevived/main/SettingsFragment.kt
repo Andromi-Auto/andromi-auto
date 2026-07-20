@@ -520,6 +520,7 @@ class SettingsFragment : Fragment() {
     }
 
     private fun updateSettingsList() {
+        val app = App.provide(requireContext())
         val scrollState = settingsRecyclerView.layoutManager?.onSaveInstanceState()
         val items = mutableListOf<SettingItem>()
 

@@ -750,8 +750,8 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
                     loadingOverlay?.alpha = 1f
                     touchOverlayView?.requestFocus()
                 }?.start()
-                ?: run { 
-                    loadingOverlay?.visibility = View.GONE 
+                ?: run {
+                    loadingOverlay?.visibility = View.GONE
                     touchOverlayView?.requestFocus()
                 }
         }

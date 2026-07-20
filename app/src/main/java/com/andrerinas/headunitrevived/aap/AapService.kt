@@ -71,7 +71,9 @@ import com.andrerinas.headunitrevived.utils.VpnControl
 import com.andrerinas.headunitrevived.connection.CarKeyReceiver
 import com.andrerinas.headunitrevived.connection.NativeAaHandshakeManager
 import com.andrerinas.headunitrevived.connection.NearbyManager
+import com.andrerinas.headunitrevived.connection.carkey.CarKeysManager
 import com.andrerinas.headunitrevived.main.BackgroundNotification
+import com.andrerinas.headunitrevived.utils.SUExecutor
 import com.andrerinas.headunitrevived.utils.Settings
 import com.andrerinas.headunitrevived.utils.protoUint32ToLong
 import java.net.ServerSocket
@@ -104,7 +106,6 @@ class AapService : Service(), UsbReceiver.Listener {
     private var nativeAaHandshakeManager: NativeAaHandshakeManager? = null
     private var nearbyManager: NearbyManager? = null
     private var wifiAutoStartReceiver: WifiAutoStartReceiver? = null
-    private var carKeyReceiver: CarKeyReceiver? = null
     private var wirelessServer: WirelessServer? = null
     private var networkDiscovery: NetworkDiscovery? = null
     private var mediaSession: MediaSessionCompat? = null
@@ -194,7 +195,6 @@ class AapService : Service(), UsbReceiver.Listener {
     private var accessoryHandshakeFailures = 0
     private var networkCallback: ConnectivityManager.NetworkCallback? = null
     private var wifiLock: WifiManager.WifiLock? = null
-    private var isCarKeyReceiverRegistered = false
 
     private var wifiReadyCallback: ConnectivityManager.NetworkCallback? = null
 
@@ -734,8 +734,6 @@ class AapService : Service(), UsbReceiver.Listener {
         }
 
 
-        carKeyReceiver = CarKeyReceiver()
-
         checkAlreadyConnectedUsb()
         registerNetworkMonitor()
     }
@@ -903,24 +901,7 @@ class AapService : Service(), UsbReceiver.Listener {
         // Silent audio hack removed to prevent mixing/resampling stuttering issues
 
         // Register the comprehensive steering wheel key receiver
-        if (!isCarKeyReceiverRegistered) {
-            val filter = IntentFilter().apply {
-                priority = 1000
-                CarKeyReceiver.ACTIONS.forEach { addAction(it) }
-            }
-            try {
-                ContextCompat.registerReceiver(
-                    this,
-                    carKeyReceiver,
-                    filter,
-                    ContextCompat.RECEIVER_EXPORTED
-                )
-                isCarKeyReceiverRegistered = true
-                AppLog.d("AapService: CarKeyReceiver registered")
-            } catch (e: Exception) {
-                AppLog.e("AapService: Failed to register CarKeyReceiver", e)
-            }
-        }
+        App.provide(this).carKeysManager.registerReceivers(this)
 
         // Reactivate the existing MediaSession (created in onCreate, kept alive across disconnects)
         safeMediaSessionCall { it.isActive = true }
@@ -1080,15 +1061,7 @@ class AapService : Service(), UsbReceiver.Listener {
 
         // Release any permanent audio focus we may have requested when connected
         releasePermanentAudioFocus()
-        if (isCarKeyReceiverRegistered) {
-            try {
-                carKeyReceiver?.let { unregisterReceiver(it) }
-            } catch (e: Exception) {
-                AppLog.e("AapService: Failed to unregister CarKeyReceiver", e)
-            } finally {
-                isCarKeyReceiverRegistered = false
-            }
-        }
+        App.provide(this).carKeysManager.unregisterReceivers()
 
         if (!isDestroying) updateNotification()
         mediaMetadataDecodeJob?.cancel()
@@ -1615,10 +1588,7 @@ class AapService : Service(), UsbReceiver.Listener {
         try { unregisterReceiver(usbReceiver) } catch (_: Exception) {}
         try { unregisterReceiver(mediaButtonReceiver) } catch (_: Exception) {}
         try { unregisterReceiver(wakeDetectReceiver) } catch (_: Exception) {}
-        if (isCarKeyReceiverRegistered) {
-            try { carKeyReceiver?.let { unregisterReceiver(it) } } catch (_: Exception) {}
-            isCarKeyReceiverRegistered = false
-        }
+        App.provide(this).carKeysManager.unregisterReceivers()
         try { wifiAutoStartReceiver?.let { unregisterReceiver(it) } } catch (_: Exception) {}
         uiModeManager.disableCarMode(0)
         serviceScope.cancel()

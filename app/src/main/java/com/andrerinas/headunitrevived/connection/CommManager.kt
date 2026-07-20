@@ -22,6 +22,9 @@ import com.andrerinas.headunitrevived.aap.protocol.messages.SensorEvent
 import com.andrerinas.headunitrevived.aap.protocol.proto.MediaPlayback
 import java.net.Socket
 import android.view.KeyEvent
+import com.andrerinas.headunitrevived.aap.protocol.messages.TouchEvent
+import com.andrerinas.headunitrevived.aap.protocol.proto.Input
+import com.andrerinas.headunitrevived.aap.protocol.proto.Input.TouchEvent.PointerAction
 
 /**
  * Central connection and transport lifecycle manager.
@@ -502,6 +505,33 @@ class CommManager(
         if (_connectionState.value is ConnectionState.TransportStarted) {
             _transport?.send(message)
         }
+    }
+
+    fun sendToggleVoiceAssistant() {
+        if (_connectionState.value != ConnectionState.TransportStarted)
+            return
+
+        // close
+        if (_transport!!.isAssistantActive) {
+            sendKey(KeyEvent.KEYCODE_BACK, true)
+            sendKey(KeyEvent.KEYCODE_BACK, false)
+            loseFocus() // otherwise button stays marked
+
+        // open
+        } else {
+            sendKey(KeyEvent.KEYCODE_SEARCH, false) // up/down must be reversed
+            sendKey(KeyEvent.KEYCODE_SEARCH, true)
+        }
+    }
+
+    fun loseFocus() {
+        val ts = SystemClock.elapsedRealtime()
+
+        _transport!!.send(TouchEvent(
+            ts,
+            PointerAction.TOUCH_ACTION_DOWN,
+            0,
+            mutableListOf(Triple(0, 0, 0))))
     }
 
     fun sendUpdateUiConfigRequest(left: Int, top: Int, right: Int, bottom: Int) {
