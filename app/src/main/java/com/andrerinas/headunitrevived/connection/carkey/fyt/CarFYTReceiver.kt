@@ -162,10 +162,10 @@ class CarFYTReceiver : CarKeyReceiver {
                 if (moduleCode == 0) {
                     when (updateCode) {
                         133 -> {
-                            if (ints?.size == 0)
+                            if (ints == null || ints.isEmpty())
                                 return
 
-                            val key = ints!![0]
+                            val key = ints[0]
                             AppLog.i("CarKeyReceiver: Clicked key $key")
 
                             // assistant
