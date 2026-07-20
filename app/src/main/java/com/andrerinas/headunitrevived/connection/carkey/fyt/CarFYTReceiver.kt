@@ -105,7 +105,11 @@ class CarFYTReceiver : CarKeyReceiver {
 
             this.handler!!.removeCallbacksAndMessages(null)
             this.handler!!.looper.quit()
-            context.unbindService(this)
+            try {
+                context.unbindService(this)
+            } catch (e: IllegalArgumentException) {
+                // Ignore if not registered/bound
+            }
             this.handler = null
             this.toolkit = null
             this.modules.clear()
