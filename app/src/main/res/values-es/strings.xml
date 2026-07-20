@@ -595,4 +595,6 @@
     <string name="software_video_decoder_device">MediaCodec del dispositivo</string>
 
     <string name="btn_show_qr">Mostrar código QR</string>
+
+    <string name="self_mode_overlay_permission_description">Para permitir que el Modo Propio se inicie de manera confiable en segundo plano, active el permiso \"Mostrar sobre outras aplicaciones\" en la siguiente pantalla.</string>
 </resources>

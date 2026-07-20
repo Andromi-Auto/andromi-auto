@@ -588,4 +588,6 @@
     <string name="software_video_decoder_device">MediaCodec dispozitiv</string>
 
     <string name="btn_show_qr">Afișează codul QR</string>
+
+    <string name="self_mode_overlay_permission_description">Pentru a permite Modului Personal să pornească fiabil în fundal, activați permisiunea „Afișare peste alte aplicații” în ecranul următor.</string>
 </resources>

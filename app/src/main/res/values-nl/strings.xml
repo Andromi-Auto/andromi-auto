@@ -587,4 +587,6 @@
     <string name="software_video_decoder_device">Apparaat MediaCodec</string>
 
     <string name="btn_show_qr">QR-code tonen</string>
+
+    <string name="self_mode_overlay_permission_description">Om de Self-modus betrouwbaar op de achtergrond te laten starten, schakelt u de machtiging \"Weergeven over andere apps\" in op het volgende scherm.</string>
 </resources>

@@ -593,4 +593,6 @@
     <string name="software_video_decoder_device">MediaCodec thiết bị</string>
 
     <string name="btn_show_qr">Hiển thị mã QR</string>
+
+    <string name="self_mode_overlay_permission_description">Để cho phép Chế độ Tự chạy khởi động ổn định từ nền, vui lòng bật quyền \"Hiển thị trên các ứng dụng khác\" trong màn hình tiếp theo.</string>
 </resources>
