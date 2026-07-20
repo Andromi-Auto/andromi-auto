@@ -588,4 +588,6 @@
     <string name="software_video_decoder_device">MediaCodec urządzenia</string>
 
     <string name="btn_show_qr">Pokaż kod QR</string>
+
+    <string name="self_mode_overlay_permission_description">Aby umożliwić niezawodne uruchamianie trybu własnego w tle, włącz uprawnienie \"Wyświetlaj nad innymi aplikacjami\" na następnym ekranie.</string>
 </resources>

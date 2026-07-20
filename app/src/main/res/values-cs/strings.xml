@@ -587,4 +587,6 @@
     <string name="software_video_decoder_device">MediaCodec zařízení</string>
 
     <string name="btn_show_qr">Zobrazit QR kód</string>
+
+    <string name="self_mode_overlay_permission_description">Chcete-li umožnit spolehlivé spuštění vlastního režimu na pozadí, povolte v další obrazovce oprávnění „Zobrazit nad ostatními aplikacemi“.</string>
 </resources>

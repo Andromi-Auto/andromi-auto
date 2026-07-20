@@ -596,4 +596,6 @@
     <string name="use_libusb_description">Use libusb for communication. Disable to use Android\'s standard USB API.</string>
 
     <string name="btn_show_qr">Show QR Code</string>
+
+    <string name="self_mode_overlay_permission_description">To allow Self Mode to start reliably from the background, please enable the \"Display over other apps\" permission in the next screen.</string>
 </resources>

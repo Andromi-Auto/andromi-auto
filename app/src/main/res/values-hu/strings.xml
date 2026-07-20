@@ -586,4 +586,6 @@
     <string name="software_video_decoder_device">Eszköz MediaCodec</string>
 
     <string name="btn_show_qr">QR-kód megjelenítése</string>
+
+    <string name="self_mode_overlay_permission_description">A Saját mód háttérben történő megbízható indításához engedélyezze a „Megjelenítés más alkalmazások felett” jogosultságot a következő képernyőn.</string>
 </resources>

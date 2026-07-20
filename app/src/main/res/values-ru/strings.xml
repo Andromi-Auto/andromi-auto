@@ -586,4 +586,6 @@
     <string name="use_libusb_description">Использовать libusb для связи. Отключите для использования стандартного USB API Android.</string>
 
     <string name="btn_show_qr">Показать QR-код</string>
+
+    <string name="self_mode_overlay_permission_description">Чтобы автономный режим надежно запускался в фоновом режиме, включите разрешение «Отображение поверх других приложений» на следующем экране.</string>
 </resources>

@@ -592,4 +592,6 @@
     <string name="software_video_decoder_device">Geräte-MediaCodec</string>
 
     <string name="btn_show_qr">QR-Code anzeigen</string>
+
+    <string name="self_mode_overlay_permission_description">Damit der Self Mode zuverlässig im Hintergrund starten kann, aktivieren Sie bitte die Berechtigung \"Über anderen Apps einblenden\" im nächsten Bildschirm.</string>
 </resources>

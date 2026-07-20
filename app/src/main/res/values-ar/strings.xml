@@ -587,4 +587,6 @@
     <string name="software_video_decoder_device">MediaCodec للجهاز</string>
 
     <string name="btn_show_qr">عرض رمز QR</string>
+
+    <string name="self_mode_overlay_permission_description">للسماح للوضع الذاتي بالبدء بشكل موثوق في الخلفية، يرجى تفعيل إذن \"الظهور فوق التطبيقات الأخرى\" في الشاشة التالية.</string>
 </resources>
