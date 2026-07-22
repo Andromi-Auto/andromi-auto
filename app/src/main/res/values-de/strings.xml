@@ -181,7 +181,9 @@
     <string name="wifi_ssid_not_set">Nicht festgelegt</string>
 
     <string name="listen_for_usb_devices_label">USB System Anbindung</string>
-    <string name="listen_for_usb_devices_description">Zeigt den Systemdialog, wenn ein USB-Gerät angeschlossen wird.</string>
+    <string name="listen_for_usb_devices_description">Zeige die Android-Systemaufforderung an, wenn ein USB-Gerät angeschlossen wird.</string>
+    <string name="show_toast_messages">Toast-Meldungen anzeigen</string>
+    <string name="show_toast_messages_description">Status-Meldungen bei Verbindung, Trennung und Moduswechsel einblenden.</string>
     <string name="auto_start_usb_label">Autostart bei USB</string>
     <string name="auto_start_usb_description">Die App automatisch öffnen und eine Verbindung versuchen, wenn ein USB-Gerät angeschlossen wird</string>
     <string name="auto_start_settings">Einstellungen für automatischen Start</string>

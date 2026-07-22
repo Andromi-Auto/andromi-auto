@@ -184,6 +184,8 @@
     <string name="wifi_ssid_not_set">설정 안 됨</string>
     <string name="listen_for_usb_devices_label">USB 기기 감지</string>
     <string name="listen_for_usb_devices_description">USB 기기가 연결되면 Android 시스템 프롬프트를 표시합니다.</string>
+    <string name="show_toast_messages">토스트 메시지 표시</string>
+    <string name="show_toast_messages_description">연결, 해제 및 모드 전환 시 상태 토스트 팝업을 표시합니다.</string>
     <string name="auto_start_usb_label">USB 연결 시 자동 시작</string>
     <string name="auto_start_usb_description">USB 기기가 연결되면 앱을 자동으로 실행하고 연결을 시도합니다</string>
     <string name="auto_start_settings">자동 시작 설정</string>

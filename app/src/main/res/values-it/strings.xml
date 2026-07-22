@@ -181,7 +181,9 @@
     <string name="wifi_ssid_not_set">Non impostato</string>
 
     <string name="listen_for_usb_devices_label">Ascolta dispositivi USB</string>
-    <string name="listen_for_usb_devices_description">Mostra la richiesta di sistema Android quando viene collegato un dispositivo USB.</string>
+    <string name="listen_for_usb_devices_description">Mostra il messaggio di sistema Android quando viene collegato un dispositivo USB.</string>
+    <string name="show_toast_messages">Mostra messaggi Toast</string>
+    <string name="show_toast_messages_description">Mostra popup di stato alla connessione, disconnessione e cambio modalità.</string>
     <string name="auto_start_usb_label">Avvio automatico su USB</string>
     <string name="auto_start_usb_description">Apri automaticamente l\'app e tenta la connessione quando viene collegato un dispositivo USB</string>
     <string name="auto_start_settings">Impostazioni avvio automatico</string>

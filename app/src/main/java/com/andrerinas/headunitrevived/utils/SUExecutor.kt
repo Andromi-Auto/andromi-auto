@@ -143,24 +143,42 @@ class SUExecutor {
         var hasPermission: Boolean = false
         val connection = ShizukuServiceConnection()
 
+        private fun isShizukuGranted(): Boolean {
+            return try {
+                Shizuku.pingBinder() &&
+                    Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED &&
+                    !Shizuku.isPreV11()
+            } catch (e: Throwable) {
+                false
+            }
+        }
+
         override fun register() {
-            Shizuku.addRequestPermissionResultListener(this)
-            val granted = Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED && !Shizuku.isPreV11()
-            if (granted) {
+            try {
+                Shizuku.addRequestPermissionResultListener(this)
+            } catch (e: Throwable) {
+                Log.w("SUExecutor", "Failed to add Shizuku permission listener: ${e.message}")
+            }
+            if (isShizukuGranted()) {
                 this.hasPermission = true
                 this.connection.bind()
             }
         }
 
         override fun unregister() {
-            Shizuku.removeRequestPermissionResultListener(this)
+            try {
+                Shizuku.removeRequestPermissionResultListener(this)
+            } catch (e: Throwable) { }
         }
 
         override fun checkPermission(): Boolean {
-            val granted = Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED && !Shizuku.isPreV11()
-            if (granted && !this.hasPermission) {
-                this.hasPermission = true
-                this.connection.bind()
+            if (isShizukuGranted()) {
+                if (!this.hasPermission) {
+                    this.hasPermission = true
+                    this.connection.bind()
+                }
+            } else {
+                this.hasPermission = false
             }
             return this.hasPermission
         }
@@ -180,11 +198,7 @@ class SUExecutor {
         }
 
         override fun onRequestPermissionResult(requestCode: Int, grantResult: Int) {
-            this.hasPermission = run {
-                val granted = Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED
-
-                granted && !Shizuku.isPreV11()
-            }
+            this.hasPermission = isShizukuGranted()
 
             if (this.hasPermission)
                 this.connection.bind()

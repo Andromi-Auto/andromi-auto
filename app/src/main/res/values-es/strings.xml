@@ -162,6 +162,8 @@
 
     <string name="listen_for_usb_devices_label">Escuchar dispositivos USB</string>
     <string name="listen_for_usb_devices_description">Mostrar el aviso del sistema Android al conectar un dispositivo USB.</string>
+    <string name="show_toast_messages">Mostrar mensajes emergentes (Toast)</string>
+    <string name="show_toast_messages_description">Mostrar mensajes emergentes de estado al conectar, desconectar y cambiar de modo.</string>
     <string name="auto_start_usb_label">Inicio automático por USB</string>
     <string name="auto_start_usb_description">Abrir la app automáticamente e intentar conectar cuando se conecta un dispositivo USB</string>
     <string name="auto_start_settings">Ajustes de inicio automático</string>

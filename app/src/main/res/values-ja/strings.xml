@@ -182,6 +182,8 @@
 
     <string name="listen_for_usb_devices_label">USBデバイスへの反応</string>
     <string name="listen_for_usb_devices_description">USBデバイスが接続されたときにAndroidのシステムプロンプトを表示します。</string>
+    <string name="show_toast_messages">トースト通知を表示</string>
+    <string name="show_toast_messages_description">接続・切断・モード切替時にステータスのトースト通知を表示します。</string>
     <string name="auto_start_usb_label">USBから自動起動</string>
     <string name="auto_start_usb_description">USBデバイスが接続されたら、アプリを自動的に起動して接続を試みます</string>
     <string name="auto_start_settings">自動起動設定</string>

@@ -12,6 +12,12 @@ object ConscryptInitializer {
         if (initialized) return conscryptAvailable
         initialized = true
 
+        if (!hasNeonSupport()) {
+            android.util.Log.w("ConscryptInit", "CPU does not support NEON/ARM SIMD. Skipping Conscrypt to prevent SIGILL crash.")
+            conscryptAvailable = false
+            return false
+        }
+
         try {
             val conscrypt = Class.forName("org.conscrypt.Conscrypt")
             val newProviderMethod = conscrypt.getMethod("newProvider")
@@ -42,4 +48,21 @@ object ConscryptInitializer {
     fun isNeededForTls12(): Boolean = Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP
 
     fun getProviderName(): String? = if (conscryptAvailable) "Conscrypt" else null
+
+    private fun hasNeonSupport(): Boolean {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && Build.SUPPORTED_ABIS.any { it.contains("64") }) {
+            return true
+        }
+
+        return try {
+            java.io.File("/proc/cpuinfo").useLines { lines ->
+                lines.any { line ->
+                    (line.startsWith("Features") || line.startsWith("flags")) &&
+                            (line.contains("neon", ignoreCase = true) || line.contains("asimd", ignoreCase = true))
+                }
+            }
+        } catch (e: Throwable) {
+            true
+        }
+    }
 }

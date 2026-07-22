@@ -161,7 +161,9 @@
     <string name="wifi_ssid_not_set">غير محدد</string>
 
     <string name="listen_for_usb_devices_label">الاستماع لأجهزة USB</string>
-    <string name="listen_for_usb_devices_description">إظهار مطالبة نظام Android عند توصيل جهاز USB.</string>
+    <string name="listen_for_usb_devices_description">إظهار موجه نظام Android عند توصيل جهاز USB.</string>
+    <string name="show_toast_messages">إظهار الرسائل المنبثقة (Toast)</string>
+    <string name="show_toast_messages_description">عرض الرسائل المنبثقة للحالة عند الاتصال والانفصال وتغيير الوضع.</string>
     <string name="auto_start_usb_label">تشغيل تلقائي عند توصيل USB</string>
     <string name="auto_start_usb_description">فتح التطبيق تلقائيًا ومحاولة الاتصال عند توصيل جهاز USB</string>
     <string name="auto_start_settings">إعدادات التشغيل التلقائي</string>
