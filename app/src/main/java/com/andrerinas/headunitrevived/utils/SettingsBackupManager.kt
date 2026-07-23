@@ -54,6 +54,7 @@ object SettingsBackupManager {
         "resolutionId" to ValueType.INT,
         "stretch_to_fill" to ValueType.BOOLEAN,
         "forced_scale" to ValueType.BOOLEAN,
+        "hud_mirroring" to ValueType.BOOLEAN,
         "ui-scale-home-percent" to ValueType.INT,
         "ui-scale-settings-percent" to ValueType.INT,
         "mic-sample-rate" to ValueType.INT,

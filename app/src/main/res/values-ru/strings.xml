@@ -232,6 +232,8 @@
     <!-- Audio Settings -->
     <string name="forced_scale">Принудительное масштабирование (Legacy Fix)</string>
     <string name="forced_scale_description">Исправляет проблемы с масштабированием на некоторых старых устройствах, использующих SurfaceView. Используйте только если изображение выглядит искаженным или смещенным.</string>
+    <string name="hud_mirroring">Режим HUD (Горизонтальное отражение)</string>
+    <string name="hud_mirroring_description">Отражает экран по горизонтали для проекции на лобовое стекло (Head-Up Display). Требуется режим отображения TextureView или GLES20 (не работает с SurfaceView).</string>
 
     <string name="category_audio">Аудио</string>
     <string name="enable_audio_sink">Включить вывод звука</string>

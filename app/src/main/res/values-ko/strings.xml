@@ -257,6 +257,8 @@
     <string name="pref_stretch_screen_summary">화면 비율을 무시하고 전체 화면을 채웁니다(검정색 바 제거)</string>
     <string name="forced_scale">강제 화면 배율 조정(구형 기기 보정)</string>
     <string name="forced_scale_description">SurfaceView를 사용하는 일부 구형 기기에서 화면 크기 조정 문제를 보정합니다. 이미지가 왜곡되거나 위치가 어긋나 보일 때만 사용하세요.</string>
+    <string name="hud_mirroring">HUD 모드 (좌우 반전)</string>
+    <string name="hud_mirroring_description">전면 유리 반사를 위해 화면을 좌우로 반전합니다 (헤드업 디스플레이). TextureView 또는 GLES20 뷰 모드가 필요합니다 (SurfaceView에서는 작동하지 않음).</string>
 
 
     <!-- Audio Settings -->

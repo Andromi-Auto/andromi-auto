@@ -229,6 +229,8 @@
     <!-- Audio Settings -->
     <string name="forced_scale">Escala forçada (Modo de compatibilidade)</string>
     <string name="forced_scale_description">Corrige problemas de escala em alguns dispositivos antigos que usam SurfaceView. Use apenas se a imagem parecer distorcida ou deslocada.</string>
+    <string name="hud_mirroring">Modo HUD (Espelhamento horizontal)</string>
+    <string name="hud_mirroring_description">Espelha a tela horizontalmente para reflexão no para-brisa (Head-Up Display). Requer o modo de visualização TextureView ou GLES20 (não funciona com SurfaceView).</string>
 
     <string name="category_audio">Áudio</string>
     <string name="enable_audio_sink">Ativar receptor de áudio</string>

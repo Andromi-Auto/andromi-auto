@@ -76,6 +76,11 @@ class Settings(private val context: Context) {
         get() = prefs.getBoolean("forced_scale", false)
         set(value) { prefs.edit().putBoolean("forced_scale", value).apply() }
 
+    // HUD Mode (Horizontal flip for windshield reflection)
+    var hudMirroring: Boolean
+        get() = prefs.getBoolean("hud_mirroring", false)
+        set(value) { prefs.edit().putBoolean("hud_mirroring", value).apply() }
+
     // UI Scale percentage for Home
     var uiScaleHomePercent: Int
         get() = prefs.getInt("ui-scale-home-percent", 100)

@@ -248,6 +248,8 @@
     <string name="pref_stretch_screen_summary">Ignoriert das Seitenverhältnis, um das gesamte Display auszufüllen (entfernt schwarze Balken)</string>
     <string name="forced_scale">Erzwungene Skalierung (Legacy Fix)</string>
     <string name="forced_scale_description">Korrigiert Skalierungsprobleme auf einigen älteren Geräten mit SurfaceView. Nur verwenden, wenn das Bild verzerrt oder verschoben aussieht.</string>
+    <string name="hud_mirroring">HUD-Modus (Horizontale Spiegelung)</string>
+    <string name="hud_mirroring_description">Spiegelt die Anzeige horizontal für Windschutzscheiben-Reflektion (Head-Up Display). Erfordert View-Modus TextureView oder GLES20 (funktioniert nicht mit SurfaceView).</string>
 
     <!-- Audio Settings -->
     <string name="category_audio">Audio</string>

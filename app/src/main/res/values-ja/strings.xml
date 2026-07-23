@@ -249,6 +249,8 @@
     <!-- Audio Settings -->
     <string name="forced_scale">強制スケール (レガシー修正)</string>
     <string name="forced_scale_description">SurfaceViewを使用する一部の古いデバイスでのスケーリングの問題を修正します。画像が歪んだりずれたりして見える場合にのみ使用してください。</string>
+    <string name="hud_mirroring">HUDモード（左右反転）</string>
+    <string name="hud_mirroring_description">フロントガラス投影用に画面を左右反転します（ヘッドアップディスプレイ）。TextureViewまたはGLES20表示モードが必要です（SurfaceViewでは動作しません）。</string>
 
     <string name="category_audio">オーディオ</string>
     <string name="enable_audio_sink">オーディオシンク</string>

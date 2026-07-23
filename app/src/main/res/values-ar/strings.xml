@@ -229,6 +229,8 @@
     <!-- Audio Settings -->
     <string name="forced_scale">قياس إجباري (إصلاح قديم)</string>
     <string name="forced_scale_description">يصحح مشاكل القياس على بعض الأجهزة القديمة التي تستخدم SurfaceView. استخدمه فقط إذا كانت الصورة تبدو مشوهة أو مزاحة.</string>
+    <string name="hud_mirroring">وضع HUD (قلب أفقي)</string>
+    <string name="hud_mirroring_description">يعكس الشاشة أفقيًا للانعكاس على الزجاج الأمامي (عرض رأسك). يتطلب وضع العرض TextureView أو GLES20 (لا يعمل مع SurfaceView).</string>
 
     <string name="category_audio">الصوت</string>
     <string name="enable_audio_sink">مخرج الصوت</string>

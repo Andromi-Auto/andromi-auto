@@ -229,6 +229,8 @@
     <!-- Audio Settings -->
     <string name="forced_scale">Vynucené měřítko (Legacy oprava)</string>
     <string name="forced_scale_description">Opravuje problémy s měřítkem u některých starších zařízení používajících SurfaceView. Používejte pouze v případě, že obraz vypadá zkresleně nebo posunutě.</string>
+    <string name="hud_mirroring">Režim HUD (Horizontální převrácení)</string>
+    <string name="hud_mirroring_description">Horizontálně převrátí displej pro odraz na čelním skle (Head-Up Display). Vyžaduje režim zobrazení TextureView nebo GLES20 (nefunguje s SurfaceView).</string>
 
     <string name="category_audio">Audio</string>
     <string name="enable_audio_sink">Povolit audio výstup (Sink)</string>

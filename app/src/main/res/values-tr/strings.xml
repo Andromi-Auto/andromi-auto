@@ -243,6 +243,8 @@
     <string name="pref_stretch_screen_summary">Tüm ekranı doldurmak için en boy oranını yok sayar (siyah çubukları kaldırır)</string>
     <string name="forced_scale">Zorunlu Ölçekleme (Eski Düzeltme)</string>
     <string name="forced_scale_description">SurfaceView kullanan bazı eski cihazlardaki ölçekleme sorunlarını düzeltir. Sadece görüntü bozuk veya kaymış görünüyorsa kullanın.</string>
+    <string name="hud_mirroring">HUD Modu (Yatay Çevirme)</string>
+    <string name="hud_mirroring_description">Ön cam yansıması için ekranı yatay olarak çevirir (Head-Up Display). TextureView veya GLES20 görünüm modu gerektirir (SurfaceView ile çalışmaz).</string>
 
 
     <string name="category_audio">Ses</string>

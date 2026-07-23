@@ -1119,7 +1119,8 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         val pointerData = mutableListOf<Triple<Int, Int, Int>>()
         repeat(event.pointerCount) { pointerIndex ->
             val pointerId = event.getPointerId(pointerIndex)
-            val px = event.getX(pointerIndex)
+            val rawPx = event.getX(pointerIndex)
+            val px = if (settings.hudMirroring) (viewW - rawPx) else rawPx
             val py = event.getY(pointerIndex)
 
             var videoX = 0f

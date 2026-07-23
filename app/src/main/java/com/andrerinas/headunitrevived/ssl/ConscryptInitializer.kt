@@ -1,6 +1,7 @@
 package com.andrerinas.headunitrevived.ssl
 
 import android.os.Build
+import com.andrerinas.headunitrevived.utils.AppLog
 import java.security.Security
 
 object ConscryptInitializer {
@@ -11,12 +12,6 @@ object ConscryptInitializer {
     fun initialize(): Boolean {
         if (initialized) return conscryptAvailable
         initialized = true
-
-        if (!hasNeonSupport()) {
-            android.util.Log.w("ConscryptInit", "CPU does not support NEON/ARM SIMD. Skipping Conscrypt to prevent SIGILL crash.")
-            conscryptAvailable = false
-            return false
-        }
 
         try {
             val conscrypt = Class.forName("org.conscrypt.Conscrypt")
@@ -30,13 +25,13 @@ object ConscryptInitializer {
             conscryptAvailable = result != -1 || Security.getProvider("Conscrypt") != null
 
             if (conscryptAvailable) {
-                android.util.Log.i("ConscryptInit", "Conscrypt installed as security provider (position: $result)")
+                AppLog.i("Conscrypt installed as security provider (position: %d)", result)
             }
         } catch (e: ClassNotFoundException) {
-            android.util.Log.e("ConscryptInit", "Conscrypt library not found - TLS 1.2 may not work on Android < 21", e)
+            AppLog.e("Conscrypt library not found - TLS 1.2 may not work on Android < 21", e)
             conscryptAvailable = false
         } catch (e: Exception) {
-            android.util.Log.e("ConscryptInit", "Failed to initialize Conscrypt", e)
+            AppLog.e("Failed to initialize Conscrypt", e)
             conscryptAvailable = false
         }
 
@@ -48,21 +43,4 @@ object ConscryptInitializer {
     fun isNeededForTls12(): Boolean = Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP
 
     fun getProviderName(): String? = if (conscryptAvailable) "Conscrypt" else null
-
-    private fun hasNeonSupport(): Boolean {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && Build.SUPPORTED_ABIS.any { it.contains("64") }) {
-            return true
-        }
-
-        return try {
-            java.io.File("/proc/cpuinfo").useLines { lines ->
-                lines.any { line ->
-                    (line.startsWith("Features") || line.startsWith("flags")) &&
-                            (line.contains("neon", ignoreCase = true) || line.contains("asimd", ignoreCase = true))
-                }
-            }
-        } catch (e: Throwable) {
-            true
-        }
-    }
 }

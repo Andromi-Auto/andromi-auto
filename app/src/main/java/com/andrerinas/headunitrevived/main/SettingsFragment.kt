@@ -96,6 +96,7 @@ class SettingsFragment : Fragment() {
     // Flag to determine if the projection should stretch to fill the screen
     private var pendingStretchToFill: Boolean? = null
     private var pendingForcedScale: Boolean? = null
+    private var pendingHudMirroring: Boolean? = null
 
     private var pendingKillOnDisconnect: Boolean? = null
 
@@ -190,6 +191,7 @@ class SettingsFragment : Fragment() {
         // Initialize local state for stretch to fill
         pendingStretchToFill = settings.stretchToFill
         pendingForcedScale = settings.forcedScale
+        pendingHudMirroring = settings.hudMirroring
 
         pendingKillOnDisconnect = settings.killOnDisconnect
         pendingAutoEnableHotspot = settings.autoEnableHotspot
@@ -273,6 +275,7 @@ class SettingsFragment : Fragment() {
         pendingAppLanguage = settings.appLanguage
         pendingStretchToFill = settings.stretchToFill
         pendingForcedScale = settings.forcedScale
+        pendingHudMirroring = settings.hudMirroring
         pendingKillOnDisconnect = settings.killOnDisconnect
         pendingAutoEnableHotspot = settings.autoEnableHotspot
         pendingFakeSpeed = settings.fakeSpeed
@@ -392,6 +395,7 @@ class SettingsFragment : Fragment() {
         // Save the stretch to fill preference
         pendingStretchToFill?.let { settings.stretchToFill = it }
         pendingForcedScale?.let { settings.forcedScale = it }
+        pendingHudMirroring?.let { settings.hudMirroring = it }
 
         pendingKillOnDisconnect?.let { settings.killOnDisconnect = it }
         pendingAutoEnableHotspot?.let { settings.autoEnableHotspot = it }
@@ -479,6 +483,7 @@ class SettingsFragment : Fragment() {
                         pendingAppLanguage != settings.appLanguage ||
                         pendingStretchToFill != settings.stretchToFill ||
                         pendingForcedScale != settings.forcedScale ||
+                        pendingHudMirroring != settings.hudMirroring ||
                         pendingInsetLeft != settings.insetLeft ||
                         pendingInsetTop != settings.insetTop ||
                         pendingInsetRight != settings.insetRight ||
@@ -1083,6 +1088,18 @@ class SettingsFragment : Fragment() {
             onCheckedChanged = { isChecked ->
                 pendingStretchToFill = isChecked
                 requiresRestart = true // Requires a reconnect to apply the new rendering bounds
+                checkChanges()
+                updateSettingsList()
+            }
+        ))
+
+        items.add(SettingItem.ToggleSettingEntry(
+            stableId = "hudMirroring",
+            nameResId = R.string.hud_mirroring,
+            descriptionResId = R.string.hud_mirroring_description,
+            isChecked = pendingHudMirroring ?: false,
+            onCheckedChanged = { isChecked ->
+                pendingHudMirroring = isChecked
                 checkChanges()
                 updateSettingsList()
             }

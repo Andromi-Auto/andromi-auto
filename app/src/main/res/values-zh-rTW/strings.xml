@@ -228,6 +228,8 @@
     <!-- Audio Settings -->
     <string name="forced_scale">強制縮放 (舊版修正)</string>
     <string name="forced_scale_description">修正某些使用 SurfaceView 的舊裝置上的縮放問題。僅在影像看起來扭曲 or 位移時使用。</string>
+    <string name="hud_mirroring">HUD 模式（水平翻轉）</string>
+    <string name="hud_mirroring_description">水平翻轉螢幕以供擋風玻璃反射（抬頭顯示器）。需要 TextureView 或 GLES20 檢視模式（不適用於 SurfaceView）。</string>
 
     <string name="category_audio">音訊</string>
     <string name="enable_audio_sink">啟用音訊接收器</string>

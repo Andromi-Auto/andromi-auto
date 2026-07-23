@@ -228,6 +228,8 @@
     <!-- Audio Settings -->
     <string name="forced_scale">Geforceerde schaal (Legacy Fix)</string>
     <string name="forced_scale_description">Corrigeert schalingsproblemen op sommige oudere apparaten die SurfaceView gebruiken. Alleen gebruiken als het beeld vervormd of verschoven is.</string>
+    <string name="hud_mirroring">HUD-modus (Horizontaal spiegelen)</string>
+    <string name="hud_mirroring_description">Spiegelt het scherm horizontaal voor reflectie op de voorruit (Head-Up Display). Vereist TextureView- of GLES20-weergavemodus (werkt niet met SurfaceView).</string>
 
     <string name="category_audio">Audio</string>
     <string name="enable_audio_sink">Audio-sink inschakelen</string>

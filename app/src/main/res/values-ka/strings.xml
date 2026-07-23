@@ -250,6 +250,8 @@
     <string name="pref_stretch_screen_summary">უგულებელყოფს გვერდების თანაფარდობას მთელი ეკრანის შესავსებად (აქრობს შავ ზოლებს)</string>
     <string name="forced_scale">იძულებითი მასშტაბირება (Legacy Fix)</string>
     <string name="forced_scale_description">ასწორებს მასშტაბირების პრობლემებს ზოგიერთ ძველ მოწყობილობაზე SurfaceView-ს გამოყენებისას. გამოიყენეთ მხოლოდ იმ შემთხვევაში, თუ გამოსახულება დამახინჯებულია ან გადაადგილებულია.</string>
+    <string name="hud_mirroring">HUD რეჟიმი (ჰორიზონტალური სარკე)</string>
+    <string name="hud_mirroring_description">ჰორიზონტალურად ასახავს ეკრანს საქარე მინის რეკლამისთვის (Head-Up Display). მოითხოვს TextureView ან GLES20 ხედვის რეჟიმს (არ მუშაობს SurfaceView-თან).</string>
 
     <string name="category_audio">აუდიო</string>
     <string name="enable_audio_sink">აუდიო მიმღები (Audio Sink)</string>

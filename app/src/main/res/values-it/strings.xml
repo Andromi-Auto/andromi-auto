@@ -247,6 +247,8 @@
     <string name="pref_stretch_screen_summary">Ignora le proporzioni per riempire l\'intero display (rimuove le barre nere)</string>
     <string name="forced_scale">Scala forzata (Fix Legacy)</string>
     <string name="forced_scale_description">Corregge i problemi di ridimensionamento su alcuni dispositivi più vecchi che utilizzano SurfaceView. Utilizzare solo se l\'immagine appare distorta o spostata.</string>
+    <string name="hud_mirroring">Modalità HUD (Capovolgimento orizzontale)</string>
+    <string name="hud_mirroring_description">Capovolge lo schermo orizzontalmente per il riflesso sul parabrezza (Head-Up Display). Richiede la modalità di visualizzazione TextureView o GLES20 (non funziona con SurfaceView).</string>
 
 
     <!-- Audio Settings -->

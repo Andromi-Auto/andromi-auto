@@ -228,6 +228,8 @@
     <!-- Audio Settings -->
     <string name="forced_scale">Kényszerített méretezés (Legacy javítás)</string>
     <string name="forced_scale_description">Javítja a méretezési problémákat egyes régebbi, SurfaceView-t használó eszközökön. Csak akkor használja, ha a kép torz vagy eltolt.</string>
+    <string name="hud_mirroring">HUD mód (Vízszintes tükrözés)</string>
+    <string name="hud_mirroring_description">Vízszintesen tükrözi a kijelzőt a szélvédőre vetítéshez (Head-Up Display). TextureView vagy GLES20 nézetmódot igényel (SurfaceView-val nem működik).</string>
 
     <string name="category_audio">Hang</string>
     <string name="enable_audio_sink">Hang fogadása</string>

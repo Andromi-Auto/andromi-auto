@@ -74,6 +74,7 @@ adb shell am start -a android.intent.action.VIEW -d "headunit://connect?ip=192.1
 - Added display over other apps permission for better compatibility with some headunits, espacially with self mode
 - Fix transport get stucked on multiple reconnects, thanks to @notathf
 - Add car keys support for FYT headunits, thanks to @MrEAlderson
+- Added Option to flip projection horizontal for Headup-Displays
 
 ### v.3.1.1
 - Reduce pressure on sensor events like night and gps and start/stop these events in onConnected, onDisconnect and onDestroy

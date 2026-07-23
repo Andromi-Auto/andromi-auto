@@ -241,6 +241,8 @@
     <string name="pref_stretch_screen_summary">Bỏ qua tỉ lệ khung hình để lấp đầy màn hình (loại bỏ viền đen)</string>
     <string name="forced_scale">Tỉ lệ ép buộc (Khắc phục cho máy cũ)</string>
     <string name="forced_scale_description">Khắc phục lỗi tỉ lệ trên một số máy cũ dùng SurfaceView. Chỉ dùng khi hình bị méo hoặc lệch.</string>
+    <string name="hud_mirroring">Chế độ HUD (Lật ngang)</string>
+    <string name="hud_mirroring_description">Lật màn hình theo chiều ngang để phản chiếu lên kính chắn gió (Head-Up Display). Yêu cầu chế độ hiển thị TextureView hoặc GLES20 (không hoạt động với SurfaceView).</string>
 
 
     <!-- Audio Settings -->

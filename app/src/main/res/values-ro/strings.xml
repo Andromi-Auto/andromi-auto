@@ -245,6 +245,8 @@
     <!-- Audio Settings -->
     <string name="forced_scale">Scalare forțată (Fix legacy)</string>
     <string name="forced_scale_description">Corectează problemele de scalare pe unele dispozitive mai vechi care folosesc SurfaceView. Utilizați numai dacă imaginea pare distorsionată sau deplasată.</string>
+    <string name="hud_mirroring">Mod HUD (Oglindire orizontală)</string>
+    <string name="hud_mirroring_description">Răstoarnă afișajul pe orizontală pentru reflexia pe parbriz (Head-Up Display). Necesită modul de vizualizare TextureView sau GLES20 (nu funcționează cu SurfaceView).</string>
 
     <string name="category_audio">Audio</string>
     <string name="enable_audio_sink">Receptor Audio (Sink)</string>
