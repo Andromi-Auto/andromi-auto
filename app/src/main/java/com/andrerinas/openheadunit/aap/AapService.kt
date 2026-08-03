@@ -1032,10 +1032,6 @@ class AapService : Service(), UsbReceiver.Listener {
         safeMediaSessionCall { it.isActive = false }
         updateMediaSessionState(false)
         serviceScope.launch(Dispatchers.IO) {
-            val settings = App.provide(this@AapService).settings
-            val mode = settings.wifiConnectionMode
-            val strategy = settings.helperConnectionStrategy
-
             if (wifiLauncherManager.getActiveMode() == WifiLauncherMode.NATIVE_AA && !state.isUserExit) {
                 // Unexpected disconnect — reset and re-initialize for auto-reconnect.
                 AppLog.i("AapService: Native AA Mode disconnected. Resetting manager and group in 1.5s...")
@@ -1057,6 +1053,7 @@ class AapService : Service(), UsbReceiver.Listener {
                 commManager.awaitDisconnectComplete()
                 AppLog.i("AapService: CommManager teardown complete. Stopping WiFi Direct group.")
                 wifiLauncherManager.sharedServices.wifiDirectManager?.stop()
+                wifiLauncherManager.restartDiscovery()
             }
 
             App.provide(this@AapService).audioDecoder.stop()

@@ -58,7 +58,7 @@ class WirelessServer(val registerNsd: Boolean, val service: AapService) {
                             withContext(Dispatchers.IO) {
                                 try { clientSocket.close() } catch (e: Exception) {}
                             }
-                        } else if (android.os.SystemClock.elapsedRealtime() < service.userExitCooldownUntil) {
+                        } else if (android.os.SystemClock.elapsedRealtime() < service.userExitCooldownUntil && !service.userExitedAA) {
                             // [FIX] User just exited AA — reject the instant reconnection.
                             AppLog.w("WirelessServer: Rejecting connection from ${clientSocket.inetAddress} — user exit cooldown active (${service.userExitCooldownUntil - android.os.SystemClock.elapsedRealtime()}ms remaining)")
                             withContext(Dispatchers.IO) {
