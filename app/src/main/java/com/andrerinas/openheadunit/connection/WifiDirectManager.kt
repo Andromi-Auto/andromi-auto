@@ -19,9 +19,10 @@ import androidx.core.content.ContextCompat
 import com.andrerinas.openheadunit.App
 import com.andrerinas.openheadunit.R
 import com.andrerinas.openheadunit.aap.AapService
+import com.andrerinas.openheadunit.connection.wifi.WifiLauncherMode
+import com.andrerinas.openheadunit.connection.wifi.modes.WifiLauncherHelper
 import com.andrerinas.openheadunit.utils.ToastUtils
 import com.andrerinas.openheadunit.utils.AppLog
-import com.andrerinas.openheadunit.utils.Settings
 import java.net.InetSocketAddress
 import java.net.Socket
 
@@ -137,10 +138,10 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
                             commManager.connectionState.value is com.andrerinas.openheadunit.connection.CommManager.ConnectionState.Connecting
 
                         if (!isConnected && !isConnectingOrConnected && !isGroupCreatingOrCreated) {
-                            if (appSettings.wifiConnectionMode == 2 && appSettings.helperConnectionStrategy == 1) {
+                            if (appSettings.wifiConnectionMode == WifiLauncherMode.HELPER && appSettings.helperConnectionStrategy == WifiLauncherHelper.Strategy.WIFI_DIRECT) {
                                 AppLog.i("WifiDirectManager: P2P enabled, auto-starting WiFi Direct visibility")
                                 makeVisible()
-                            } else if (appSettings.wifiConnectionMode == 3) {
+                            } else if (appSettings.wifiConnectionMode == WifiLauncherMode.NATIVE_AA) {
                                 AppLog.i("WifiDirectManager: P2P enabled, auto-starting Native AA quiet host")
                                 startNativeAaQuietHost()
                             }
@@ -162,7 +163,7 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
                         intent.getParcelableExtra(WifiP2pManager.EXTRA_WIFI_P2P_DEVICE)
                     }
                     device?.let {
-                        if (com.andrerinas.openheadunit.App.provide(context).settings.wifiConnectionMode != 3) {
+                        if (com.andrerinas.openheadunit.App.provide(context).settings.wifiConnectionMode != WifiLauncherMode.NATIVE_AA) {
                             AppLog.i("WifiDirectManager: Local name: ${it.deviceName}, Address: ${it.deviceAddress}")
                         }
                         AapService.wifiDirectName.value = it.deviceName
@@ -228,8 +229,8 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
     @SuppressLint("MissingPermission")
     private fun checkStuckRetryBurst() {
         val appSettings = App.provide(context).settings
-        val isHelperP2p = appSettings.wifiConnectionMode == 2 && appSettings.helperConnectionStrategy == 1
-        val isNative = appSettings.wifiConnectionMode == 3
+        val isHelperP2p = appSettings.wifiConnectionMode == WifiLauncherMode.HELPER && appSettings.helperConnectionStrategy == WifiLauncherHelper.Strategy.WIFI_DIRECT
+        val isNative = appSettings.wifiConnectionMode == WifiLauncherMode.NATIVE_AA
         if ((!isHelperP2p && !isNative) || !isGroupOwner) {
             tightBurstCount = 0
             return
@@ -742,13 +743,13 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
         val ch = channel
         if (ch != null) {
             val appSettings = com.andrerinas.openheadunit.App.provide(context).settings
-            if (appSettings.wifiConnectionMode == 2 && appSettings.helperConnectionStrategy == 1) {
+            if (appSettings.wifiConnectionMode == WifiLauncherMode.HELPER && appSettings.helperConnectionStrategy == WifiLauncherHelper.Strategy.WIFI_DIRECT) {
                 AapService.scanningState.value = true
             }
             manager?.discoverPeers(ch, object : WifiP2pManager.ActionListener {
                 override fun onSuccess() {
                     AppLog.d("WifiDirectManager: Discovery active")
-                    if (appSettings.wifiConnectionMode == 2 && appSettings.helperConnectionStrategy == 1) {
+                    if (appSettings.wifiConnectionMode == WifiLauncherMode.HELPER && appSettings.helperConnectionStrategy == WifiLauncherHelper.Strategy.WIFI_DIRECT) {
                         handler.postDelayed({
                             if (!isClientConnected) {
                                 AapService.scanningState.value = false
@@ -973,7 +974,7 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
     }
 
     private fun isNativeAaMode(): Boolean {
-        return com.andrerinas.openheadunit.App.provide(context).settings.wifiConnectionMode == 3
+        return com.andrerinas.openheadunit.App.provide(context).settings.wifiConnectionMode == WifiLauncherMode.NATIVE_AA
     }
 
     private fun shouldRetryNativeGroupFor5Ghz(frequency: Int): Boolean {

@@ -14,6 +14,7 @@ import kotlinx.coroutines.*
 import android.os.Build
 import android.content.pm.PackageManager
 import androidx.core.content.ContextCompat
+import com.andrerinas.openheadunit.connection.wifi.modes.WifiLauncherNativeAA
 import java.io.DataInputStream
 import java.io.IOException
 import java.io.OutputStream
@@ -26,6 +27,7 @@ import java.util.*
  */
 class NativeAaHandshakeManager(
     private val context: AapService,
+    private val launcher: WifiLauncherNativeAA,
     private val scope: CoroutineScope
 ) {
     companion object {
@@ -55,7 +57,7 @@ class NativeAaHandshakeManager(
 
         fun checkCompatibility(context: Context): Boolean {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                if (ContextCompat.checkSelfPermission(context, android.Manifest.permission.BLUETOOTH_CONNECT) 
+                if (ContextCompat.checkSelfPermission(context, android.Manifest.permission.BLUETOOTH_CONNECT)
                     != PackageManager.PERMISSION_GRANTED) {
                     AppLog.w("NativeAA: Compatibility Check skipped - Missing BLUETOOTH_CONNECT")
                     return false
@@ -133,7 +135,7 @@ class NativeAaHandshakeManager(
         if (isRunning) return
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            if (ContextCompat.checkSelfPermission(context, android.Manifest.permission.BLUETOOTH_CONNECT) 
+            if (ContextCompat.checkSelfPermission(context, android.Manifest.permission.BLUETOOTH_CONNECT)
                 != PackageManager.PERMISSION_GRANTED) {
                 AppLog.e("NativeAA: Missing BLUETOOTH_CONNECT permission. Handshake server cannot start.")
                 return
@@ -320,17 +322,17 @@ class NativeAaHandshakeManager(
             val input = socket.inputStream
             val output = socket.outputStream
             val buf = ByteArray(1024)
-            
+
             AppLog.i("NativeAA: HFP responder active for ${socket.remoteDevice.name}")
-            
+
             while (isRunning && isActive && socket.isConnected) {
                 if (input.available() > 0) {
                     val read = input.read(buf)
                     if (read == -1) break
-                    
+
                     val cmd = String(buf, 0, read, Charsets.US_ASCII).trim()
                     AppLog.d("NativeAA: HFP RX: $cmd")
-                    
+
                     // Respond to standard HFP initialization commands
                     when {
                         cmd.contains("AT+BRSF") -> {
@@ -452,7 +454,7 @@ class NativeAaHandshakeManager(
      */
     fun manualPoke(address: String) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            if (ContextCompat.checkSelfPermission(context, android.Manifest.permission.BLUETOOTH_CONNECT) 
+            if (ContextCompat.checkSelfPermission(context, android.Manifest.permission.BLUETOOTH_CONNECT)
                 != PackageManager.PERMISSION_GRANTED) {
                 AppLog.w("NativeAA: Missing BLUETOOTH_CONNECT. Cannot manualPoke.")
                 return
@@ -462,7 +464,7 @@ class NativeAaHandshakeManager(
         try {
             val device = adapter.getRemoteDevice(address)
             AppLog.i("NativeAA: Manual poke requested for ${device.name} ($address)")
-            
+
             pokeJob?.cancel()
             pokeJob = scope.launch(Dispatchers.IO + CoroutineName("NativeAa-ManualWakeup")) {
                 AppLog.i("NativeAA: Attempting manual poke to ${device.name}...")
@@ -506,13 +508,13 @@ class NativeAaHandshakeManager(
 
             AppLog.i("NativeAA: Phone connected. Current credentials state: SSID=${currentSsid ?: "<null>"}, IP=${currentIp ?: "<null>"}")
             AppLog.i("NativeAA: Waiting for WiFi credentials to be ready (Max 60s)...")
-            
+
             // Wait up to 60 seconds for credentials (P2P group creation can be slow)
             var attempts = 0
             while ((currentSsid == null || currentIp == null) && attempts < 120 && isRunning && isActive) {
                 if (attempts % 20 == 0 && attempts > 0) {
                     AppLog.w("NativeAA: Still waiting for credentials after ${attempts / 2}s. Requesting P2P refresh...")
-                    context.triggerWifiDirectRefresh()
+                    launcher.triggerWifiDirectRefresh()
                 } else if (attempts % 10 == 0 && attempts > 0) {
                     AppLog.d("NativeAA: Still waiting... SSID=${currentSsid != null}, IP=${currentIp != null} (Attempt $attempts/120)")
                 }
@@ -535,7 +537,7 @@ class NativeAaHandshakeManager(
             if (bssid.isEmpty() || bssid == "00:00:00:00:00:00" || bssid == "02:00:00:00:00:00") {
                 AppLog.e("NativeAA: BSSID is still masked/empty ($bssid) at Type 3 time — phone WILL reject these credentials. Aborting handshake. PLEASE CHECK IF LOCATION (GPS) IS ENABLED ON THIS DEVICE!")
                 // Triggering a P2P refresh so the next attempt has a valid BSSID
-                context.triggerWifiDirectRefresh()
+                launcher.triggerWifiDirectRefresh()
                 return@withContext
             }
 

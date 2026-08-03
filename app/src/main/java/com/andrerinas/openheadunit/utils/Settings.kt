@@ -10,6 +10,8 @@ import android.os.Build
 import com.andrerinas.openheadunit.aap.protocol.proto.Control
 import com.andrerinas.openheadunit.app.UsbAttachedActivity
 import com.andrerinas.openheadunit.connection.UsbDeviceCompat
+import com.andrerinas.openheadunit.connection.wifi.WifiLauncherMode
+import com.andrerinas.openheadunit.connection.wifi.modes.WifiLauncherHelper
 
 class Settings(private val context: Context) {
 
@@ -345,23 +347,23 @@ class Settings(private val context: Context) {
         set(value) { prefs.edit().putString("head-unit-model", value).apply() }
 
     // 0 = Manual, 1 = Auto (Headunit Server), 2 = Helper (Wifi Launcher), 3 = Native AA
-    var wifiConnectionMode: Int
+    var wifiConnectionMode: WifiLauncherMode
         get() {
             // Migration: Check if old helper boolean exists
             if (prefs.contains("wifi-launcher-mode")) {
                 val old = prefs.getBoolean("wifi-launcher-mode", false)
                 val newMode = if (old) 2 else 1
                 prefs.edit().putInt("wifi-connection-mode", newMode).remove("wifi-launcher-mode").apply()
-                return newMode
+                return WifiLauncherMode.byIdOrDefault(newMode)
             }
             // Migration: Check if native-aa-wireless was true
             if (prefs.getBoolean("native-aa-wireless", false)) {
                 prefs.edit().putInt("wifi-connection-mode", 3).remove("native-aa-wireless").apply()
-                return 3
+                return WifiLauncherMode.NATIVE_AA
             }
-            return prefs.getInt("wifi-connection-mode", 2) // Default 2 (Wireless Helper)
+            return WifiLauncherMode.byIdOrDefault(prefs.getInt("wifi-connection-mode", -1))
         }
-        set(value) { prefs.edit().putInt("wifi-connection-mode", value).apply() }
+        set(value) { prefs.edit().putInt("wifi-connection-mode", value.id).apply() }
 
     var videoCodec: String
         get() = prefs.getString("video-codec", "Auto")!!
@@ -1185,9 +1187,9 @@ class Settings(private val context: Context) {
         set(value) { prefs.edit().putInt("wait-for-wifi-timeout", value).apply() }
 
     // 0 = Common Wifi (NSD), 1 = Wifi Direct P2P, 2 = Nearby Devices, 3 = Phone Hotspot (Host), 4 = Headunit Hotspot (Passive)
-    var helperConnectionStrategy: Int
-        get() = prefs.getInt("helper-connection-strategy", 2) // Default to Nearby Devices (2)
-        set(value) = prefs.edit().putInt("helper-connection-strategy", value).apply()
+    var helperConnectionStrategy: WifiLauncherHelper.Strategy
+        get() = WifiLauncherHelper.Strategy.byIdOrDefault(prefs.getInt("helper-connection-strategy", -1))
+        set(value) = prefs.edit().putInt("helper-connection-strategy", value.id).apply()
 
     var lastNearbyDeviceName: String
         get() = prefs.getString("last-nearby-device-name", "")!!
