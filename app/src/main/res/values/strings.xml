@@ -211,6 +211,15 @@
     <string name="use_gradient_background_description_on_auto">The app draws its own background with the gradient circle centered. Does not apply to Extreme Dark mode</string>
     <string name="use_gradient_background_description_off_auto">The app\'s classic background is being used. Does not apply to Extreme Dark mode</string>
     <string name="category_dark_mode">Dark Mode</string>
+    <string name="category_theming">Theming</string>
+    <string name="customization_title">Customization</string>
+    <string name="customization_description">Customize home screen background and visual appearance</string>
+    <string name="home_background_image">Background Image</string>
+    <string name="home_background_image_description">Choose a custom image for the main home screen</string>
+    <string name="home_background_default">Default (bg.png)</string>
+    <string name="home_background_custom">Custom Image</string>
+    <string name="btn_choose_image">Choose Image</string>
+    <string name="btn_reset_default">Reset to Default</string>
     <string name="category_automation">Automation</string>
     <string name="dark_mode_settings">Dark Mode Settings</string>
     <string name="app_theme_short">App</string>

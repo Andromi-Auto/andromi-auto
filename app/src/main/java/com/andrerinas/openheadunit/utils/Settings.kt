@@ -640,6 +640,11 @@ class Settings(private val context: Context) {
         get() = prefs.getInt("loading-screen-scale-percent", 100)
         set(value) { prefs.edit().putInt("loading-screen-scale-percent", value).apply() }
 
+    // Custom home screen background image
+    var homeBackgroundImagePath: String
+        get() = prefs.getString("home-background-image-path", "") ?: ""
+        set(value) { prefs.edit().putString("home-background-image-path", value).apply() }
+
     @SuppressLint("ApplySharedPref")
     fun commit() {
         prefs.edit().commit()

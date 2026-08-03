@@ -1,4 +1,7 @@
 # Changelog
+### v.3.2.1-beta
+- Added new Theming settings section and Customization menu with custom Home Screen Background Image selection
+
 ### v.3.2.0
 - Don't grab audio focus on connect in dynamic mode, thanks to @bnayahu
 - Acquire transient audio focus while AA audio plays, thanks to @bnayahu

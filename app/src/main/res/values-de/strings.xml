@@ -47,6 +47,15 @@
     <string name="use_gradient_background_description_on_auto">Die App zeichnet ihren eigenen Hintergrund mit dem zentrierten Verlaufskreis. Gilt nicht für den Modus Extrem Dunkel</string>
     <string name="use_gradient_background_description_off_auto">Der klassische Hintergrund der App wird verwendet. Gilt nicht für den Modus Extrem Dunkel</string>
     <string name="category_dark_mode">Dunkelmodus</string>
+    <string name="category_theming">Theming</string>
+    <string name="customization_title">Anpassung</string>
+    <string name="customization_description">Hintergrundbild des Hauptbildschirms und Erscheinungsbild anpassen</string>
+    <string name="home_background_image">Hintergrund-Bild</string>
+    <string name="home_background_image_description">Wähle ein eigenes Bild für den Hauptbildschirm</string>
+    <string name="home_background_default">Standard (bg.png)</string>
+    <string name="home_background_custom">Eigenes Bild</string>
+    <string name="btn_choose_image">Bild auswählen</string>
+    <string name="btn_reset_default">Auf Standard zurücksetzen</string>
     <string name="category_automation">Automatisierung</string>
     <string name="dark_mode_settings">Dunkelmodus-Einstellungen</string>
     <string name="app_theme_short">App</string>

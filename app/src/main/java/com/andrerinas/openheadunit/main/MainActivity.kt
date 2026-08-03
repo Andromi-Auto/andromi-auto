@@ -148,6 +148,7 @@ class MainActivity : BaseActivity() {
         }
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
+        applyCustomHomeBackground()
 
         val appSettings = Settings(this)
         requestedOrientation = appSettings.screenOrientation.androidOrientation
@@ -835,6 +836,7 @@ class MainActivity : BaseActivity() {
     override fun onResume() {
         super.onResume()
         setFullscreen()
+        applyCustomHomeBackground()
 
         checkSetupFlow()
 
@@ -902,13 +904,26 @@ class MainActivity : BaseActivity() {
             unregisterReceiver(finishReceiver)
             isFinishReceiverRegistered = false
         }
-        if (isRecreateReceiverRegistered) {
-            unregisterReceiver(recreateReceiver)
-            isRecreateReceiverRegistered = false
-        }
         if (isFinishing) {
             AppLog.i("MainActivity finishing, resetting auto-start flag.")
             HomeFragment.resetAutoStart()
+        }
+    }
+
+    fun applyCustomHomeBackground() {
+        val customBgImageView = findViewById<ImageView>(R.id.custom_home_background) ?: return
+        val path = Settings(this).homeBackgroundImagePath
+        val file = if (path.isNotEmpty()) File(path) else null
+
+        if (file != null && file.exists() && file.length() > 0) {
+            customBgImageView.visibility = View.VISIBLE
+            Glide.with(this)
+                .load(file)
+                .centerCrop()
+                .into(customBgImageView)
+        } else {
+            try { Glide.with(this).clear(customBgImageView) } catch (_: Exception) {}
+            customBgImageView.visibility = View.GONE
         }
     }
 

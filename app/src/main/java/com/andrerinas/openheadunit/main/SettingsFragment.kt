@@ -80,7 +80,9 @@ class SettingsFragment : Fragment() {
         // Navigation
         "gpsNavigation",
         // Graphic
-        "resolution", "dpiPixelDensity", "viewMode", "screenOrientation", "startInFullscreenMode", "loadingScreen",
+        "resolution", "dpiPixelDensity", "viewMode", "screenOrientation", "startInFullscreenMode",
+        // Theming
+        "theming", "loadingScreen", "customization",
         // Video
         "videoCodec", "fpsLimit",
         // Input
@@ -1265,6 +1267,9 @@ class SettingsFragment : Fragment() {
             ))
         }
 
+        // --- Theming Settings ---
+        items.add(SettingItem.CategoryHeader("theming", R.string.category_theming))
+
         items.add(SettingItem.SettingEntry(
             stableId = "loadingScreen",
             nameResId = R.string.loading_screen,
@@ -1273,6 +1278,17 @@ class SettingsFragment : Fragment() {
             else getString(R.string.loading_screen_custom),
             onClick = {
                 findNavController().navigate(R.id.action_settingsFragment_to_loadingScreenFragment)
+            }
+        ))
+
+        items.add(SettingItem.SettingEntry(
+            stableId = "customization",
+            nameResId = R.string.customization_title,
+            value = if (settings.homeBackgroundImagePath.isEmpty())
+                getString(R.string.home_background_default)
+            else getString(R.string.home_background_custom),
+            onClick = {
+                findNavController().navigate(R.id.action_settingsFragment_to_customizationFragment)
             }
         ))
 
