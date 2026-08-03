@@ -51,6 +51,8 @@ class WifiLauncherHelper : WifiLauncher {
 
 
     override fun start(quiet: Boolean) {
+        AppLog.i("WifiLauncher: Using strategy $strategy.")
+
         when (strategy) {
             Strategy.COMMON_WIFI -> { /* #startDiscovery(oneShot = false) handled by SharedServices */ }
             Strategy.WIFI_DIRECT -> {

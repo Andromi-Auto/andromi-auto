@@ -34,11 +34,11 @@ class WifiLauncherManager(val service: AapService) {
             throw IllegalArgumentException("newLauncher is already active")
 
         if (!force && (active?.hasSameStartConfiguration(newLauncher) ?: false)) {
-            AppLog.d("AapService: WiFi Mode ${newLauncher.mode}.mode with same start-configuration is already initialized.")
+            AppLog.d("WifiLauncher: WiFi Mode ${newLauncher.mode}.mode with same start-configuration is already initialized.")
             return
         }
 
-        AppLog.i("AapService: Initializing WiFi Mode: ${newLauncher.mode}")
+        AppLog.i("WifiLauncher: Initializing WiFi Mode: ${newLauncher.mode}")
 
         // stop old launcher
         active?.stop()
