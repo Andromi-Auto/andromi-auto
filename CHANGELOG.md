@@ -1,6 +1,9 @@
 # Changelog
-### v.3.2.1-beta
-- Added new Theming settings section and Customization menu with custom Home Screen Background Image selection
+### v.3.2.1 - upcoming
+- Fixing new welcome screen reappears
+- Fixing screen flicker every 10s
+- Fixing HW decoding on kitkat
+- Fixing 2 Fatal errors shown in play console
 
 ### v.3.2.0
 - Don't grab audio focus on connect in dynamic mode, thanks to @bnayahu
