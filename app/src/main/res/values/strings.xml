@@ -220,6 +220,16 @@
     <string name="home_background_custom">Custom Image</string>
     <string name="btn_choose_image">Choose Image</string>
     <string name="btn_reset_default">Reset to Default</string>
+    <string name="home_button_colors">Button Colors &amp; Gradients</string>
+    <string name="home_button_colors_description">Customize the colors and gradients of the 4 home screen buttons</string>
+    <string name="btn_color_self_mode">Self Mode Button</string>
+    <string name="btn_color_usb">USB Button</string>
+    <string name="btn_color_wifi">WiFi Button</string>
+    <string name="btn_color_settings">Settings Button</string>
+    <string name="btn_reset_colors">Reset All Button Colors</string>
+    <string name="pick_color_title">Pick Button Color</string>
+    <string name="color_preset_default">Default</string>
+    <string name="color_custom_hex">Hex Color</string>
     <string name="category_automation">Automation</string>
     <string name="dark_mode_settings">Dark Mode Settings</string>
     <string name="app_theme_short">App</string>

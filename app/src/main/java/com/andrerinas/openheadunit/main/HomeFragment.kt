@@ -44,6 +44,7 @@ import com.andrerinas.openheadunit.utils.VpnControl
 import com.andrerinas.openheadunit.utils.BluetoothHelper
 import com.andrerinas.openheadunit.connection.UsbReceiver
 import com.andrerinas.openheadunit.connection.UsbAccessoryMode
+import com.andrerinas.openheadunit.utils.ColorUtils
 import kotlinx.coroutines.withContext
 
 class HomeFragment : Fragment() {
@@ -320,11 +321,20 @@ class HomeFragment : Fragment() {
 
     private fun restoreOriginalStyle() {
         val whiteTint = ColorStateList.valueOf(0xFFFFFFFF.toInt())
-        val buttons = listOf(self_mode_button, usb, wifi, settings)
-        val ids = listOf(R.id.self_mode_button, R.id.usb_button, R.id.wifi_button, R.id.settings_button)
-        buttons.zip(ids).forEach { (button, id) ->
-            originalBackgrounds[id]?.let { drawableRes ->
-                button.background = ContextCompat.getDrawable(requireContext(), drawableRes)
+        val appSettings = App.provide(requireContext()).settings
+
+        val buttonConfigs = listOf(
+            Triple(self_mode_button, R.drawable.gradient_blue, appSettings.customSelfModeButtonColor),
+            Triple(usb, R.drawable.gradient_orange, appSettings.customUsbButtonColor),
+            Triple(wifi, R.drawable.gradient_purple, appSettings.customWifiButtonColor),
+            Triple(settings, R.drawable.gradient_darkblue, appSettings.customSettingsButtonColor)
+        )
+
+        buttonConfigs.forEach { (button, defaultDrawableRes, customColor) ->
+            if (customColor != 0) {
+                button.background = ColorUtils.createGradientDrawable(customColor, 32f, requireContext())
+            } else {
+                button.background = ContextCompat.getDrawable(requireContext(), defaultDrawableRes)
             }
             (button as? com.google.android.material.button.MaterialButton)?.iconTint = whiteTint
         }
@@ -612,7 +622,11 @@ class HomeFragment : Fragment() {
         updateProjectionButtonText()
         updateButtonStyle()
         updateTextColors()
-        RenameNotice.maybeShow(requireActivity(), App.provide(requireContext()).settings)
+        activity?.let { act ->
+            if (!act.isFinishing && !act.isDestroyed) {
+                RenameNotice.maybeShow(act, App.provide(requireContext()).settings)
+            }
+        }
     }
 
     override fun onPause() {

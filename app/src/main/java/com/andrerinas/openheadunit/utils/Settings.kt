@@ -645,6 +645,23 @@ class Settings(private val context: Context) {
         get() = prefs.getString("home-background-image-path", "") ?: ""
         set(value) { prefs.edit().putString("home-background-image-path", value).apply() }
 
+    // Custom button colors for Home screen (0 = default gradient)
+    var customSelfModeButtonColor: Int
+        get() = prefs.getInt("custom-self-mode-button-color", 0)
+        set(value) { prefs.edit().putInt("custom-self-mode-button-color", value).apply() }
+
+    var customUsbButtonColor: Int
+        get() = prefs.getInt("custom-usb-button-color", 0)
+        set(value) { prefs.edit().putInt("custom-usb-button-color", value).apply() }
+
+    var customWifiButtonColor: Int
+        get() = prefs.getInt("custom-wifi-button-color", 0)
+        set(value) { prefs.edit().putInt("custom-wifi-button-color", value).apply() }
+
+    var customSettingsButtonColor: Int
+        get() = prefs.getInt("custom-settings-button-color", 0)
+        set(value) { prefs.edit().putInt("custom-settings-button-color", value).apply() }
+
     @SuppressLint("ApplySharedPref")
     fun commit() {
         prefs.edit().commit()
