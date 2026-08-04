@@ -2493,10 +2493,22 @@ class SettingsFragment : Fragment() {
             .setTitle(R.string.hotspot_permission_title)
             .setMessage(R.string.hotspot_permission_message)
             .setPositiveButton(R.string.open_settings) { dialog, _ ->
-                val intent = Intent(SystemSettings.ACTION_MANAGE_WRITE_SETTINGS).apply {
-                    data = Uri.parse("package:${requireContext().packageName}")
+                try {
+                    val intent = Intent(SystemSettings.ACTION_MANAGE_WRITE_SETTINGS).apply {
+                        data = Uri.parse("package:${requireContext().packageName}")
+                    }
+                    startActivity(intent)
+                } catch (e: Exception) {
+                    try {
+                        startActivity(Intent(SystemSettings.ACTION_MANAGE_WRITE_SETTINGS))
+                    } catch (e2: Exception) {
+                        try {
+                            startActivity(Intent(SystemSettings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                                data = Uri.parse("package:${requireContext().packageName}")
+                            })
+                        } catch (_: Exception) {}
+                    }
                 }
-                startActivity(intent)
                 dialog.dismiss()
             }
             .setNegativeButton(R.string.cancel) { _, _ ->
@@ -2838,10 +2850,22 @@ class SettingsFragment : Fragment() {
             .setTitle(R.string.hotspot_permission_title)
             .setMessage(R.string.hotspot_permission_message)
             .setPositiveButton(R.string.open_settings) { dialog, _ ->
-                val intent = Intent(android.provider.Settings.ACTION_MANAGE_WRITE_SETTINGS).apply {
-                    data = Uri.parse("package:${requireContext().packageName}")
+                try {
+                    val intent = Intent(android.provider.Settings.ACTION_MANAGE_WRITE_SETTINGS).apply {
+                        data = Uri.parse("package:${requireContext().packageName}")
+                    }
+                    startActivity(intent)
+                } catch (e: Exception) {
+                    try {
+                        startActivity(Intent(android.provider.Settings.ACTION_MANAGE_WRITE_SETTINGS))
+                    } catch (e2: Exception) {
+                        try {
+                            startActivity(Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                                data = Uri.parse("package:${requireContext().packageName}")
+                            })
+                        } catch (_: Exception) {}
+                    }
                 }
-                startActivity(intent)
                 dialog.dismiss()
             }
             .setNegativeButton(R.string.cancel) { _, _ ->
