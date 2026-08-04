@@ -49,7 +49,7 @@
     <string name="category_dark_mode">Dunkelmodus</string>
     <string name="category_theming">Theming</string>
     <string name="customization_title">Anpassung</string>
-    <string name="customization_description">Hintergrundbild des Hauptbildschirms und Erscheinungsbild anpassen</string>
+    <string name="customization_description">Aussehen der App verändern</string>
     <string name="home_background_image">Hintergrund-Bild</string>
     <string name="home_background_image_description">Wähle ein eigenes Bild für den Hauptbildschirm</string>
     <string name="home_background_default">Standard (bg.png)</string>
@@ -66,6 +66,10 @@
     <string name="pick_color_title">Button-Farbe wählen</string>
     <string name="color_preset_default">Standard</string>
     <string name="color_custom_hex">Hex-Farbcode</string>
+    <string name="home_button_scale">Button-Größe</string>
+    <string name="home_button_scale_description">Vergrößere oder verkleinere die 4 Startseiten-Buttons</string>
+    <string name="home_button_scale_preview">Live-Vorschau Startseite</string>
+    <string name="btn_reset_scale">Button-Größe zurücksetzen</string>
     <string name="category_automation">Automatisierung</string>
     <string name="dark_mode_settings">Dunkelmodus-Einstellungen</string>
     <string name="app_theme_short">App</string>

@@ -1284,9 +1284,7 @@ class SettingsFragment : Fragment() {
         items.add(SettingItem.SettingEntry(
             stableId = "customization",
             nameResId = R.string.customization_title,
-            value = if (settings.homeBackgroundImagePath.isEmpty())
-                getString(R.string.home_background_default)
-            else getString(R.string.home_background_custom),
+            value = getString(R.string.customization_description),
             onClick = {
                 findNavController().navigate(R.id.action_settingsFragment_to_customizationFragment)
             }

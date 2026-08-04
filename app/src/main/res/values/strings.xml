@@ -230,6 +230,10 @@
     <string name="pick_color_title">Pick Button Color</string>
     <string name="color_preset_default">Default</string>
     <string name="color_custom_hex">Hex Color</string>
+    <string name="home_button_scale">Button Size</string>
+    <string name="home_button_scale_description">Adjust the size of the 4 home screen buttons</string>
+    <string name="home_button_scale_preview">Live Home Screen Preview</string>
+    <string name="btn_reset_scale">Reset Button Size</string>
     <string name="category_automation">Automation</string>
     <string name="dark_mode_settings">Dark Mode Settings</string>
     <string name="app_theme_short">App</string>

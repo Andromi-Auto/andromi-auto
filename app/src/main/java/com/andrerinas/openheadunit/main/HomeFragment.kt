@@ -616,11 +616,53 @@ class HomeFragment : Fragment() {
         }
     }
 
+    private fun updateButtonScale() {
+        val view = view ?: return
+        val appSettings = App.provide(requireContext()).settings
+        val scalePercent = appSettings.homeButtonScalePercent.coerceIn(60, 120)
+        val scaleFactor = scalePercent / 100.0f
+        val density = resources.displayMetrics.density
+
+        val buttons = listOfNotNull(
+            view.findViewById<com.google.android.material.button.MaterialButton>(R.id.self_mode_button),
+            view.findViewById<com.google.android.material.button.MaterialButton>(R.id.usb_button),
+            view.findViewById<com.google.android.material.button.MaterialButton>(R.id.wifi_button),
+            view.findViewById<com.google.android.material.button.MaterialButton>(R.id.settings_button)
+        )
+
+        val isPortrait = resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
+
+        if (isPortrait) {
+            val basePaddingDp = 12f
+            val adjustedPaddingPx = ((basePaddingDp * (2.0f - scaleFactor)).coerceIn(4f, 16f) * density).toInt()
+            buttons.forEach { button ->
+                (button.parent as? View)?.setPadding(adjustedPaddingPx, adjustedPaddingPx, adjustedPaddingPx, adjustedPaddingPx)
+            }
+        } else {
+            val baseMarginDp = 40f
+            val adjustedMarginPx = ((baseMarginDp * (2.0f - scaleFactor)).coerceIn(12f, 48f) * density).toInt()
+            buttons.forEach { button ->
+                val params = button.layoutParams as? ViewGroup.MarginLayoutParams
+                if (params != null) {
+                    params.setMargins(adjustedMarginPx, adjustedMarginPx, adjustedMarginPx, adjustedMarginPx)
+                    button.layoutParams = params
+                }
+            }
+        }
+
+        val mainButtonsLayout = view.findViewById<View>(R.id.main_buttons_layout)
+        if (mainButtonsLayout != null) {
+            mainButtonsLayout.scaleX = scaleFactor
+            mainButtonsLayout.scaleY = scaleFactor
+        }
+    }
+
     override fun onResume() {
         super.onResume()
         AppLog.i("HomeFragment: onResume. isConnected=${commManager.isConnected}")
         updateProjectionButtonText()
         updateButtonStyle()
+        updateButtonScale()
         updateTextColors()
         activity?.let { act ->
             if (!act.isFinishing && !act.isDestroyed) {

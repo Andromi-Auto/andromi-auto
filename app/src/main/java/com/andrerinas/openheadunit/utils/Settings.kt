@@ -662,6 +662,17 @@ class Settings(private val context: Context) {
         get() = prefs.getInt("custom-settings-button-color", 0)
         set(value) { prefs.edit().putInt("custom-settings-button-color", value).apply() }
 
+    // Custom button scaling percentage for Home screen (default = 100%, valid range 60..120)
+    var homeButtonScalePercent: Int
+        get() {
+            val saved = prefs.getInt("home-button-scale-percent", 100)
+            return if (saved in 60..120) saved else 100
+        }
+        set(value) {
+            val valid = if (value in 60..120) value else 100
+            prefs.edit().putInt("home-button-scale-percent", valid).apply()
+        }
+
     @SuppressLint("ApplySharedPref")
     fun commit() {
         prefs.edit().commit()

@@ -59,15 +59,11 @@
             android:textStyle="bold"
             android:layout_marginBottom="12dp" />
 
-        <GridLayout
-            android:id="@+id/preset_grid"
+        <LinearLayout
+            android:id="@+id/preset_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:columnCount="6"
-            android:rowCount="2"
-            android:alignmentMode="alignMargins"
-            android:useDefaultMargins="true"
-            android:layout_gravity="center_horizontal"
+            android:orientation="vertical"
             android:layout_marginBottom="20dp" />
 
         <!-- Custom Hex Input Section -->
