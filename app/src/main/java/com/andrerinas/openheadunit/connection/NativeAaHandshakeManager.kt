@@ -591,6 +591,9 @@ class NativeAaHandshakeManager(
         try {
             val device = adapter.getRemoteDevice(address)
             AppLog.i("NativeAA: Manual poke requested for ${device.name} ($address)")
+            // The user asking to try again is the way out of a handshake backoff — it is the only
+            // gesture the UI offers, and it means they want another attempt whatever we concluded.
+            resetHandshakeBackoff()
 
             pokeJob?.cancel()
             pokeJob = scope.launch(Dispatchers.IO + CoroutineName("NativeAa-ManualWakeup")) {
