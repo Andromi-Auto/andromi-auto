@@ -45,6 +45,8 @@ class WifiLauncherNativeAA(
     }
 
     private fun setupWifiDirect(wifiDirectManager: WifiDirectManager) {
+        val commManager = App.provide(service).commManager
+
         wifiDirectManager.setCredentialsListener { ssid, psk, ip, bssid ->
             val commManager = App.provide(service).commManager
 
@@ -61,7 +63,15 @@ class WifiLauncherNativeAA(
                 AppLog.i("AapService: userExitedAA is true. Skipping auto-poke.")
             }
         }
-        wifiDirectManager.setNativeHandshakeStateProvider { handshakeManager?.isHandshakeInFlight() == true }
+
+        // Settling counts as in-flight here: isHandshakeInFlight() goes false the instant Type 3
+        // is written, but the phone still has to associate, do WPS and get a DHCP lease, and
+        // recreating the group in that window hands it an SSID it can no longer join.
+        wifiDirectManager.setNativeHandshakeStateProvider {
+            handshakeManager?.isHandshakeInFlight() == true ||
+            handshakeManager?.isHandoffSettling() == true
+        }
+        wifiDirectManager.setNativeSessionConnectedProvider { commManager.isConnected }
         wifiDirectManager.setNativeGroupInvalidatedListener { handshakeManager?.invalidateCredentials() }
     }
 
