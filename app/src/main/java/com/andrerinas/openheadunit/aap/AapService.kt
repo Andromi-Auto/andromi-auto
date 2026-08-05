@@ -1582,8 +1582,16 @@ class AapService : Service(), UsbReceiver.Listener {
                 // onCreate() already armed everything moments ago and re-running would tear
                 // down and recreate the P2P group (new random SSID/passphrase) right as it's
                 // being delivered to the phone.
+                // A successful handoff closes the AA listeners, so isActive() is false for the
+                // whole life of a working session — without the connection check below, any
+                // later ACL_CONNECTED (the phone's own Bluetooth profiles reconnecting, or one
+                // of our pokes) would tear down a session that is projecting fine.
                 val settings = App.provide(this).settings
-                if (settings.wifiConnectionMode == WifiLauncherMode.NATIVE_AA && wifiLauncherManager.getActiveMode() != WifiLauncherMode.NATIVE_AA) {
+                val sessionUp = commManager.isConnected ||
+                    commManager.connectionState.value is CommManager.ConnectionState.Connecting
+                if (settings.wifiConnectionMode == WifiLauncherMode.NATIVE_AA && !sessionUp &&
+                    nativeAaHandshakeManager?.isActive() != true &&
+                    nativeAaHandshakeManager?.isAttemptInFlight() != true) {
                     AppLog.i("AapService: Bluetooth auto-start — Native AA handshake manager was stopped, re-arming.")
                     userExitedAA = false
                     userExitCooldownUntil = 0L
