@@ -15,8 +15,8 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Run Gemini AI Code Review
-        uses: petarzarkov/gemini-ai-code-review-action@v1
+      - name: Gemini PR Reviewer
+        uses: tmikada/gemini-pr-reviewer@v1
         with:
           gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
-          model: "gemini-2.5-flash" # or gemini-2.5-pro
+          model: "gemini-2.5-flash"
