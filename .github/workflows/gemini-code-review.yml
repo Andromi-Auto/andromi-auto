@@ -1,22 +1,23 @@
-name: Gemini PR Review
+name: "Code Review"
 
 on:
   pull_request:
-    types: [opened, synchronize]
+    types: [opened, synchronize, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: write
 
 jobs:
   review:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pull-requests: write
-
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Gemini PR Reviewer
-        uses: tmikada/gemini-pr-reviewer@v1
+      - name: "Run AI Code Review"
+        uses: petarzarkov/gemini-code-review-action@latest
         with:
-          gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
-          model: "gemini-2.5-flash"
+          model: gemini-2.5-flash
+          skip_draft_prs: false
+          language: English
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
