@@ -6,7 +6,7 @@ import android.os.Build
 import android.widget.Toast
 import com.andrerinas.openheadunit.App
 import com.andrerinas.openheadunit.R
-import com.andrerinas.openheadunit.connection.wifi.NearbyManager
+import com.andrerinas.openheadunit.connection.wifi.modes.helper.NearbyManager
 import com.andrerinas.openheadunit.connection.wifi.modes.helper.HelperStrategy
 import com.andrerinas.openheadunit.connection.wifi.WifiLauncher
 import com.andrerinas.openheadunit.connection.wifi.WifiLauncherManager

@@ -1,4 +1,4 @@
-package com.andrerinas.openheadunit.connection.wifi
+package com.andrerinas.openheadunit.connection.wifi.modes.helper
 
 import android.Manifest
 import android.content.Context

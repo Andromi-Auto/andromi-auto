@@ -27,7 +27,7 @@ import com.andrerinas.openheadunit.App
 import com.andrerinas.openheadunit.R
 import com.andrerinas.openheadunit.aap.AapProjectionActivity
 import com.andrerinas.openheadunit.aap.AapService
-import com.andrerinas.openheadunit.connection.wifi.NearbyManager
+import com.andrerinas.openheadunit.connection.wifi.modes.helper.NearbyManager
 import com.andrerinas.openheadunit.connection.UsbDeviceCompat
 import android.content.res.Configuration
 import com.andrerinas.openheadunit.utils.AppLog

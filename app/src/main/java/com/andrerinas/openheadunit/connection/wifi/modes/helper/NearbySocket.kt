@@ -1,4 +1,4 @@
-package com.andrerinas.openheadunit.connection.wifi
+package com.andrerinas.openheadunit.connection.wifi.modes.helper
 
 import com.andrerinas.openheadunit.utils.AppLog
 import java.io.InputStream
