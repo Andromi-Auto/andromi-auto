@@ -68,6 +68,17 @@ adb shell am start -a android.intent.action.VIEW -d "headunit://connect?ip=192.1
 - more customization options for the UI and the app itself
 
 ## Changelog
+### v.3.2.3
+- Adding custom log location (App folder or Download folder)
+- additional fixing for the fps/freeze problems. Thanks to @o-jcardenass and @andrecuellar for helping
+
+### v.3.2.2
+- Fixing location jumping, especially on lower speeds
+- Fixing screen flicker again in video decoder
+- Fix/video throughput telemetry and keyframe lockout, thanks to @o-jcardenass
+- Fix Steering Wheel Buttons not working anymore
+- added new native mode without WiFi-Direct creation, thanks to @o-jcardenass
+
 ### v.3.2.1
 - Fixing new welcome screen reappears, thanks to @andrecuellar
 - Fixing screen flicker every 10s thanks to @o-jcardenass

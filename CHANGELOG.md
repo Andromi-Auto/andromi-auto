@@ -1,7 +1,17 @@
 # Changelog
+### v.3.2.3
+- Adding custom log location (App folder or Download folder)
+- additional fixing for the fps/freeze problems. Thanks to @o-jcardenass and @andrecuellar for helping
+
+### v.3.2.2
+- Fixing location jumping, especially on lower speeds
+- Fixing screen flicker again in video decoder
+- Fix/video throughput telemetry and keyframe lockout, thanks to @o-jcardenass
+- Fix Steering Wheel Buttons not working anymore
+- added new native mode without WiFi-Direct creation, thanks to @o-jcardenass
+
 ### v.3.2.1
 - Fixing new welcome screen, thanks to @andrecuellar
-- Fixing screen flicker every 10s thanks to @o-jcardenass
 - Fixing HW decoding on kitkat thanks to @o-jcardenass
 - Fixing 2 Fatal errors shown in play console
 - fix: move mic timestamp inside encrypted payload (byte 4), thanks to @bruno303
