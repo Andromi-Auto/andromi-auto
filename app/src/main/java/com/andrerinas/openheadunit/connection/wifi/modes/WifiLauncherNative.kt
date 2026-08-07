@@ -30,7 +30,7 @@ class WifiLauncherNative : WifiLauncher {
 
     override val mode = WifiLauncherMode.NATIVE
 
-    override fun hasSameStartConfiguration(launcher: WifiLauncher) = launcher is WifiLauncherNative
+    override fun hasSameStartConfiguration(launcher: WifiLauncher) = launcher is WifiLauncherNative && launcher.strategy == strategy
 
     override fun hasWifiDirect() = true
 
