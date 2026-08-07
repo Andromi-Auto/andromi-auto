@@ -38,7 +38,7 @@ import com.andrerinas.openheadunit.utils.ToastUtils
 import com.andrerinas.openheadunit.aap.protocol.messages.NightModeEvent
 import com.andrerinas.openheadunit.aap.protocol.proto.MediaPlayback
 import com.andrerinas.openheadunit.connection.CommManager
-import com.andrerinas.openheadunit.connection.NetworkDiscovery
+import com.andrerinas.openheadunit.connection.wifi.NetworkDiscovery
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.PlaybackStateCompat
@@ -64,11 +64,13 @@ import android.media.AudioFocusRequest
 import android.view.View
 import android.view.WindowManager
 import android.media.AudioManager
+import com.andrerinas.openheadunit.connection.wifi.modes.helper.HelperStrategy
+import com.andrerinas.openheadunit.connection.wifi.modes.native.NativeStrategy
 import com.andrerinas.openheadunit.utils.HotspotManager
 import com.andrerinas.openheadunit.connection.wifi.WifiLauncherManager
 import com.andrerinas.openheadunit.connection.wifi.WifiLauncherMode
 import com.andrerinas.openheadunit.connection.wifi.modes.WifiLauncherHelper
-import com.andrerinas.openheadunit.connection.wifi.modes.WifiLauncherNativeAA
+import com.andrerinas.openheadunit.connection.wifi.modes.WifiLauncherNative
 import com.andrerinas.openheadunit.connection.wifi.WirelessServer
 import com.andrerinas.openheadunit.main.BackgroundNotification
 import com.andrerinas.openheadunit.utils.Settings
@@ -687,7 +689,14 @@ class AapService : Service(), UsbReceiver.Listener {
         AppLog.init(settings, this)
         syncLogBackendState()
 
-        initWifiModeWithOptionalWait()
+        // Decided here as well as inside initWifiMode() so a paused start skips the wait-for-WiFi
+        // machinery entirely rather than setting it up and being turned away at the end of it.
+        if (applyBootLoopGuard()) {
+            AppLog.w("AapService: Wireless bring-up paused by the boot-loop guard. USB and the rest of the app are unaffected.")
+        } else {
+            initWifiModeWithOptionalWait()
+        }
+        scheduleBootLoopStrikeClear()
         checkAlreadyConnectedUsb()
         registerNetworkMonitor()
     }
@@ -942,6 +951,10 @@ class AapService : Service(), UsbReceiver.Listener {
     private fun setupMediaSession() {
         val mbr = ComponentName(this, MediaButtonReceiver::class.java)
         mediaSession = MediaSessionCompat(this, "HeadunitRevived", mbr, null).apply {
+            setFlags(
+                MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS or
+                    MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS
+            )
             setCallback(object : MediaSessionCompat.Callback() {
                 override fun onMediaButtonEvent(mediaButtonEvent: Intent?): Boolean {
                     val keyEvent = mediaButtonEvent?.let { IntentCompat.getParcelableExtra(it, Intent.EXTRA_KEY_EVENT, android.view.KeyEvent::class.java) }
@@ -1040,7 +1053,7 @@ class AapService : Service(), UsbReceiver.Listener {
         safeMediaSessionCall { it.isActive = false }
         updateMediaSessionState(false)
         serviceScope.launch(Dispatchers.IO) {
-            if (wifiLauncherManager.getActiveMode() == WifiLauncherMode.NATIVE_AA && !state.isUserExit) {
+            if (wifiLauncherManager.getActiveMode() == WifiLauncherMode.NATIVE && !state.isUserExit) {
                 // Unexpected disconnect — reset and re-initialize for auto-reconnect.
                 AppLog.i("AapService: Native AA Mode disconnected. Resetting manager and group in 1.5s...")
                 serviceScope.launch {
@@ -1277,7 +1290,7 @@ class AapService : Service(), UsbReceiver.Listener {
     private fun initWifiModeWithOptionalWait() {
         val settings = App.provide(this).settings
 
-        if (settings.wifiConnectionMode != WifiLauncherMode.HELPER || settings.helperConnectionStrategy != WifiLauncherHelper.Strategy.WIFI_DIRECT || !settings.waitForWifiBeforeWifiDirect) {
+        if (settings.wifiConnectionMode != WifiLauncherMode.HELPER || settings.helperConnectionStrategy != HelperStrategy.WIFI_DIRECT || !settings.waitForWifiBeforeWifiDirect) {
             wifiLauncherManager.setActiveFromSettings()
             return
         }
@@ -1532,7 +1545,12 @@ class AapService : Service(), UsbReceiver.Listener {
 
         when (intent?.action) {
             ACTION_START_SELF_MODE       -> startSelfMode()
-            ACTION_START_WIRELESS        -> wifiLauncherManager.setActiveFromSettings()
+            ACTION_START_WIRELESS        -> {
+                // Asked for from the UI, so the user is present: release the boot-loop pause
+                // rather than silently ignoring them.
+                Settings.clearBootLoopState(this)
+                wifiLauncherManager.setActiveFromSettings()
+            }
             ACTION_START_WIRELESS_SCAN   -> {
                 val settings = App.provide(this).settings
                 val mode = settings.wifiConnectionMode
@@ -1542,6 +1560,7 @@ class AapService : Service(), UsbReceiver.Listener {
                 // [FIX] Reset exit flags on manual scan start
                 userExitedAA = false
                 userExitCooldownUntil = 0L
+                Settings.clearBootLoopState(this)
                 wifiLauncherManager.setActiveFromSettings(force = true, quiet = false)
 
                 if (mode == WifiLauncherMode.AUTO)
@@ -1557,7 +1576,7 @@ class AapService : Service(), UsbReceiver.Listener {
                     userExitCooldownUntil = 0L
 
                     val settings = App.provide(this).settings
-                    if (wifiLauncherManager.getActiveMode() != WifiLauncherMode.NATIVE_AA || settings.wifiConnectionMode != WifiLauncherMode.NATIVE_AA) {
+                    if (wifiLauncherManager.getActiveMode() != WifiLauncherMode.NATIVE || settings.wifiConnectionMode != WifiLauncherMode.NATIVE) {
                         AppLog.i("AapService: Initializing Native AA mode before poke...")
                         wifiLauncherManager.setActiveFromSettings(force = true)
                     } else {
@@ -1566,7 +1585,7 @@ class AapService : Service(), UsbReceiver.Listener {
 
                     val launcher = wifiLauncherManager.active
 
-                    if (launcher is WifiLauncherNativeAA) {
+                    if (launcher is WifiLauncherNative) {
                         launcher.handshakeManager?.manualPoke(mac)
                     } else {
                         ToastUtils.showToast(this, "Native AA mode not active.")
@@ -1591,7 +1610,7 @@ class AapService : Service(), UsbReceiver.Listener {
                     commManager.connectionState.value is CommManager.ConnectionState.Connecting
                 val launcher = wifiLauncherManager.active
 
-                if (launcher is WifiLauncherNativeAA && !sessionUp &&
+                if (launcher is WifiLauncherNative && !sessionUp &&
                     launcher.handshakeManager?.isActive() != true &&
                     launcher.handshakeManager?.isAttemptInFlight() != true) {
                     AppLog.i("AapService: Bluetooth auto-start — Native AA handshake manager was stopped, re-arming.")
@@ -1605,7 +1624,7 @@ class AapService : Service(), UsbReceiver.Listener {
                 if (endpointId != null) {
                     AppLog.i("AapService: Connecting to Nearby endpoint $endpointId")
 
-                    val launcher = WifiLauncherHelper(wifiLauncherManager, WifiLauncherHelper.Strategy.NEARBY_DEVICES)
+                    val launcher = WifiLauncherHelper(wifiLauncherManager, HelperStrategy.NEARBY_DEVICES)
                     wifiLauncherManager.setActive(launcher, force = true)
                     launcher.nearbyManager?.connectToEndpoint(endpointId)
                 }
@@ -2130,6 +2149,93 @@ class AapService : Service(), UsbReceiver.Listener {
     }
 
     // -------------------------------------------------------------------------
+    // Boot-loop guard
+    // -------------------------------------------------------------------------
+
+    /**
+     * Whether to skip wireless bring-up because starting it appears to be crashing the device, and
+     * posts the notice explaining that if so.
+     *
+     * See [BootLoopPolicy]. The decision is taken from the strike count the receiver has already
+     * written, so it needs nothing from the start intent and can run here in onCreate.
+     */
+    private fun applyBootLoopGuard(): Boolean {
+        if (Settings.isWirelessPausedByBootLoop(this)) {
+            AppLog.w("AapService: Wireless is still paused from an earlier boot loop. Open the app to re-enable it.")
+            notifyBootLoopPause()
+            return true
+        }
+        val strikes = Settings.getBootLoopStrikes(this)
+        if (!BootLoopPolicy.shouldPauseWireless(strikes)) return false
+
+        AppLog.w(
+            "AapService: $strikes boot-started runs in a row ended before " +
+                "${BootLoopPolicy.HEALTHY_RUN_MS / 1000}s. Pausing wireless bring-up — on some head units " +
+                "the WiFi stack takes the whole system down when a phone joins, and auto-start then " +
+                "repeats it forever."
+        )
+        Settings.setWirelessPausedByBootLoop(this, true)
+        notifyBootLoopPause()
+        return true
+    }
+
+    /**
+     * Clears the strikes once this run has lasted long enough to count as healthy.
+     *
+     * Deliberately time-based rather than hung off a successful connection: on the head unit this
+     * guard was written for, one cycle reached a complete projection session with audio playing and
+     * the system died anyway, so a connection-based signal would reset the count every pass.
+     */
+    private fun scheduleBootLoopStrikeClear() {
+        if (Settings.getBootLoopStrikes(this) == 0) return
+        serviceScope.launch {
+            delay(BootLoopPolicy.HEALTHY_RUN_MS)
+            AppLog.i("AapService: This run has lasted ${BootLoopPolicy.HEALTHY_RUN_MS / 1000}s. Clearing the boot-loop strikes.")
+            Settings.setBootLoopStrikes(this@AapService, 0)
+        }
+    }
+
+    /**
+     * Tells the user wireless was left off and what to do about it. Names the WiFi Direct join when
+     * that is the configuration, because on the units this happens to, switching the Native AA
+     * transport to the head unit's own hotspot avoids the P2P path altogether.
+     */
+    private fun notifyBootLoopPause() {
+        val settings = App.provide(this).settings
+        val onNativeWifiDirect = settings.wifiConnectionMode == WifiLauncherMode.NATIVE &&
+            settings.nativeApStrategy == NativeStrategy.WIFI_DIRECT
+        val text = getString(
+            if (onNativeWifiDirect) R.string.boot_loop_paused_native_wifi_direct
+            else R.string.boot_loop_paused_generic
+        )
+
+        val launchIntent = Intent(this, MainActivity::class.java).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            putExtra(MainActivity.EXTRA_LAUNCH_SOURCE, "Boot-loop guard")
+        }
+        val piFlags = PendingIntent.FLAG_UPDATE_CURRENT or
+            (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0)
+        val pi = PendingIntent.getActivity(this, 201, launchIntent, piFlags)
+
+        val notification = NotificationCompat.Builder(this, App.bootStartChannel)
+            .setSmallIcon(R.drawable.ic_stat_aa)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setContentTitle(getString(R.string.boot_loop_paused_title))
+            .setContentText(text)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(text))
+            .setContentIntent(pi)
+            .setAutoCancel(true)
+            .build()
+
+        try {
+            (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
+                .notify(BOOT_LOOP_NOTIFICATION_ID, notification)
+        } catch (e: Exception) {
+            AppLog.w("AapService: Could not post the boot-loop notice: ${e.message}")
+        }
+    }
+
+    // -------------------------------------------------------------------------
     // Self Mode
     // -------------------------------------------------------------------------
 
@@ -2205,7 +2311,7 @@ class AapService : Service(), UsbReceiver.Listener {
             }
 
             AppLog.i("SelfMode: AA < 17.4 detected. Starting WirelessServer on 5288 and running legacy triggers...")
-            wifiLauncherManager.setActive(WifiLauncherMode.NATIVE_AA)
+            wifiLauncherManager.setActive(WifiLauncherMode.NATIVE)
 
             val connectivityManager = getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && connectivityManager.activeNetwork == null) {
@@ -2350,6 +2456,7 @@ class AapService : Service(), UsbReceiver.Listener {
         val scanningState = MutableStateFlow(false)
 
         private const val BOOT_START_NOTIFICATION_ID = 42
+        private const val BOOT_LOOP_NOTIFICATION_ID = 43
         private const val PROJECTION_LAUNCH_NOTIFICATION_ID = 43
 
         // Service action strings used with startService() and sendBroadcast()

@@ -1,11 +1,9 @@
 package com.andrerinas.openheadunit.connection.wifi
 
-import android.content.Context
 import com.andrerinas.openheadunit.connection.wifi.modes.WifiLauncherAuto
 import com.andrerinas.openheadunit.connection.wifi.modes.WifiLauncherHelper
 import com.andrerinas.openheadunit.connection.wifi.modes.WifiLauncherManual
-import com.andrerinas.openheadunit.connection.wifi.modes.WifiLauncherNativeAA
-import com.andrerinas.openheadunit.utils.Settings
+import com.andrerinas.openheadunit.connection.wifi.modes.WifiLauncherNative
 
 enum class WifiLauncherMode(
     val id: Int,
@@ -14,7 +12,7 @@ enum class WifiLauncherMode(
     MANUAL(0, ::WifiLauncherManual),
     AUTO(1, ::WifiLauncherAuto),
     HELPER(2, ::WifiLauncherHelper),
-    NATIVE_AA(3, ::WifiLauncherNativeAA);
+    NATIVE(3, ::WifiLauncherNative);
 
     companion object {
 

@@ -27,7 +27,7 @@ import com.andrerinas.openheadunit.App
 import com.andrerinas.openheadunit.R
 import com.andrerinas.openheadunit.aap.AapProjectionActivity
 import com.andrerinas.openheadunit.aap.AapService
-import com.andrerinas.openheadunit.connection.NearbyManager
+import com.andrerinas.openheadunit.connection.wifi.NearbyManager
 import com.andrerinas.openheadunit.connection.UsbDeviceCompat
 import android.content.res.Configuration
 import com.andrerinas.openheadunit.utils.AppLog
@@ -41,8 +41,8 @@ import com.andrerinas.openheadunit.utils.VpnControl
 import com.andrerinas.openheadunit.utils.BluetoothHelper
 import com.andrerinas.openheadunit.connection.UsbReceiver
 import com.andrerinas.openheadunit.connection.UsbAccessoryMode
+import com.andrerinas.openheadunit.connection.wifi.modes.helper.HelperStrategy
 import com.andrerinas.openheadunit.connection.wifi.WifiLauncherMode
-import com.andrerinas.openheadunit.connection.wifi.modes.WifiLauncherHelper
 import kotlinx.coroutines.withContext
 
 class HomeFragment : Fragment() {
@@ -217,7 +217,7 @@ class HomeFragment : Fragment() {
 
         // [FIX] Skip manual WiFi connection if Native AA is selected.
         // Native AA handles its own handshake via Bluetooth/P2P.
-        if (appSettings.wifiConnectionMode == WifiLauncherMode.NATIVE_AA) {
+        if (appSettings.wifiConnectionMode == WifiLauncherMode.NATIVE) {
             AppLog.i("HomeFragment: Native AA mode active. Skipping manual auto-connect attempt.")
             return false
         }
@@ -483,7 +483,7 @@ class HomeFragment : Fragment() {
                         // Already connected
                     } else {
                         val strategy = App.provide(requireContext()).settings.helperConnectionStrategy
-                        if (strategy == WifiLauncherHelper.Strategy.HEADUNIT_HOTSPOT) {
+                        if (strategy == HelperStrategy.HEADUNIT_HOTSPOT) {
                             if (!AapService.scanningState.value) {
                                 (requireActivity() as? MainActivity)?.beginAutoConnect(
                                     "manual WiFi helper scan",
@@ -497,7 +497,7 @@ class HomeFragment : Fragment() {
                             com.andrerinas.openheadunit.utils.ShareHotspotQrDialog.show(
                                 requireContext()
                             )
-                        } else if (strategy == WifiLauncherHelper.Strategy.NEARBY_DEVICES) {
+                        } else if (strategy == HelperStrategy.NEARBY_DEVICES) {
                             // Nearby Devices — show live discovery dialog
                             showNearbyDeviceSelector()
                         } else if (AapService.scanningState.value) {
@@ -515,7 +515,7 @@ class HomeFragment : Fragment() {
                         }
                     }
                 }
-                WifiLauncherMode.NATIVE_AA -> { // Native AA
+                WifiLauncherMode.NATIVE -> { // Native AA
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
                         ContextCompat.checkSelfPermission(requireContext(), android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
                         bluetoothPermissionLauncher.launch(android.Manifest.permission.BLUETOOTH_CONNECT)

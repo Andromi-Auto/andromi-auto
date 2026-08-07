@@ -3,12 +3,10 @@ package com.andrerinas.openheadunit.connection.wifi
 import com.andrerinas.openheadunit.App
 import com.andrerinas.openheadunit.aap.AapService
 import com.andrerinas.openheadunit.aap.AapService.Companion.scanningState
-import com.andrerinas.openheadunit.connection.CommManager
-import com.andrerinas.openheadunit.connection.NetworkDiscovery
-import com.andrerinas.openheadunit.connection.WifiDirectManager
 import com.andrerinas.openheadunit.utils.AppLog
 import com.andrerinas.openheadunit.utils.HotspotManager
 import com.andrerinas.openheadunit.utils.VpnControl
+import java.net.Socket
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -99,7 +97,7 @@ class WifiLauncherSharedServices(val service: AapService) {
         scanningState.value = true
 
         localDiscovery = NetworkDiscovery(service, object : NetworkDiscovery.Listener {
-            override fun onServiceFound(ip: String, port: Int, socket: java.net.Socket?) {
+            override fun onServiceFound(ip: String, port: Int, socket: Socket?) {
                 if (commManager.isConnected) {
                     // Already connected by the time this callback fired; discard the socket
                     try { socket?.close() } catch (e: Exception) {}

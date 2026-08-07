@@ -10,8 +10,9 @@ import android.os.Build
 import com.andrerinas.openheadunit.aap.protocol.proto.Control
 import com.andrerinas.openheadunit.app.UsbAttachedActivity
 import com.andrerinas.openheadunit.connection.UsbDeviceCompat
+import com.andrerinas.openheadunit.connection.wifi.modes.helper.HelperStrategy
+import com.andrerinas.openheadunit.connection.wifi.modes.native.NativeStrategy
 import com.andrerinas.openheadunit.connection.wifi.WifiLauncherMode
-import com.andrerinas.openheadunit.connection.wifi.modes.WifiLauncherHelper
 
 class Settings(private val context: Context) {
 
@@ -368,7 +369,7 @@ class Settings(private val context: Context) {
             // Migration: Check if native-aa-wireless was true
             if (prefs.getBoolean("native-aa-wireless", false)) {
                 prefs.edit().putInt("wifi-connection-mode", 3).remove("native-aa-wireless").apply()
-                return WifiLauncherMode.NATIVE_AA
+                return WifiLauncherMode.NATIVE
             }
             return WifiLauncherMode.byIdOrDefault(prefs.getInt("wifi-connection-mode", -1))
         }
@@ -1266,9 +1267,8 @@ class Settings(private val context: Context) {
         get() = prefs.getInt("wait-for-wifi-timeout", 10)
         set(value) { prefs.edit().putInt("wait-for-wifi-timeout", value).apply() }
 
-    // 0 = Common Wifi (NSD), 1 = Wifi Direct P2P, 2 = Nearby Devices, 3 = Phone Hotspot (Host), 4 = Headunit Hotspot (Passive)
-    var helperConnectionStrategy: WifiLauncherHelper.Strategy
-        get() = WifiLauncherHelper.Strategy.byIdOrDefault(prefs.getInt("helper-connection-strategy", -1))
+    var helperConnectionStrategy: HelperStrategy
+        get() = HelperStrategy.byIdOrDefault(prefs.getInt("helper-connection-strategy", -1))
         set(value) = prefs.edit().putInt("helper-connection-strategy", value.id).apply()
 
     var lastNearbyDeviceName: String
@@ -1285,9 +1285,9 @@ class Settings(private val context: Context) {
     // Deliberately not folded into helperConnectionStrategy: that setting belongs to mode 2 and
     // means something different in every one of its five values. A wireless mode that reuses
     // another mode's selector is how the two call sites of the old usesWifiDirect() drifted apart.
-    var nativeApTransport: Int
-        get() = prefs.getInt("native-ap-transport", 0)
-        set(value) = prefs.edit().putInt("native-ap-transport", value).apply()
+    var nativeApStrategy: NativeStrategy
+        get() = NativeStrategy.byIdOrDefault(prefs.getInt("native-ap-transport", -1))
+        set(value) = prefs.edit().putInt("native-ap-transport", value.id).apply()
 
     // Whether the Native AA handshake opens with a WifiVersionRequest (Type 4), as real head units
     // and the OEM ZLink app do, instead of going straight to WifiStartRequest.

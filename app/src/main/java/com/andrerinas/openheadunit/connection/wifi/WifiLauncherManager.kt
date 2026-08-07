@@ -5,6 +5,7 @@ import com.andrerinas.openheadunit.App
 import com.andrerinas.openheadunit.aap.AapService
 import com.andrerinas.openheadunit.connection.wifi.modes.WifiLauncherHelper
 import com.andrerinas.openheadunit.utils.AppLog
+import com.andrerinas.openheadunit.utils.Settings
 
 class WifiLauncherManager(val service: AapService) {
 
@@ -35,6 +36,15 @@ class WifiLauncherManager(val service: AapService) {
 
         if (!force && (active?.hasSameStartConfiguration(newLauncher) ?: false)) {
             AppLog.d("WifiLauncher: WiFi Mode ${newLauncher.mode}.mode with same start-configuration is already initialized.")
+            return
+        }
+
+        // Every automatic entry point lands here, including the Bluetooth auto-start that fires
+        // when the phone comes into range — which on a looping unit would walk straight back into
+        // the crash the guard was set to avoid. Explicit user actions release the pause first, so
+        // this only ever blocks a start nobody asked for.
+        if (Settings.isWirelessPausedByBootLoop(service)) {
+            AppLog.w("AapService: Wireless bring-up requested, but it is paused by the boot-loop guard. Open the app to re-enable it.")
             return
         }
 
