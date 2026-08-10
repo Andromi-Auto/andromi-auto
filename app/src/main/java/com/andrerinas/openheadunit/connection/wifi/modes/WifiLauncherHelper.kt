@@ -98,6 +98,9 @@ class WifiLauncherHelper : WifiLauncher {
     }
 
     override fun stop(seq: WifiLauncherStopSequence) {
+        if (!seq.handledAt(WifiLauncherStopSequence.LAST))
+            return
+
         nearbyManager?.stop()
     }
 
