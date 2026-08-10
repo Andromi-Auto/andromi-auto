@@ -17,7 +17,7 @@ abstract class WifiLauncher(val manager: WifiLauncherManager) {
 
     abstract fun start(quiet: Boolean)
 
-    abstract fun stop()
+    abstract fun stop(seq: WifiLauncherStopSequence)
 
     open fun restartDiscovery() {
         manager.startDiscovery()

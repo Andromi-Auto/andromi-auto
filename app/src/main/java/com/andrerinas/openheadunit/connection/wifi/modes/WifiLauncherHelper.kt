@@ -11,6 +11,7 @@ import com.andrerinas.openheadunit.connection.wifi.modes.helper.HelperStrategy
 import com.andrerinas.openheadunit.connection.wifi.WifiLauncher
 import com.andrerinas.openheadunit.connection.wifi.WifiLauncherManager
 import com.andrerinas.openheadunit.connection.wifi.WifiLauncherMode
+import com.andrerinas.openheadunit.connection.wifi.WifiLauncherStopSequence
 import com.andrerinas.openheadunit.utils.AppLog
 import com.andrerinas.openheadunit.utils.HotspotManager
 import com.andrerinas.openheadunit.utils.Settings
@@ -96,7 +97,7 @@ class WifiLauncherHelper : WifiLauncher {
         }
     }
 
-    override fun stop() {
+    override fun stop(seq: WifiLauncherStopSequence) {
         nearbyManager?.stop()
     }
 

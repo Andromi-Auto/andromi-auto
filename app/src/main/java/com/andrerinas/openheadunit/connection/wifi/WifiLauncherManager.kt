@@ -51,7 +51,7 @@ class WifiLauncherManager(val service: AapService) {
         AppLog.i("WifiLauncher: Initializing WiFi Mode: ${newLauncher.mode}")
 
         // stop old launcher
-        active?.stop()
+        active?.stop(WifiLauncherStopSequence.ANY)
 
         // replace it with new one
         active = newLauncher
@@ -59,13 +59,16 @@ class WifiLauncherManager(val service: AapService) {
         active?.start(quiet)
     }
 
-    fun stop() {
+    fun stop(seq: WifiLauncherStopSequence = WifiLauncherStopSequence.ANY) {
         if (active == null)
             return
 
-        sharedServices.stopAll()
-        active?.stop()
-        active = null
+        active?.stop(seq)
+
+        if (seq.handledAt(WifiLauncherStopSequence.LAST)) {
+            sharedServices.stopAll()
+            active = null
+        }
     }
 
     fun forceStartDiscoveryScan() {

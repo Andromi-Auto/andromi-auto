@@ -1,4 +1,4 @@
-package com.andrerinas.openheadunit.connection
+package com.andrerinas.openheadunit.connection.wifi
 
 import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
@@ -9,6 +9,7 @@ import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.net.NetworkInfo
+import android.net.wifi.SupplicantState
 import android.net.wifi.WifiManager
 import android.net.wifi.p2p.WifiP2pConfig
 import android.net.wifi.p2p.WifiP2pDevice
@@ -19,14 +20,15 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
+import android.provider.Settings
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import com.andrerinas.openheadunit.App
 import com.andrerinas.openheadunit.R
 import com.andrerinas.openheadunit.aap.AapService
 import com.andrerinas.openheadunit.aap.NativeHandoffPolicy
-import com.andrerinas.openheadunit.connection.wifi.WifiDirectCompat
-import com.andrerinas.openheadunit.connection.wifi.WifiLauncherMode
+import com.andrerinas.openheadunit.aap.P2pChannelPolicy
+import com.andrerinas.openheadunit.connection.CommManager
 import com.andrerinas.openheadunit.connection.wifi.modes.helper.HelperStrategy
 import com.andrerinas.openheadunit.main.MainActivity
 import com.andrerinas.openheadunit.utils.ToastUtils
@@ -483,7 +485,7 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
                             // Fallback 5: Try Settings.Secure (Samsung/Pixel trick)
                             var resolved = false
                             try {
-                                val secureMac = android.provider.Settings.Secure.getString(context.contentResolver, "wifi_p2p_device_address")
+                                val secureMac = Settings.Secure.getString(context.contentResolver, "wifi_p2p_device_address")
                                 if (!secureMac.isNullOrEmpty() && secureMac != "00:00:00:00:00:00" && secureMac != "02:00:00:00:00:00") {
                                     AppLog.i("WifiDirectManager: Fallback 5 - Selected MAC from Settings.Secure: $secureMac")
                                     bssid = secureMac
@@ -648,14 +650,14 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
     private fun logStationCoexistence(ssid: String, groupFrequency: Int) {
         try {
             val wifiManager = context.applicationContext
-                .getSystemService(Context.WIFI_SERVICE) as android.net.wifi.WifiManager
+                .getSystemService(Context.WIFI_SERVICE) as WifiManager
             val info = wifiManager.connectionInfo ?: return
             // supplicantState, not networkId or SSID. Both of those are redacted to -1 and
             // "<unknown ssid>" whenever the caller cannot satisfy the location gate, which on a
             // head unit is routine (the service runs without the projection activity in front),
             // so keying on either would silently report "not associated" on the newer Android
             // versions where this diagnosis is worth having. supplicantState survives redaction.
-            if (info.supplicantState != android.net.wifi.SupplicantState.COMPLETED) {
+            if (info.supplicantState != SupplicantState.COMPLETED) {
                 lastCoexistenceSsid = null
                 return
             }
@@ -909,7 +911,7 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
             context.startActivity(intent)
         } catch (e: Exception) {
             try {
-                val intent = Intent(android.provider.Settings.ACTION_WIFI_SETTINGS).apply {
+                val intent = Intent(Settings.ACTION_WIFI_SETTINGS).apply {
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 }
                 context.startActivity(intent)

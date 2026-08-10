@@ -5,6 +5,7 @@ import com.andrerinas.openheadunit.connection.wifi.WifiLauncher
 import com.andrerinas.openheadunit.connection.wifi.WifiLauncherManager
 import com.andrerinas.openheadunit.connection.wifi.WifiLauncherMode
 import com.andrerinas.openheadunit.connection.wifi.WifiLauncherSharedServices
+import com.andrerinas.openheadunit.connection.wifi.WifiLauncherStopSequence
 import com.andrerinas.openheadunit.utils.Settings
 
 class WifiLauncherManual(
@@ -24,6 +25,6 @@ class WifiLauncherManual(
     override fun start(quiet: Boolean) {
     }
 
-    override fun stop() {
+    override fun stop(seq: WifiLauncherStopSequence) {
     }
 }

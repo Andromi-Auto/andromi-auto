@@ -32,6 +32,17 @@ class WirelessServer(val registerNsd: Boolean, val service: AapService) {
     private var registrationListener: NsdManager.RegistrationListener? = null
     private var job: Job? = null
 
+    /**
+     * Whether the TCP port the phone is told to dial is actually bound right now.
+     *
+     * start() only launches a coroutine; the bind happens inside it and can fail (the port
+     * still held by a previous session is the usual way). Handing the phone credentials for a
+     * port nothing is listening on produces the worst possible log: a clean handshake, a
+     * successful WiFi join, and then silence.
+     */
+    @Volatile var isListening = false
+        private set
+
     fun start() {
         val commManager = App.provide(service).commManager
 
@@ -45,6 +56,7 @@ class WirelessServer(val registerNsd: Boolean, val service: AapService) {
         job = service.serviceScope.launch(Dispatchers.IO) {
             try {
                 serverSocket = ServerSocket(5288).apply { reuseAddress = true }
+                isListening = true
                 AppLog.i("Wireless Server listening on port 5288")
                 logLocalNetworkInterfaces()
 
@@ -74,6 +86,7 @@ class WirelessServer(val registerNsd: Boolean, val service: AapService) {
             } catch (e: Exception) {
                 if (isActive) AppLog.e("Wireless server error", e)
             } finally {
+                isListening = false
                 unregisterNsd()
                 try { serverSocket?.close() } catch (e: Exception) {}
             }

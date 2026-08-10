@@ -8,6 +8,7 @@ import android.os.Handler
 import android.os.Looper
 import android.widget.Toast
 import androidx.core.content.ContextCompat
+import com.andrerinas.openheadunit.R
 import com.andrerinas.openheadunit.utils.AppLog
 import com.andrerinas.openheadunit.utils.HotspotConfigReader
 import com.andrerinas.openheadunit.utils.HotspotManager
@@ -16,7 +17,7 @@ import com.andrerinas.openheadunit.utils.NetworkAddresses
 import com.andrerinas.openheadunit.utils.Settings
 import com.andrerinas.openheadunit.utils.SoftApStateReader
 import com.andrerinas.openheadunit.utils.ToastUtils
-import com.andrerinas.openheadunit.connection.WifiDirectManager
+import com.andrerinas.openheadunit.connection.wifi.WifiDirectManager
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

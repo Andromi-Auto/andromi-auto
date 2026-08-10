@@ -2,13 +2,14 @@ package com.andrerinas.openheadunit.connection.wifi.modes
 
 import com.andrerinas.openheadunit.App
 import com.andrerinas.openheadunit.connection.CommManager
+import com.andrerinas.openheadunit.connection.wifi.WifiDirectManager
 import com.andrerinas.openheadunit.connection.wifi.modes.native.NativeAaHandshakeManager
 import com.andrerinas.openheadunit.connection.wifi.modes.native.SoftApCredentialsProvider
-import com.andrerinas.openheadunit.connection.wifi.WifiDirectManager
 import com.andrerinas.openheadunit.connection.wifi.modes.native.NativeStrategy
 import com.andrerinas.openheadunit.connection.wifi.WifiLauncher
 import com.andrerinas.openheadunit.connection.wifi.WifiLauncherManager
 import com.andrerinas.openheadunit.connection.wifi.WifiLauncherMode
+import com.andrerinas.openheadunit.connection.wifi.WifiLauncherStopSequence
 import com.andrerinas.openheadunit.utils.AppLog
 
 class WifiLauncherNative : WifiLauncher {
@@ -44,27 +45,44 @@ class WifiLauncherNative : WifiLauncher {
         handshakeManager = NativeAaHandshakeManager(service, this, service.serviceScope)
         softApCredentialsProvider = SoftApCredentialsProvider(service, service.serviceScope, settings)
 
-        // Start WiFi Direct as a "quiet host" (P2P Group for phone to join)
-        // We let WifiDirectManager handle the WiFi state (enabling if needed)
-        if (this.strategy == NativeStrategy.HOTSPOT) {
-            // Read this device's own access point instead of hosting a P2P group. The AP
-            // itself is the user's to switch on; the provider only resolves and watches it.
-            AppLog.i("AapService: Native AA on the head unit hotspot — resolving access point credentials.")
-            softApCredentialsProvider?.start()
-        } else {
-            // Start WiFi Direct as a "quiet host" (P2P Group for phone to join)
-            // We let WifiDirectManager handle the WiFi state (enabling if needed)
-            setupWifiDirect(wifiDirect)
-            wifiDirect.startNativeAaQuietHost()
-        }
+        // Skip the whole route, not just the handshake, when the Bluetooth this unit's
+        // phone is bonded to isn't reachable from here: with no Bluetooth channel there is
+        // nobody to hand the credentials to, so hosting a P2P group or holding the hotspot
+        // open would only churn the WiFi stack for nothing.
+        val externalBt = NativeAaHandshakeManager.externalBtDiagnostic()
+        if (externalBt != null) AppLog.e(externalBt)
+        val blockedByExternalBt =
+            externalBt != null && !NativeAaHandshakeManager.externalBtOverridden(service)
 
-        // Start the official Bluetooth handshake servers
-        handshakeManager?.start()
+        if (!blockedByExternalBt) {
+            if (this.strategy == NativeStrategy.HOTSPOT) {
+                // Read this device's own access point instead of hosting a P2P group. The AP
+                // itself is the user's to switch on; the provider only resolves and watches it.
+                AppLog.i("AapService: Native AA on the head unit hotspot — resolving access point credentials.")
+                softApCredentialsProvider?.start()
+            } else {
+                // Start WiFi Direct as a "quiet host" (P2P Group for phone to join)
+                // We let WifiDirectManager handle the WiFi state (enabling if needed)
+                setupWifiDirect(wifiDirect)
+                wifiDirect.startNativeAaQuietHost()
+            }
+
+            // Start the official Bluetooth handshake servers
+            handshakeManager?.start()
+        }
     }
 
-    override fun stop() {
-        handshakeManager?.stop()
-        softApCredentialsProvider?.stop()
+    override fun stop(seq: WifiLauncherStopSequence) {
+        // Before the hotspot goes, not after: SoftApCredentialsProvider watches
+        // WIFI_AP_STATE_CHANGED and switches an access point it started back on when it sees one
+        // drop. Left registered here it would treat this very teardown as the hotspot failing and
+        // bring it back up as the service dies — leaving the access point running with nothing
+        // left to serve it.
+        if (seq.handledAt(WifiLauncherStopSequence.BEFORE_HOTSPOT_DISABLE))
+            softApCredentialsProvider?.stop()
+
+        if (seq.handledAt(WifiLauncherStopSequence.LAST))
+            handshakeManager?.stop()
     }
 
     private fun setupWifiDirect(wifiDirectManager: WifiDirectManager) {
@@ -128,4 +146,13 @@ class WifiLauncherNative : WifiLauncher {
             AppLog.i("AapService: userExitedAA is true. Skipping auto-poke.")
         }
     }
+
+    /**
+     * Whether the AAP TCP port the phone will be sent to is bound and accepting.
+     *
+     * The Bluetooth handshake checks this before handing over credentials, mirroring the ordering
+     * the reference head unit software uses: access point up, address resolved, port bound, and
+     * only then talk to the phone.
+     */
+    fun isWirelessServerListening(): Boolean = manager.sharedServices.wirelessServer?.isListening == true
 }

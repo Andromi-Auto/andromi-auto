@@ -3253,7 +3253,7 @@ class SettingsFragment : Fragment() {
                 // the user can name it under the secondary-Bluetooth setting, and Native mode
                 // will then run. Without that it stays switched off, and the log says why.
                 .setPositiveButton(android.R.string.ok) { dialog, _ ->
-                    pendingWifiConnectionMode = 3
+                    pendingWifiConnectionMode = WifiLauncherMode.NATIVE
                     checkChanges()
                     updateSettingsList()
                     dialog.dismiss()
