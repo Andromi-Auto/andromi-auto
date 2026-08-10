@@ -1,5 +1,7 @@
 package com.andrerinas.openheadunit.aap
 
+import com.andrerinas.openheadunit.connection.wifi.modes.native.NativeStrategy
+
 /** What a user-initiated disconnect should do to this head unit's own access point. */
 enum class HotspotExitAction {
     /** Not a hotspot route — this decision belongs to someone else. */
@@ -44,7 +46,7 @@ object UserExitHotspotPolicy {
     fun onUserExit(
         mode: Int,
         strategy: Int,
-        transport: NativeTransport,
+        transport: NativeStrategy,
         autoEnableHotspot: Boolean,
         teardownProvenUnsafe: Boolean = false
     ): HotspotExitAction = when {
@@ -62,6 +64,6 @@ object UserExitHotspotPolicy {
     }
 
     /** Whether this combination puts the phone on an access point this device is hosting. */
-    fun usesHeadUnitHotspot(mode: Int, strategy: Int, transport: NativeTransport): Boolean =
-        (mode == 3 && transport == NativeTransport.HOTSPOT) || (mode == 2 && strategy == 4)
+    fun usesHeadUnitHotspot(mode: Int, strategy: Int, transport: NativeStrategy): Boolean =
+        (mode == 3 && transport == NativeStrategy.HOTSPOT) || (mode == 2 && strategy == 4)
 }

@@ -27,23 +27,22 @@ import com.andrerinas.openheadunit.App
 import com.andrerinas.openheadunit.R
 import com.andrerinas.openheadunit.aap.AapProjectionActivity
 import com.andrerinas.openheadunit.aap.AapService
-import com.andrerinas.openheadunit.connection.NearbyManager
+import com.andrerinas.openheadunit.connection.wifi.modes.helper.NearbyManager
 import com.andrerinas.openheadunit.connection.UsbDeviceCompat
 import android.content.res.Configuration
-import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothManager
 import com.andrerinas.openheadunit.utils.AppLog
 import com.andrerinas.openheadunit.utils.AppPermissions
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.flow.collect
 import com.andrerinas.openheadunit.utils.Settings
 import com.andrerinas.openheadunit.utils.VpnControl
 import com.andrerinas.openheadunit.utils.BluetoothHelper
 import com.andrerinas.openheadunit.connection.UsbReceiver
 import com.andrerinas.openheadunit.connection.UsbAccessoryMode
+import com.andrerinas.openheadunit.connection.wifi.modes.helper.HelperStrategy
+import com.andrerinas.openheadunit.connection.wifi.WifiLauncherMode
 import com.andrerinas.openheadunit.utils.ColorUtils
 import kotlinx.coroutines.withContext
 
@@ -219,7 +218,7 @@ class HomeFragment : Fragment() {
 
         // [FIX] Skip manual WiFi connection if Native AA is selected.
         // Native AA handles its own handshake via Bluetooth/P2P.
-        if (appSettings.wifiConnectionMode == 3) {
+        if (appSettings.wifiConnectionMode == WifiLauncherMode.NATIVE) {
             AppLog.i("HomeFragment: Native AA mode active. Skipping manual auto-connect attempt.")
             return false
         }
@@ -238,7 +237,7 @@ class HomeFragment : Fragment() {
 
         return when (connectionType) {
             Settings.CONNECTION_TYPE_WIFI -> {
-                if (appSettings.wifiConnectionMode == 1) {
+                if (appSettings.wifiConnectionMode == WifiLauncherMode.AUTO) {
                     val ip = appSettings.lastConnectionIp
                     if (ip.isNotEmpty()) {
                         AppLog.i("Auto-connect: Attempting WiFi connection to $ip")
@@ -321,20 +320,11 @@ class HomeFragment : Fragment() {
 
     private fun restoreOriginalStyle() {
         val whiteTint = ColorStateList.valueOf(0xFFFFFFFF.toInt())
-        val appSettings = App.provide(requireContext()).settings
-
-        val buttonConfigs = listOf(
-            Triple(self_mode_button, R.drawable.gradient_blue, appSettings.customSelfModeButtonColor),
-            Triple(usb, R.drawable.gradient_orange, appSettings.customUsbButtonColor),
-            Triple(wifi, R.drawable.gradient_purple, appSettings.customWifiButtonColor),
-            Triple(settings, R.drawable.gradient_darkblue, appSettings.customSettingsButtonColor)
-        )
-
-        buttonConfigs.forEach { (button, defaultDrawableRes, customColor) ->
-            if (customColor != 0) {
-                button.background = ColorUtils.createGradientDrawable(customColor, 32f, requireContext())
-            } else {
-                button.background = ContextCompat.getDrawable(requireContext(), defaultDrawableRes)
+        val buttons = listOf(self_mode_button, usb, wifi, settings)
+        val ids = listOf(R.id.self_mode_button, R.id.usb_button, R.id.wifi_button, R.id.settings_button)
+        buttons.zip(ids).forEach { (button, id) ->
+            originalBackgrounds[id]?.let { drawableRes ->
+                button.background = ContextCompat.getDrawable(requireContext(), drawableRes)
             }
             (button as? com.google.android.material.button.MaterialButton)?.iconTint = whiteTint
         }
@@ -472,7 +462,7 @@ class HomeFragment : Fragment() {
         wifi.setOnClickListener {
             val mode = App.provide(requireContext()).settings.wifiConnectionMode
             when (mode) {
-                1 -> { // Auto (Headunit Server) - One-Shot Scan
+                WifiLauncherMode.AUTO -> { // Auto (Headunit Server) - One-Shot Scan
                     if (commManager.isConnected) {
                         // Already connected
                     } else if (AapService.scanningState.value) {
@@ -489,12 +479,12 @@ class HomeFragment : Fragment() {
                         ContextCompat.startForegroundService(requireContext(), intent)
                     }
                 }
-                2 -> { // Helper (Wireless Launcher)
+                WifiLauncherMode.HELPER -> { // Helper (Wireless Launcher)
                     if (commManager.isConnected) {
                         // Already connected
                     } else {
                         val strategy = App.provide(requireContext()).settings.helperConnectionStrategy
-                        if (strategy == 4) {
+                        if (strategy == HelperStrategy.HEADUNIT_HOTSPOT) {
                             if (!AapService.scanningState.value) {
                                 (requireActivity() as? MainActivity)?.beginAutoConnect(
                                     "manual WiFi helper scan",
@@ -508,7 +498,7 @@ class HomeFragment : Fragment() {
                             com.andrerinas.openheadunit.utils.ShareHotspotQrDialog.show(
                                 requireContext()
                             )
-                        } else if (strategy == 2) {
+                        } else if (strategy == HelperStrategy.NEARBY_DEVICES) {
                             // Nearby Devices — show live discovery dialog
                             showNearbyDeviceSelector()
                         } else if (AapService.scanningState.value) {
@@ -526,7 +516,7 @@ class HomeFragment : Fragment() {
                         }
                     }
                 }
-                3 -> { // Native AA
+                WifiLauncherMode.NATIVE -> { // Native AA
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
                         ContextCompat.checkSelfPermission(requireContext(), android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
                         bluetoothPermissionLauncher.launch(android.Manifest.permission.BLUETOOTH_CONNECT)
@@ -534,7 +524,7 @@ class HomeFragment : Fragment() {
                         showNativeAaDeviceSelector()
                     }
                 }
-                else -> { // Manual (0) -> Open List
+                WifiLauncherMode.MANUAL -> { // Manual (0) -> Open List
                     val controller = findNavController()
                     if (controller.currentDestination?.id == R.id.homeFragment) {
                         controller.navigate(R.id.action_homeFragment_to_networkListFragment)
@@ -616,53 +606,11 @@ class HomeFragment : Fragment() {
         }
     }
 
-    private fun updateButtonScale() {
-        val view = view ?: return
-        val appSettings = App.provide(requireContext()).settings
-        val scalePercent = appSettings.homeButtonScalePercent.coerceIn(60, 120)
-        val scaleFactor = scalePercent / 100.0f
-        val density = resources.displayMetrics.density
-
-        val buttons = listOfNotNull(
-            view.findViewById<com.google.android.material.button.MaterialButton>(R.id.self_mode_button),
-            view.findViewById<com.google.android.material.button.MaterialButton>(R.id.usb_button),
-            view.findViewById<com.google.android.material.button.MaterialButton>(R.id.wifi_button),
-            view.findViewById<com.google.android.material.button.MaterialButton>(R.id.settings_button)
-        )
-
-        val isPortrait = resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
-
-        if (isPortrait) {
-            val basePaddingDp = 12f
-            val adjustedPaddingPx = ((basePaddingDp * (2.0f - scaleFactor)).coerceIn(4f, 16f) * density).toInt()
-            buttons.forEach { button ->
-                (button.parent as? View)?.setPadding(adjustedPaddingPx, adjustedPaddingPx, adjustedPaddingPx, adjustedPaddingPx)
-            }
-        } else {
-            val baseMarginDp = 40f
-            val adjustedMarginPx = ((baseMarginDp * (2.0f - scaleFactor)).coerceIn(12f, 48f) * density).toInt()
-            buttons.forEach { button ->
-                val params = button.layoutParams as? ViewGroup.MarginLayoutParams
-                if (params != null) {
-                    params.setMargins(adjustedMarginPx, adjustedMarginPx, adjustedMarginPx, adjustedMarginPx)
-                    button.layoutParams = params
-                }
-            }
-        }
-
-        val mainButtonsLayout = view.findViewById<View>(R.id.main_buttons_layout)
-        if (mainButtonsLayout != null) {
-            mainButtonsLayout.scaleX = scaleFactor
-            mainButtonsLayout.scaleY = scaleFactor
-        }
-    }
-
     override fun onResume() {
         super.onResume()
         AppLog.i("HomeFragment: onResume. isConnected=${commManager.isConnected}")
         updateProjectionButtonText()
         updateButtonStyle()
-        updateButtonScale()
         updateTextColors()
         activity?.let { act ->
             if (!act.isFinishing && !act.isDestroyed) {
