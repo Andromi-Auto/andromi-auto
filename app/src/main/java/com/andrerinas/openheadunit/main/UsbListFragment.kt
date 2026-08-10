@@ -115,9 +115,7 @@ class UsbListFragment : Fragment() {
             }
             holder.itemView.setBackgroundResource(bgRes)
 
-            val vidHex = device.vendorId.toString(16).padStart(4, '0').uppercase()
-            val pidHex = device.productId.toString(16).padStart(4, '0').uppercase()
-            val vidPidText = " (VID: 0x$vidHex, PID: 0x$pidHex)"
+            val vidPidText = " (${mSettings.formatUsbVidPidDisplay(device.vendorId, device.productId)})"
             holder.startButton.text = "${device.uniqueName}$vidPidText"
             holder.startButton.tag = position
             holder.startButton.setOnClickListener(this)

@@ -89,7 +89,7 @@ class UsbAttachedActivity : Activity() {
         val settings = if (!isLocked) Settings(this) else null
 
         if (settings != null && settings.isUsbDeviceBlacklisted(device.vendorId, device.productId)) {
-            AppLog.i("UsbAttachedActivity: Ignored blacklisted USB device (VID: 0x${device.vendorId.toString(16)}, PID: 0x${device.productId.toString(16)})")
+            AppLog.i("UsbAttachedActivity: Ignored blacklisted USB device (${settings.formatUsbVidPidDisplay(device.vendorId, device.productId)})")
             finish()
             return
         }
@@ -191,7 +191,7 @@ class UsbAttachedActivity : Activity() {
 
         val settings = if (!isLocked) Settings(this) else null
         if (settings != null && settings.isUsbDeviceBlacklisted(device.vendorId, device.productId)) {
-            AppLog.i("UsbAttachedActivity: Ignored blacklisted USB device in onNewIntent (VID: 0x${device.vendorId.toString(16)}, PID: 0x${device.productId.toString(16)})")
+            AppLog.i("UsbAttachedActivity: Ignored blacklisted USB device in onNewIntent (${settings.formatUsbVidPidDisplay(device.vendorId, device.productId)})")
             finish()
             return
         }
