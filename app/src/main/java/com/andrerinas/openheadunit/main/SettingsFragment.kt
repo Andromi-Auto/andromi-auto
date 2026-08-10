@@ -25,6 +25,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.andrerinas.openheadunit.App
 import com.andrerinas.openheadunit.R
 import com.andrerinas.openheadunit.aap.AapService
+import com.andrerinas.openheadunit.aap.PlaybackFocusPolicy
 import com.andrerinas.openheadunit.main.settings.SettingItem
 import com.andrerinas.openheadunit.main.settings.SettingsAdapter
 import com.andrerinas.openheadunit.utils.AppLog
@@ -85,7 +86,9 @@ class SettingsFragment : Fragment() {
         // Navigation
         "gpsNavigation",
         // Graphic
-        "resolution", "dpiPixelDensity", "viewMode", "screenOrientation", "startInFullscreenMode", "loadingScreen",
+        "resolution", "dpiPixelDensity", "viewMode", "screenOrientation", "startInFullscreenMode",
+        // Theming
+        "theming", "loadingScreen", "customization",
         // Video
         "videoCodec", "fpsLimit",
         // Input
@@ -113,6 +116,7 @@ class SettingsFragment : Fragment() {
     private var pendingBluetoothAddress: String? = null
     private var pendingEnableAudioSink: Boolean? = null
     private var pendingStaticAudioFocus: Boolean? = null
+    private var pendingPlaybackFocusMode: PlaybackFocusPolicy.Mode? = null
     private var pendingSeparateAudioStreams: Boolean? = null
     private var pendingUseAacAudio: Boolean? = null
     private var pendingAttachHwDspEqualizer: Boolean? = null
@@ -235,6 +239,7 @@ class SettingsFragment : Fragment() {
         pendingBluetoothAddress = settings.bluetoothAddress
         pendingEnableAudioSink = settings.enableAudioSink
         pendingStaticAudioFocus = settings.staticAudioFocus
+        pendingPlaybackFocusMode = settings.playbackFocusMode
         pendingSeparateAudioStreams = settings.separateAudioStreams
         pendingUseAacAudio = settings.useAacAudio
         pendingAttachHwDspEqualizer = settings.attachHwDspEqualizer
@@ -345,6 +350,7 @@ class SettingsFragment : Fragment() {
         pendingBluetoothAddress = settings.bluetoothAddress
         pendingEnableAudioSink = settings.enableAudioSink
         pendingStaticAudioFocus = settings.staticAudioFocus
+        pendingPlaybackFocusMode = settings.playbackFocusMode
         pendingSeparateAudioStreams = settings.separateAudioStreams
         pendingUseAacAudio = settings.useAacAudio
         pendingAttachHwDspEqualizer = settings.attachHwDspEqualizer
@@ -465,6 +471,7 @@ class SettingsFragment : Fragment() {
         pendingBluetoothAddress?.let { settings.bluetoothAddress = it }
         pendingEnableAudioSink?.let { settings.enableAudioSink = it }
         pendingStaticAudioFocus?.let { settings.staticAudioFocus = it }
+        pendingPlaybackFocusMode?.let { settings.playbackFocusMode = it }
         pendingSeparateAudioStreams?.let { settings.separateAudioStreams = it }
         pendingUseAacAudio?.let { settings.useAacAudio = it }
         pendingAttachHwDspEqualizer?.let { settings.attachHwDspEqualizer = it }
@@ -581,6 +588,7 @@ class SettingsFragment : Fragment() {
                         pendingBluetoothAddress != settings.bluetoothAddress ||
                         pendingEnableAudioSink != settings.enableAudioSink ||
                         pendingStaticAudioFocus != settings.staticAudioFocus ||
+                        pendingPlaybackFocusMode != settings.playbackFocusMode ||
                         pendingSeparateAudioStreams != settings.separateAudioStreams ||
                         pendingUseAacAudio != settings.useAacAudio ||
                         pendingAttachHwDspEqualizer != settings.attachHwDspEqualizer ||
@@ -633,6 +641,7 @@ class SettingsFragment : Fragment() {
                           pendingEnableRotary != settings.enableRotary ||
                           pendingEnableAudioSink != settings.enableAudioSink ||
                           pendingStaticAudioFocus != settings.staticAudioFocus ||
+                          pendingPlaybackFocusMode != settings.playbackFocusMode ||
                           pendingSeparateAudioStreams != settings.separateAudioStreams ||
                           pendingUseAacAudio != settings.useAacAudio ||
                           pendingAttachHwDspEqualizer != settings.attachHwDspEqualizer ||
@@ -1392,6 +1401,9 @@ class SettingsFragment : Fragment() {
             ))
         }
 
+        // --- Theming Settings ---
+        items.add(SettingItem.CategoryHeader("theming", R.string.category_theming))
+
         items.add(SettingItem.SettingEntry(
             stableId = "loadingScreen",
             nameResId = R.string.loading_screen,
@@ -1400,6 +1412,15 @@ class SettingsFragment : Fragment() {
             else getString(R.string.loading_screen_custom),
             onClick = {
                 findNavController().navigate(R.id.action_settingsFragment_to_loadingScreenFragment)
+            }
+        ))
+
+        items.add(SettingItem.SettingEntry(
+            stableId = "customization",
+            nameResId = R.string.customization_title,
+            value = getString(R.string.customization_description),
+            onClick = {
+                findNavController().navigate(R.id.action_settingsFragment_to_customizationFragment)
             }
         ))
 
@@ -1544,6 +1565,49 @@ class SettingsFragment : Fragment() {
                     updateSettingsList()
                 }
             ))
+
+            // Applies to both focus routes: the dynamic one that runs while an AA audio channel
+            // plays, and static mode's permanent grab at connect.
+            val focusModes = listOf(
+                PlaybackFocusPolicy.Mode.AUTO,
+                PlaybackFocusPolicy.Mode.ALWAYS,
+                PlaybackFocusPolicy.Mode.NEVER
+            )
+            val currentMode = pendingPlaybackFocusMode ?: PlaybackFocusPolicy.Mode.AUTO
+            items.add(SettingItem.SegmentedButtonSettingEntry(
+                stableId = "playbackFocusMode",
+                nameResId = R.string.playback_focus_mode,
+                options = listOf(
+                    getString(R.string.playback_focus_mode_auto),
+                    getString(R.string.playback_focus_mode_always),
+                    getString(R.string.playback_focus_mode_never)
+                ),
+                selectedIndex = focusModes.indexOf(currentMode).coerceAtLeast(0),
+                onOptionSelected = { index ->
+                    pendingPlaybackFocusMode = focusModes.getOrElse(index) { PlaybackFocusPolicy.Mode.AUTO }
+                    checkChanges()
+                    updateSettingsList()
+                }
+            ))
+
+            items.add(SettingItem.InfoBanner(
+                stableId = "playbackFocusModeHint",
+                textResId = when (currentMode) {
+                    PlaybackFocusPolicy.Mode.ALWAYS -> R.string.playback_focus_mode_always_hint
+                    PlaybackFocusPolicy.Mode.NEVER -> R.string.playback_focus_mode_never_hint
+                    else -> R.string.playback_focus_mode_auto_hint
+                }
+            ))
+
+            // The hints above are written for the dynamic path, which takes focus only while
+            // audio plays. Static mode takes it for the whole session, so say so rather than
+            // maintaining a second set of three.
+            if (pendingStaticAudioFocus == true) {
+                items.add(SettingItem.InfoBanner(
+                    stableId = "playbackFocusModeStaticHint",
+                    textResId = R.string.playback_focus_mode_static_hint
+                ))
+            }
         }
 
         items.add(SettingItem.ToggleSettingEntry(
@@ -1768,6 +1832,44 @@ class SettingsFragment : Fragment() {
                         }
                         dialog.dismiss()
                         updateSettingsList()
+                    }
+                    .show()
+            }
+        ))
+
+        val logLocations = Settings.LogLocation.entries
+        val logLocationNames = logLocations.map {
+            when (it) {
+                Settings.LogLocation.DEFAULT -> getString(R.string.log_location_default)
+                Settings.LogLocation.DOWNLOADS -> getString(R.string.log_location_downloads)
+            }
+        }.toTypedArray()
+        items.add(SettingItem.SettingEntry(
+            stableId = "logLocation",
+            nameResId = R.string.log_location,
+            value = when (settings.logLocation) {
+                Settings.LogLocation.DEFAULT -> getString(R.string.log_location_default)
+                Settings.LogLocation.DOWNLOADS -> getString(R.string.log_location_downloads)
+            },
+            onClick = {
+                val currentIndex = logLocations.indexOf(settings.logLocation)
+                MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
+                    .setTitle(R.string.log_location)
+                    .setSingleChoiceItems(logLocationNames, currentIndex) { dialog, which ->
+                        val newLocation = logLocations[which]
+                        val applyLocation: () -> Unit = {
+                            settings.logLocation = newLocation
+                            if (settings.logSource == Settings.LogSource.APPLOG_FILE) {
+                                AppLog.init(settings, requireContext().applicationContext)
+                            }
+                            dialog.dismiss()
+                            updateSettingsList()
+                        }
+                        if (newLocation == Settings.LogLocation.DOWNLOADS) {
+                            runWithDownloadsStoragePermission(applyLocation)
+                        } else {
+                            applyLocation()
+                        }
                     }
                     .show()
             }
@@ -3150,6 +3252,27 @@ class SettingsFragment : Fragment() {
     }
 
     private fun handleNativeAaSelection() {
+        // An external Bluetooth module is not a "might not work" — the phone is bonded to a chip
+        // this app cannot write to, so say so plainly and name the evidence instead of offering
+        // the generic "try it anyway".
+        val externalBtEvidence = BluetoothHelper.externalBtEvidence
+        if (externalBtEvidence != null) {
+            MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
+                .setTitle(R.string.external_bt_nativeaa)
+                .setMessage(getString(R.string.external_bt_nativeaa_desc, externalBtEvidence))
+                // Selecting the mode is still allowed: on a unit with a second, reachable radio
+                // the user can name it under the secondary-Bluetooth setting, and Native mode
+                // will then run. Without that it stays switched off, and the log says why.
+                .setPositiveButton(android.R.string.ok) { dialog, _ ->
+                    pendingWifiConnectionMode = 3
+                    checkChanges()
+                    updateSettingsList()
+                    dialog.dismiss()
+                }
+                .setNegativeButton(android.R.string.cancel, null)
+                .show()
+            return
+        }
         if (NativeAaHandshakeManager.checkCompatibility(requireContext())) {
             MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
                 .setTitle(R.string.supported_nativeaa)

@@ -827,6 +827,10 @@ class AapService : Service(), UsbReceiver.Listener {
      * (AapControl.audioFocusRequest -> AapAudio.requestFocusChange), so grabbing a
      * permanent gain here would needlessly evict other media (e.g. the car radio) the
      * moment the phone connects, before AA plays anything.
+     *
+     * Whether to take it at all is PlaybackFocusPolicy's call, the same as for the dynamic path:
+     * on a head unit that is also the phone's Bluetooth A2DP sink, evicting the sink makes it
+     * AVRCP-pause that same phone, so the session starts with the projected audio stopped.
      */
     private fun requestPermanentAudioFocus() {
         if (!settings.enableAudioSink) {
@@ -837,6 +841,22 @@ class AapService : Service(), UsbReceiver.Listener {
             AppLog.d("Static Audio Focus disabled - skipping permanent audio focus request; focus will be acquired on demand.")
             return
         }
+
+        // One probe at connect is enough: the sink only pauses on a focus-loss *event*, so a
+        // Bluetooth link that comes up later in the session never sees one.
+        val mode = settings.playbackFocusMode
+        val btMediaLinkActive = BluetoothHelper.isA2dpMediaLinkActive(this)
+        if (!PlaybackFocusPolicy.shouldAcquirePermanent(
+                mode = mode,
+                staticAudioFocus = true,
+                audioSinkEnabled = true,
+                btMediaLinkActive = btMediaLinkActive)) {
+            AppLog.i("AapService: Static Audio Focus - leaving system audio focus alone " +
+                    "(mode=$mode, bluetoothMedia=$btMediaLinkActive)")
+            return
+        }
+        AppLog.i("AapService: Static Audio Focus - acquiring permanent system audio focus " +
+                "(mode=$mode, bluetoothMedia=$btMediaLinkActive)")
 
         try {
             val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
@@ -1137,6 +1157,61 @@ class AapService : Service(), UsbReceiver.Listener {
                 commManager.awaitDisconnectComplete()
                 AppLog.i("AapService: CommManager teardown complete. Stopping WiFi Direct group.")
                 wifiDirectManager?.stop()
+            } else if (state.isUserExit) {
+                // The same question for the routes that run on a soft AP instead of a P2P group.
+                // Closing the socket does not make the phone leave the network — it stays
+                // associated and Android Auto retries its wireless setup until it throttles itself
+                // — so the access point has to go, and for the same reason as above only once
+                // CommManager has finished. Unlike a P2P group the access point is usually the
+                // user's own, and switching one back on is best effort, so it only comes down when
+                // they have already handed the app that job.
+                //
+                // Restarted rather than left down. It has to disappear for the phone to be put off
+                // it, but leaving it off charges the whole bring-up — measured at ~20s on a unit
+                // that refuses setSoftApConfiguration() — to the next connection, with the phone
+                // waiting through it. Paying it here spends the same seconds while the user is
+                // already walking away.
+                val action = UserExitHotspotPolicy.onUserExit(
+                    mode, strategy, nativeTransport(), settings.autoEnableHotspot,
+                    settings.hotspotTeardownProvenUnsafe
+                )
+                if (action != HotspotExitAction.NONE) {
+                    commManager.awaitDisconnectComplete()
+                    // Stop watching an access point nobody is connecting over, either way: this
+                    // holds a system broadcast receiver and can still re-enable the hotspot on its
+                    // own long after the user has finished with it.
+                    softApCredentialsProvider?.stop()
+                }
+                when (action) {
+                    HotspotExitAction.DISABLE -> {
+                        AppLog.i("AapService: CommManager teardown complete. Restarting the hotspot so the phone leaves the network.")
+                        if (!HotspotManager.restart(this@AapService)) {
+                            // The one way to learn that this radio will not host an access point
+                            // again once it has been taken down. Remembered so it costs the user
+                            // one hotspot rather than one per session — from here on this device's
+                            // access point is left alone and the phone is told, in the branch
+                            // below, what that means.
+                            settings.hotspotTeardownProvenUnsafe = true
+                            AppLog.w(
+                                "AapService: This device did not bring its access point back after " +
+                                    "the app took it down, so it will not be taken down again. " +
+                                    "Ending a session will leave the phone on the network from now " +
+                                    "on — end it from the phone's own Android Auto notification if " +
+                                    "that becomes a problem."
+                            )
+                        }
+                    }
+                    HotspotExitAction.WARN_LEFT_UP -> AppLog.w(
+                        "AapService: Stopping the connection does not switch this device's hotspot " +
+                            "off — either the app was not given charge of it, or this device has " +
+                            "already shown it cannot switch one back on. So the phone stays " +
+                            "joined to it and Android Auto may keep retrying until it throttles " +
+                            "itself. Turn the hotspot off and on again to clear that, or end the " +
+                            "session from the phone's own Android Auto notification instead, which " +
+                            "makes it leave the network by itself."
+                    )
+                    HotspotExitAction.NONE -> {}
+                }
             }
 
             App.provide(this@AapService).audioDecoder.stop()
@@ -1519,19 +1594,29 @@ class AapService : Service(), UsbReceiver.Listener {
 
             // Mode 3: Native AA Wireless
             if (mode == 3) {
-                if (nativeTransport() == NativeTransport.HOTSPOT) {
-                    // Read this device's own access point instead of hosting a P2P group. The AP
-                    // itself is the user's to switch on; the provider only resolves and watches it.
-                    AppLog.i("AapService: Native AA on the head unit hotspot — resolving access point credentials.")
-                    softApCredentialsProvider?.start()
-                } else {
-                    // Start WiFi Direct as a "quiet host" (P2P Group for phone to join)
-                    // We let WifiDirectManager handle the WiFi state (enabling if needed)
-                    wifiDirectManager?.startNativeAaQuietHost()
-                }
+                // Skip the whole route, not just the handshake, when the Bluetooth this unit's
+                // phone is bonded to isn't reachable from here: with no Bluetooth channel there is
+                // nobody to hand the credentials to, so hosting a P2P group or holding the hotspot
+                // open would only churn the WiFi stack for nothing.
+                val externalBt = NativeAaHandshakeManager.externalBtDiagnostic()
+                if (externalBt != null) AppLog.e(externalBt)
+                val blockedByExternalBt =
+                    externalBt != null && !NativeAaHandshakeManager.externalBtOverridden(this)
+                if (!blockedByExternalBt) {
+                    if (nativeTransport() == NativeTransport.HOTSPOT) {
+                        // Read this device's own access point instead of hosting a P2P group. The AP
+                        // itself is the user's to switch on; the provider only resolves and watches it.
+                        AppLog.i("AapService: Native AA on the head unit hotspot — resolving access point credentials.")
+                        softApCredentialsProvider?.start()
+                    } else {
+                        // Start WiFi Direct as a "quiet host" (P2P Group for phone to join)
+                        // We let WifiDirectManager handle the WiFi state (enabling if needed)
+                        wifiDirectManager?.startNativeAaQuietHost()
+                    }
 
-                // Start the official Bluetooth handshake servers
-                nativeAaHandshakeManager?.start()
+                    // Start the official Bluetooth handshake servers
+                    nativeAaHandshakeManager?.start()
+                }
             }
         }
 
@@ -1612,6 +1697,13 @@ class AapService : Service(), UsbReceiver.Listener {
         nativeAaHandshakeManager?.stop()
         releaseBootWakeLock()
 
+        // Before the hotspot goes, not after: SoftApCredentialsProvider watches
+        // WIFI_AP_STATE_CHANGED and switches an access point it started back on when it sees one
+        // drop. Left registered here it would treat this very teardown as the hotspot failing and
+        // bring it back up as the service dies — leaving the access point running with nothing
+        // left to serve it.
+        softApCredentialsProvider?.stop()
+
         if (App.provide(this).settings.autoEnableHotspot) {
             AppLog.i("AapService: Auto-disabling hotspot...")
             HotspotManager.setHotspotEnabled(this, false)
@@ -1632,7 +1724,6 @@ class AapService : Service(), UsbReceiver.Listener {
         stopForeground(true)
         stopWirelessServer()
         wifiDirectManager?.stop()
-        softApCredentialsProvider?.stop()
         nearbyManager?.stop()
         try {
             mediaSession?.let {
@@ -2203,6 +2294,15 @@ class AapService : Service(), UsbReceiver.Listener {
             AppLog.i("AapService: userExitedAA is true. Skipping auto-poke.")
         }
     }
+
+    /**
+     * Whether the AAP TCP port the phone will be sent to is bound and accepting.
+     *
+     * The Bluetooth handshake checks this before handing over credentials, mirroring the ordering
+     * the reference head unit software uses: access point up, address resolved, port bound, and
+     * only then talk to the phone.
+     */
+    fun isWirelessServerListening(): Boolean = wirelessServer?.isListening == true
 
     /** The transport mode 3 is configured to use. Read fresh: the user can change it in settings. */
     private fun nativeTransport(): NativeTransport =
@@ -2777,6 +2877,17 @@ class AapService : Service(), UsbReceiver.Listener {
         private var registrationListener: NsdManager.RegistrationListener? = null
         private var job: Job? = null
 
+        /**
+         * Whether the TCP port the phone is told to dial is actually bound right now.
+         *
+         * start() only launches a coroutine; the bind happens inside it and can fail (the port
+         * still held by a previous session is the usual way). Handing the phone credentials for a
+         * port nothing is listening on produces the worst possible log: a clean handshake, a
+         * successful WiFi join, and then silence.
+         */
+        @Volatile var isListening = false
+            private set
+
         fun start(registerNsd: Boolean = true) {
             nsdManager = getSystemService(Context.NSD_SERVICE) as? NsdManager
             if (nsdManager == null) {
@@ -2788,6 +2899,7 @@ class AapService : Service(), UsbReceiver.Listener {
             job = serviceScope.launch(Dispatchers.IO) {
                 try {
                     serverSocket = ServerSocket(5288).apply { reuseAddress = true }
+                    isListening = true
                     AppLog.i("Wireless Server listening on port 5288")
                     logLocalNetworkInterfaces()
 
@@ -2817,6 +2929,7 @@ class AapService : Service(), UsbReceiver.Listener {
                 } catch (e: Exception) {
                     if (isActive) AppLog.e("Wireless server error", e)
                 } finally {
+                    isListening = false
                     unregisterNsd()
                     try { serverSocket?.close() } catch (e: Exception) {}
                 }
