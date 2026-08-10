@@ -34,13 +34,13 @@ class Settings(private val context: Context) {
     }
 
     var allowedDevices: Set<String>
-        get() = prefs.getStringSet("allow-devices", HashSet<String>())!!
+        get() = prefs.getStringSet("allow-devices", null)?.toSet() ?: emptySet()
         set(devices) {
             prefs.edit().putStringSet("allow-devices", devices).apply()
         }
 
     var networkAddresses: Set<String>
-        get() = prefs.getStringSet("network-addresses", HashSet<String>())!!
+        get() = prefs.getStringSet("network-addresses", null)?.toSet() ?: emptySet()
         set(addrs) {
             prefs.edit().putStringSet("network-addresses", addrs).apply()
         }
@@ -583,6 +583,37 @@ class Settings(private val context: Context) {
         get() = prefs.getBoolean("listen-for-usb-devices", true)
         set(value) { prefs.edit().putBoolean("listen-for-usb-devices", value).apply() }
 
+    var usbBlacklist: Set<String>
+        get() = prefs.getStringSet("usb-blacklist", null)?.toSet() ?: emptySet()
+        set(value) { prefs.edit().putStringSet("usb-blacklist", value).apply() }
+
+    fun formatUsbVidPidKey(vid: Int, pid: Int): String {
+        return String.format(java.util.Locale.US, "%04x:%04x", vid, pid).lowercase()
+    }
+
+    fun formatUsbVidPidDisplay(vid: Int, pid: Int): String {
+        return String.format(java.util.Locale.US, "VID: 0x%04X, PID: 0x%04X", vid, pid)
+    }
+
+    fun isUsbDeviceBlacklisted(vid: Int, pid: Int): Boolean {
+        val key = formatUsbVidPidKey(vid, pid)
+        return usbBlacklist.contains(key)
+    }
+
+    fun addUsbDeviceToBlacklist(vid: Int, pid: Int) {
+        val key = formatUsbVidPidKey(vid, pid)
+        val set = usbBlacklist.toMutableSet()
+        set.add(key)
+        usbBlacklist = set
+    }
+
+    fun removeUsbDeviceFromBlacklist(vid: Int, pid: Int) {
+        val key = formatUsbVidPidKey(vid, pid)
+        val set = usbBlacklist.toMutableSet()
+        set.remove(key)
+        usbBlacklist = set
+    }
+
     var showToastMessages: Boolean
         get() = prefs.getBoolean("show-toast-messages", true)
         set(value) { prefs.edit().putBoolean("show-toast-messages", value).apply() }
@@ -683,6 +714,39 @@ class Settings(private val context: Context) {
     var loadingScreenScalePercent: Int
         get() = prefs.getInt("loading-screen-scale-percent", 100)
         set(value) { prefs.edit().putInt("loading-screen-scale-percent", value).apply() }
+
+    // Custom home screen background image
+    var homeBackgroundImagePath: String
+        get() = prefs.getString("home-background-image-path", "") ?: ""
+        set(value) { prefs.edit().putString("home-background-image-path", value).apply() }
+
+    // Custom button colors for Home screen (0 = default gradient)
+    var customSelfModeButtonColor: Int
+        get() = prefs.getInt("custom-self-mode-button-color", 0)
+        set(value) { prefs.edit().putInt("custom-self-mode-button-color", value).apply() }
+
+    var customUsbButtonColor: Int
+        get() = prefs.getInt("custom-usb-button-color", 0)
+        set(value) { prefs.edit().putInt("custom-usb-button-color", value).apply() }
+
+    var customWifiButtonColor: Int
+        get() = prefs.getInt("custom-wifi-button-color", 0)
+        set(value) { prefs.edit().putInt("custom-wifi-button-color", value).apply() }
+
+    var customSettingsButtonColor: Int
+        get() = prefs.getInt("custom-settings-button-color", 0)
+        set(value) { prefs.edit().putInt("custom-settings-button-color", value).apply() }
+
+    // Custom button scaling percentage for Home screen (default = 100%, valid range 60..120)
+    var homeButtonScalePercent: Int
+        get() {
+            val saved = prefs.getInt("home-button-scale-percent", 100)
+            return if (saved in 60..120) saved else 100
+        }
+        set(value) {
+            val valid = if (value in 60..120) value else 100
+            prefs.edit().putInt("home-button-scale-percent", valid).apply()
+        }
 
     @SuppressLint("ApplySharedPref")
     fun commit() {
