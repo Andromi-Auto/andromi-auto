@@ -211,10 +211,6 @@ object BluetoothHelper {
         catch (e: Exception) { null }
     }
 
-    fun handsFreeLinkState(context: Context): Boolean { // ??
-        return true
-    }
-
     private fun serviceExists(name: String): Boolean = try {
         val serviceManagerClass = Class.forName("android.os.ServiceManager")
         val getServiceMethod = serviceManagerClass.getMethod("getService", String::class.java)

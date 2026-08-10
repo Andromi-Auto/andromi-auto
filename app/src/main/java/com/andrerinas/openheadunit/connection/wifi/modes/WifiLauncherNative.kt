@@ -39,7 +39,7 @@ class WifiLauncherNative : WifiLauncher {
 
     override fun hasLocalDiscovery() = false
 
-    override fun start(quiet: Boolean) {
+    override fun start(noInfoToasts: Boolean) {
         val wifiDirect = manager.sharedServices.wifiDirectManager!!
 
         handshakeManager = NativeAaHandshakeManager(service, this, service.serviceScope)
