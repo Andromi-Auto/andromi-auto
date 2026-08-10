@@ -6,16 +6,14 @@ import android.content.res.Configuration
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.GridLayout
 import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
+import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -24,7 +22,6 @@ import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
-import com.google.android.material.textfield.TextInputLayout
 import com.andrerinas.openheadunit.App
 import com.andrerinas.openheadunit.R
 import com.andrerinas.openheadunit.utils.AppLog
@@ -74,11 +71,39 @@ class CustomizationFragment : Fragment() {
     private var overlayHomeContent: android.widget.FrameLayout? = null
     private var sliderOverlayButtonScale: com.google.android.material.slider.Slider? = null
     private var txtOverlayScaleLabel: TextView? = null
-    private var hideOverlayRunnable: Runnable? = null
     private var currentOverlayHomeView: View? = null
+
+    private val hideOverlayRunnable = Runnable {
+        overlayHomePreview?.animate()
+            ?.alpha(0f)
+            ?.setDuration(250)
+            ?.withEndAction {
+                overlayHomePreview?.visibility = View.GONE
+            }
+            ?.start()
+        customizationMainContent?.animate()?.alpha(1f)?.setDuration(250)?.start()
+    }
 
     private val imagePicker = registerForActivityResult(PickImageContract()) { uri ->
         uri?.let { handleImageSelected(it) }
+    }
+
+    private val sliderTouchListener = object : com.google.android.material.slider.Slider.OnSliderTouchListener {
+        override fun onStartTrackingTouch(slider: com.google.android.material.slider.Slider) {
+            showSamsungStyleOverlay()
+        }
+
+        override fun onStopTrackingTouch(slider: com.google.android.material.slider.Slider) {
+            hideSamsungStyleOverlay()
+        }
+    }
+
+    private val sliderChangeListener = com.google.android.material.slider.Slider.OnChangeListener { _, value, fromUser ->
+        val scaleVal = value.toInt()
+        updatePreviewScale(scaleVal)
+        if (fromUser) {
+            settings.homeButtonScalePercent = scaleVal
+        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -203,34 +228,11 @@ class CustomizationFragment : Fragment() {
         txtButtonScaleValue?.text = "$currentScale%"
         updatePreviewScale(currentScale)
 
-        sliderButtonScale?.addOnChangeListener { _, value, fromUser ->
-            val scaleVal = value.toInt()
-            updatePreviewScale(scaleVal)
-            if (fromUser) {
-                settings.homeButtonScalePercent = scaleVal
-            }
-        }
+        sliderButtonScale?.addOnChangeListener(sliderChangeListener)
+        sliderOverlayButtonScale?.addOnChangeListener(sliderChangeListener)
 
-        sliderOverlayButtonScale?.addOnChangeListener { _, value, fromUser ->
-            val scaleVal = value.toInt()
-            updatePreviewScale(scaleVal)
-            if (fromUser) {
-                settings.homeButtonScalePercent = scaleVal
-            }
-        }
-
-        val touchListener = object : com.google.android.material.slider.Slider.OnSliderTouchListener {
-            override fun onStartTrackingTouch(slider: com.google.android.material.slider.Slider) {
-                showSamsungStyleOverlay()
-            }
-
-            override fun onStopTrackingTouch(slider: com.google.android.material.slider.Slider) {
-                hideSamsungStyleOverlay()
-            }
-        }
-
-        sliderButtonScale?.addOnSliderTouchListener(touchListener)
-        sliderOverlayButtonScale?.addOnSliderTouchListener(touchListener)
+        sliderButtonScale?.addOnSliderTouchListener(sliderTouchListener)
+        sliderOverlayButtonScale?.addOnSliderTouchListener(sliderTouchListener)
 
         btnResetScale?.setOnClickListener {
             settings.homeButtonScalePercent = 100
@@ -244,7 +246,7 @@ class CustomizationFragment : Fragment() {
     }
 
     private fun showSamsungStyleOverlay() {
-        hideOverlayRunnable?.let { overlayHomePreview?.removeCallbacks(it) }
+        overlayHomePreview?.removeCallbacks(hideOverlayRunnable)
         customizationMainContent?.animate()?.alpha(0f)?.setDuration(200)?.start()
         overlayHomePreview?.apply {
             visibility = View.VISIBLE
@@ -253,16 +255,6 @@ class CustomizationFragment : Fragment() {
     }
 
     private fun hideSamsungStyleOverlay() {
-        hideOverlayRunnable = Runnable {
-            overlayHomePreview?.animate()
-                ?.alpha(0f)
-                ?.setDuration(250)
-                ?.withEndAction {
-                    overlayHomePreview?.visibility = View.GONE
-                }
-                ?.start()
-            customizationMainContent?.animate()?.alpha(1f)?.setDuration(250)?.start()
-        }
         overlayHomePreview?.postDelayed(hideOverlayRunnable, 600)
     }
 
@@ -622,20 +614,16 @@ class CustomizationFragment : Fragment() {
             presetContainer.addView(rowLayout)
         }
 
-        hexEditText.addTextChangedListener(object : android.text.TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                if (isInternalTextChange) return
-                val input = s?.toString()?.trim() ?: ""
-                if (input.isNotEmpty()) {
-                    val parsed = ColorUtils.parseColorSafely(input, -1)
-                    if (parsed != -1) {
-                        updateDialogPreview(parsed)
-                    }
+        val textWatcher = hexEditText.doOnTextChanged { text, _, _, _ ->
+            if (isInternalTextChange) return@doOnTextChanged
+            val input = text?.toString()?.trim() ?: ""
+            if (input.isNotEmpty()) {
+                val parsed = ColorUtils.parseColorSafely(input, -1)
+                if (parsed != -1) {
+                    updateDialogPreview(parsed)
                 }
             }
-            override fun afterTextChanged(s: android.text.Editable?) {}
-        })
+        }
 
         MaterialAlertDialogBuilder(ctx)
             .setView(dialogView)
@@ -648,6 +636,9 @@ class CustomizationFragment : Fragment() {
                 refreshUI()
             }
             .setNegativeButton(R.string.cancel, null)
+            .setOnDismissListener {
+                hexEditText.removeTextChangedListener(textWatcher)
+            }
             .show()
     }
 
