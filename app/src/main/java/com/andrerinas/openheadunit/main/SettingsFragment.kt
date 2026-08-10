@@ -844,7 +844,7 @@ class SettingsFragment : Fragment() {
                     getString(R.string.native_ap_transport_wifi_direct),
                     getString(R.string.native_ap_transport_hotspot)
                 ),
-                selectedIndex = if ((pendingNativeApTransport ?: 0) == 1) 1 else 0,
+                selectedIndex = (pendingNativeApTransport ?: NativeStrategy.DEFAULT).id,
                 onOptionSelected = { index ->
                     pendingNativeApTransport = NativeStrategy.byIdOrDefault(index)
                     checkChanges()
@@ -852,7 +852,7 @@ class SettingsFragment : Fragment() {
                 }
             ))
 
-            if ((pendingNativeApTransport ?: 0) == 1) {
+            if ((pendingNativeApTransport ?: NativeStrategy.DEFAULT) == NativeStrategy.HOTSPOT) {
                 items.add(SettingItem.InfoBanner(
                     stableId = "nativeApTransportHint",
                     textResId = R.string.native_ap_transport_hint
