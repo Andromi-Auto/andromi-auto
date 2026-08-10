@@ -33,6 +33,10 @@ class Settings(private val context: Context) {
         return allowDevices.contains(deviceCompat.uniqueName)
     }
 
+    var isAdvancedSettingsActive: Boolean
+        get() = prefs.getBoolean("advanced-settings-active", false)
+        set(value) { prefs.edit().putBoolean("advanced-settings-active", value).apply() }
+
     var allowedDevices: Set<String>
         get() = prefs.getStringSet("allow-devices", null)?.toSet() ?: emptySet()
         set(devices) {
