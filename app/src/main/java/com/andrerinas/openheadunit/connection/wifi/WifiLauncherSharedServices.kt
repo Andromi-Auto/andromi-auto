@@ -38,10 +38,10 @@ class WifiLauncherSharedServices(val service: AapService) {
         wifiDirectManager = WifiDirectManager(service)
 
         // This chipset potentially can't run SoftAP and WiFi Direct concurrently — make sure hotspot is off before P2P starts.
-        Thread {
+        service.serviceScope.launch {
             AppLog.i("AapService: Mode requires WiFi Direct — ensuring hotspot is disabled first...")
             HotspotManager.setHotspotEnabled(service, false)
-        }.start()
+        }
 
         wifiDirectManager?.setCredentialsListener { _, _, _, _ ->
             AppLog.d("AapService: WiFi credentials received, but not in Native AA mode. Skipping HandshakeManager update.")

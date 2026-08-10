@@ -21,7 +21,7 @@ class WifiLauncherAuto(
 
     override fun hasLocalDiscovery() = true
 
-    override fun start(quiet: Boolean) {
+    override fun start(noInfoToasts: Boolean) {
         // Auto discovery for standard server mode via NSD/mDNS
         // #startDiscovery(oneShot = false) handled by SharedServices
     }

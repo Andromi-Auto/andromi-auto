@@ -15,9 +15,9 @@ enum class NativeStrategy(val id: Int) {
 
 
         fun byIdOrDefault(id: Int): NativeStrategy {
-            for (mode in NativeStrategy.entries) {
-                if (mode.id == id)
-                    return mode
+            for (strategy in NativeStrategy.entries) {
+                if (strategy.id == id)
+                    return strategy
             }
 
             return DEFAULT

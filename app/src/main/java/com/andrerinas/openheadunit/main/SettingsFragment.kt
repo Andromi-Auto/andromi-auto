@@ -62,10 +62,8 @@ class SettingsFragment : Fragment() {
     private var resetButton: MaterialButton? = null
 
     // Basic/Advanced tab + search state (Feature A)
-    private enum class SettingsTier { BASIC, ADVANCED }
     private var settingsTabGroup: com.google.android.material.button.MaterialButtonToggleGroup? = null
     private var searchInput: com.google.android.material.textfield.TextInputEditText? = null
-    private var activeTab: SettingsTier = SettingsTier.BASIC
     private var searchQuery: String = ""
     // The complete, unfiltered list built by updateSettingsList(); rendering filters this.
     private var fullSettingsList: List<SettingItem> = emptyList()
@@ -103,6 +101,7 @@ class SettingsFragment : Fragment() {
     )
 
     // Local state to hold changes before saving
+    private var pendingAdvancedSettings: Boolean? = null
     private var pendingUseGps: Boolean? = null
     private var pendingShowNavigationNotifications: Boolean? = null
     private var pendingSyncMediaSessionAaMetadata: Boolean? = null
@@ -226,6 +225,7 @@ class SettingsFragment : Fragment() {
         settings = App.provide(requireContext()).settings
 
         // Initialize local state with current values
+        pendingAdvancedSettings = settings.isAdvancedSettingsActive
         pendingUseGps = settings.useGpsForNavigation
         pendingShowNavigationNotifications = settings.showNavigationNotifications
         pendingSyncMediaSessionAaMetadata = settings.syncMediaSessionWithAaMetadata
@@ -338,6 +338,7 @@ class SettingsFragment : Fragment() {
     }
 
     private fun reloadPendingStateFromSettings() {
+        pendingAdvancedSettings = settings.isAdvancedSettingsActive
         pendingUseGps = settings.useGpsForNavigation
         pendingShowNavigationNotifications = settings.showNavigationNotifications
         pendingSyncMediaSessionAaMetadata = settings.syncMediaSessionWithAaMetadata
@@ -457,6 +458,7 @@ class SettingsFragment : Fragment() {
     private fun saveSettings() {
         val languageChanged = pendingAppLanguage != settings.appLanguage
 
+        pendingAdvancedSettings?.let { settings.isAdvancedSettingsActive = it }
         pendingUseGps?.let { settings.useGpsForNavigation = it }
         pendingShowNavigationNotifications?.let { settings.showNavigationNotifications = it }
         pendingSyncMediaSessionAaMetadata?.let { settings.syncMediaSessionWithAaMetadata = it }
@@ -575,7 +577,8 @@ class SettingsFragment : Fragment() {
 
     private fun checkChanges() {
         // Check for any changes
-        val anyChange = pendingUseGps != settings.useGpsForNavigation ||
+        val anyChange = pendingAdvancedSettings != settings.isAdvancedSettingsActive ||
+                        pendingUseGps != settings.useGpsForNavigation ||
                         pendingShowNavigationNotifications != settings.showNavigationNotifications ||
                         pendingSyncMediaSessionAaMetadata != settings.syncMediaSessionWithAaMetadata ||
                         pendingResolution != settings.resolutionId ||
@@ -841,7 +844,7 @@ class SettingsFragment : Fragment() {
                     getString(R.string.native_ap_transport_wifi_direct),
                     getString(R.string.native_ap_transport_hotspot)
                 ),
-                selectedIndex = if ((pendingNativeApTransport ?: 0) == 1) 1 else 0,
+                selectedIndex = (pendingNativeApTransport ?: NativeStrategy.DEFAULT).id,
                 onOptionSelected = { index ->
                     pendingNativeApTransport = NativeStrategy.byIdOrDefault(index)
                     checkChanges()
@@ -849,7 +852,7 @@ class SettingsFragment : Fragment() {
                 }
             ))
 
-            if ((pendingNativeApTransport ?: 0) == 1) {
+            if ((pendingNativeApTransport ?: NativeStrategy.DEFAULT) == NativeStrategy.HOTSPOT) {
                 items.add(SettingItem.InfoBanner(
                     stableId = "nativeApTransportHint",
                     textResId = R.string.native_ap_transport_hint
@@ -2007,10 +2010,11 @@ class SettingsFragment : Fragment() {
         settingsTabGroup = view.findViewById(R.id.settingsTabGroup)
         searchInput = view.findViewById(R.id.settingsSearch)
 
-        settingsTabGroup?.check(if (activeTab == SettingsTier.BASIC) R.id.tabBasic else R.id.tabAdvanced)
+        settingsTabGroup?.check(if (pendingAdvancedSettings == false) R.id.tabBasic else R.id.tabAdvanced)
         settingsTabGroup?.addOnButtonCheckedListener { _, checkedId, isChecked ->
             if (!isChecked) return@addOnButtonCheckedListener
-            activeTab = if (checkedId == R.id.tabAdvanced) SettingsTier.ADVANCED else SettingsTier.BASIC
+            pendingAdvancedSettings = (checkedId == R.id.tabAdvanced)
+            checkChanges()
             renderSettings()
         }
 
@@ -2090,7 +2094,7 @@ class SettingsFragment : Fragment() {
             return headerMatchesQuery || searchableText(item).contains(query, ignoreCase = true)
         }
 
-        if (activeTab == SettingsTier.ADVANCED) return true
+        if (pendingAdvancedSettings == true) return true
 
         return item.stableId in basicSettingIds
     }

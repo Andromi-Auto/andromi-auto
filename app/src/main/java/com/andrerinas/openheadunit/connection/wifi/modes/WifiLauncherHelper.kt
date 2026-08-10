@@ -51,7 +51,7 @@ class WifiLauncherHelper : WifiLauncher {
     }
 
 
-    override fun start(quiet: Boolean) {
+    override fun start(noInfoToasts: Boolean) {
         AppLog.i("WifiLauncher: Using strategy $strategy.")
 
         when (strategy) {
@@ -62,7 +62,7 @@ class WifiLauncherHelper : WifiLauncher {
 
                 if (wifiManager.isWifiEnabled) {
                     wifiDirect.makeVisible()
-                } else if (!quiet) {
+                } else if (!noInfoToasts) {
                     ToastUtils.showToast(service, service.getString(R.string.wifi_disabled_info), Toast.LENGTH_SHORT)
                 }
             }
@@ -75,10 +75,10 @@ class WifiLauncherHelper : WifiLauncher {
 
         // Hotspot logic for Helper mode if enabled (only for Strategy 4: Headunit Hotspot)
         if (settings.autoEnableHotspot && strategy == HelperStrategy.HEADUNIT_HOTSPOT) {
-            Thread {
+            service.serviceScope.launch {
                 AppLog.i("AapService: Auto-enabling hotspot for Helper mode...")
                 HotspotManager.setHotspotEnabled(service, true)
-            }.start()
+            }
         }
     }
 
