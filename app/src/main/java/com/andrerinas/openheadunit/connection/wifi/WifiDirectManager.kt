@@ -1,4 +1,4 @@
-package com.andrerinas.openheadunit.connection.wifi
+package com.andrerinas.openheadunit.connection
 
 import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
@@ -19,23 +19,25 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
-import android.provider.Settings
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import com.andrerinas.openheadunit.App
 import com.andrerinas.openheadunit.R
 import com.andrerinas.openheadunit.aap.AapService
 import com.andrerinas.openheadunit.aap.NativeHandoffPolicy
-import com.andrerinas.openheadunit.connection.CommManager
+import com.andrerinas.openheadunit.connection.wifi.WifiDirectCompat
+import com.andrerinas.openheadunit.connection.wifi.WifiLauncherMode
 import com.andrerinas.openheadunit.connection.wifi.modes.helper.HelperStrategy
 import com.andrerinas.openheadunit.main.MainActivity
-import com.andrerinas.openheadunit.utils.AppLog
 import com.andrerinas.openheadunit.utils.ToastUtils
+import com.andrerinas.openheadunit.utils.AppLog
 import java.io.File
 import java.net.Inet4Address
 import java.net.InetSocketAddress
 import java.net.NetworkInterface
 import java.net.Socket
+
+
 
 class WifiDirectManager(private val context: Context) : WifiP2pManager.ConnectionInfoListener, WifiP2pManager.GroupInfoListener {
 
@@ -95,6 +97,18 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
     private var discoveredInterface: String? = null
     private var nativeGroupCreationMode = NATIVE_GROUP_MODE_UNKNOWN
     private var native5GhzBandMismatchRetries = 0
+
+    /**
+     * SSID of the last group reported as being on a channel most phones cannot join, so the several
+     * [onGroupInfoAvailable] callbacks a single group produces are said once.
+     *
+     * The SSID and not the interface or the BSSID: Android generates a fresh DIRECT-xy-… per group,
+     * it is populated on the very first callback, and it is never privacy-masked. `interface` is
+     * null until an IP is up and the BSSID is often 02:00:00:00:00:00 here, so either would both
+     * split one group across two identities and merge two groups into one.
+     */
+    private var lastUnfriendlyChannelSsid: String? = null
+    private var lastCoexistenceSsid: String? = null
     private var lastNativeGroupStatusMessage: String? = null
 
     // Native AA join recovery state. The watchdog fires if the phone never joins our quiet-host
@@ -469,7 +483,7 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
                             // Fallback 5: Try Settings.Secure (Samsung/Pixel trick)
                             var resolved = false
                             try {
-                                val secureMac = Settings.Secure.getString(context.contentResolver, "wifi_p2p_device_address")
+                                val secureMac = android.provider.Settings.Secure.getString(context.contentResolver, "wifi_p2p_device_address")
                                 if (!secureMac.isNullOrEmpty() && secureMac != "00:00:00:00:00:00" && secureMac != "02:00:00:00:00:00") {
                                     AppLog.i("WifiDirectManager: Fallback 5 - Selected MAC from Settings.Secure: $secureMac")
                                     bssid = secureMac
@@ -524,8 +538,13 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
             }
 
             val band = if (frequency > 4000) "5GHz" else if (frequency > 0) "2.4GHz" else "unknown"
-            AppLog.i("WifiDirectManager: onGroupInfoAvailable: SSID: $ssid, BSSID: $bssid, GO: $isOwner, IFACE: ${iface ?: "null"}, Freq: $frequency MHz ($band)")
+            val channelLabel = if (P2pChannelPolicy.is24GHz(frequency)) ", ${P2pChannelPolicy.describe(frequency)}" else ""
+            AppLog.i("WifiDirectManager: onGroupInfoAvailable: SSID: $ssid, BSSID: $bssid, GO: $isOwner, IFACE: ${iface ?: "null"}, Freq: $frequency MHz ($band$channelLabel)")
 
+            // Runs before the channel report below, which is the order the Native AA branch used to
+            // impose from inside itself: a group that is about to be torn down and remade on 5GHz
+            // must not first tell the user to restart their WiFi. The retry regenerates the SSID
+            // every time, so the report's per-SSID dedupe would not have suppressed the repeats.
             if (isNativeAaMode() && isOwner) {
                 if (frequency > 4000) {
                     native5GhzBandMismatchRetries = 0
@@ -536,6 +555,33 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
                     removeGroupAndRetryNative5Ghz()
                     return
                 }
+            }
+
+            if (isOwner) {
+                logStationCoexistence(ssid, frequency)
+
+                // A group above channel 11 is up and beaconing and still invisible to most phones:
+                // a client in the FCC domain associates on channels 1-11 only and will not even
+                // list the SSID in a scan, so the phone reports nothing worse than "can't find the
+                // network". Report it and carry on — recreating the group does not help, because
+                // the channel is picked when the WiFi radio comes up, not when the group is made:
+                // measured on a unit where this failed as six recreates, 2467 MHz every time. Only
+                // a WiFi restart, or a country code the driver will honour, moves it.
+                //
+                // Said once per group, not once per callback: requestGroupInfo() is issued from
+                // several places, so this runs three or four times for one group.
+                if (P2pChannelPolicy.isClientUnfriendly(frequency)) {
+                    if (ssid != lastUnfriendlyChannelSsid) {
+                        lastUnfriendlyChannelSsid = ssid
+                        AppLog.e("WifiDirectManager: WiFi Direct group came up on ${P2pChannelPolicy.describe(frequency)} ($frequency MHz). Carrying on, but a phone limited to channels 1-11 will not find this network: it will scan and never see the SSID. Restarting this unit's WiFi, or giving it a WiFi country code, is what moves the group off channel 12/13.")
+                        showToast("WiFi Direct is on ${P2pChannelPolicy.describe(frequency)}, which most phones cannot join. Restart WiFi and try again.")
+                    }
+                } else if (frequency > 0) {
+                    lastUnfriendlyChannelSsid = null
+                }
+            }
+
+            if (isNativeAaMode() && isOwner) {
                 notifyNativeGroupStarted(ssid, frequency, band)
                 // The group is up. If no phone joins within the window, recover (recreate fresh).
                 armNativeJoinWatchdog()
@@ -580,6 +626,53 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
                 AppLog.e("WifiDirectManager: FATAL: Group info remained null after 20 retries.")
                 groupInfoRetries = 0
             }
+        }
+    }
+
+    /**
+     * Reports whether this unit is also joined to an ordinary WiFi network while hosting the group.
+     *
+     * One radio serving a station link and a group owner at once has to divide its time between
+     * them, and on a single-channel chipset that shows up as the projected video and audio going
+     * dead together for a few hundred milliseconds at a time, over and over, with nothing wrong
+     * anywhere in the app. It is invisible from a log otherwise, and it is not rare: a dashcam or
+     * a phone hotspot the unit reconnects to on its own is enough.
+     *
+     * Frequencies make the diagnosis exact when both are known: the same channel is shared airtime,
+     * different channels means the radio is also retuning between them. Several head units report
+     * the group frequency as 0, so say what is known and do not withhold the warning over it.
+     *
+     * Logged once per group rather than once per callback, because requestGroupInfo() is issued
+     * several places, so this runs three or four times for one group.
+     */
+    private fun logStationCoexistence(ssid: String, groupFrequency: Int) {
+        try {
+            val wifiManager = context.applicationContext
+                .getSystemService(Context.WIFI_SERVICE) as android.net.wifi.WifiManager
+            val info = wifiManager.connectionInfo ?: return
+            // supplicantState, not networkId or SSID. Both of those are redacted to -1 and
+            // "<unknown ssid>" whenever the caller cannot satisfy the location gate, which on a
+            // head unit is routine (the service runs without the projection activity in front),
+            // so keying on either would silently report "not associated" on the newer Android
+            // versions where this diagnosis is worth having. supplicantState survives redaction.
+            if (info.supplicantState != android.net.wifi.SupplicantState.COMPLETED) {
+                lastCoexistenceSsid = null
+                return
+            }
+            if (ssid == lastCoexistenceSsid) return
+            lastCoexistenceSsid = ssid
+
+            val staFrequency = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                info.frequency
+            } else 0
+            val relation = when {
+                staFrequency <= 0 || groupFrequency <= 0 -> "one of the two frequencies is unavailable"
+                staFrequency == groupFrequency -> "same channel, the two networks share airtime"
+                else -> "different channels, the radio has to switch between them"
+            }
+            AppLog.w("WifiDirectManager: This unit is connected to another WiFi network while hosting the WiFi Direct group (station $staFrequency MHz, group $groupFrequency MHz: $relation). One radio serving both can stall projected video and audio together for a few hundred milliseconds at a time. Disconnecting the other network, or using the head unit hotspot instead, removes the contention.")
+        } catch (e: Exception) {
+            AppLog.d("WifiDirectManager: Could not read station state for coexistence check: ${e.message}")
         }
     }
 
@@ -816,7 +909,7 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
             context.startActivity(intent)
         } catch (e: Exception) {
             try {
-                val intent = Intent(Settings.ACTION_WIFI_SETTINGS).apply {
+                val intent = Intent(android.provider.Settings.ACTION_WIFI_SETTINGS).apply {
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 }
                 context.startActivity(intent)
@@ -891,6 +984,8 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
         nativeGroupCreationMode = NATIVE_GROUP_MODE_UNKNOWN
         lastNativeGroupStatusMessage = null
         native5GhzBandMismatchRetries = 0
+        lastUnfriendlyChannelSsid = null
+        lastCoexistenceSsid = null
         nativeRecreateCount = 0
         cancelNativeJoinWatchdog()
         recreateNativeGroup(forceStandard = false)
@@ -1211,6 +1306,8 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
         isClientConnected = false
         nativeGroupCreationMode = NATIVE_GROUP_MODE_UNKNOWN
         native5GhzBandMismatchRetries = 0
+        lastUnfriendlyChannelSsid = null
+        lastCoexistenceSsid = null
         nativeRecreateCount = 0
         lastNativeGroupStatusMessage = null
         AapService.scanningState.value = false
