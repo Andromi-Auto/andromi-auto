@@ -31,13 +31,13 @@ class Settings(private val context: Context) {
     }
 
     var allowedDevices: Set<String>
-        get() = prefs.getStringSet("allow-devices", HashSet<String>())!!
+        get() = prefs.getStringSet("allow-devices", null)?.toSet() ?: emptySet()
         set(devices) {
             prefs.edit().putStringSet("allow-devices", devices).apply()
         }
 
     var networkAddresses: Set<String>
-        get() = prefs.getStringSet("network-addresses", HashSet<String>())!!
+        get() = prefs.getStringSet("network-addresses", null)?.toSet() ?: emptySet()
         set(addrs) {
             prefs.edit().putStringSet("network-addresses", addrs).apply()
         }
@@ -579,6 +579,37 @@ class Settings(private val context: Context) {
     var listenForUsbDevices: Boolean
         get() = prefs.getBoolean("listen-for-usb-devices", true)
         set(value) { prefs.edit().putBoolean("listen-for-usb-devices", value).apply() }
+
+    var usbBlacklist: Set<String>
+        get() = prefs.getStringSet("usb-blacklist", null)?.toSet() ?: emptySet()
+        set(value) { prefs.edit().putStringSet("usb-blacklist", value).apply() }
+
+    fun formatUsbVidPidKey(vid: Int, pid: Int): String {
+        return String.format(java.util.Locale.US, "%04x:%04x", vid, pid).lowercase()
+    }
+
+    fun formatUsbVidPidDisplay(vid: Int, pid: Int): String {
+        return String.format(java.util.Locale.US, "VID: 0x%04X, PID: 0x%04X", vid, pid)
+    }
+
+    fun isUsbDeviceBlacklisted(vid: Int, pid: Int): Boolean {
+        val key = formatUsbVidPidKey(vid, pid)
+        return usbBlacklist.contains(key)
+    }
+
+    fun addUsbDeviceToBlacklist(vid: Int, pid: Int) {
+        val key = formatUsbVidPidKey(vid, pid)
+        val set = usbBlacklist.toMutableSet()
+        set.add(key)
+        usbBlacklist = set
+    }
+
+    fun removeUsbDeviceFromBlacklist(vid: Int, pid: Int) {
+        val key = formatUsbVidPidKey(vid, pid)
+        val set = usbBlacklist.toMutableSet()
+        set.remove(key)
+        usbBlacklist = set
+    }
 
     var showToastMessages: Boolean
         get() = prefs.getBoolean("show-toast-messages", true)
