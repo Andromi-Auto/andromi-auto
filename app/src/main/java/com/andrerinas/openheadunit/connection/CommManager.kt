@@ -170,6 +170,19 @@ class CommManager(
         }
 
     /**
+     * `true` while a connection exists **or** one is being set up.
+     *
+     * [isConnected] deliberately excludes [ConnectionState.Connecting], which is right for the
+     * questions it was written for. It is wrong for discovery: a scan started during that window
+     * finds the head unit server, hands the socket over, and [connect] refuses it at its own
+     * `Connecting` guard and closes it — and that server is wedged by any connection it accepts
+     * and nobody follows through. Closing afterwards does not undo it; the damage is done at
+     * `accept()`. Ask this before opening a probe, not [isConnected].
+     */
+    val isBusy: Boolean
+        get() = isConnected || connectionState.value is ConnectionState.Connecting
+
+    /**
      * Returns `true` if the current USB connection is to [device].
      * Used by AapService to decide whether a USB detach event should trigger a disconnect.
      */
@@ -234,9 +247,22 @@ class CommManager(
      */
     suspend fun connect(socket: Socket) = withContext(Dispatchers.IO) {
         // Another caller already started the connection — do nothing.
-        if (_connectionState.value is ConnectionState.Connecting)
+        if (_connectionState.value is ConnectionState.Connecting) {
+            // [BUG_FIX] But close what we are refusing. A socket handed to connect() has no
+            // other owner: NetworkDiscovery gives ownership up at this call, and WirelessServer's
+            // accept loop closes the sockets it refuses itself, so returning without closing
+            // leaves the peer holding a session nobody will ever read from. This guard is the
+            // only one of the three that did not, and it is the reachable one — isConnected
+            // deliberately excludes Connecting, and WirelessServer checks it from a detached
+            // coroutine, so two connections arriving together both get past it.
+            //
+            // The cost is worst on the head unit server path, where the server binds to one
+            // connection for the life of its process and an abandoned one leaves it deaf until
+            // the user restarts it by hand.
+            AppLog.i("CommManager: Connect already in progress; closing the handed-over socket")
+            try { socket.close() } catch (e: Exception) {}
             return@withContext
-
+        }
 
         _disconnectJob?.join()
 

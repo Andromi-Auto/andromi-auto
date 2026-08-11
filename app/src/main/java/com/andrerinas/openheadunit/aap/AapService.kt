@@ -117,6 +117,17 @@ class AapService : Service(), UsbReceiver.Listener {
     private var networkDiscovery: NetworkDiscovery? = null
     private var mediaSession: MediaSessionCompat? = null
 
+    /** Last `NetworkCallback.onAvailable` we acted on, for the debounce in [registerNetworkMonitor]. */
+    private var lastNetworkAvailableKickMs: Long = 0L
+
+    /**
+     * Set when a network-available kick found a sweep already in flight and was folded into it.
+     * The sweep it joined was started for the *previous* network, so the one after it should not
+     * wait out the ordinary re-arm. Consumed once, in the discovery listener's `onScanFinished`.
+     */
+    @Volatile
+    private var rescanWithoutWaiting: Boolean = false
+
     private inline fun <T> safeMediaSessionCall(crossinline block: (MediaSessionCompat) -> T): T? {
         if (isDestroying) return null
         val session = mediaSession ?: return null
@@ -1394,13 +1405,29 @@ class AapService : Service(), UsbReceiver.Listener {
             override fun onAvailable(network: Network) {
                 AppLog.i("NetworkMonitor: Network available: $network")
 
-                // force start scan, now that we are connected
+                // [BUG_FIX] force start scan, now that we are connected — but do not stop the
+                // scan already running to do it. stop() is cooperative, so the pair started a
+                // second sweep beside the first, and two sweeps probing the head unit server's
+                // port at once is how it ends up bound to a connection nobody owns.
+                // startScan() is a no-op while a healthy scan is in flight, which is what this
+                // wants: a scan is running, so the network is already being looked at.
+                // onAvailable also fires repeatedly (per network, and again on re-validation),
+                // hence the debounce.
+                val now = SystemClock.elapsedRealtime()
+                if (now - lastNetworkAvailableKickMs < NETWORK_AVAILABLE_DEBOUNCE_MS) {
+                    AppLog.d("NetworkMonitor: Ignoring repeat onAvailable within debounce window")
+                    return
+                }
+                lastNetworkAvailableKickMs = now
                 serviceScope.launch {
                     delay(500)
-                    val discovery = networkDiscovery
-                    if (discovery != null) {
-                        discovery.stop()
-                        discovery.startScan()
+                    val discovery = networkDiscovery ?: return@launch
+                    if (!discovery.startScan()) {
+                        // Folded into a sweep that was already running — which was started for the
+                        // network we have just left. Do not cancel it; just do not make the next
+                        // one wait ten seconds either.
+                        rescanWithoutWaiting = true
+                        AppLog.i("NetworkMonitor: a scan was already in flight; the next one will not wait")
                     }
                 }
             }
@@ -1539,8 +1566,9 @@ class AapService : Service(), UsbReceiver.Listener {
 
         AppLog.i("AapService: Initializing WiFi Mode: $mode (Strategy: $strategy)")
 
+        // stopWirelessServer() already stops the scan and nulls the field; the networkDiscovery
+        // .stop() that used to sit here could never see anything to stop.
         stopWirelessServer()
-        networkDiscovery?.stop()
         nearbyManager?.stop()
         nativeAaHandshakeManager?.stop()
         softApCredentialsProvider?.stop()
@@ -2331,18 +2359,28 @@ class AapService : Service(), UsbReceiver.Listener {
         val mode = settings.wifiConnectionMode
         val strategy = settings.helperConnectionStrategy
 
-        if (mode == 3) return
-        // Allow discovery for Strategy 0 (NSD), 3 (Phone Hotspot) and 4 (Headunit Hotspot)
-        if (mode == 2 && strategy != 0 && strategy != 3 && strategy != 4) return
-        if (commManager.isConnected || (wirelessServer == null && !oneShot)) return
+        if (!DiscoveryModePolicy.usesNetworkDiscovery(mode, strategy)) return
+        // [BUG_FIX] isBusy, not isConnected. isConnected excludes Connecting, so a rescan landing
+        // inside the connect-and-handshake window -- up to twelve seconds -- opened a second socket
+        // to the head unit server, which connect() then refused at its own Connecting guard and
+        // closed. That wedges the server just as thoroughly as leaking it would.
+        if (commManager.isBusy || (wirelessServer == null && !oneShot)) return
 
-        networkDiscovery?.stop()
         scanningState.value = true
 
-        networkDiscovery = NetworkDiscovery(this, object : NetworkDiscovery.Listener {
+        // [BUG_FIX] Reused rather than rebuilt. This used to stop the old instance and replace it,
+        // which defeated NetworkDiscovery's own guard: the replacement's scanJob is null, so it saw
+        // no scan to wait for and probed the head unit server while the discarded instance still
+        // had a probe in flight. Both reach port 5277, one of them is thrown away, and the server
+        // binds to the connection nobody follows through -- deaf until the user restarts it by
+        // hand. Keeping the instance lets startScan() serialise, which is what it was written for.
+        // A real mode change still gets a fresh instance: stopWirelessServer() nulls this.
+        val discovery = networkDiscovery ?: NetworkDiscovery(this, object : NetworkDiscovery.Listener {
             override fun onServiceFound(ip: String, port: Int, socket: java.net.Socket?) {
-                if (commManager.isConnected) {
-                    // Already connected by the time this callback fired; discard the socket
+                if (commManager.isBusy) {
+                    // Connected, or connecting, by the time this callback fired; discard the
+                    // socket. isBusy rather than isConnected because handing it to connect()
+                    // during a connect in flight only gets it closed one frame later.
                     try { socket?.close() } catch (e: Exception) {}
                     return
                 }
@@ -2366,20 +2404,38 @@ class AapService : Service(), UsbReceiver.Listener {
                 }
             }
 
-            override fun onScanFinished() {
+            // The flag comes from the scan that finished, not from the call that built this
+            // listener: the instance outlives any single request now, so capturing it here would
+            // pin every later scan to the first caller's choice.
+            override fun onScanFinished(wasOneShot: Boolean) {
                 scanningState.value = false
-                if (oneShot) {
+                if (wasOneShot) {
                     AppLog.i("One-shot scan finished.")
                     return
                 }
-                // Reschedule the next scan after 10 s to avoid hammering the network
+                // Reschedule the next scan to avoid hammering the network.
+                //
+                // Unless the network changed while this sweep was running. Joining the phone's
+                // network has to start a scan promptly — waiting out the loop is most of a
+                // minute at the moment the user is starting a drive — and this is how that is
+                // done safely. The kick must never cancel a live probe to get there: two sweeps
+                // probing the head unit server at once is what wedges it, so the kick only makes
+                // the *next* sweep immediate, on the network that has actually arrived.
+                val delayMs = if (rescanWithoutWaiting) {
+                    rescanWithoutWaiting = false
+                    AppLog.i("AapService: network changed during the last scan; rescanning immediately")
+                    0L
+                } else {
+                    10000L
+                }
                 serviceScope.launch {
-                    delay(10000)
-                    if (wirelessServer != null && !commManager.isConnected) startDiscovery()
+                    delay(delayMs)
+                    if (wirelessServer != null && !commManager.isBusy) startDiscovery()
                 }
             }
         })
-        networkDiscovery?.startScan()
+        networkDiscovery = discovery
+        discovery.startScan(oneShot)
     }
 
     private fun stopWirelessServer() {
@@ -2387,6 +2443,9 @@ class AapService : Service(), UsbReceiver.Listener {
         activeHelperStrategy = -1
         networkDiscovery?.stop()
         networkDiscovery = null
+        // Belongs to the discovery loop that is going away; a fresh one starts scanning at once
+        // anyway and would only spend it on a sweep that needed no hurrying.
+        rescanWithoutWaiting = false
         wirelessServer?.stopServer()
         wirelessServer = null
         scanningState.value = false
@@ -3038,6 +3097,12 @@ class AapService : Service(), UsbReceiver.Listener {
 
         /** Delay before retrying USB connection after an unexpected disconnect. */
         private const val USB_RECONNECT_DELAY_MS = 3000L
+
+        /**
+         * `NetworkCallback.onAvailable` fires per network and again on re-validation, so a
+         * single join can produce several. One discovery kick per join is what is wanted.
+         */
+        private const val NETWORK_AVAILABLE_DEBOUNCE_MS = 1000L
 
         /** Cooldown period after user-initiated exit. During this window, the WirelessServer
          *  rejects incoming connections to prevent the phone from instantly reconnecting. */
