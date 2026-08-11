@@ -812,6 +812,14 @@ class AapService : Service(), UsbReceiver.Listener {
                         })
                     }
                     is CommManager.ConnectionState.Error -> {
+                        // Nothing may be counted here, and nothing new may be hung off this branch.
+                        // connectionState is a MutableStateFlow, so collection is conflated, and
+                        // startHandshake() calls disconnect() with no suspension point after
+                        // emitting Error — the value is already Disconnected by the time any
+                        // collector resumes, so this branch does not run while the Disconnected one
+                        // below runs normally. Anything that has to count failures counts them
+                        // where they happen; the silent-peer streak lives in CommManager for that
+                        // reason.
                         if (state.message.contains("Handshake failed")) {
                             onHandshakeFailed()
                         }
@@ -2413,7 +2421,9 @@ class AapService : Service(), UsbReceiver.Listener {
                     AppLog.i("One-shot scan finished.")
                     return
                 }
-                // Reschedule the next scan to avoid hammering the network.
+                // Reschedule the next scan to avoid hammering the network — and slow right down
+                // when the peer we keep reaching accepts the connection and never answers, which
+                // no amount of retrying fixes and which costs it a stranded socket each time.
                 //
                 // Unless the network changed while this sweep was running. Joining the phone's
                 // network has to start a scan promptly — waiting out the loop is most of a
@@ -2426,7 +2436,7 @@ class AapService : Service(), UsbReceiver.Listener {
                     AppLog.i("AapService: network changed during the last scan; rescanning immediately")
                     0L
                 } else {
-                    10000L
+                    UnresponsivePeerPolicy.rescanDelayMs(commManager.silentPeerFailures)
                 }
                 serviceScope.launch {
                     delay(delayMs)

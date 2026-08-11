@@ -8,6 +8,7 @@ import com.andrerinas.openheadunit.aap.AapTransport
 import com.andrerinas.openheadunit.aap.KeyDebouncePolicy
 import com.andrerinas.openheadunit.aap.MediaKeyRoutingPolicy
 import com.andrerinas.openheadunit.aap.PlaybackFocusPolicy
+import com.andrerinas.openheadunit.aap.UnresponsivePeerPolicy
 import com.andrerinas.openheadunit.aap.VideoStarvationPolicy
 import com.andrerinas.openheadunit.utils.AppLog
 import com.andrerinas.openheadunit.utils.BluetoothHelper
@@ -136,6 +137,31 @@ class CommManager(
 
     /** @Volatile: written on IO thread, read on Main and IO threads. */
     @Volatile private var _transport: AapTransport? = null
+
+    /**
+     * `ip:port` of the most recent connection attempt, or `null` when it was not a socket
+     * (USB). Lets a caller attribute a handshake failure to the peer it happened with, which
+     * matters for the one failure that is a property of that peer rather than of the link —
+     * see [ERROR_HANDSHAKE_PEER_SILENT].
+     */
+    @Volatile var lastAttemptedEndpoint: String? = null
+        private set
+
+    /**
+     * Consecutive handshakes against one endpoint where the peer accepted the connection and then
+     * sent nothing at all. Read by the discovery rescheduler to back off — see
+     * [com.andrerinas.openheadunit.aap.UnresponsivePeerPolicy].
+     *
+     * Counted here rather than from a [ConnectionState.Error] collector because that state is not
+     * observable: [connectionState] is a `MutableStateFlow`, so collection is conflated, and
+     * [startHandshake] calls [disconnect] with no suspension point after emitting the error — the
+     * value has already moved on to `Disconnected` before any collector resumes.
+     */
+    @Volatile var silentPeerFailures: Int = 0
+        private set
+
+    /** The endpoint [silentPeerFailures] is counting; a different one starts its own streak. */
+    @Volatile private var silentPeerEndpoint: String? = null
     var onUpdateUiConfigReplyReceived: (() -> Unit)? = null
     @Volatile private var _connection: AccessoryConnection? = null
 
@@ -206,6 +232,8 @@ class CommManager(
             return@withContext
 
 
+        lastAttemptedEndpoint = null
+
         val usbManager = context.getSystemService(Context.USB_SERVICE) as UsbManager
         if (!usbManager.hasPermission(device)) {
             _connectionState.emit(ConnectionState.Error("USB permission not granted for device"))
@@ -264,6 +292,8 @@ class CommManager(
             return@withContext
         }
 
+        lastAttemptedEndpoint = socket.inetAddress?.hostAddress?.let { "$it:${socket.port}" }
+
         _disconnectJob?.join()
 
         try {
@@ -295,6 +325,8 @@ class CommManager(
         // Another caller already started the connection — do nothing.
         if (_connectionState.value is ConnectionState.Connecting)
             return@withContext
+
+        lastAttemptedEndpoint = "$ip:$port"
 
         _disconnectJob?.join()
 
@@ -366,22 +398,65 @@ class CommManager(
                     _transport!!.onAudioFocusStateChanged = { isPlaying -> onAudioFocusStateChanged?.invoke(isPlaying) }
                     _transport!!.onUpdateUiConfigReplyReceived = { onUpdateUiConfigReplyReceived?.invoke() }
                 }
-                if (_transport?.startHandshake(_connection!!) == true) {
+                // Held locally because startHandshake() quits the transport on failure, and
+                // quitting nulls _transport before it returns — the failure reason would be
+                // unreachable by the time we came to report it.
+                val transport = _transport
+                if (transport?.startHandshake(_connection!!) == true) {
                     // A session that got this far had a working link to carry video on. See
                     // VideoStarvationPolicy for what it means when one ends without carrying any.
                     sessionReachedHandshake = true
                     videoDecoder.framesRenderedThisSession = 0L
+                    silentPeerFailures = 0
                     _connectionState.emit(ConnectionState.HandshakeComplete)
                 } else {
-                    _connectionState.emit(ConnectionState.Error("Handshake failed"))
+                    val silent = transport?.lastHandshakeFailure == AapTransport.HandshakeFailure.PEER_SILENT
+                    noteHandshakeOutcome(silent)
+                    _connectionState.emit(
+                        ConnectionState.Error(if (silent) ERROR_HANDSHAKE_PEER_SILENT else "Handshake failed")
+                    )
                     disconnect()
                 }
             } else {
                 _connectionState.emit(ConnectionState.Error("Starting handshake without connection"))
             }
         } catch (e: Exception) {
+            // An exception is never the silent-peer case; clear the streak rather than leaving it
+            // to age into a backoff that no longer describes what is happening.
+            noteHandshakeOutcome(silent = false)
             _connectionState.emit(ConnectionState.Error("Handshake failed: ${e.message}"))
             disconnect()
+        }
+    }
+
+    /**
+     * Updates [silentPeerFailures] after a failed handshake, and explains the situation once when
+     * the streak reaches the point where the retry cadence drops.
+     */
+    private fun noteHandshakeOutcome(silent: Boolean) {
+        if (!silent) {
+            // Any other failure means this is not the deaf-peer case, so the streak — and the
+            // backoff resting on it — starts over.
+            silentPeerFailures = 0
+            return
+        }
+        val endpoint = lastAttemptedEndpoint
+        silentPeerFailures =
+            UnresponsivePeerPolicy.countAfterSilentFailure(silentPeerFailures, silentPeerEndpoint, endpoint)
+        silentPeerEndpoint = endpoint
+        // Only Android Auto's head unit server — the peer on 5277, so the discovery path and Self
+        // Mode — has something the user can restart. The phone dialling our own server on 5288 and
+        // the Nearby helper can both reach this branch, and sending their users into Android Auto's
+        // developer settings after a switch they never turned on would be worse than saying nothing.
+        if (UnresponsivePeerPolicy.shouldExplain(silentPeerFailures) && endpoint?.endsWith(":5277") == true) {
+            AppLog.e(
+                "CommManager: $endpoint has accepted $silentPeerFailures connections in a row " +
+                    "without answering any of them. Slowing discovery to one attempt every " +
+                    "${UnresponsivePeerPolicy.BACKOFF_RESCAN_MS / 1000}s. Android Auto's head unit " +
+                    "server does not recover on its own once this happens — stop and start it again " +
+                    "on the phone, in Android Auto's developer settings, and this will reconnect by " +
+                    "itself."
+            )
         }
     }
 
@@ -796,5 +871,16 @@ class CommManager(
     fun destroy() {
         doDisconnect()
         _scope.cancel()
+    }
+
+    companion object {
+        /**
+         * [ConnectionState.Error] message for the one handshake failure that says something
+         * specific about the *peer* rather than about us: the TCP connection was accepted, the
+         * version request went out, and not one byte ever came back.
+         *
+         * Still contains "Handshake failed" so the generic handling keeps working.
+         */
+        const val ERROR_HANDSHAKE_PEER_SILENT = "Handshake failed: the peer never responded"
     }
 }

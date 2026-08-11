@@ -87,6 +87,24 @@ class AapTransport(
     val isWireless: Boolean
         get() = connection is com.andrerinas.openheadunit.connection.SocketAccessoryConnection
     var ignoreNextStopRequest: Boolean = false
+    /** Why the last [startHandshake] failed, for callers that report it. */
+    enum class HandshakeFailure {
+        NONE,
+
+        /**
+         * The version exchange timed out on every attempt without the peer sending a single
+         * byte, and without any transport error of our own. The link is fine and the peer is
+         * simply not answering — on the WiFi head unit server path that means it is bound to
+         * an earlier connection and will stay that way until it is restarted.
+         */
+        PEER_SILENT,
+
+        OTHER
+    }
+
+    @Volatile var lastHandshakeFailure: HandshakeFailure = HandshakeFailure.NONE
+        private set
+
     /** Set by [AapControl] when VIDEO_FOCUS_NATIVE triggers a stop (user tapped Exit). */
     @Volatile var wasUserExit: Boolean = false
     @Volatile var onQuit: ((Boolean) -> Unit)? = null
@@ -274,6 +292,7 @@ class AapTransport(
     }
 
     private fun handshake(connection: AccessoryConnection): Boolean {
+        lastHandshakeFailure = HandshakeFailure.OTHER
         try {
             val isUsb = connection !is SocketAccessoryConnection && !connection.isSingleMessage
             // Increased delay for AA 16.4+ stability on USB - skip for Sockets
@@ -302,6 +321,10 @@ class AapTransport(
             var ret = -1
             var attempt = 0
             var received = false
+            // Separates "the peer is not answering" from "our own link broke". Only the first
+            // is worth reporting upwards: it is the one the user can do something about.
+            var peerSentBytes = false
+            var transportError = false
             // Outer deadline prevents the loop from running for minutes on an unresponsive device.
             // Each send+recv pair uses 2 s per operation; 3 attempts × 4 s ≈ 12 s worst-case,
             // capped here at HANDSHAKE_TIMEOUT_MS so a stuck device fails fast.
@@ -316,6 +339,7 @@ class AapTransport(
                 AppLog.d("Handshake: Version request sent. ret: $ret. attempt: $attempt. TS: ${SystemClock.elapsedRealtime()}")
                 if (ret < 0) {
                     AppLog.w("Handshake: Version request send failed (ret=$ret), attempt $attempt")
+                    transportError = true
                     SystemClock.sleep(200)
                     continue
                 }
@@ -332,6 +356,8 @@ class AapTransport(
                     val remaining = (recvDeadline - SystemClock.elapsedRealtime())
                         .toInt().coerceAtLeast(100)
                     ret = connection.recvBlocking(buffer, buffer.size, remaining, false)
+                    if (ret < 0) transportError = true   // EOF or IOException, not a timeout
+                    if (ret > 0) peerSentBytes = true
                     if (ret <= 0) break  // timeout or error — fall through to outer retry
                     if (ret >= 6
                         && buffer[0] == 0.toByte()
@@ -355,6 +381,16 @@ class AapTransport(
 
             if (!received) {
                 AppLog.e("Handshake: Version request/response failed after $attempt attempt(s). last ret: $ret")
+                if (!peerSentBytes && !transportError) {
+                    lastHandshakeFailure = HandshakeFailure.PEER_SILENT
+                    AppLog.e(
+                        "Handshake: the peer accepted the connection and then sent nothing at all. " +
+                            "Our link is fine — every read timed out rather than failing. On the WiFi " +
+                            "head unit server path this means Android Auto's server on the phone is " +
+                            "still bound to an earlier connection; it does not recover on its own and " +
+                            "has to be stopped and started again in Android Auto's developer settings."
+                    )
+                }
                 return false
             }
             AppLog.i("Handshake: Version response recv ret: %d", ret)
@@ -381,6 +417,7 @@ class AapTransport(
             AppLog.i("Handshake: Status OK sent: %d", ret)
             AppLog.d("Handshake: Handshake successful. TS: ${SystemClock.elapsedRealtime()}")
 
+            lastHandshakeFailure = HandshakeFailure.NONE
             return true
         } catch (e: Exception) {
             AppLog.e("Handshake failed with exception", e)
