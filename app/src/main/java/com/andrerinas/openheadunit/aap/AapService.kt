@@ -548,6 +548,16 @@ class AapService : Service(), UsbReceiver.Listener {
                 }
                 Intent.ACTION_SHUTDOWN -> {
                     AppLog.i("WakeDetect: SHUTDOWN (system shutting down, not hibernating)")
+                    maybeTearDownBeforeLinkGoes(LinkLossTrigger.DEVICE_SHUTDOWN) { goAsync() }
+                }
+                android.net.wifi.WifiManager.WIFI_STATE_CHANGED_ACTION -> {
+                    val state = intent.getIntExtra(
+                        android.net.wifi.WifiManager.EXTRA_WIFI_STATE,
+                        android.net.wifi.WifiManager.WIFI_STATE_UNKNOWN
+                    )
+                    if (state == android.net.wifi.WifiManager.WIFI_STATE_DISABLING) {
+                        maybeTearDownBeforeLinkGoes(LinkLossTrigger.WIFI_STATION_DISABLING) { goAsync() }
+                    }
                 }
                 else -> {
                     // OEM boot/ACC/wake intents — log with extras for diagnostics
@@ -1381,6 +1391,10 @@ class AapService : Service(), UsbReceiver.Listener {
             addAction(Intent.ACTION_POWER_CONNECTED)
             addAction(Intent.ACTION_POWER_DISCONNECTED)
             addAction(Intent.ACTION_SHUTDOWN)
+            // Not a wake event: the warning that WiFi station mode is going away, which is the
+            // only chance to close a session riding it before the interface does. See
+            // LinkLossTeardownPolicy.
+            addAction(android.net.wifi.WifiManager.WIFI_STATE_CHANGED_ACTION)
             // Standard boot (dynamic duplicate — BootCompleteReceiver handles manifest side)
             addAction(Intent.ACTION_BOOT_COMPLETED)
             addAction(Intent.ACTION_LOCKED_BOOT_COMPLETED)
@@ -2344,6 +2358,61 @@ class AapService : Service(), UsbReceiver.Listener {
     private fun nativeTransport(): NativeTransport =
         NativeTransport.fromSetting(App.provide(this).settings.nativeApTransport)
 
+    /**
+     * Closes an active session while the link it rides still works.
+     *
+     * Android Auto's head unit server is wedged permanently by a peer that vanishes without
+     * closing, and only a restart on the phone clears it. A session that closes properly does not
+     * do that. The system warns us before some link losses and not others; this takes the ones it
+     * does warn about.
+     *
+     * [pendingResult] keeps the broadcast alive while the teardown runs, because it does socket
+     * work and the caller is a receiver on the main thread. It is always finished.
+     */
+    private fun maybeTearDownBeforeLinkGoes(
+        trigger: LinkLossTrigger,
+        pendingResult: () -> BroadcastReceiver.PendingResult
+    ) {
+        if (!commManager.isConnected) return
+        val settings = App.provide(this).settings
+        if (!LinkLossTeardownPolicy.shouldTearDown(
+                trigger,
+                settings.wifiConnectionMode,
+                settings.helperConnectionStrategy,
+                nativeTransport(),
+                // [BUG_FIX] Ask the session, not the settings. wifiConnectionMode is stored and
+                // says nothing about what is running: a USB drive with a WiFi mode selected was
+                // being disconnected by the user switching WiFi off, which the session never
+                // rode in the first place.
+                sessionIsWireless = commManager.isWirelessSession
+            )
+        ) {
+            AppLog.i("AapService: $trigger, but this session does not ride that link; leaving it alone")
+            return
+        }
+
+        val pending = pendingResult()
+        val startedAt = SystemClock.elapsedRealtime()
+        AppLog.i(
+            "AapService: $trigger with a live session — closing it now, while the link still " +
+                "works. A session that just vanishes leaves the phone's head unit server holding a " +
+                "peer that never came back, and only restarting it by hand clears that."
+        )
+        Thread {
+            try {
+                commManager.disconnectForLinkLoss(LINK_LOSS_TEARDOWN_BUDGET_MS)
+                AppLog.i(
+                    "AapService: link-loss teardown finished in " +
+                        "${SystemClock.elapsedRealtime() - startedAt}ms"
+                )
+            } catch (e: Exception) {
+                AppLog.e("AapService: link-loss teardown failed", e)
+            } finally {
+                try { pending.finish() } catch (e: Exception) {}
+            }
+        }.apply { name = "AapService-LinkLossTeardown"; start() }
+    }
+
     fun triggerWifiDirectRefresh() {
         val mode = App.provide(this).settings.wifiConnectionMode
         if (mode != 3) return
@@ -3113,6 +3182,14 @@ class AapService : Service(), UsbReceiver.Listener {
          * single join can produce several. One discovery kick per join is what is wanted.
          */
         private const val NETWORK_AVAILABLE_DEBOUNCE_MS = 1000L
+
+        /**
+         * How long a link-loss teardown may take. The interface is already on its way down and the
+         * broadcast is holding the system up, so this is a budget rather than a target: the
+         * ByeBye and the socket close together take well under 200 ms when the link still works,
+         * and when it does not there is nothing to wait for.
+         */
+        private const val LINK_LOSS_TEARDOWN_BUDGET_MS = 1500L
 
         /** Cooldown period after user-initiated exit. During this window, the WirelessServer
          *  rejects incoming connections to prevent the phone from instantly reconnecting. */

@@ -209,6 +209,16 @@ class CommManager(
         get() = isConnected || connectionState.value is ConnectionState.Connecting
 
     /**
+     * `true` when the running session rides a socket rather than USB.
+     *
+     * The stored wireless mode says nothing about this — a USB session can be live while
+     * `wifiConnectionMode` names a WiFi route — so anything reacting to the WiFi radio going away
+     * has to ask the session, not the settings.
+     */
+    val isWirelessSession: Boolean
+        get() = _connection is SocketAccessoryConnection
+
+    /**
      * Returns `true` if the current USB connection is to [device].
      * Used by AapService to decide whether a USB detach event should trigger a disconnect.
      */
@@ -868,6 +878,31 @@ class CommManager(
      * Call this when the owning component (e.g. the foreground service) is destroyed.
      * After [destroy], the CommManager instance must not be used again.
      */
+    /**
+     * Closes the session because the link carrying it is about to go away, and blocks until the
+     * socket is actually closed or [timeoutMs] elapses. Never call from the main thread.
+     *
+     * Deliberately not [disconnect]. That one means "the user pressed Exit": it marks a user exit,
+     * which suppresses the reconnect, and it honours `killOnDisconnect`, which would finish the
+     * activities and stop the service. Neither is right for a WiFi toggle the user expects to come
+     * back from.
+     *
+     * Blocking is the whole point. [disconnect] only schedules the teardown, which is fine when
+     * something will still be running afterwards to notice; it is not fine when the interface is
+     * on its way down and what matters is that the close goes out before it.
+     */
+    fun disconnectForLinkLoss(timeoutMs: Long) {
+        if (_connectionState.value is ConnectionState.Disconnected) return
+
+        HeadUnitScreenConfig.unlockResolution()
+        // Not clean and not a user exit: an unexpected end the app should try to recover from,
+        // which is what the existing reconnect paths already key on.
+        _connectionState.value = ConnectionState.Disconnected(isClean = false, isUserExit = false)
+        val job = _scope.launch { doDisconnect(sendByeBye = true) }
+        _disconnectJob = job
+        runBlocking { withTimeoutOrNull(timeoutMs) { job.join() } }
+    }
+
     fun destroy() {
         doDisconnect()
         _scope.cancel()

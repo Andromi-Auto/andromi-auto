@@ -183,6 +183,11 @@ class AapTransport(
 
         val size = connection?.sendBlocking(ba.data, ba.limit, 250) ?: -1
 
+        // Silent until it matters. A failed write here is how "the ByeBye went out" and "the link
+        // was already gone" tell themselves apart, which is the whole question for a teardown
+        // racing an interface going down.
+        if (size < 0) AppLog.w("AapTransport: send failed (ret=$size); the link is already gone")
+
         if (AppLog.LOG_VERBOSE) {
             AppLog.v("Sent size: %d", size)
             // AapDump.logvHex("US", 0, ba.data, ba.limit) // AapDump might be removed or changed
