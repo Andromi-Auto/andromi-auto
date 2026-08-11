@@ -22,7 +22,7 @@ class WifiLauncherManual(
 
     override fun hasLocalDiscovery() = false
 
-    override fun start(quiet: Boolean) {
+    override fun start(noInfoToasts: Boolean) {
     }
 
     override fun stop(seq: WifiLauncherStopSequence) {

@@ -15,7 +15,7 @@ abstract class WifiLauncher(val manager: WifiLauncherManager) {
 
     abstract fun hasLocalDiscovery(): Boolean
 
-    abstract fun start(quiet: Boolean)
+    abstract fun start(noInfoToasts: Boolean)
 
     abstract fun stop(seq: WifiLauncherStopSequence)
 

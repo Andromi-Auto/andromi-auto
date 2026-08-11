@@ -1327,7 +1327,7 @@ class NativeAaHandshakeManager(
      * than dropping the field. Omitting it risks a strict parser rejecting the whole message, which
      * would surface as silence rather than as the specific refusal an empty one produces.
      *
-     * [transport] picks the access-point type: DYNAMIC for a hotspot, matching both reference
+     * [strategy] picks the access-point type: DYNAMIC for a hotspot, matching both reference
      * implementations, and STATIC for a WiFi Direct group as before.
      */
     private fun sendWifiSecurityResponse(
@@ -1335,14 +1335,14 @@ class NativeAaHandshakeManager(
         ssid: String,
         key: String,
         bssid: String?,
-        transport: NativeStrategy
+        strategy: NativeStrategy
     ) {
         val response = Wireless.WifiInfoResponse.newBuilder()
             .setSsid(ssid)
             .setKey(key)
             .setSecurityMode(Wireless.SecurityMode.WPA2_PERSONAL)
             .setAccessPointType(
-                if (transport == NativeStrategy.HOTSPOT) Wireless.AccessPointType.DYNAMIC
+                if (strategy == NativeStrategy.HOTSPOT) Wireless.AccessPointType.DYNAMIC
                 else Wireless.AccessPointType.STATIC
             )
             .setBssid(bssid.orEmpty())

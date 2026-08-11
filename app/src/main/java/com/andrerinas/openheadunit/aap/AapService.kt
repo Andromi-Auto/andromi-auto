@@ -1585,7 +1585,7 @@ class AapService : Service(), UsbReceiver.Listener {
                 userExitedAA = false
                 userExitCooldownUntil = 0L
                 Settings.clearBootLoopState(this)
-                wifiLauncherManager.setActiveFromSettings(force = true, quiet = false)
+                wifiLauncherManager.setActiveFromSettings(force = true, noInfoToasts = false)
 
                 if (mode == WifiLauncherMode.AUTO)
                     wifiLauncherManager.startDiscovery(oneShot = true)

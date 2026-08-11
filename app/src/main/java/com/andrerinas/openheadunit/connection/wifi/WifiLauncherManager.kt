@@ -1,9 +1,7 @@
 package com.andrerinas.openheadunit.connection.wifi
 
-import android.content.Context
 import com.andrerinas.openheadunit.App
 import com.andrerinas.openheadunit.aap.AapService
-import com.andrerinas.openheadunit.connection.wifi.modes.WifiLauncherHelper
 import com.andrerinas.openheadunit.utils.AppLog
 import com.andrerinas.openheadunit.utils.Settings
 
@@ -18,17 +16,17 @@ class WifiLauncherManager(val service: AapService) {
 
     fun getActiveMode(): WifiLauncherMode? = active?.mode
 
-    fun setActiveFromSettings(force: Boolean = false, quiet: Boolean = true) {
+    fun setActiveFromSettings(force: Boolean = false, noInfoToasts: Boolean = true) {
         val settings = App.provide(service).settings
 
-        setActive(settings.wifiConnectionMode, force, quiet)
+        setActive(settings.wifiConnectionMode, force, noInfoToasts)
     }
 
-    fun setActive(mode: WifiLauncherMode, force: Boolean = false, quiet: Boolean = true) {
-        setActive(mode.factory(this), force, quiet)
+    fun setActive(mode: WifiLauncherMode, force: Boolean = false, noInfoToasts: Boolean = true) {
+        setActive(mode.factory(this), force, noInfoToasts)
     }
 
-    fun setActive(newLauncher: WifiLauncher, force: Boolean = false, quiet: Boolean = true) {
+    fun setActive(newLauncher: WifiLauncher, force: Boolean = false, noInfoToasts: Boolean = true) {
         if (newLauncher.manager != this)
             throw IllegalArgumentException("newLauncher.manager is different instance")
         if (active == newLauncher)
@@ -56,7 +54,7 @@ class WifiLauncherManager(val service: AapService) {
         // replace it with new one
         active = newLauncher
         sharedServices.update(newLauncher)
-        active?.start(quiet)
+        active?.start(noInfoToasts)
     }
 
     fun stop(seq: WifiLauncherStopSequence = WifiLauncherStopSequence.ANY) {

@@ -1,4 +1,4 @@
-package com.andrerinas.openheadunit.connection
+package com.andrerinas.headunitrevived.connection
 
 import com.andrerinas.openheadunit.connection.wifi.modes.native.NativeAaHandshakeManager
 import org.junit.Assert.assertEquals

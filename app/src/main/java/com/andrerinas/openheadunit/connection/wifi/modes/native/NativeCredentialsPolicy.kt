@@ -56,7 +56,7 @@ object NativeCredentialsPolicy {
     fun isUsableBssid(bssid: String?): Boolean = SoftApBssidPolicy.isUsable(bssid)
 
     /** What to do when [isUsableBssid] said no. */
-    fun onUnusableBssid(transport: NativeStrategy): UnusableBssidAction = when (transport) {
+    fun onUnusableBssid(strategy: NativeStrategy): UnusableBssidAction = when (strategy) {
         NativeStrategy.WIFI_DIRECT -> UnusableBssidAction.ABORT
         NativeStrategy.HOTSPOT -> UnusableBssidAction.SEND_WITH_EMPTY_BSSID
     }
