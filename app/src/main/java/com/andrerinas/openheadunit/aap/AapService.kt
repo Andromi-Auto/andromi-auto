@@ -128,6 +128,21 @@ class AapService : Service(), UsbReceiver.Listener {
     @Volatile
     private var rescanWithoutWaiting: Boolean = false
 
+    /**
+     * Set when a link-loss teardown closed the session because station WiFi was going away.
+     *
+     * The ordinary answer to a disconnect is to restart the discovery loop two seconds later, and
+     * that is wrong here: the network it would scan is the one on its way down. What it finds is
+     * whatever interface enumerates first — a modem bridge, typically — and it sweeps that subnet
+     * every ten seconds until WiFi returns, which costs nothing but reads in a captured log
+     * exactly like discovery probing the wrong network for real.
+     *
+     * Cleared when a network comes back, which is also what revives the loop: `onAvailable` calls
+     * `startScan()` on the instance that is still there.
+     */
+    @Volatile
+    private var discoveryDormantAfterWifiLoss: Boolean = false
+
     private inline fun <T> safeMediaSessionCall(crossinline block: (MediaSessionCompat) -> T): T? {
         if (isDestroying) return null
         val session = mediaSession ?: return null
@@ -1294,6 +1309,11 @@ class AapService : Service(), UsbReceiver.Listener {
                         if (wifiManager.isWifiEnabled) {
                             wifiDirectManager?.makeVisible()
                         }
+                    } else if (discoveryDormantAfterWifiLoss) {
+                        AppLog.i(
+                            "AapService: link-loss teardown — leaving discovery down until a " +
+                                "network comes back, rather than scanning the one that went away."
+                        )
                     } else {
                         startDiscovery()
                     }
@@ -1435,6 +1455,12 @@ class AapService : Service(), UsbReceiver.Listener {
                 // wants: a scan is running, so the network is already being looked at.
                 // onAvailable also fires repeatedly (per network, and again on re-validation),
                 // hence the debounce.
+                // Whatever else this network is, it ends the wait a WiFi teardown started. The
+                // startScan() below is what actually revives the loop.
+                if (discoveryDormantAfterWifiLoss) {
+                    discoveryDormantAfterWifiLoss = false
+                    AppLog.i("NetworkMonitor: network is back after a link-loss teardown; discovery resumes")
+                }
                 val now = SystemClock.elapsedRealtime()
                 if (now - lastNetworkAvailableKickMs < NETWORK_AVAILABLE_DEBOUNCE_MS) {
                     AppLog.d("NetworkMonitor: Ignoring repeat onAvailable within debounce window")
@@ -2391,6 +2417,10 @@ class AapService : Service(), UsbReceiver.Listener {
             return
         }
 
+        // Only the WiFi trigger: a shutdown takes the whole device with it, so what the discovery
+        // loop does in the two seconds it has left does not matter.
+        if (trigger == LinkLossTrigger.WIFI_STATION_DISABLING) discoveryDormantAfterWifiLoss = true
+
         val pending = pendingResult()
         val startedAt = SystemClock.elapsedRealtime()
         AppLog.i(
@@ -2441,7 +2471,15 @@ class AapService : Service(), UsbReceiver.Listener {
         // inside the connect-and-handshake window -- up to twelve seconds -- opened a second socket
         // to the head unit server, which connect() then refused at its own Connecting guard and
         // closed. That wedges the server just as thoroughly as leaking it would.
-        if (commManager.isBusy || (wirelessServer == null && !oneShot)) return
+        //
+        // Logged rather than returned silently: this gate and the re-arm below are the only two
+        // ways the discovery loop can end without saying so, and a loop that stops for no visible
+        // reason is the one thing a submitted log cannot be read for.
+        if (commManager.isBusy) {
+            AppLog.i("AapService: Discovery not started — a connection is live or being set up")
+            return
+        }
+        if (wirelessServer == null && !oneShot) return
 
         scanningState.value = true
 
@@ -2509,7 +2547,13 @@ class AapService : Service(), UsbReceiver.Listener {
                 }
                 serviceScope.launch {
                     delay(delayMs)
-                    if (wirelessServer != null && !commManager.isBusy) startDiscovery()
+                    if (wirelessServer == null) {
+                        AppLog.i("AapService: Discovery loop ends — the wireless server is gone")
+                    } else if (commManager.isBusy) {
+                        AppLog.i("AapService: Discovery loop ends — a connection is live or being set up")
+                    } else {
+                        startDiscovery()
+                    }
                 }
             }
         })
@@ -2525,6 +2569,7 @@ class AapService : Service(), UsbReceiver.Listener {
         // Belongs to the discovery loop that is going away; a fresh one starts scanning at once
         // anyway and would only spend it on a sweep that needed no hurrying.
         rescanWithoutWaiting = false
+        discoveryDormantAfterWifiLoss = false
         wirelessServer?.stopServer()
         wirelessServer = null
         scanningState.value = false
