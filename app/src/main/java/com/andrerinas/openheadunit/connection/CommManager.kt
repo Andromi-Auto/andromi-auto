@@ -626,6 +626,27 @@ class CommManager(
         send(com.andrerinas.openheadunit.aap.protocol.messages.VideoFocusEvent(gain = true, unsolicited = true))
     }
 
+    /**
+     * First half of a video-focus cycle: release focus so the phone tears its video sink down and
+     * has to set it up again, which is what makes it start the next stream with a keyframe. The
+     * caller sends the matching gain after a gap.
+     *
+     * The release makes the phone answer with a video sink stop. [AapTransport.ignoreNextStopRequest]
+     * marks that one as ours, so it stays distinguishable in the log from a sink stop nobody asked
+     * for - which is what a video-black failure looks like, and has been the decisive line in four
+     * rounds of hardware testing.
+     *
+     * Only WarmRelaunchKeyframePolicy should be deciding when this is warranted: releasing focus
+     * across a stream that is rendering is a known way to lose one permanently.
+     */
+    fun releaseVideoFocusForKeyframe() {
+        if (_connectionState.value !is ConnectionState.TransportStarted) return
+        val transport = _transport ?: return
+        transport.ignoreNextStopRequest = true
+        AppLog.i("CommManager: releasing video focus to force a keyframe")
+        transport.send(com.andrerinas.openheadunit.aap.protocol.messages.VideoFocusEvent(gain = false, unsolicited = false))
+    }
+
     fun updateAudioGains() {
         _transport?.aapAudio?.updateGains()
     }

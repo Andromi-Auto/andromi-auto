@@ -154,6 +154,10 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
                 // First frame hasn't arrived yet — handled by the starting overlay. If the phone is
                 // streaming video but nothing draws, offer to switch renderer (issue #767).
                 maybeOfferRendererConfirm()
+                // A relaunch lands here too, and used to get nothing else: the overlay is already
+                // hidden (the previous instance had rendered), so its keyframe watchdog never
+                // re-arms, and maybeRequestVideoFocus below is never reached.
+                maybeRecoverWarmRelaunch()
                 watchdogHandler.postDelayed(this, 2000)
                 return
             }
@@ -172,6 +176,96 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
     }
 
     private var lastVideoFocusRequestMs = 0L
+
+    // Age and escalation state of the surface the decoder currently renders to. Reset together in
+    // onSurfaceChanged, so each relaunch gets exactly one focus cycle.
+    private var lastSurfaceSetMs = 0L
+    private var warmRelaunchCycleSpent = false
+
+    /**
+     * A relaunch handed the decoder a fresh surface and no picture has followed it.
+     *
+     * The phone is the bottleneck here, not the rebuild: measured across ten TextureView/GLES
+     * returns, the relaunch took 384-507 ms and codec creation 49-308 ms, while waiting for a
+     * decodable picture afterwards took 6.3-115.9 s - 97-99% of the whole return. On the SurfaceView
+     * backend, whose teardown releases video focus and so makes the phone re-run sink setup, the
+     * same wait was 42-96 ms.
+     *
+     * Repeating the unsolicited gain does not close that gap; dozens go out per slow return and none
+     * is ever followed by a picture. [WarmRelaunchKeyframePolicy] decides when to escalate to the
+     * release/regain cycle instead, and why each gate is there.
+     */
+    private fun maybeRecoverWarmRelaunch() {
+        if (lastSurfaceSetMs == 0L) return
+        val now = SystemClock.elapsedRealtime()
+        val action = WarmRelaunchKeyframePolicy.decide(
+            sessionHasRendered = videoDecoder.hasRenderedThisSession,
+            renderedSinceSurfaceSet = videoDecoder.lastFrameRenderedMs != 0L,
+            transportStarted = commManager.connectionState.value is CommManager.ConnectionState.TransportStarted,
+            msSinceSurfaceSet = now - lastSurfaceSetMs,
+            msSincePhoneBytes = now - videoDecoder.lastInputBytesReceivedMs,
+            phoneAliveThresholdMs = phoneAliveThresholdMs,
+            cycleAlreadySpent = warmRelaunchCycleSpent,
+            msSinceLastRequest = now - lastVideoFocusRequestMs
+        )
+        when (action) {
+            WarmRelaunchKeyframePolicy.Action.NONE -> return
+            WarmRelaunchKeyframePolicy.Action.NUDGE -> {
+                lastVideoFocusRequestMs = now
+                AppLog.w("AapProjectionActivity: relaunched surface still has no picture - requesting video focus (unsolicited)")
+                commManager.send(VideoFocusEvent(gain = true, unsolicited = true))
+            }
+            WarmRelaunchKeyframePolicy.Action.CYCLE_FOCUS -> {
+                warmRelaunchCycleSpent = true
+                lastVideoFocusRequestMs = now
+                AppLog.w("AapProjectionActivity: relaunched surface has no picture after ${now - lastSurfaceSetMs}ms - cycling video focus")
+                commManager.releaseVideoFocusForKeyframe()
+                focusCycleGainPending = true
+                watchdogHandler.removeCallbacks(focusCycleGainRunnable)
+                watchdogHandler.postDelayed(
+                    focusCycleGainRunnable,
+                    WarmRelaunchKeyframePolicy.FOCUS_CYCLE_GAP_MS
+                )
+            }
+        }
+    }
+
+    /**
+     * Runs the escalation check one window after a surface is claimed, instead of waiting for the
+     * reconnecting watchdog to reach it.
+     *
+     * That watchdog is the backstop, not the trigger: it first ticks 5 s after onResume and every
+     * 2 s after that, so leaving the escalation to it would put a floor under the recovery well
+     * above the window the policy actually specifies. Driving it from the surface keeps the cost at
+     * the window itself.
+     */
+    private val warmRelaunchCheckRunnable = Runnable { maybeRecoverWarmRelaunch() }
+
+    private var focusCycleGainPending = false
+
+    /**
+     * Second half of the focus cycle - see [WarmRelaunchKeyframePolicy.FOCUS_CYCLE_GAP_MS] for why
+     * it is not sent with the release.
+     */
+    private val focusCycleGainRunnable = Runnable {
+        focusCycleGainPending = false
+        AppLog.w("AapProjectionActivity: retaking video focus to complete the keyframe cycle")
+        commManager.send(VideoFocusEvent(gain = true, unsolicited = true))
+    }
+
+    /**
+     * Completes a focus cycle early rather than dropping it.
+     *
+     * The release and the gain are one operation split across a delay, so anything that cancels the
+     * pending half has to send it instead of forgetting it. Left released, the phone stops the video
+     * sink and nothing ever asks for it back - a permanent black screen with audio still playing,
+     * which is a worse outcome than the slow return the cycle exists to fix.
+     */
+    private fun settleFocusCycle() {
+        if (!focusCycleGainPending) return
+        watchdogHandler.removeCallbacks(focusCycleGainRunnable)
+        focusCycleGainRunnable.run()
+    }
 
     /**
      * Mid-session recovery: the connection is proven live (the state check above) but no frame
@@ -724,6 +818,9 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         // Clear any activity-local fullscreen override when leaving the Activity so
         // the stored settings remain authoritative on next resume.
         activityFullscreenOverride = null
+        // Before the handler is cleared below, and never after it.
+        settleFocusCycle()
+        watchdogHandler.removeCallbacks(warmRelaunchCheckRunnable)
         watchdogHandler.removeCallbacks(watchdogRunnable)
         watchdogHandler.removeCallbacks(videoWatchdogRunnable)
         watchdogHandler.removeCallbacks(reconnectingWatchdog)
@@ -1285,6 +1382,15 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         isSurfaceSet = true
 
         videoDecoder.setSurface(surface)
+        // A surface arriving inside a cycle's own gap must not strand the pending gain.
+        settleFocusCycle()
+        lastSurfaceSetMs = SystemClock.elapsedRealtime()
+        warmRelaunchCycleSpent = false
+        watchdogHandler.removeCallbacks(warmRelaunchCheckRunnable)
+        watchdogHandler.postDelayed(
+            warmRelaunchCheckRunnable,
+            WarmRelaunchKeyframePolicy.ESCALATE_AFTER_SURFACE_MS
+        )
 
         // --- Surface Mismatch Detection ---
         // Compare actual surface dimensions with what HeadUnitScreenConfig negotiated.
