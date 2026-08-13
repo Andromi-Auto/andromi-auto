@@ -94,6 +94,10 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
     private var fpsTextView: TextView? = null
     private var touchOverlayView: OverlayTouchView? = null
     private var currentFps: Int? = null
+
+    // Named rather than inline so onDestroy can tell this instance's listener apart from a
+    // relaunched instance's before clearing it - lambdas have no usable identity across instances.
+    private val fpsListener: (Int) -> Unit = { fps -> currentFps = fps }
     private val performanceHandler = android.os.Handler(android.os.Looper.getMainLooper())
     private val performanceSampler = PerformanceSampler()
     private val performanceExecutor = Executors.newSingleThreadExecutor { runnable ->
@@ -127,6 +131,9 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
                 }
 
                 AppLog.w("Watchdog: No video received yet. Requesting Keyframe (Unsolicited Focus)...")
+                // Shares one throttle clock with the reconnecting watchdog's mid-session
+                // re-request, so the two never double-fire across the overlay transition.
+                lastVideoFocusRequestMs = SystemClock.elapsedRealtime()
                 commManager.send(VideoFocusEvent(gain = true, unsolicited = true))
                 watchdogHandler.postDelayed(this, 1500)
             }
@@ -134,8 +141,12 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
     }
     private val reconnectingWatchdog = object : Runnable {
         override fun run() {
-            // Only run watchdog if we are actually supposed to be connected
-            if (commManager.connectionState.value !is CommManager.ConnectionState.HandshakeComplete) {
+            // Bail without re-posting only when the session is genuinely over; onResume re-arms
+            // on the next entry. The steady state during projection is TransportStarted, and
+            // checking only HandshakeComplete here killed this watchdog on its first tick of
+            // every session - which is why a video stream that died mid-session stayed black
+            // with nothing ever asking for it back.
+            if (!ProjectionWatchdogPolicy.isSessionLive(commManager.connectionState.value)) {
                 return
             }
             val lastFrame = videoDecoder.lastFrameRenderedMs
@@ -155,8 +166,29 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
                 // Decoder producing but display possibly frozen (issue #650).
                 maybeRecoverFromDisplayStall()
             }
+            maybeRequestVideoFocus()
             watchdogHandler.postDelayed(this, 2000)
         }
+    }
+
+    private var lastVideoFocusRequestMs = 0L
+
+    /**
+     * Mid-session recovery: the connection is proven live (the state check above) but no frame
+     * has arrived for long enough that the reconnecting overlay is up, so ask the phone for
+     * video again. Without this, the one unsolicited focus gain sent when a surface appears was
+     * the only request in the whole session - if the stream stopped after that, nothing ever
+     * asked for it back and the screen stayed black until the app was killed.
+     */
+    private fun maybeRequestVideoFocus() {
+        val now = SystemClock.elapsedRealtime()
+        if (!ProjectionWatchdogPolicy.shouldRequestVideoFocus(
+                overlayState == OverlayState.RECONNECTING, now, lastVideoFocusRequestMs
+            )
+        ) return
+        lastVideoFocusRequestMs = now
+        AppLog.w("AapProjectionActivity: connected but no frames - requesting video focus (unsolicited)")
+        commManager.send(VideoFocusEvent(gain = true, unsolicited = true))
     }
     private val exitRunnable = Runnable {
         if (commManager.connectionState.value is CommManager.ConnectionState.Disconnected) {
@@ -243,6 +275,11 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
             AppLog.i("Recreating projection view due to settings change...")
             val container = findViewById<FrameLayout>(R.id.container)
             if (::projectionView.isInitialized) {
+                // Deregister before discarding the view: the GLES backend posts its
+                // onSurfaceDestroyed to the main looper, so a still-registered callback from the
+                // discarded view would land after the replacement's onSurfaceChanged and release
+                // video focus for the new view's running stream.
+                projectionView.removeCallback(this)
                 videoDecoder.softwareYuvFrameSink = null
                 videoDecoder.stop(DecoderStopPolicy.REASON_PROJECTION_VIEW_RECREATE)
                 container.removeView(projectionView as View)
@@ -1315,10 +1352,20 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
     }
 
     override fun onSurfaceDestroyed(surface: android.view.Surface) {
+        // A relaunched instance may already own the decoder: on a singleTask relaunch the old
+        // instance's surface teardown is framework-ordered after its onDestroy, and for the GLES
+        // backend one main-looper post later still, so it lands after the new instance's
+        // setSurface. Acting on it then would release video focus for a stream the new instance
+        // is rendering and stop a decoder that was just rebuilt. All surface ownership changes
+        // happen on the main thread, so this read cannot race the send below.
+        if (!videoDecoder.isCurrentSurface(surface)) {
+            AppLog.i("SurfaceCallback: onSurfaceDestroyed for a stale surface - ignoring. Surface: $surface")
+            return
+        }
         AppLog.i("SurfaceCallback: onSurfaceDestroyed. Surface: $surface")
         isSurfaceSet = false
         commManager.send(VideoFocusEvent(gain = false, unsolicited = false))
-        videoDecoder.stop(DecoderStopPolicy.REASON_SURFACE_DESTROYED)
+        videoDecoder.stopIfCurrentSurface(surface, DecoderStopPolicy.REASON_SURFACE_DESTROYED)
     }
 
 
@@ -1506,9 +1553,17 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         performanceExecutor.shutdownNow()
         AppLog.i("AapProjectionActivity.onDestroy called. isFinishing=$isFinishing")
         App.isPiPActive = false
-        videoDecoder.onFpsChanged = null
-        videoDecoder.softwareYuvFrameSink = null
-        videoDecoder.dimensionsListener = null
+        // On a singleTask relaunch the new instance's onCreate runs before this old instance's
+        // onDestroy, so it has already registered its own view callback and decoder listeners.
+        // Deregister only what still belongs to this instance, or the teardown of the old
+        // instance strips the live one: its view callback stays armed to fire a stale
+        // surface-destroy, and its listeners get nulled out from under it.
+        if (::projectionView.isInitialized) projectionView.removeCallback(this)
+        if (videoDecoder.onFpsChanged === fpsListener) videoDecoder.onFpsChanged = null
+        (if (::projectionView.isInitialized) projectionView as? SoftwareYuvFrameSink else null)?.let {
+            if (videoDecoder.softwareYuvFrameSink === it) videoDecoder.softwareYuvFrameSink = null
+        }
+        if (videoDecoder.dimensionsListener === this) videoDecoder.dimensionsListener = null
     }
 
     companion object {
@@ -1625,9 +1680,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         }
         container.addView(fpsTextView, params)
 
-        videoDecoder.onFpsChanged = { fps ->
-            currentFps = fps
-        }
+        videoDecoder.onFpsChanged = fpsListener
         startPerformanceOverlayUpdates()
     }
 

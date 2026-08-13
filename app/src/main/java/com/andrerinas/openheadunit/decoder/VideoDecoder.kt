@@ -354,6 +354,32 @@ class VideoDecoder(private val settings: Settings) {
     }
 
     /**
+     * True when [surface] is the surface this decoder currently renders to.
+     *
+     * Identity comparison is deliberate: every teardown path hands back the exact Surface object
+     * it created, so `===` distinguishes a live owner from a torn-down view whose callback is
+     * arriving late.
+     */
+    fun isCurrentSurface(surface: Surface): Boolean = synchronized(this) { mSurface === surface }
+
+    /**
+     * Stops the decoder only if [surface] still owns it. Compare-and-stop is atomic under the
+     * same monitor [setSurface] and [stop] already hold, so a stale teardown from a torn-down
+     * view can never stop a decoder that a newer surface has since claimed. [mSurface] is left
+     * as it is either way — [stop] never cleared it, and [decode] guards on validity.
+     *
+     * @return whether the decoder was actually stopped.
+     */
+    fun stopIfCurrentSurface(surface: Surface, reason: String): Boolean = synchronized(this) {
+        if (mSurface !== surface) {
+            AppLog.i("Decoder stop ($reason) skipped: surface is no longer current")
+            return false
+        }
+        stop(reason)
+        true
+    }
+
+    /**
      * Stops the decoder, terminates the output thread, and releases hardware resources.
      */
     fun stop(reason: String = "unknown") {
