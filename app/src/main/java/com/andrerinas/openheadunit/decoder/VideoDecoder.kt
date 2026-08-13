@@ -1032,6 +1032,20 @@ class VideoDecoder(private val settings: Settings) {
             // leaked one makes every later create fail until the process dies.
             try { codec?.release() } catch (ignore: Exception) {}
             codec = null; running = false
+            // The surface died between decode()'s validity check and this configure - the framework
+            // tears it down on the main thread and no lock of ours covers that window. Restarting
+            // would only fail here again, and every attempt reaches onDecoderError, which asks the
+            // phone for a keyframe: measured once on hardware, that provoked an unsolicited video
+            // sink start while no surface existed at all, and the session's next real relaunch
+            // needed a focus cycle to recover from the state it left behind.
+            //
+            // So do not schedule anything. decode()'s own surface guard idles this path until
+            // setSurface() arrives with a replacement, which rebuilds from there - the same route
+            // every ordinary surface swap already takes.
+            if (mSurface?.isValid != true) {
+                AppLog.w("Decoder start aborted: the surface went away mid-configure. Waiting for a new one.")
+                return
+            }
             scheduleRestart("decoder_start_failed: ${e.message}")
         }
     }
