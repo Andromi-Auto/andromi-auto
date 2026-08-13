@@ -27,6 +27,10 @@ interface VideoDimensionsListener {
 class VideoDecoder(private val settings: Settings) {
     companion object {
         private const val TIMEOUT_US = 10000L
+        // How long feedInputBuffer waits for a free codec input buffer, total. Measured: 30ms
+        // reported a full queue within a second of every start on hardware that then decoded at
+        // full rate. The wait also aborts as soon as running clears - see the loop.
+        private const val INPUT_DEQUEUE_PATIENCE_MS = 300L
         private const val MAX_RESTARTS_WITHOUT_FRAME = 3
 
         // sync_stall watchdog tuning. An intermittently slow decoder — one that renders, just not
@@ -39,6 +43,14 @@ class VideoDecoder(private val settings: Settings) {
         private const val SYNC_STALL_COOLDOWN_MS = 8000L
         private const val SYNC_STALL_RESET_MS = 60000L
         private const val MAX_SYNC_STALL_RESTARTS = 4
+        // First-frame window for a codec rebuilt mid-session. Measured on a UNISOC MT50: up to
+        // ~8s from a mid-session reconfigure to the first frame on a session that then ran at
+        // 50fps, so the 2s window above restarted codecs that were merely warming up - and each
+        // restart resets the warm-up, which is how a healthy relaunch cascaded into the restart
+        // budget. Applies only while the session has already rendered (the codec type is proven,
+        // patience is cheap); a cold start keeps the 2s window so a genuinely dead component
+        // still fails fast.
+        private const val WARM_RECONFIGURE_FIRST_FRAME_GRACE_MS = 10000L
 
         // Interval of the decode/render throughput summary. This exists because a slow picture
         // is otherwise unattributable from a user-submitted log: the only rendered-frame count
@@ -177,6 +189,12 @@ class VideoDecoder(private val settings: Settings) {
     private var restartsSinceLastFrame = 0
     private var codecFallbackUsed = false
     private var decoderPermanentlyFailed = false
+    // True once any frame of this session has rendered. Session-scoped where lastFrameRenderedMs
+    // is start-scoped: every stop() zeroes that timestamp, so after a surface swap a stream that
+    // had rendered for an hour looks identical to one that never worked. This flag is what lets
+    // the restart ladder tell them apart, and it clears only when the session itself ends.
+    // Written by the output thread and the software render path, read on the transport thread.
+    @Volatile private var renderedThisSession = false
 
     // sync_stall cooldown/cap state - see SYNC_STALL_* constants.
     private var syncStallRestartCount = 0
@@ -265,13 +283,19 @@ class VideoDecoder(private val settings: Settings) {
 
     @Volatile private var decoderNeedsRestart = false
     @Volatile private var decoderRestartReason: String? = null
-    @Volatile private var pendingKeyframeRequest = false
 
     // Callback for transport layer integration
     var onDecoderError: (() -> Unit)? = null
 
     val videoWidth: Int get() = mWidth
     val videoHeight: Int get() = mHeight
+
+    /**
+     * Whether any frame of the current session has rendered. Distinguishes a decoder rebuilt under a
+     * live, proven stream from one that has never worked, which [lastFrameRenderedMs] cannot: every
+     * stop() zeroes that timestamp.
+     */
+    val hasRenderedThisSession: Boolean get() = renderedThisSession
 
     enum class CodecType(val mimeType: String, val displayName: String, val settingsValue: String) {
         H264("video/avc", "H.264/AVC", "H.264"),
@@ -345,9 +369,13 @@ class VideoDecoder(private val settings: Settings) {
             if (mSurface === surface) return
 
             AppLog.i("New surface set: $surface")
-            if (codec != null || softwareHevcDecoder != null) {
-                stop(DecoderStopPolicy.REASON_NEW_SURFACE)
-            }
+            // Unconditional, not gated on a live codec: stop() is where the failure state
+            // (decoderPermanentlyFailed, the restart counters, the one-time fallback) is reset,
+            // and the failure paths release the codec on their way down - so gating this on
+            // codec != null made a latched failure permanent for the rest of the session, with a
+            // fresh surface arriving and nothing ever clearing the flag that blocks decode().
+            // stop() is idempotent when nothing is running.
+            stop(DecoderStopPolicy.REASON_NEW_SURFACE)
             mSurface = surface
             lastFrameRenderedMs = 0L
         }
@@ -394,14 +422,18 @@ class VideoDecoder(private val settings: Settings) {
             } catch (e: Exception) {}
             outputThread = null
 
-            // Shorter than the output thread's join because overrunning it is safe here: the loop
-            // checks its own identity against feedThread, so once this clears it a thread still
-            // parked in MediaCodec can only exit. Kept short because stop() holds this object's
-            // monitor and setSurface() reaches it from the main thread.
+            // The join budget must exceed the longest MediaCodec call the feed thread can be
+            // inside, or this falls through to codec.release() while the thread is still in the
+            // codec - interrupt() does not abort a MediaCodec call, and calling into a released
+            // codec wedges some vendor components until the process dies. The feed loop checks
+            // running (cleared above) on every 10ms dequeue, so in practice it exits within one
+            // dequeue; 500ms covers the worst case with margin. The identity check against
+            // feedThread remains the backstop for a thread that overruns even this: it can only
+            // exit, never feed the next session's codec.
             try {
                 if (feedThread != null && feedThread != Thread.currentThread()) {
                     feedThread?.interrupt()
-                    feedThread?.join(200)
+                    feedThread?.join(500)
                 }
             } catch (e: Exception) {}
             feedThread = null
@@ -429,28 +461,34 @@ class VideoDecoder(private val settings: Settings) {
             inputBuffers = null
             legacyFrameBuffer = null
             codecBufferInfo = null
-            codecConfigured = false
             if (!DecoderStopPolicy.isDecoderRestart(reason)) {
-                vps = null
-                sps = null
-                pps = null
-                mWidth = 0
-                mHeight = 0
                 restartsSinceLastFrame = 0
                 codecFallbackUsed = false
                 decoderPermanentlyFailed = false
                 syncStallRestartCount = 0
                 lastSyncStallRestartMs = 0L
             }
-            // The pinned codec type describes the stream, not the decoder instance, so it has to
-            // outlive a surface teardown: the phone keeps sending the same codec while the view is
-            // rebuilt, and re-detecting on whatever packet lands mid-teardown can misread an
-            // ordinary H.264 P-slice as HEVC and configure the wrong decoder for the rest of the
-            // session. Only a real disconnect can change what the phone is sending.
+            // Everything that describes the *stream* rather than this decoder instance survives
+            // anything short of the session ending, and only a real disconnect can change what the
+            // phone is sending.
+            //
+            // The pinned codec type has to outlive a surface teardown because re-detecting on
+            // whatever packet lands mid-teardown can misread an ordinary H.264 P-slice as HEVC and
+            // configure the wrong decoder for the rest of the session. The parameter sets and the
+            // dimensions parsed out of them are the same kind of fact: dropping them left the
+            // rebuilt codec configured from HeadUnitScreenConfig's negotiated size with no csd-0 at
+            // all, which is what the "Fallback to negotiated dimensions" line reports - measured
+            // once per relaunch, on every backend, in every capture of the video-black round 6.
             if (DecoderStopPolicy.endsSession(reason)) {
                 codecTypePinned = false
+                renderedThisSession = false
+                vps = null
+                sps = null
+                pps = null
+                mWidth = 0
+                mHeight = 0
+                codecConfigured = false
             }
-            // Keep VPS/SPS/PPS cached so we can re-inject them on restart
             lastFrameRenderedMs = 0L
             loggedFirstSoftwareFrame = false
             loggedFirstHardwareFrame = false
@@ -497,8 +535,16 @@ class VideoDecoder(private val settings: Settings) {
 
                 // Track restarts that never produced a single frame for the currently pinned
                 // codec type. A genuinely broken hardware decoder (e.g. an MTK HEVC component
-                // that can't configure at all) will keep failing here forever otherwise.
-                if (codecTypePinned && lastFrameRenderedMs == 0L) {
+                // that can't configure at all) will keep failing here forever otherwise. A
+                // session that has already rendered is excluded: the codec type is proven for
+                // this stream, so restarts after a surface swap are warm-up churn, and counting
+                // them walked healthy sessions through the flip and into the permanent latch.
+                if (DecoderRestartPolicy.countsTowardFailure(
+                        codecTypePinned,
+                        renderedSinceLastStart = lastFrameRenderedMs != 0L,
+                        renderedThisSession = renderedThisSession
+                    )
+                ) {
                     restartsSinceLastFrame++
                     if (restartsSinceLastFrame >= MAX_RESTARTS_WITHOUT_FRAME) {
                         if (!codecFallbackUsed) {
@@ -520,8 +566,9 @@ class VideoDecoder(private val settings: Settings) {
                             decoderPermanentlyFailed = true
                         }
                     }
-                } else if (lastFrameRenderedMs != 0L) {
-                    // Decoder was healthy before this restart; don't count it against the pin.
+                } else if (lastFrameRenderedMs != 0L || renderedThisSession) {
+                    // Decoder was healthy before this restart, or the session has already proven
+                    // the codec type; don't count it against the pin.
                     restartsSinceLastFrame = 0
                 }
 
@@ -606,12 +653,6 @@ class VideoDecoder(private val settings: Settings) {
             }
 
             if (codec == null) return
-
-            if (pendingKeyframeRequest) {
-                pendingKeyframeRequest = false
-                AppLog.i("Decoder restarted and ready. Invoking error callback to request keyframe.")
-                onDecoderError?.invoke()
-            }
 
             enqueueForFeed(frameData, frameOffset, size)
         }
@@ -750,6 +791,7 @@ class VideoDecoder(private val settings: Settings) {
 
     private fun onSoftwareFramesRendered(renderedFrames: Int) {
         lastFrameRenderedMs = SystemClock.elapsedRealtime()
+        renderedThisSession = true
         framesRenderedThisSession += renderedFrames
         if (!loggedFirstSoftwareFrame) {
             loggedFirstSoftwareFrame = true
@@ -970,15 +1012,25 @@ class VideoDecoder(private val settings: Settings) {
                 LegacyOptimizer.setHighPriority()
                 outputThreadLoop()
             }.apply { name = "VideoDecoder-Output"; start() }
-            feedThread = Thread {
+            // Published before start(): the loop's guard reads this field to prove its own
+            // identity, and a thread that starts before the assignment lands can read the null a
+            // prior stop() left and exit at birth - after which every frame queues into a feed
+            // queue nobody drains.
+            val newFeedThread = Thread {
                 android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_DISPLAY)
                 feedThreadLoop()
-            }.apply { name = "VideoDecoder-Feed"; start() }
+            }.apply { name = "VideoDecoder-Feed" }
+            feedThread = newFeedThread
+            newFeedThread.start()
 
             codecTypePinned = true
             AppLog.i("Codec initialized: $bestCodec")
         } catch (e: Exception) {
             AppLog.e("Failed to start decoder", e)
+            // Release, not just null: a component created but never released survives the
+            // reference drop, and on head units with a single hardware decoder instance each
+            // leaked one makes every later create fail until the process dies.
+            try { codec?.release() } catch (ignore: Exception) {}
             codec = null; running = false
             scheduleRestart("decoder_start_failed: ${e.message}")
         }
@@ -1028,7 +1080,6 @@ class VideoDecoder(private val settings: Settings) {
         val currentCodec = codec ?: return false
         try {
             var inputIndex = -1
-            var attempts = 0
             // ~300ms of patience. Anything much shorter gives up while the codec is merely busy:
             // at 30ms this reported a full input queue within a second of every decoder start,
             // before the component had drained its first buffers, on hardware that then went on to
@@ -1036,16 +1087,22 @@ class VideoDecoder(private val settings: Settings) {
             //
             // The whole dequeue is timed, not just the retries: the first call blocks for up to
             // TIMEOUT_US on its own, and what holds up audio behind us is the total.
+            //
+            // running is checked every iteration because interrupt() cannot abort a MediaCodec
+            // call: stop() clears running before it joins this thread, so checking it here bounds
+            // the time a stopping decoder waits on us to one dequeue rather than the full budget -
+            // which is what lets stop()'s join reliably win before it releases the codec.
             val waitStart = SystemClock.elapsedRealtime()
-            while (attempts < 30) {
+            while (running && SystemClock.elapsedRealtime() - waitStart < INPUT_DEQUEUE_PATIENCE_MS) {
                 inputIndex = currentCodec.dequeueInputBuffer(TIMEOUT_US)
                 if (inputIndex >= 0) break
-                attempts++
             }
             inputWaitMs += SystemClock.elapsedRealtime() - waitStart
 
             if (inputIndex < 0) {
-                AppLog.e("Input buffer feed failed (full)")
+                // Silent when the wait was cut short by a teardown: that exit is ordinary and the
+                // frame is moot, while "full" would blame the codec on every stop.
+                if (running) AppLog.e("Input buffer feed failed (full)")
                 return false
             }
 
@@ -1208,6 +1265,7 @@ class VideoDecoder(private val settings: Settings) {
 
                     currentCodec.releaseOutputBuffer(renderIndex, true)
                     lastFrameRenderedMs = SystemClock.elapsedRealtime()
+                    renderedThisSession = true
                     lastOutputMs = lastFrameRenderedMs
                     framesRenderedThisSession++
                     consecutiveErrors = 0
@@ -1247,10 +1305,21 @@ class VideoDecoder(private val settings: Settings) {
                 // we update lastOutputMs to prevent false-positive restarts and screen flickering.
                 val now = SystemClock.elapsedRealtime()
                 val stallGap = now - lastOutputMs
-                if (stallGap > SYNC_STALL_THRESHOLD_MS) {
+                // A rebuilt codec that has not yet produced its first frame gets the longer
+                // warm-up window when this session has already rendered - see the constant.
+                val stallThreshold = if (lastFrameRenderedMs == 0L && renderedThisSession) {
+                    WARM_RECONFIGURE_FIRST_FRAME_GRACE_MS
+                } else {
+                    SYNC_STALL_THRESHOLD_MS
+                }
+                if (stallGap > stallThreshold) {
                     val inputIdleGap = now - lastInputBytesReceivedMs
                     if (inputIdleGap > SYNC_STALL_THRESHOLD_MS) {
                         // Stream is idle on the phone side (no new video frames arriving).
+                        // Deliberately silent: this branch used to fall through to the
+                        // "restart suppressed" line below, which read as a decoder fault for a
+                        // phone that had simply stopped sending, and misled a whole hardware
+                        // round with "0/4 used" printed every 10s for an idle stream.
                         lastOutputMs = now
                     } else {
                         // Input bytes ARE arriving, but decoder produces no output -> REAL DECODER STALL!
@@ -1270,14 +1339,14 @@ class VideoDecoder(private val settings: Settings) {
                             scheduleRestart("sync_stall")
                             break
                         }
-                    }
-                    // Suppressed by the cooldown or the cap. Report it, throttled: the branch
-                    // above is the only thing that ever mentions a stall, so once it stops
-                    // firing a decoder that has exhausted its restart budget keeps stalling
-                    // with an entirely clean log and reads as healthy.
-                    if (now - lastSyncStallSuppressedLogMs >= SYNC_STALL_SUPPRESSED_LOG_INTERVAL_MS) {
-                        lastSyncStallSuppressedLogMs = now
-                        AppLog.w("Decoder stall detected (no output for ${stallGap}ms) but restart suppressed ($syncStallRestartCount/$MAX_SYNC_STALL_RESTARTS used, ${SYNC_STALL_COOLDOWN_MS}ms cooldown). Still spinning on output.")
+                        // Suppressed by the cooldown or the cap. Report it, throttled: the branch
+                        // above is the only thing that ever mentions a stall, so once it stops
+                        // firing a decoder that has exhausted its restart budget keeps stalling
+                        // with an entirely clean log and reads as healthy.
+                        if (now - lastSyncStallSuppressedLogMs >= SYNC_STALL_SUPPRESSED_LOG_INTERVAL_MS) {
+                            lastSyncStallSuppressedLogMs = now
+                            AppLog.w("Decoder stall detected (no output for ${stallGap}ms) but restart suppressed ($syncStallRestartCount/$MAX_SYNC_STALL_RESTARTS used, ${SYNC_STALL_COOLDOWN_MS}ms cooldown). Still spinning on output.")
+                        }
                     }
                 }
             } catch (e: Exception) {
