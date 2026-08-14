@@ -27,10 +27,6 @@ interface VideoDimensionsListener {
 class VideoDecoder(private val settings: Settings) {
     companion object {
         private const val TIMEOUT_US = 10000L
-        // How long feedInputBuffer waits for a free codec input buffer, total. Measured: 30ms
-        // reported a full queue within a second of every start on hardware that then decoded at
-        // full rate. The wait also aborts as soon as running clears - see the loop.
-        private const val INPUT_DEQUEUE_PATIENCE_MS = 300L
         private const val MAX_RESTARTS_WITHOUT_FRAME = 3
 
         // sync_stall watchdog tuning. An intermittently slow decoder — one that renders, just not
@@ -65,11 +61,9 @@ class VideoDecoder(private val settings: Settings) {
         // handing back a long backlog cannot hold the loop away from its stall checks.
         private const val MAX_CATCHUP_SKIPS = 8
 
-        // Frames that may wait between the transport and the codec. Deep enough to absorb the
-        // arrival burst that follows a few hundred milliseconds of wireless silence, around
-        // 200ms of video at the rates this negotiates, and no deeper, because everything sitting
-        // here is latency between a touch and the picture answering it.
-        private const val FRAME_QUEUE_CAPACITY = 12
+        // How deep the queue between the transport and the codec is, and how long the feed thread
+        // waits for the codec, both live in VideoFeedQueuePolicy - they are one decision and
+        // drifting apart is what cost #830 its reference frames.
         private const val FEED_POLL_MS = 200L
         // Floor for pooled frame buffers, so the pool settles at a reusable size instead of
         // reallocating around whatever the first few frames happened to measure.
@@ -236,8 +230,11 @@ class VideoDecoder(private val settings: Settings) {
     // undrained, which turned a busy decoder into stalled audio and late keepalives. Frames are
     // copied on the way in because the transport reuses the buffer it hands us.
     private class PendingFrame(var data: ByteArray, var size: Int, var arrivalNanos: Long)
-    private val frameQueue = ArrayBlockingQueue<PendingFrame>(FRAME_QUEUE_CAPACITY)
-    private val framePool = ArrayBlockingQueue<PendingFrame>(FRAME_QUEUE_CAPACITY + 2)
+    // Derived once per decoder rather than per session: the queue is allocated here, and fpsLimit
+    // only changes when the user changes it, which restarts the service that owns this object.
+    private val frameQueueCapacity = VideoFeedQueuePolicy.capacityFor(settings.fpsLimit)
+    private val frameQueue = ArrayBlockingQueue<PendingFrame>(frameQueueCapacity)
+    private val framePool = ArrayBlockingQueue<PendingFrame>(frameQueueCapacity + 2)
     // Volatile and identity-checked by the loop itself: interrupt() does not abort a MediaCodec
     // call, so a feed thread parked in dequeueInputBuffer can outlive the join() below. If it
     // does, stop() goes on to release the codec and a later start() sets running back to true -
@@ -696,7 +693,10 @@ class VideoDecoder(private val settings: Settings) {
      * instead - read [codec] once, and let stop() clear [running] and interrupt before releasing.
      */
     private fun feedThreadLoop() {
-        AppLog.i("Feed thread started")
+        AppLog.i(
+            "Feed thread started (queue holds $frameQueueCapacity frames, " +
+                "${VideoFeedQueuePolicy.heldMsAt(settings.fpsLimit)}ms at ${settings.fpsLimit}fps)"
+        )
         val self = Thread.currentThread()
         while (running && feedThread === self) {
             val frame = try {
@@ -708,30 +708,24 @@ class VideoDecoder(private val settings: Settings) {
             try {
                 if (!running || feedThread !== self || codec == null) continue
                 val buf = ByteBuffer.wrap(frame.data, 0, frame.size)
-                var fed = true
-                while (buf.hasRemaining()) {
-                    if (!feedInputBuffer(buf, frame.arrivalNanos)) {
-                        // A teardown that lands mid-frame fails the same way a full queue does.
-                        // Say nothing in that case: the frame is moot and the log line would
-                        // appear on every ordinary stop.
-                        if (!running || feedThread !== self || codec == null) {
-                            fed = false
-                            break
+                when (feedInputBuffer(buf, frame.arrivalNanos)) {
+                    FeedResult.FED -> framesFed++
+                    // Counted and answered where the real buffer capacity is known.
+                    FeedResult.DROPPED_TOO_LARGE -> {}
+                    FeedResult.NO_INPUT_BUFFER -> {
+                        // A teardown fails the same way a full queue does. Say nothing in that
+                        // case: the frame is moot and the log line would appear on every
+                        // ordinary stop.
+                        if (running && feedThread === self && codec != null) {
+                            // The codec had no free input buffer for the whole wait. Drop the
+                            // frame and carry on: the next keyframe repairs the picture, and a
+                            // decoder that is genuinely stuck rather than busy is still caught by
+                            // the sync_stall watchdog.
+                            AppLog.w("Input buffer full. Dropping frame.")
+                            framesDropped++
                         }
-                        // The codec had no free input buffer for the whole wait. Drop what is left
-                        // of this frame and carry on: the next keyframe repairs the picture, and
-                        // the decoders this happens on are the ones least able to afford the
-                        // alternative. Routing it into the recovery path instead cost a keyframe
-                        // request and a video-focus cycle for an event that fires within a second
-                        // of the decoder starting on ordinary hardware. A decoder that is genuinely
-                        // stuck rather than busy is still caught by the sync_stall watchdog.
-                        AppLog.w("Input buffer full. Dropping frame.")
-                        framesDropped++
-                        fed = false
-                        break
                     }
                 }
-                if (fed) framesFed++
             } catch (e: Exception) {
                 AppLog.w("Feed thread error: ${e.message}")
             } finally {
@@ -1087,11 +1081,28 @@ class VideoDecoder(private val settings: Settings) {
         return false
     }
 
+    /** Outcome of [feedInputBuffer] for one frame. */
+    private enum class FeedResult {
+        /** The whole frame was queued into the codec. */
+        FED,
+
+        /** No free input buffer inside the patience window; nothing was queued. */
+        NO_INPUT_BUFFER,
+
+        /** Frame exceeds the codec's input buffer; dropped and accounted for inside. */
+        DROPPED_TOO_LARGE,
+    }
+
     /**
-     * Feeds the raw byte stream into the decoder buffer.
+     * Queues one whole frame into the codec, or nothing at all.
+     *
+     * A frame is never split across input buffers: each queued buffer is parsed as a complete
+     * access unit (this API range has no partial-frame flag), so a piece fed on its own reaches
+     * the codec as a frame of its own and corrupts the picture as surely as the loss it was
+     * trying to avoid - that is what the old truncate-and-feed path did.
      */
-    private fun feedInputBuffer(buffer: ByteBuffer, arrivalNanos: Long): Boolean {
-        val currentCodec = codec ?: return false
+    private fun feedInputBuffer(buffer: ByteBuffer, arrivalNanos: Long): FeedResult {
+        val currentCodec = codec ?: return FeedResult.NO_INPUT_BUFFER
         try {
             var inputIndex = -1
             // ~300ms of patience. Anything much shorter gives up while the codec is merely busy:
@@ -1107,7 +1118,7 @@ class VideoDecoder(private val settings: Settings) {
             // the time a stopping decoder waits on us to one dequeue rather than the full budget -
             // which is what lets stop()'s join reliably win before it releases the codec.
             val waitStart = SystemClock.elapsedRealtime()
-            while (running && SystemClock.elapsedRealtime() - waitStart < INPUT_DEQUEUE_PATIENCE_MS) {
+            while (running && SystemClock.elapsedRealtime() - waitStart < VideoFeedQueuePolicy.INPUT_DEQUEUE_PATIENCE_MS) {
                 inputIndex = currentCodec.dequeueInputBuffer(TIMEOUT_US)
                 if (inputIndex >= 0) break
             }
@@ -1117,7 +1128,7 @@ class VideoDecoder(private val settings: Settings) {
                 // Silent when the wait was cut short by a teardown: that exit is ordinary and the
                 // frame is moot, while "full" would blame the codec on every stop.
                 if (running) AppLog.e("Input buffer feed failed (full)")
-                return false
+                return FeedResult.NO_INPUT_BUFFER
             }
 
             val inputBuffer = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -1126,7 +1137,7 @@ class VideoDecoder(private val settings: Settings) {
                 @Suppress("DEPRECATION") inputBuffers?.get(inputIndex)
             }
 
-            if (inputBuffer == null) return false
+            if (inputBuffer == null) return FeedResult.NO_INPUT_BUFFER
             inputBuffer.clear()
 
             val capacity = inputBuffer.capacity()
@@ -1139,25 +1150,27 @@ class VideoDecoder(private val settings: Settings) {
                 MediaCodec.BUFFER_FLAG_CODEC_CONFIG
             } else 0
 
-            if (buffer.remaining() <= capacity) {
-                inputBuffer.put(buffer)
-            } else {
-                AppLog.w("Frame too large: ${buffer.remaining()} > $capacity. Truncating!")
-                val limit = buffer.limit()
-                buffer.limit(buffer.position() + capacity)
-                inputBuffer.put(buffer)
-                buffer.limit(limit)
+            if (buffer.remaining() > capacity) {
+                // Handled here rather than in the caller because this is the only place the real
+                // buffer capacity is known - codecs are free to allocate more or less than the
+                // KEY_MAX_INPUT_SIZE the format asked for. The dequeued buffer goes straight back
+                // empty so the codec's pool is not depleted by the drop.
+                AppLog.w("Frame larger than the codec input buffer: ${buffer.remaining()} > $capacity bytes. Dropping frame.")
+                currentCodec.queueInputBuffer(inputIndex, 0, 0, 0, 0)
+                framesDropped++
+                return FeedResult.DROPPED_TOO_LARGE
             }
 
+            inputBuffer.put(buffer)
             inputBuffer.flip()
 
             val pts = ((if (arrivalNanos > 0L) arrivalNanos else System.nanoTime()) - startTime) / 1000
 
             currentCodec.queueInputBuffer(inputIndex, 0, inputBuffer.limit(), pts, flags)
-            return true
+            return FeedResult.FED
         } catch (e: Exception) {
             AppLog.e("Error feeding input buffer", e)
-            return false
+            return FeedResult.NO_INPUT_BUFFER
         }
     }
 
