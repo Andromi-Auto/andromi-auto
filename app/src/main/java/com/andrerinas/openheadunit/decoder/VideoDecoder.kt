@@ -6,6 +6,8 @@ import android.media.MediaCodecList
 import android.media.MediaFormat
 import android.os.Build
 import android.view.Surface
+import com.andrerinas.openheadunit.aap.VideoKeyframeScanner
+import com.andrerinas.openheadunit.aap.VideoRecoveryPolicy
 import com.andrerinas.openheadunit.utils.AppLog
 import com.andrerinas.openheadunit.utils.Settings
 import com.andrerinas.openheadunit.utils.HeadUnitScreenConfig
@@ -284,6 +286,20 @@ class VideoDecoder(private val settings: Settings) {
     // Callback for transport layer integration
     var onDecoderError: (() -> Unit)? = null
 
+    // Fired, throttled, when a frame is shed with the picture live - see notifyFrameDropped().
+    // The transport wires it to the same gain-only keyframe nudge corrupt-frame recovery uses.
+    var onFrameDropped: (() -> Unit)? = null
+
+    // Fired when a keyframe is handed to the codec, which is the only evidence a shed reference
+    // frame has been repaired. Read where the frame is fed rather than where it arrives: a keyframe
+    // the queue sheds never reaches the picture, so it repairs nothing and must not count.
+    var onKeyframeObserved: (() -> Unit)? = null
+
+    // Throttle stamp for onFrameDropped. Both drop sites feed it: the transport read thread on
+    // queue overflow and the feed thread on input-buffer exhaustion. A race between them costs
+    // at most one extra nudge, so a volatile check-then-set is enough.
+    @Volatile private var lastDropKeyframeRequestMs = 0L
+
     val videoWidth: Int get() = mWidth
     val videoHeight: Int get() = mHeight
 
@@ -498,6 +514,7 @@ class VideoDecoder(private val settings: Settings) {
             framesRendered = 0L
             framesSkippedAtRender = 0L
             inputWaitMs = 0L
+            lastDropKeyframeRequestMs = 0L
             lastThroughputLogMs = 0L
             lastLoggedFramesFed = 0L
             lastLoggedFramesDropped = 0L
@@ -517,9 +534,9 @@ class VideoDecoder(private val settings: Settings) {
      * Main entry point for decoding a video/control packet.
      *
      * Reports nothing back to the caller. A frame this cannot place into the codec's input queue
-     * is simply lost, which the stream heals from on the phone's next keyframe; treating it as
-     * stream corruption instead put a keyframe request and a video-focus cycle behind an event
-     * that fires within a second of the decoder starting on ordinary hardware.
+     * is lost here, and once the picture is live the loss asks the phone for a keyframe - see
+     * [notifyFrameDropped] for the shape of that ask and why it stays silent before the first
+     * rendered frame.
      */
     fun decode(buffer: ByteArray, offset: Int, size: Int, forceSoftware: Boolean, codecName: String) {
         synchronized(this) {
@@ -680,10 +697,41 @@ class VideoDecoder(private val settings: Settings) {
             // The codec has not taken a frame for as long as this queue holds. Drop the one that
             // just arrived rather than something already queued: the older frames are what
             // everything after them is decoded against, so dropping forward costs one frame while
-            // dropping backward corrupts every frame that referenced it until the next keyframe -
-            // and on this protocol those are seconds apart and cannot be asked for cheaply.
+            // dropping backward corrupts every frame that referenced it until the next keyframe.
+            // The frame shed here is still a reference for what follows it, though, so ask for
+            // that keyframe rather than waiting out the phone's own cadence - see
+            // notifyFrameDropped().
             framePool.offer(frame)
-            framesDropped++
+            notifyFrameDropped()
+        }
+    }
+
+    /**
+     * Counts a shed frame and, with the picture live, asks the phone for the keyframe that
+     * repairs what the loss costs.
+     *
+     * Every frame shed here is a reference some later frame predicts from, so the picture drifts
+     * washed-out and blocky until a keyframe arrives - and the phone runs a fixed keyframe period
+     * measured at ~69s, so waiting that out costs an average of ~35s of corruption on screen.
+     *
+     * The transport answers with the gain-only unsolicited focus nudge first, throttled so a
+     * sustained backlog costs one request a second rather than one per frame, and starts a clock
+     * that [com.andrerinas.openheadunit.aap.KeyframeCycleEscalationPolicy] uses to decide whether
+     * that was enough. There is still no P-frame latch here and never will be: gating the feed on
+     * keyframe detection is what once made recovering from a drop more expensive than the drop.
+     *
+     * Before the first rendered frame this stays silent - a warming codec sheds frames while
+     * perfectly healthy, and that window belongs to
+     * [com.andrerinas.openheadunit.aap.WarmRelaunchKeyframePolicy], which must not have a second
+     * decider reaching for the same lever underneath it.
+     */
+    private fun notifyFrameDropped() {
+        framesDropped++
+        val now = SystemClock.elapsedRealtime()
+        if (VideoRecoveryPolicy.shouldRequestOnDroppedFrame(lastFrameRenderedMs != 0L, now, lastDropKeyframeRequestMs)) {
+            lastDropKeyframeRequestMs = now
+            AppLog.w("VideoDecoder: dropped a reference frame, requesting keyframe")
+            onFrameDropped?.invoke()
         }
     }
 
@@ -718,11 +766,14 @@ class VideoDecoder(private val settings: Settings) {
                         // ordinary stop.
                         if (running && feedThread === self && codec != null) {
                             // The codec had no free input buffer for the whole wait. Drop the
-                            // frame and carry on: the next keyframe repairs the picture, and a
-                            // decoder that is genuinely stuck rather than busy is still caught by
-                            // the sync_stall watchdog.
+                            // frame and carry on, asking for the keyframe that repairs the
+                            // picture - see notifyFrameDropped(), whose rendered-frame gate keeps
+                            // this quiet in the window where it used to misfire: within a second
+                            // of the decoder starting, while the component is merely draining its
+                            // first buffers. A decoder that is genuinely stuck rather than busy
+                            // is still caught by the sync_stall watchdog.
                             AppLog.w("Input buffer full. Dropping frame.")
-                            framesDropped++
+                            notifyFrameDropped()
                         }
                     }
                 }
@@ -1146,6 +1197,9 @@ class VideoDecoder(private val settings: Settings) {
             // Some decoders (Rockchip/Allwinner) require this flag for every config packet
             // even after the stream has already started.
             val isConfig = buffer.hasArray() && isCodecConfigData(buffer.array(), buffer.position(), buffer.remaining())
+            val isKeyframe = buffer.hasArray() && VideoKeyframeScanner.containsKeyframe(
+                buffer.array(), buffer.position(), buffer.remaining(), currentCodecType == CodecType.H265
+            )
             val flags = if (isConfig && (shouldAlwaysFlagConfig() || !codecConfigured)) {
                 MediaCodec.BUFFER_FLAG_CODEC_CONFIG
             } else 0
@@ -1157,7 +1211,7 @@ class VideoDecoder(private val settings: Settings) {
                 // empty so the codec's pool is not depleted by the drop.
                 AppLog.w("Frame larger than the codec input buffer: ${buffer.remaining()} > $capacity bytes. Dropping frame.")
                 currentCodec.queueInputBuffer(inputIndex, 0, 0, 0, 0)
-                framesDropped++
+                notifyFrameDropped()
                 return FeedResult.DROPPED_TOO_LARGE
             }
 
@@ -1167,6 +1221,10 @@ class VideoDecoder(private val settings: Settings) {
             val pts = ((if (arrivalNanos > 0L) arrivalNanos else System.nanoTime()) - startTime) / 1000
 
             currentCodec.queueInputBuffer(inputIndex, 0, inputBuffer.limit(), pts, flags)
+            if (isKeyframe) {
+                AppLog.i("VideoDecoder: keyframe reached the codec (${inputBuffer.limit()} bytes)")
+                onKeyframeObserved?.invoke()
+            }
             return FeedResult.FED
         } catch (e: Exception) {
             AppLog.e("Error feeding input buffer", e)

@@ -17,6 +17,7 @@ import com.andrerinas.openheadunit.aap.protocol.messages.MediaAck
 import com.andrerinas.openheadunit.aap.protocol.messages.Messages
 import com.andrerinas.openheadunit.aap.protocol.messages.ScrollWheelEvent
 import com.andrerinas.openheadunit.aap.protocol.messages.SensorEvent
+import com.andrerinas.openheadunit.aap.protocol.messages.VideoFocusEvent
 import com.andrerinas.openheadunit.utils.LegacyOptimizer
 import com.andrerinas.openheadunit.connection.AccessoryConnection
 import com.andrerinas.openheadunit.connection.SocketAccessoryConnection
@@ -128,26 +129,155 @@ class AapTransport(
     val isAlive: Boolean
         get() = pollThread?.isAlive ?: false
 
-    private fun triggerFocusCycleRecovery() {
-        // Ask the phone for a fresh keyframe with an unsolicited focus GAIN only, the same nudge the
-        // startup keyframe watchdog uses. We deliberately do not release focus (gain=false) first:
-        // on some head unit / phone combos, releasing video focus drops the stream to a few fps and
-        // it never recovers, so a single transient dropped frame turned into a permanent freeze
-        // (issue #755). A gain-only request still makes the phone resend a keyframe without
-        // disturbing the running stream.
+    // Escalation state for KeyframeCycleEscalationPolicy - see triggerFocusCycleRecovery().
+    // unrepairedSinceMs is when the picture was last known good: set by a shed reference frame,
+    // cleared when a keyframe reaches the codec. Zero means nothing is broken.
+    private var unrepairedSinceMs = 0L
+    private var focusCyclesUsedThisSession = 0
+    private var lastFocusCycleMs = 0L
+
+    /** Second half of an escalated focus cycle - see [WarmRelaunchKeyframePolicy.FOCUS_CYCLE_GAP_MS]. */
+    private val focusCycleGainRunnable = Runnable {
+        AppLog.w("AapTransport: retaking video focus to complete the keyframe cycle")
+        send(VideoFocusEvent(gain = true, unsolicited = true))
+    }
+
+    /**
+     * Armed by the first shed frame of an unrepaired stretch, cancelled by the keyframe that repairs
+     * it. This is what makes the escalation reachable at all: recovery requests are throttled to one
+     * a second, so a single dropped frame produces exactly one call into
+     * [triggerFocusCycleRecovery] - anything that escalated on a *count* of calls could never fire
+     * for the one-lost-frame case the fix exists for.
+     */
+    private val unrepairedCheckRunnable = Runnable { escalateIfStillUnrepaired() }
+
+    /**
+     * Asks the phone for a fresh keyframe with a gain-only nudge, and starts the clock that decides
+     * whether the nudge was enough.
+     *
+     * The nudge is measured inert across three hardware rounds - see [KeyframeCycleEscalationPolicy]
+     * for the numbers - but it costs one message, does not disturb the running stream the way a
+     * release can, and has only ever been tested against one phone. It stays the first response.
+     *
+     * @param escalatable whether this caller's stream is live enough to earn a focus release if the
+     *   nudge goes unanswered. Only the dropped-frame path passes true: it is already gated on the
+     *   decoder having rendered, so the picture provably exists. A decoder error fires while the
+     *   codec is being rebuilt, which is [WarmRelaunchKeyframePolicy]'s window, and pointing a second
+     *   decider at the same lever there is how two escalations end up racing. Frame corruption on a
+     *   live stream would qualify on merit, but [AapVideo] has no rendered-frame signal to gate on.
+     */
+    @Synchronized
+    private fun triggerFocusCycleRecovery(escalatable: Boolean) {
         AppLog.w("AapTransport: Requesting recovery keyframe (unsolicited focus gain).")
-        send(com.andrerinas.openheadunit.aap.protocol.messages.VideoFocusEvent(gain = true, unsolicited = true))
+        send(VideoFocusEvent(gain = true, unsolicited = true))
+
+        if (!escalatable || unrepairedSinceMs != 0L) return
+        // Stamped only once the check is actually armed. Setting it without a handler to run the
+        // check on would latch the clock with nothing able to clear it but a keyframe, and every
+        // later drop would return early on it - the stuck-latch failure this design exists to avoid.
+        val handler = sendHandler ?: return
+        unrepairedSinceMs = SystemClock.elapsedRealtime()
+        handler.removeCallbacks(unrepairedCheckRunnable)
+        handler.postDelayed(
+            unrepairedCheckRunnable,
+            KeyframeCycleEscalationPolicy.ESCALATE_AFTER_UNREPAIRED_MS
+        )
+    }
+
+    /**
+     * The picture has been broken for [KeyframeCycleEscalationPolicy.ESCALATE_AFTER_UNREPAIRED_MS]
+     * and no keyframe has arrived to repair it. Spend a cycle if the budget allows.
+     */
+    @Synchronized
+    private fun escalateIfStillUnrepaired() {
+        val since = unrepairedSinceMs
+        if (since == 0L) return
+
+        val now = SystemClock.elapsedRealtime()
+        val spent = "$focusCyclesUsedThisSession/${KeyframeCycleEscalationPolicy.MAX_CYCLES_PER_SESSION}"
+
+        when (KeyframeCycleEscalationPolicy.decide(now, since, focusCyclesUsedThisSession, lastFocusCycleMs)) {
+            KeyframeCycleEscalationPolicy.Action.NUDGE -> AppLog.w(
+                "AapTransport: picture unrepaired for ${now - since}ms, no cycle available now " +
+                    "($spent spent) - waiting for the phone's own keyframe"
+            )
+
+            KeyframeCycleEscalationPolicy.Action.CYCLE_FOCUS -> {
+                focusCyclesUsedThisSession++
+                lastFocusCycleMs = now
+                AppLog.w(
+                    "AapTransport: picture unrepaired for ${now - since}ms - cycling video focus " +
+                        "($focusCyclesUsedThisSession/${KeyframeCycleEscalationPolicy.MAX_CYCLES_PER_SESSION})"
+                )
+                ignoreNextStopRequest = true
+                send(VideoFocusEvent(gain = false, unsolicited = false))
+                // One shared regain runnable, replaced rather than tracked per cycle. Sound because
+                // CYCLE_COOLDOWN_MS keeps two cycles sixty seconds apart against a 400ms regain gap,
+                // so two can never be in flight together - see that constant before shortening it.
+                sendHandler?.removeCallbacks(focusCycleGainRunnable)
+                sendHandler?.postDelayed(focusCycleGainRunnable, WarmRelaunchKeyframePolicy.FOCUS_CYCLE_GAP_MS)
+            }
+        }
+
+        // Look again after the cooldown while the picture is still broken and the budget still has
+        // something in it. Without this, a cycle the cooldown refused - or one that fired and did not
+        // work - would be the end of it for the session, because a drop arriving while the clock is
+        // already running deliberately does not re-arm anything. Once the budget is gone nothing is
+        // re-armed and the line above has said so.
+        if (focusCyclesUsedThisSession < KeyframeCycleEscalationPolicy.MAX_CYCLES_PER_SESSION) {
+            sendHandler?.removeCallbacks(unrepairedCheckRunnable)
+            sendHandler?.postDelayed(unrepairedCheckRunnable, KeyframeCycleEscalationPolicy.CYCLE_COOLDOWN_MS)
+        }
+    }
+
+    /**
+     * A keyframe reached the codec, so whatever was broken is repaired. Stops the clock and disarms
+     * the escalation.
+     *
+     * Runs on the decoder's feed thread. Everything it touches is this object's own state and it
+     * never waits on the decoder, which is what keeps it clear of [VideoDecoder.stop] - that holds
+     * the decoder's monitor while joining the very thread this runs on.
+     */
+    @Synchronized
+    private fun onKeyframeRepairedPicture() {
+        if (unrepairedSinceMs == 0L) return
+        unrepairedSinceMs = 0L
+        sendHandler?.removeCallbacks(unrepairedCheckRunnable)
+    }
+
+    /**
+     * Drops the escalation clock without treating the picture as repaired.
+     *
+     * Called when the decoder is being rebuilt. Whatever was corrupt belongs to a codec that no
+     * longer exists, and the window that follows is [WarmRelaunchKeyframePolicy]'s - if the clock
+     * were left running it could spend a cycle in the middle of that policy's own escalation, which
+     * is two deciders reaching for the same lever. The next shed frame after the new codec renders
+     * starts a fresh clock.
+     */
+    @Synchronized
+    private fun abandonUnrepairedClock() {
+        unrepairedSinceMs = 0L
+        sendHandler?.removeCallbacks(unrepairedCheckRunnable)
     }
 
     init {
         micRecorder.listener = this
         aapAudio = AapAudio(audioDecoder, audioManager, settings, context)
         aapVideo = AapVideo(videoDecoder, settings) {
-            triggerFocusCycleRecovery()
+            triggerFocusCycleRecovery(escalatable = false)
         }
 
         videoDecoder.onDecoderError = {
-            triggerFocusCycleRecovery()
+            abandonUnrepairedClock()
+            triggerFocusCycleRecovery(escalatable = false)
+        }
+
+        videoDecoder.onFrameDropped = {
+            triggerFocusCycleRecovery(escalatable = true)
+        }
+
+        videoDecoder.onKeyframeObserved = {
+            onKeyframeRepairedPicture()
         }
     }
 
@@ -192,12 +322,16 @@ class AapTransport(
         cb.invoke(clean)
         micRecorder.stop()
         micRecorder.listener = null
+        sendHandler?.removeCallbacks(focusCycleGainRunnable)
+        sendHandler?.removeCallbacks(unrepairedCheckRunnable)
         pollThread?.quit()
         sendThread?.quit()
         aapAudio.releaseAllFocus()
         aapVideo.release()
 
         videoDecoder.onDecoderError = null
+        videoDecoder.onFrameDropped = null
+        videoDecoder.onKeyframeObserved = null
 
         try {            // Don't join the poll thread from within itself — it would block for the full
             // timeout since the thread can't finish while it's waiting for itself to finish.
