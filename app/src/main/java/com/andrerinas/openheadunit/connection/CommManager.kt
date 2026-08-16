@@ -621,9 +621,37 @@ class CommManager(
         val request = com.andrerinas.openheadunit.aap.protocol.messages.UpdateUiConfigRequest(left, top, right, bottom)
         AppLog.i("[UI_DEBUG_FIX] TX UpdateUiConfigRequest: L=$left T=$top R=$right B=$bottom")
         send(request)
-        // Always sends VideoFocusNotification(PROJECTED, unsolicited=true) after
-        // updating the UI config. This triggers a keyframe from the phone.
+        // The trailing gain-only notification does *not* bring a keyframe forward, whatever this
+        // comment used to claim. Dropped-frame-keyframe round 4 fired sixteen of these config
+        // requests on a live stream: the phone acknowledged every one and its keyframe cadence never
+        // moved off its fixed ~69s period. Kept because it costs one message and nothing has measured
+        // the surface-mismatch path this serves without it.
         send(com.andrerinas.openheadunit.aap.protocol.messages.VideoFocusEvent(gain = true, unsolicited = true))
+    }
+
+    /**
+     * First half of a video-focus cycle: release focus so the phone tears its video sink down and
+     * has to set it up again, which is what makes it start the next stream with a keyframe. The
+     * caller sends the matching gain after a gap.
+     *
+     * The release makes the phone answer with a video sink stop. [AapTransport.ignoreNextStopRequest]
+     * marks that one as ours, so it stays distinguishable in the log from a sink stop nobody asked
+     * for - which is what a video-black failure looks like, and has been the decisive line in four
+     * rounds of hardware testing.
+     *
+     * Two policies decide when this is warranted, and nothing else should: [WarmRelaunchKeyframePolicy]
+     * for a surface that has never shown a frame, and [KeyframeCycleEscalationPolicy] for a picture
+     * left corrupt by a shed reference frame. The latter sends its own release from [AapTransport]
+     * rather than calling here, because it has to pair the release with a regain on the send handler.
+     * Releasing focus across a stream that is rendering is a known way to lose one permanently, which
+     * is why both sets of gates are as reluctant as they are.
+     */
+    fun releaseVideoFocusForKeyframe() {
+        if (_connectionState.value !is ConnectionState.TransportStarted) return
+        val transport = _transport ?: return
+        transport.ignoreNextStopRequest = true
+        AppLog.i("CommManager: releasing video focus to force a keyframe")
+        transport.send(com.andrerinas.openheadunit.aap.protocol.messages.VideoFocusEvent(gain = false, unsolicited = false))
     }
 
     fun updateAudioGains() {
