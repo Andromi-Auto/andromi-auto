@@ -78,6 +78,8 @@ class AapTransport(
     private val micRecorder: MicRecorder = MicRecorder(settings.micSampleRate, context)
     private val sessionIds = SparseIntArray(4)
     private val startedSensors = HashSet<Int>(4)
+    private val droppedSensorEvents = HashMap<Int, Int>(4)
+    private var lastSensorDropLogMs = 0L
     private val keyCodes = mutableMapOf<Int, Int>()
     private val modeManager: UiModeManager =
         context.getSystemService(UI_MODE_SERVICE) as UiModeManager
@@ -299,6 +301,9 @@ class AapTransport(
         }
     }
 
+    // Synchronized against noteDroppedSensorEvent, whose log line iterates startedSensors from the
+    // main thread while this adds from the poll thread.
+    @Synchronized
     internal fun startSensor(type: Int) {
         startedSensors.add(type)
     }
@@ -591,17 +596,31 @@ class AapTransport(
     }
 
     fun send(sensor: SensorEvent): Boolean {
-        return if (isAlive && startedSensors.contains(sensor.sensorType)) {
+        if (isAlive && startedSensors.contains(sensor.sensorType)) {
             send(sensor as AapMessage)
-            true
-        } else {
-            if (!isAlive) {
-                //AppLog.w("AapTransport not alive, ignoring sensor event for sensor ${sensor.sensorType}")
-            } else {
-                //AppLog.e("Sensor " + sensor.sensorType + " is not started yet")
-            }
-            false
+            return true
         }
+        noteDroppedSensorEvent(sensor.sensorType)
+        return false
+    }
+
+    /**
+     * A dropped sensor event is worth knowing about once, not once per event. LOCATION resends on
+     * a timer for the whole session, so logging every drop would bury everything else in a log a
+     * reporter attaches to an issue. Report the first drop of a type straight away, then a running
+     * count at most every [SENSOR_DROP_LOG_INTERVAL_MS] for as long as it keeps happening.
+     */
+    @Synchronized
+    private fun noteDroppedSensorEvent(sensorType: Int) {
+        val previous = droppedSensorEvents[sensorType] ?: 0
+        droppedSensorEvents[sensorType] = previous + 1
+
+        val now = SystemClock.elapsedRealtime()
+        if (previous > 0 && now - lastSensorDropLogMs < SENSOR_DROP_LOG_INTERVAL_MS) {
+            return
+        }
+        lastSensorDropLogMs = now
+        AppLog.i("AapTransport: dropping sensor events, isAlive=$isAlive startedSensors=$startedSensors droppedByType=$droppedSensorEvents")
     }
 
     fun send(message: AapMessage) {
@@ -648,5 +667,6 @@ class AapTransport(
         // Maximum wall-clock time allowed for the version-exchange phase of the AAP handshake.
         // Prevents the retry loop from blocking for minutes on an unresponsive USB device.
         private const val HANDSHAKE_TIMEOUT_MS = 10_000L
+        private const val SENSOR_DROP_LOG_INTERVAL_MS = 30_000L
     }
 }
