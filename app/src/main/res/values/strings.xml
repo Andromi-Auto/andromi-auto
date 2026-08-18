@@ -944,4 +944,9 @@
     <string name="rename_notice_title">Our name is changing to Open Headunit</string>
     <string name="rename_notice_message">Headunit Revived is growing, thanks to you, and it is turning into something of its own: Open Headunit. We are rolling the new name out over the next updates, so you may still see the old name in some places for a while.\n\nSame app, same people behind it, and all your settings stay exactly as they are.</string>
     <string name="rename_notice_button">Got it</string>
+    <string name="category_ui">UI</string>
+    <string name="hide_phone_signal_label">Hide the Phone\'s Signal</string>
+    <string name="hide_battery_level_label">Hide the Phone\'s Battery Level</string>
+    <string name="hide_clock_label">Hide the Clock</string>
+    <string name="might_broken_on_newer_aa_versions">This functionality might not work on newer versions of Android Auto</string>
 </resources>

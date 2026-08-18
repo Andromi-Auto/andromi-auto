@@ -167,6 +167,10 @@ class SettingsFragment : Fragment() {
     private var pendingAssistantVolumeOffset: Int? = null
     private var pendingNavigationVolumeOffset: Int? = null
 
+    private var pendingHideBatteryLevel: Boolean? = null
+    private var pendingHidePhoneSignal: Boolean? = null
+    private var pendingHideClock: Boolean? = null
+
     private var requiresRestart = false
     private var hasChanges = false
     private val SAVE_ITEM_ID = 1001
@@ -290,6 +294,10 @@ class SettingsFragment : Fragment() {
         pendingAssistantVolumeOffset = settings.assistantVolumeOffset
         pendingNavigationVolumeOffset = settings.navigationVolumeOffset
 
+        pendingHidePhoneSignal = settings.hidePhoneSignal
+        pendingHideBatteryLevel = settings.hideBatteryLevel
+        pendingHideClock = settings.hideClock
+
         // Loading screen settings are handled in LoadingScreenFragment (saves directly)
 
         // Intercept system back button
@@ -393,6 +401,9 @@ class SettingsFragment : Fragment() {
         pendingMediaVolumeOffset = settings.mediaVolumeOffset
         pendingAssistantVolumeOffset = settings.assistantVolumeOffset
         pendingNavigationVolumeOffset = settings.navigationVolumeOffset
+        pendingHideBatteryLevel = settings.hideBatteryLevel
+        pendingHidePhoneSignal = settings.hidePhoneSignal
+        pendingHideClock = settings.hideClock
     }
 
     private fun setupToolbar() {
@@ -520,11 +531,13 @@ class SettingsFragment : Fragment() {
         pendingHotspotSsid?.let { settings.hotspotSsid = it }
         pendingHotspotPassword?.let { settings.hotspotPassword = it }
         pendingHotspotInterface?.let { settings.hotspotInterface = it }
-
         pendingInsetLeft?.let { settings.insetLeft = it }
         pendingInsetTop?.let { settings.insetTop = it }
         pendingInsetRight?.let { settings.insetRight = it }
         pendingInsetBottom?.let { settings.insetBottom = it }
+        pendingHidePhoneSignal?.let { settings.hidePhoneSignal = it }
+        pendingHideBatteryLevel?.let { settings.hideBatteryLevel = it }
+        pendingHideClock?.let { settings.hideClock = it }
 
         settings.commit()
         AppLog.init(settings, requireContext().applicationContext)
@@ -631,7 +644,10 @@ class SettingsFragment : Fragment() {
                         pendingHotspotSsid != settings.hotspotSsid ||
                         pendingHotspotPassword != settings.hotspotPassword ||
                         pendingHotspotInterface != settings.hotspotInterface ||
-                        pendingUseLibusb != settings.useLibusb
+                        pendingUseLibusb != settings.useLibusb ||
+                        pendingHideBatteryLevel != settings.hideBatteryLevel ||
+                        pendingHidePhoneSignal != settings.hidePhoneSignal ||
+                        pendingHideClock != settings.hideClock
 
         hasChanges = anyChange
 
@@ -1724,6 +1740,45 @@ class SettingsFragment : Fragment() {
             }
         ))
 
+        // --- UI Settings ---
+        items.add(SettingItem.CategoryHeader("UI", R.string.category_ui))
+
+        items.add(SettingItem.ToggleSettingEntry(
+            stableId = "hideClock",
+            nameResId = R.string.hide_clock_label,
+            descriptionResId = null,
+            isChecked = pendingHideClock!!,
+            onCheckedChanged = { isChecked ->
+                pendingHideClock = isChecked
+                checkChanges()
+                updateSettingsList()
+            }
+        ))
+
+        items.add(SettingItem.ToggleSettingEntry(
+            stableId = "hidePhoneSignal",
+            nameResId = R.string.hide_phone_signal_label,
+            descriptionResId = R.string.might_broken_on_newer_aa_versions,
+            isChecked = pendingHidePhoneSignal!!,
+            onCheckedChanged = { isChecked ->
+                pendingHidePhoneSignal = isChecked
+                checkChanges()
+                updateSettingsList()
+            }
+        ))
+
+        items.add(SettingItem.ToggleSettingEntry(
+            stableId = "hideBatteryLevel",
+            nameResId = R.string.hide_battery_level_label,
+            descriptionResId = R.string.might_broken_on_newer_aa_versions,
+            isChecked = pendingHideBatteryLevel!!,
+            onCheckedChanged = { isChecked ->
+                pendingHideBatteryLevel = isChecked
+                checkChanges()
+                updateSettingsList()
+            }
+        ))
+
         // --- Backup Settings ---
         items.add(SettingItem.CategoryHeader("backup", R.string.category_backup))
 
@@ -2119,7 +2174,7 @@ class SettingsFragment : Fragment() {
         is SettingItem.SettingEntry ->
             "${item.nameOverride ?: getString(item.nameResId)} ${item.value} ${item.searchKeywords ?: ""}"
         is SettingItem.ToggleSettingEntry ->
-            "${item.nameOverride ?: getString(item.nameResId)} ${getString(item.descriptionResId)} ${item.searchKeywords ?: ""}"
+            "${item.nameOverride ?: getString(item.nameResId)} ${if (item.descriptionResId != null) getString(item.descriptionResId) else ""} ${item.searchKeywords ?: ""}"
         is SettingItem.SliderSettingEntry ->
             "${getString(item.nameResId)} ${item.value}"
         is SettingItem.SegmentedButtonSettingEntry ->

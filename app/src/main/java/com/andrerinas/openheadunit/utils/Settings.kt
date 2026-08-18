@@ -364,6 +364,18 @@ class Settings(private val context: Context) {
         get() = prefs.getString("head-unit-model", "Desktop Head Unit")!!
         set(value) { prefs.edit().putString("head-unit-model", value).apply() }
 
+    var hideBatteryLevel: Boolean
+        get() = prefs.getBoolean("hide-battery-level", false)
+        set(value) { prefs.edit().putBoolean("hide-battery-level", value).apply() }
+
+    var hidePhoneSignal: Boolean
+        get() = prefs.getBoolean("hide-phone-signal", false)
+        set(value) { prefs.edit().putBoolean("hide-phone-signal", value).apply() }
+
+    var hideClock: Boolean
+        get() = prefs.getBoolean("hide-clock", false)
+        set(value) { prefs.edit().putBoolean("hide-clock", value).apply() }
+
     // 0 = Manual, 1 = Auto (Headunit Server), 2 = Helper (Wifi Launcher), 3 = Native AA
     var wifiConnectionMode: WifiLauncherMode
         get() {
