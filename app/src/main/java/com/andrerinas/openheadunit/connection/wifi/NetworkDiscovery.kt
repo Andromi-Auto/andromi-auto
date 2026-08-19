@@ -45,11 +45,11 @@ class NetworkDiscovery(private val context: Context, private val listener: Liste
     interface Listener {
         fun onServiceFound(ip: String, port: Int, socket: Socket? = null)
         /**
-         * [oneShot] is the disposition of the scan that just finished, not of the last request.
+         * [wasOneShot] is the disposition of the scan that just finished, not of the last request.
          * A one-shot request made while a continuous scan was already running is ignored, so the
          * running scan has to report its own kind or it would silently lose its re-arm.
          */
-        fun onScanFinished(oneShot: Boolean)
+        fun onScanFinished(wasOneShot: Boolean)
     }
 
     /**

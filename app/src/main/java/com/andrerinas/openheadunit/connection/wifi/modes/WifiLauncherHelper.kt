@@ -93,7 +93,16 @@ class WifiLauncherHelper : WifiLauncher {
                     wifiDirect?.makeVisible()
                 }
             }
-            else -> super.restartDiscovery()
+            else -> {
+                if (service.discoveryDormantAfterWifiLoss) {
+                    AppLog.i(
+                        "AapService: link-loss teardown — leaving discovery down until a " +
+                            "network comes back, rather than scanning the one that went away."
+                    )
+                } else {
+                    super.restartDiscovery()
+                }
+            }
         }
     }
 

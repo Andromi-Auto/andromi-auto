@@ -3,6 +3,7 @@ package com.andrerinas.openheadunit.connection.wifi
 import com.andrerinas.openheadunit.App
 import com.andrerinas.openheadunit.aap.AapService
 import com.andrerinas.openheadunit.aap.AapService.Companion.scanningState
+import com.andrerinas.openheadunit.aap.UnresponsivePeerPolicy
 import com.andrerinas.openheadunit.utils.AppLog
 import com.andrerinas.openheadunit.utils.HotspotManager
 import com.andrerinas.openheadunit.utils.VpnControl
@@ -90,52 +91,104 @@ class WifiLauncherSharedServices(val service: AapService) {
     fun startLocalDiscovery(oneShot: Boolean = false) {
         val commManager = App.provide(service).commManager
 
-        if (commManager.isConnected || (wirelessServer == null && !oneShot))
+        // Logged rather than returned silently: this gate and the re-arm below are the only two
+        // ways the discovery loop can end without saying so, and a loop that stops for no visible
+        // reason is the one thing a submitted log cannot be read for.
+        if (commManager.isBusy) {
+            AppLog.i("AapService: Discovery not started — a connection is live or being set up")
+            return
+        }
+        if (wirelessServer == null && !oneShot)
             return
 
-        localDiscovery?.stop()
         scanningState.value = true
 
-        localDiscovery = NetworkDiscovery(service, object : NetworkDiscovery.Listener {
-            override fun onServiceFound(ip: String, port: Int, socket: Socket?) {
-                if (commManager.isConnected) {
-                    // Already connected by the time this callback fired; discard the socket
-                    try { socket?.close() } catch (e: Exception) {}
-                    return
-                }
-                when (port) {
-                    5277 -> {
-                        // Headunit Server detected — reuse the pre-opened socket when possible
-                        AppLog.i("Auto-connecting to Headunit Server at $ip:$port (reusing socket)")
-                        service.serviceScope.launch {
-                            if (socket != null && socket.isConnected)
-                                commManager.connect(socket)
-                            else
-                                commManager.connect(ip, 5277)
+        // [BUG_FIX] Reused rather than rebuilt. This used to stop the old instance and replace it,
+        // which defeated NetworkDiscovery's own guard: the replacement's scanJob is null, so it saw
+        // no scan to wait for and probed the head unit server while the discarded instance still
+        // had a probe in flight. Both reach port 5277, one of them is thrown away, and the server
+        // binds to the connection nobody follows through -- deaf until the user restarts it by
+        // hand. Keeping the instance lets startScan() serialise, which is what it was written for.
+        // A real mode change still gets a fresh instance: stopWirelessServer() nulls this.
+        if (localDiscovery == null) {
+            localDiscovery = NetworkDiscovery(
+                service,
+                object : NetworkDiscovery.Listener {
+                    override fun onServiceFound(ip: String, port: Int, socket: Socket?) {
+                        if (commManager.isBusy) {
+                            // Connected, or connecting, by the time this callback fired; discard the
+                            // socket. isBusy rather than isConnected because handing it to connect()
+                            // during a connect in flight only gets it closed one frame later.
+                            try {
+                                socket?.close()
+                            } catch (e: Exception) {
+                            }
+                            return
+                        }
+                        when (port) {
+                            5277 -> {
+                                // Headunit Server detected — reuse the pre-opened socket when possible
+                                AppLog.i("Auto-connecting to Headunit Server at $ip:$port (reusing socket)")
+                                service.serviceScope.launch {
+                                    if (socket != null && socket.isConnected)
+                                        commManager.connect(socket)
+                                    else
+                                        commManager.connect(ip, 5277)
+                                }
+                            }
+
+                            5289 -> {
+                                // WiFi Launcher detected. The wake (holding the probe socket open) already
+                                // happened in NetworkDiscovery; here we just wait for the helper to launch
+                                // and connect back to our WirelessServer on 5288.
+                                AppLog.i("AapService: WiFi Launcher detected at $ip:$port; awaiting inbound helper connection on 5288")
+                            }
                         }
                     }
-                    5289 -> {
-                        // WiFi Launcher detected. The wake (holding the probe socket open) already
-                        // happened in NetworkDiscovery; here we just wait for the helper to launch
-                        // and connect back to our WirelessServer on 5288.
-                        AppLog.i("AapService: WiFi Launcher detected at $ip:$port; awaiting inbound helper connection on 5288")
+
+                    // The flag comes from the scan that finished, not from the call that built this
+                    // listener: the instance outlives any single request now, so capturing it here would
+                    // pin every later scan to the first caller's choice.
+                    override fun onScanFinished(wasOneShot: Boolean) {
+                        scanningState.value = false
+                        if (wasOneShot) {
+                            AppLog.i("One-shot scan finished.")
+                            return
+                        }
+
+                        // Reschedule the next scan to avoid hammering the network — and slow right down
+                        // when the peer we keep reaching accepts the connection and never answers, which
+                        // no amount of retrying fixes and which costs it a stranded socket each time.
+                        //
+                        // Unless the network changed while this sweep was running. Joining the phone's
+                        // network has to start a scan promptly — waiting out the loop is most of a
+                        // minute at the moment the user is starting a drive — and this is how that is
+                        // done safely. The kick must never cancel a live probe to get there: two sweeps
+                        // probing the head unit server at once is what wedges it, so the kick only makes
+                        // the *next* sweep immediate, on the network that has actually arrived.
+                        val delayMs = if (service.rescanWithoutWaiting) {
+                            service.rescanWithoutWaiting = false
+                            AppLog.i("AapService: network changed during the last scan; rescanning immediately")
+                            0L
+                        } else {
+                            UnresponsivePeerPolicy.rescanDelayMs(commManager.silentPeerFailures)
+                        }
+
+                        service.serviceScope.launch {
+                            delay(delayMs)
+                            if (wirelessServer == null) {
+                                AppLog.i("AapService: Discovery loop ends — the wireless server is gone")
+                            } else if (commManager.isBusy) {
+                                AppLog.i("AapService: Discovery loop ends — a connection is live or being set up")
+                            } else {
+                                startLocalDiscovery()
+                            }
+                        }
                     }
                 }
-            }
+            )
+        }
 
-            override fun onScanFinished() {
-                scanningState.value = false
-                if (oneShot) {
-                    AppLog.i("One-shot scan finished.")
-                    return
-                }
-                // Reschedule the next scan after 10 s to avoid hammering the network
-                service.serviceScope.launch {
-                    delay(10000)
-                    if (wirelessServer != null && !commManager.isConnected) startLocalDiscovery()
-                }
-            }
-        })
         localDiscovery?.startScan()
     }
 
@@ -143,6 +196,8 @@ class WifiLauncherSharedServices(val service: AapService) {
         if (localDiscovery == null)
             return
 
+        service.rescanWithoutWaiting = false
+        service.discoveryDormantAfterWifiLoss = false
         localDiscovery?.stop()
         localDiscovery = null
     }
