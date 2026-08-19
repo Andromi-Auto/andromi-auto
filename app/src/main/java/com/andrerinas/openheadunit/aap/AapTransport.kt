@@ -17,6 +17,7 @@ import com.andrerinas.openheadunit.aap.protocol.messages.MediaAck
 import com.andrerinas.openheadunit.aap.protocol.messages.Messages
 import com.andrerinas.openheadunit.aap.protocol.messages.ScrollWheelEvent
 import com.andrerinas.openheadunit.aap.protocol.messages.SensorEvent
+import com.andrerinas.openheadunit.aap.protocol.messages.VideoFocusEvent
 import com.andrerinas.openheadunit.utils.LegacyOptimizer
 import com.andrerinas.openheadunit.connection.AccessoryConnection
 import com.andrerinas.openheadunit.connection.SocketAccessoryConnection
@@ -77,6 +78,8 @@ class AapTransport(
     private val micRecorder: MicRecorder = MicRecorder(settings.micSampleRate, context)
     private val sessionIds = SparseIntArray(4)
     private val startedSensors = HashSet<Int>(4)
+    private val droppedSensorEvents = HashMap<Int, Int>(4)
+    private var lastSensorDropLogMs = 0L
     private val keyCodes = mutableMapOf<Int, Int>()
     private val modeManager: UiModeManager =
         context.getSystemService(UI_MODE_SERVICE) as UiModeManager
@@ -87,6 +90,24 @@ class AapTransport(
     val isWireless: Boolean
         get() = connection is com.andrerinas.openheadunit.connection.SocketAccessoryConnection
     var ignoreNextStopRequest: Boolean = false
+    /** Why the last [startHandshake] failed, for callers that report it. */
+    enum class HandshakeFailure {
+        NONE,
+
+        /**
+         * The version exchange timed out on every attempt without the peer sending a single
+         * byte, and without any transport error of our own. The link is fine and the peer is
+         * simply not answering — on the WiFi head unit server path that means it is bound to
+         * an earlier connection and will stay that way until it is restarted.
+         */
+        PEER_SILENT,
+
+        OTHER
+    }
+
+    @Volatile var lastHandshakeFailure: HandshakeFailure = HandshakeFailure.NONE
+        private set
+
     /** Set by [AapControl] when VIDEO_FOCUS_NATIVE triggers a stop (user tapped Exit). */
     @Volatile var wasUserExit: Boolean = false
     @Volatile var onQuit: ((Boolean) -> Unit)? = null
@@ -128,29 +149,161 @@ class AapTransport(
     val isAlive: Boolean
         get() = pollThread?.isAlive ?: false
 
-    private fun triggerFocusCycleRecovery() {
-        // Ask the phone for a fresh keyframe with an unsolicited focus GAIN only, the same nudge the
-        // startup keyframe watchdog uses. We deliberately do not release focus (gain=false) first:
-        // on some head unit / phone combos, releasing video focus drops the stream to a few fps and
-        // it never recovers, so a single transient dropped frame turned into a permanent freeze
-        // (issue #755). A gain-only request still makes the phone resend a keyframe without
-        // disturbing the running stream.
+    // Escalation state for KeyframeCycleEscalationPolicy - see triggerFocusCycleRecovery().
+    // unrepairedSinceMs is when the picture was last known good: set by a shed reference frame,
+    // cleared when a keyframe reaches the codec. Zero means nothing is broken.
+    private var unrepairedSinceMs = 0L
+    private var focusCyclesUsedThisSession = 0
+    private var lastFocusCycleMs = 0L
+
+    /** Second half of an escalated focus cycle - see [WarmRelaunchKeyframePolicy.FOCUS_CYCLE_GAP_MS]. */
+    private val focusCycleGainRunnable = Runnable {
+        AppLog.w("AapTransport: retaking video focus to complete the keyframe cycle")
+        send(VideoFocusEvent(gain = true, unsolicited = true))
+    }
+
+    /**
+     * Armed by the first shed frame of an unrepaired stretch, cancelled by the keyframe that repairs
+     * it. This is what makes the escalation reachable at all: recovery requests are throttled to one
+     * a second, so a single dropped frame produces exactly one call into
+     * [triggerFocusCycleRecovery] - anything that escalated on a *count* of calls could never fire
+     * for the one-lost-frame case the fix exists for.
+     */
+    private val unrepairedCheckRunnable = Runnable { escalateIfStillUnrepaired() }
+
+    /**
+     * Asks the phone for a fresh keyframe with a gain-only nudge, and starts the clock that decides
+     * whether the nudge was enough.
+     *
+     * The nudge is measured inert across three hardware rounds - see [KeyframeCycleEscalationPolicy]
+     * for the numbers - but it costs one message, does not disturb the running stream the way a
+     * release can, and has only ever been tested against one phone. It stays the first response.
+     *
+     * @param escalatable whether this caller's stream is live enough to earn a focus release if the
+     *   nudge goes unanswered. Only the dropped-frame path passes true: it is already gated on the
+     *   decoder having rendered, so the picture provably exists. A decoder error fires while the
+     *   codec is being rebuilt, which is [WarmRelaunchKeyframePolicy]'s window, and pointing a second
+     *   decider at the same lever there is how two escalations end up racing. Frame corruption on a
+     *   live stream would qualify on merit, but [AapVideo] has no rendered-frame signal to gate on.
+     */
+    @Synchronized
+    private fun triggerFocusCycleRecovery(escalatable: Boolean) {
         AppLog.w("AapTransport: Requesting recovery keyframe (unsolicited focus gain).")
-        send(com.andrerinas.openheadunit.aap.protocol.messages.VideoFocusEvent(gain = true, unsolicited = true))
+        send(VideoFocusEvent(gain = true, unsolicited = true))
+
+        if (!escalatable || unrepairedSinceMs != 0L) return
+        // Stamped only once the check is actually armed. Setting it without a handler to run the
+        // check on would latch the clock with nothing able to clear it but a keyframe, and every
+        // later drop would return early on it - the stuck-latch failure this design exists to avoid.
+        val handler = sendHandler ?: return
+        unrepairedSinceMs = SystemClock.elapsedRealtime()
+        handler.removeCallbacks(unrepairedCheckRunnable)
+        handler.postDelayed(
+            unrepairedCheckRunnable,
+            KeyframeCycleEscalationPolicy.ESCALATE_AFTER_UNREPAIRED_MS
+        )
+    }
+
+    /**
+     * The picture has been broken for [KeyframeCycleEscalationPolicy.ESCALATE_AFTER_UNREPAIRED_MS]
+     * and no keyframe has arrived to repair it. Spend a cycle if the budget allows.
+     */
+    @Synchronized
+    private fun escalateIfStillUnrepaired() {
+        val since = unrepairedSinceMs
+        if (since == 0L) return
+
+        val now = SystemClock.elapsedRealtime()
+        val spent = "$focusCyclesUsedThisSession/${KeyframeCycleEscalationPolicy.MAX_CYCLES_PER_SESSION}"
+
+        when (KeyframeCycleEscalationPolicy.decide(now, since, focusCyclesUsedThisSession, lastFocusCycleMs)) {
+            KeyframeCycleEscalationPolicy.Action.NUDGE -> AppLog.w(
+                "AapTransport: picture unrepaired for ${now - since}ms, no cycle available now " +
+                    "($spent spent) - waiting for the phone's own keyframe"
+            )
+
+            KeyframeCycleEscalationPolicy.Action.CYCLE_FOCUS -> {
+                focusCyclesUsedThisSession++
+                lastFocusCycleMs = now
+                AppLog.w(
+                    "AapTransport: picture unrepaired for ${now - since}ms - cycling video focus " +
+                        "($focusCyclesUsedThisSession/${KeyframeCycleEscalationPolicy.MAX_CYCLES_PER_SESSION})"
+                )
+                ignoreNextStopRequest = true
+                send(VideoFocusEvent(gain = false, unsolicited = false))
+                // One shared regain runnable, replaced rather than tracked per cycle. Sound because
+                // CYCLE_COOLDOWN_MS keeps two cycles sixty seconds apart against a 400ms regain gap,
+                // so two can never be in flight together - see that constant before shortening it.
+                sendHandler?.removeCallbacks(focusCycleGainRunnable)
+                sendHandler?.postDelayed(focusCycleGainRunnable, WarmRelaunchKeyframePolicy.FOCUS_CYCLE_GAP_MS)
+            }
+        }
+
+        // Look again after the cooldown while the picture is still broken and the budget still has
+        // something in it. Without this, a cycle the cooldown refused - or one that fired and did not
+        // work - would be the end of it for the session, because a drop arriving while the clock is
+        // already running deliberately does not re-arm anything. Once the budget is gone nothing is
+        // re-armed and the line above has said so.
+        if (focusCyclesUsedThisSession < KeyframeCycleEscalationPolicy.MAX_CYCLES_PER_SESSION) {
+            sendHandler?.removeCallbacks(unrepairedCheckRunnable)
+            sendHandler?.postDelayed(unrepairedCheckRunnable, KeyframeCycleEscalationPolicy.CYCLE_COOLDOWN_MS)
+        }
+    }
+
+    /**
+     * A keyframe reached the codec, so whatever was broken is repaired. Stops the clock and disarms
+     * the escalation.
+     *
+     * Runs on the decoder's feed thread. Everything it touches is this object's own state and it
+     * never waits on the decoder, which is what keeps it clear of [VideoDecoder.stop] - that holds
+     * the decoder's monitor while joining the very thread this runs on.
+     */
+    @Synchronized
+    private fun onKeyframeRepairedPicture() {
+        if (unrepairedSinceMs == 0L) return
+        unrepairedSinceMs = 0L
+        sendHandler?.removeCallbacks(unrepairedCheckRunnable)
+    }
+
+    /**
+     * Drops the escalation clock without treating the picture as repaired.
+     *
+     * Called when the decoder is being rebuilt. Whatever was corrupt belongs to a codec that no
+     * longer exists, and the window that follows is [WarmRelaunchKeyframePolicy]'s - if the clock
+     * were left running it could spend a cycle in the middle of that policy's own escalation, which
+     * is two deciders reaching for the same lever. The next shed frame after the new codec renders
+     * starts a fresh clock.
+     */
+    @Synchronized
+    private fun abandonUnrepairedClock() {
+        unrepairedSinceMs = 0L
+        sendHandler?.removeCallbacks(unrepairedCheckRunnable)
     }
 
     init {
         micRecorder.listener = this
         aapAudio = AapAudio(audioDecoder, audioManager, settings, context)
         aapVideo = AapVideo(videoDecoder, settings) {
-            triggerFocusCycleRecovery()
+            triggerFocusCycleRecovery(escalatable = false)
         }
 
         videoDecoder.onDecoderError = {
-            triggerFocusCycleRecovery()
+            abandonUnrepairedClock()
+            triggerFocusCycleRecovery(escalatable = false)
+        }
+
+        videoDecoder.onFrameDropped = {
+            triggerFocusCycleRecovery(escalatable = true)
+        }
+
+        videoDecoder.onKeyframeObserved = {
+            onKeyframeRepairedPicture()
         }
     }
 
+    // Synchronized against noteDroppedSensorEvent, whose log line iterates startedSensors from the
+    // main thread while this adds from the poll thread.
+    @Synchronized
     internal fun startSensor(type: Int) {
         startedSensors.add(type)
     }
@@ -164,6 +317,11 @@ class AapTransport(
         Utils.intToBytes(ba.limit - AapMessage.HEADER_SIZE, 2, ba.data)
 
         val size = connection?.sendBlocking(ba.data, ba.limit, 250) ?: -1
+
+        // Silent until it matters. A failed write here is how "the ByeBye went out" and "the link
+        // was already gone" tell themselves apart, which is the whole question for a teardown
+        // racing an interface going down.
+        if (size < 0) AppLog.w("AapTransport: send failed (ret=$size); the link is already gone")
 
         if (AppLog.LOG_VERBOSE) {
             AppLog.v("Sent size: %d", size)
@@ -192,12 +350,16 @@ class AapTransport(
         cb.invoke(clean)
         micRecorder.stop()
         micRecorder.listener = null
+        sendHandler?.removeCallbacks(focusCycleGainRunnable)
+        sendHandler?.removeCallbacks(unrepairedCheckRunnable)
         pollThread?.quit()
         sendThread?.quit()
         aapAudio.releaseAllFocus()
         aapVideo.release()
 
         videoDecoder.onDecoderError = null
+        videoDecoder.onFrameDropped = null
+        videoDecoder.onKeyframeObserved = null
 
         try {            // Don't join the poll thread from within itself — it would block for the full
             // timeout since the thread can't finish while it's waiting for itself to finish.
@@ -274,6 +436,7 @@ class AapTransport(
     }
 
     private fun handshake(connection: AccessoryConnection): Boolean {
+        lastHandshakeFailure = HandshakeFailure.OTHER
         try {
             val isUsb = connection !is SocketAccessoryConnection && !connection.isSingleMessage
             // Increased delay for AA 16.4+ stability on USB - skip for Sockets
@@ -302,6 +465,10 @@ class AapTransport(
             var ret = -1
             var attempt = 0
             var received = false
+            // Separates "the peer is not answering" from "our own link broke". Only the first
+            // is worth reporting upwards: it is the one the user can do something about.
+            var peerSentBytes = false
+            var transportError = false
             // Outer deadline prevents the loop from running for minutes on an unresponsive device.
             // Each send+recv pair uses 2 s per operation; 3 attempts × 4 s ≈ 12 s worst-case,
             // capped here at HANDSHAKE_TIMEOUT_MS so a stuck device fails fast.
@@ -316,6 +483,7 @@ class AapTransport(
                 AppLog.d("Handshake: Version request sent. ret: $ret. attempt: $attempt. TS: ${SystemClock.elapsedRealtime()}")
                 if (ret < 0) {
                     AppLog.w("Handshake: Version request send failed (ret=$ret), attempt $attempt")
+                    transportError = true
                     SystemClock.sleep(200)
                     continue
                 }
@@ -332,6 +500,8 @@ class AapTransport(
                     val remaining = (recvDeadline - SystemClock.elapsedRealtime())
                         .toInt().coerceAtLeast(100)
                     ret = connection.recvBlocking(buffer, buffer.size, remaining, false)
+                    if (ret < 0) transportError = true   // EOF or IOException, not a timeout
+                    if (ret > 0) peerSentBytes = true
                     if (ret <= 0) break  // timeout or error — fall through to outer retry
                     if (ret >= 6
                         && buffer[0] == 0.toByte()
@@ -355,6 +525,16 @@ class AapTransport(
 
             if (!received) {
                 AppLog.e("Handshake: Version request/response failed after $attempt attempt(s). last ret: $ret")
+                if (!peerSentBytes && !transportError) {
+                    lastHandshakeFailure = HandshakeFailure.PEER_SILENT
+                    AppLog.e(
+                        "Handshake: the peer accepted the connection and then sent nothing at all. " +
+                            "Our link is fine — every read timed out rather than failing. On the WiFi " +
+                            "head unit server path this means Android Auto's server on the phone is " +
+                            "still bound to an earlier connection; it does not recover on its own and " +
+                            "has to be stopped and started again in Android Auto's developer settings."
+                    )
+                }
                 return false
             }
             AppLog.i("Handshake: Version response recv ret: %d", ret)
@@ -381,6 +561,7 @@ class AapTransport(
             AppLog.i("Handshake: Status OK sent: %d", ret)
             AppLog.d("Handshake: Handshake successful. TS: ${SystemClock.elapsedRealtime()}")
 
+            lastHandshakeFailure = HandshakeFailure.NONE
             return true
         } catch (e: Exception) {
             AppLog.e("Handshake failed with exception", e)
@@ -415,17 +596,31 @@ class AapTransport(
     }
 
     fun send(sensor: SensorEvent): Boolean {
-        return if (isAlive && startedSensors.contains(sensor.sensorType)) {
+        if (isAlive && startedSensors.contains(sensor.sensorType)) {
             send(sensor as AapMessage)
-            true
-        } else {
-            if (!isAlive) {
-                //AppLog.w("AapTransport not alive, ignoring sensor event for sensor ${sensor.sensorType}")
-            } else {
-                //AppLog.e("Sensor " + sensor.sensorType + " is not started yet")
-            }
-            false
+            return true
         }
+        noteDroppedSensorEvent(sensor.sensorType)
+        return false
+    }
+
+    /**
+     * A dropped sensor event is worth knowing about once, not once per event. LOCATION resends on
+     * a timer for the whole session, so logging every drop would bury everything else in a log a
+     * reporter attaches to an issue. Report the first drop of a type straight away, then a running
+     * count at most every [SENSOR_DROP_LOG_INTERVAL_MS] for as long as it keeps happening.
+     */
+    @Synchronized
+    private fun noteDroppedSensorEvent(sensorType: Int) {
+        val previous = droppedSensorEvents[sensorType] ?: 0
+        droppedSensorEvents[sensorType] = previous + 1
+
+        val now = SystemClock.elapsedRealtime()
+        if (previous > 0 && now - lastSensorDropLogMs < SENSOR_DROP_LOG_INTERVAL_MS) {
+            return
+        }
+        lastSensorDropLogMs = now
+        AppLog.i("AapTransport: dropping sensor events, isAlive=$isAlive startedSensors=$startedSensors droppedByType=$droppedSensorEvents")
     }
 
     fun send(message: AapMessage) {
@@ -472,5 +667,6 @@ class AapTransport(
         // Maximum wall-clock time allowed for the version-exchange phase of the AAP handshake.
         // Prevents the retry loop from blocking for minutes on an unresponsive USB device.
         private const val HANDSHAKE_TIMEOUT_MS = 10_000L
+        private const val SENSOR_DROP_LOG_INTERVAL_MS = 30_000L
     }
 }
