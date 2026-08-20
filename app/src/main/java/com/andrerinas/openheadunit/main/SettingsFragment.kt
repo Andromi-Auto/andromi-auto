@@ -663,6 +663,10 @@ class SettingsFragment : Fragment() {
         updateSaveButtonState()
     }
 
+    /** Reads a fault budget for the settings row, so 0 says what it means rather than showing "0". */
+    private fun describeFaultBudget(budget: Int): String =
+        if (budget == VideoFaultInjector.UNLIMITED_BUDGET) "Whole session" else "$budget faults"
+
     private fun updateSettingsList() {
         val app = App.provide(requireContext())
         val scrollState = settingsRecyclerView.layoutManager?.onSaveInstanceState()
@@ -1888,6 +1892,25 @@ class SettingsFragment : Fragment() {
                         .setTitle(R.string.debug_video_fault_rate)
                         .setSingleChoiceItems(faultRateNames, currentIndex) { dialog, which ->
                             settings.debugVideoFaultRate = faultRates[which]
+                            dialog.dismiss()
+                            updateSettingsList()
+                        }
+                        .show()
+                }
+            ))
+
+            val faultBudgets = listOf(VideoFaultInjector.UNLIMITED_BUDGET, 5, 10, 30, 100)
+            val faultBudgetNames = faultBudgets.map { describeFaultBudget(it) }.toTypedArray()
+            items.add(SettingItem.SettingEntry(
+                stableId = "debugVideoFaultBudget",
+                nameResId = R.string.debug_video_fault_budget,
+                value = describeFaultBudget(settings.debugVideoFaultBudget),
+                onClick = {
+                    val currentIndex = faultBudgets.indexOf(settings.debugVideoFaultBudget).coerceAtLeast(0)
+                    MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
+                        .setTitle(R.string.debug_video_fault_budget)
+                        .setSingleChoiceItems(faultBudgetNames, currentIndex) { dialog, which ->
+                            settings.debugVideoFaultBudget = faultBudgets[which]
                             dialog.dismiss()
                             updateSettingsList()
                         }

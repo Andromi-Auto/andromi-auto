@@ -35,40 +35,26 @@ internal class AapVideo(private val videoDecoder: VideoDecoder, private val sett
     private var lastKeyframeRequestMs = 0L
     private var lastAnomalyReportMs = 0L
 
-    /**
-     * Stamped at construction, which is session start, so the first summary is one interval into the
-     * run rather than on the first frame - the constructor has already said the injector is on.
-     */
-    private var lastInjectorSummaryMs = android.os.SystemClock.elapsedRealtime()
-
     /** Ordering rules for the fragment run. Pure and unit-tested; see [VideoFragmentAssembler]. */
     private val assembler = VideoFragmentAssembler()
+
+    /** Every line the injector prints. Declared first: [faultInjector]'s initializer announces on it. */
+    private val reporter = VideoFaultReporter("AapVideo")
 
     /**
      * Null unless the user has deliberately turned fault injection on, so the healthy path costs one
      * null check. See [VideoFaultInjector] for why this exists at all.
      */
     private val faultInjector: VideoFaultInjector? =
-        VideoFaultInjector(settings.debugVideoFaultInjection, settings.debugVideoFaultRate)
-            .takeIf { it.isActive }
-            ?.also {
-                AppLog.w(
-                    "AapVideo: FAULT INJECTION IS ON - mode=%s, one in %d. The video stream is being " +
-                        "corrupted on purpose; this log does not show a real fault.",
-                    settings.debugVideoFaultInjection, it.rate
-                )
-            }
-
-    /**
-     * Says periodically what the injector has had to work with, so a run that injects nothing says so
-     * rather than looking like a run where the setting never took. See [VideoFaultInjector.describe].
-     */
-    private fun reportInjectorProgress(injector: VideoFaultInjector) {
-        val now = android.os.SystemClock.elapsedRealtime()
-        if (now - lastInjectorSummaryMs < VideoFaultInjector.SUMMARY_INTERVAL_MS) return
-        lastInjectorSummaryMs = now
-        AppLog.w("AapVideo: fault injection - %s", injector.describe())
-    }
+        VideoFaultInjector(
+            settings.debugVideoFaultInjection,
+            settings.debugVideoFaultRate,
+            settings.debugVideoFaultBudget
+        )
+            // Stage-scoped, so a reader-stage mode is applied once in the reader and not a second
+            // time here. See VideoFaultInjector.isActiveAt.
+            .takeIf { it.isActiveAt(VideoFaultInjector.Stage.ASSEMBLER) }
+            ?.also { reporter.announce(it) }
 
     /**
      * Asks the phone for a fresh keyframe because a frame was lost or arrived unusable.
@@ -82,6 +68,20 @@ internal class AapVideo(private val videoDecoder: VideoDecoder, private val sett
      * as an unsolicited focus nudge, escalating to a real focus cycle only under much stricter
      * gates, and the phone rebuilds the stream in response.
      */
+    /**
+     * The reader's framing audit found a run short of the bytes its first fragment declared.
+     *
+     * This is the one corruption mode nothing downstream of the reader can see. A middle fragment
+     * that never arrives leaves [VideoFragmentAssembler] looking at a first, some middles and a last
+     * in order, so the frame is assembled with a hole and decoded as though it were whole - no
+     * anomaly, no ask, and a picture that drifts until the phone's own keyframe cadence comes round.
+     * [FragmentedMessageAudit] is the only thing that notices, and until now all it did was log.
+     *
+     * Runs on the poll thread, which is the thread [process] and every other keyframe request
+     * already run on, so it shares their throttle and their ordering without any locking of its own.
+     */
+    fun onFragmentRunHoled() = requestKeyframe("fragment run lost bytes")
+
     private fun requestKeyframe(reason: String) {
         val now = android.os.SystemClock.elapsedRealtime()
         if (VideoRecoveryPolicy.canRequestKeyframe(now, lastKeyframeRequestMs)) {
@@ -222,13 +222,7 @@ internal class AapVideo(private val videoDecoder: VideoDecoder, private val sett
         val injector = faultInjector
         val fault = injector?.effectFor(flags) ?: VideoFaultInjector.Effect.NONE
         if (injector != null) {
-            if (fault != VideoFaultInjector.Effect.NONE) {
-                AppLog.w(
-                    "AapVideo: FAULT INJECTED (#%d of %d candidates): %s on flag %d, len=%d",
-                    injector.injectedCount, injector.matchingCount, fault, flags, len
-                )
-            }
-            reportInjectorProgress(injector)
+            reporter.onMessage(injector, fault, flags, len)
             // A dropped message must not reach the assembler at all - that is the point. Reported as
             // consumed, because from the protocol's side it did arrive.
             if (fault == VideoFaultInjector.Effect.DROP) return true

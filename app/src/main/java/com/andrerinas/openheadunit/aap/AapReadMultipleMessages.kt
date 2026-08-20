@@ -10,8 +10,10 @@ import java.nio.ByteBuffer
 internal class AapReadMultipleMessages(
         connection: AccessoryConnection,
         ssl: AapSsl,
-        handler: AapMessageHandler)
-    : AapRead.Base(connection, ssl, handler) {
+        handler: AapMessageHandler,
+        onVideoRunHoled: () -> Unit = {},
+        faultInjector: VideoFaultInjector? = null)
+    : AapRead.Base(connection, ssl, handler, onVideoRunHoled, faultInjector) {
 
     // Increase buffers to 4MB to handle large 1080p/4K/HEVC I-frames
     private val fifo = ByteBuffer.allocate(4 * 1024 * 1024) 
@@ -88,14 +90,25 @@ internal class AapReadMultipleMessages(
 
             fifo.get(msgBuffer, 0, recvHeader.enc_len)
 
+            // Reader-stage fault injection - see the same branch in AapReadSingleMessage, and
+            // shouldDropForFaultInjection for why the decrypt below is not skipped with it.
+            val injectedDrop =
+                shouldDropForFaultInjection(recvHeader.chan, recvHeader.flags, recvHeader.enc_len)
+
             // The whole body arrived, so this fragment can be counted against the run's declared
-            // total. Done before decryption because the total is a framing quantity.
-            auditFragment(recvHeader.chan, recvHeader.flags, recvHeader.enc_len, declaredTotal)
+            // total. Done before decryption because the total is a framing quantity - and skipped
+            // for an injected drop, which is what leaves the run short of what it declared.
+            if (!injectedDrop) {
+                auditFragment(recvHeader.chan, recvHeader.flags, recvHeader.enc_len, declaredTotal)
+            }
 
             try {
+                // Unconditional, including for a message about to be dropped: the SSL engine's
+                // record sequence advances per record and a record we never unwrap desynchronises
+                // the session for good.
                 val msg = AapMessageIncoming.decrypt(recvHeader, 0, msgBuffer, ssl)
 
-                if (msg != null) {
+                if (msg != null && !injectedDrop) {
                     handler.handle(msg)
                 }
             } catch (e: Exception) {

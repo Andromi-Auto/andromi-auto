@@ -382,15 +382,19 @@ class VideoDecoder(
     // The transport wires it to the same gain-only keyframe nudge corrupt-frame recovery uses.
     var onFrameDropped: (() -> Unit)? = null
 
-    // Fired when a keyframe is handed to the codec, which is the only evidence a shed reference
-    // frame has been repaired. Read where the frame is fed rather than where it arrives: a keyframe
-    // the queue sheds never reaches the picture, so it repairs nothing and must not count.
+    // Fired when a keyframe has produced a picture, which is the only evidence a shed reference
+    // frame has been repaired. Driven from the output side rather than the arrival or the feed: a
+    // keyframe the queue sheds never reaches the codec, and one whose access unit lost a fragment
+    // on the way reaches it and decodes to nothing. Neither repairs anything, and both used to
+    // count - see [KeyframeRepairTracker].
     var onKeyframeObserved: (() -> Unit)? = null
 
-    // True once a keyframe has been fed to *this* codec instance. A codec rebuilt mid-session
-    // resumes on a P-frame and can produce nothing until an IDR arrives, so this is what separates
-    // "the decoder is broken" from "the decoder has been given nothing it could decode".
-    @Volatile private var keyframeFedSinceStart = false
+    // Whether a keyframe has produced a picture on *this* codec instance. A codec rebuilt
+    // mid-session resumes on a P-frame and can produce nothing until an IDR arrives, so this is what
+    // separates "the decoder is broken" from "the decoder has been given nothing it could decode" -
+    // and it counts the output rather than the feed, because a keyframe that arrived with a hole in
+    // it is fed like any other and decodes to nothing. See [KeyframeRepairTracker].
+    private val keyframeRepair = KeyframeRepairTracker()
 
     // Throttle stamp for onFrameDropped. Both drop sites feed it: the transport read thread on
     // queue overflow and the feed thread on input-buffer exhaustion. A race between them costs
@@ -399,6 +403,10 @@ class VideoDecoder(
 
     /** Throttle stamp for [onKeyframeStarved], on the output thread only. */
     private var lastKeyframeStarvedAskMs = 0L
+
+    /** Said once per process: this component's output timestamps mean nothing. Not session-scoped,
+     * because it is a property of the decoder rather than of the stream. */
+    private var loggedUnusableOutputTimestamps = false
 
     /** Diagnostic only - see [ParameterSetTracker]. Feed-thread confined, like the scan that feeds it. */
     private val parameterSetTracker = ParameterSetTracker()
@@ -497,7 +505,7 @@ class VideoDecoder(
             stop(DecoderStopPolicy.REASON_NEW_SURFACE)
             mSurface = surface
             lastFrameRenderedMs = 0L
-            keyframeFedSinceStart = false
+            keyframeRepair.reset()
         }
     }
 
@@ -617,7 +625,9 @@ class VideoDecoder(
                 loggedContentKinds.clear()
             }
             lastFrameRenderedMs = 0L
-            keyframeFedSinceStart = false
+            // Presentation timestamps restart near zero on the next configure, so a stamp left
+            // pending here would be confirmed by the new codec's very first frame.
+            keyframeRepair.reset()
             lastKeyframeStarvedAskMs = 0L
             loggedFirstSoftwareFrame = false
             loggedFirstHardwareFrame = false
@@ -743,11 +753,22 @@ class VideoDecoder(
                 } else {
                     val detectedType = detectCodecType(frameData, frameOffset, size)
                     val requestedType = if (codecName.contains("265")) CodecType.H265 else CodecType.H264
-                    if (requestedType == CodecType.H265) {
-                        CodecType.H265
-                    } else {
-                        detectedType ?: requestedType
+                    val hevcDetectable = isHevcSupported()
+                    val hevcUsable = hevcDetectable || bundledHevcSelected()
+                    val selected = CodecTypeSelectionPolicy.select(
+                        detected = detectedType,
+                        requested = requestedType,
+                        hevcDetectable = hevcDetectable,
+                        hevcUsable = hevcUsable,
+                    )
+                    if (selected != requestedType) {
+                        AppLog.i(
+                            "Building a $selected decoder although the setting asks for " +
+                                "$requestedType (stream says ${detectedType ?: "nothing yet"}, " +
+                                "HEVC detectable=$hevcDetectable usable=$hevcUsable)"
+                        )
                     }
+                    selected
                 }
                 currentCodecType = typeToUse
 
@@ -960,6 +981,18 @@ class VideoDecoder(
                 settings.softwareVideoDecoder == Settings.SoftwareVideoDecoder.BUNDLED_FFMPEG &&
                 FfmpegHevcDecoder.isAvailable()
     }
+
+    /**
+     * True when an explicitly selected software HEVC decoder is available, i.e. H.265 is playable
+     * here even though [isHevcSupported] - which is hardware-only - says no. Mirrors the
+     * `explicitSoftwareHevc` half of the announcement, so the decoder and the codec we asked the
+     * phone for agree about whether H.265 was ever on the table.
+     */
+    private fun bundledHevcSelected(): Boolean =
+        settings.forceSoftwareDecoding && when (settings.softwareVideoDecoder) {
+            Settings.SoftwareVideoDecoder.BUNDLED_FFMPEG -> isBundledHevcDecoderAvailable()
+            Settings.SoftwareVideoDecoder.DEVICE_MEDIACODEC -> isHevcDecoderAvailable(includeSoftware = true)
+        }
 
     private fun startBundledHevc(width: Int, height: Int) {
         try {
@@ -1641,9 +1674,10 @@ class VideoDecoder(
 
             currentCodec.queueInputBuffer(inputIndex, 0, inputBuffer.limit(), pts, flags)
             if (isKeyframe) {
-                keyframeFedSinceStart = true
+                // Fed, not yet repaired. The picture counts as repaired at the output side, where
+                // a keyframe that arrived holed is told apart from one that decodes.
+                keyframeRepair.onKeyframeFed(pts)
                 AppLog.i("VideoDecoder: keyframe reached the codec (${inputBuffer.limit()} bytes)")
-                onKeyframeObserved?.invoke()
             }
             return FeedResult.FED
         } catch (e: Exception) {
@@ -1803,6 +1837,22 @@ class VideoDecoder(
                     lastFrameRenderedMs = SystemClock.elapsedRealtime()
                     renderedThisSession = true
                     lastOutputMs = lastFrameRenderedMs
+                    // bufferInfo carries the last successful dequeue, which is renderIndex. The
+                    // frames released ahead of it in this pass decoded earlier and so have smaller
+                    // timestamps, and the ones the catch-up branch discarded decoded too - so this
+                    // one stamp answers for the whole pass either way.
+                    if (keyframeRepair.onFrameRendered(bufferInfo.presentationTimeUs)) {
+                        if (keyframeRepair.timestampsUnusable && !loggedUnusableOutputTimestamps) {
+                            loggedUnusableOutputTimestamps = true
+                            AppLog.w(
+                                "$currentCodecName never carries a keyframe's timestamp through to its " +
+                                    "output, so a repaired picture is read from frames arriving rather " +
+                                    "than from the frame that repaired it."
+                            )
+                        }
+                        AppLog.i("VideoDecoder: keyframe decoded - the picture is repaired")
+                        onKeyframeObserved?.invoke()
+                    }
                     framesRenderedThisSession++
                     consecutiveErrors = 0
                     // The one landmark that says video actually reached the screen on the path
@@ -1854,7 +1904,7 @@ class VideoDecoder(
                         stallGapMs = stallGap,
                         inputIdleGapMs = inputIdleGap,
                         inputIdleThresholdMs = SYNC_STALL_THRESHOLD_MS,
-                        keyframeFedSinceStart = keyframeFedSinceStart,
+                        keyframeDecodedSinceStart = keyframeRepair.keyframeDecoded,
                         sessionHasRendered = renderedThisSession,
                     )
                     if (cause == DecoderStallCausePolicy.Cause.PHONE_IDLE) {

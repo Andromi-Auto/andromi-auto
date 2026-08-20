@@ -196,6 +196,15 @@ class CommManager(
         }
 
     /**
+     * When the phone last sent anything on any AAP channel, or `0` if it has not yet this session.
+     *
+     * Proof the link is alive, as distinct from proof the picture is moving. See
+     * [AapTransport.lastMessageReceivedMs].
+     */
+    val lastAapMessageMs: Long
+        get() = _transport?.lastMessageReceivedMs ?: 0L
+
+    /**
      * `true` while a connection exists **or** one is being set up.
      *
      * [isConnected] deliberately excludes [ConnectionState.Connecting], which is right for the

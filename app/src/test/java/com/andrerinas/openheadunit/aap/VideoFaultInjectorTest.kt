@@ -2,6 +2,7 @@ package com.andrerinas.openheadunit.aap
 
 import com.andrerinas.openheadunit.aap.VideoFaultInjector.Effect
 import com.andrerinas.openheadunit.aap.VideoFaultInjector.Mode
+import com.andrerinas.openheadunit.aap.VideoFaultInjector.Stage
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -119,14 +120,129 @@ class VideoFaultInjectorTest {
     }
 
     @Test
+    fun `a budget stops injection at exactly N faults`() {
+        val injector = VideoFaultInjector(Mode.DROP_MIDDLE_FRAGMENT, rate = 2, budget = 3)
+        assertEquals(3, injector.budget)
+        // Six targeted messages at one in two is three faults, which is the whole budget.
+        repeat(6) { injector.effectFor(middleFlag) }
+        assertEquals(3L, injector.injectedCount)
+        assertTrue(injector.budgetSpent)
+        // Everything after it goes through untouched, however long the run continues.
+        repeat(50) { assertEquals(Effect.NONE, injector.effectFor(middleFlag)) }
+        assertEquals(3L, injector.injectedCount)
+    }
+
+    @Test
+    fun `a spent budget still counts candidates`() {
+        // The clean half of a bounded run has to be visible as traffic that went by untouched, or
+        // the summary reads like a stream that stopped fragmenting.
+        val injector = VideoFaultInjector(Mode.DROP_MIDDLE_FRAGMENT, rate = 2, budget = 1)
+        repeat(10) { injector.effectFor(middleFlag) }
+        assertEquals(10L, injector.matchingCount)
+        assertEquals(1L, injector.injectedCount)
+    }
+
+    @Test
+    fun `no budget means the whole session, and a negative one is not a budget`() {
+        val unlimited = VideoFaultInjector(Mode.DROP_MIDDLE_FRAGMENT, rate = 2)
+        repeat(40) { unlimited.effectFor(middleFlag) }
+        assertEquals(20L, unlimited.injectedCount)
+        assertFalse(unlimited.budgetSpent)
+
+        // Clamped rather than read as "stop immediately", which would silently turn a mistyped
+        // setting into a run that injects nothing and looks like a rate that never took.
+        val negative = VideoFaultInjector(Mode.DROP_MIDDLE_FRAGMENT, rate = 2, budget = -4)
+        assertEquals(VideoFaultInjector.UNLIMITED_BUDGET, negative.budget)
+        repeat(10) { negative.effectFor(middleFlag) }
+        assertEquals(5L, negative.injectedCount)
+    }
+
+    @Test
     fun `the summary carries the setting and both counts`() {
         val injector = VideoFaultInjector(Mode.DROP_MIDDLE_FRAGMENT, rate = 20)
         repeat(8) { injector.effectFor(middleFlag) }
         val text = injector.describe()
         // The exact shape a five-minute run that injected nothing produced, which is the case this
         // line exists for: eight candidates at one in twenty is zero faults and no defect.
-        listOf("DROP_MIDDLE_FRAGMENT", "1-in-20", "8 candidates", "0 injected").forEach {
+        listOf("DROP_MIDDLE_FRAGMENT", "1-in-20", "8 candidates", "0 injected", "no budget").forEach {
             assertTrue("missing '$it' in: $text", text.contains(it))
         }
+    }
+
+    @Test
+    fun `the summary says how much of a budget is left`() {
+        val injector = VideoFaultInjector(Mode.DROP_MIDDLE_FRAGMENT, rate = 2, budget = 5)
+        repeat(4) { injector.effectFor(middleFlag) }
+        assertTrue(injector.describe(), injector.describe().contains("budget 2/5"))
+    }
+
+    // --- Which stage a mode belongs to ------------------------------------------------------
+
+    @Test
+    fun `each mode belongs to exactly one stage, and only one site applies it`() {
+        // The two injection sites - AapVideo.process and the readers - both ask isActiveAt rather
+        // than comparing modes, so a mode can never be applied twice or land at neither site. This
+        // pins that: for every mode, at most one stage claims it, and OFF is claimed by none.
+        for (mode in Mode.entries) {
+            val injector = VideoFaultInjector(mode, rate = 2)
+            val claims = Stage.entries.count { injector.isActiveAt(it) }
+            if (mode == Mode.OFF) {
+                assertEquals("OFF must be applied nowhere", 0, claims)
+            } else {
+                assertEquals("$mode must be applied at exactly one stage", 1, claims)
+            }
+        }
+    }
+
+    @Test
+    fun `only the reader mode runs in the reader`() {
+        // The distinction the whole reader stage exists for. An assembler-stage drop happens after
+        // the framing audit has already counted the fragment, so the audit sees a complete run and
+        // the one corruption mode nothing else can see stays invisible. A hardware round measured
+        // that cost: 37 and 59 injected middle-fragment faults, zero keyframe requests.
+        assertTrue(
+            VideoFaultInjector(Mode.DROP_MIDDLE_FRAGMENT_IN_READER, rate = 2).isActiveAt(Stage.READER)
+        )
+        for (mode in Mode.entries - Mode.DROP_MIDDLE_FRAGMENT_IN_READER) {
+            assertFalse(
+                "$mode must not be applied in the reader",
+                VideoFaultInjector(mode, rate = 2).isActiveAt(Stage.READER)
+            )
+        }
+    }
+
+    @Test
+    fun `the reader mode attacks middle fragments, like the assembler-stage mode it mirrors`() {
+        // Same fault, injected one step earlier. If these ever target different flags the pair stops
+        // being a controlled comparison, which is the only reason to keep both.
+        assertEquals(
+            VideoFaultInjector.targetFlag(Mode.DROP_MIDDLE_FRAGMENT),
+            VideoFaultInjector.targetFlag(Mode.DROP_MIDDLE_FRAGMENT_IN_READER)
+        )
+        assertEquals(middleFlag, VideoFaultInjector.targetFlag(Mode.DROP_MIDDLE_FRAGMENT_IN_READER))
+    }
+
+    @Test
+    fun `the reader mode honours the rate and the budget like every other`() {
+        val injector = VideoFaultInjector(Mode.DROP_MIDDLE_FRAGMENT_IN_READER, rate = 3, budget = 2)
+        val effects = (1..12).map { injector.effectFor(middleFlag) }
+        assertEquals(
+            "two faults at one in three, then the budget stops it",
+            listOf(Effect.DROP, Effect.DROP),
+            effects.filter { it != Effect.NONE }
+        )
+        assertTrue(injector.budgetSpent)
+        // Candidates keep being counted past the budget, so the summary still says how much of the
+        // stream went by untouched - what the recovery half of a bounded run is measured against.
+        assertEquals(12L, injector.matchingCount)
+    }
+
+    @Test
+    fun `the reader mode leaves every other flag alone`() {
+        val injector = VideoFaultInjector(Mode.DROP_MIDDLE_FRAGMENT_IN_READER, rate = 2)
+        for (flags in listOf(first, lastFlag, single)) {
+            repeat(10) { assertEquals(Effect.NONE, injector.effectFor(flags)) }
+        }
+        assertEquals(0L, injector.injectedCount)
     }
 }

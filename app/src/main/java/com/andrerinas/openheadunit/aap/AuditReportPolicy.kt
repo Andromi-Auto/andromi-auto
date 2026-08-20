@@ -1,7 +1,11 @@
 package com.andrerinas.openheadunit.aap
 
 /**
- * How often one [FragmentedMessageAudit] outcome may be printed.
+ * How often one repeating diagnostic line may be printed.
+ *
+ * Written for a [FragmentedMessageAudit] outcome, which is the case the rest of this describes, and
+ * since reused for [AapTransport]'s held-cycle line - a check that repeats every two seconds and can
+ * hold for minutes. Callers keep their own counters, so two of them never share a budget.
  *
  * The first version of this was a hard cap: ten lines per outcome per session, then silence. It was
  * meant to stop a broken link filling the log with one line per frame, and on a healthy link it

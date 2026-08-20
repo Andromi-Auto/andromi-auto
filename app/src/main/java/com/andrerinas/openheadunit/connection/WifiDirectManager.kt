@@ -869,7 +869,18 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
             }
             manager?.discoverPeers(ch, object : WifiP2pManager.ActionListener {
                 override fun onSuccess() {
-                    AppLog.d("WifiDirectManager: Discovery active")
+                    // INFO, not DEBUG: discoverPeers() puts the P2P radio into find mode, sweeping
+                    // the social channels, and on a single-radio unit hosting a group that is
+                    // seconds of silence for everything already on it. Two reporters' captures show
+                    // exactly that shape on this loop's ten-second cadence, and neither could be
+                    // checked against it - the only line the loop left was at a level nobody is
+                    // ever asked to capture. A search running under a live session is the anomaly,
+                    // so say which case this is.
+                    val sessionLive = isNativeSessionConnected?.invoke() == true
+                    AppLog.i(
+                        "WifiDirectManager: Discovery active - peer search running%s",
+                        if (sessionLive) " while an Android Auto session is connected" else ""
+                    )
                     if (appSettings.wifiConnectionMode == 2 && appSettings.helperConnectionStrategy == 1) {
                         handler.postDelayed({
                             if (!isClientConnected) {

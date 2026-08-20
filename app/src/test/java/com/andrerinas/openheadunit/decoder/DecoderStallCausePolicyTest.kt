@@ -17,10 +17,10 @@ class DecoderStallCausePolicyTest {
     private fun classify(
         stallGapMs: Long = 10_000L,
         inputIdleGapMs: Long = 0L,
-        keyframeFedSinceStart: Boolean = false,
+        keyframeDecodedSinceStart: Boolean = false,
         sessionHasRendered: Boolean = true,
     ) = DecoderStallCausePolicy.classify(
-        stallGapMs, inputIdleGapMs, idleThreshold, keyframeFedSinceStart, sessionHasRendered
+        stallGapMs, inputIdleGapMs, idleThreshold, keyframeDecodedSinceStart, sessionHasRendered
     )
 
     @Test
@@ -29,7 +29,7 @@ class DecoderStallCausePolicyTest {
         // Decided before anything else, so it holds whatever the codec's own state looks like.
         assertEquals(
             Cause.PHONE_IDLE,
-            classify(inputIdleGapMs = 30_000L, keyframeFedSinceStart = true, sessionHasRendered = false)
+            classify(inputIdleGapMs = 30_000L, keyframeDecodedSinceStart = true, sessionHasRendered = false)
         )
     }
 
@@ -43,7 +43,26 @@ class DecoderStallCausePolicyTest {
 
     @Test
     fun `a codec that has had its keyframe and still produces nothing is stalled`() {
-        assertEquals(Cause.STALLED, classify(keyframeFedSinceStart = true))
+        assertEquals(Cause.STALLED, classify(keyframeDecodedSinceStart = true))
+    }
+
+    @Test
+    fun `a keyframe that was fed but never decoded still counts as starvation`() {
+        // The case that reopened the wedge: an access unit that lost a middle fragment keeps its
+        // parameter sets and IDR slice at the head, so it scans as a keyframe and is fed like one,
+        // and the codec produces nothing from it. The caller passes what came *out*, so this reads
+        // exactly like the codec never having had one - which is the answer that asks for a real
+        // keyframe instead of rebuilding for it.
+        assertEquals(Cause.STARVED_OF_KEYFRAME, classify(keyframeDecodedSinceStart = false))
+        // And the patience bound still applies to it, so a codec that is genuinely dead is not
+        // waited on forever just because every keyframe it was handed arrived broken.
+        assertEquals(
+            Cause.STALLED,
+            classify(
+                keyframeDecodedSinceStart = false,
+                stallGapMs = DecoderStallCausePolicy.KEYFRAME_STARVATION_PATIENCE_MS
+            )
+        )
     }
 
     @Test

@@ -20,6 +20,15 @@ package com.andrerinas.openheadunit.decoder
  * budget gone, then stalls at 10, 20, 30, 40, 50 and 60 seconds with `rendered=0` throughout while
  * input flowed at ~50fps. Android Auto's own client eventually asked whether its screen was visible.
  *
+ * ### A keyframe that decodes, not one that was fed
+ *
+ * [keyframeDecodedSinceStart] is measured at the codec's output for a reason. An access unit that
+ * lost a fragment in the middle still carries its parameter sets and IDR slice at the head, so it
+ * scans as a keyframe, is fed like one, and produces no picture. Counting that as "the codec has had
+ * what it needs" put this straight back on the rebuild path - and at one middle fragment lost in
+ * three, a later round measured the whole pre-fix signature returning: two exhausted restart ladders
+ * and 90+ seconds of `rendered=0`. See [KeyframeRepairTracker].
+ *
  * Naming the starved case costs nothing on the healthy path and turns the loop into a wait.
  *
  * Pure: no clock, no logging. The caller supplies the elapsed times it already has.
@@ -43,8 +52,8 @@ object DecoderStallCausePolicy {
         PHONE_IDLE,
 
         /**
-         * Input is arriving, but no keyframe has reached this codec since it started, so there is
-         * nothing it could have rendered. Ask for a keyframe; do not rebuild.
+         * Input is arriving, but no keyframe has decoded on this codec since it started, so there
+         * is nothing it could have rendered. Ask for a keyframe; do not rebuild.
          */
         STARVED_OF_KEYFRAME,
 
@@ -56,7 +65,8 @@ object DecoderStallCausePolicy {
      * @param stallGapMs time since the last rendered frame, or since this codec started if none.
      * @param inputIdleGapMs time since the last bytes arrived from the phone.
      * @param inputIdleThresholdMs how long that gap has to be before the phone counts as idle.
-     * @param keyframeFedSinceStart whether a keyframe has been handed to this codec instance.
+     * @param keyframeDecodedSinceStart whether a keyframe has produced output on this codec
+     *   instance. Not whether one was fed - a holed keyframe is fed and decodes to nothing.
      * @param sessionHasRendered whether any frame at all has rendered this session. A cold start that
      *   has never rendered stays on the ordinary path deliberately: there the codec type is still
      *   unproven, and the rebuild is what reaches the one-time fallback to the other codec.
@@ -65,11 +75,11 @@ object DecoderStallCausePolicy {
         stallGapMs: Long,
         inputIdleGapMs: Long,
         inputIdleThresholdMs: Long,
-        keyframeFedSinceStart: Boolean,
+        keyframeDecodedSinceStart: Boolean,
         sessionHasRendered: Boolean,
     ): Cause {
         if (inputIdleGapMs > inputIdleThresholdMs) return Cause.PHONE_IDLE
-        if (keyframeFedSinceStart) return Cause.STALLED
+        if (keyframeDecodedSinceStart) return Cause.STALLED
         if (!sessionHasRendered) return Cause.STALLED
         if (stallGapMs >= KEYFRAME_STARVATION_PATIENCE_MS) return Cause.STALLED
         return Cause.STARVED_OF_KEYFRAME

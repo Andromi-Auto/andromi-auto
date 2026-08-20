@@ -688,6 +688,7 @@
          purpose - it is a developer tool and the terms are protocol terms. -->
     <string name="debug_video_fault_injection" translatable="false">Video fault injection</string>
     <string name="debug_video_fault_rate" translatable="false">Fault rate (one in N)</string>
+    <string name="debug_video_fault_budget" translatable="false">Fault budget</string>
     <string name="debug_force_memory_profile" translatable="false">Force memory profile</string>
     <string name="debug_video_low_latency" translatable="false">Request decoder low-latency mode</string>
     <string name="debug_video_low_latency_description" translatable="false">Sets the vendor low-latency MediaFormat key when configuring the video decoder. Falls back automatically if the decoder rejects it.</string>

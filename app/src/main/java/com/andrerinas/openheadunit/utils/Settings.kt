@@ -372,6 +372,21 @@ class Settings(private val context: Context) {
                 .apply()
         }
 
+    /**
+     * Stop injecting after this many faults, or 0 to keep going for the whole session.
+     *
+     * What a bounded run buys is the second half of the measurement: a stream that is still being
+     * corrupted stays broken no matter what the recovery code does, so only a run that stops can
+     * show whether the picture comes back. See [VideoFaultInjector.budget].
+     */
+    var debugVideoFaultBudget: Int
+        get() = prefs.getInt("debug-video-fault-budget", VideoFaultInjector.UNLIMITED_BUDGET)
+        set(value) {
+            prefs.edit()
+                .putInt("debug-video-fault-budget", value.coerceAtLeast(VideoFaultInjector.UNLIMITED_BUDGET))
+                .apply()
+        }
+
     var rightHandDrive: Boolean
         get() = prefs.getBoolean("right-hand-drive", false)
         set(value) { prefs.edit().putBoolean("right-hand-drive", value).apply() }
