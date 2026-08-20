@@ -471,6 +471,9 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
             }
             isSurfaceSet = false
             setupProjectionView()
+            val mirror = if (settings.hudMirroring) -1.0f else 1.0f
+            findViewById<View>(R.id.loading_overlay)?.scaleX = mirror
+            fpsTextView?.scaleX = mirror
         }
     }
 
@@ -880,6 +883,9 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         setFullscreen() // Call setFullscreen here as well
 
         val loadingOverlay = findViewById<View>(R.id.loading_overlay)
+        if (settings.hudMirroring) {
+            loadingOverlay?.scaleX = -1.0f
+        }
 
         // [FIX] If we are already connected and frames are flowing (e.g. activity recreation),
         // hide the overlay immediately to prevent the "Android Auto is starting" flicker.
@@ -1011,6 +1017,9 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         AppLog.i("Showing reconnecting overlay")
         overlayState = OverlayState.RECONNECTING
         val overlay = findViewById<View>(R.id.loading_overlay) ?: return
+        if (settings.hudMirroring) {
+            overlay.scaleX = -1.0f
+        }
 
         // Ensure default content is shown, custom media is hidden
         findViewById<View>(R.id.loading_default_content)?.visibility = View.VISIBLE
@@ -1056,6 +1065,11 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
             findViewById<TextView>(R.id.loading_custom_text)?.text = handover
         }
 
+        val overlay = findViewById<View>(R.id.loading_overlay)
+        if (settings.hudMirroring) {
+            overlay?.scaleX = -1.0f
+        }
+
         val mediaPath = settings.loadingScreenMediaPath
         val mediaType = settings.loadingScreenMediaType
         if (mediaPath.isEmpty() || mediaType.isEmpty()) return
@@ -1071,7 +1085,6 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         val customTextOverlay = findViewById<View>(R.id.loading_custom_text_overlay)
         val customImage = findViewById<ImageView>(R.id.loading_custom_image)
         val customVideo = findViewById<VideoView>(R.id.loading_custom_video)
-        val overlay = findViewById<View>(R.id.loading_overlay)
 
         // Always hide the default content when custom media is active
         defaultContent?.visibility = View.GONE
@@ -1341,7 +1354,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
             }
         }
 
-        MaterialAlertDialogBuilder(this, R.style.DarkAlertDialog)
+        val dialog = MaterialAlertDialogBuilder(this, R.style.DarkAlertDialog)
             .setTitle(R.string.exit_dialog_title)
             .setAdapter(adapter) { _, which ->
                 val selected = options[which]
@@ -1363,6 +1376,11 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
             }
             .setNegativeButton(R.string.cancel, null)
             .show()
+
+        if (settings.hudMirroring) {
+            val root = dialog.window?.findViewById<View>(android.R.id.content) ?: dialog.window?.decorView
+            root?.scaleX = -1.0f
+        }
     }
 
     private fun showQuickSettings() {
@@ -1887,6 +1905,9 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 elevation = 100f
                 translationZ = 100f
+            }
+            if (settings.hudMirroring) {
+                scaleX = -1.0f
             }
         }
         val params = FrameLayout.LayoutParams(

@@ -496,6 +496,8 @@ class SettingsFragment : Fragment() {
 
         pendingAppLanguage?.let { settings.appLanguage = it }
 
+        val hudMirroringChanged = pendingHudMirroring != null && pendingHudMirroring != settings.hudMirroring
+
         // Save the stretch to fill preference
         pendingStretchToFill?.let { settings.stretchToFill = it }
         pendingForcedScale?.let { settings.forcedScale = it }
@@ -571,7 +573,7 @@ class SettingsFragment : Fragment() {
 
         Toast.makeText(context, getString(R.string.settings_saved), Toast.LENGTH_SHORT).show()
 
-        if (languageChanged) {
+        if (languageChanged || hudMirroringChanged) {
             requireActivity().recreate()
         }
     }
@@ -2428,7 +2430,8 @@ class SettingsFragment : Fragment() {
         val appTheme: Settings.AppTheme,
         val useExtremeDarkMode: Boolean,
         val useGradientBackground: Boolean,
-        val screenOrientation: Settings.ScreenOrientation
+        val screenOrientation: Settings.ScreenOrientation,
+        val hudMirroring: Boolean
     )
 
     private fun startExportSettings() {
@@ -2810,7 +2813,8 @@ class SettingsFragment : Fragment() {
             appTheme = settings.appTheme,
             useExtremeDarkMode = settings.useExtremeDarkMode,
             useGradientBackground = settings.useGradientBackground,
-            screenOrientation = settings.screenOrientation
+            screenOrientation = settings.screenOrientation,
+            hudMirroring = settings.hudMirroring
         )
     }
 
@@ -2872,7 +2876,8 @@ class SettingsFragment : Fragment() {
             snapshot.appTheme != settings.appTheme ||
             snapshot.useExtremeDarkMode != settings.useExtremeDarkMode ||
             snapshot.useGradientBackground != settings.useGradientBackground ||
-            snapshot.screenOrientation != settings.screenOrientation
+            snapshot.screenOrientation != settings.screenOrientation ||
+            snapshot.hudMirroring != settings.hudMirroring
     }
 
     private fun showAudioOffsetsDialog() {
