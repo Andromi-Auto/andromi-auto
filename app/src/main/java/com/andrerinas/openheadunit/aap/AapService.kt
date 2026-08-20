@@ -1934,6 +1934,15 @@ class AapService : Service(), UsbReceiver.Listener {
                     if (activeWifiMode != 3 || settings.wifiConnectionMode != 3) {
                         AppLog.i("AapService: Initializing Native AA mode before poke...")
                         initWifiMode(force = true)
+                    } else if (nativeAaHandshakeManager?.isActive() != true) {
+                        // A completed handoff closes the AA listeners while leaving the manager
+                        // running, and start() returns immediately on isRunning - so calling it here
+                        // reopened nothing. The poke then woke the phone, the phone opened RFCOMM,
+                        // and nothing was listening: the button appeared to do nothing however many
+                        // times it was pressed. A full re-init is what reopens them, which is what
+                        // the Bluetooth auto-start path below already does for the same reason.
+                        AppLog.i("AapService: Native AA listeners are closed — re-arming before the poke.")
+                        initWifiMode(force = true)
                     } else {
                         AppLog.d("AapService: Already in Native AA mode, skipping re-init.")
                         // Just ensure servers are running if they were stopped for some reason
@@ -3081,7 +3090,17 @@ class AapService : Service(), UsbReceiver.Listener {
 
             job = serviceScope.launch(Dispatchers.IO) {
                 try {
-                    serverSocket = ServerSocket(5288).apply { reuseAddress = true }
+                    // Unbound first, then the option, then bind. ServerSocket(int) binds inside the
+                    // constructor, so setting reuseAddress after it is a no-op on a socket that is
+                    // already bound - which is the whole failure this line was written to prevent.
+                    // The previous peer's connection sits in TIME_WAIT for minutes after a session
+                    // ends, so a re-init within that window threw BindException, isListening stayed
+                    // false, and the next handshake woke the phone over Bluetooth and handed it
+                    // nothing (NativeAaHandshakeManager aborts with "nothing is listening on 5288").
+                    serverSocket = ServerSocket().apply {
+                        reuseAddress = true
+                        bind(java.net.InetSocketAddress(5288))
+                    }
                     isListening = true
                     AppLog.i("Wireless Server listening on port 5288")
                     logLocalNetworkInterfaces()
