@@ -33,6 +33,7 @@ import com.andrerinas.openheadunit.main.settings.SettingItem
 import com.andrerinas.openheadunit.main.settings.SettingsAdapter
 import com.andrerinas.openheadunit.utils.AppLog
 import com.andrerinas.openheadunit.utils.AppPermissions
+import com.andrerinas.openheadunit.utils.AppThemeManager
 import com.andrerinas.openheadunit.utils.Settings
 import com.andrerinas.openheadunit.utils.LocaleHelper
 import com.andrerinas.openheadunit.BuildConfig
@@ -2612,6 +2613,15 @@ class SettingsFragment : Fragment() {
         settings = App.provide(ctx).settings
         applyWirelessSideEffects(snapshot, ctx)
 
+        // Re-evaluate app theme engine to immediately apply default theme
+        AppThemeManager.reapply(ctx, settings)
+
+        // Notify Service about Night Mode changes immediately
+        val nightModeUpdateIntent = Intent(AapService.ACTION_REQUEST_NIGHT_MODE_UPDATE).apply {
+            setPackage(ctx.packageName)
+        }
+        ctx.sendBroadcast(nightModeUpdateIntent)
+
         if (SettingsBackupManager.requiresProjectionRestart(result.changedKeys) && App.provide(ctx).commManager.isConnected) {
             Toast.makeText(ctx, ctx.getString(R.string.stopping_service), Toast.LENGTH_SHORT).show()
             val stopServiceIntent = Intent(ctx, AapService::class.java).apply {
@@ -2805,15 +2815,25 @@ class SettingsFragment : Fragment() {
     }
 
     private fun handleImportedSettings(snapshot: ImportSnapshot, result: SettingsBackupManager.ImportResult) {
-        settings = App.provide(requireContext()).settings
-        applyWirelessSideEffects(snapshot)
+        val ctx = context ?: return
+        settings = App.provide(ctx).settings
+        applyWirelessSideEffects(snapshot, ctx)
 
-        if (SettingsBackupManager.requiresProjectionRestart(result.changedKeys) && App.provide(requireContext()).commManager.isConnected) {
-            Toast.makeText(requireContext(), getString(R.string.stopping_service), Toast.LENGTH_SHORT).show()
-            val stopServiceIntent = Intent(requireContext(), AapService::class.java).apply {
+        // Re-evaluate app theme engine to immediately apply static or dynamic theme
+        AppThemeManager.reapply(ctx, settings)
+
+        // Notify Service about Night Mode changes immediately
+        val nightModeUpdateIntent = Intent(AapService.ACTION_REQUEST_NIGHT_MODE_UPDATE).apply {
+            setPackage(ctx.packageName)
+        }
+        ctx.sendBroadcast(nightModeUpdateIntent)
+
+        if (SettingsBackupManager.requiresProjectionRestart(result.changedKeys) && App.provide(ctx).commManager.isConnected) {
+            Toast.makeText(ctx, getString(R.string.stopping_service), Toast.LENGTH_SHORT).show()
+            val stopServiceIntent = Intent(ctx, AapService::class.java).apply {
                 action = AapService.ACTION_STOP_SERVICE
             }
-            ContextCompat.startForegroundService(requireContext(), stopServiceIntent)
+            ContextCompat.startForegroundService(ctx, stopServiceIntent)
         }
 
         hasChanges = false
@@ -2823,13 +2843,13 @@ class SettingsFragment : Fragment() {
         updateSettingsList()
 
         Toast.makeText(
-            requireContext(),
+            ctx,
             getString(R.string.settings_imported, result.importedKeys, result.skippedKeys),
             Toast.LENGTH_LONG
         ).show()
 
         if (shouldRecreateAfterImport(snapshot)) {
-            requireActivity().recreate()
+            activity?.recreate()
         }
     }
 

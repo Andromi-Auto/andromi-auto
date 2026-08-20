@@ -78,6 +78,7 @@ adb shell am start -a android.intent.action.VIEW -d "headunit://connect?ip=192.1
 - Fix video artifacts
 - Fixing wireless stack where failures stay broken until restart
 - Bringing back old style USB List
+- Fix broken theme after import: Reapply Theme selection after Settings import
 
 ### v.3.2.5
 - Fix black screen after backgrounding, and the washed-out picture a dropped frame leaves
