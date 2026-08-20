@@ -351,6 +351,52 @@ class Settings(private val context: Context) {
         set(value) { prefs.edit().putString("debug-force-memory-profile", value?.name).apply() }
 
     /**
+     * Puts the Native AA WiFi Direct group on 2.4 GHz instead of asking for 5 GHz.
+     *
+     * Off by default, and it is a rig lever rather than a preference: 5 GHz is what a working
+     * session runs on and nothing here recommends moving off it. What it exists for is that the
+     * link-outage reports come from 2.4 GHz head units and the rig could never be put on that band
+     * - the group is requested as 5 GHz and any group that lands on 2.4 GHz is torn down and
+     * remade. Both of those are turned off together by this one flag; see
+     * [com.andrerinas.openheadunit.aap.NativeGroupBandPolicy], which is where the coupling lives.
+     *
+     * Applies to the next group, so it needs a reconnect rather than only a settings write.
+     */
+    var debugForceP2pBand24: Boolean
+        get() = prefs.getBoolean("debug-force-p2p-band-24", false)
+        set(value) { prefs.edit().putBoolean("debug-force-p2p-band-24", value).apply() }
+
+    /**
+     * On a device with no band API, asks the P2P stack for a 5 GHz operating channel.
+     *
+     * Below API 29 there is no `WifiP2pConfig.Builder`, so the group's band is the driver's choice
+     * and this app has never had a say in it - which is every pre-Android-10 head unit, including
+     * both units in the periodic-outage reports. The hidden `setWifiP2pChannels` is the one lever
+     * left; see [com.andrerinas.openheadunit.aap.P2pOperatingChannelPolicy].
+     *
+     * **Off by default, and it should stay off until a unit reports back.** The request is a
+     * disallowed-frequency list, so a unit whose P2P firmware cannot host a 5 GHz group owner is not
+     * left on 2.4 GHz - it is left unable to form a group at all. The bring-up clears the restriction
+     * and retries once when that happens, but an opt-in costs nothing and a wrong default costs
+     * every pre-Q unit its connection.
+     *
+     * Ignored from API 29 up, where the supported band request does this properly.
+     */
+    var p2pLegacyFiveGhz: Boolean
+        get() = prefs.getBoolean("p2p-legacy-5ghz", false)
+        set(value) { prefs.edit().putBoolean("p2p-legacy-5ghz", value).apply() }
+
+    /**
+     * Asks for UNII-3 (channel 149) instead of UNII-1 (channel 36) when [p2pLegacyFiveGhz] is on.
+     *
+     * Both are non-DFS and channel 36 is what the reference implementations use, so this exists only
+     * for a regulatory domain that refuses the lower range.
+     */
+    var p2pLegacyFiveGhzUpperBand: Boolean
+        get() = prefs.getBoolean("p2p-legacy-5ghz-upper", false)
+        set(value) { prefs.edit().putBoolean("p2p-legacy-5ghz-upper", value).apply() }
+
+    /**
      * Asks the decoder for low-latency mode, through whichever key its vendor understands.
      *
      * Off by default, and it stays off until a log from a real device shows a component accepting the

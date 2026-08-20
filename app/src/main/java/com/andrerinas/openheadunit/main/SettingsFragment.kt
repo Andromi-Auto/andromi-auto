@@ -1853,6 +1853,51 @@ class SettingsFragment : Fragment() {
             }
         ))
 
+        // Puts the Native AA P2P group on 2.4 GHz, which the rig can otherwise never run: the group
+        // is requested as 5 GHz and any group that lands on 2.4 GHz is torn down and remade. Both of
+        // those come off together - see NativeGroupBandPolicy. Applies on the next connection.
+        items.add(SettingItem.ToggleSettingEntry(
+            stableId = "debugForceP2pBand24",
+            nameResId = R.string.debug_force_p2p_band_24,
+            descriptionResId = R.string.debug_force_p2p_band_24_description,
+            isChecked = settings.debugForceP2pBand24,
+            searchKeywords = "2.4 ghz band wifi direct p2p group native link outage",
+            onCheckedChanged = { isChecked ->
+                settings.debugForceP2pBand24 = isChecked
+                updateSettingsList()
+            }
+        ))
+
+        // Below Android 10 there is no band request at all, so this is the only lever those units
+        // have. Off by default: the request is a frequency whitelist, so a unit that cannot host a
+        // 5 GHz group owner fails to create one rather than falling back - see the retry in
+        // WifiDirectManager. Applies on the next connection.
+        items.add(SettingItem.ToggleSettingEntry(
+            stableId = "p2pLegacyFiveGhz",
+            nameResId = R.string.p2p_legacy_5ghz,
+            descriptionResId = R.string.p2p_legacy_5ghz_description,
+            isChecked = settings.p2pLegacyFiveGhz,
+            searchKeywords = "5 ghz band wifi direct legacy android 9 channel 36 stutter",
+            onCheckedChanged = { isChecked ->
+                settings.p2pLegacyFiveGhz = isChecked
+                updateSettingsList()
+            }
+        ))
+
+        if (settings.p2pLegacyFiveGhz) {
+            items.add(SettingItem.ToggleSettingEntry(
+                stableId = "p2pLegacyFiveGhzUpperBand",
+                nameResId = R.string.p2p_legacy_5ghz_upper,
+                descriptionResId = R.string.p2p_legacy_5ghz_upper_description,
+                isChecked = settings.p2pLegacyFiveGhzUpperBand,
+                searchKeywords = "channel 149 upper 5 ghz unii region",
+                onCheckedChanged = { isChecked ->
+                    settings.p2pLegacyFiveGhzUpperBand = isChecked
+                    updateSettingsList()
+                }
+            ))
+        }
+
         // Deliberately corrupts the video stream so the reassembler's failure paths can be
         // exercised on a working unit. Applies on the next connection, and every injected fault is
         // logged loudly - see VideoFaultInjector. Applied immediately rather than through the
