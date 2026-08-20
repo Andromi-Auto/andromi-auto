@@ -4,6 +4,12 @@
 - Refactor WiFi-Code from AapService into their own classes for better maintenance, thanks to @MrEAlderson
 - USB-Blacklist Filter to prevent the app from asking for non Android phones
 
+### v.3.2.6
+- Fix settings UI crash and dpi input on older Android devices
+- Fix video artifacts
+- Fixing wireless stack where failures stay broken until restart
+- Bringing back old style USB List
+
 ### v.3.2.5
 - Fix black screen after backgrounding, and the washed-out picture a dropped frame leaves
 - Fix headunit server socket leak
