@@ -53,6 +53,15 @@ class NativeAaHandshakeManager(
         /** How long to wait for the AAP TCP port to be bound before giving up on a handshake. */
         private const val PORT_WAIT_MS = 3_000L
 
+        /**
+         * How long to wait for the port after asking for the server to be (re)started.
+         *
+         * Deliberately short. [awaitWirelessServerListening] delays without pumping the session's
+         * inbound channel, so everything spent here is time the phone's keepalives go unserviced;
+         * the bind's own retry budget is under two seconds, so this only has to cover it.
+         */
+        private const val PORT_ENSURE_MS = 4_000L
+
         /** Which of [allServiceNames] are secondary Bluetooth radios, i.e. not [primaryServiceName]
          *  (dual-Bluetooth-radio head units). Pure and unit-testable: identity is by system
          *  service name, not MAC address, since BluetoothAdapter.getAddress() returns the fixed
@@ -1212,10 +1221,17 @@ class NativeAaHandshakeManager(
             // with it unbound means a genuine failure, not a race — but a session torn down and
             // rebuilt a moment ago can still be releasing it.
             if (!awaitWirelessServerListening(PORT_WAIT_MS)) {
-                AppLog.e("NativeAA: Handshake aborted — nothing is listening on port 5288 after ${PORT_WAIT_MS / 1000}s, so the phone would join the network and find no head unit. Restart the app if this persists.")
-                abortedLocally = true
-                feed(WppEvent.CredentialsUnavailable)
-                return@withContext
+                // Ask for a repair before giving up. A server that failed to bind once used to stay
+                // dead for the life of the mode, because the only thing that rebuilt it was a full
+                // mode re-initialisation - so this abort repeated every few seconds, forever, with
+                // the phone woken each time and told nothing.
+                if (!context.ensureWirelessServerListening("the Bluetooth handshake", PORT_ENSURE_MS)) {
+                    AppLog.e("NativeAA: Handshake aborted — nothing is listening on port 5288 after ${PORT_WAIT_MS / 1000}s, and starting it here did not work either, so the phone would join the network and find no head unit. Restart the app if this persists.")
+                    abortedLocally = true
+                    feed(WppEvent.CredentialsUnavailable)
+                    return@withContext
+                }
+                AppLog.i("NativeAA: port 5288 was not bound, and is now. Carrying on with the handshake.")
             }
 
             AppLog.i("NativeAA: Starting Handshake Exchange:")
