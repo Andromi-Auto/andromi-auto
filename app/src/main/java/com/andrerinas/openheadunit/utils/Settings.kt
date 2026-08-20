@@ -8,6 +8,8 @@ import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Build
 import com.andrerinas.openheadunit.aap.MediaKeyRoutingPolicy
+import com.andrerinas.openheadunit.aap.VideoFaultInjector
+import com.andrerinas.openheadunit.decoder.DeviceMemoryProfile
 import com.andrerinas.openheadunit.aap.PlaybackFocusPolicy
 import com.andrerinas.openheadunit.aap.protocol.proto.Control
 import com.andrerinas.openheadunit.app.UsbAttachedActivity
@@ -321,6 +323,54 @@ class Settings(private val context: Context) {
             return SoftwareVideoDecoder.fromInt(value) ?: SoftwareVideoDecoder.BUNDLED_FFMPEG
         }
         set(value) { prefs.edit().putInt("software-video-decoder", value.value).apply() }
+
+    /**
+     * Deliberately corrupts the projected video stream, for testing the reassembler's failure paths.
+     *
+     * Off, and meant to stay off. The artifact reports this exists for come from units we do not
+     * have, and a healthy rig never produces the conditions that cause them - so without this there
+     * is no way to show a fix works except to wait for a reporter's next drive. Every injected fault
+     * is logged, so a log captured with this left on cannot be mistaken for a log of a real fault.
+     */
+    var debugVideoFaultInjection: VideoFaultInjector.Mode
+        get() {
+            val value = prefs.getInt("debug-video-fault-injection", VideoFaultInjector.Mode.OFF.value)
+            return VideoFaultInjector.Mode.fromInt(value) ?: VideoFaultInjector.Mode.OFF
+        }
+        set(value) { prefs.edit().putInt("debug-video-fault-injection", value.value).apply() }
+
+    /**
+     * Overrides how much memory the video pipeline believes this device has.
+     *
+     * Null means measure it. Set, it lets a well-provisioned rig run the constrained path, which is
+     * otherwise only reachable on hardware we do not have. Stored by name rather than by ordinal so
+     * reordering the enum cannot silently change what a stored value means.
+     */
+    var debugForceMemoryProfile: DeviceMemoryProfile?
+        get() = DeviceMemoryProfile.fromName(prefs.getString("debug-force-memory-profile", null))
+        set(value) { prefs.edit().putString("debug-force-memory-profile", value?.name).apply() }
+
+    /**
+     * Asks the decoder for low-latency mode, through whichever key its vendor understands.
+     *
+     * Off by default, and it stays off until a log from a real device shows a component accepting the
+     * key - which is this project's standing rule about vendor MediaFormat keys, written after
+     * KEY_PRIORITY and KEY_OPERATING_RATE were both measured being rejected outright. The configure
+     * ladder is what makes turning it on cheap to try: a rejected key now costs one retry instead of
+     * the session. See [com.andrerinas.openheadunit.decoder.DecoderConfigLadder].
+     */
+    var debugVideoLowLatency: Boolean
+        get() = prefs.getBoolean("debug-video-low-latency", false)
+        set(value) { prefs.edit().putBoolean("debug-video-low-latency", value).apply() }
+
+    /** One in this many of the targeted messages is faulted. See [debugVideoFaultInjection]. */
+    var debugVideoFaultRate: Int
+        get() = prefs.getInt("debug-video-fault-rate", VideoFaultInjector.DEFAULT_RATE)
+        set(value) {
+            prefs.edit()
+                .putInt("debug-video-fault-rate", value.coerceIn(VideoFaultInjector.MIN_RATE, VideoFaultInjector.MAX_RATE))
+                .apply()
+        }
 
     var rightHandDrive: Boolean
         get() = prefs.getBoolean("right-hand-drive", false)

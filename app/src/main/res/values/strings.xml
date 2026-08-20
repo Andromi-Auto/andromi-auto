@@ -683,6 +683,14 @@
     <string name="nav_action_ferry_train">Ferry / train</string>
     <string name="nav_action_destination">Arrival</string>
     <string name="show_fps_counter">Show FPS Counter</string>
+    <!-- Debug-only: deliberately corrupts the projected video stream so the reassembler's
+         failure paths can be exercised on a unit that is working correctly. Not translated on
+         purpose - it is a developer tool and the terms are protocol terms. -->
+    <string name="debug_video_fault_injection" translatable="false">Video fault injection</string>
+    <string name="debug_video_fault_rate" translatable="false">Fault rate (one in N)</string>
+    <string name="debug_force_memory_profile" translatable="false">Force memory profile</string>
+    <string name="debug_video_low_latency" translatable="false">Request decoder low-latency mode</string>
+    <string name="debug_video_low_latency_description" translatable="false">Sets the vendor low-latency MediaFormat key when configuring the video decoder. Falls back automatically if the decoder rejects it.</string>
     <string name="show_fps_counter_description">Display a real-time FPS overlay in the top-left corner during projection.</string>
 
     <!-- Auto-start permission strings -->

@@ -216,10 +216,16 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
                 commManager.send(VideoFocusEvent(gain = true, unsolicited = true))
             }
             WarmRelaunchKeyframePolicy.Action.CYCLE_FOCUS -> {
+                // The transport's own escalation spends the same lever. If it holds it, no release
+                // went out for this policy to complete, so nothing here may be marked as spent -
+                // and the keyframe that cycle brings is the one this was asking for anyway.
+                if (!commManager.releaseVideoFocusForKeyframe()) {
+                    AppLog.w("AapProjectionActivity: relaunched surface has no picture, but a focus cycle is already in flight - waiting for it")
+                    return
+                }
                 warmRelaunchCycleSpent = true
                 lastVideoFocusRequestMs = now
                 AppLog.w("AapProjectionActivity: relaunched surface has no picture after ${now - lastSurfaceSetMs}ms - cycling video focus")
-                commManager.releaseVideoFocusForKeyframe()
                 focusCycleGainPending = true
                 watchdogHandler.removeCallbacks(focusCycleGainRunnable)
                 watchdogHandler.postDelayed(
@@ -250,7 +256,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
     private val focusCycleGainRunnable = Runnable {
         focusCycleGainPending = false
         AppLog.w("AapProjectionActivity: retaking video focus to complete the keyframe cycle")
-        commManager.send(VideoFocusEvent(gain = true, unsolicited = true))
+        commManager.retakeVideoFocusForKeyframe()
     }
 
     /**

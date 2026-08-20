@@ -27,6 +27,8 @@ import com.andrerinas.openheadunit.R
 import com.andrerinas.openheadunit.aap.AapService
 import com.andrerinas.openheadunit.aap.MediaKeyRoutingPolicy
 import com.andrerinas.openheadunit.aap.PlaybackFocusPolicy
+import com.andrerinas.openheadunit.aap.VideoFaultInjector
+import com.andrerinas.openheadunit.decoder.DeviceMemoryProfile
 import com.andrerinas.openheadunit.main.settings.SettingItem
 import com.andrerinas.openheadunit.main.settings.SettingsAdapter
 import com.andrerinas.openheadunit.utils.AppLog
@@ -1808,6 +1810,91 @@ class SettingsFragment : Fragment() {
                 updateSettingsList()
             }
         ))
+
+        // Applied immediately, like the two below it: the configure ladder falls back on its own if
+        // the decoder rejects the key, so there is nothing to confirm before trying it.
+        items.add(SettingItem.ToggleSettingEntry(
+            stableId = "debugVideoLowLatency",
+            nameResId = R.string.debug_video_low_latency,
+            descriptionResId = R.string.debug_video_low_latency_description,
+            isChecked = settings.debugVideoLowLatency,
+            searchKeywords = "low latency vendor key decoder mediatek amlogic qualcomm exynos",
+            onCheckedChanged = { isChecked ->
+                settings.debugVideoLowLatency = isChecked
+                updateSettingsList()
+            }
+        ))
+
+        // Lets a well-provisioned rig run the constrained video pipeline, which is otherwise only
+        // reachable on 1GB hardware we do not have. Applies on the next connection; the configure
+        // line reports the profile and marks it FORCED.
+        val memoryProfileNames = listOf("Measure") +
+            DeviceMemoryProfile.entries.map { it.name.lowercase().replaceFirstChar { c -> c.uppercase() } }
+        val memoryProfileValues = listOf<DeviceMemoryProfile?>(null) + DeviceMemoryProfile.entries
+        items.add(SettingItem.SettingEntry(
+            stableId = "debugForceMemoryProfile",
+            nameResId = R.string.debug_force_memory_profile,
+            value = memoryProfileNames[memoryProfileValues.indexOf(settings.debugForceMemoryProfile).coerceAtLeast(0)],
+            searchKeywords = "memory profile low ram constrained buffers queue",
+            onClick = {
+                val currentIndex = memoryProfileValues.indexOf(settings.debugForceMemoryProfile).coerceAtLeast(0)
+                MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
+                    .setTitle(R.string.debug_force_memory_profile)
+                    .setSingleChoiceItems(memoryProfileNames.toTypedArray(), currentIndex) { dialog, which ->
+                        settings.debugForceMemoryProfile = memoryProfileValues[which]
+                        dialog.dismiss()
+                        updateSettingsList()
+                    }
+                    .show()
+            }
+        ))
+
+        // Deliberately corrupts the video stream so the reassembler's failure paths can be
+        // exercised on a working unit. Applies on the next connection, and every injected fault is
+        // logged loudly - see VideoFaultInjector. Applied immediately rather than through the
+        // pending/save flow, like the log level below: this is a tool, not a preference.
+        val faultModes = VideoFaultInjector.Mode.entries
+        val faultModeNames = faultModes
+            .map { it.name.lowercase().replace('_', ' ').replaceFirstChar { c -> c.uppercase() } }
+            .toTypedArray()
+        items.add(SettingItem.SettingEntry(
+            stableId = "debugVideoFaultInjection",
+            nameResId = R.string.debug_video_fault_injection,
+            value = faultModeNames[faultModes.indexOf(settings.debugVideoFaultInjection).coerceAtLeast(0)],
+            searchKeywords = "fault injection corrupt fragment reassembly test",
+            onClick = {
+                val currentIndex = faultModes.indexOf(settings.debugVideoFaultInjection).coerceAtLeast(0)
+                MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
+                    .setTitle(R.string.debug_video_fault_injection)
+                    .setSingleChoiceItems(faultModeNames, currentIndex) { dialog, which ->
+                        settings.debugVideoFaultInjection = faultModes[which]
+                        dialog.dismiss()
+                        updateSettingsList()
+                    }
+                    .show()
+            }
+        ))
+
+        if (settings.debugVideoFaultInjection != VideoFaultInjector.Mode.OFF) {
+            val faultRates = listOf(10, 30, 100, 300, 1000, 3000)
+            val faultRateNames = faultRates.map { "1 in " + it }.toTypedArray()
+            items.add(SettingItem.SettingEntry(
+                stableId = "debugVideoFaultRate",
+                nameResId = R.string.debug_video_fault_rate,
+                value = "1 in " + settings.debugVideoFaultRate,
+                onClick = {
+                    val currentIndex = faultRates.indexOf(settings.debugVideoFaultRate).coerceAtLeast(0)
+                    MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
+                        .setTitle(R.string.debug_video_fault_rate)
+                        .setSingleChoiceItems(faultRateNames, currentIndex) { dialog, which ->
+                            settings.debugVideoFaultRate = faultRates[which]
+                            dialog.dismiss()
+                            updateSettingsList()
+                        }
+                        .show()
+                }
+            ))
+        }
 
         val logLevels = LogExporter.LogLevel.entries
         val logLevelNames = logLevels.map { it.name.lowercase().replaceFirstChar { c -> c.uppercase() } }.toTypedArray()

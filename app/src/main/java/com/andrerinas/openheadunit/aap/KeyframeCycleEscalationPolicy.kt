@@ -43,6 +43,17 @@ package com.andrerinas.openheadunit.aap
  * component never re-initialised - but that is one rig and one phone. Hence a budget rather than a
  * free hand: [MAX_CYCLES_PER_SESSION] in total, no two closer together than [CYCLE_COOLDOWN_MS].
  *
+ * ### Who arms the clock
+ *
+ * A shed reference frame is no longer the only caller. A decoder that has just been rebuilt, and one
+ * that is waiting for a keyframe rather than rebuilding, both arm it too - those are the cases where
+ * the picture is most certainly gone and least able to return on its own, since a rebuilt codec
+ * resumes on a P-frame and the next scheduled keyframe is up to a GOP away. They used to do the
+ * opposite: a rebuild *cancelled* the clock and armed nothing, so a decoder restarting every ten
+ * seconds could never reach an escalation, which is how one corrupt access unit turned into a
+ * permanent black screen. The [WarmRelaunchKeyframePolicy] overlap that motivated the old wiring is
+ * handled by [FocusCycleLever] rather than by declining to ask.
+ *
  * Deliberately blind to everything except its own timeline and the keyframe signal. An earlier
  * attempt (commit 66e59b2c) latched on a `waitingForKeyframe` flag that gated the *feed*, and could
  * stick for a whole session with no timeout. Nothing here can stick: the clock clears on a keyframe,

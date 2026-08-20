@@ -64,12 +64,15 @@ internal class AapReadMultipleMessages(
             fifo.get(recvHeader.buf, 0, recvHeader.buf.size)
             recvHeader.decode()
 
+            // Only a first fragment carries the total size, and only then is this meaningful.
+            var declaredTotal = 0
             if (recvHeader.flags == 0x09) {
                 if (fifo.remaining() < 4) {
                     fifo.reset()
                     break
                 }
                 fifo.get(skipBuffer, 0, 4)
+                declaredTotal = Utils.bytesToInt(skipBuffer, 0, false)
             }
 
             if (recvHeader.enc_len > msgBuffer.size || recvHeader.enc_len < 0) {
@@ -84,6 +87,10 @@ internal class AapReadMultipleMessages(
             }
 
             fifo.get(msgBuffer, 0, recvHeader.enc_len)
+
+            // The whole body arrived, so this fragment can be counted against the run's declared
+            // total. Done before decryption because the total is a framing quantity.
+            auditFragment(recvHeader.chan, recvHeader.flags, recvHeader.enc_len, declaredTotal)
 
             try {
                 val msg = AapMessageIncoming.decrypt(recvHeader, 0, msgBuffer, ssl)

@@ -45,6 +45,8 @@ internal class AapReadSingleMessage(connection: AccessoryConnection, ssl: AapSsl
                 return -2
             }
 
+            // Only a first fragment carries the total size, and only then is this meaningful.
+            var declaredTotal = 0
             if (recvHeader.flags == 0x09) {
                 // Once header arrived, data should be flowing — 10s timeout is valid here
                 val readSize = connection.recvBlocking(fragmentSizeBuffer, 4, 10000, true)
@@ -52,6 +54,7 @@ internal class AapReadSingleMessage(connection: AccessoryConnection, ssl: AapSsl
                     AppLog.e("AapRead: Failed to read fragment total size. Skipping.")
                     return 0
                 }
+                declaredTotal = Utils.bytesToInt(fragmentSizeBuffer, 0, false)
             }
 
             // Step 2: Read the encrypted message body
@@ -70,6 +73,10 @@ internal class AapReadSingleMessage(connection: AccessoryConnection, ssl: AapSsl
                 AppLog.e("AapRead: Failed to read full message body. Expected ${recvHeader.enc_len}, got $msgSize. Skipping.")
                 return 0
             }
+
+            // The whole body arrived, so this fragment can be counted against the run's declared
+            // total. Done before decryption because the total is a framing quantity.
+            auditFragment(recvHeader.chan, recvHeader.flags, recvHeader.enc_len, declaredTotal)
 
             // Step 3: Decrypt the message
             val msg = AapMessageIncoming.decrypt(recvHeader, 0, msgBuffer, ssl)

@@ -3,6 +3,7 @@ package com.andrerinas.openheadunit.aap
 import com.andrerinas.openheadunit.aap.KeyframeCycleEscalationPolicy.Action
 import com.andrerinas.openheadunit.aap.KeyframeCycleEscalationPolicy.CYCLE_COOLDOWN_MS
 import com.andrerinas.openheadunit.aap.KeyframeCycleEscalationPolicy.ESCALATE_AFTER_UNREPAIRED_MS
+import com.andrerinas.openheadunit.aap.WarmRelaunchKeyframePolicy.ESCALATE_AFTER_SURFACE_MS
 import com.andrerinas.openheadunit.aap.WarmRelaunchKeyframePolicy.FOCUS_CYCLE_GAP_MS
 import com.andrerinas.openheadunit.aap.KeyframeCycleEscalationPolicy.MAX_CYCLES_PER_SESSION
 import com.andrerinas.openheadunit.aap.KeyframeCycleEscalationPolicy.NATURAL_CADENCE_MIN_OBSERVED_MS
@@ -159,6 +160,35 @@ class KeyframeCycleEscalationPolicyTest {
         assertTrue(
             "cooldown ${CYCLE_COOLDOWN_MS}ms is not comfortably clear of the ${FOCUS_CYCLE_GAP_MS}ms regain gap",
             CYCLE_COOLDOWN_MS >= FOCUS_CYCLE_GAP_MS * 10
+        )
+    }
+
+    @Test
+    fun `the surface escalation always gets to the lever first`() {
+        // Both policies can want a cycle at once - a decoder rebuilt under a surface that has never
+        // shown a frame satisfies each of them - and only one release may go out. The lever refuses
+        // the second claim, so nothing breaks either way, but the ordering decides which policy's
+        // budget pays: the surface path is the one with the measured 3.0-3.2s recovery behind it and
+        // should win, so it must stay the shorter window.
+        assertTrue(
+            "surface escalation ${ESCALATE_AFTER_SURFACE_MS}ms no longer precedes the unrepaired " +
+                "escalation ${ESCALATE_AFTER_UNREPAIRED_MS}ms",
+            ESCALATE_AFTER_SURFACE_MS < ESCALATE_AFTER_UNREPAIRED_MS
+        )
+    }
+
+    @Test
+    fun `a refused claim is re-checked only after the winning cycle has had its chance`() {
+        // When the lever is already held, AapTransport re-arms its check at this window instead of
+        // returning and leaving the clock latched. That is only correct while the window outlasts the
+        // whole of the other cycle: FOCUS_CYCLE_GAP_MS to send the regain, plus the phone's own
+        // turnaround - measured at 544ms and 557ms from the release line to the keyframe reaching the
+        // codec, on the rig, on the two cycles a corrupt-access-unit run produced. 400 + 557 is
+        // comfortably inside 2000; shortening either constant has to argue with those numbers.
+        assertTrue(
+            "re-check window ${ESCALATE_AFTER_UNREPAIRED_MS}ms no longer outlasts the regain gap " +
+                "${FOCUS_CYCLE_GAP_MS}ms plus the measured 557ms keyframe turnaround",
+            ESCALATE_AFTER_UNREPAIRED_MS > FOCUS_CYCLE_GAP_MS + 557
         )
     }
 }
