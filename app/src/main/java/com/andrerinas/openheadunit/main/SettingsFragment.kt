@@ -27,6 +27,8 @@ import com.andrerinas.openheadunit.R
 import com.andrerinas.openheadunit.aap.AapService
 import com.andrerinas.openheadunit.aap.MediaKeyRoutingPolicy
 import com.andrerinas.openheadunit.aap.PlaybackFocusPolicy
+import com.andrerinas.openheadunit.aap.VideoFaultInjector
+import com.andrerinas.openheadunit.decoder.DeviceMemoryProfile
 import com.andrerinas.openheadunit.main.settings.SettingItem
 import com.andrerinas.openheadunit.main.settings.SettingsAdapter
 import com.andrerinas.openheadunit.utils.AppLog
@@ -660,6 +662,10 @@ class SettingsFragment : Fragment() {
 
         updateSaveButtonState()
     }
+
+    /** Reads a fault budget for the settings row, so 0 says what it means rather than showing "0". */
+    private fun describeFaultBudget(budget: Int): String =
+        if (budget == VideoFaultInjector.UNLIMITED_BUDGET) "Whole session" else "$budget faults"
 
     private fun updateSettingsList() {
         val app = App.provide(requireContext())
@@ -1808,6 +1814,155 @@ class SettingsFragment : Fragment() {
                 updateSettingsList()
             }
         ))
+
+        // Applied immediately, like the two below it: the configure ladder falls back on its own if
+        // the decoder rejects the key, so there is nothing to confirm before trying it.
+        items.add(SettingItem.ToggleSettingEntry(
+            stableId = "debugVideoLowLatency",
+            nameResId = R.string.debug_video_low_latency,
+            descriptionResId = R.string.debug_video_low_latency_description,
+            isChecked = settings.debugVideoLowLatency,
+            searchKeywords = "low latency vendor key decoder mediatek amlogic qualcomm exynos",
+            onCheckedChanged = { isChecked ->
+                settings.debugVideoLowLatency = isChecked
+                updateSettingsList()
+            }
+        ))
+
+        // Lets a well-provisioned rig run the constrained video pipeline, which is otherwise only
+        // reachable on 1GB hardware we do not have. Applies on the next connection; the configure
+        // line reports the profile and marks it FORCED.
+        val memoryProfileNames = listOf("Measure") +
+            DeviceMemoryProfile.entries.map { it.name.lowercase().replaceFirstChar { c -> c.uppercase() } }
+        val memoryProfileValues = listOf<DeviceMemoryProfile?>(null) + DeviceMemoryProfile.entries
+        items.add(SettingItem.SettingEntry(
+            stableId = "debugForceMemoryProfile",
+            nameResId = R.string.debug_force_memory_profile,
+            value = memoryProfileNames[memoryProfileValues.indexOf(settings.debugForceMemoryProfile).coerceAtLeast(0)],
+            searchKeywords = "memory profile low ram constrained buffers queue",
+            onClick = {
+                val currentIndex = memoryProfileValues.indexOf(settings.debugForceMemoryProfile).coerceAtLeast(0)
+                MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
+                    .setTitle(R.string.debug_force_memory_profile)
+                    .setSingleChoiceItems(memoryProfileNames.toTypedArray(), currentIndex) { dialog, which ->
+                        settings.debugForceMemoryProfile = memoryProfileValues[which]
+                        dialog.dismiss()
+                        updateSettingsList()
+                    }
+                    .show()
+            }
+        ))
+
+        // Puts the Native AA P2P group on 2.4 GHz, which the rig can otherwise never run: the group
+        // is requested as 5 GHz and any group that lands on 2.4 GHz is torn down and remade. Both of
+        // those come off together - see NativeGroupBandPolicy. Applies on the next connection.
+        items.add(SettingItem.ToggleSettingEntry(
+            stableId = "debugForceP2pBand24",
+            nameResId = R.string.debug_force_p2p_band_24,
+            descriptionResId = R.string.debug_force_p2p_band_24_description,
+            isChecked = settings.debugForceP2pBand24,
+            searchKeywords = "2.4 ghz band wifi direct p2p group native link outage",
+            onCheckedChanged = { isChecked ->
+                settings.debugForceP2pBand24 = isChecked
+                updateSettingsList()
+            }
+        ))
+
+        // Below Android 10 there is no band request at all, so this is the only lever those units
+        // have. Off by default: the request is a frequency whitelist, so a unit that cannot host a
+        // 5 GHz group owner fails to create one rather than falling back - see the retry in
+        // WifiDirectManager. Applies on the next connection.
+        items.add(SettingItem.ToggleSettingEntry(
+            stableId = "p2pLegacyFiveGhz",
+            nameResId = R.string.p2p_legacy_5ghz,
+            descriptionResId = R.string.p2p_legacy_5ghz_description,
+            isChecked = settings.p2pLegacyFiveGhz,
+            searchKeywords = "5 ghz band wifi direct legacy android 9 channel 36 stutter",
+            onCheckedChanged = { isChecked ->
+                settings.p2pLegacyFiveGhz = isChecked
+                updateSettingsList()
+            }
+        ))
+
+        if (settings.p2pLegacyFiveGhz) {
+            items.add(SettingItem.ToggleSettingEntry(
+                stableId = "p2pLegacyFiveGhzUpperBand",
+                nameResId = R.string.p2p_legacy_5ghz_upper,
+                descriptionResId = R.string.p2p_legacy_5ghz_upper_description,
+                isChecked = settings.p2pLegacyFiveGhzUpperBand,
+                searchKeywords = "channel 149 upper 5 ghz unii region",
+                onCheckedChanged = { isChecked ->
+                    settings.p2pLegacyFiveGhzUpperBand = isChecked
+                    updateSettingsList()
+                }
+            ))
+        }
+
+        // Deliberately corrupts the video stream so the reassembler's failure paths can be
+        // exercised on a working unit. Applies on the next connection, and every injected fault is
+        // logged loudly - see VideoFaultInjector. Applied immediately rather than through the
+        // pending/save flow, like the log level below: this is a tool, not a preference.
+        val faultModes = VideoFaultInjector.Mode.entries
+        val faultModeNames = faultModes
+            .map { it.name.lowercase().replace('_', ' ').replaceFirstChar { c -> c.uppercase() } }
+            .toTypedArray()
+        items.add(SettingItem.SettingEntry(
+            stableId = "debugVideoFaultInjection",
+            nameResId = R.string.debug_video_fault_injection,
+            value = faultModeNames[faultModes.indexOf(settings.debugVideoFaultInjection).coerceAtLeast(0)],
+            searchKeywords = "fault injection corrupt fragment reassembly test",
+            onClick = {
+                val currentIndex = faultModes.indexOf(settings.debugVideoFaultInjection).coerceAtLeast(0)
+                MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
+                    .setTitle(R.string.debug_video_fault_injection)
+                    .setSingleChoiceItems(faultModeNames, currentIndex) { dialog, which ->
+                        settings.debugVideoFaultInjection = faultModes[which]
+                        dialog.dismiss()
+                        updateSettingsList()
+                    }
+                    .show()
+            }
+        ))
+
+        if (settings.debugVideoFaultInjection != VideoFaultInjector.Mode.OFF) {
+            val faultRates = listOf(10, 30, 100, 300, 1000, 3000)
+            val faultRateNames = faultRates.map { "1 in " + it }.toTypedArray()
+            items.add(SettingItem.SettingEntry(
+                stableId = "debugVideoFaultRate",
+                nameResId = R.string.debug_video_fault_rate,
+                value = "1 in " + settings.debugVideoFaultRate,
+                onClick = {
+                    val currentIndex = faultRates.indexOf(settings.debugVideoFaultRate).coerceAtLeast(0)
+                    MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
+                        .setTitle(R.string.debug_video_fault_rate)
+                        .setSingleChoiceItems(faultRateNames, currentIndex) { dialog, which ->
+                            settings.debugVideoFaultRate = faultRates[which]
+                            dialog.dismiss()
+                            updateSettingsList()
+                        }
+                        .show()
+                }
+            ))
+
+            val faultBudgets = listOf(VideoFaultInjector.UNLIMITED_BUDGET, 5, 10, 30, 100)
+            val faultBudgetNames = faultBudgets.map { describeFaultBudget(it) }.toTypedArray()
+            items.add(SettingItem.SettingEntry(
+                stableId = "debugVideoFaultBudget",
+                nameResId = R.string.debug_video_fault_budget,
+                value = describeFaultBudget(settings.debugVideoFaultBudget),
+                onClick = {
+                    val currentIndex = faultBudgets.indexOf(settings.debugVideoFaultBudget).coerceAtLeast(0)
+                    MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
+                        .setTitle(R.string.debug_video_fault_budget)
+                        .setSingleChoiceItems(faultBudgetNames, currentIndex) { dialog, which ->
+                            settings.debugVideoFaultBudget = faultBudgets[which]
+                            dialog.dismiss()
+                            updateSettingsList()
+                        }
+                        .show()
+                }
+            ))
+        }
 
         val logLevels = LogExporter.LogLevel.entries
         val logLevelNames = logLevels.map { it.name.lowercase().replaceFirstChar { c -> c.uppercase() } }.toTypedArray()
