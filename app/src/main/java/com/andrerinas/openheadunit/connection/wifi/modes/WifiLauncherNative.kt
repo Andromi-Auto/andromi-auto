@@ -14,7 +14,7 @@ import com.andrerinas.openheadunit.utils.AppLog
 
 class WifiLauncherNative : WifiLauncher {
 
-    private val strategy: NativeStrategy
+    val strategy: NativeStrategy
 
     var handshakeManager: NativeAaHandshakeManager? = null
         private set

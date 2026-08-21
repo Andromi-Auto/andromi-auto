@@ -63,7 +63,7 @@ class WifiLauncherSharedServices(val service: AapService) {
         wifiDirectManager = null
     }
 
-    private fun startWirelessServer(launcher: WifiLauncher) {
+    fun startWirelessServer(launcher: WifiLauncher) {
         val commManager = App.provide(service).commManager
         val existing = wirelessServer
         val action = WirelessServerRestartPolicy.decide(

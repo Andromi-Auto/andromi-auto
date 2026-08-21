@@ -1227,7 +1227,7 @@ class NativeAaHandshakeManager(
                 // dead for the life of the mode, because the only thing that rebuilt it was a full
                 // mode re-initialisation - so this abort repeated every few seconds, forever, with
                 // the phone woken each time and told nothing.
-                if (!context.ensureWirelessServerListening("the Bluetooth handshake", PORT_ENSURE_MS)) {
+                if (!ensureWirelessServerListening("the Bluetooth handshake", PORT_ENSURE_MS)) {
                     AppLog.e("NativeAA: Handshake aborted — nothing is listening on port 5288 after ${PORT_WAIT_MS / 1000}s, and starting it here did not work either, so the phone would join the network and find no head unit. Restart the app if this persists.")
                     abortedLocally = true
                     feed(WppEvent.CredentialsUnavailable)
@@ -1282,6 +1282,44 @@ class NativeAaHandshakeManager(
             try { socket.close() } catch (e: Exception) {}
             AppLog.i("NativeAA: BT Handshake socket closed.")
         }
+    }
+
+    /**
+     * Tries to get the AAP port bound, and reports whether it is.
+     *
+     * Called by the Bluetooth handshake when it finds the port unbound with credentials already in
+     * hand. Until this existed the handshake could only give up, so a server that died once stayed
+     * dead for the life of the mode: the phone was woken, told to join a network, and left dialling
+     * a port nothing was listening on, every few seconds, indefinitely.
+     *
+     * The start is marshalled onto Main because every other caller of [startWirelessServer] runs
+     * there. Without that, this one arrives from `Dispatchers.IO` and can pass the "nothing is
+     * assigned" check at the same moment [initWifiMode] does, and both bind. `SO_REUSEADDR` does not
+     * help there - it covers a port in TIME_WAIT, not one with a live listener on it - so the loser
+     * throws and spends its retry budget losing to its own sibling.
+     *
+     * @param reason what asked, for the log.
+     * @param timeoutMs how long to wait for the bind after asking.
+     */
+    suspend fun ensureWirelessServerListening(reason: String, timeoutMs: Long): Boolean {
+        val sharedServices = launcher.manager.sharedServices
+
+        if (sharedServices.wirelessServer?.isListening == true)
+            return true
+
+        AppLog.i("AapService: $reason found port 5288 unbound. Trying to start the wireless server.")
+        withContext(Dispatchers.Main.immediate) { sharedServices.startWirelessServer(launcher) }
+
+        val deadline = SystemClock.elapsedRealtime() + timeoutMs
+        while (SystemClock.elapsedRealtime() < deadline) {
+            if (sharedServices.wirelessServer?.isListening == true) {
+                AppLog.i("AapService: port 5288 is bound now.")
+                return true
+            }
+            delay(250)
+        }
+        AppLog.w("AapService: port 5288 is still not bound ${timeoutMs}ms after trying to start it.")
+        return false
     }
 
     /**

@@ -2,7 +2,9 @@ package com.andrerinas.openheadunit.connection.wifi.server
 
 import android.os.SystemClock
 
-class WirelessServerHistory {
+class WirelessServerHistory(
+
+) {
 
     // Rebuild bookkeeping for WirelessServerRestartPolicy. The handshake asks about every 4s while a
     // phone keeps arriving, so without a bound a port that cannot bind becomes a rebuild loop.
@@ -12,6 +14,13 @@ class WirelessServerHistory {
         private set
     var rebuildWindowStartedAtMs = 0L
         private set
+
+    constructor(lastRebuildAtMs: Long = 0L, rebuildsInWindow: Int = 0, windowStartedAtMs: Long = 0L) : this() {
+        this.lastRebuildAtMs = lastRebuildAtMs
+        this.rebuildsInWindow = rebuildsInWindow
+        this.rebuildWindowStartedAtMs = windowStartedAtMs
+    }
+
 
     fun reset() {
         lastRebuildAtMs = 0L

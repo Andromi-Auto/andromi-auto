@@ -1,7 +1,7 @@
-package com.andrerinas.openheadunit.aap
+package com.andrerinas.openheadunit.connection.wifi
 
-import com.andrerinas.openheadunit.connection.wifi.WifiLauncherMode
-import com.andrerinas.openheadunit.connection.wifi.WifiModePolicy
+import com.andrerinas.openheadunit.connection.wifi.modes.WifiLauncherHelper
+import com.andrerinas.openheadunit.connection.wifi.modes.WifiLauncherNative
 import com.andrerinas.openheadunit.connection.wifi.modes.helper.HelperStrategy
 import com.andrerinas.openheadunit.connection.wifi.modes.native.NativeStrategy
 
@@ -29,19 +29,9 @@ enum class LinkLossTrigger {
  */
 object LinkLossTeardownPolicy {
 
-    /**
-     * @param mode [com.andrerinas.openheadunit.utils.Settings.wifiConnectionMode]
-     * @param strategy [com.andrerinas.openheadunit.utils.Settings.helperConnectionStrategy]
-     * @param transport applies to [mode] 3 only
-     * @param sessionIsWireless whether the session actually running rides a socket. The wireless
-     *   mode is a stored setting and says nothing about it: a USB session can be live while
-     *   [mode] names a WiFi route, and switching WiFi off must not end it.
-     */
     fun shouldTearDown(
         trigger: LinkLossTrigger,
-        mode: WifiLauncherMode,
-        helperStrategy: HelperStrategy,
-        transport: NativeStrategy = NativeStrategy.WIFI_DIRECT,
+        launcher: WifiLauncher,
         sessionIsWireless: Boolean = true
     ): Boolean = when (trigger) {
         // The whole device is going, so every route's link is going with it — USB included.
@@ -53,11 +43,16 @@ object LinkLossTeardownPolicy {
         // A USB session rides none of it and must be left alone whatever the settings say.
         LinkLossTrigger.WIFI_STATION_DISABLING ->
             sessionIsWireless &&
-                !WifiModePolicy.usesWifiDirect(mode, helperStrategy, transport) &&
-                !ridesOwnAccessPoint(mode, helperStrategy, transport)
+                !launcher.hasWifiDirect() &&
+                !ridesOwnAccessPoint(launcher)
     }
 
     /** The two routes where the phone sits on an access point this device is hosting. */
-    private fun ridesOwnAccessPoint(mode: WifiLauncherMode, strategy: HelperStrategy, transport: NativeStrategy): Boolean =
-        (mode == WifiLauncherMode.NATIVE && transport == NativeStrategy.HOTSPOT) || (mode == WifiLauncherMode.HELPER && strategy == HelperStrategy.HEADUNIT_HOTSPOT)
+    private fun ridesOwnAccessPoint(launcher: WifiLauncher): Boolean {
+        return when (launcher) {
+            is WifiLauncherNative -> launcher.strategy == NativeStrategy.HOTSPOT
+            is WifiLauncherHelper -> launcher.strategy == HelperStrategy.HEADUNIT_HOTSPOT
+            else -> false
+        }
+    }
 }

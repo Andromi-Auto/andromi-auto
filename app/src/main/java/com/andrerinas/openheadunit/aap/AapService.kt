@@ -65,6 +65,8 @@ import android.media.AudioFocusRequest
 import android.view.View
 import android.view.WindowManager
 import android.media.AudioManager
+import com.andrerinas.openheadunit.connection.wifi.LinkLossTeardownPolicy
+import com.andrerinas.openheadunit.connection.wifi.LinkLossTrigger
 import com.andrerinas.openheadunit.connection.wifi.modes.helper.HelperStrategy
 import com.andrerinas.openheadunit.connection.wifi.modes.native.NativeStrategy
 import com.andrerinas.openheadunit.utils.HotspotManager
@@ -641,12 +643,11 @@ class AapService : Service(), UsbReceiver.Listener {
         pendingResult: () -> BroadcastReceiver.PendingResult
     ) {
         if (!commManager.isConnected) return
-        val settings = App.provide(this).settings
+        val launcher = wifiLauncherManager.active ?: return
+
         if (!LinkLossTeardownPolicy.shouldTearDown(
                 trigger,
-                settings.wifiConnectionMode,
-                settings.helperConnectionStrategy,
-                settings.nativeApStrategy,
+                launcher,
                 // [BUG_FIX] Ask the session, not the settings. wifiConnectionMode is stored and
                 // says nothing about what is running: a USB drive with a WiFi mode selected was
                 // being disconnected by the user switching WiFi off, which the session never

@@ -21,7 +21,7 @@ import kotlinx.coroutines.launch
 
 class WifiLauncherHelper : WifiLauncher {
 
-    private val strategy: HelperStrategy
+    val strategy: HelperStrategy
 
     var nearbyManager: NearbyManager? = null
         private set

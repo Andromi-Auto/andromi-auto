@@ -1,5 +1,8 @@
 package com.andrerinas.openheadunit.aap
 
+import com.andrerinas.openheadunit.connection.wifi.LinkLossTeardownPolicy
+import com.andrerinas.openheadunit.connection.wifi.LinkLossTrigger
+import com.andrerinas.openheadunit.connection.wifi.WifiLauncherMock
 import com.andrerinas.openheadunit.connection.wifi.WifiLauncherMode
 import com.andrerinas.openheadunit.connection.wifi.WifiModePolicy
 import com.andrerinas.openheadunit.connection.wifi.modes.helper.HelperStrategy
@@ -15,11 +18,15 @@ class LinkLossTeardownPolicyTest {
         for (mode in 1..3) {
             for (strategy in 0..4) {
                 for (transport in NativeStrategy.entries) {
+                    val launcher = WifiLauncherMock.create(
+                        WifiLauncherMode.byIdOrDefault(mode),
+                        HelperStrategy.byIdOrDefault(strategy),
+                        transport);
+
                     assertTrue(
                         "mode=$mode strategy=$strategy transport=$transport",
                         LinkLossTeardownPolicy.shouldTearDown(
-                            LinkLossTrigger.DEVICE_SHUTDOWN, WifiLauncherMode.byIdOrDefault(mode),
-                            HelperStrategy.byIdOrDefault(strategy), transport
+                            LinkLossTrigger.DEVICE_SHUTDOWN, launcher
                         )
                     )
                 }
@@ -30,9 +37,9 @@ class LinkLossTeardownPolicyTest {
     @Test
     fun `station wifi going down closes the routes that ride it`() {
         // Mode 1 (NSD) and mode 2 strategies 0 and 3 all reach the phone over station WiFi.
-        assertTrue(LinkLossTeardownPolicy.shouldTearDown(LinkLossTrigger.WIFI_STATION_DISABLING, WifiLauncherMode.AUTO, HelperStrategy.COMMON_WIFI))
-        assertTrue(LinkLossTeardownPolicy.shouldTearDown(LinkLossTrigger.WIFI_STATION_DISABLING, WifiLauncherMode.HELPER, HelperStrategy.COMMON_WIFI))
-        assertTrue(LinkLossTeardownPolicy.shouldTearDown(LinkLossTrigger.WIFI_STATION_DISABLING, WifiLauncherMode.HELPER, HelperStrategy.PHONE_HOTSPOT))
+        assertTrue(LinkLossTeardownPolicy.shouldTearDown(LinkLossTrigger.WIFI_STATION_DISABLING, WifiLauncherMock.create(WifiLauncherMode.AUTO, HelperStrategy.COMMON_WIFI)))
+        assertTrue(LinkLossTeardownPolicy.shouldTearDown(LinkLossTrigger.WIFI_STATION_DISABLING, WifiLauncherMock.create(WifiLauncherMode.HELPER, HelperStrategy.COMMON_WIFI)))
+        assertTrue(LinkLossTeardownPolicy.shouldTearDown(LinkLossTrigger.WIFI_STATION_DISABLING, WifiLauncherMock.create(WifiLauncherMode.HELPER, HelperStrategy.PHONE_HOTSPOT)))
     }
 
     @Test
@@ -41,23 +48,26 @@ class LinkLossTeardownPolicyTest {
         // Tearing this down would cost a 45-90s reconnect to prevent nothing.
         assertFalse(
             LinkLossTeardownPolicy.shouldTearDown(
-                LinkLossTrigger.WIFI_STATION_DISABLING, WifiLauncherMode.NATIVE,  HelperStrategy.COMMON_WIFI,
-                NativeStrategy.WIFI_DIRECT
+                LinkLossTrigger.WIFI_STATION_DISABLING,
+                WifiLauncherMock.create(WifiLauncherMode.NATIVE,  HelperStrategy.COMMON_WIFI,
+                NativeStrategy.WIFI_DIRECT)
             )
         )
-        assertFalse(LinkLossTeardownPolicy.shouldTearDown(LinkLossTrigger.WIFI_STATION_DISABLING, WifiLauncherMode.HELPER,
-            HelperStrategy.WIFI_DIRECT))
+        assertFalse(
+            LinkLossTeardownPolicy.shouldTearDown(
+                LinkLossTrigger.WIFI_STATION_DISABLING, WifiLauncherMock.create(WifiLauncherMode.HELPER,
+            HelperStrategy.WIFI_DIRECT)))
     }
 
     @Test
     fun `station wifi going down leaves a session on our own access point alone`() {
         assertFalse(
             LinkLossTeardownPolicy.shouldTearDown(
-                LinkLossTrigger.WIFI_STATION_DISABLING, WifiLauncherMode.NATIVE, HelperStrategy.COMMON_WIFI, NativeStrategy.HOTSPOT
+                LinkLossTrigger.WIFI_STATION_DISABLING, WifiLauncherMock.create(WifiLauncherMode.NATIVE, HelperStrategy.COMMON_WIFI, NativeStrategy.HOTSPOT)
             )
         )
         // Mode 2 strategy 4 is the head unit hotspot: same reasoning, different route.
-        assertFalse(LinkLossTeardownPolicy.shouldTearDown(LinkLossTrigger.WIFI_STATION_DISABLING, WifiLauncherMode.HELPER, HelperStrategy.HEADUNIT_HOTSPOT))
+        assertFalse(LinkLossTeardownPolicy.shouldTearDown(LinkLossTrigger.WIFI_STATION_DISABLING, WifiLauncherMock.create(WifiLauncherMode.HELPER, HelperStrategy.HEADUNIT_HOTSPOT)))
     }
 
     @Test
@@ -69,8 +79,8 @@ class LinkLossTeardownPolicyTest {
                 assertFalse(
                     "mode=$mode strategy=$strategy",
                     LinkLossTeardownPolicy.shouldTearDown(
-                        LinkLossTrigger.WIFI_STATION_DISABLING, WifiLauncherMode.byIdOrDefault(mode),
-                        HelperStrategy.byIdOrDefault(strategy),
+                        LinkLossTrigger.WIFI_STATION_DISABLING, WifiLauncherMock.create(WifiLauncherMode.byIdOrDefault(mode),
+                        HelperStrategy.byIdOrDefault(strategy)),
                         sessionIsWireless = false
                     )
                 )
@@ -84,7 +94,7 @@ class LinkLossTeardownPolicyTest {
         // a USB session that vanishes as by a wireless one.
         assertTrue(
             LinkLossTeardownPolicy.shouldTearDown(
-                LinkLossTrigger.DEVICE_SHUTDOWN, WifiLauncherMode.AUTO,  HelperStrategy.COMMON_WIFI, sessionIsWireless = false
+                LinkLossTrigger.DEVICE_SHUTDOWN, WifiLauncherMock.create(WifiLauncherMode.AUTO,  HelperStrategy.COMMON_WIFI), sessionIsWireless = false
             )
         )
     }
@@ -98,8 +108,8 @@ class LinkLossTeardownPolicyTest {
             for (strategy in 0..4) {
                 for (transport in NativeStrategy.entries) {
                     val tearsDown = LinkLossTeardownPolicy.shouldTearDown(
-                        LinkLossTrigger.WIFI_STATION_DISABLING, WifiLauncherMode.byIdOrDefault(mode),
-                        HelperStrategy.byIdOrDefault(strategy), transport,
+                        LinkLossTrigger.WIFI_STATION_DISABLING, WifiLauncherMock.create(WifiLauncherMode.byIdOrDefault(mode),
+                        HelperStrategy.byIdOrDefault(strategy), transport),
                         sessionIsWireless = true
                     )
                     val ownsItsNetwork =
