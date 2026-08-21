@@ -379,7 +379,7 @@ class Settings(private val context: Context) {
      * Below API 29 there is no `WifiP2pConfig.Builder`, so the group's band is the driver's choice
      * and this app has never had a say in it - which is every pre-Android-10 head unit, including
      * both units in the periodic-outage reports. The hidden `setWifiP2pChannels` is the one lever
-     * left; see [com.andrerinas.openheadunit.aap.P2pOperatingChannelPolicy].
+     * left; see [com.andrerinas.openheadunit.connection.wifi.direct.WifiP2pOperatingChannelPolicy].
      *
      * **Off by default, and it should stay off until a unit reports back.** The request is a
      * disallowed-frequency list, so a unit whose P2P firmware cannot host a 5 GHz group owner is not

@@ -73,7 +73,7 @@ import com.andrerinas.openheadunit.connection.wifi.WifiLauncherMode
 import com.andrerinas.openheadunit.connection.wifi.WifiLauncherStopSequence
 import com.andrerinas.openheadunit.connection.wifi.modes.WifiLauncherHelper
 import com.andrerinas.openheadunit.connection.wifi.modes.WifiLauncherNative
-import com.andrerinas.openheadunit.connection.wifi.WirelessServer
+import com.andrerinas.openheadunit.connection.wifi.server.WirelessServer
 import com.andrerinas.openheadunit.main.BackgroundNotification
 import com.andrerinas.openheadunit.utils.Settings
 import com.andrerinas.openheadunit.utils.protoUint32ToLong
@@ -1733,8 +1733,20 @@ class AapService : Service(), UsbReceiver.Listener {
                     userExitCooldownUntil = 0L
 
                     val settings = App.provide(this).settings
+                    val activeLauncher = wifiLauncherManager.active
+
                     if (wifiLauncherManager.getActiveMode() != WifiLauncherMode.NATIVE || settings.wifiConnectionMode != WifiLauncherMode.NATIVE) {
                         AppLog.i("AapService: Initializing Native AA mode before poke...")
+                        wifiLauncherManager.setActiveFromSettings(force = true)
+                    } else if (activeLauncher is WifiLauncherNative && activeLauncher.handshakeManager?.isActive() != true) {
+                        // A completed handoff closes the AA listeners while leaving the manager
+                        // running, and start() returns immediately on isRunning - so calling it here
+                        // reopened nothing. The poke then woke the phone, the phone opened RFCOMM,
+                        // and nothing was listening: the button appeared to do nothing however many
+                        // times it was pressed. A full re-init is what reopens them, which is what
+                        // the Bluetooth auto-start path below already does for the same reason.
+                        AppLog.i("AapService: Native AA listeners are closed — re-arming before the poke.")
+                        wifiLauncherManager.stop()
                         wifiLauncherManager.setActiveFromSettings(force = true)
                     } else {
                         AppLog.d("AapService: Already in Native AA mode, skipping re-init.")

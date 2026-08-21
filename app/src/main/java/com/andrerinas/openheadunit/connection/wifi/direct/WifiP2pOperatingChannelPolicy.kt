@@ -1,9 +1,9 @@
-package com.andrerinas.openheadunit.aap
+package com.andrerinas.openheadunit.connection.wifi.direct
 
 /**
  * Which operating channel to ask the P2P stack for, on the devices that have no band API.
  *
- * [NativeGroupBandPolicy] asks for a *band*, and that request only exists from API 29
+ * [com.andrerinas.openheadunit.aap.NativeGroupBandPolicy] asks for a *band*, and that request only exists from API 29
  * (`WifiP2pConfig.Builder.setGroupOperatingBand`). Below it the app calls the no-argument
  * `createGroup` and the driver picks unaided, which is what every pre-Android-10 head unit in the
  * reports has been doing: `Standard createGroup SUCCESS!`, then `Freq: 0 MHz (unknown)`, with the
@@ -30,7 +30,7 @@ package com.andrerinas.openheadunit.aap
  * DFS range between them. [CHANNEL_UPPER] is offered for the same reason the filing lists two ranges:
  * a unit whose regulatory domain refuses UNII-1 may still take UNII-3.
  */
-object P2pOperatingChannelPolicy {
+object WifiP2pOperatingChannelPolicy {
 
     /** Ask for nothing and leave the platform's own choice alone. */
     const val CHANNEL_UNRESTRICTED = 0
@@ -54,7 +54,7 @@ object P2pOperatingChannelPolicy {
      * True when asking for an operating channel is the only way to influence the band.
      *
      * From API 29 the band request is a supported call with a supported fallback, and it is what
-     * [NativeGroupBandPolicy] already drives; reaching for a hidden method there would be trading a
+     * [com.andrerinas.openheadunit.aap.NativeGroupBandPolicy] already drives; reaching for a hidden method there would be trading a
      * guarantee for a reflection.
      */
     fun appliesTo(sdkInt: Int): Boolean = sdkInt < FIRST_API_WITH_BAND_REQUEST
@@ -89,7 +89,7 @@ object P2pOperatingChannelPolicy {
         // reason. It is Japan-only and 802.11b-only, so operatingChannel() will never return it -
         // but a converter that quietly answers 2477 is worse than one that refuses. The constant is
         // P2pChannelPolicy's because that object converts the other way and must agree with this one.
-        channel == CHANNEL_24_GHZ_TOP -> P2pChannelPolicy.CHANNEL_14_MHZ
+        channel == CHANNEL_24_GHZ_TOP -> WifiP2pChannelPolicy.CHANNEL_14_MHZ
         channel <= CHANNEL_24_GHZ_TOP -> 2407 + channel * 5
         else -> 5000 + channel * 5
     }

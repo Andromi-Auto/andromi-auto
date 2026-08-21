@@ -1,6 +1,7 @@
 package com.andrerinas.openheadunit.aap
 
-import com.andrerinas.openheadunit.aap.WirelessServerRestartPolicy.Action
+import com.andrerinas.openheadunit.connection.wifi.server.WirelessServerRestartPolicy
+import com.andrerinas.openheadunit.connection.wifi.server.WirelessServerRestartPolicy.Action
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue

@@ -1,4 +1,4 @@
-package com.andrerinas.openheadunit.connection.wifi
+package com.andrerinas.openheadunit.connection.wifi.direct
 
 import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
@@ -6,6 +6,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.net.NetworkInfo
 import android.net.wifi.SupplicantState
@@ -19,6 +20,7 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
+import android.provider.Settings
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import com.andrerinas.openheadunit.App
@@ -26,14 +28,12 @@ import com.andrerinas.openheadunit.R
 import com.andrerinas.openheadunit.aap.AapService
 import com.andrerinas.openheadunit.aap.NativeGroupBandPolicy
 import com.andrerinas.openheadunit.aap.NativeHandoffPolicy
-import com.andrerinas.openheadunit.aap.P2pOperatingChannelPolicy
-import com.andrerinas.openheadunit.aap.P2pChannelPolicy
 import com.andrerinas.openheadunit.connection.CommManager
+import com.andrerinas.openheadunit.connection.wifi.WifiLauncherMode
 import com.andrerinas.openheadunit.connection.wifi.modes.helper.HelperStrategy
 import com.andrerinas.openheadunit.main.MainActivity
 import com.andrerinas.openheadunit.utils.ToastUtils
 import com.andrerinas.openheadunit.utils.AppLog
-import com.andrerinas.openheadunit.utils.Settings
 import java.io.File
 import java.net.Inet4Address
 import java.net.InetSocketAddress
@@ -545,7 +545,7 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
                             // Fallback 5: Try Settings.Secure (Samsung/Pixel trick)
                             var resolved = false
                             try {
-                                val secureMac = android.provider.Settings.Secure.getString(context.contentResolver, "wifi_p2p_device_address")
+                                val secureMac = Settings.Secure.getString(context.contentResolver, "wifi_p2p_device_address")
                                 if (!secureMac.isNullOrEmpty() && secureMac != "00:00:00:00:00:00" && secureMac != "02:00:00:00:00:00") {
                                     AppLog.i("WifiDirectManager: Fallback 5 - Selected MAC from Settings.Secure: $secureMac")
                                     bssid = secureMac
@@ -597,7 +597,7 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
             }
 
             val band = if (frequency > 4000) "5GHz" else if (frequency > 0) "2.4GHz" else "unknown"
-            val channelLabel = if (P2pChannelPolicy.is24GHz(frequency)) ", ${P2pChannelPolicy.describe(frequency)}" else ""
+            val channelLabel = if (WifiP2pChannelPolicy.is24GHz(frequency)) ", ${WifiP2pChannelPolicy.describe(frequency)}" else ""
             AppLog.i("WifiDirectManager: onGroupInfoAvailable: SSID: $ssid, BSSID: $bssid, GO: $isOwner, IFACE: ${iface ?: "null"}, Freq: $frequency MHz ($band$channelLabel)")
 
             // Runs before the channel report below, which is the order the Native AA branch used to
@@ -629,11 +629,11 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
                 //
                 // Said once per group, not once per callback: requestGroupInfo() is issued from
                 // several places, so this runs three or four times for one group.
-                if (P2pChannelPolicy.isClientUnfriendly(frequency)) {
+                if (WifiP2pChannelPolicy.isClientUnfriendly(frequency)) {
                     if (ssid != lastUnfriendlyChannelSsid) {
                         lastUnfriendlyChannelSsid = ssid
-                        AppLog.e("WifiDirectManager: WiFi Direct group came up on ${P2pChannelPolicy.describe(frequency)} ($frequency MHz). Carrying on, but a phone limited to channels 1-11 will not find this network: it will scan and never see the SSID. Restarting this unit's WiFi, or giving it a WiFi country code, is what moves the group off channel 12/13.")
-                        showToast("WiFi Direct is on ${P2pChannelPolicy.describe(frequency)}, which most phones cannot join. Restart WiFi and try again.")
+                        AppLog.e("WifiDirectManager: WiFi Direct group came up on ${WifiP2pChannelPolicy.describe(frequency)} ($frequency MHz). Carrying on, but a phone limited to channels 1-11 will not find this network: it will scan and never see the SSID. Restarting this unit's WiFi, or giving it a WiFi country code, is what moves the group off channel 12/13.")
+                        showToast("WiFi Direct is on ${WifiP2pChannelPolicy.describe(frequency)}, which most phones cannot join. Restart WiFi and try again.")
                     }
                 } else if (frequency > 0) {
                     lastUnfriendlyChannelSsid = null
@@ -999,7 +999,7 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
             context.startActivity(intent)
         } catch (e: Exception) {
             try {
-                val intent = Intent(android.provider.Settings.ACTION_WIFI_SETTINGS).apply {
+                val intent = Intent(Settings.ACTION_WIFI_SETTINGS).apply {
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 }
                 context.startActivity(intent)
@@ -1163,18 +1163,18 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
         // Below Q there is no band request, so the driver picks the channel unless it is given a
         // frequency list. This has to happen before createGroup: the platform only accepts a channel
         // change while no group exists, and drops it silently afterwards.
-        val operatingChannel = P2pOperatingChannelPolicy.operatingChannel(
+        val operatingChannel = WifiP2pOperatingChannelPolicy.operatingChannel(
             sdkInt = Build.VERSION.SDK_INT,
             requestFiveGhz = appSettings.p2pLegacyFiveGhz && !force24,
             useUpperBand = appSettings.p2pLegacyFiveGhzUpperBand,
         )
-        if (operatingChannel == P2pOperatingChannelPolicy.CHANNEL_UNRESTRICTED) {
+        if (operatingChannel == WifiP2pOperatingChannelPolicy.CHANNEL_UNRESTRICTED) {
             AppLog.i("WifiDirectManager: 5GHz P2P group request requires Android 10+. Using standard createGroup.")
             standardCreateGroup(mgr, ch, 0, NATIVE_GROUP_MODE_STANDARD_LEGACY)
             return
         }
 
-        val frequency = P2pOperatingChannelPolicy.frequencyMhzFor(operatingChannel)
+        val frequency = WifiP2pOperatingChannelPolicy.frequencyMhzFor(operatingChannel)
         AppLog.i(
             "WifiDirectManager: no band request below Android 10, so asking for operating channel " +
                 "$operatingChannel ($frequency MHz) instead. The group cannot be told which band to " +

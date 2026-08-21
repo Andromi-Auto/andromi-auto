@@ -1,7 +1,6 @@
-package com.andrerinas.openheadunit.connection
+package com.andrerinas.openheadunit.connection.wifi.direct
 
 import android.net.wifi.p2p.WifiP2pManager
-import com.andrerinas.openheadunit.aap.P2pOperatingChannelPolicy
 import com.andrerinas.openheadunit.utils.AppLog
 
 /**
@@ -10,7 +9,7 @@ import com.andrerinas.openheadunit.utils.AppLog
  *
  * The same reflection shape as `setDeviceName` in [WifiDirectManager], for the same reason: the
  * method is `@hide` rather than absent, and the non-SDK blocklist that would refuse it only starts at
- * API 28, below which this is the only lever there is. See [P2pOperatingChannelPolicy] for what the
+ * API 28, below which this is the only lever there is. See [WifiP2pOperatingChannelPolicy] for what the
  * platform does with the value and why the listen channel must be left alone.
  *
  * Every failure here is non-fatal by construction. A group on the platform's own choice of channel is
@@ -34,7 +33,7 @@ object WifiP2pChannelCompat {
         operatingChannel: Int,
         onResult: (applied: Boolean, detail: String) -> Unit,
     ) {
-        if (!P2pOperatingChannelPolicy.isRequestable(operatingChannel)) {
+        if (!WifiP2pOperatingChannelPolicy.isRequestable(operatingChannel)) {
             onResult(false, "channel $operatingChannel is outside what the platform accepts")
             return
         }
@@ -63,7 +62,7 @@ object WifiP2pChannelCompat {
             method.invoke(
                 manager,
                 channel,
-                P2pOperatingChannelPolicy.LISTEN_CHANNEL_UNCHANGED,
+                WifiP2pOperatingChannelPolicy.LISTEN_CHANNEL_UNCHANGED,
                 operatingChannel,
                 listener,
             )
@@ -92,7 +91,7 @@ object WifiP2pChannelCompat {
     ) = setOperatingChannel(
         manager,
         channel,
-        P2pOperatingChannelPolicy.CHANNEL_UNRESTRICTED,
+        WifiP2pOperatingChannelPolicy.CHANNEL_UNRESTRICTED,
         onResult,
     )
 }

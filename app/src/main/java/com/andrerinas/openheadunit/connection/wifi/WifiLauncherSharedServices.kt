@@ -1,9 +1,14 @@
 package com.andrerinas.openheadunit.connection.wifi
 
+import android.os.SystemClock
 import com.andrerinas.openheadunit.App
 import com.andrerinas.openheadunit.aap.AapService
 import com.andrerinas.openheadunit.aap.AapService.Companion.scanningState
 import com.andrerinas.openheadunit.aap.UnresponsivePeerPolicy
+import com.andrerinas.openheadunit.connection.wifi.direct.WifiDirectManager
+import com.andrerinas.openheadunit.connection.wifi.server.WirelessServer
+import com.andrerinas.openheadunit.connection.wifi.server.WirelessServerHistory
+import com.andrerinas.openheadunit.connection.wifi.server.WirelessServerRestartPolicy
 import com.andrerinas.openheadunit.utils.AppLog
 import com.andrerinas.openheadunit.utils.HotspotManager
 import com.andrerinas.openheadunit.utils.VpnControl
@@ -15,10 +20,14 @@ class WifiLauncherSharedServices(val service: AapService) {
 
     var wifiDirectManager: WifiDirectManager? = null
         private set
+
     var wirelessServer: WirelessServer? = null
         private set
+    val wirelessServerHistory = WirelessServerHistory()
+
     var localDiscovery: NetworkDiscovery? = null
         private set
+
 
     fun update(active: WifiLauncher) {
         if (active.hasWifiDirect()) startWifiDirect() else stopWifiDirect()
@@ -55,12 +64,52 @@ class WifiLauncherSharedServices(val service: AapService) {
     }
 
     private fun startWirelessServer(launcher: WifiLauncher) {
-        if (wirelessServer != null) {
-            // don't stop old server if start-properties haven't changed
-            if (wirelessServer!!.registerNsd == launcher.hasLocalDiscovery())
+        val commManager = App.provide(service).commManager
+        val existing = wirelessServer
+        val action = WirelessServerRestartPolicy.decide(
+            assigned = existing != null,
+            alive = existing?.isAlive == true,
+            listening = existing?.isListening == true,
+            nowMs = SystemClock.elapsedRealtime(),
+            sessionBusy = commManager.isConnected,
+            history = wirelessServerHistory
+        )
+        val why = WirelessServerRestartPolicy.describe(
+            action,
+            existing != null,
+            existing?.isListening == true,
+        )
+        when (action) {
+            WirelessServerRestartPolicy.Action.NO_OP,
+            WirelessServerRestartPolicy.Action.AWAIT,
+                -> {
+                AppLog.d("AapService: Wireless server not started - $why.")
                 return
+            }
 
-            stopWirelessServer()
+            WirelessServerRestartPolicy.Action.BACKOFF -> {
+                // INFO, not DEBUG. This is the state a stuck unit sits in, and the reporter logs
+                // that would have identified it are captured at INFO.
+                AppLog.i("AapService: Wireless server on 5288 is not accepting connections - $why.")
+                return
+            }
+
+            WirelessServerRestartPolicy.Action.REBUILD -> {
+                wirelessServerHistory.attempt()
+                AppLog.w("AapService: Rebuilding the wireless server on 5288 - $why (attempt ${wirelessServerHistory.rebuildsInWindow}).")
+                // Only this object, never stopWirelessServer(): that also clears activeWifiMode and
+                // activeHelperStrategy, and the mode has not changed - we are repairing inside it.
+                try {
+                    existing?.stopServer()
+                } catch (e: Exception) {
+                    AppLog.d("AapService: Error stopping the previous wireless server: ${e.message}")
+                }
+                wirelessServer = null
+            }
+
+            WirelessServerRestartPolicy.Action.START -> {
+                AppLog.d("AapService: Starting the wireless server on 5288 - $why.")
+            }
         }
 
         // Register NSD for Headunit Server (Auto), Helper Common Wifi (NSD), and the Hotspot
@@ -69,7 +118,11 @@ class WifiLauncherSharedServices(val service: AapService) {
         // handoff instead of just blindly probing the TCP port.
         val shouldRegisterNsd = launcher.hasLocalDiscovery()
 
-        wirelessServer = WirelessServer(shouldRegisterNsd, service).apply { start() }
+        wirelessServer = WirelessServer(
+            shouldRegisterNsd,
+            service,
+            wirelessServerHistory,
+        ).apply { start() }
     }
 
     private fun stopWirelessServer() {
@@ -185,7 +238,7 @@ class WifiLauncherSharedServices(val service: AapService) {
                             }
                         }
                     }
-                }
+                },
             )
         }
 

@@ -1,4 +1,4 @@
-package com.andrerinas.openheadunit.aap
+package com.andrerinas.openheadunit.connection.wifi.server
 
 /**
  * Whether the TCP server the phone is told to dial should be started, left alone, or rebuilt.
@@ -79,9 +79,7 @@ object WirelessServerRestartPolicy {
         listening: Boolean,
         nowMs: Long,
         sessionBusy: Boolean = false,
-        lastRebuildAtMs: Long,
-        rebuildsInWindow: Int,
-        windowStartedAtMs: Long,
+        history: WirelessServerHistory,
     ): Action {
         if (assigned && listening) return Action.NO_OP
         if (!assigned) return Action.START
@@ -90,8 +88,8 @@ object WirelessServerRestartPolicy {
 
         // Assigned, not listening, and its coroutine has ended: it is dead and nothing else will
         // revive it. The cooldown is for the port that refuses to bind at all.
-        if (lastRebuildAtMs > 0L && nowMs - lastRebuildAtMs < REBUILD_COOLDOWN_MS) return Action.BACKOFF
-        if (windowIsOpen(nowMs, windowStartedAtMs) && rebuildsInWindow >= MAX_REBUILDS_PER_WINDOW) {
+        if (history.lastRebuildAtMs > 0L && nowMs - history.lastRebuildAtMs < REBUILD_COOLDOWN_MS) return Action.BACKOFF
+        if (windowIsOpen(nowMs, history.rebuildWindowStartedAtMs) && history.rebuildsInWindow >= MAX_REBUILDS_PER_WINDOW) {
             return Action.BACKOFF
         }
         return Action.REBUILD
