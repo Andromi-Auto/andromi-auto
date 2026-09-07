@@ -82,6 +82,10 @@ adb shell am start -a android.intent.action.VIEW -d "headunit://connect?ip=192.1
 - more customization options for the UI and the app itself
 
 ## Changelog
+### v.3.3.2
+- USB: connect non-Pixel phones without fighting a fast-reverting dongle
+- Feat/automation command surface
+
 ### v.3.3.1
 - Added: Option to auto-resume media playback on quick reconnect if music was playing before disconnect
 - Fixed: Errors shown in playconsole
