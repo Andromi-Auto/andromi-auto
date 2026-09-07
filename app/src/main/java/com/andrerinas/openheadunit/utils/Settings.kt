@@ -2082,4 +2082,8 @@ class Settings(private val context: Context) {
         get() = prefs.getBoolean("native-aa-ignore-external-bt", false)
         set(value) = prefs.edit().putBoolean("native-aa-ignore-external-bt", value).apply()
 
+    var autoKillOemApps: Boolean
+        get() = prefs.getBoolean("auto-kill-oem-apps", false)
+        set(value) = prefs.edit().putBoolean("auto-kill-oem-apps", value).apply()
+
 }
