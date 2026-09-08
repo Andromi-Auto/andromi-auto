@@ -298,8 +298,11 @@
     <string name="add_new">Hinzufügen</string>
     <string name="cancel">Abbrechen</string>
     <string name="enable">Aktivieren</string>
-    <string name="pref_stretch_screen_title">Auf Bildschirmgröße strecken</string>
-    <string name="pref_stretch_screen_summary">Ignoriert das Seitenverhältnis, um das gesamte Display auszufüllen (entfernt schwarze Balken)</string>
+    <string name="video_fit_mode">Bildanpassung</string>
+    <string name="change_video_fit_mode">Bildanpassung ändern</string>
+    <string name="video_fit_mode_fill">Auf Vollbild strecken (keine Balken, kann verzerren)</string>
+    <string name="video_fit_mode_contain">Mit Balken einpassen (kein Beschnitt, keine Verzerrung)</string>
+    <string name="video_fit_mode_cover">Durch Beschneiden füllen (keine Balken, keine Verzerrung)</string>
     <string name="forced_scale">Erzwungene Skalierung (Legacy Fix)</string>
     <string name="forced_scale_description">Korrigiert Skalierungsprobleme auf einigen älteren Geräten mit SurfaceView. Nur verwenden, wenn das Bild verzerrt oder verschoben aussieht.</string>
     <string name="hud_mirroring">HUD-Modus (Horizontale Spiegelung)</string>

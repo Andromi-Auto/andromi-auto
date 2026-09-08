@@ -234,8 +234,11 @@
     <string name="add_new">إضافة جديد</string>
     <string name="cancel">إلغاء</string>
     <string name="enable">تمكين</string>
-    <string name="pref_stretch_screen_title">تمديد لملء الشاشة</string>
-    <string name="pref_stretch_screen_summary">يتجاهل نسبة العرض إلى الارتفاع لملء الشاشة بأكملها (يزيل الأشرطة السوداء)</string>
+    <string name="video_fit_mode">ملاءمة الفيديو</string>
+    <string name="change_video_fit_mode">تغيير ملاءمة الفيديو</string>
+    <string name="video_fit_mode_fill">تمديد للملء (بدون أشرطة، قد يشوّه الصورة)</string>
+    <string name="video_fit_mode_contain">احتواء مع أشرطة (بدون اقتصاص أو تشويه)</string>
+    <string name="video_fit_mode_cover">ملء بالاقتصاص (بدون أشرطة أو تشويه)</string>
 
     <!-- Audio Settings -->
     <string name="forced_scale">قياس إجباري (إصلاح قديم)</string>

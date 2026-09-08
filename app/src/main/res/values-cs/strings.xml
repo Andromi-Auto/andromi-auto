@@ -234,8 +234,11 @@
     <string name="add_new">Přidat nové</string>
     <string name="cancel">Zrušit</string>
     <string name="enable">Povolit</string>
-    <string name="pref_stretch_screen_title">Roztáhnout na celou obrazovku</string>
-    <string name="pref_stretch_screen_summary">Ignoruje poměr stran a vyplní celý displej (odstraní černé pruhy)</string>
+    <string name="video_fit_mode">Přizpůsobení obrazu</string>
+    <string name="change_video_fit_mode">Změnit přizpůsobení obrazu</string>
+    <string name="video_fit_mode_fill">Roztáhnout na celou plochu (bez pruhů, může deformovat)</string>
+    <string name="video_fit_mode_contain">Vejít se s pruhy (bez oříznutí a deformace)</string>
+    <string name="video_fit_mode_cover">Vyplnit oříznutím (bez pruhů a deformace)</string>
 
     <!-- Audio Settings -->
     <string name="forced_scale">Vynucené měřítko (Legacy oprava)</string>

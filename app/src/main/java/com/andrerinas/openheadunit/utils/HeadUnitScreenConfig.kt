@@ -21,9 +21,9 @@ object HeadUnitScreenConfig {
     private var isPortraitScaled: Boolean = false
     private var isInitialized: Boolean = false
     private var lastSettingsHash: Int = 0
-
-    // Flag to determine if the projection should stretch and ignore aspect ratio
-    private var stretchToFill: Boolean = false
+    
+    // How the negotiated video is fitted into the panel (FILL/CONTAIN/COVER, see Settings.VideoFitMode).
+    private var videoFitMode: Settings.VideoFitMode = Settings.VideoFitMode.FILL
 
     // Forced scale for older devices (Legacy fix)
     var forcedScale: Boolean = false
@@ -54,7 +54,7 @@ object HeadUnitScreenConfig {
 
 
     fun init(context: Context, displayMetrics: DisplayMetrics, settings: Settings) {
-        stretchToFill = settings.stretchToFill
+        videoFitMode = settings.videoFitMode
         forcedScale = settings.forcedScale && settings.viewMode == Settings.ViewMode.SURFACE
 
         val realW: Int
@@ -313,7 +313,7 @@ object HeadUnitScreenConfig {
             if (isUltrawideEnabled() && (screenWidthPx >= 1700 || realScreenWidthPx >= 1700)) {
                 // Force 720p (1280x720) for 2.4GHz compatibility, but use PAR to fill the 1780+ width
                 negotiatedResolutionType = Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType._1280x720
-                stretchToFill = true // Must be true for Ultrawide stretch
+                videoFitMode = Settings.VideoFitMode.FILL // the ultra-wide stretch needs FILL
                 AppLog.i("[ULTRAWIDE] Forcing 720p and Stretch for window width: $screenWidthPx")
             } else if (isPortraitDisplay) {
                 negotiatedResolutionType = if (screenWidthPx > 720 || screenHeightPx > 1280) {
@@ -366,46 +366,28 @@ object HeadUnitScreenConfig {
         // 2. Perform scaling calculations (now safe because negotiatedResolutionType is set)
         AppLog.i("[UI_DEBUG] CarScreen: usable area ${screenWidthPx}x${screenHeightPx}, using $negotiatedResolutionType")
 
-        if (screenHeightPx > screenWidthPx) {
-            isSmallScreen = screenWidthPx <= 1080 && screenHeightPx <= 1920
-        } else {
-            isSmallScreen = screenWidthPx <= 1920 && screenHeightPx <= 1080
-        }
-
-        scaleFactor = 1.0f
-        if (isUltrawideEnabled() && (screenWidthPx >= 1700 || realScreenWidthPx >= 1700)) {
-            // Force usable dimensions to match the physical window for 1:1 mapping
-            screenHeightPx = 720
-            scaleFactor = 1.0f
-            AppLog.i("[ULTRAWIDE] Forcing 1.0 Scale and Usable area: ${screenWidthPx}x${screenHeightPx}")
-        } else if (!isSmallScreen) {
-            val sWidth = screenWidthPx.toFloat()
-            val sHeight = screenHeightPx.toFloat()
-            if (getNegotiatedWidth() > 0 && getNegotiatedHeight() > 0) {
-                 if (sWidth / sHeight < getAspectRatio()) {
-                    isPortraitScaled = true
-                    scaleFactor = sHeight / getNegotiatedHeight().toFloat()
-                } else {
-                    isPortraitScaled = false
-                    scaleFactor = sWidth / getNegotiatedWidth().toFloat()
-                }
-            }
-        }
-
-        AppLog.i("[UI_DEBUG] CarScreen isSmallScreen: $isSmallScreen, scaleFactor: $scaleFactor, margins: w=${getWidthMargin()}, h=${getHeightMargin()}")
+        val fit = ProjectionGeometryPolicy.fit(
+            screenWidthPx, screenHeightPx, getNegotiatedWidth(), getNegotiatedHeight()
+        )
+        isSmallScreen = fit.isSmallScreen
+        scaleFactor = fit.scaleFactor
+        // Null on a small screen, where the previous value deliberately stands.
+        fit.isPortraitScaled?.let { isPortraitScaled = it }
+        
+        AppLog.i("[UI_DEBUG] CarScreen isSmallScreen: $isSmallScreen, scaleFactor: $scaleFactor, portraitScaled: $isPortraitScaled, margins: w=${getWidthMargin()}, h=${getHeightMargin()}")
     }
 
-    fun getAdjustedHeight(): Int {
-        return (getNegotiatedHeight() * scaleFactor).roundToInt()
-    }
+    fun getAdjustedHeight(): Int = ProjectionGeometryPolicy.adjustedHeight(getNegotiatedHeight(), scaleFactor)
 
-    fun getAdjustedWidth(): Int {
-        return (getNegotiatedWidth() * scaleFactor).roundToInt()
-    }
+    fun getAdjustedWidth(): Int = ProjectionGeometryPolicy.adjustedWidth(getNegotiatedWidth(), scaleFactor)
 
-    private fun getAspectRatio(): Float {
-        return getNegotiatedWidth().toFloat() / getNegotiatedHeight().toFloat()
-    }
+    // COVER target size for the legacy forcedScale/SurfaceView path, which sizes the view through
+    // LayoutParams rather than a View.scale transform.
+    fun getCoverWidth(): Int =
+        ProjectionGeometryPolicy.coverWidth(screenWidthPx, screenHeightPx, getNegotiatedWidth(), getNegotiatedHeight())
+
+    fun getCoverHeight(): Int =
+        ProjectionGeometryPolicy.coverHeight(screenWidthPx, screenHeightPx, getNegotiatedWidth(), getNegotiatedHeight())
 
     fun getNegotiatedHeight(): Int {
         val resString = negotiatedResolutionType.toString().replace("_", "")
@@ -434,65 +416,23 @@ object HeadUnitScreenConfig {
         }
     }
 
-    fun getHeightMargin(): Int {
-        if (isUltrawideEnabled() && screenWidthPx >= 1920) return 0
-        val margin = ((getAdjustedHeight() - screenHeightPx) / scaleFactor).roundToInt()
-        return margin.coerceAtLeast(0)
-    }
+    fun getHeightMargin(): Int =
+        ProjectionGeometryPolicy.heightMargin(getNegotiatedHeight(), screenHeightPx, scaleFactor)
 
-    fun getWidthMargin(): Int {
-        if (isUltrawideEnabled() && screenWidthPx >= 1920) return 0
-        val margin = ((getAdjustedWidth() - screenWidthPx) / scaleFactor).roundToInt()
-        return margin.coerceAtLeast(0)
-    }
+    fun getWidthMargin(): Int =
+        ProjectionGeometryPolicy.widthMargin(getNegotiatedWidth(), screenWidthPx, scaleFactor)
 
-    private fun divideOrOne(numerator: Float, denominator: Float): Float {
-        return if (denominator == 0.0f) 1.0f else numerator / denominator
-    }
+    fun getScaleX(): Float = ProjectionGeometryPolicy.scaleX(
+        videoFitMode, forcedScale,
+        screenWidthPx, screenHeightPx, getNegotiatedWidth(), getNegotiatedHeight(),
+        getWidthMargin(), getHeightMargin()
+    )
 
-    fun getScaleX(): Float {
-        if (isUltrawideEnabled() && (screenWidthPx >= 1700 || realScreenWidthPx >= 1700)) {
-            return 1.0f
-        }
-
-        if (forcedScale) {
-            return 1.0f
-        }
-
-        if (getNegotiatedWidth() > screenWidthPx) {
-            return divideOrOne(getNegotiatedWidth().toFloat(), screenWidthPx.toFloat())
-        }
-        if (isPortraitScaled) {
-            return divideOrOne(getAspectRatio(), (screenWidthPx.toFloat() / screenHeightPx.toFloat()))
-        }
-        return 1.0f
-    }
-        // Stretch option PR #259
-    fun getScaleY(): Float {
-        if (isUltrawideEnabled() && (screenWidthPx >= 1700 || realScreenWidthPx >= 1700)) {
-            return 1.0f
-        }
-
-        if (forcedScale) {
-            return 1.0f
-        }
-
-        if (getNegotiatedHeight() > screenHeightPx) {
-            return if (stretchToFill) {
-                // Before PR #233 Fix scaler Y
-                divideOrOne(getNegotiatedHeight().toFloat(), screenHeightPx.toFloat())
-            } else {
-                // After PR #233 Fix scaler Y
-                divideOrOne((screenWidthPx.toFloat() / screenHeightPx.toFloat()), getAspectRatio())
-            }
-        }
-
-        if (isPortraitScaled) {
-            return 1.0f
-        }
-
-        return divideOrOne((screenWidthPx.toFloat() / screenHeightPx.toFloat()), getAspectRatio())
-    }
+    fun getScaleY(): Float = ProjectionGeometryPolicy.scaleY(
+        videoFitMode, forcedScale,
+        screenWidthPx, screenHeightPx, getNegotiatedWidth(), getNegotiatedHeight(),
+        getWidthMargin(), getHeightMargin()
+    )
 
     fun getDensityDpi(): Int {
         return if (this::currentSettings.isInitialized && currentSettings.dpiPixelDensity != 0) {
@@ -596,7 +536,7 @@ object HeadUnitScreenConfig {
         hash = 31 * hash + settings.viewMode.ordinal
         hash = 31 * hash + settings.screenOrientation.ordinal
         hash = 31 * hash + settings.fullscreenMode.value
-        hash = 31 * hash + (if (settings.stretchToFill) 1 else 0)
+        hash = 31 * hash + settings.videoFitMode.value
         hash = 31 * hash + (if (settings.forcedScale) 1 else 0)
         // Include physical dimensions in the hash. If the screen rotates or a foldable is unfolded,
         // the hash will change, triggering a clean unlock and recalculation.

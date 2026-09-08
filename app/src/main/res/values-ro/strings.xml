@@ -255,8 +255,11 @@
     <string name="add_new">Adaugă nou</string>
     <string name="cancel">Anulează</string>
     <string name="enable">Activează</string>
-    <string name="pref_stretch_screen_title">Întindere pentru a umple ecranul</string>
-    <string name="pref_stretch_screen_summary">Ignoră raportul de aspect pentru a umple întregul afișaj (elimină barele negre)</string>
+    <string name="video_fit_mode">Încadrarea imaginii</string>
+    <string name="change_video_fit_mode">Schimbă încadrarea imaginii</string>
+    <string name="video_fit_mode_fill">Întinde pentru umplere (fără bare, poate deforma)</string>
+    <string name="video_fit_mode_contain">Încadrează cu bare (fără decupare sau deformare)</string>
+    <string name="video_fit_mode_cover">Umple prin decupare (fără bare sau deformare)</string>
 
     <!-- Audio Settings -->
     <string name="forced_scale">Scalare forțată (Fix legacy)</string>

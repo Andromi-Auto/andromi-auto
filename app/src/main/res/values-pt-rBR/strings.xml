@@ -234,8 +234,11 @@
     <string name="add_new">Adicionar novo</string>
     <string name="cancel">Cancelar</string>
     <string name="enable">Ativar</string>
-    <string name="pref_stretch_screen_title">Esticar para preencher a tela</string>
-    <string name="pref_stretch_screen_summary">Ignora a proporção original para preencher todo o visor (remove as barras pretas)</string>
+    <string name="video_fit_mode">Ajuste do vídeo</string>
+    <string name="change_video_fit_mode">Alterar ajuste do vídeo</string>
+    <string name="video_fit_mode_fill">Esticar para preencher (sem barras, pode distorcer)</string>
+    <string name="video_fit_mode_contain">Ajustar com barras (sem corte nem distorção)</string>
+    <string name="video_fit_mode_cover">Preencher cortando (sem barras nem distorção)</string>
 
     <!-- Audio Settings -->
     <string name="forced_scale">Escala forçada (Modo de compatibilidade)</string>

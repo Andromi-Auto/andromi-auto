@@ -262,8 +262,11 @@
     <string name="add_new">ახლის დამატება</string>
     <string name="cancel">გაუქმება</string>
     <string name="enable">ჩართვა</string>
-    <string name="pref_stretch_screen_title">გაწელვა მთელ ეკრანზე</string>
-    <string name="pref_stretch_screen_summary">უგულებელყოფს გვერდების თანაფარდობას მთელი ეკრანის შესავსებად (აქრობს შავ ზოლებს)</string>
+    <string name="video_fit_mode">ვიდეოს მორგება</string>
+    <string name="change_video_fit_mode">ვიდეოს მორგების შეცვლა</string>
+    <string name="video_fit_mode_fill">გაწელვა შესავსებად (ზოლების გარეშე, შეიძლება დამახინჯდეს)</string>
+    <string name="video_fit_mode_contain">ჩასმა ზოლებით (ჩამოჭრისა და დამახინჯების გარეშე)</string>
+    <string name="video_fit_mode_cover">შევსება ჩამოჭრით (ზოლებისა და დამახინჯების გარეშე)</string>
     <string name="forced_scale">იძულებითი მასშტაბირება (Legacy Fix)</string>
     <string name="forced_scale_description">ასწორებს მასშტაბირების პრობლემებს ზოგიერთ ძველ მოწყობილობაზე SurfaceView-ს გამოყენებისას. გამოიყენეთ მხოლოდ იმ შემთხვევაში, თუ გამოსახულება დამახინჯებულია ან გადაადგილებულია.</string>
     <string name="hud_mirroring">HUD რეჟიმი (ჰორიზონტალური სარკე)</string>

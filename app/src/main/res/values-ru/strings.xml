@@ -237,8 +237,11 @@
     <string name="add_new">Добавить</string>
     <string name="cancel">Отмена</string>
     <string name="enable">Включить</string>
-    <string name="pref_stretch_screen_title">Растянуть на весь экран</string>
-    <string name="pref_stretch_screen_summary">Игнорирует соотношение сторон для заполнения всего дисплея (убирает черные полосы)</string>
+    <string name="video_fit_mode">Вписывание видео</string>
+    <string name="change_video_fit_mode">Изменить вписывание видео</string>
+    <string name="video_fit_mode_fill">Растянуть на весь экран (без полос, возможны искажения)</string>
+    <string name="video_fit_mode_contain">Вписать с полосами (без обрезки и искажений)</string>
+    <string name="video_fit_mode_cover">Заполнить обрезкой (без полос и искажений)</string>
 
     <!-- Audio Settings -->
     <string name="forced_scale">Принудительное масштабирование (Legacy Fix)</string>

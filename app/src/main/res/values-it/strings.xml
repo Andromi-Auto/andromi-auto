@@ -259,8 +259,11 @@
     <string name="add_new">Aggiungi nuovo</string>
     <string name="cancel">Annulla</string>
     <string name="enable">Abilita</string>
-    <string name="pref_stretch_screen_title">Adatta allo schermo</string>
-    <string name="pref_stretch_screen_summary">Ignora le proporzioni per riempire l\'intero display (rimuove le barre nere)</string>
+    <string name="video_fit_mode">Adattamento video</string>
+    <string name="change_video_fit_mode">Cambia adattamento video</string>
+    <string name="video_fit_mode_fill">Allunga per riempire (senza bande, può distorcere)</string>
+    <string name="video_fit_mode_contain">Adatta con bande (senza ritaglio né distorsione)</string>
+    <string name="video_fit_mode_cover">Riempi ritagliando (senza bande né distorsione)</string>
     <string name="forced_scale">Scala forzata (Fix Legacy)</string>
     <string name="forced_scale_description">Corregge i problemi di ridimensionamento su alcuni dispositivi più vecchi che utilizzano SurfaceView. Utilizzare solo se l\'immagine appare distorta o spostata.</string>
     <string name="hud_mirroring">Modalità HUD (Capovolgimento orizzontale)</string>

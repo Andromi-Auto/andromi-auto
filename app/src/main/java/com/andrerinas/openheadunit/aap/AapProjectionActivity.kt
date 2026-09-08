@@ -1908,77 +1908,35 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         val marginW = HeadUnitScreenConfig.getWidthMargin().toFloat()
         val marginH = HeadUnitScreenConfig.getHeightMargin().toFloat()
 
-        // Logic check: When forcedScale is active, the visual behavior of 'stretchToFill'
-        // is inverted (True = Aspect Ratio Centered, False = Stretched to Screen).
-        // We adjust the touch mapping to match this visual reality.
-        val isStretch = if (HeadUnitScreenConfig.forcedScale) {
-            !settings.stretchToFill
-        } else {
-            settings.stretchToFill
-        }
-
         val pointerData = mutableListOf<Triple<Int, Int, Int>>()
         repeat(event.pointerCount) { pointerIndex ->
             val pointerId = event.getPointerId(pointerIndex)
-            if (measuredTouchSurfaceEnabled) {
-                val corrected = TouchCoordinateMapper.map(
-                    rawX = event.getX(pointerIndex),
-                    rawY = event.getY(pointerIndex),
-                    inputSurfaceWidth = viewW,
-                    inputSurfaceHeight = viewH,
-                    negotiatedWidth = videoW,
-                    negotiatedHeight = videoH,
-                    marginWidth = marginW,
-                    marginHeight = marginH,
-                    stretchToFill = isStretch,
-                    hudMirroring = settings.hudMirroring
-                )
+            // measuredTouchSurfaceEnabled already chose viewW/viewH above; the mapping is the same
+            // either way, so there is one implementation of it now.
+            val corrected = TouchCoordinateMapper.map(
+                rawX = event.getX(pointerIndex),
+                rawY = event.getY(pointerIndex),
+                inputSurfaceWidth = viewW,
+                inputSurfaceHeight = viewH,
+                negotiatedWidth = videoW,
+                negotiatedHeight = videoH,
+                marginWidth = marginW,
+                marginHeight = marginH,
+                fitMode = settings.videoFitMode,
+                hudMirroring = settings.hudMirroring
+            )
+            pointerData.add(Triple(pointerId, corrected.x, corrected.y))
+        }
 
-                pointerData.add(Triple(pointerId, corrected.x, corrected.y))
-            } else {
-                val rawPx = event.getX(pointerIndex)
-                val px = if (settings.hudMirroring) (viewW - rawPx) else rawPx
-                val py = event.getY(pointerIndex)
-
-                val videoX: Float
-                val videoY: Float
-
-                if (HeadUnitScreenConfig.isUltrawideEnabled() && HeadUnitScreenConfig.getUsableWidth() >= 1700) {
-                    // Ultrawide Sidebar-Aware Mapping
-                    videoX = (px / viewW) * videoW
-                    videoY = (py / viewH) * videoH
-                } else if (isStretch) {
-                    videoX = (px / viewW) * (videoW - marginW)
-                    videoY = (py / viewH) * (videoH - marginH)
-                } else {
-                    val uiW = videoW - marginW
-                    val uiH = videoH - marginH
-                    val uiRatio = uiW / uiH
-                    val viewRatio = viewW / viewH
-
-                    var displayedUiW = viewW
-                    var displayedUiH = viewH
-
-                    if (viewRatio > uiRatio) {
-                        displayedUiW = viewH * uiRatio
-                    } else {
-                        displayedUiH = viewW / uiRatio
-                    }
-
-                    val uiLeft = (viewW - displayedUiW) / 2f
-                    val uiTop = (viewH - displayedUiH) / 2f
-
-                    val localX = px - uiLeft
-                    val localY = py - uiTop
-
-                    videoX = (localX / displayedUiW) * uiW
-                    videoY = (localY / displayedUiH) * uiH
-                }
-
-                val correctedX = videoX.toInt().coerceIn(0, videoW)
-                val correctedY = videoY.toInt().coerceIn(0, videoH)
-                pointerData.add(Triple(pointerId, correctedX, correctedY))
-            }
+        // The only instrument that says whether a tap reached the pixel it looked like it hit.
+        // Verbose because it is one line per pointer per motion event.
+        if (AppLog.LOG_VERBOSE) {
+            val first = pointerData.firstOrNull()
+            AppLog.v(
+                "[UI_DEBUG] Touch map: raw=${event.getX(0).toInt()},${event.getY(0).toInt()} " +
+                    "-> video=${first?.second},${first?.third} view=${viewW.toInt()}x${viewH.toInt()} " +
+                    "video=${videoW}x${videoH} margin=${marginW.toInt()}x${marginH.toInt()} fit=${settings.videoFitMode}"
+            )
         }
 
         commManager.send(TouchEvent(ts, action, event.actionIndex, pointerData))

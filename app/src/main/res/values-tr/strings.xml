@@ -255,8 +255,11 @@
     <string name="add_new">Yeni ekle</string>
     <string name="cancel">İptal</string>
     <string name="enable">Etkinleştir</string>
-    <string name="pref_stretch_screen_title">Ekranı doldurmak için uzat</string>
-    <string name="pref_stretch_screen_summary">Tüm ekranı doldurmak için en boy oranını yok sayar (siyah çubukları kaldırır)</string>
+    <string name="video_fit_mode">Video sığdırma</string>
+    <string name="change_video_fit_mode">Video sığdırmayı değiştir</string>
+    <string name="video_fit_mode_fill">Doldurmak için genişlet (çubuk yok, bozulabilir)</string>
+    <string name="video_fit_mode_contain">Çubuklarla sığdır (kırpma ve bozulma yok)</string>
+    <string name="video_fit_mode_cover">Kırparak doldur (çubuk ve bozulma yok)</string>
     <string name="forced_scale">Zorunlu Ölçekleme (Eski Düzeltme)</string>
     <string name="forced_scale_description">SurfaceView kullanan bazı eski cihazlardaki ölçekleme sorunlarını düzeltir. Sadece görüntü bozuk veya kaymış görünüyorsa kullanın.</string>
     <string name="hud_mirroring">HUD Modu (Yatay Çevirme)</string>
