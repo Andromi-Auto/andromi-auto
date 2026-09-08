@@ -21,10 +21,10 @@ object HeadUnitScreenConfig {
     private var isPortraitScaled: Boolean = false
     private var isInitialized: Boolean = false
     private var lastSettingsHash: Int = 0
-    
+
     // Flag to determine if the projection should stretch and ignore aspect ratio
-    private var stretchToFill: Boolean = false 
-    
+    private var stretchToFill: Boolean = false
+
     // Forced scale for older devices (Legacy fix)
     var forcedScale: Boolean = false
         private set
@@ -80,7 +80,7 @@ object HeadUnitScreenConfig {
             display.getRealSize(size)
             realW = size.x
             realH = size.y
-            
+
             @Suppress("DEPRECATION")
             display.getSize(size)
             usableW = size.x
@@ -97,14 +97,14 @@ object HeadUnitScreenConfig {
         val isConfigLandscape = configOrientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
         val isConfigPortrait = configOrientation == android.content.res.Configuration.ORIENTATION_PORTRAIT
 
-        if (screenOrientation == Settings.ScreenOrientation.LANDSCAPE || 
+        if (screenOrientation == Settings.ScreenOrientation.LANDSCAPE ||
             screenOrientation == Settings.ScreenOrientation.LANDSCAPE_REVERSE ||
             ((screenOrientation == Settings.ScreenOrientation.AUTO || screenOrientation == Settings.ScreenOrientation.SYSTEM) && isConfigLandscape)) {
             finalRealW = Math.max(realW, realH)
             finalRealH = Math.min(realW, realH)
             finalUsableW = Math.max(usableW, usableH)
             finalUsableH = Math.min(usableW, usableH)
-        } else if (screenOrientation == Settings.ScreenOrientation.PORTRAIT || 
+        } else if (screenOrientation == Settings.ScreenOrientation.PORTRAIT ||
                    screenOrientation == Settings.ScreenOrientation.PORTRAIT_REVERSE ||
                    ((screenOrientation == Settings.ScreenOrientation.AUTO || screenOrientation == Settings.ScreenOrientation.SYSTEM) && isConfigPortrait)) {
             finalRealW = Math.min(realW, realH)
@@ -139,15 +139,15 @@ object HeadUnitScreenConfig {
         appContext = context.applicationContext
 
         // Determine if we are planning to hide the bars (Immersive)
-        val immersive = settings.fullscreenMode == Settings.FullscreenMode.IMMERSIVE || 
+        val immersive = settings.fullscreenMode == Settings.FullscreenMode.IMMERSIVE ||
                         settings.fullscreenMode == Settings.FullscreenMode.IMMERSIVE_WITH_NOTCH
 
-        // THE ANCHOR: 
-        // If we are immersive, our "World" is the physical screen. 
+        // THE ANCHOR:
+        // If we are immersive, our "World" is the physical screen.
         // If we are NOT, our "World" is limited to the usable window area (no lying to AA).
         val defaultAnchorW = if (immersive) finalRealW else finalUsableW
         val defaultAnchorH = if (immersive) finalRealH else finalUsableH
-        
+
         density = displayMetrics.density
         densityDpi = displayMetrics.densityDpi
 
@@ -157,7 +157,7 @@ object HeadUnitScreenConfig {
         systemInsetTop = settings.insetTop
         systemInsetRight = settings.insetRight
         systemInsetBottom = settings.insetBottom
-        
+
         // Check if we have cached surface dimensions from a previous session.
         // If the settings haven't changed (same hash), use the cached values
         // to avoid a mid-session UpdateUiConfigRequest and potential flicker.
@@ -196,7 +196,7 @@ object HeadUnitScreenConfig {
         }
 
         AppLog.i("[UI_DEBUG] HeadUnitScreenConfig: Honest Init | Mode: ${settings.fullscreenMode} | Anchor: ${realScreenWidthPx}x${realScreenHeightPx} | Seeded Insets: L$systemInsetLeft T$systemInsetTop R$systemInsetRight B$systemInsetBottom")
-        
+
         recalculate()
     }
 
@@ -204,12 +204,12 @@ object HeadUnitScreenConfig {
         if (systemInsetLeft == left && systemInsetTop == top && systemInsetRight == right && systemInsetBottom == bottom) {
             return
         }
-        
+
         systemInsetLeft = left
         systemInsetTop = top
         systemInsetRight = right
         systemInsetBottom = bottom
-        
+
         if (isInitialized) {
             recalculate()
         }
@@ -298,7 +298,7 @@ object HeadUnitScreenConfig {
 
         // 1. Determine base negotiated resolution
         if (isResolutionLocked) {
-            // Safety Check: If the locked resolution's orientation (Landscape/Portrait) 
+            // Safety Check: If the locked resolution's orientation (Landscape/Portrait)
             // no longer matches the display orientation, the lock is stale and must be dropped.
             val isPortraitRes = getNegotiatedHeight() > getNegotiatedWidth()
             if (isPortraitRes != isPortraitDisplay) {
@@ -308,9 +308,14 @@ object HeadUnitScreenConfig {
                 AppLog.i("[UI_DEBUG] CarScreen: RESOLUTION LOCKED to $negotiatedResolutionType. Usable area is ${screenWidthPx}x${screenHeightPx}. Skipping re-negotiation.")
             }
         }
-        
+
         if (!isResolutionLocked && selectedResolution == Settings.Resolution.AUTO) {
-            if (isPortraitDisplay) {
+            if (isUltrawideEnabled() && (screenWidthPx >= 1700 || realScreenWidthPx >= 1700)) {
+                // Force 720p (1280x720) for 2.4GHz compatibility, but use PAR to fill the 1780+ width
+                negotiatedResolutionType = Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType._1280x720
+                stretchToFill = true // Must be true for Ultrawide stretch
+                AppLog.i("[ULTRAWIDE] Forcing 720p and Stretch for window width: $screenWidthPx")
+            } else if (isPortraitDisplay) {
                 negotiatedResolutionType = if (screenWidthPx > 720 || screenHeightPx > 1280) {
                     Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType._1080x1920
                 } else {
@@ -319,7 +324,7 @@ object HeadUnitScreenConfig {
             } else {
                 negotiatedResolutionType = when {
                     screenWidthPx <= 800 && screenHeightPx <= 480 -> Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType._800x480
-                    (screenWidthPx >= 3840 || screenHeightPx >= 2160) && VideoDecoder.isHevcSupported() && Build.VERSION.SDK_INT >= 24 -> 
+                    (screenWidthPx >= 3840 || screenHeightPx >= 2160) && VideoDecoder.isHevcSupported() && Build.VERSION.SDK_INT >= 24 ->
                         Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType._3840x2160
                     (screenWidthPx >= 2560 || screenHeightPx >= 1440) && canNegotiateHevc && Build.VERSION.SDK_INT >= 24 ->
                         Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType._2560x1440
@@ -368,7 +373,12 @@ object HeadUnitScreenConfig {
         }
 
         scaleFactor = 1.0f
-        if (!isSmallScreen) {
+        if (isUltrawideEnabled() && (screenWidthPx >= 1700 || realScreenWidthPx >= 1700)) {
+            // Force usable dimensions to match the physical window for 1:1 mapping
+            screenHeightPx = 720
+            scaleFactor = 1.0f
+            AppLog.i("[ULTRAWIDE] Forcing 1.0 Scale and Usable area: ${screenWidthPx}x${screenHeightPx}")
+        } else if (!isSmallScreen) {
             val sWidth = screenWidthPx.toFloat()
             val sHeight = screenHeightPx.toFloat()
             if (getNegotiatedWidth() > 0 && getNegotiatedHeight() > 0) {
@@ -381,7 +391,7 @@ object HeadUnitScreenConfig {
                 }
             }
         }
-        
+
         AppLog.i("[UI_DEBUG] CarScreen isSmallScreen: $isSmallScreen, scaleFactor: $scaleFactor, margins: w=${getWidthMargin()}, h=${getHeightMargin()}")
     }
 
@@ -425,11 +435,13 @@ object HeadUnitScreenConfig {
     }
 
     fun getHeightMargin(): Int {
+        if (isUltrawideEnabled() && screenWidthPx >= 1920) return 0
         val margin = ((getAdjustedHeight() - screenHeightPx) / scaleFactor).roundToInt()
         return margin.coerceAtLeast(0)
     }
 
     fun getWidthMargin(): Int {
+        if (isUltrawideEnabled() && screenWidthPx >= 1920) return 0
         val margin = ((getAdjustedWidth() - screenWidthPx) / scaleFactor).roundToInt()
         return margin.coerceAtLeast(0)
     }
@@ -439,6 +451,10 @@ object HeadUnitScreenConfig {
     }
 
     fun getScaleX(): Float {
+        if (isUltrawideEnabled() && (screenWidthPx >= 1700 || realScreenWidthPx >= 1700)) {
+            return 1.0f
+        }
+
         if (forcedScale) {
             return 1.0f
         }
@@ -453,6 +469,10 @@ object HeadUnitScreenConfig {
     }
         // Stretch option PR #259
     fun getScaleY(): Float {
+        if (isUltrawideEnabled() && (screenWidthPx >= 1700 || realScreenWidthPx >= 1700)) {
+            return 1.0f
+        }
+
         if (forcedScale) {
             return 1.0f
         }
@@ -483,10 +503,23 @@ object HeadUnitScreenConfig {
     }
 
     fun getPixelAspectRatioE4(): Int {
+        if (isUltrawideEnabled() && screenWidthPx >= 1700) {
+            // Force dynamic Pixel Aspect Ratio for 1780+ width window using a 1280 buffer
+            val ratio = (screenWidthPx.toFloat() / 1280f) * 10000
+            return ratio.roundToInt()
+        }
         return if (this::currentSettings.isInitialized && currentSettings.pixelAspectRatioE4 > 0) {
             currentSettings.pixelAspectRatioE4
         } else {
             10000 // 1.0 = square pixels
+        }
+    }
+
+    fun isUltrawideEnabled(): Boolean {
+        return if (this::currentSettings.isInitialized) {
+            currentSettings.optimizeUltrawide
+        } else {
+            false
         }
     }
 
@@ -509,11 +542,11 @@ object HeadUnitScreenConfig {
         val finalSurfaceH: Int
 
         val screenOrientation = if (this::currentSettings.isInitialized) currentSettings.screenOrientation else Settings.ScreenOrientation.SYSTEM
-        if (screenOrientation == Settings.ScreenOrientation.LANDSCAPE || 
+        if (screenOrientation == Settings.ScreenOrientation.LANDSCAPE ||
             screenOrientation == Settings.ScreenOrientation.LANDSCAPE_REVERSE) {
             finalSurfaceW = Math.max(surfaceW, surfaceH)
             finalSurfaceH = Math.min(surfaceW, surfaceH)
-        } else if (screenOrientation == Settings.ScreenOrientation.PORTRAIT || 
+        } else if (screenOrientation == Settings.ScreenOrientation.PORTRAIT ||
                    screenOrientation == Settings.ScreenOrientation.PORTRAIT_REVERSE) {
             finalSurfaceW = Math.min(surfaceW, surfaceH)
             finalSurfaceH = Math.max(surfaceW, surfaceH)

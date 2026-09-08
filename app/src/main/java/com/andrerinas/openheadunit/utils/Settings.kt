@@ -89,6 +89,11 @@ class Settings(private val context: Context) {
         get() = prefs.getBoolean("stretch_to_fill", true)
         set(value) { prefs.edit().putBoolean("stretch_to_fill", value).apply() }
 
+    // Optimization for Ultrawide displays (1920x720 / 1780x720)
+    var optimizeUltrawide: Boolean
+        get() = prefs.getBoolean("optimize-ultrawide", false)
+        set(value) { prefs.edit().putBoolean("optimize-ultrawide", value).apply() }
+
     // Forced scale for older devices (SurfaceView fix)
     var forcedScale: Boolean
         get() = prefs.getBoolean("forced_scale", false)

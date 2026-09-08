@@ -186,6 +186,7 @@ class SettingsFragment : Fragment() {
 
     // Flag to determine if the projection should stretch to fill the screen
     private var pendingStretchToFill: Boolean? = null
+    private var pendingOptimizeUltrawide: Boolean? = null
     private var pendingForcedScale: Boolean? = null
     private var pendingHudMirroring: Boolean? = null
     private var pendingUseMeasuredTouchSurface: Boolean? = null
@@ -316,6 +317,7 @@ class SettingsFragment : Fragment() {
 
         // Initialize local state for stretch to fill
         pendingStretchToFill = settings.stretchToFill
+        pendingOptimizeUltrawide = settings.optimizeUltrawide
         pendingForcedScale = settings.forcedScale
         pendingHudMirroring = settings.hudMirroring
         pendingUseMeasuredTouchSurface = settings.useMeasuredTouchSurface
@@ -438,6 +440,7 @@ class SettingsFragment : Fragment() {
         pendingScreenOrientation = settings.screenOrientation
         pendingAppLanguage = settings.appLanguage
         pendingStretchToFill = settings.stretchToFill
+        pendingOptimizeUltrawide = settings.optimizeUltrawide
         pendingForcedScale = settings.forcedScale
         pendingHudMirroring = settings.hudMirroring
         pendingUseMeasuredTouchSurface = settings.useMeasuredTouchSurface
@@ -588,6 +591,7 @@ class SettingsFragment : Fragment() {
 
         // Save the stretch to fill preference
         pendingStretchToFill?.let { settings.stretchToFill = it }
+        pendingOptimizeUltrawide?.let { settings.optimizeUltrawide = it }
         pendingForcedScale?.let { settings.forcedScale = it }
         pendingHudMirroring?.let { settings.hudMirroring = it }
         pendingUseMeasuredTouchSurface?.let { settings.useMeasuredTouchSurface = it }
@@ -705,6 +709,7 @@ class SettingsFragment : Fragment() {
                         pendingScreenOrientation != settings.screenOrientation ||
                         pendingAppLanguage != settings.appLanguage ||
                         pendingStretchToFill != settings.stretchToFill ||
+                        pendingOptimizeUltrawide != settings.optimizeUltrawide ||
                         pendingForcedScale != settings.forcedScale ||
                         pendingHudMirroring != settings.hudMirroring ||
                         pendingUseMeasuredTouchSurface != settings.useMeasuredTouchSurface ||
@@ -1713,6 +1718,20 @@ class SettingsFragment : Fragment() {
             onCheckedChanged = { isChecked ->
                 pendingStretchToFill = isChecked
                 requiresRestart = true // Requires a reconnect to apply the new rendering bounds
+                checkChanges()
+                updateSettingsList()
+            }
+        ))
+
+        // Add the toggle for Ultrawide Optimization
+        items.add(SettingItem.ToggleSettingEntry(
+            stableId = "optimizeUltrawide",
+            nameResId = R.string.pref_optimize_ultrawide_title,
+            descriptionResId = R.string.pref_optimize_ultrawide_summary,
+            isChecked = pendingOptimizeUltrawide ?: settings.optimizeUltrawide,
+            onCheckedChanged = { isChecked ->
+                pendingOptimizeUltrawide = isChecked
+                requiresRestart = true
                 checkChanges()
                 updateSettingsList()
             }

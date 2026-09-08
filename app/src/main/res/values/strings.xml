@@ -492,6 +492,8 @@
     <string name="enable">Enable</string>
     <string name="pref_stretch_screen_title">Stretch to fill screen</string>
     <string name="pref_stretch_screen_summary">Ignores aspect ratio to fill the entire display (removes black bars)</string>
+    <string name="pref_optimize_ultrawide_title" translatable="false">Optimize for Ultrawide displays</string>
+    <string name="pref_optimize_ultrawide_summary" translatable="false">Forces 720p scaling, dynamic aspect ratio, and 1:1 touch overlay mapping for wide screens (1920x720 / 1780x720)</string>
     <string name="forced_scale">Forced Scale (Legacy Fix)</string>
     <string name="forced_scale_description">Corrects scaling issues on some older devices using SurfaceView. Only use if the image looks distorted or shifted.</string>
     <string name="hud_mirroring">HUD Mode (Horizontal Flip)</string>
