@@ -390,7 +390,7 @@ object HeadUnitScreenConfig {
         // Null on a small screen, where the previous value deliberately stands.
         fit.isPortraitScaled?.let { isPortraitScaled = it }
         
-        AppLog.i("[UI_DEBUG] CarScreen isSmallScreen: $isSmallScreen, scaleFactor: $scaleFactor, portraitScaled: $isPortraitScaled, margins: w=${getWidthMargin()}, h=${getHeightMargin()}")
+        AppLog.i("[UI_DEBUG] CarScreen isSmallScreen: $isSmallScreen, scaleFactor: $scaleFactor, portraitScaled: $isPortraitScaled, shape=${marginStrategy()}, margins: w=${getWidthMargin()}, h=${getHeightMargin()}")
 
         if (!notifyingMarginDivergence &&
             MarginAnnouncementPolicy.shouldReannounce(
@@ -449,11 +449,19 @@ object HeadUnitScreenConfig {
         }
     }
 
+    // A stored resolution above the panel's rows used to hide a third of the frame behind a margin
+    // the touch mapper never saw. In FILL a wider panel describes itself by pixel shape instead.
+    private fun marginStrategy(): MarginStrategyPolicy.Strategy = MarginStrategyPolicy.select(
+        videoFitMode, screenWidthPx, screenHeightPx, getNegotiatedWidth(), getNegotiatedHeight()
+    )
+
     fun getHeightMargin(): Int =
-        ProjectionGeometryPolicy.heightMargin(getNegotiatedHeight(), screenHeightPx, scaleFactor)
+        if (marginStrategy() == MarginStrategyPolicy.Strategy.PAR) 0
+        else ProjectionGeometryPolicy.heightMargin(getNegotiatedHeight(), screenHeightPx, scaleFactor)
 
     fun getWidthMargin(): Int =
-        ProjectionGeometryPolicy.widthMargin(getNegotiatedWidth(), screenWidthPx, scaleFactor)
+        if (marginStrategy() == MarginStrategyPolicy.Strategy.PAR) 0
+        else ProjectionGeometryPolicy.widthMargin(getNegotiatedWidth(), screenWidthPx, scaleFactor)
 
     fun getScaleX(): Float = ProjectionGeometryPolicy.scaleX(
         videoFitMode, forcedScale,
