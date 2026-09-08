@@ -192,6 +192,7 @@ class SettingsFragment : Fragment() {
     private var pendingFloatingButtonOpacityPercent: Int? = null
     private var pendingFloatingButtonXPercent: Int? = null
     private var pendingFloatingButtonYPercent: Int? = null
+    private var pendingAaExitAction: Settings.ExitAction? = null
     private var pendingForcedScale: Boolean? = null
     private var pendingHudMirroring: Boolean? = null
     private var pendingUseMeasuredTouchSurface: Boolean? = null
@@ -328,6 +329,7 @@ class SettingsFragment : Fragment() {
         pendingFloatingButtonOpacityPercent = settings.floatingButtonOpacityPercent
         pendingFloatingButtonXPercent = settings.floatingButtonXPercent
         pendingFloatingButtonYPercent = settings.floatingButtonYPercent
+        pendingAaExitAction = settings.aaExitAction
         pendingForcedScale = settings.forcedScale
         pendingHudMirroring = settings.hudMirroring
         pendingUseMeasuredTouchSurface = settings.useMeasuredTouchSurface
@@ -456,6 +458,7 @@ class SettingsFragment : Fragment() {
         pendingFloatingButtonOpacityPercent = settings.floatingButtonOpacityPercent
         pendingFloatingButtonXPercent = settings.floatingButtonXPercent
         pendingFloatingButtonYPercent = settings.floatingButtonYPercent
+        pendingAaExitAction = settings.aaExitAction
         pendingForcedScale = settings.forcedScale
         pendingHudMirroring = settings.hudMirroring
         pendingUseMeasuredTouchSurface = settings.useMeasuredTouchSurface
@@ -612,6 +615,7 @@ class SettingsFragment : Fragment() {
         pendingFloatingButtonOpacityPercent?.let { settings.floatingButtonOpacityPercent = it }
         pendingFloatingButtonXPercent?.let { settings.floatingButtonXPercent = it }
         pendingFloatingButtonYPercent?.let { settings.floatingButtonYPercent = it }
+        pendingAaExitAction?.let { settings.aaExitAction = it }
         FloatingButtonManager.update(requireContext())
         pendingForcedScale?.let { settings.forcedScale = it }
         pendingHudMirroring?.let { settings.hudMirroring = it }
@@ -736,6 +740,7 @@ class SettingsFragment : Fragment() {
                         pendingFloatingButtonOpacityPercent != settings.floatingButtonOpacityPercent ||
                         pendingFloatingButtonXPercent != settings.floatingButtonXPercent ||
                         pendingFloatingButtonYPercent != settings.floatingButtonYPercent ||
+                        pendingAaExitAction != settings.aaExitAction ||
                         pendingForcedScale != settings.forcedScale ||
                         pendingHudMirroring != settings.hudMirroring ||
                         pendingUseMeasuredTouchSurface != settings.useMeasuredTouchSurface ||
@@ -1624,6 +1629,30 @@ class SettingsFragment : Fragment() {
                 }
             ))
         }
+
+        val exitActions = arrayOf(
+            getString(R.string.aa_exit_action_oem_launcher),
+            getString(R.string.aa_exit_action_app_home),
+            getString(R.string.aa_exit_action_disconnect)
+        )
+        val currentExitActionIdx = (pendingAaExitAction ?: settings.aaExitAction).value
+        items.add(SettingItem.SettingEntry(
+            stableId = "aaExitAction",
+            nameResId = R.string.pref_aa_exit_action_title,
+            value = exitActions.getOrElse(currentExitActionIdx) { exitActions[0] },
+            searchKeywords = getString(R.string.pref_aa_exit_action_summary),
+            onClick = { _ ->
+                MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
+                    .setTitle(R.string.pref_aa_exit_action_title)
+                    .setSingleChoiceItems(exitActions, currentExitActionIdx) { dialog, which ->
+                        Settings.ExitAction.fromInt(which)?.let { pendingAaExitAction = it }
+                        checkChanges()
+                        dialog.dismiss()
+                        updateSettingsList()
+                    }
+                    .show()
+            }
+        ))
 
         // --- Navigation Settings ---
         items.add(SettingItem.CategoryHeader("navigation", R.string.category_navigation))
