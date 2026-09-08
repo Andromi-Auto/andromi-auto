@@ -494,6 +494,15 @@
     <string name="pref_stretch_screen_summary">Ignores aspect ratio to fill the entire display (removes black bars)</string>
     <string name="pref_optimize_ultrawide_title" translatable="false">Optimize for Ultrawide displays</string>
     <string name="pref_optimize_ultrawide_summary" translatable="false">Forces 720p scaling, dynamic aspect ratio, and 1:1 touch overlay mapping for wide screens (1920x720 / 1780x720)</string>
+
+    <!-- More Features Settings -->
+    <string name="category_more_features" translatable="false">More Features</string>
+    <string name="pref_enable_floating_button_title" translatable="false">Floating Launcher Button</string>
+    <string name="pref_enable_floating_button_summary" translatable="false">Displays a floating button over the OEM launcher and other apps to quickly return to Open Headunit</string>
+    <string name="pref_floating_button_size_title" translatable="false">Floating Button Size</string>
+    <string name="pref_floating_button_opacity_title" translatable="false">Floating Button Opacity</string>
+    <string name="pref_floating_button_x_title" translatable="false">Horizontal Position (X)</string>
+    <string name="pref_floating_button_y_title" translatable="false">Vertical Position (Y)</string>
     <string name="forced_scale">Forced Scale (Legacy Fix)</string>
     <string name="forced_scale_description">Corrects scaling issues on some older devices using SurfaceView. Only use if the image looks distorted or shifted.</string>
     <string name="hud_mirroring">HUD Mode (Horizontal Flip)</string>

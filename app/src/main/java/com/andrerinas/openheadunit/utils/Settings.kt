@@ -94,6 +94,27 @@ class Settings(private val context: Context) {
         get() = prefs.getBoolean("optimize-ultrawide", false)
         set(value) { prefs.edit().putBoolean("optimize-ultrawide", value).apply() }
 
+    // Floating Launcher Overlay Button Settings
+    var enableFloatingButton: Boolean
+        get() = prefs.getBoolean("enable-floating-button", true)
+        set(value) { prefs.edit().putBoolean("enable-floating-button", value).apply() }
+
+    var floatingButtonXPercent: Int
+        get() = prefs.getInt("floating-button-x-percent", 0)
+        set(value) { prefs.edit().putInt("floating-button-x-percent", value.coerceIn(0, 100)).apply() }
+
+    var floatingButtonYPercent: Int
+        get() = prefs.getInt("floating-button-y-percent", 54)
+        set(value) { prefs.edit().putInt("floating-button-y-percent", value.coerceIn(0, 100)).apply() }
+
+    var floatingButtonOpacityPercent: Int
+        get() = prefs.getInt("floating-button-opacity-percent", 80)
+        set(value) { prefs.edit().putInt("floating-button-opacity-percent", value.coerceIn(0, 100)).apply() }
+
+    var floatingButtonSizeDp: Int
+        get() = prefs.getInt("floating-button-size-dp", 60)
+        set(value) { prefs.edit().putInt("floating-button-size-dp", value.coerceIn(32, 120)).apply() }
+
     // Forced scale for older devices (SurfaceView fix)
     var forcedScale: Boolean
         get() = prefs.getBoolean("forced_scale", false)

@@ -187,6 +187,11 @@ class SettingsFragment : Fragment() {
     // Flag to determine if the projection should stretch to fill the screen
     private var pendingStretchToFill: Boolean? = null
     private var pendingOptimizeUltrawide: Boolean? = null
+    private var pendingEnableFloatingButton: Boolean? = null
+    private var pendingFloatingButtonSizeDp: Int? = null
+    private var pendingFloatingButtonOpacityPercent: Int? = null
+    private var pendingFloatingButtonXPercent: Int? = null
+    private var pendingFloatingButtonYPercent: Int? = null
     private var pendingForcedScale: Boolean? = null
     private var pendingHudMirroring: Boolean? = null
     private var pendingUseMeasuredTouchSurface: Boolean? = null
@@ -318,6 +323,11 @@ class SettingsFragment : Fragment() {
         // Initialize local state for stretch to fill
         pendingStretchToFill = settings.stretchToFill
         pendingOptimizeUltrawide = settings.optimizeUltrawide
+        pendingEnableFloatingButton = settings.enableFloatingButton
+        pendingFloatingButtonSizeDp = settings.floatingButtonSizeDp
+        pendingFloatingButtonOpacityPercent = settings.floatingButtonOpacityPercent
+        pendingFloatingButtonXPercent = settings.floatingButtonXPercent
+        pendingFloatingButtonYPercent = settings.floatingButtonYPercent
         pendingForcedScale = settings.forcedScale
         pendingHudMirroring = settings.hudMirroring
         pendingUseMeasuredTouchSurface = settings.useMeasuredTouchSurface
@@ -441,6 +451,11 @@ class SettingsFragment : Fragment() {
         pendingAppLanguage = settings.appLanguage
         pendingStretchToFill = settings.stretchToFill
         pendingOptimizeUltrawide = settings.optimizeUltrawide
+        pendingEnableFloatingButton = settings.enableFloatingButton
+        pendingFloatingButtonSizeDp = settings.floatingButtonSizeDp
+        pendingFloatingButtonOpacityPercent = settings.floatingButtonOpacityPercent
+        pendingFloatingButtonXPercent = settings.floatingButtonXPercent
+        pendingFloatingButtonYPercent = settings.floatingButtonYPercent
         pendingForcedScale = settings.forcedScale
         pendingHudMirroring = settings.hudMirroring
         pendingUseMeasuredTouchSurface = settings.useMeasuredTouchSurface
@@ -592,6 +607,12 @@ class SettingsFragment : Fragment() {
         // Save the stretch to fill preference
         pendingStretchToFill?.let { settings.stretchToFill = it }
         pendingOptimizeUltrawide?.let { settings.optimizeUltrawide = it }
+        pendingEnableFloatingButton?.let { settings.enableFloatingButton = it }
+        pendingFloatingButtonSizeDp?.let { settings.floatingButtonSizeDp = it }
+        pendingFloatingButtonOpacityPercent?.let { settings.floatingButtonOpacityPercent = it }
+        pendingFloatingButtonXPercent?.let { settings.floatingButtonXPercent = it }
+        pendingFloatingButtonYPercent?.let { settings.floatingButtonYPercent = it }
+        FloatingButtonManager.update(requireContext())
         pendingForcedScale?.let { settings.forcedScale = it }
         pendingHudMirroring?.let { settings.hudMirroring = it }
         pendingUseMeasuredTouchSurface?.let { settings.useMeasuredTouchSurface = it }
@@ -710,6 +731,11 @@ class SettingsFragment : Fragment() {
                         pendingAppLanguage != settings.appLanguage ||
                         pendingStretchToFill != settings.stretchToFill ||
                         pendingOptimizeUltrawide != settings.optimizeUltrawide ||
+                        pendingEnableFloatingButton != settings.enableFloatingButton ||
+                        pendingFloatingButtonSizeDp != settings.floatingButtonSizeDp ||
+                        pendingFloatingButtonOpacityPercent != settings.floatingButtonOpacityPercent ||
+                        pendingFloatingButtonXPercent != settings.floatingButtonXPercent ||
+                        pendingFloatingButtonYPercent != settings.floatingButtonYPercent ||
                         pendingForcedScale != settings.forcedScale ||
                         pendingHudMirroring != settings.hudMirroring ||
                         pendingUseMeasuredTouchSurface != settings.useMeasuredTouchSurface ||
@@ -1513,6 +1539,88 @@ class SettingsFragment : Fragment() {
                     pendingRaiseProjectionDuringCall = isChecked
                     checkChanges()
                     updateSettingsList()
+                }
+            ))
+        }
+
+        // --- More Features Settings ---
+        items.add(SettingItem.CategoryHeader("moreFeatures", R.string.category_more_features))
+
+        val isFloatingButtonEnabled = pendingEnableFloatingButton ?: settings.enableFloatingButton
+
+        items.add(SettingItem.ToggleSettingEntry(
+            stableId = "enableFloatingButton",
+            nameResId = R.string.pref_enable_floating_button_title,
+            descriptionResId = R.string.pref_enable_floating_button_summary,
+            isChecked = isFloatingButtonEnabled,
+            onCheckedChanged = { isChecked ->
+                pendingEnableFloatingButton = isChecked
+                if (isChecked) {
+                    FloatingButtonManager.requestOverlayPermission(requireContext())
+                }
+                checkChanges()
+                updateSettingsList()
+            }
+        ))
+
+        if (isFloatingButtonEnabled) {
+            val size = pendingFloatingButtonSizeDp ?: settings.floatingButtonSizeDp
+            items.add(SettingItem.SliderSettingEntry(
+                stableId = "floatingButtonSizeDp",
+                nameResId = R.string.pref_floating_button_size_title,
+                value = "${size}dp",
+                sliderValue = size.toFloat(),
+                valueFrom = 32f,
+                valueTo = 120f,
+                stepSize = 1f,
+                onValueChanged = { newVal ->
+                    pendingFloatingButtonSizeDp = newVal.toInt()
+                    checkChanges()
+                }
+            ))
+
+            val opacity = pendingFloatingButtonOpacityPercent ?: settings.floatingButtonOpacityPercent
+            items.add(SettingItem.SliderSettingEntry(
+                stableId = "floatingButtonOpacityPercent",
+                nameResId = R.string.pref_floating_button_opacity_title,
+                value = "${opacity}%",
+                sliderValue = opacity.toFloat(),
+                valueFrom = 10f,
+                valueTo = 100f,
+                stepSize = 5f,
+                onValueChanged = { newVal ->
+                    pendingFloatingButtonOpacityPercent = newVal.toInt()
+                    checkChanges()
+                }
+            ))
+
+            val xPos = pendingFloatingButtonXPercent ?: settings.floatingButtonXPercent
+            items.add(SettingItem.SliderSettingEntry(
+                stableId = "floatingButtonXPercent",
+                nameResId = R.string.pref_floating_button_x_title,
+                value = "${xPos}%",
+                sliderValue = xPos.toFloat(),
+                valueFrom = 0f,
+                valueTo = 100f,
+                stepSize = 1f,
+                onValueChanged = { newVal ->
+                    pendingFloatingButtonXPercent = newVal.toInt()
+                    checkChanges()
+                }
+            ))
+
+            val yPos = pendingFloatingButtonYPercent ?: settings.floatingButtonYPercent
+            items.add(SettingItem.SliderSettingEntry(
+                stableId = "floatingButtonYPercent",
+                nameResId = R.string.pref_floating_button_y_title,
+                value = "${yPos}%",
+                sliderValue = yPos.toFloat(),
+                valueFrom = 0f,
+                valueTo = 100f,
+                stepSize = 1f,
+                onValueChanged = { newVal ->
+                    pendingFloatingButtonYPercent = newVal.toInt()
+                    checkChanges()
                 }
             ))
         }
