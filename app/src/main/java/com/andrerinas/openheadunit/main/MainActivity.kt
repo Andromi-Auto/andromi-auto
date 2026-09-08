@@ -930,6 +930,17 @@ class MainActivity : BaseActivity() {
 
         // Coming back from a failed attempt lands here, so this is where the reason gets said.
         updateConnectionIssueBanner()
+
+        checkOverlayPermission()
+    }
+
+    private fun checkOverlayPermission() {
+        val settings = App.provide(this).settings
+        if (settings.enableFloatingButton && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (!android.provider.Settings.canDrawOverlays(this)) {
+                FloatingButtonManager.requestOverlayPermission(this)
+            }
+        }
     }
 
     /**

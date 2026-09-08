@@ -58,6 +58,7 @@ import android.content.IntentFilter
 import com.andrerinas.openheadunit.view.ProjectionViewScaler
 import android.animation.ObjectAnimator
 import android.animation.PropertyValuesHolder
+import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.VideoView
 import com.bumptech.glide.Glide
@@ -1942,7 +1943,11 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
                 val videoX: Float
                 val videoY: Float
 
-                if (isStretch) {
+                if (HeadUnitScreenConfig.isUltrawideEnabled() && HeadUnitScreenConfig.getUsableWidth() >= 1700) {
+                    // Ultrawide Sidebar-Aware Mapping
+                    videoX = (px / viewW) * videoW
+                    videoY = (py / viewH) * videoH
+                } else if (isStretch) {
                     videoX = (px / viewW) * (videoW - marginW)
                     videoY = (py / viewH) * (videoH - marginH)
                 } else {
