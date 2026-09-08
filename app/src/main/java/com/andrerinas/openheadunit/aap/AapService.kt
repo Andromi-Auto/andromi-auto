@@ -96,6 +96,7 @@ import com.andrerinas.openheadunit.connection.wifi.modes.WifiLauncherManual
 import com.andrerinas.openheadunit.connection.wifi.modes.WifiLauncherNative
 import com.andrerinas.openheadunit.connection.wifi.server.WirelessServer
 import com.andrerinas.openheadunit.main.BackgroundNotification
+import com.andrerinas.openheadunit.main.FloatingButtonManager
 import com.andrerinas.openheadunit.utils.Settings
 import com.andrerinas.openheadunit.utils.VpnControl
 import com.andrerinas.openheadunit.utils.protoUint32ToLong
@@ -595,6 +596,7 @@ class AapService : Service() {
                     screenOffTimestamp = 0
 
                     AppLog.i("WakeDetect: SCREEN_ON (screen was off for ${offSec}s)")
+                    FloatingButtonManager.update(this@AapService)
 
                     val settings = App.provide(this@AapService).settings
 
@@ -972,6 +974,7 @@ class AapService : Service() {
         }
         scheduleBootLoopStrikeClear()
         registerNetworkMonitor()
+        FloatingButtonManager.update(this)
     }
 
     /** Enables Android Automotive UI mode so the system uses car-optimised layouts. */
@@ -2278,6 +2281,7 @@ class AapService : Service() {
     @SuppressLint("WrongConstant")
     override fun onDestroy() {
         AppLog.i("AapService destroying... (wakeLock held=${bootWakeLock?.isHeld == true})")
+        FloatingButtonManager.removeOverlay(this)
         isDestroying = true
         // Nothing else clears it here, and the manager outlives the service instance.
         selfLauncherManager.isActive = false
