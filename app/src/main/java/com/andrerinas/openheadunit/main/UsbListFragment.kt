@@ -19,6 +19,7 @@ import androidx.core.text.HtmlCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -31,6 +32,10 @@ import com.andrerinas.openheadunit.connection.usb.UsbDeviceCompat
 import com.andrerinas.openheadunit.connection.usb.UsbReceiver
 import com.andrerinas.openheadunit.utils.Settings
 import com.google.android.material.appbar.MaterialToolbar
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class UsbListFragment : Fragment() {
     private lateinit var adapter: DeviceAdapter
@@ -48,7 +53,7 @@ class UsbListFragment : Fragment() {
         toolbar = view.findViewById(R.id.toolbar)
 
         settings = Settings(requireContext())
-        adapter = DeviceAdapter(requireContext(), settings)
+        adapter = DeviceAdapter(requireContext(), settings, lifecycleScope)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         recyclerView.adapter = adapter
 
@@ -92,7 +97,11 @@ class UsbListFragment : Fragment() {
         val startButton = itemView.findViewById<Button>(android.R.id.button2)
     }
 
-    private class DeviceAdapter(private val mContext: Context, private val mSettings: Settings) : RecyclerView.Adapter<DeviceViewHolder>(), View.OnClickListener {
+    private class DeviceAdapter(
+        private val mContext: Context,
+        private val mSettings: Settings,
+        private val scope: CoroutineScope,
+    ) : RecyclerView.Adapter<DeviceViewHolder>(), View.OnClickListener {
         private var allowedDevices: MutableSet<String> = mutableSetOf()
         private var deviceList: List<UsbDeviceCompat> = listOf()
         private var lastClickTime: Long = 0
@@ -220,16 +229,24 @@ class UsbListFragment : Fragment() {
                     val usbManager = mContext.getSystemService(Context.USB_SERVICE) as UsbManager
                     if (usbManager.hasPermission(device.wrappedDevice)) {
                         val usbMode = UsbAccessoryMode(usbManager)
-                        if (usbMode.connectAndSwitch(device.wrappedDevice, mSettings.useLibusb)) {
-                            Toast.makeText(mContext, R.string.switching_to_android_auto, Toast.LENGTH_SHORT).show()
-                            (mContext as? MainActivity)?.beginAutoConnect(
-                                "manual USB list (AOA switch)",
-                                MainActivity.ConnectionUiMode.OVERLAY
-                            )
-                        } else {
-                            Toast.makeText(mContext, R.string.switch_failed, Toast.LENGTH_SHORT).show()
+                        val useLibusb = mSettings.useLibusb
+                        // Eight control transfers at a 1 s timeout each. On the main thread that is
+                        // an ANR against any device that stops answering rather than refusing.
+                        scope.launch(Dispatchers.IO) {
+                            val switched = usbMode.connectAndSwitch(device.wrappedDevice, useLibusb)
+                            withContext(Dispatchers.Main) {
+                                if (switched) {
+                                    Toast.makeText(mContext, R.string.switching_to_android_auto, Toast.LENGTH_SHORT).show()
+                                    (mContext as? MainActivity)?.beginAutoConnect(
+                                        "manual USB list (AOA switch)",
+                                        MainActivity.ConnectionUiMode.OVERLAY
+                                    )
+                                } else {
+                                    Toast.makeText(mContext, R.string.switch_failed, Toast.LENGTH_SHORT).show()
+                                }
+                                notifyDataSetChanged()
+                            }
                         }
-                        notifyDataSetChanged()
                     } else {
                         Toast.makeText(mContext, R.string.requesting_usb_permission, Toast.LENGTH_SHORT).show()
                         ContextCompat.startForegroundService(mContext, Intent(mContext, AapService::class.java))
