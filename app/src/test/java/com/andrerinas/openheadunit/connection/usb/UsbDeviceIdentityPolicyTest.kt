@@ -175,6 +175,20 @@ class UsbDeviceIdentityPolicyTest {
     }
 
     @Test
+    fun `a dongle that is only a serial gadget is named as one`() {
+        // liaoyuan A2A, 0525:A4A7, the Linux serial gadget half of a wireless adapter that flips
+        // identities while it hunts for a phone. Rejected either way; the reason is the diagnosis.
+        val device = Device(
+            vendorId = 0x0525, productId = 0xA4A7, deviceClass = 0x00,
+            interfaces = listOf(
+                Interface(0x02, 0x02, 0x01),
+                Interface(0x0A, 0x00, 0x00, hasBulkIn = true, hasBulkOut = true),
+            ),
+        )
+        assertEquals("rejected: CDC-ACM serial device, not a phone", evaluate(device).toString())
+    }
+
+    @Test
     fun `a CDC serial pair is not a network, even on an otherwise ambiguous device`() {
         // The same phone with a vendor MTP interface instead of a PTP one, and no interface name to
         // settle it. Only the ACM control subclass keeps this apart from the ethernet adapter.
@@ -245,10 +259,22 @@ class UsbDeviceIdentityPolicyTest {
 
     @Test
     fun `a device already in accessory mode is accepted before any interface is read`() {
-        val accessory = Device(0x18D1, 0x2D00, 0x00, emptyList())
-        val accessoryAdb = Device(0x18D1, 0x2D01, 0x00, emptyList())
-        assertEquals("accepted: already in accessory mode", evaluate(accessory).toString())
-        assertTrue(evaluate(accessoryAdb).accepted)
+        // The four AOSP accepts: accessory, +ADB, +audio, +audio+ADB.
+        for (pid in listOf(0x2D00, 0x2D01, 0x2D04, 0x2D05)) {
+            val device = Device(0x18D1, pid, 0x00, emptyList())
+            assertEquals(
+                "accepted: already in accessory mode",
+                evaluate(device).toString(),
+            )
+        }
+    }
+
+    @Test
+    fun `the audio-only accessory modes are not accepted, having no accessory interface`() {
+        for (pid in listOf(0x2D02, 0x2D03)) {
+            val device = Device(0x18D1, pid, 0x00, emptyList())
+            assertFalse(evaluate(device).accepted)
+        }
     }
 
     @Test

@@ -27,12 +27,16 @@ class UsbAccessoryMode(private val usbMgr: UsbManager) {
             AppLog.i("UsbAccessoryMode: Performing AOA switch via native libusb...")
             val native = UsbNative()
             if (native.wrap(connection, 0, 0)) {
-                val switchResult = native.accModeSwitch() == 0
+                val code = native.accModeSwitch()
                 native.close()
-                switchResult
+                // The code only reaches raw logcat from the native side, and an APPLOG_FILE export
+                // carries none of it. Say what it means where the reporter's log will have it.
+                if (code != 0) AppLog.w(AoaSwitchFailurePolicy.failureLine(code))
+                code == 0
             } else {
                 AppLog.e("UsbAccessoryMode: Failed to wrap device for native AOA switch")
                 native.close()
+                AppLog.w(AoaSwitchFailurePolicy.failureLine(AoaSwitchFailurePolicy.NO_HANDLE))
                 false
             }
         } else {
@@ -50,6 +54,13 @@ class UsbAccessoryMode(private val usbMgr: UsbManager) {
         var len = connection.controlTransfer(UsbConstants.USB_DIR_IN or UsbConstants.USB_TYPE_VENDOR, ACC_REQ_GET_PROTOCOL, 0, 0, buffer, 2, USB_TIMEOUT_IN_MS)
         if (len != 2) {
             AppLog.e("Error controlTransfer len: $len")
+            // controlTransfer returns -1 for a stall and for a timeout alike, so name both. A
+            // device that answers neither is not offering Android Auto over USB.
+            AppLog.w(
+                "UsbAccessoryMode: AOA switch failed: the device did not complete the Android " +
+                    "Auto handshake (stalled or no answer), so it is not offering Android Auto " +
+                    "over USB"
+            )
             return false
         }
         val acc_ver = Utils.getAccVersion(buffer)
