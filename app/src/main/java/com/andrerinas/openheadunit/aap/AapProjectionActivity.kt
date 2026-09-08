@@ -894,6 +894,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
 
                             // Lock the resolution so that orientation changes don't cause re-negotiation
                             HeadUnitScreenConfig.lockResolution()
+                            HeadUnitScreenConfig.onMarginsDiverged = ::onMarginsDiverged
                             applyOrientationSettings()
 
                             // Handshake done. If the surface is already ready (e.g. reconnect
@@ -1779,16 +1780,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
                 AppLog.i("[UI_DEBUG_FIX] Skipping surface dimension cache update due to transient orientation mismatch: ${width}x${height}")
             }
 
-            if (commManager.connectionState.value is CommManager.ConnectionState.TransportStarted) {
-                // AA is already running → send corrected per-side margins dynamically
-                commManager.sendUpdateUiConfigRequest(
-                    HeadUnitScreenConfig.getLeftMargin(),
-                    HeadUnitScreenConfig.getTopMargin(),
-                    HeadUnitScreenConfig.getRightMargin(),
-                    HeadUnitScreenConfig.getBottomMargin()
-                )
-                AppLog.i("[UI_DEBUG_FIX] AA is already running, send corrected via sendUpdateUiConfigRequest")
-            }
+            reannounceMargins()
             // If transport not started yet, ServiceDiscoveryResponse will use the corrected values automatically.
         }
 
@@ -1869,6 +1861,42 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
             projectionView.setVideoSize(width, height)
             ProjectionViewScaler.updateScale(projectionView as View, width, height)
         }
+    }
+
+    /**
+     * Send the panel's per-side margins to a running session. False when there is no session to
+     * tell, which leaves the announced margins standing so the next recalculate tries again.
+     * A surface change reaches here twice, through recalculate and then directly; one send.
+     */
+    private fun reannounceMargins(): Boolean {
+        if (commManager.connectionState.value !is CommManager.ConnectionState.TransportStarted) {
+            return false
+        }
+        if (HeadUnitScreenConfig.marginsMatchAnnounced()) return true
+        commManager.sendUpdateUiConfigRequest(
+            HeadUnitScreenConfig.getLeftMargin(),
+            HeadUnitScreenConfig.getTopMargin(),
+            HeadUnitScreenConfig.getRightMargin(),
+            HeadUnitScreenConfig.getBottomMargin()
+        )
+        HeadUnitScreenConfig.recordAnnouncedMargins(
+            HeadUnitScreenConfig.getWidthMargin(), HeadUnitScreenConfig.getHeightMargin()
+        )
+        AppLog.i("[UI_DEBUG_FIX] AA is already running, send corrected via sendUpdateUiConfigRequest")
+        return true
+    }
+
+    /**
+     * The margins moved after they were announced, which on a device whose insets are still
+     * settling also means the scale was computed against the old reading. Re-announce and redraw.
+     */
+    private fun onMarginsDiverged(): Boolean {
+        val reannounced = reannounceMargins()
+        runOnUiThread {
+            val view = projectionView as? View ?: return@runOnUiThread
+            ProjectionViewScaler.updateScale(view, videoDecoder.videoWidth, videoDecoder.videoHeight)
+        }
+        return reannounced
     }
 
     private fun sendTouchEvent(event: MotionEvent) {
@@ -1996,6 +2024,8 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
 
     override fun onDestroy() {
         super.onDestroy()
+        HeadUnitScreenConfig.onMarginsDiverged = null
+        HeadUnitScreenConfig.clearAnnouncedMargins()
         closeCallRaiseEpisode("the projection is going away")
         unregisterAudioModeListener()
         if (isFinishReceiverRegistered) {

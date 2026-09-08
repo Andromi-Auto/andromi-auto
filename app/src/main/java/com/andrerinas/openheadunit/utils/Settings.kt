@@ -108,14 +108,11 @@ class Settings(private val context: Context) {
         }
     }
 
-    // Optimization for Ultrawide displays (1920x720 / 1780x720)
-    var optimizeUltrawide: Boolean
-        get() = prefs.getBoolean("optimize-ultrawide", false)
-        set(value) { prefs.edit().putBoolean("optimize-ultrawide", value).apply() }
-
     // Floating Launcher Overlay Button Settings
+    // Off by default: on it, MainActivity.checkOverlayPermission() sends a fresh install to the
+    // system overlay screen on first resume, for a feature the user has not asked for yet.
     var enableFloatingButton: Boolean
-        get() = prefs.getBoolean("enable-floating-button", true)
+        get() = prefs.getBoolean("enable-floating-button", false)
         set(value) { prefs.edit().putBoolean("enable-floating-button", value).apply() }
 
     var floatingButtonXPercent: Int

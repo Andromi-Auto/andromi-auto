@@ -495,8 +495,6 @@
     <string name="video_fit_mode_fill">Stretch to fill (no bars, may distort)</string>
     <string name="video_fit_mode_contain">Fit with bars (no crop, no distortion)</string>
     <string name="video_fit_mode_cover">Fill by cropping (no bars, no distortion)</string>
-    <string name="pref_optimize_ultrawide_title" translatable="false">Optimize for Ultrawide displays</string>
-    <string name="pref_optimize_ultrawide_summary" translatable="false">Forces 720p scaling, dynamic aspect ratio, and 1:1 touch overlay mapping for wide screens (1920x720 / 1780x720)</string>
 
     <!-- More Features Settings -->
     <string name="category_more_features" translatable="false">More Features</string>

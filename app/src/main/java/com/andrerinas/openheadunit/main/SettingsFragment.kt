@@ -184,7 +184,6 @@ class SettingsFragment : Fragment() {
     private var pendingHotspotPassword: String? = null
     private var pendingHotspotInterface: String? = null
 
-    private var pendingOptimizeUltrawide: Boolean? = null
     private var pendingEnableFloatingButton: Boolean? = null
     private var pendingFloatingButtonSizeDp: Int? = null
     private var pendingFloatingButtonOpacityPercent: Int? = null
@@ -319,7 +318,6 @@ class SettingsFragment : Fragment() {
         pendingScreenOrientation = settings.screenOrientation
         pendingAppLanguage = settings.appLanguage
 
-        pendingOptimizeUltrawide = settings.optimizeUltrawide
         pendingEnableFloatingButton = settings.enableFloatingButton
         pendingFloatingButtonSizeDp = settings.floatingButtonSizeDp
         pendingFloatingButtonOpacityPercent = settings.floatingButtonOpacityPercent
@@ -447,7 +445,6 @@ class SettingsFragment : Fragment() {
         pendingShowToastMessages = settings.showToastMessages
         pendingScreenOrientation = settings.screenOrientation
         pendingAppLanguage = settings.appLanguage
-        pendingOptimizeUltrawide = settings.optimizeUltrawide
         pendingEnableFloatingButton = settings.enableFloatingButton
         pendingFloatingButtonSizeDp = settings.floatingButtonSizeDp
         pendingFloatingButtonOpacityPercent = settings.floatingButtonOpacityPercent
@@ -603,7 +600,6 @@ class SettingsFragment : Fragment() {
         val hudMirroringChanged = pendingHudMirroring != null && pendingHudMirroring != settings.hudMirroring
 
         // Save the stretch to fill preference
-        pendingOptimizeUltrawide?.let { settings.optimizeUltrawide = it }
         pendingEnableFloatingButton?.let { settings.enableFloatingButton = it }
         pendingFloatingButtonSizeDp?.let { settings.floatingButtonSizeDp = it }
         pendingFloatingButtonOpacityPercent?.let { settings.floatingButtonOpacityPercent = it }
@@ -727,7 +723,6 @@ class SettingsFragment : Fragment() {
                         pendingShowToastMessages != settings.showToastMessages ||
                         pendingScreenOrientation != settings.screenOrientation ||
                         pendingAppLanguage != settings.appLanguage ||
-                        pendingOptimizeUltrawide != settings.optimizeUltrawide ||
                         pendingEnableFloatingButton != settings.enableFloatingButton ||
                         pendingFloatingButtonSizeDp != settings.floatingButtonSizeDp ||
                         pendingFloatingButtonOpacityPercent != settings.floatingButtonOpacityPercent ||
@@ -1834,20 +1829,6 @@ class SettingsFragment : Fragment() {
                         updateSettingsList()
                     }
                     .show()
-            }
-        ))
-
-        // Add the toggle for Ultrawide Optimization
-        items.add(SettingItem.ToggleSettingEntry(
-            stableId = "optimizeUltrawide",
-            nameResId = R.string.pref_optimize_ultrawide_title,
-            descriptionResId = R.string.pref_optimize_ultrawide_summary,
-            isChecked = pendingOptimizeUltrawide ?: settings.optimizeUltrawide,
-            onCheckedChanged = { isChecked ->
-                pendingOptimizeUltrawide = isChecked
-                requiresRestart = true
-                checkChanges()
-                updateSettingsList()
             }
         ))
 

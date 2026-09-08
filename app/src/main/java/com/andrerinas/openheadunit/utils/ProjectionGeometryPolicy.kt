@@ -1,5 +1,6 @@
 package com.andrerinas.openheadunit.utils
 
+import kotlin.math.abs
 import kotlin.math.roundToInt
 
 /**
@@ -138,5 +139,43 @@ object ProjectionGeometryPolicy {
         val uiH = uiHeight(videoH, marginH)
         if (mode == Settings.VideoFitMode.FILL) return divideOrOne(videoH.toFloat(), uiH.toFloat())
         return fitFactor(mode, panelW, panelH, uiW, uiH) * divideOrOne(videoH.toFloat(), panelH.toFloat())
+    }
+
+    /** 10000 means square pixels, and doubles as "the user has not set one". */
+    const val SQUARE_PIXELS_E4 = 10000
+
+    /** Half as wide as tall, and twice as wide as tall. No real panel is outside this. */
+    const val MIN_PIXEL_ASPECT_E4 = 5000
+    const val MAX_PIXEL_ASPECT_E4 = 20000
+
+    /**
+     * The pixel shape to advertise so the phone lays its UI out for the real panel while still
+     * encoding a 16:9 buffer. Measured against the margin-reduced canvas, because the margins
+     * already describe a correctly shaped canvas inside a bigger buffer. The phone pre-compensates
+     * by 10000/this and the panel's own stretch cancels it, so sending the reciprocal doubles it.
+     */
+    fun pixelAspectRatioE4(
+        mode: Settings.VideoFitMode,
+        panelW: Int,
+        panelH: Int,
+        videoW: Int,
+        videoH: Int,
+        marginW: Int,
+        marginH: Int
+    ): Int {
+        // Only FILL stretches the canvas to the panel. CONTAIN and COVER keep the aspect themselves,
+        // so asking the phone to pre-compensate would squeeze its UI by the correction.
+        if (mode != Settings.VideoFitMode.FILL) return SQUARE_PIXELS_E4
+        val canvasW = uiWidth(videoW, marginW)
+        val canvasH = uiHeight(videoH, marginH)
+        if (panelW <= 0 || panelH <= 0 || canvasW <= 0 || canvasH <= 0) return SQUARE_PIXELS_E4
+        val derived = ((panelW.toFloat() * canvasH) / (panelH.toFloat() * canvasW) * 10000f).roundToInt()
+        // A panel reading this far from square is a bad measurement, not a panel; say square rather
+        // than put it on the wire.
+        if (derived < MIN_PIXEL_ASPECT_E4 || derived > MAX_PIXEL_ASPECT_E4) return SQUARE_PIXELS_E4
+        // Within a few percent of square, say square: the phone gains nothing from the correction.
+        // This is the dial to widen if a panel class turns out not to want the correction.
+        val deviation = abs(derived - SQUARE_PIXELS_E4) / SQUARE_PIXELS_E4.toFloat()
+        return if (deviation > 0.03f) derived else SQUARE_PIXELS_E4
     }
 }

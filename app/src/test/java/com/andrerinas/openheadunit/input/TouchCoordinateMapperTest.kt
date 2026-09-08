@@ -25,8 +25,11 @@ class TouchCoordinateMapperTest {
         assertEquals(540, point.y)
     }
 
+    // Android Auto anchors its canvas at the buffer's top-left with the announced margin at the
+    // bottom, measured on hardware from the coordinate it logged receiving. Centring this mapping
+    // instead cost 135 panel px on a 2400x1080 unit and hit the control one rail slot below.
     @Test
-    fun `touch mapping accounts for android auto vertical margin`() {
+    fun `a margined canvas is anchored at the buffer top-left`() {
         val point = TouchCoordinateMapper.map(
             rawX = 1200f,
             rawY = 540f,
@@ -42,6 +45,31 @@ class TouchCoordinateMapperTest {
 
         assertEquals(960, point.x)
         assertEquals(443, point.y)
+    }
+
+    // The panel the ultra-wide work is measured on: a 1280x720 buffer with no margin at all, so
+    // the mapping is the panel scaled straight onto the buffer.
+    @Test
+    fun `an ultra-wide panel maps onto the whole buffer`() {
+        fun at(x: Float, y: Float) = TouchCoordinateMapper.map(
+            rawX = x,
+            rawY = y,
+            inputSurfaceWidth = 1920f,
+            inputSurfaceHeight = 720f,
+            negotiatedWidth = 1280,
+            negotiatedHeight = 720,
+            marginWidth = 0f,
+            marginHeight = 0f,
+            fitMode = Settings.VideoFitMode.FILL,
+            hudMirroring = false
+        )
+
+        assertEquals(0, at(0f, 0f).x)
+        assertEquals(0, at(0f, 0f).y)
+        assertEquals(640, at(960f, 360f).x)
+        assertEquals(360, at(960f, 360f).y)
+        assertEquals(1280, at(1920f, 720f).x)
+        assertEquals(720, at(1920f, 720f).y)
     }
 
     @Test

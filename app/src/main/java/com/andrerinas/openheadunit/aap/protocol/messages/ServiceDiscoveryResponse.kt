@@ -88,6 +88,8 @@ class ServiceDiscoveryResponse(private val context: Context)
                     val negotiatedResolution = HeadUnitScreenConfig.negotiatedResolutionType
                     val phoneWidthMargin = HeadUnitScreenConfig.getWidthMargin()
                     val phoneHeightMargin = HeadUnitScreenConfig.getHeightMargin()
+                    // What goes on the wire, so a later metrics change can be seen to have left it.
+                    HeadUnitScreenConfig.recordAnnouncedMargins(phoneWidthMargin, phoneHeightMargin)
 
                     // Enforce H.265 for 1440p resolution as required by Android Auto.
                     // Software HEVC is allowed only when the user explicitly selected it.
@@ -112,6 +114,7 @@ class ServiceDiscoveryResponse(private val context: Context)
                     logNegotiatedCodecCapability(effectiveCodec, announcedFps)
                     logNarrowBandProfile(context, settings)
                     AppLog.i("[ServiceDiscovery] Margins are: ${phoneWidthMargin}x${phoneHeightMargin}")
+                    AppLog.i("[ServiceDiscovery] PixelAspectRatioE4 is: ${HeadUnitScreenConfig.getPixelAspectRatioE4()} (10000 = square)")
 
                     mediaSinkServiceBuilder.addVideoConfigs(Control.Service.MediaSinkService.VideoConfiguration.newBuilder().apply {
                         codecResolution = negotiatedResolution

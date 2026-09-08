@@ -196,4 +196,73 @@ class ProjectionGeometryPolicyTest {
         assertEquals(1.0f, ProjectionGeometryPolicy.fit(1440, 720, 0, 0).scaleFactor, 0.0001f)
         assertEquals(0, ProjectionGeometryPolicy.widthMargin(1280, 1440, 0.0f))
     }
+
+    // Telling the phone the pixels are not square is the only lever a non-16:9 panel has, because
+    // the proto offers no non-16:9 resolution to ask for. Measured on a 1440x720 panel: the derived
+    // 11250 drew Android Auto's chrome circles 60x60 px, square 10001 drew them 67x60. What is left
+    // on the panel is derived/announced, so the derived value is the one that cancels.
+    @Test
+    fun `a wide panel at 720p advertises its real pixel shape`() {
+        assertEquals(15000, ProjectionGeometryPolicy.pixelAspectRatioE4(fill, 1920, 720, 1280, 720, 0, 0))
+        assertEquals(11250, ProjectionGeometryPolicy.pixelAspectRatioE4(fill, 1440, 720, 1280, 720, 0, 0))
+        assertEquals(13906, ProjectionGeometryPolicy.pixelAspectRatioE4(fill, 1780, 720, 1280, 720, 0, 0))
+    }
+
+    @Test
+    fun `a 16 by 9 panel stays square`() {
+        assertEquals(10000, ProjectionGeometryPolicy.pixelAspectRatioE4(fill, 1920, 1080, 1920, 1080, 0, 0))
+    }
+
+    // The margins already describe a correctly shaped canvas inside the bigger buffer, so measuring
+    // against the raw negotiated size would correct a second time and skew the case that works.
+    @Test
+    fun `a margined canvas is already square and is left alone`() {
+        assertEquals(10000, ProjectionGeometryPolicy.pixelAspectRatioE4(fill, 1440, 720, 1920, 1080, 480, 360))
+        assertEquals(10000, ProjectionGeometryPolicy.pixelAspectRatioE4(fill, 1920, 720, 1920, 1080, 0, 360))
+    }
+
+    // The whole chain on the panel this was reported from, with the resolution the short-side
+    // ladder now picks for it. Every scale is 1.0 and there is no margin, so the buffer, the
+    // picture and the touch surface all coincide, and the panel's shape rides on the pixel ratio.
+    @Test
+    fun `an ultra-wide panel needs no margin and no transform`() {
+        for ((panelW, expectedPar) in listOf(1920 to 15000, 1780 to 13906)) {
+            assertEquals(0 to 0, margins(panelW, 720, 1280, 720))
+            assertEquals(1.0f, scaleX(fill, panelW, 720, 1280, 720), 0.0001f)
+            assertEquals(1.0f, scaleY(fill, panelW, 720, 1280, 720), 0.0001f)
+            assertEquals(
+                expectedPar,
+                ProjectionGeometryPolicy.pixelAspectRatioE4(fill, panelW, 720, 1280, 720, 0, 0)
+            )
+        }
+    }
+
+    // An impossible panel reading is a bad measurement, not a panel. Say square rather than put a
+    // number on the wire that no phone can lay a UI out for.
+    @Test
+    fun `an impossible panel cannot put nonsense on the wire`() {
+        assertEquals(10000, ProjectionGeometryPolicy.pixelAspectRatioE4(fill, 4000, 200, 1280, 720, 0, 0))
+        assertEquals(10000, ProjectionGeometryPolicy.pixelAspectRatioE4(fill, 200, 4000, 1280, 720, 0, 0))
+    }
+
+    @Test
+    fun `a near-square panel is not worth correcting`() {
+        // 1940x1080 derives 10104, which is 1 percent off square and inside the tolerance.
+        assertEquals(10000, ProjectionGeometryPolicy.pixelAspectRatioE4(fill, 1940, 1080, 1920, 1080, 0, 0))
+    }
+
+    // The correction and the two aspect-preserving modes are alternatives, not layers: announcing
+    // 11250 and then pillarboxing with square pixels squeezes the phone's UI by the correction.
+    @Test
+    fun `only fill claims the pixels are not square`() {
+        assertEquals(10000, ProjectionGeometryPolicy.pixelAspectRatioE4(contain, 1920, 720, 1280, 720, 0, 0))
+        assertEquals(10000, ProjectionGeometryPolicy.pixelAspectRatioE4(cover, 1920, 720, 1280, 720, 0, 0))
+        assertEquals(15000, ProjectionGeometryPolicy.pixelAspectRatioE4(fill, 1920, 720, 1280, 720, 0, 0))
+    }
+
+    @Test
+    fun `a degenerate canvas reports square pixels`() {
+        assertEquals(10000, ProjectionGeometryPolicy.pixelAspectRatioE4(fill, 1920, 720, 1280, 720, 1280, 0))
+        assertEquals(10000, ProjectionGeometryPolicy.pixelAspectRatioE4(fill, 0, 0, 1280, 720, 0, 0))
+    }
 }

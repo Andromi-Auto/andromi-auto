@@ -52,6 +52,39 @@ object HeadUnitScreenConfig {
     private var realScreenWidthPx: Int = 0
     private var realScreenHeightPx: Int = 0
 
+    // What ServiceDiscoveryResponse actually put on the wire. init() re-reads the display metrics
+    // on every scale update, so the live margins can move under a session that already announced
+    // its own; this is what the drift is measured against.
+    private var announcedWidthMargin: Int = MarginAnnouncementPolicy.NOT_ANNOUNCED
+    private var announcedHeightMargin: Int = MarginAnnouncementPolicy.NOT_ANNOUNCED
+
+    /**
+     * Raised when the live margins leave the announced ones. The listener records what it sends;
+     * a false keeps the old announcement standing so the next recalculate retries.
+     */
+    var onMarginsDiverged: (() -> Boolean)? = null
+
+    // The listener redraws, which re-enters init() and can land back here. One notification at a time.
+    private var notifyingMarginDivergence: Boolean = false
+
+    fun recordAnnouncedMargins(widthMargin: Int, heightMargin: Int) {
+        announcedWidthMargin = widthMargin
+        announcedHeightMargin = heightMargin
+    }
+
+    /** True when the live margins are already on the wire, so sending them again would only repeat it. */
+    fun marginsMatchAnnounced(): Boolean =
+        announcedWidthMargin != MarginAnnouncementPolicy.NOT_ANNOUNCED &&
+            announcedHeightMargin != MarginAnnouncementPolicy.NOT_ANNOUNCED &&
+            !MarginAnnouncementPolicy.shouldReannounce(
+                announcedWidthMargin, announcedHeightMargin, getWidthMargin(), getHeightMargin()
+            )
+
+    fun clearAnnouncedMargins() {
+        announcedWidthMargin = MarginAnnouncementPolicy.NOT_ANNOUNCED
+        announcedHeightMargin = MarginAnnouncementPolicy.NOT_ANNOUNCED
+    }
+
 
     fun init(context: Context, displayMetrics: DisplayMetrics, settings: Settings) {
         videoFitMode = settings.videoFitMode
@@ -237,17 +270,18 @@ object HeadUnitScreenConfig {
     }
 
     /**
-     * The proto resolution the physical panel warrants, in the display's orientation. Delegates to
-     * SystemOptimizer.panelCeiling (the shared source of truth) so the runtime cap agrees with the
-     * settings "too high" warning and the DPI calculation (issue #767).
+     * The largest proto resolution the panel can use, in the display's orientation. Deliberately
+     * SystemOptimizer.hardCeiling and not panelCeiling: the latter is the recommendation, and
+     * capping to it silently overrode the "Use anyway" the settings dialog offers, costing an
+     * ultra-wide panel its native width on a resolution the user had picked on purpose.
      */
-    private fun autoResolutionForPanel(
+    private fun hardCeilingForPanel(
         w: Int,
         h: Int,
         portrait: Boolean,
         canHevc: Boolean
     ): Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType {
-        return protoForResolution(SystemOptimizer.panelCeiling(w, h, canHevc), portrait)
+        return protoForResolution(SystemOptimizer.hardCeiling(w, h, canHevc), portrait)
     }
 
     /**
@@ -308,46 +342,28 @@ object HeadUnitScreenConfig {
                 AppLog.i("[UI_DEBUG] CarScreen: RESOLUTION LOCKED to $negotiatedResolutionType. Usable area is ${screenWidthPx}x${screenHeightPx}. Skipping re-negotiation.")
             }
         }
+        
+        // A locked session keeps what it already negotiated. This used to fall through to the
+        // manual branch, where AUTO carries no codec and the fallback landed on 480p.
+        NegotiatedResolutionPolicy.select(
+            isLocked = isResolutionLocked,
+            selected = selectedResolution,
+            panelW = screenWidthPx,
+            panelH = screenHeightPx,
+            fitMode = videoFitMode,
+            hevcSupported = VideoDecoder.isHevcSupported(),
+            canHevcHighRes = canNegotiateHevc,
+            sdkInt = Build.VERSION.SDK_INT
+        )?.let { negotiatedResolutionType = protoForResolution(it, isPortraitDisplay) }
 
-        if (!isResolutionLocked && selectedResolution == Settings.Resolution.AUTO) {
-            if (isUltrawideEnabled() && (screenWidthPx >= 1700 || realScreenWidthPx >= 1700)) {
-                // Force 720p (1280x720) for 2.4GHz compatibility, but use PAR to fill the 1780+ width
-                negotiatedResolutionType = Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType._1280x720
-                videoFitMode = Settings.VideoFitMode.FILL // the ultra-wide stretch needs FILL
-                AppLog.i("[ULTRAWIDE] Forcing 720p and Stretch for window width: $screenWidthPx")
-            } else if (isPortraitDisplay) {
-                negotiatedResolutionType = if (screenWidthPx > 720 || screenHeightPx > 1280) {
-                    Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType._1080x1920
-                } else {
-                    Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType._720x1280
-                }
-            } else {
-                negotiatedResolutionType = when {
-                    screenWidthPx <= 800 && screenHeightPx <= 480 -> Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType._800x480
-                    (screenWidthPx >= 3840 || screenHeightPx >= 2160) && VideoDecoder.isHevcSupported() && Build.VERSION.SDK_INT >= 24 ->
-                        Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType._3840x2160
-                    (screenWidthPx >= 2560 || screenHeightPx >= 1440) && canNegotiateHevc && Build.VERSION.SDK_INT >= 24 ->
-                        Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType._2560x1440
-                    screenWidthPx > 1280 || screenHeightPx > 720 -> Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType._1920x1080
-                    else -> Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType._1280x720
-                }
-            }
-        } else {
-            // Manual selection: map to the correct orientation via the shared helper.
-            negotiatedResolutionType = protoForResolution(
-                selectedResolution ?: Settings.Resolution._800x480, isPortraitDisplay
-            )
-        }
-
-        // Cap the negotiated resolution to what the physical panel warrants, so we never ask the
-        // phone for more pixels than the screen can show. Downscaling e.g. 1080p to a 600p panel
-        // every frame overloads the display scaler (MediaTek MDP) and stalls video (issue #650).
-        // min(current, panelCeiling): only ever lowers, so explicit lower choices and HEVC-gated
-        // 1440p/4K are never raised.
+        // Cap to the largest buffer the panel can use, so a small panel never decodes a frame it
+        // has to downscale every time, which overloads the MediaTek MDP scaler (issue #650). This
+        // is the hard ceiling, not the recommendation: a wide panel uses a 1920-wide buffer in full
+        // and only hides rows. min(current, ceiling), so a lower choice is never raised.
         val preCapResolution = negotiatedResolutionType
-        val panelCeiling = autoResolutionForPanel(realScreenWidthPx, realScreenHeightPx, isPortraitDisplay, canNegotiateHevc)
-        if (pixelsOf(negotiatedResolutionType) > pixelsOf(panelCeiling)) {
-            negotiatedResolutionType = panelCeiling
+        val hardCeiling = hardCeilingForPanel(realScreenWidthPx, realScreenHeightPx, isPortraitDisplay, canNegotiateHevc)
+        if (pixelsOf(negotiatedResolutionType) > pixelsOf(hardCeiling)) {
+            negotiatedResolutionType = hardCeiling
         }
         // And to what the link can carry. Same min(current, ceiling) shape as the panel cap above,
         // so a user already asking for less is never raised to meet it.
@@ -375,6 +391,23 @@ object HeadUnitScreenConfig {
         fit.isPortraitScaled?.let { isPortraitScaled = it }
         
         AppLog.i("[UI_DEBUG] CarScreen isSmallScreen: $isSmallScreen, scaleFactor: $scaleFactor, portraitScaled: $isPortraitScaled, margins: w=${getWidthMargin()}, h=${getHeightMargin()}")
+
+        if (!notifyingMarginDivergence &&
+            MarginAnnouncementPolicy.shouldReannounce(
+                announcedWidthMargin, announcedHeightMargin, getWidthMargin(), getHeightMargin()
+            )
+        ) {
+            AppLog.i(
+                "[UI_DEBUG] CarScreen: margins drifted from the announced " +
+                    "${announcedWidthMargin}x${announcedHeightMargin} to ${getWidthMargin()}x${getHeightMargin()}"
+            )
+            notifyingMarginDivergence = true
+            try {
+                onMarginsDiverged?.invoke()
+            } finally {
+                notifyingMarginDivergence = false
+            }
+        }
     }
 
     fun getAdjustedHeight(): Int = ProjectionGeometryPolicy.adjustedHeight(getNegotiatedHeight(), scaleFactor)
@@ -443,24 +476,14 @@ object HeadUnitScreenConfig {
     }
 
     fun getPixelAspectRatioE4(): Int {
-        if (isUltrawideEnabled() && screenWidthPx >= 1700) {
-            // Force dynamic Pixel Aspect Ratio for 1780+ width window using a 1280 buffer
-            val ratio = (screenWidthPx.toFloat() / 1280f) * 10000
-            return ratio.roundToInt()
-        }
-        return if (this::currentSettings.isInitialized && currentSettings.pixelAspectRatioE4 > 0) {
-            currentSettings.pixelAspectRatioE4
-        } else {
-            10000 // 1.0 = square pixels
-        }
-    }
-
-    fun isUltrawideEnabled(): Boolean {
-        return if (this::currentSettings.isInitialized) {
-            currentSettings.optimizeUltrawide
-        } else {
-            false
-        }
+        // The settings row normalises anything <= 0 to 10000, so 10000 is also "unset" and is what
+        // lets the derived value through. An explicit non-square choice always wins.
+        val manual = if (this::currentSettings.isInitialized) currentSettings.pixelAspectRatioE4 else 0
+        if (manual > 0 && manual != ProjectionGeometryPolicy.SQUARE_PIXELS_E4) return manual
+        return ProjectionGeometryPolicy.pixelAspectRatioE4(
+            videoFitMode, screenWidthPx, screenHeightPx, getNegotiatedWidth(), getNegotiatedHeight(),
+            getWidthMargin(), getHeightMargin()
+        )
     }
 
     fun getUsableWidth(): Int = screenWidthPx

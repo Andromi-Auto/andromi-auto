@@ -27,6 +27,10 @@ object TouchCoordinateMapper {
 
         val uiW = negotiatedWidth - marginWidth
         val uiH = negotiatedHeight - marginHeight
+        // Android Auto draws at the buffer's top-left and leaves the announced margin at the
+        // bottom, measured from the coordinate it logged receiving. Centring the canvas here put
+        // every tap half the margin low, one control down. The renderer's centre pivot and the
+        // symmetric insets both suggest otherwise; neither describes what the phone does.
 
         val videoX: Float
         val videoY: Float
