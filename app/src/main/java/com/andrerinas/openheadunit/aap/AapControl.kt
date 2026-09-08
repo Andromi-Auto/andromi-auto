@@ -20,6 +20,7 @@ import com.andrerinas.openheadunit.decoder.video.VideoDecoder
 import com.andrerinas.openheadunit.location.LocationHolder
 import com.andrerinas.openheadunit.App
 import com.andrerinas.openheadunit.utils.AppLog
+import com.andrerinas.openheadunit.utils.HeadUnitScreenConfig
 import com.andrerinas.openheadunit.utils.Settings
 import com.andrerinas.openheadunit.utils.Utils
 
@@ -150,11 +151,21 @@ internal class AapControlMedia(
             // congested links where the backlog it would be trying to bound shows up. The backlog
             // is bounded where it costs nothing instead: the decoder discards decoded frames it is
             // behind on rather than having the phone send fewer.
-            return if (aapTransport.isWireless) 12 else 16
+            val base = if (aapTransport.isWireless) 12 else 16
+            return if (HeadUnitScreenConfig.isUltrawideEnabled()) {
+                base * 4
+            } else {
+                base
+            }
         }
 
         // Audio still benefits from a wider jitter window, especially on wireless.
-        return if (aapTransport.isWireless) 30 else 16
+        val baseAudio = if (aapTransport.isWireless) 30 else 16
+        return if (HeadUnitScreenConfig.isUltrawideEnabled()) {
+            baseAudio * 2
+        } else {
+            baseAudio
+        }
     }
 
     private fun mediaSinkStopRequest(channel: Int): Int {
