@@ -1,0 +1,100 @@
+# Floating Launcher Overlay Button Feature Patch
+
+--- app/src/main/AndroidManifest.xml
++++ app/src/main/AndroidManifest.xml
+@@ -50,2 +50,3 @@
+     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+
+--- app/src/main/java/com/andrerinas/openheadunit/App.kt
++++ app/src/main/java/com/andrerinas/openheadunit/App.kt
+@@ -21,4 +21,6 @@
+-class App : Application() {
++class App : Application(), Application.ActivityLifecycleCallbacks {
+
++    private var startedActivityCount = 0
+
+@@ -36,2 +38,4 @@
+         super.onCreate()
+         instance = this
++        registerActivityLifecycleCallbacks(this)
+
+@@ -152,0 +156,19 @@
++    override fun onActivityCreated(activity: android.app.Activity, savedInstanceState: android.os.Bundle?) {}
++    override fun onActivityStarted(activity: android.app.Activity) {
++        startedActivityCount++
++        if (startedActivityCount == 1) {
++            com.andrerinas.openheadunit.main.FloatingButtonManager.onAppForegroundChanged(this, isForeground = true)
++        }
++    }
++    override fun onActivityResumed(activity: android.app.Activity) {}
++    override fun onActivityPaused(activity: android.app.Activity) {}
++    override fun onActivityStopped(activity: android.app.Activity) {
++        startedActivityCount--
++        if (startedActivityCount <= 0) {
++            startedActivityCount = 0
++            com.andrerinas.openheadunit.main.FloatingButtonManager.onAppForegroundChanged(this, isForeground = false)
++        }
++    }
++    override fun onActivitySaveInstanceState(activity: android.app.Activity, outState: android.os.Bundle) {}
++    override fun onActivityDestroyed(activity: android.app.Activity) {}
+
+--- app/src/main/java/com/andrerinas/openheadunit/aap/AapService.kt
++++ app/src/main/java/com/andrerinas/openheadunit/aap/AapService.kt
+@@ -542,2 +542,4 @@
+                     AppLog.i("WakeDetect: SCREEN_ON (screen was off for ${offSec}s)")
++                    com.andrerinas.openheadunit.main.FloatingButtonManager.update(this@AapService)
+
+@@ -907,2 +909,3 @@
+         usbLauncherManager.checkAlreadyConnected()
+         registerNetworkMonitor()
++        com.andrerinas.openheadunit.main.FloatingButtonManager.update(this)
+
+@@ -1969,2 +1972,3 @@
+         try { wifiAutoStartReceiver?.let { unregisterReceiver(it) } } catch (_: Exception) {}
++        com.andrerinas.openheadunit.main.FloatingButtonManager.removeOverlay(this)
+
+--- app/src/main/java/com/andrerinas/openheadunit/utils/Settings.kt
++++ app/src/main/java/com/andrerinas/openheadunit/utils/Settings.kt
+@@ +105,25 @@
++    var enableFloatingButton: Boolean
++        get() = prefs.getBoolean("enable-floating-button", true)
++        set(value) { prefs.edit().putBoolean("enable-floating-button", value).apply() }
++
++    var floatingButtonXPercent: Int
++        get() = prefs.getInt("floating-button-x-percent", 0)
++        set(value) { prefs.edit().putInt("floating-button-x-percent", value.coerceIn(0, 100)).apply() }
++
++    var floatingButtonYPercent: Int
++        get() = prefs.getInt("floating-button-y-percent", 54)
++        set(value) { prefs.edit().putInt("floating-button-y-percent", value.coerceIn(0, 100)).apply() }
++
++    var floatingButtonOpacityPercent: Int
++        get() = prefs.getInt("floating-button-opacity-percent", 80)
++        set(value) { prefs.edit().putInt("floating-button-opacity-percent", value.coerceIn(0, 100)).apply() }
++
++    var floatingButtonSizeDp: Int
++        get() = prefs.getInt("floating-button-size-dp", 60)
++        set(value) { prefs.edit().putInt("floating-button-size-dp", value.coerceIn(32, 120)).apply() }
+
+--- app/src/main/java/com/andrerinas/openheadunit/main/MainActivity.kt
++++ app/src/main/java/com/andrerinas/openheadunit/main/MainActivity.kt
+@@ +1008,35 @@
++    private fun checkSystemPermissions() {
++        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
++            val needsOverlay = !android.provider.Settings.canDrawOverlays(this)
++            if (needsOverlay) {
++                systemPermissionDialog = com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
++                    .setTitle("System Permissions Required")
++                    .setMessage("Emzoom AA needs 'Display over other apps' permission to show the Floating Launcher Button on your OEM home screen.")
++                    .setPositiveButton("Grant Permission") { _, _ ->
++                        val intent = Intent(
++                            android.provider.Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
++                            android.net.Uri.parse("package:$packageName")
++                        )
++                        startActivity(intent)
++                    }
++                    .setNegativeButton("Later", null)
++                    .show()
++            }
++        }
++    }
