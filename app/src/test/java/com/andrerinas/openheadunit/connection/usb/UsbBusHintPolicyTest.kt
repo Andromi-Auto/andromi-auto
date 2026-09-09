@@ -8,22 +8,53 @@ class UsbBusHintPolicyTest {
 
     @Test
     fun `an empty bus is the empty-bus hint whatever else was seen`() {
-        assertEquals(UsbBusHintPolicy.Hint.EMPTY_BUS, UsbBusHintPolicy.hint(0, 0, 4))
+        assertEquals(UsbBusHintPolicy.Hint.EMPTY_BUS, UsbBusHintPolicy.hint(0, 0, 4, featureDeclared = true))
     }
 
     @Test
     fun `a usable device needs no hint`() {
-        assertNull(UsbBusHintPolicy.hint(1, 1, 3))
+        assertNull(UsbBusHintPolicy.hint(1, 1, 3, featureDeclared = true))
     }
 
     @Test
     fun `one refused device is not a cycling adapter`() {
-        assertEquals(UsbBusHintPolicy.Hint.NONE_USABLE, UsbBusHintPolicy.hint(1, 0, 1))
+        assertEquals(UsbBusHintPolicy.Hint.NONE_USABLE, UsbBusHintPolicy.hint(1, 0, 1, featureDeclared = true))
     }
 
     @Test
     fun `two identities inside the window is a cycling adapter`() {
-        assertEquals(UsbBusHintPolicy.Hint.CYCLING_ADAPTER, UsbBusHintPolicy.hint(1, 0, 2))
+        assertEquals(UsbBusHintPolicy.Hint.CYCLING_ADAPTER, UsbBusHintPolicy.hint(1, 0, 2, featureDeclared = true))
+    }
+
+    @Test
+    fun `an empty bus on a unit that never declared USB host is a permanent verdict`() {
+        assertEquals(
+            UsbBusHintPolicy.Hint.NO_HOST_SUPPORT,
+            UsbBusHintPolicy.hint(0, 0, 0, featureDeclared = false)
+        )
+    }
+
+    @Test
+    fun `a ROM that omits the feature but hosts devices anyway is never told it cannot`() {
+        // Sloppy ROMs enumerate without declaring. Claiming NO_HOST_SUPPORT here would be a lie the
+        // device itself disproves, so the ordinary refusal hints have to win.
+        assertEquals(
+            UsbBusHintPolicy.Hint.NONE_USABLE,
+            UsbBusHintPolicy.hint(1, 0, 1, featureDeclared = false)
+        )
+        assertEquals(
+            UsbBusHintPolicy.Hint.CYCLING_ADAPTER,
+            UsbBusHintPolicy.hint(1, 0, 2, featureDeclared = false)
+        )
+        assertNull(UsbBusHintPolicy.hint(1, 1, 0, featureDeclared = false))
+    }
+
+    @Test
+    fun `a declared feature keeps the three-way empty-bus wording`() {
+        assertEquals(
+            UsbBusHintPolicy.Hint.EMPTY_BUS,
+            UsbBusHintPolicy.hint(0, 0, 0, featureDeclared = true)
+        )
     }
 
     @Test

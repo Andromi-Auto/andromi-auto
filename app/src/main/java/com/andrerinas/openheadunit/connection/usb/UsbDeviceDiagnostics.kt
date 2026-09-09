@@ -1,6 +1,7 @@
 package com.andrerinas.openheadunit.connection.usb
 
 import android.content.Context
+import android.content.pm.PackageManager
 import android.hardware.usb.UsbConstants
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbInterface
@@ -9,6 +10,7 @@ import com.andrerinas.openheadunit.utils.AppLog
 import java.util.Collections
 import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * Dumps the raw USB bus alongside our own verdict on each device. Every enumeration site filters
@@ -24,6 +26,13 @@ object UsbDeviceDiagnostics {
     /** (seen at, VID:PID) for every device any scan has met, trimmed to the hint window. */
     private val seenIdentities = Collections.synchronizedList(mutableListOf<Pair<Long, String>>())
 
+    /** The host-support verdict is a fact about the unit, so it is worth saying exactly once. */
+    private val hostSupportReported = AtomicBoolean(false)
+
+    /** Whether the framework will enumerate anything at all on this unit's USB bus. */
+    fun hasUsbHostFeature(context: Context): Boolean =
+        context.packageManager.hasSystemFeature(PackageManager.FEATURE_USB_HOST)
+
     fun logDeviceList(context: Context, usbManager: UsbManager, caller: String) {
         val devices = try {
             usbManager.deviceList.values.toList()
@@ -37,6 +46,21 @@ object UsbDeviceDiagnostics {
         val reportAtInfo = accepted == 0
         val lines = devices.map { "UsbDiagnostics:   ${describe(context, it, usbManager)}" }
         val recentIdentities = recordIdentities(devices)
+
+        val hint = UsbBusHintPolicy.hint(
+            devices.size, accepted, recentIdentities.size, hasUsbHostFeature(context)
+        )
+
+        // Above the dedup, because this verdict never changes: an unchanged empty bus returns early
+        // below, so a reporter who only ever scans an empty bus would otherwise never see it.
+        if (hint == UsbBusHintPolicy.Hint.NO_HOST_SUPPORT && hostSupportReported.compareAndSet(false, true)) {
+            AppLog.i(
+                "UsbDiagnostics: this head unit does not declare USB host support " +
+                    "(android.hardware.usb.host), so Android enumerates nothing on the bus whatever " +
+                    "is plugged in and wired Android Auto cannot work here. Storage sticks and vendor " +
+                    "mirroring apps are unaffected: they do not go through the Android USB API."
+            )
+        }
 
         // The service scan runs on every attach, detach and permission result, so repeating an
         // unchanged bus would bury the change that matters in a log the user has to read. Keyed by
@@ -54,7 +78,9 @@ object UsbDeviceDiagnostics {
 
         // The common causes, in the order they are worth checking, so the log answers the question
         // without a round trip to the reporter.
-        when (UsbBusHintPolicy.hint(devices.size, accepted, recentIdentities.size)) {
+        when (hint) {
+            // Already reported above, and only once per process.
+            UsbBusHintPolicy.Hint.NO_HOST_SUPPORT -> Unit
             UsbBusHintPolicy.Hint.EMPTY_BUS -> AppLog.i(
                 "UsbDiagnostics: nothing is on the bus. Either the port carries no data, the unit " +
                     "is not in USB host mode, or a wireless adapter is waiting for its phone " +

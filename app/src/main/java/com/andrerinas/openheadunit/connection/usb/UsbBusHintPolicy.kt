@@ -16,9 +16,22 @@ object UsbBusHintPolicy {
     /** Distinct VID:PIDs inside the window that mean a device is cycling rather than being swapped. */
     const val CYCLING_IDENTITIES = 2
 
-    enum class Hint { EMPTY_BUS, CYCLING_ADAPTER, NONE_USABLE }
+    enum class Hint { NO_HOST_SUPPORT, EMPTY_BUS, CYCLING_ADAPTER, NONE_USABLE }
 
-    fun hint(deviceCount: Int, acceptedCount: Int, distinctIdentitiesInWindow: Int): Hint? = when {
+    /**
+     * @param featureDeclared `android.hardware.usb.host`. A ROM that omits it never starts the
+     *   framework's host stack, so the bus stays empty whatever is plugged in - a permanent fact
+     *   about the unit rather than the three-way guess [Hint.EMPTY_BUS] offers.
+     */
+    fun hint(
+        deviceCount: Int,
+        acceptedCount: Int,
+        distinctIdentitiesInWindow: Int,
+        featureDeclared: Boolean,
+    ): Hint? = when {
+        // Only when nothing enumerated: some ROMs omit the declaration and host devices anyway, and
+        // telling those users their unit cannot do USB would be worse than saying nothing.
+        deviceCount == 0 && !featureDeclared -> Hint.NO_HOST_SUPPORT
         deviceCount == 0 -> Hint.EMPTY_BUS
         acceptedCount > 0 -> null
         distinctIdentitiesInWindow >= CYCLING_IDENTITIES -> Hint.CYCLING_ADAPTER

@@ -29,6 +29,7 @@ import com.andrerinas.openheadunit.aap.AapProjectionActivity
 import com.andrerinas.openheadunit.aap.AapService
 import com.andrerinas.openheadunit.connection.usb.UsbAccessoryMode
 import com.andrerinas.openheadunit.connection.usb.UsbDeviceCompat
+import com.andrerinas.openheadunit.connection.usb.UsbDeviceDiagnostics
 import com.andrerinas.openheadunit.connection.usb.UsbReceiver
 import com.andrerinas.openheadunit.utils.Settings
 import com.google.android.material.appbar.MaterialToolbar
@@ -78,6 +79,12 @@ class UsbListFragment : Fragment() {
             adapter.setData(it, allowDevices)
 
             if (it.isEmpty()) {
+                // A unit whose ROM never declared USB host enumerates nothing whatever is plugged
+                // in, so "no device connected" reads as the user's fault when it is not.
+                noUsbDeviceTextView.setText(
+                    if (UsbDeviceDiagnostics.hasUsbHostFeature(requireContext())) R.string.no_usb_device_connected
+                    else R.string.no_usb_host_support
+                )
                 noUsbDeviceTextView.visibility = VISIBLE
                 recyclerView.visibility = GONE
             } else {

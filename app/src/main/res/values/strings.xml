@@ -334,6 +334,7 @@
     <string name="not_running">Not Running</string>
     <string name="no_android_auto_device_connected">No Android Auto Device connected. Please check USB connection.</string>
     <string name="no_usb_device_connected">No USB device connected to device.</string>
+    <string name="no_usb_host_support">This head unit does not support USB host mode, so wired Android Auto is not available on it. Use a wireless connection instead.</string>
     <string name="press_back_again_to_exit">Press back again to exit</string>
     <string name="back">Back</string>
     <string name="debug_mode">Debug Mode</string>
