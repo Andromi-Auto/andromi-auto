@@ -1101,19 +1101,21 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
                 val deliveryStability =
                     if (isNativeAaMode() && isOwner) nativeIdentityStability
                     else GroupIdentityStability.NOT_MEASURED
+                val ipRetries = GroupIpResolutionPolicy.retriesAfterFirstRead(isOwner)
                 Thread {
                     try {
                         var ip = getWifiDirectIp(iface)
                         var retries = 0
-                        while (ip == null && retries < 15) {
-                            AppLog.d("WifiDirectManager: Waiting for IP on interface ${iface ?: "any p2p"} (Attempt ${retries + 1}/15)...")
+                        while (ip == null && retries < ipRetries) {
+                            AppLog.d("WifiDirectManager: Waiting for IP on interface ${iface ?: "any p2p"} (Attempt ${retries + 1}/$ipRetries)...")
                             Thread.sleep(1000)
                             ip = getWifiDirectIp(iface)
                             retries++
                         }
 
-                        // For Native AA, we almost always expect 192.168.49.1 if we are GO
-                        val finalIp = ip ?: (if (isOwner) "192.168.49.1" else null)
+                        // A group owner is 192.168.49.1 by platform, so waiting for the interface to
+                        // say so only delays the credentials and the wake poke behind them.
+                        val finalIp = GroupIpResolutionPolicy.resolve(ip, isOwner)
                         if (deliveryEpoch != credentialsEpoch) {
                             AppLog.i(
                                 "WifiDirectManager: not delivering credentials for $ssid - that group was " +
@@ -1773,10 +1775,11 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
                             if (band == NativeGroupBandPolicy.Band.GHZ_2_4) NATIVE_GROUP_MODE_24GHZ_REQUESTED
                             else NATIVE_GROUP_MODE_5GHZ_REQUESTED
                         isGroupOwner = true
-                        handler.postDelayed({
-                            mgr.requestConnectionInfo(ch, this@WifiDirectManager)
-                            mgr.requestGroupInfo(ch, this@WifiDirectManager)
-                        }, 1000L)
+                        // Asked now rather than a second later: a group that cannot answer yet is
+                        // already covered by the 20 x 1s retry in onGroupInfoAvailable, so the wait
+                        // only ever cost a second it could not save.
+                        mgr.requestConnectionInfo(ch, this@WifiDirectManager)
+                        mgr.requestGroupInfo(ch, this@WifiDirectManager)
                     }
                     override fun onFailure(reason: Int) {
                         onQuietGroupFailed(mgr, ch, retryCount, preference, chosenChannel,

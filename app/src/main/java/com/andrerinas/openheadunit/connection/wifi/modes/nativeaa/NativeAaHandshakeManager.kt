@@ -54,6 +54,10 @@ class NativeAaHandshakeManager(
         /** How often the poke loop re-asks whether a prompt on screen still holds it off. */
         private const val PROMPT_POLL_MS = 1_000L
 
+        /** Ceiling on waiting for the AA listeners before poking anyway, and how often to ask. */
+        private const val POKE_READY_WAIT_MS = 2_000L
+        private const val POKE_READY_POLL_MS = 100L
+
         /** How long to wait for the AAP TCP port to be bound before giving up on a handshake. */
         private const val PORT_WAIT_MS = 3_000L
 
@@ -1270,6 +1274,23 @@ class NativeAaHandshakeManager(
      * re-delivery, and the phone *joining our group* is itself a P2P connection change, hence a
      * re-delivery. That put a real RFCOMM connect() in the middle of the phone's DHCP exchange.
      */
+    /**
+     * Wakes the phone while the group is still forming, rather than waiting for the credentials it
+     * does not need yet. The handshake opens with the version exchange and waits for credentials
+     * afterwards, so the phone's own wake latency runs alongside the bring-up instead of after it.
+     */
+    fun triggerEarlyWake(userExited: Boolean) {
+        if (!EarlyWakePolicy.mayWakeBeforeCredentials(
+                listenersOpen = isActive(),
+                credentialsPresent = credentials != null,
+                userExited = userExited,
+                sessionUp = commManager.isConnected,
+            )
+        ) return
+        AppLog.i("NativeAA: waking the phone while the WiFi group is still forming.")
+        triggerPoke()
+    }
+
     fun triggerPoke() {
         if (isHandoffSettling()) {
             // Info, not debug: this line is the evidence the suppression is working, and reporter
@@ -1301,8 +1322,9 @@ class NativeAaHandshakeManager(
         // a local called credentials would shadow it with a Triple that is never null.
         val snapshot = credentials
         val pokeKey = Triple(snapshot?.ssid ?: "", snapshot?.ip ?: "", snapshot?.bssid ?: "")
-        if (pokeJob?.isActive == true && pokeKey == lastPokeTriggerCredentials) {
-            AppLog.d("NativeAA: triggerPoke() called again with unchanged credentials while a poke is already running - not restarting it.")
+        if (!EarlyWakePolicy.shouldRestartLoop(pokeJob?.isActive == true, lastPokeTriggerCredentials, pokeKey)) {
+            AppLog.d("NativeAA: a wake poke is already running for these credentials - not restarting it.")
+            lastPokeTriggerCredentials = pokeKey
             return
         }
         lastPokeTriggerCredentials = pokeKey
@@ -1310,8 +1332,14 @@ class NativeAaHandshakeManager(
         pokeJob?.cancel()
         pokeDeferralLogged = false
         pokeJob = scope.launch(Dispatchers.IO + CoroutineName("NativeAa-Wakeup")) {
-            AppLog.d("NativeAA: triggerPoke() delay starting (2s)...")
-            delay(2000) // Small safety delay before connecting
+            // The listeners are what the woken phone dials back on, so wait for them rather than
+            // for a fixed two seconds that was only ever a guess at the same thing.
+            var waitedMs = 0L
+            while (!isActive() && waitedMs < POKE_READY_WAIT_MS && isActive) {
+                delay(POKE_READY_POLL_MS)
+                waitedMs += POKE_READY_POLL_MS
+            }
+            AppLog.d("NativeAA: wake poke starting (listeners ready after ${waitedMs}ms).")
 
             while (isRunning && isActive) {
                 // Asked of the screen, never of the settings, and on every pass rather than once on
