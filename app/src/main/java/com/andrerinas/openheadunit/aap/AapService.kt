@@ -2665,13 +2665,15 @@ class AapService : Service() {
     private fun rotateWifiDirectIdentity() {
         val native = wifiLauncherManager.active as? WifiLauncherNative
         val handshake = native?.handshakeManager
+        val wifiDirect = wifiLauncherManager.sharedServices.wifiDirectManager
         val reason = P2pIdentityRotationPolicy.deferralReason(
             sessionLive = commManager.isConnected,
             handshakeInFlight = handshake?.isHandshakeInFlight() == true ||
                 handshake?.isHandoffSettling() == true,
             nativeWifiDirectActive = native?.strategy == NativeStrategy.WIFI_DIRECT,
+            createOutstanding = wifiDirect?.isCreatingGroup == true ||
+                wifiDirect?.isAcceptedCreatePending == true,
         )
-        val wifiDirect = wifiLauncherManager.sharedServices.wifiDirectManager
         if (reason != null || wifiDirect == null) {
             AppLog.i(
                 "AapService: the new WiFi Direct identity waits for the next create: " +

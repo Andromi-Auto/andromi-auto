@@ -26,13 +26,15 @@ object P2pIdentityRotationPolicy {
         sessionLive: Boolean,
         handshakeInFlight: Boolean,
         nativeWifiDirectActive: Boolean,
-    ): Boolean = deferralReason(sessionLive, handshakeInFlight, nativeWifiDirectActive) == null
+        createOutstanding: Boolean = false,
+    ): Boolean = deferralReason(sessionLive, handshakeInFlight, nativeWifiDirectActive, createOutstanding) == null
 
     /** Why the rotation waits for the next create, or null when it can be applied now. */
     fun deferralReason(
         sessionLive: Boolean,
         handshakeInFlight: Boolean,
         nativeWifiDirectActive: Boolean,
+        createOutstanding: Boolean = false,
     ): String? = when {
         !nativeWifiDirectActive ->
             "no WiFi Direct group of this mode is up, so there is nothing to rename yet"
@@ -40,6 +42,9 @@ object P2pIdentityRotationPolicy {
             "a phone is projecting on this group and recreating it would end the session"
         handshakeInFlight ->
             "a phone is being handed the credentials right now and would be given a network that is going away"
+        // A second create under one the platform is still holding is answered BUSY for two minutes.
+        createOutstanding ->
+            "a group is still being asked for, and the next create after it carries the new identity"
         else -> null
     }
 

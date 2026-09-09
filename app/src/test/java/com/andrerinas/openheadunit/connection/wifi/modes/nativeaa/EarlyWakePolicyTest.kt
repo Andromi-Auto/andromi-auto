@@ -81,4 +81,35 @@ class EarlyWakePolicyTest {
     fun `credentials going away restarts the loop`() {
         assertTrue(EarlyWakePolicy.shouldRestartLoop(loopActive = true, previousKey = real, newKey = none))
     }
+
+    // --- a wake that brought the phone back to nothing is not repeated ---
+
+    @Test
+    fun `an early loop stops once its handshake ended for lack of credentials`() {
+        assertTrue(EarlyWakePolicy.stopAfterCredentialsFailure(loopStartedEmpty = true, credentialsPresent = false))
+    }
+
+    @Test
+    fun `a credentialed loop, or one whose credentials exist now, keeps going`() {
+        assertFalse(EarlyWakePolicy.stopAfterCredentialsFailure(loopStartedEmpty = false, credentialsPresent = false))
+        assertFalse(EarlyWakePolicy.stopAfterCredentialsFailure(loopStartedEmpty = true, credentialsPresent = true))
+    }
+
+    @Test
+    fun `a second empty wake waits for the credentials`() {
+        assertFalse(EarlyWakePolicy.mayStartWithoutCredentials(keyIsEmpty = true, earlyWakeSpent = true))
+        assertTrue(EarlyWakePolicy.mayStartWithoutCredentials(keyIsEmpty = true, earlyWakeSpent = false))
+    }
+
+    @Test
+    fun `a credentialed wake is never held by a spent early one`() {
+        assertTrue(EarlyWakePolicy.mayStartWithoutCredentials(keyIsEmpty = false, earlyWakeSpent = true))
+    }
+
+    @Test
+    fun `an empty key is all three fields empty`() {
+        assertTrue(EarlyWakePolicy.isEmptyKey(none))
+        assertFalse(EarlyWakePolicy.isEmptyKey(real))
+        assertFalse(EarlyWakePolicy.isEmptyKey(Triple("DIRECT-ab", "", "")))
+    }
 }

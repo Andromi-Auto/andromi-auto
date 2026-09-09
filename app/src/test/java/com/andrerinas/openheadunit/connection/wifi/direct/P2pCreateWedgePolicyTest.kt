@@ -1,8 +1,10 @@
 package com.andrerinas.openheadunit.connection.wifi.direct
 
 import com.andrerinas.openheadunit.connection.wifi.direct.P2pCreateWedgePolicy.Step
+import com.andrerinas.openheadunit.connection.wifi.direct.P2pCreateWedgePolicy.Variant
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -64,5 +66,48 @@ class P2pCreateWedgePolicyTest {
     @Test
     fun `a refusal below the stall floor is still a pending create, not a refusal`() {
         assertFalse(P2pCreateWedgePolicy.isRefusalHonest(P2pCreateWedgePolicy.BUSY, 1_000L))
+    }
+
+    // --- the group-info loop running out is the stall, with no BUSY needed ---
+
+    @Test
+    fun `twenty empty group reads on an accepted create is a stall`() {
+        assertEquals(Step.CANCEL_FIRST, P2pCreateWedgePolicy.stepAfterGroupInfoExhausted(21_000L, cancelAlreadySpent = false))
+    }
+
+    @Test
+    fun `an exhausted loop with no accepted create, or a cancel already spent, cancels nothing`() {
+        assertEquals(Step.RETRY, P2pCreateWedgePolicy.stepAfterGroupInfoExhausted(null, cancelAlreadySpent = false))
+        assertEquals(Step.RETRY, P2pCreateWedgePolicy.stepAfterGroupInfoExhausted(21_000L, cancelAlreadySpent = true))
+        assertEquals(Step.RETRY, P2pCreateWedgePolicy.stepAfterGroupInfoExhausted(P2pCreateWedgePolicy.FRAMEWORK_CREATE_TIMEOUT_MS, cancelAlreadySpent = false))
+    }
+
+    // --- what is asked for after a cancel: the same request goes back accepted and hanging ---
+
+    @Test
+    fun `each cancel drops something the stuck create asked for`() {
+        assertEquals(Variant.NAMED_NO_BAND, P2pCreateWedgePolicy.nextAfterCancel(Variant.BANDED, cancelsSpent = 1))
+        assertEquals(Variant.FRAMEWORK_PROFILE, P2pCreateWedgePolicy.nextAfterCancel(Variant.NAMED_NO_BAND, cancelsSpent = 2))
+    }
+
+    @Test
+    fun `the framework profile is the last thing to try`() {
+        assertNull(P2pCreateWedgePolicy.nextAfterCancel(Variant.FRAMEWORK_PROFILE, cancelsSpent = 1))
+        assertNull(P2pCreateWedgePolicy.nextAfterCancel(Variant.FRAMEWORK_PROFILE, cancelsSpent = 3))
+    }
+
+    @Test
+    fun `the cancel budget is one per variant and nothing more`() {
+        assertEquals(3, P2pCreateWedgePolicy.MAX_CANCELS_PER_BRING_UP)
+        assertNull(P2pCreateWedgePolicy.nextAfterCancel(Variant.BANDED, cancelsSpent = P2pCreateWedgePolicy.MAX_CANCELS_PER_BRING_UP))
+        assertNull(P2pCreateWedgePolicy.nextAfterCancel(Variant.NAMED_NO_BAND, cancelsSpent = P2pCreateWedgePolicy.MAX_CANCELS_PER_BRING_UP))
+    }
+
+    @Test
+    fun `a banded create refused twice still has the profile left after the name`() {
+        // The banded rung was stuck, cancelled, then the named rung was stuck and cancelled.
+        assertEquals(Variant.FRAMEWORK_PROFILE, P2pCreateWedgePolicy.nextAfterCancel(Variant.NAMED_NO_BAND, cancelsSpent = 2))
+        // And the profile itself stuck: that is the end.
+        assertNull(P2pCreateWedgePolicy.nextAfterCancel(Variant.FRAMEWORK_PROFILE, cancelsSpent = 3))
     }
 }

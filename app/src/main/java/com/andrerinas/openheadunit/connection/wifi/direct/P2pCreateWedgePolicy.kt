@@ -24,12 +24,30 @@ object P2pCreateWedgePolicy {
      */
     const val CREATE_STALL_FLOOR_MS = 8_000L
 
+    /** How long a cancelConnect is given to answer before the ladder carries on without it. */
+    const val CANCEL_ANSWER_TIMEOUT_MS = 3_000L
+
+    /** One cancel per variant: the same request goes back accepted and hanging, so each cancel drops something. */
+    const val MAX_CANCELS_PER_BRING_UP = 3
+
     enum class Step {
         /** Ask again on the existing ladder. */
         RETRY,
 
         /** Cancel the creation the platform is still holding, then ask again. */
         CANCEL_FIRST,
+    }
+
+    /** Which create the platform accepted, by what it asked for. */
+    enum class Variant {
+        /** A named, persistent group on a requested band or frequency. */
+        BANDED,
+
+        /** A named, persistent group with the band left to the platform. */
+        NAMED_NO_BAND,
+
+        /** The two-argument create: whatever profile the platform stored last. */
+        FRAMEWORK_PROFILE,
     }
 
     /**
@@ -45,6 +63,27 @@ object P2pCreateWedgePolicy {
         !isOurCreatePending(reason, msSinceAcceptedCreate) -> Step.RETRY
         msSinceAcceptedCreate!! < CREATE_STALL_FLOOR_MS -> Step.RETRY
         else -> Step.CANCEL_FIRST
+    }
+
+    /**
+     * The same question once the group-info retries have run out on an accepted create. No BUSY has
+     * to arrive for that: the platform said yes, twenty seconds passed, and there is no group.
+     */
+    fun stepAfterGroupInfoExhausted(
+        msSinceAcceptedCreate: Long?,
+        cancelAlreadySpent: Boolean,
+    ): Step = stepAfterBusy(BUSY, msSinceAcceptedCreate, cancelAlreadySpent)
+
+    /**
+     * The create to ask for after [stuck] was cancelled, or null once there is nothing left to drop.
+     * [cancelsSpent] counts the cancel just spent. Below API 29 only the framework profile exists,
+     * so the first cancel there is the last.
+     */
+    fun nextAfterCancel(stuck: Variant, cancelsSpent: Int): Variant? = when {
+        cancelsSpent >= MAX_CANCELS_PER_BRING_UP -> null
+        stuck == Variant.BANDED -> Variant.NAMED_NO_BAND
+        stuck == Variant.NAMED_NO_BAND -> Variant.FRAMEWORK_PROFILE
+        else -> null
     }
 
     /**

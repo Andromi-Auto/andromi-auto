@@ -56,6 +56,26 @@ class P2pIdentityRotationPolicyTest {
     }
 
     @Test
+    fun `a create still being answered is not built over`() {
+        assertFalse(
+            P2pIdentityRotationPolicy.applyNow(
+                sessionLive = false,
+                handshakeInFlight = false,
+                nativeWifiDirectActive = true,
+                createOutstanding = true,
+            )
+        )
+        assertNotNull(
+            P2pIdentityRotationPolicy.deferralReason(
+                sessionLive = false,
+                handshakeInFlight = false,
+                nativeWifiDirectActive = true,
+                createOutstanding = true,
+            )
+        )
+    }
+
+    @Test
     fun `a projecting session keeps its group`() {
         assertFalse(
             P2pIdentityRotationPolicy.applyNow(

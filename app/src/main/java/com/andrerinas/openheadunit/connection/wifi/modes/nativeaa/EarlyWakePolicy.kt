@@ -11,8 +11,9 @@ package com.andrerinas.openheadunit.connection.wifi.modes.nativeaa
 object EarlyWakePolicy {
 
     /**
-     * [listenersOpen] must be the real "the AA RFCOMM listener is accepting" read. A phone woken to
-     * a head unit with no listener finds nothing to dial and the log still says the poke worked.
+     * [listenersOpen] is the manager's "started, and the listener not closed for this session"
+     * read. A phone woken to a head unit with no listener finds nothing to dial and the log still
+     * says the poke worked.
      */
     fun mayWakeBeforeCredentials(
         listenersOpen: Boolean,
@@ -39,6 +40,21 @@ object EarlyWakePolicy {
         else -> true
     }
 
-    private fun isEmptyKey(key: Triple<String, String, String>): Boolean =
+    /**
+     * Whether a wake loop may start with no credentials. Once one has brought the phone back to a
+     * head unit with no network, the next wake waits for the credentials to exist.
+     */
+    fun mayStartWithoutCredentials(keyIsEmpty: Boolean, earlyWakeSpent: Boolean): Boolean =
+        !keyIsEmpty || !earlyWakeSpent
+
+    /**
+     * Whether a handshake that ended for lack of credentials should stop the running wake loop.
+     * Only a loop that started empty: one started by a credential delivery is the ordinary wake,
+     * and a group that went away under it is re-delivered by the recreate.
+     */
+    fun stopAfterCredentialsFailure(loopStartedEmpty: Boolean, credentialsPresent: Boolean): Boolean =
+        loopStartedEmpty && !credentialsPresent
+
+    fun isEmptyKey(key: Triple<String, String, String>): Boolean =
         key.first.isEmpty() && key.second.isEmpty() && key.third.isEmpty()
 }

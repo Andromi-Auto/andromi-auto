@@ -164,6 +164,10 @@ class SettingsFragment : Fragment() {
     private var pendingScreenOrientation: Settings.ScreenOrientation? = null
     private var pendingAppLanguage: String? = null
     private var pendingFakeSpeed: Boolean? = null
+    private var pendingNarrowBandProfileCap: Boolean? = null
+    private var pendingDebugVideoLowLatency: Boolean? = null
+    private var pendingAllowExternalConfiguration: Boolean? = null
+    private var pendingKeepDummyVpnDuringSession: Boolean? = null
 
     private var pendingWifiConnectionMode: WifiLauncherMode? = null
     private var pendingHelperConnectionStrategy: HelperStrategy? = null
@@ -179,6 +183,7 @@ class SettingsFragment : Fragment() {
     private var pendingNativeDriverSelectionTimeout: Int? = null
     private var pendingNativePreferredDeviceMac: String? = null
     private var pendingWifiDirectBand: Int? = null
+    private var pendingWifiDirectStableIdentity: Boolean? = null
     private var pendingHotspotBand: Int? = null
     private var pendingFiveGhzChannel: Int? = null
     private var pendingHotspotSsid: String? = null
@@ -235,11 +240,14 @@ class SettingsFragment : Fragment() {
     // afterwards, so this dialog is the one moment a Fragment has to be involved. AapService can
     // start the VPN with no Activity once this has run. On the Play Store flavor the toggle that
     // launches this is never rendered, because VpnControl.isVpnAvailable() is false there.
-    private var pendingKeepDummyVpn = false
+    private var vpnConsentRequested = false
     private val vpnConsentLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         val granted = result.resultCode == android.app.Activity.RESULT_OK
-        settings.keepDummyVpnDuringSession = granted && pendingKeepDummyVpn
-        pendingKeepDummyVpn = false
+        if (vpnConsentRequested) {
+            pendingKeepDummyVpnDuringSession = granted
+            checkChanges()
+        }
+        vpnConsentRequested = false
         if (!granted && VpnControl.consentDeniedRes != 0) {
             Toast.makeText(requireContext(), VpnControl.consentDeniedRes, Toast.LENGTH_LONG).show()
         }
@@ -338,6 +346,10 @@ class SettingsFragment : Fragment() {
         pendingAutoEnableHotspot = settings.autoEnableHotspot
         pendingFakeSpeed = settings.fakeSpeed
         pendingUseLibusb = settings.useLibusb
+        pendingNarrowBandProfileCap = settings.narrowBandProfileCap
+        pendingDebugVideoLowLatency = settings.debugVideoLowLatency
+        pendingAllowExternalConfiguration = settings.allowExternalConfiguration
+        pendingKeepDummyVpnDuringSession = settings.keepDummyVpnDuringSession
 
         pendingWifiConnectionMode = settings.wifiConnectionMode
         pendingHelperConnectionStrategy = settings.helperConnectionStrategy
@@ -352,6 +364,7 @@ class SettingsFragment : Fragment() {
         pendingNativeDriverSelectionTimeout = settings.nativeDriverSelectionTimeoutSec
         pendingNativePreferredDeviceMac = settings.nativePreferredDeviceMac
         pendingWifiDirectBand = settings.wifiDirectBand
+        pendingWifiDirectStableIdentity = settings.wifiDirectStableIdentity
         pendingHotspotBand = settings.hotspotBand
         pendingFiveGhzChannel = settings.fiveGhzChannel
         pendingHotspotSsid = settings.hotspotSsid
@@ -465,6 +478,10 @@ class SettingsFragment : Fragment() {
         pendingAutoEnableHotspot = settings.autoEnableHotspot
         pendingFakeSpeed = settings.fakeSpeed
         pendingUseLibusb = settings.useLibusb
+        pendingNarrowBandProfileCap = settings.narrowBandProfileCap
+        pendingDebugVideoLowLatency = settings.debugVideoLowLatency
+        pendingAllowExternalConfiguration = settings.allowExternalConfiguration
+        pendingKeepDummyVpnDuringSession = settings.keepDummyVpnDuringSession
         pendingWifiConnectionMode = settings.wifiConnectionMode
         pendingHelperConnectionStrategy = settings.helperConnectionStrategy
         pendingWaitForWifi = settings.waitForWifiBeforeWifiDirect
@@ -478,6 +495,7 @@ class SettingsFragment : Fragment() {
         pendingNativeDriverSelectionTimeout = NativeDriverSelectionPolicy.DEFAULT_TIMEOUT_SEC
         pendingNativePreferredDeviceMac = ""
         pendingWifiDirectBand = settings.wifiDirectBand
+        pendingWifiDirectStableIdentity = settings.wifiDirectStableIdentity
         pendingHotspotBand = settings.hotspotBand
         pendingFiveGhzChannel = settings.fiveGhzChannel
         pendingHotspotSsid = settings.hotspotSsid
@@ -623,6 +641,10 @@ class SettingsFragment : Fragment() {
         pendingAutoEnableHotspot?.let { settings.autoEnableHotspot = it }
         pendingFakeSpeed?.let { settings.fakeSpeed = it }
         pendingUseLibusb?.let { settings.useLibusb = it }
+        pendingNarrowBandProfileCap?.let { settings.narrowBandProfileCap = it }
+        pendingDebugVideoLowLatency?.let { settings.debugVideoLowLatency = it }
+        pendingAllowExternalConfiguration?.let { settings.allowExternalConfiguration = it }
+        pendingKeepDummyVpnDuringSession?.let { settings.keepDummyVpnDuringSession = it }
 
         val wirelessConfigBefore = wirelessRearmConfig()
         pendingWifiConnectionMode?.let { settings.wifiConnectionMode = it }
@@ -638,6 +660,7 @@ class SettingsFragment : Fragment() {
         pendingNativeDriverSelectionTimeout?.let { settings.nativeDriverSelectionTimeoutSec = it }
         pendingNativePreferredDeviceMac?.let { settings.nativePreferredDeviceMac = it }
         pendingWifiDirectBand?.let { settings.wifiDirectBand = it }
+        pendingWifiDirectStableIdentity?.let { settings.wifiDirectStableIdentity = it }
         pendingHotspotBand?.let { settings.hotspotBand = it }
         pendingFiveGhzChannel?.let { settings.fiveGhzChannel = it }
         pendingHotspotSsid?.let { settings.hotspotSsid = it }
@@ -764,12 +787,17 @@ class SettingsFragment : Fragment() {
                         pendingNativeDriverSelectionTimeout != settings.nativeDriverSelectionTimeoutSec ||
                         pendingNativePreferredDeviceMac != settings.nativePreferredDeviceMac ||
                         pendingWifiDirectBand != settings.wifiDirectBand ||
+                        pendingWifiDirectStableIdentity != settings.wifiDirectStableIdentity ||
                         pendingHotspotBand != settings.hotspotBand ||
                         pendingFiveGhzChannel != settings.fiveGhzChannel ||
                         pendingHotspotSsid != settings.hotspotSsid ||
                         pendingHotspotPassword != settings.hotspotPassword ||
                         pendingHotspotInterface != settings.hotspotInterface ||
                         pendingUseLibusb != settings.useLibusb ||
+                        pendingNarrowBandProfileCap != settings.narrowBandProfileCap ||
+                        pendingDebugVideoLowLatency != settings.debugVideoLowLatency ||
+                        pendingAllowExternalConfiguration != settings.allowExternalConfiguration ||
+                        pendingKeepDummyVpnDuringSession != settings.keepDummyVpnDuringSession ||
                         pendingHideBatteryLevel != settings.hideBatteryLevel ||
                         pendingHidePhoneSignal != settings.hidePhoneSignal ||
                         pendingHideClock != settings.hideClock
@@ -1281,21 +1309,23 @@ class SettingsFragment : Fragment() {
                     // resources so it is absent from the Play Store build entirely.
                     nameResId = VpnControl.toggleNameRes,
                     descriptionResId = VpnControl.toggleDescriptionRes,
-                    isChecked = settings.keepDummyVpnDuringSession,
+                    isChecked = pendingKeepDummyVpnDuringSession ?: settings.keepDummyVpnDuringSession,
                     searchKeywords = "vpn offline tun stutter dropout audio video 2.4 ghz network scan",
                     onCheckedChanged = { isChecked ->
                         if (!isChecked) {
-                            settings.keepDummyVpnDuringSession = false
+                            pendingKeepDummyVpnDuringSession = false
+                            checkChanges()
                             updateSettingsList()
                         } else {
                             // Null once this app is already the prepared VPN app, which is the
                             // state AapService needs to start it with no Activity.
                             val consent = VpnControl.consentIntent(requireContext())
                             if (consent == null) {
-                                settings.keepDummyVpnDuringSession = true
+                                pendingKeepDummyVpnDuringSession = true
+                                checkChanges()
                                 updateSettingsList()
                             } else {
-                                pendingKeepDummyVpn = true
+                                vpnConsentRequested = true
                                 vpnConsentLauncher.launch(consent)
                             }
                         }
@@ -2023,25 +2053,25 @@ class SettingsFragment : Fragment() {
             stableId = "narrowBandProfileCap",
             nameResId = R.string.narrow_band_profile_cap,
             descriptionResId = R.string.narrow_band_profile_cap_description,
-            isChecked = settings.narrowBandProfileCap,
+            isChecked = pendingNarrowBandProfileCap ?: settings.narrowBandProfileCap,
             searchKeywords = "2.4 GHz band resolution fps limit hotspot wifi direct video",
             onCheckedChanged = { isChecked ->
-                settings.narrowBandProfileCap = isChecked
+                pendingNarrowBandProfileCap = isChecked
+                checkChanges()
                 updateSettingsList()
             }
         ))
 
-        // Applied immediately rather than on confirm, unlike the rows above it: the configure
-        // ladder falls back on its own if the decoder rejects the key, so there is nothing to
-        // weigh up before trying it.
+        // Safe to try: the configure ladder falls back on its own if the decoder rejects the key.
         items.add(SettingItem.ToggleSettingEntry(
             stableId = "debugVideoLowLatency",
             nameResId = R.string.debug_video_low_latency,
             descriptionResId = R.string.debug_video_low_latency_description,
-            isChecked = settings.debugVideoLowLatency,
+            isChecked = pendingDebugVideoLowLatency ?: settings.debugVideoLowLatency,
             searchKeywords = "low latency vendor key decoder mediatek amlogic qualcomm exynos",
             onCheckedChanged = { isChecked ->
-                settings.debugVideoLowLatency = isChecked
+                pendingDebugVideoLowLatency = isChecked
+                checkChanges()
                 updateSettingsList()
             }
         ))
@@ -2530,9 +2560,10 @@ class SettingsFragment : Fragment() {
             stableId = "allowExternalConfiguration",
             nameResId = R.string.allow_external_configuration,
             descriptionResId = R.string.allow_external_configuration_description,
-            isChecked = settings.allowExternalConfiguration,
+            isChecked = pendingAllowExternalConfiguration ?: settings.allowExternalConfiguration,
             onCheckedChanged = { isChecked ->
-                settings.allowExternalConfiguration = isChecked
+                pendingAllowExternalConfiguration = isChecked
+                checkChanges()
                 updateSettingsList()
             }
         ))
@@ -4004,9 +4035,8 @@ class SettingsFragment : Fragment() {
      * Whether the group keeps its name and passphrase between bring-ups, and a way to draw new ones.
      *
      * Only where the group is ours to name: the hotspot's identity is the access point's own. The
-     * switch writes straight through rather than through the pending/apply pattern, because it is
-     * read at the next create and nothing needs re-arming for it. The "new identity" action replaces both halves
-     * together, which is the one rotation a phone's saved profile survives.
+     * switch is read at the next create, so Save needs no re-arm for it. The "new identity" action
+     * replaces both halves together, which is the one rotation a phone's saved profile survives.
      */
     private fun addWifiDirectIdentitySettings(items: MutableList<SettingItem>) {
         // Below API 29 the app cannot name the group at all: the platform picks the name and keeps
@@ -4017,14 +4047,15 @@ class SettingsFragment : Fragment() {
             nameResId = R.string.wifi_direct_stable_identity,
             descriptionResId = if (appNamesGroup) R.string.wifi_direct_stable_identity_description
                 else R.string.wifi_direct_stable_identity_description_legacy,
-            isChecked = settings.wifiDirectStableIdentity,
+            isChecked = pendingWifiDirectStableIdentity ?: settings.wifiDirectStableIdentity,
             searchKeywords = "persistent group ssid passphrase password same network reconnect faster",
             onCheckedChanged = { isChecked ->
-                settings.wifiDirectStableIdentity = isChecked
+                pendingWifiDirectStableIdentity = isChecked
+                checkChanges()
                 updateSettingsList()
             }
         ))
-        if (!settings.wifiDirectStableIdentity) return
+        if (pendingWifiDirectStableIdentity == false) return
         items.add(SettingItem.SettingEntry(
             stableId = "wifiDirectNewIdentity",
             nameResId = R.string.wifi_direct_new_identity,

@@ -216,6 +216,16 @@ class NativeAaHandshakeManager(
     // WifiDirectManager redelivers the same credentials, which was starving the poke before it
     // could ever finish.
     private var lastPokeTriggerCredentials: Triple<String, String, String>? = null
+
+    /** Whether the running wake loop was started with no credentials, by the early wake. */
+    private var pokeLoopStartedEmpty = false
+
+    /**
+     * Set once an early wake brought the phone back to a head unit with no network to hand it.
+     * Cleared when credentials arrive, so the ordinary credential-driven wake still runs.
+     */
+    @Volatile
+    private var earlyWakeSpent = false
     // elapsedRealtime() when handleHandshake() started, or 0 when no exchange is running; lets
     // WifiDirectManager's join watchdog know a real exchange is in progress.
     //
@@ -515,6 +525,7 @@ class NativeAaHandshakeManager(
     ) {
         AppLog.i("NativeAA: Credentials updated. SSID=$ssid, IP=$ip, BSSID=$bssid, identity stable=${GroupIdentityStabilityPolicy.label(identity)}")
         credentials = WifiCredentials(ssid = ssid, psk = psk, ip = ip, bssid = bssid, identity = identity)
+        earlyWakeSpent = false
     }
 
     /** Clears cached credentials so an in-progress wait doesn't hand out stale ones for a group
@@ -641,6 +652,7 @@ class NativeAaHandshakeManager(
 
         isRunning = true
         notStartedReason = null
+        earlyWakeSpent = false
         aaListenersClosedForSession = false
         // Local Bluetooth radio name; logged on every accept so a dual-radio head unit's logs
         // show which radio the phone actually reached (compare with the HU name in the phone's
@@ -1280,6 +1292,8 @@ class NativeAaHandshakeManager(
      * afterwards, so the phone's own wake latency runs alongside the bring-up instead of after it.
      */
     fun triggerEarlyWake(userExited: Boolean) {
+        // isActive() is "started, and the listener not closed for this session": the accept loop
+        // is launched in the same start() call, so this is as close to "accepting" as there is.
         if (!EarlyWakePolicy.mayWakeBeforeCredentials(
                 listenersOpen = isActive(),
                 credentialsPresent = credentials != null,
@@ -1325,15 +1339,22 @@ class NativeAaHandshakeManager(
         if (!EarlyWakePolicy.shouldRestartLoop(pokeJob?.isActive == true, lastPokeTriggerCredentials, pokeKey)) {
             AppLog.d("NativeAA: a wake poke is already running for these credentials - not restarting it.")
             lastPokeTriggerCredentials = pokeKey
+            // The loop re-reads credentials every pass, so from here it is a credentialed one.
+            if (!EarlyWakePolicy.isEmptyKey(pokeKey)) pokeLoopStartedEmpty = false
+            return
+        }
+        if (!EarlyWakePolicy.mayStartWithoutCredentials(EarlyWakePolicy.isEmptyKey(pokeKey), earlyWakeSpent)) {
+            AppLog.i("NativeAA: not waking the phone again before the WiFi group exists; the last wake brought it back to nothing.")
             return
         }
         lastPokeTriggerCredentials = pokeKey
+        pokeLoopStartedEmpty = EarlyWakePolicy.isEmptyKey(pokeKey)
 
         pokeJob?.cancel()
         pokeDeferralLogged = false
         pokeJob = scope.launch(Dispatchers.IO + CoroutineName("NativeAa-Wakeup")) {
-            // The listeners are what the woken phone dials back on, so wait for them rather than
-            // for a fixed two seconds that was only ever a guess at the same thing.
+            // isActive() goes true in the same start() that launches the accept loop, so this
+            // usually costs nothing; it is here for a poke triggered before start() has run.
             var waitedMs = 0L
             while (!isActive() && waitedMs < POKE_READY_WAIT_MS && isActive) {
                 delay(POKE_READY_POLL_MS)
@@ -1983,6 +2004,16 @@ class NativeAaHandshakeManager(
             val snapshot = credentials
             if (snapshot == null) {
                 AppLog.e("NativeAA: Handshake failed - No WiFi credentials available after ${CREDENTIALS_WAIT_MS / 1000}s wait.")
+                if (EarlyWakePolicy.stopAfterCredentialsFailure(pokeLoopStartedEmpty, credentialsPresent = false)) {
+                    // Woken before the group existed and the group never came. Waking it again
+                    // costs a 60 s wait and a hands-free hold each time for nothing; the
+                    // credential delivery restarts the wake once there is a network to hand over.
+                    AppLog.i("NativeAA: the early wake brought the phone back to no network; not waking it again until the WiFi group exists.")
+                    earlyWakeSpent = true
+                    pokeJob?.cancel()
+                    pokeJob = null
+                    pokeLoopStartedEmpty = false
+                }
                 abortedLocally = true
                 feed(WppEvent.CredentialsUnavailable)
                 return@withContext
