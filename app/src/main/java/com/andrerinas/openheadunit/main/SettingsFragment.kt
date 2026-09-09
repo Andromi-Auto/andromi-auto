@@ -1198,20 +1198,17 @@ class SettingsFragment : Fragment() {
                     nameResId = R.string.native_driver_preferred_device,
                     value = prefDeviceName,
                     onClick = { _ ->
+                        // Only a phone can be the preferred phone: a watch chosen here used to
+                        // count as one everywhere. A stored non-phone is cleared with None.
                         val likelyPhones = bonded.filter {
                             BluetoothHelper.isLikelyPhone(it, preferredMac = currentPrefMac)
                         }
-                        val otherDevices = bonded.filter { it !in likelyPhones }
 
                         val options = mutableListOf<Pair<String, String>>()
                         options.add("" to getString(R.string.driver_none))
                         likelyPhones.forEach { dev ->
                             val name = dev.name ?: "Unknown"
                             options.add(dev.address to "$name (${dev.address})")
-                        }
-                        otherDevices.forEach { dev ->
-                            val name = dev.name ?: "Unknown"
-                            options.add(dev.address to "🎧 $name (${dev.address})")
                         }
                         val labels = options.map { it.second }.toTypedArray()
                         val selectedIdx = options.indexOfFirst { it.first.equals(currentPrefMac, ignoreCase = true) }.coerceAtLeast(0)

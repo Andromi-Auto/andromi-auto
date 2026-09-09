@@ -1425,7 +1425,16 @@ class NativeAaHandshakeManager(
                         target.macs.forEach { mac ->
                             val reading = bondReadingFor(adapter, mac)
                             if (BluetoothWakePolicy.mayPoke(reading)) {
-                                try { bonded.add(adapter.getRemoteDevice(mac)) } catch (e: Exception) {}
+                                try {
+                                    val device = adapter.getRemoteDevice(mac)
+                                    val verdict = BluetoothHelper.classifyDevice(
+                                        device, BluetoothHelper.pinFor(
+                                            device, settings.nativePreferredDeviceMac, settings.lastConnectedNativeMac
+                                        )
+                                    )
+                                    AppLog.d("NativeAA: chosen wake target ${device.name} ($mac) reads as ${verdict.verdict}")
+                                    bonded.add(device)
+                                } catch (e: Exception) {}
                             }
                             if (BluetoothWakePolicy.shouldForget(reading)) staleMacs.add(mac)
                         }
@@ -1436,22 +1445,23 @@ class NativeAaHandshakeManager(
                         bonded
                     }
                     PokeTargets.AllPaired -> {
-                        AppLog.w("NativeAA: No wake poke device selected, and poking all paired devices is on. Poking all of them...")
-                        // Only a phone can answer Native AA, and a poke spent on a speaker or a
-                        // watch holds the hands-free slot for nothing. Fall back to the whole set
-                        // when the filter leaves none, so an unreadable device class cannot go mute.
-                        val allPaired = adapter.bondedDevices.toList()
-                        val phones = allPaired.filter {
-                            BluetoothHelper.isLikelyPhone(
-                                it, settings.nativePreferredDeviceMac, settings.lastConnectedNativeMac
+                        AppLog.w("NativeAA: No wake poke device selected, and poking all paired devices is on. Poking every paired phone...")
+                        // Only a phone answers Native AA: the one advertising the Audio Gateway
+                        // record this poke dials. A dongle, a radio or a watch holds the hands-free
+                        // slot for nothing, so a device ruled out is never poked here; a MAC chosen
+                        // in Auto Start settings is poked without this question.
+                        val candidates = BluetoothHelper.driverCandidates(
+                            context, settings.nativePreferredDeviceMac, settings.lastConnectedNativeMac
+                        )
+                        if (candidates.offered.isEmpty()) {
+                            AppLog.w(
+                                "NativeAA: no paired device advertises the Audio Gateway record, so nothing " +
+                                    "is poked. Choose the phone in Auto Start settings if this is wrong."
                             )
+                        } else if (candidates.hidden.isNotEmpty()) {
+                            AppLog.i("NativeAA: ${candidates.hidden.size} paired device(s) are not phones and are not poked.")
                         }
-                        if (phones.isEmpty()) allPaired else {
-                            if (phones.size < allPaired.size) {
-                                AppLog.i("NativeAA: ${allPaired.size - phones.size} paired device(s) are not phones and are not poked.")
-                            }
-                            phones
-                        }
+                        candidates.offered
                     }
                     PokeTargets.None -> {
                         AppLog.w("NativeAA: No wake poke device selected, so nothing is poked. Choose one in Auto Start settings.")
