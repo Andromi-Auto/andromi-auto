@@ -233,6 +233,19 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
     @Volatile
     private var nativeCreateRequestedAtMs = 0L
 
+    /**
+     * When a createGroup of ours was accepted and no group has arrived since, or 0.
+     *
+     * The framework holds that creation for two minutes and answers BUSY to every create and remove
+     * in the meantime, so this is what separates "the platform is still finishing our own request"
+     * from a radio that will not host a group at all.
+     */
+    @Volatile
+    private var acceptedCreateWithoutGroupSinceMs = 0L
+
+    /** The [acceptedCreateWithoutGroupSinceMs] a cancel has already been spent on, so one is spent per stuck create. */
+    private var wedgeCancelSpentForStampMs = 0L
+
     /** Re-asks once a claimed create has had its grace, so a refresh with nothing behind it is not the end of the road. */
     private val nativeRefreshRecheck = Runnable { refreshNativeCredentials() }
 
@@ -258,6 +271,53 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
         // edges it provokes look like they came from another app.
         markP2pRequest()
         AppLog.i("WifiDirectManager: a Native AA group create is claimed ($why); a refresh in the next ${NativeRefreshPolicy.CREATE_GRACE_MS / 1000}s waits for it.")
+    }
+
+    /** A create the platform accepted. It owns the P2P state machine from here until a group arrives. */
+    private fun noteAcceptedCreate() {
+        acceptedCreateWithoutGroupSinceMs = SystemClock.elapsedRealtime()
+        wedgeCancelSpentForStampMs = 0L
+    }
+
+    /** How long the platform has been holding a create of ours with no group to show for it, or null. */
+    private fun msSinceAcceptedCreate(): Long? = acceptedCreateWithoutGroupSinceMs
+        .takeIf { it != 0L }
+        ?.let { SystemClock.elapsedRealtime() - it }
+
+    /**
+     * Whether this BUSY should be answered by cancelling the creation the platform is still holding.
+     *
+     * See [P2pCreateWedgePolicy]: inside that window every create and remove is refused, so the
+     * ladder below cannot win and only the cancel can.
+     */
+    private fun shouldCancelStuckCreate(reason: Int): Boolean =
+        P2pCreateWedgePolicy.stepAfterBusy(
+            reason = reason,
+            msSinceAcceptedCreate = msSinceAcceptedCreate(),
+            cancelAlreadySpent = wedgeCancelSpentForStampMs == acceptedCreateWithoutGroupSinceMs,
+        ) == P2pCreateWedgePolicy.Step.CANCEL_FIRST
+
+    /** Drop the stuck creation, then hand back to [then] so the ladder carries on either way. */
+    private fun cancelStuckCreate(mgr: WifiP2pManager, ch: WifiP2pManager.Channel, then: () -> Unit) {
+        val heldMs = msSinceAcceptedCreate() ?: 0L
+        wedgeCancelSpentForStampMs = acceptedCreateWithoutGroupSinceMs
+        AppLog.w(
+            "WifiDirectManager: a group this unit accepted ${heldMs}ms ago never formed, and it " +
+                "refuses every new one until it gives up on that by itself " +
+                "(${P2pCreateWedgePolicy.FRAMEWORK_CREATE_TIMEOUT_MS / 1000}s). Cancelling it instead of waiting."
+        )
+        markP2pRequest()
+        mgr.cancelConnect(ch, object : WifiP2pManager.ActionListener {
+            override fun onSuccess() {
+                AppLog.i("WifiDirectManager: the stuck group creation was cancelled; asking for a group again.")
+                acceptedCreateWithoutGroupSinceMs = 0L
+                handler.postDelayed({ then() }, 500L)
+            }
+            override fun onFailure(reason: Int) {
+                AppLog.w("WifiDirectManager: cancelling the stuck group creation was refused (${getP2pErrorString(reason)}); retrying anyway.")
+                handler.postDelayed({ then() }, 2000L)
+            }
+        })
     }
 
     private fun releaseNativeCreateWindow(why: String) {
@@ -724,6 +784,9 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
             }
 
             groupInfoRetries = 0
+            // A group arrived, so nothing of ours is left half-created for the framework to hold.
+            acceptedCreateWithoutGroupSinceMs = 0L
+            wedgeCancelSpentForStampMs = 0L
             val ssid = group.networkName
             val psk = group.passphrase ?: ""
             val isOwner = group.isGroupOwner
@@ -1683,6 +1746,7 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
                 mgr.createGroup(ch, config, object : WifiP2pManager.ActionListener {
                     override fun onSuccess() {
                         AppLog.i("WifiDirectManager: $bandLabel createGroup SUCCESS!")
+                        noteAcceptedCreate()
                         noteGroupFormed()
                         // Only a create that carried the frequency disproves the record. A group
                         // formed on the driver's own pick is the failure it describes, not its cure.
@@ -1700,13 +1764,13 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
                     }
                     override fun onFailure(reason: Int) {
                         onQuietGroupFailed(mgr, ch, retryCount, preference, chosenChannel,
-                            requestedFrequency, bandLabel, getP2pErrorString(reason), null)
+                            requestedFrequency, bandLabel, reason, getP2pErrorString(reason), null)
                     }
                 })
                 return
             } catch (t: Throwable) {
                 onQuietGroupFailed(mgr, ch, retryCount, preference, chosenChannel,
-                    requestedFrequency, bandLabel, "crashed before any async result", t)
+                    requestedFrequency, bandLabel, -1, "crashed before any async result", t)
                 return
             }
         }
@@ -1816,9 +1880,15 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
         chosenChannel: Int,
         requestedFrequency: Int,
         bandLabel: String,
+        reason: Int,
         reasonStr: String,
         crash: Throwable?,
     ) {
+        // Ahead of the ladder: inside the platform's own create window nothing on it can succeed.
+        if (shouldCancelStuckCreate(reason)) {
+            cancelStuckCreate(mgr, ch) { createQuietGroup(retryCount) }
+            return
+        }
         val requestLabel =
             if (requestedFrequency > 0) "$bandLabel ${FiveGhzChannelPolicy.describe(chosenChannel)}"
             else bandLabel
@@ -1960,6 +2030,10 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
                     override fun onSuccess() { onStandardCreateSucceeded(mgr, ch, groupMode) }
                     override fun onFailure(reason: Int) {
                         val reasonStr = getP2pErrorString(reason)
+                        if (shouldCancelStuckCreate(reason)) {
+                            cancelStuckCreate(mgr, ch) { standardCreateGroup(mgr, ch, retryCount, groupMode) }
+                            return
+                        }
                         if (reason == 2 && retryCount < MAX_NATIVE_STANDARD_CREATE_RETRIES) {
                             AppLog.w("WifiDirectManager: standard createGroup failed ($reasonStr), removing group and retrying standard in 2s...")
                             invalidateNativeGroupCredentials("the standard create was refused and is being retried")
@@ -1992,6 +2066,10 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
             override fun onSuccess() { onStandardCreateSucceeded(mgr, ch, groupMode) }
             override fun onFailure(reason: Int) {
                 val reasonStr = getP2pErrorString(reason)
+                if (shouldCancelStuckCreate(reason)) {
+                    cancelStuckCreate(mgr, ch) { standardCreateGroup(mgr, ch, retryCount, groupMode) }
+                    return
+                }
                 if (reason == 2 && retryCount < MAX_NATIVE_STANDARD_CREATE_RETRIES) {
                     AppLog.w("WifiDirectManager: standard createGroup failed ($reasonStr), removing group and retrying standard in 2s...")
                     invalidateNativeGroupCredentials("the standard create was refused and is being retried")
@@ -2019,7 +2097,14 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
                         createQuietGroup(0)
                     }
                 } else {
-                    reportGroupRefusal(reasonStr)
+                    if (P2pCreateWedgePolicy.isRefusalHonest(reason, msSinceAcceptedCreate())) {
+                        reportGroupRefusal(reasonStr)
+                    } else {
+                        AppLog.w(
+                            "WifiDirectManager: no group yet ($reasonStr), but this unit is still " +
+                                "finishing a create of ours rather than refusing to host one. Waiting for it."
+                        )
+                    }
                     isGroupCreatingOrCreated = false
                     releaseNativeCreateWindow("the unit refused the group")
                 }
@@ -2029,6 +2114,7 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
 
     private fun onStandardCreateSucceeded(mgr: WifiP2pManager, ch: WifiP2pManager.Channel, groupMode: String) {
         AppLog.i("WifiDirectManager: Standard createGroup SUCCESS!")
+        noteAcceptedCreate()
         noteGroupFormed()
         // Read before releaseLegacyChannelRestriction() clears the flag. A group formed while the
         // restriction stood is on the channel that was asked for, and only that disproves the
@@ -2408,6 +2494,8 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
         generation++
         credentialsEpoch++
         isGroupCreatingOrCreated = false
+        acceptedCreateWithoutGroupSinceMs = 0L
+        wedgeCancelSpentForStampMs = 0L
         handler.removeCallbacksAndMessages(null)
         // Both of these guard an operation that is finished the moment we stop, and both used to be
         // cleared only by a posted runnable that the line above just cancelled - so a stop() landing

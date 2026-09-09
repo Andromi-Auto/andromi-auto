@@ -143,7 +143,17 @@ class NativeAaHandshakeManager(
     // closeAaListeners()) without taking down the HFP ones too.
     private val extraAaServerSockets = Collections.synchronizedList(mutableListOf<BluetoothServerSocket>())
     private val extraHfpServerSockets = Collections.synchronizedList(mutableListOf<BluetoothServerSocket>())
-    private var isRunning = false
+    // Read from the poke and handshake loops on Dispatchers.IO and written from start()/stop() on
+    // the caller's thread, so the reads have to see the write.
+    @Volatile private var isRunning = false
+
+    /**
+     * Why [start] gave up, kept for whoever asks later.
+     *
+     * The reason is logged once at arming time and has rotated out of a reporter's buffer long
+     * before they press anything, so a poke on a manager that never started said nothing at all.
+     */
+    @Volatile private var notStartedReason: String? = null
     // Set by closeAaListeners() so the AA accept loops can tell "we closed this on purpose
     // after a successful handoff" apart from a real socket error, for logging only.
     @Volatile private var aaListenersClosedForSession = false
@@ -517,6 +527,16 @@ class NativeAaHandshakeManager(
     // "believed to be running."
     fun isActive(): Boolean = isRunning && !aaListenersClosedForSession
 
+    /**
+     * Whether the handshake servers were ever brought up, as opposed to [isActive]'s "can accept a
+     * connection right now". The two answers need different repairs: a closed listener is reopened
+     * by [rearmForNextSession], and only [start] can help one that was never opened.
+     */
+    fun isStarted(): Boolean = isRunning
+
+    /** Why [start] gave up, for a caller that found [isStarted] false and has to say something useful. */
+    fun notStartedReason(): String? = notStartedReason
+
     fun isHandshakeInFlight(): Boolean =
         NativeHandoffPolicy.isHandshaking(handshakeStartedAt, SystemClock.elapsedRealtime())
 
@@ -590,6 +610,7 @@ class NativeAaHandshakeManager(
         externalBtDiagnostic()?.let {
             if (!externalBtOverridden(context)) {
                 AppLog.e(it)
+                notStartedReason = it
                 return
             }
             AppLog.w("$it\nNativeAA: starting anyway, because the Bluetooth compatibility check is switched off in Settings.")
@@ -599,6 +620,7 @@ class NativeAaHandshakeManager(
             if (ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT)
                 != PackageManager.PERMISSION_GRANTED) {
                 AppLog.e("NativeAA: Missing BLUETOOTH_CONNECT permission. Handshake server cannot start.")
+                notStartedReason = "the app has no BLUETOOTH_CONNECT permission"
                 return
             }
         }
@@ -609,10 +631,12 @@ class NativeAaHandshakeManager(
             // re-arm check) need to see this as genuinely stopped so they retry later,
             // instead of believing the listener sockets are up when nothing was ever opened.
             AppLog.e("NativeAA: Bluetooth adapter not available or disabled")
+            notStartedReason = "this unit's Bluetooth was off or unavailable when the mode was armed"
             return
         }
 
         isRunning = true
+        notStartedReason = null
         aaListenersClosedForSession = false
         // Local Bluetooth radio name; logged on every accept so a dual-radio head unit's logs
         // show which radio the phone actually reached (compare with the HU name in the phone's
@@ -745,7 +769,15 @@ class NativeAaHandshakeManager(
      */
     @SuppressLint("MissingPermission")
     fun rearmForNextSession() {
-        if (!isRunning) return
+        if (!isRunning) {
+            // The one line whose absence made a reporter's capture unreadable: the caller has
+            // already said it is reopening the listeners, and nothing here can.
+            AppLog.w(
+                "NativeAA: the Android Auto listeners cannot be reopened because the handshake " +
+                    "servers are not running" + (notStartedReason?.let { " ($it)" } ?: "") + "."
+            )
+            return
+        }
         // The session that just ended answered the question the prompt asks. The chosen target is
         // left alone: the switch-driver path sets it from a coroutine that races this one.
         clearSelectionPrompt()
@@ -1405,6 +1437,7 @@ class NativeAaHandshakeManager(
                             delay(200)
                             waitedMs += 200
                         }
+                        if (waitedMs == 0 && !isRunning) AppLog.w("NativeAA: not waiting for credentials, because the handshake servers are not running.")
                     }
 
                     // A credential redelivery cancels this loop and starts a fresh one, and cancel
@@ -1484,7 +1517,8 @@ class NativeAaHandshakeManager(
                             delay(200)
                             waitedMs += 200
                         }
-                        AppLog.i("NativeAA: Pre-poke credential wait completed. SSID=${credentials?.ssid}, IP=${credentials?.ip} (waited ${waitedMs}ms)")
+                        val whyNotWaited = if (waitedMs == 0 && !isRunning) ", because the handshake servers are not running" else ""
+                        AppLog.i("NativeAA: Pre-poke credential wait completed. SSID=${credentials?.ssid}, IP=${credentials?.ip} (waited ${waitedMs}ms$whyNotWaited)")
                     }
 
                     // pokeJob.cancel() above cannot interrupt a blocking connect(), so the

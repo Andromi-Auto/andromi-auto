@@ -2465,6 +2465,16 @@ class AapService : Service() {
                         if (wifiLauncherManager.activeMode != WifiLauncherMode.NATIVE) {
                             AppLog.i("AapService: Initializing Native AA mode before poke...")
                             wifiLauncherManager.setActiveFromSettings(force = true)
+                        } else if (activeLauncher is WifiLauncherNative && activeLauncher.handshakeManager?.isStarted() != true) {
+                            // Never started, or stopped. rearmAfterSessionEnd() cannot help here:
+                            // it returns on the same flag, so the button used to promise a repair
+                            // it never made and the phone had nothing to connect back to.
+                            val why = activeLauncher.handshakeManager?.notStartedReason()
+                            AppLog.w(
+                                "AapService: the Native AA handshake servers are not running" +
+                                    (why?.let { " ($it)" } ?: "") + ", so nothing could answer the phone. Starting them before the poke."
+                            )
+                            activeLauncher.handshakeManager?.start()
                         } else if (activeLauncher is WifiLauncherNative && activeLauncher.handshakeManager?.isActive() != true) {
                             // A completed handoff closes the AA listeners while leaving the manager
                             // running, and start() returns immediately on isRunning, so calling it here
