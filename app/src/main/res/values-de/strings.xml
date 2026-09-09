@@ -1090,6 +1090,8 @@
     <string name="wifi_direct_new_identity_none">Wird bei der nächsten Verbindung festgelegt</string>
     <string name="wifi_direct_new_identity_confirm">Wählt einen neuen Namen und ein neues Passwort für die Gruppe, gültig ab der nächsten Verbindung. Dein Smartphone wird dafür über Bluetooth eingerichtet, als wäre dies ein neues Headunit. Nutze dies, wenn das Smartphone versucht, sich mit einem nicht mehr erreichbaren Netzwerk zu verbinden.</string>
     <string name="wifi_direct_new_identity_done">Ab der nächsten Verbindung wird eine neue Netzwerkidentität verwendet.</string>
+    <string name="wifi_direct_new_identity_applied">Eine neue Netzwerkidentität wird jetzt eingerichtet. Dein Smartphone wird bei der nächsten Verbindung aufgefordert, ihr beizutreten.</string>
+    <string name="wifi_direct_stable_identity_description_legacy">In dieser Android-Version stammt der Netzwerkname vom System, das ihn so lange wie möglich beibehält. Lass die Option aktiviert, damit sich dein Smartphone wieder mit einem bekannten Netzwerk verbindet, und wähle unten eine neue Identität, falls es das gespeicherte Netzwerk weiterhin ablehnt. Deaktiviere sie, damit das System das Netzwerk vor jeder Verbindung vergisst.</string>
     <string name="debug_video_low_latency">Low-Latency-Modus für Decoder anfordern</string>
     <string name="debug_video_low_latency_description">Setzt beim Konfigurieren des Videodecoders den herstellerspezifischen Low-Latency-MediaFormat-Schlüssel. Fällt automatisch zurück, wenn der Decoder ihn ablehnt.</string>
     <string name="debug_video_feed_hold">Langsamen Decoder simulieren</string>

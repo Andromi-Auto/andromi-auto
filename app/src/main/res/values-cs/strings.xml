@@ -1089,6 +1089,8 @@
     <string name="wifi_direct_new_identity_none">Bude vybráno při příštím připojení</string>
     <string name="wifi_direct_new_identity_confirm">Zvolí nový název a heslo pro skupinu od příštího připojení. Telefon se nastaví přes Bluetooth jako pro novou hlavní jednotku.</string>
     <string name="wifi_direct_new_identity_done">Od příštího připojení bude použita nová identita sítě.</string>
+    <string name="wifi_direct_new_identity_applied">Nová identita sítě se právě nastavuje. Telefon bude vyzván, aby se k ní připojil při příštím připojení.</string>
+    <string name="wifi_direct_stable_identity_description_legacy">V této verzi Androidu určuje název sítě systém, který jej zachovává, dokud to jde. Nechte zapnuté, aby se telefon připojoval ke známé síti, a použijte novou identitu níže, pokud uloženou síť stále odmítá. Vypnutím systém zapomene síť před každým připojením.</string>
     <string name="debug_video_low_latency">Požádat o režim nízké latence dekodéru</string>
     <string name="debug_video_low_latency_description">Nastaví klíč MediaFormat nízké latence výrobce při konfiguraci videodekodéru.</string>
     <string name="debug_video_feed_hold">Simulovat pomalý dekodér</string>

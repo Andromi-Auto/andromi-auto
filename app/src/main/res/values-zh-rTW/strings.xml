@@ -1088,6 +1088,8 @@
     <string name="wifi_direct_new_identity_none">將於下次連線時選擇</string>
     <string name="wifi_direct_new_identity_confirm">為群組選擇新的名稱和密碼，並於下次連線時生效。手機將透過藍牙重新設定，猶如連至全新車機。</string>
     <string name="wifi_direct_new_identity_done">下次連線時將使用新的網路識別碼。</string>
+    <string name="wifi_direct_new_identity_applied">正在設定新的網路識別碼。下次連線時將要求您的手機加入該網路。</string>
+    <string name="wifi_direct_stable_identity_description_legacy">在此 Android 版本中，網路名稱由系統決定，並會盡可能維持不變。請保持開啟，讓手機重新連接已知的網路；若手機持續拒絕已儲存的網路，請在下方改用新的識別碼。關閉後，系統會在每次連線前忘記該網路。</string>
     <string name="debug_video_low_latency">請求解碼器低延遲模式</string>
     <string name="debug_video_low_latency_description">在設定視訊解碼器時設定廠商低延遲 MediaFormat 金鑰。</string>
     <string name="debug_video_feed_hold">模擬慢速解碼器</string>

@@ -89,6 +89,7 @@ import com.andrerinas.openheadunit.utils.HotspotManager
 import com.andrerinas.openheadunit.connection.wifi.WifiLauncherManager
 import com.andrerinas.openheadunit.connection.wifi.WifiLauncherMode
 import com.andrerinas.openheadunit.connection.wifi.WifiLauncherStopSequence
+import com.andrerinas.openheadunit.connection.wifi.direct.P2pIdentityRotationPolicy
 import com.andrerinas.openheadunit.connection.wifi.direct.StationScanMonitor
 import com.andrerinas.openheadunit.connection.wifi.direct.StationStandDown
 import com.andrerinas.openheadunit.connection.wifi.modes.WifiLauncherHelper
@@ -2444,6 +2445,7 @@ class AapService : Service() {
                     wifiLauncherManager.startDiscovery(oneShot = true)
             }
             ACTION_STOP_WIRELESS         -> wifiLauncherManager.stop()
+            ACTION_ROTATE_WIFI_DIRECT_IDENTITY -> rotateWifiDirectIdentity()
             ACTION_NATIVE_AA_POKE        -> {
                 val mac = intent?.getStringExtra(EXTRA_MAC)
                 if (mac != null) {
@@ -2654,6 +2656,30 @@ class AapService : Service() {
             }
         }
         return START_STICKY
+    }
+
+    /**
+     * Puts the newly drawn WiFi Direct identity on the air now rather than at the next connection.
+     * Refused while the group is in use, and the stored pair is then what the next create asks for.
+     */
+    private fun rotateWifiDirectIdentity() {
+        val native = wifiLauncherManager.active as? WifiLauncherNative
+        val handshake = native?.handshakeManager
+        val reason = P2pIdentityRotationPolicy.deferralReason(
+            sessionLive = commManager.isConnected,
+            handshakeInFlight = handshake?.isHandshakeInFlight() == true ||
+                handshake?.isHandoffSettling() == true,
+            nativeWifiDirectActive = native?.strategy == NativeStrategy.WIFI_DIRECT,
+        )
+        val wifiDirect = wifiLauncherManager.sharedServices.wifiDirectManager
+        if (reason != null || wifiDirect == null) {
+            AppLog.i(
+                "AapService: the new WiFi Direct identity waits for the next create: " +
+                    (reason ?: "this mode has no WiFi Direct manager running")
+            )
+            return
+        }
+        wifiDirect.rotateNativeIdentityNow()
     }
 
     // -------------------------------------------------------------------------
@@ -2954,6 +2980,7 @@ class AapService : Service() {
         const val ACTION_BT_AUTO_START              = "com.andrerinas.openheadunit.ACTION_BT_AUTO_START"
         const val ACTION_START_WIRELESS_SCAN       = "com.andrerinas.openheadunit.ACTION_START_WIRELESS_SCAN"
         const val ACTION_STOP_WIRELESS             = "com.andrerinas.openheadunit.ACTION_STOP_WIRELESS"
+        const val ACTION_ROTATE_WIFI_DIRECT_IDENTITY = "com.andrerinas.openheadunit.ACTION_ROTATE_WIFI_DIRECT_IDENTITY"
         const val ACTION_NATIVE_AA_POKE            = "com.andrerinas.openheadunit.ACTION_NATIVE_AA_POKE"
         const val ACTION_NATIVE_AA_SWITCH_DEVICE   = "com.andrerinas.openheadunit.ACTION_NATIVE_AA_SWITCH_DEVICE"
         const val ACTION_NATIVE_AA_CANCEL_POKE      = "com.andrerinas.openheadunit.ACTION_NATIVE_AA_CANCEL_POKE"

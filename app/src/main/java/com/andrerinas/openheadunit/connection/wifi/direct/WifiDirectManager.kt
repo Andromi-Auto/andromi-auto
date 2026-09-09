@@ -433,6 +433,9 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
     // group; nativeRecreateCount bounds how many times we recreate before giving up.
     private var nativeRecreateCount = 0
 
+    /** What the last profile purge did, so the group's read-back line says whether it worked. */
+    private var lastPersistentPurgeVerdict: String? = null
+
     /**
      * True once a projection session has run over the current group. The join watchdog recreates
      * a group no phone joined, and a recreate is what moves the group's address out from under
@@ -1040,7 +1043,8 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
                         "WifiDirectManager: " + P2pGroupIdentityPolicy.describeReadBack(
                             nativeRequestedIdentity, ssid, psk, group.networkId) +
                             " bssid=$bssid stable=${GroupIdentityStabilityPolicy.label(verdict.stability)}" +
-                            " (${verdict.reason}) source=$bssidSource"
+                            " (${verdict.reason}) source=$bssidSource" +
+                            (lastPersistentPurgeVerdict?.let { " profilePurge=$it" } ?: "")
                     )
                 }
             }
@@ -1407,10 +1411,9 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
             // PROV-DISC retry storm (confirmed via live-device bisection against `ebab63a8`,
             // whose only change was skipping this teardown on reuse) — tear down and recreate
             // on every reuse rather than trying to detect which ones are broken.
-            // NOTE: this used to also call deletePersistentGroup() to purge the profile (so a
-            // plain createGroup() wouldn't reuse the same SSID/netId) — confirmed on-device that
-            // call is rejected outright for every netId, including the profile's own real one.
-            // Dropped; likely a permission this app doesn't hold.
+            // No deletePersistentGroup() here: that call is refused from Android 11, and below API 29,
+            // where it still works, it is reserved for the Native AA rename (P2pPersistentGroupPurge).
+            // The Helper path only needs a clean registrar, which the teardown alone gives it.
             AppLog.i("WifiDirectManager: Existing P2P group found — removing and recreating fresh for a clean WPS/PBC registrar")
             // The next createGroup() call generates a brand-new GO interface with a new random
             // MAC — a cached BSSID from the group we're tearing down is now stale and must never
@@ -1537,6 +1540,19 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
                 context.startActivity(intent)
             } catch (e: Exception) {}
         }, 800L)
+    }
+
+    /**
+     * Puts a new network name and passphrase on the air now instead of at the next connection.
+     * Below API 29 the create reinvokes the platform's stored profile, so the profile is deleted
+     * first; from 29 the create names the group itself and the recreate is the whole of it.
+     */
+    fun rotateNativeIdentityNow() {
+        AppLog.i(
+            "WifiDirectManager: a new WiFi Direct identity was asked for now (" +
+                "${P2pIdentityRotationPolicy.mechanism(Build.VERSION.SDK_INT)}); recreating the group."
+        )
+        startNativeAaQuietHost()
     }
 
     @SuppressLint("MissingPermission")
@@ -2205,9 +2221,9 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
      * owner. It asks for nothing rather than asking for 2.4 GHz, so the platform decides.
      *
      * Fresh group, same name: the teardown stays, but the create asks for the kept identity (see
-     * [chooseNativeGroupIdentity]), so a recreate costs the phone nothing it saved. Used to also
-     * call deletePersistentGroup() here, as the Helper mode path does, but on-device that is
-     * rejected for every netId - a system permission this app cannot hold. Dropped.
+     * [chooseNativeGroupIdentity]), so a recreate costs the phone nothing it saved. Below API 29 the
+     * create can only reinvoke the platform's stored profile, so a rename has to delete it first;
+     * deletePersistentGroup is refused from Android 11, which is well above that range.
      */
     @SuppressLint("MissingPermission")
     private fun recreateNativeGroup(forceStandard: Boolean) {
@@ -2219,13 +2235,36 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
         claimNativeCreateWindow("recreating the group")
         invalidateNativeGroupCredentials("recreating the group")
         val gen = generation
+        val appSettings = App.provide(context).settings
+        val create = {
+            if (forceStandard) standardCreateGroup(mgr, ch, 0, NATIVE_GROUP_MODE_STANDARD_FALLBACK)
+            else delayedCreateQuietGroup(0)
+        }
         val createFresh = {
             // The removeGroup below is the teardown a user exit relies on. If stop() ran while it was
             // in flight, recreating here puts a group back up that nothing is managing and that the
             // phone will keep trying to join - the opposite of what the exit asked for.
-            if (supersededByStop(gen, "Native AA group recreate")) Unit
-            else if (forceStandard) standardCreateGroup(mgr, ch, 0, NATIVE_GROUP_MODE_STANDARD_FALLBACK)
-            else delayedCreateQuietGroup(0)
+            if (supersededByStop(gen, "Native AA group recreate")) {
+                Unit
+            } else if (P2pIdentityRotationPolicy.purgeBeforeCreate(
+                    Build.VERSION.SDK_INT,
+                    appSettings.wifiDirectStableIdentity,
+                    appSettings.wifiDirectRotationPending,
+                )
+            ) {
+                // Consumed here, not after the create: a stop() landing mid-purge must not leave
+                // the request behind to purge a group nobody asked to rename.
+                appSettings.wifiDirectRotationPending = false
+                P2pPersistentGroupPurge.purge(mgr, ch, localDeviceAddress, handler) { verdict ->
+                    lastPersistentPurgeVerdict = verdict
+                    AppLog.i("WifiDirectManager: persistent profile purge: $verdict")
+                    if (!supersededByStop(gen, "Native AA group recreate")) create()
+                }
+            } else {
+                appSettings.wifiDirectRotationPending = false
+                lastPersistentPurgeVerdict = null
+                create()
+            }
         }
         markP2pRequest()
         mgr.removeGroup(ch, object : WifiP2pManager.ActionListener {
@@ -2519,6 +2558,8 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
         lastChurnReportAtMs = 0L
         pinnedChannelAbandoned = false
         namedFallbackRefused = false
+        // The verdict describes a group that is going away; it must not survive into the next start().
+        lastPersistentPurgeVerdict = null
         // Before legacyChannelRequestUnanswered is reset, because that flag is what tells the
         // release a timed-out request may have left a restriction behind.
         manager?.let { mgr -> channel?.let { ch -> releaseLegacyChannelRestriction(mgr, ch, force = true) } }

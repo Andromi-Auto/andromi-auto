@@ -28,6 +28,7 @@ import com.andrerinas.openheadunit.aap.AapService
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.CredentialField
 import com.andrerinas.openheadunit.input.MediaKeyRoutingPolicy
 import com.andrerinas.openheadunit.connection.wifi.direct.P2pGroupIdentityPolicy
+import com.andrerinas.openheadunit.connection.wifi.direct.P2pIdentityRotationPolicy
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.NativeCredentialsPreflightPolicy
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.NativeDriverSelectionPolicy
 import com.andrerinas.openheadunit.aap.NativeTransport
@@ -4008,10 +4009,14 @@ class SettingsFragment : Fragment() {
      * together, which is the one rotation a phone's saved profile survives.
      */
     private fun addWifiDirectIdentitySettings(items: MutableList<SettingItem>) {
+        // Below API 29 the app cannot name the group at all: the platform picks the name and keeps
+        // its own profile, so the toggle and the row describe that arrangement instead of this one.
+        val appNamesGroup = Build.VERSION.SDK_INT >= P2pIdentityRotationPolicy.NAMED_CREATE_SDK
         items.add(SettingItem.ToggleSettingEntry(
             stableId = "wifiDirectStableIdentity",
             nameResId = R.string.wifi_direct_stable_identity,
-            descriptionResId = R.string.wifi_direct_stable_identity_description,
+            descriptionResId = if (appNamesGroup) R.string.wifi_direct_stable_identity_description
+                else R.string.wifi_direct_stable_identity_description_legacy,
             isChecked = settings.wifiDirectStableIdentity,
             searchKeywords = "persistent group ssid passphrase password same network reconnect faster",
             onCheckedChanged = { isChecked ->
@@ -4023,7 +4028,10 @@ class SettingsFragment : Fragment() {
         items.add(SettingItem.SettingEntry(
             stableId = "wifiDirectNewIdentity",
             nameResId = R.string.wifi_direct_new_identity,
-            value = settings.wifiDirectGroupIdentity?.networkName
+            // The name the app asked for where it names the group, and the one the last group
+            // actually came up under where the platform does.
+            value = (if (appNamesGroup) settings.wifiDirectGroupIdentity?.networkName
+                else settings.wifiDirectLastGroup?.ssid)
                 ?: getString(R.string.wifi_direct_new_identity_none),
             searchKeywords = "forget reset ssid passphrase password group name",
             onClick = { _ ->
@@ -4031,9 +4039,32 @@ class SettingsFragment : Fragment() {
                     .setTitle(R.string.wifi_direct_new_identity)
                     .setMessage(R.string.wifi_direct_new_identity_confirm)
                     .setPositiveButton(android.R.string.ok) { _, _ ->
-                        settings.wifiDirectGroupIdentity =
-                            P2pGroupIdentityPolicy.mint(AapService.wifiDirectName.value)
-                        Toast.makeText(requireContext(), R.string.wifi_direct_new_identity_done, Toast.LENGTH_LONG).show()
+                        if (appNamesGroup) {
+                            settings.wifiDirectGroupIdentity =
+                                P2pGroupIdentityPolicy.mint(AapService.wifiDirectName.value)
+                        } else {
+                            settings.wifiDirectRotationPending = true
+                        }
+                        requireContext().startService(
+                            Intent(requireContext(), AapService::class.java).apply {
+                                action = AapService.ACTION_ROTATE_WIFI_DIRECT_IDENTITY
+                            }
+                        )
+                        // The saved mode, not the pending one: the running launcher is what the
+                        // service asks, and it is still the authority on whether this applies now.
+                        // A handshake is invisible from here, so the toast can only be hopeful.
+                        val appliesNow = P2pIdentityRotationPolicy.applyNow(
+                            sessionLive = App.provide(requireContext()).commManager.isConnected,
+                            handshakeInFlight = false,
+                            nativeWifiDirectActive = settings.wifiConnectionMode == WifiLauncherMode.NATIVE &&
+                                settings.nativeApStrategy == NativeStrategy.WIFI_DIRECT,
+                        )
+                        Toast.makeText(
+                            requireContext(),
+                            if (appliesNow) R.string.wifi_direct_new_identity_applied
+                            else R.string.wifi_direct_new_identity_done,
+                            Toast.LENGTH_LONG
+                        ).show()
                         updateSettingsList()
                     }
                     .setNegativeButton(android.R.string.cancel, null)

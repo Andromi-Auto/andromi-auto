@@ -1132,5 +1132,7 @@
     <string name="wifi_direct_new_identity_none">Choisie lors de la prochaine connexion</string>
     <string name="wifi_direct_new_identity_confirm">Choisit un nouveau nom et mot de passe pour le groupe, appliqués dès la prochaine connexion. Votre téléphone sera configuré via Bluetooth comme s\'il s\'agissait d\'un nouvel autoradio. Utilisez cette option si le téléphone persiste à essayer un réseau inaccessible.</string>
     <string name="wifi_direct_new_identity_done">Une nouvelle identité réseau sera utilisée dès la prochaine connexion.</string>
+    <string name="wifi_direct_new_identity_applied">Une nouvelle identité réseau est en cours de configuration. Votre téléphone sera invité à la rejoindre lors de la prochaine connexion.</string>
+    <string name="wifi_direct_stable_identity_description_legacy">Sur cette version d\'Android, le nom du réseau vient du système, qui le conserve aussi longtemps que possible. Laissez cette option activée pour que votre téléphone rejoigne un réseau connu, et essayez une nouvelle identité ci-dessous s\'il refuse toujours le réseau enregistré. Désactivez-la pour que le système oublie le réseau avant chaque connexion.</string>
     <string name="debug_video_feed_hold">Simuler un décodeur lent</string>
 </resources>

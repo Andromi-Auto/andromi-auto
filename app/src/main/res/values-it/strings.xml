@@ -1092,6 +1092,8 @@
     <string name="wifi_direct_new_identity_none">Scelta alla prossima connessione</string>
     <string name="wifi_direct_new_identity_confirm">Sceglie un nuovo nome e password per il gruppo, applicati dalla prossima connessione. Il telefono verrà configurato via Bluetooth come se fosse una nuova unità.</string>
     <string name="wifi_direct_new_identity_done">Una nuova identità di rete verrà utilizzata dalla prossima connessione.</string>
+    <string name="wifi_direct_new_identity_applied">È in corso la configurazione di una nuova identità di rete. Al telefono verrà chiesto di collegarsi alla prossima connessione.</string>
+    <string name="wifi_direct_stable_identity_description_legacy">In questa versione di Android il nome della rete lo sceglie il sistema, che lo mantiene finché può. Lascia attiva questa opzione perché il telefono si ricolleghi a una rete già nota, e prova una nuova identità qui sotto se continua a rifiutare quella salvata. Disattivala per far dimenticare la rete al sistema prima di ogni connessione.</string>
     <string name="debug_video_low_latency">Richiedi modalità a bassa latenza del decoder</string>
     <string name="debug_video_low_latency_description">Imposta la chiave proprietaria MediaFormat a bassa latenza durante la configurazione del decoder video.</string>
     <string name="debug_video_feed_hold">Simula un decoder lento</string>
