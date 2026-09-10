@@ -13,6 +13,8 @@ import java.nio.charset.StandardCharsets
 
 object AdbManager {
 
+    private const val ADB_TRAFFIC_STATS_TAG = 0xADB0
+
     private fun setupCrypto(filesDir: File): AdbCrypto {
         val publicKey = File(filesDir, "adb_public.key")
         val privateKey = File(filesDir, "adb_private.key")
@@ -47,7 +49,7 @@ object AdbManager {
         var stream: AdbStream? = null
 
         try {
-            TrafficStats.setThreadStatsTag(Thread.currentThread().id.toInt())
+            TrafficStats.setThreadStatsTag(ADB_TRAFFIC_STATS_TAG)
             val crypto = setupCrypto(context.filesDir)
 
             socket = Socket()

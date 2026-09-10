@@ -90,8 +90,9 @@ public class AdbProtocol {
     }
 
     public static byte[] generateOpen(int localId, String destination) {
-        ByteBuffer destBuf = ByteBuffer.allocate(destination.length() + 1);
-        destBuf.put(destination.getBytes(StandardCharsets.UTF_8));
+        byte[] destBytes = (destination != null ? destination : "").getBytes(StandardCharsets.UTF_8);
+        ByteBuffer destBuf = ByteBuffer.allocate(destBytes.length + 1);
+        destBuf.put(destBytes);
         destBuf.put((byte) 0);
         return generateMessage(CMD_OPEN, localId, 0, destBuf.array());
     }

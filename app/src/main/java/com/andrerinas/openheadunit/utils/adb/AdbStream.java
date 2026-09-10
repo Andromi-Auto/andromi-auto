@@ -83,6 +83,7 @@ public class AdbStream implements Closeable {
     }
 
     public void write(String str) throws IOException, InterruptedException {
+        if (str == null) return;
         write(str.getBytes(StandardCharsets.UTF_8), true);
     }
 

@@ -13,7 +13,7 @@ public class AdbConnection implements Closeable {
     private boolean connected = false;
     private AdbCrypto crypto;
     private InputStream inputStream;
-    public OutputStream outputStream;
+    OutputStream outputStream;
     private boolean sentSignature = false;
     private Socket socket;
     private final HashMap<Integer, AdbStream> openStreams = new HashMap<>();
