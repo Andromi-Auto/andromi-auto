@@ -54,6 +54,10 @@ class NativeAaHandshakeManager(
         /** How often the poke loop re-asks whether a prompt on screen still holds it off. */
         private const val PROMPT_POLL_MS = 1_000L
 
+        /** Ceiling on waiting for the AA listeners before poking anyway, and how often to ask. */
+        private const val POKE_READY_WAIT_MS = 2_000L
+        private const val POKE_READY_POLL_MS = 100L
+
         /** How long to wait for the AAP TCP port to be bound before giving up on a handshake. */
         private const val PORT_WAIT_MS = 3_000L
 
@@ -143,7 +147,17 @@ class NativeAaHandshakeManager(
     // closeAaListeners()) without taking down the HFP ones too.
     private val extraAaServerSockets = Collections.synchronizedList(mutableListOf<BluetoothServerSocket>())
     private val extraHfpServerSockets = Collections.synchronizedList(mutableListOf<BluetoothServerSocket>())
-    private var isRunning = false
+    // Read from the poke and handshake loops on Dispatchers.IO and written from start()/stop() on
+    // the caller's thread, so the reads have to see the write.
+    @Volatile private var isRunning = false
+
+    /**
+     * Why [start] gave up, kept for whoever asks later.
+     *
+     * The reason is logged once at arming time and has rotated out of a reporter's buffer long
+     * before they press anything, so a poke on a manager that never started said nothing at all.
+     */
+    @Volatile private var notStartedReason: String? = null
     // Set by closeAaListeners() so the AA accept loops can tell "we closed this on purpose
     // after a successful handoff" apart from a real socket error, for logging only.
     @Volatile private var aaListenersClosedForSession = false
@@ -202,6 +216,16 @@ class NativeAaHandshakeManager(
     // WifiDirectManager redelivers the same credentials, which was starving the poke before it
     // could ever finish.
     private var lastPokeTriggerCredentials: Triple<String, String, String>? = null
+
+    /** Whether the running wake loop was started with no credentials, by the early wake. */
+    private var pokeLoopStartedEmpty = false
+
+    /**
+     * Set once an early wake brought the phone back to a head unit with no network to hand it.
+     * Cleared when credentials arrive, so the ordinary credential-driven wake still runs.
+     */
+    @Volatile
+    private var earlyWakeSpent = false
     // elapsedRealtime() when handleHandshake() started, or 0 when no exchange is running; lets
     // WifiDirectManager's join watchdog know a real exchange is in progress.
     //
@@ -501,6 +525,7 @@ class NativeAaHandshakeManager(
     ) {
         AppLog.i("NativeAA: Credentials updated. SSID=$ssid, IP=$ip, BSSID=$bssid, identity stable=${GroupIdentityStabilityPolicy.label(identity)}")
         credentials = WifiCredentials(ssid = ssid, psk = psk, ip = ip, bssid = bssid, identity = identity)
+        earlyWakeSpent = false
     }
 
     /** Clears cached credentials so an in-progress wait doesn't hand out stale ones for a group
@@ -516,6 +541,16 @@ class NativeAaHandshakeManager(
     // this restores the invariant for: isActive() must mean "genuinely able to accept," not
     // "believed to be running."
     fun isActive(): Boolean = isRunning && !aaListenersClosedForSession
+
+    /**
+     * Whether the handshake servers were ever brought up, as opposed to [isActive]'s "can accept a
+     * connection right now". The two answers need different repairs: a closed listener is reopened
+     * by [rearmForNextSession], and only [start] can help one that was never opened.
+     */
+    fun isStarted(): Boolean = isRunning
+
+    /** Why [start] gave up, for a caller that found [isStarted] false and has to say something useful. */
+    fun notStartedReason(): String? = notStartedReason
 
     fun isHandshakeInFlight(): Boolean =
         NativeHandoffPolicy.isHandshaking(handshakeStartedAt, SystemClock.elapsedRealtime())
@@ -590,6 +625,7 @@ class NativeAaHandshakeManager(
         externalBtDiagnostic()?.let {
             if (!externalBtOverridden(context)) {
                 AppLog.e(it)
+                notStartedReason = it
                 return
             }
             AppLog.w("$it\nNativeAA: starting anyway, because the Bluetooth compatibility check is switched off in Settings.")
@@ -599,6 +635,7 @@ class NativeAaHandshakeManager(
             if (ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT)
                 != PackageManager.PERMISSION_GRANTED) {
                 AppLog.e("NativeAA: Missing BLUETOOTH_CONNECT permission. Handshake server cannot start.")
+                notStartedReason = "the app has no BLUETOOTH_CONNECT permission"
                 return
             }
         }
@@ -609,10 +646,13 @@ class NativeAaHandshakeManager(
             // re-arm check) need to see this as genuinely stopped so they retry later,
             // instead of believing the listener sockets are up when nothing was ever opened.
             AppLog.e("NativeAA: Bluetooth adapter not available or disabled")
+            notStartedReason = "this unit's Bluetooth was off or unavailable when the mode was armed"
             return
         }
 
         isRunning = true
+        notStartedReason = null
+        earlyWakeSpent = false
         aaListenersClosedForSession = false
         // Local Bluetooth radio name; logged on every accept so a dual-radio head unit's logs
         // show which radio the phone actually reached (compare with the HU name in the phone's
@@ -745,7 +785,15 @@ class NativeAaHandshakeManager(
      */
     @SuppressLint("MissingPermission")
     fun rearmForNextSession() {
-        if (!isRunning) return
+        if (!isRunning) {
+            // The one line whose absence made a reporter's capture unreadable: the caller has
+            // already said it is reopening the listeners, and nothing here can.
+            AppLog.w(
+                "NativeAA: the Android Auto listeners cannot be reopened because the handshake " +
+                    "servers are not running" + (notStartedReason?.let { " ($it)" } ?: "") + "."
+            )
+            return
+        }
         // The session that just ended answered the question the prompt asks. The chosen target is
         // left alone: the switch-driver path sets it from a coroutine that races this one.
         clearSelectionPrompt()
@@ -1238,6 +1286,25 @@ class NativeAaHandshakeManager(
      * re-delivery, and the phone *joining our group* is itself a P2P connection change, hence a
      * re-delivery. That put a real RFCOMM connect() in the middle of the phone's DHCP exchange.
      */
+    /**
+     * Wakes the phone while the group is still forming, rather than waiting for the credentials it
+     * does not need yet. The handshake opens with the version exchange and waits for credentials
+     * afterwards, so the phone's own wake latency runs alongside the bring-up instead of after it.
+     */
+    fun triggerEarlyWake(userExited: Boolean) {
+        // isActive() is "started, and the listener not closed for this session": the accept loop
+        // is launched in the same start() call, so this is as close to "accepting" as there is.
+        if (!EarlyWakePolicy.mayWakeBeforeCredentials(
+                listenersOpen = isActive(),
+                credentialsPresent = credentials != null,
+                userExited = userExited,
+                sessionUp = commManager.isConnected,
+            )
+        ) return
+        AppLog.i("NativeAA: waking the phone while the WiFi group is still forming.")
+        triggerPoke()
+    }
+
     fun triggerPoke() {
         if (isHandoffSettling()) {
             // Info, not debug: this line is the evidence the suppression is working, and reporter
@@ -1269,17 +1336,31 @@ class NativeAaHandshakeManager(
         // a local called credentials would shadow it with a Triple that is never null.
         val snapshot = credentials
         val pokeKey = Triple(snapshot?.ssid ?: "", snapshot?.ip ?: "", snapshot?.bssid ?: "")
-        if (pokeJob?.isActive == true && pokeKey == lastPokeTriggerCredentials) {
-            AppLog.d("NativeAA: triggerPoke() called again with unchanged credentials while a poke is already running - not restarting it.")
+        if (!EarlyWakePolicy.shouldRestartLoop(pokeJob?.isActive == true, lastPokeTriggerCredentials, pokeKey)) {
+            AppLog.d("NativeAA: a wake poke is already running for these credentials - not restarting it.")
+            lastPokeTriggerCredentials = pokeKey
+            // The loop re-reads credentials every pass, so from here it is a credentialed one.
+            if (!EarlyWakePolicy.isEmptyKey(pokeKey)) pokeLoopStartedEmpty = false
+            return
+        }
+        if (!EarlyWakePolicy.mayStartWithoutCredentials(EarlyWakePolicy.isEmptyKey(pokeKey), earlyWakeSpent)) {
+            AppLog.i("NativeAA: not waking the phone again before the WiFi group exists; the last wake brought it back to nothing.")
             return
         }
         lastPokeTriggerCredentials = pokeKey
+        pokeLoopStartedEmpty = EarlyWakePolicy.isEmptyKey(pokeKey)
 
         pokeJob?.cancel()
         pokeDeferralLogged = false
         pokeJob = scope.launch(Dispatchers.IO + CoroutineName("NativeAa-Wakeup")) {
-            AppLog.d("NativeAA: triggerPoke() delay starting (2s)...")
-            delay(2000) // Small safety delay before connecting
+            // isActive() goes true in the same start() that launches the accept loop, so this
+            // usually costs nothing; it is here for a poke triggered before start() has run.
+            var waitedMs = 0L
+            while (!isActive() && waitedMs < POKE_READY_WAIT_MS && isActive) {
+                delay(POKE_READY_POLL_MS)
+                waitedMs += POKE_READY_POLL_MS
+            }
+            AppLog.d("NativeAA: wake poke starting (listeners ready after ${waitedMs}ms).")
 
             while (isRunning && isActive) {
                 // Asked of the screen, never of the settings, and on every pass rather than once on
@@ -1344,7 +1425,16 @@ class NativeAaHandshakeManager(
                         target.macs.forEach { mac ->
                             val reading = bondReadingFor(adapter, mac)
                             if (BluetoothWakePolicy.mayPoke(reading)) {
-                                try { bonded.add(adapter.getRemoteDevice(mac)) } catch (e: Exception) {}
+                                try {
+                                    val device = adapter.getRemoteDevice(mac)
+                                    val verdict = BluetoothHelper.classifyDevice(
+                                        device, BluetoothHelper.pinFor(
+                                            device, settings.nativePreferredDeviceMac, settings.lastConnectedNativeMac
+                                        )
+                                    )
+                                    AppLog.d("NativeAA: chosen wake target ${device.name} ($mac) reads as ${verdict.verdict}")
+                                    bonded.add(device)
+                                } catch (e: Exception) {}
                             }
                             if (BluetoothWakePolicy.shouldForget(reading)) staleMacs.add(mac)
                         }
@@ -1355,22 +1445,23 @@ class NativeAaHandshakeManager(
                         bonded
                     }
                     PokeTargets.AllPaired -> {
-                        AppLog.w("NativeAA: No wake poke device selected, and poking all paired devices is on. Poking all of them...")
-                        // Only a phone can answer Native AA, and a poke spent on a speaker or a
-                        // watch holds the hands-free slot for nothing. Fall back to the whole set
-                        // when the filter leaves none, so an unreadable device class cannot go mute.
-                        val allPaired = adapter.bondedDevices.toList()
-                        val phones = allPaired.filter {
-                            BluetoothHelper.isLikelyPhone(
-                                it, settings.nativePreferredDeviceMac, settings.lastConnectedNativeMac
+                        AppLog.w("NativeAA: No wake poke device selected, and poking all paired devices is on. Poking every paired phone...")
+                        // Only a phone answers Native AA: the one advertising the Audio Gateway
+                        // record this poke dials. A dongle, a radio or a watch holds the hands-free
+                        // slot for nothing, so a device ruled out is never poked here; a MAC chosen
+                        // in Auto Start settings is poked without this question.
+                        val candidates = BluetoothHelper.driverCandidates(
+                            context, settings.nativePreferredDeviceMac, settings.lastConnectedNativeMac
+                        )
+                        if (candidates.offered.isEmpty()) {
+                            AppLog.w(
+                                "NativeAA: no paired device advertises the Audio Gateway record, so nothing " +
+                                    "is poked. Choose the phone in Auto Start settings if this is wrong."
                             )
+                        } else if (candidates.hidden.isNotEmpty()) {
+                            AppLog.i("NativeAA: ${candidates.hidden.size} paired device(s) are not phones and are not poked.")
                         }
-                        if (phones.isEmpty()) allPaired else {
-                            if (phones.size < allPaired.size) {
-                                AppLog.i("NativeAA: ${allPaired.size - phones.size} paired device(s) are not phones and are not poked.")
-                            }
-                            phones
-                        }
+                        candidates.offered
                     }
                     PokeTargets.None -> {
                         AppLog.w("NativeAA: No wake poke device selected, so nothing is poked. Choose one in Auto Start settings.")
@@ -1405,6 +1496,7 @@ class NativeAaHandshakeManager(
                             delay(200)
                             waitedMs += 200
                         }
+                        if (waitedMs == 0 && !isRunning) AppLog.w("NativeAA: not waiting for credentials, because the handshake servers are not running.")
                     }
 
                     // A credential redelivery cancels this loop and starts a fresh one, and cancel
@@ -1484,7 +1576,8 @@ class NativeAaHandshakeManager(
                             delay(200)
                             waitedMs += 200
                         }
-                        AppLog.i("NativeAA: Pre-poke credential wait completed. SSID=${credentials?.ssid}, IP=${credentials?.ip} (waited ${waitedMs}ms)")
+                        val whyNotWaited = if (waitedMs == 0 && !isRunning) ", because the handshake servers are not running" else ""
+                        AppLog.i("NativeAA: Pre-poke credential wait completed. SSID=${credentials?.ssid}, IP=${credentials?.ip} (waited ${waitedMs}ms$whyNotWaited)")
                     }
 
                     // pokeJob.cancel() above cannot interrupt a blocking connect(), so the
@@ -1921,6 +2014,16 @@ class NativeAaHandshakeManager(
             val snapshot = credentials
             if (snapshot == null) {
                 AppLog.e("NativeAA: Handshake failed - No WiFi credentials available after ${CREDENTIALS_WAIT_MS / 1000}s wait.")
+                if (EarlyWakePolicy.stopAfterCredentialsFailure(pokeLoopStartedEmpty, credentialsPresent = false)) {
+                    // Woken before the group existed and the group never came. Waking it again
+                    // costs a 60 s wait and a hands-free hold each time for nothing; the
+                    // credential delivery restarts the wake once there is a network to hand over.
+                    AppLog.i("NativeAA: the early wake brought the phone back to no network; not waking it again until the WiFi group exists.")
+                    earlyWakeSpent = true
+                    pokeJob?.cancel()
+                    pokeJob = null
+                    pokeLoopStartedEmpty = false
+                }
                 abortedLocally = true
                 feed(WppEvent.CredentialsUnavailable)
                 return@withContext

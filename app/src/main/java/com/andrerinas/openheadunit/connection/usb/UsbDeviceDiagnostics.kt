@@ -1,13 +1,16 @@
 package com.andrerinas.openheadunit.connection.usb
 
 import android.content.Context
+import android.content.pm.PackageManager
 import android.hardware.usb.UsbConstants
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbInterface
 import android.hardware.usb.UsbManager
 import com.andrerinas.openheadunit.utils.AppLog
+import java.util.Collections
 import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * Dumps the raw USB bus alongside our own verdict on each device. Every enumeration site filters
@@ -19,6 +22,16 @@ object UsbDeviceDiagnostics {
 
     /** Last dump per caller, so a repeated scan of an unchanged bus does not repeat itself. */
     private val lastSignatures = ConcurrentHashMap<String, String>()
+
+    /** (seen at, VID:PID) for every device any scan has met, trimmed to the hint window. */
+    private val seenIdentities = Collections.synchronizedList(mutableListOf<Pair<Long, String>>())
+
+    /** The host-support verdict is a fact about the unit, so it is worth saying exactly once. */
+    private val hostSupportReported = AtomicBoolean(false)
+
+    /** Whether the framework will enumerate anything at all on this unit's USB bus. */
+    fun hasUsbHostFeature(context: Context): Boolean =
+        context.packageManager.hasSystemFeature(PackageManager.FEATURE_USB_HOST)
 
     fun logDeviceList(context: Context, usbManager: UsbManager, caller: String) {
         val devices = try {
@@ -32,6 +45,22 @@ object UsbDeviceDiagnostics {
         val accepted = devices.count { UsbDeviceCompat.isConnectable(context, it) }
         val reportAtInfo = accepted == 0
         val lines = devices.map { "UsbDiagnostics:   ${describe(context, it, usbManager)}" }
+        val recentIdentities = recordIdentities(devices)
+
+        val hint = UsbBusHintPolicy.hint(
+            devices.size, accepted, recentIdentities.size, hasUsbHostFeature(context)
+        )
+
+        // Above the dedup, because this verdict never changes: an unchanged empty bus returns early
+        // below, so a reporter who only ever scans an empty bus would otherwise never see it.
+        if (hint == UsbBusHintPolicy.Hint.NO_HOST_SUPPORT && hostSupportReported.compareAndSet(false, true)) {
+            AppLog.i(
+                "UsbDiagnostics: this head unit does not declare USB host support " +
+                    "(android.hardware.usb.host), so Android enumerates nothing on the bus whatever " +
+                    "is plugged in and wired Android Auto cannot work here. Storage sticks and vendor " +
+                    "mirroring apps are unaffected: they do not go through the Android USB API."
+            )
+        }
 
         // The service scan runs on every attach, detach and permission result, so repeating an
         // unchanged bus would bury the change that matters in a log the user has to read. Keyed by
@@ -47,16 +76,42 @@ object UsbDeviceDiagnostics {
             if (reportAtInfo) AppLog.i(line) else AppLog.v(line)
         }
 
-        if (devices.isEmpty()) {
-            // The common causes, in the order they are worth checking, so the log answers the
-            // question without a round trip to the reporter.
-            AppLog.i(
+        // The common causes, in the order they are worth checking, so the log answers the question
+        // without a round trip to the reporter.
+        when (hint) {
+            // Already reported above, and only once per process.
+            UsbBusHintPolicy.Hint.NO_HOST_SUPPORT -> Unit
+            UsbBusHintPolicy.Hint.EMPTY_BUS -> AppLog.i(
                 "UsbDiagnostics: nothing is on the bus. Either the port carries no data, the unit " +
                     "is not in USB host mode, or a wireless adapter is waiting for its phone " +
                     "before it presents itself."
             )
+            UsbBusHintPolicy.Hint.CYCLING_ADAPTER -> AppLog.i(
+                "UsbDiagnostics: the bus identity has changed ${recentIdentities.size} times in " +
+                    "the last minute (${recentIdentities.joinToString(", ")}) and none of them " +
+                    "offers Android Auto. A wireless adapter that keeps re-enumerating has not " +
+                    "found its phone: pair the adapter with the phone, not with this head unit."
+            )
+            UsbBusHintPolicy.Hint.NONE_USABLE -> AppLog.i(
+                "UsbDiagnostics: everything on the bus was refused, for the reason on each line " +
+                    "above. Nothing here is offering Android Auto over USB."
+            )
+            null -> Unit
         }
     }
+
+    /** Adds this scan's identities to the window and returns the distinct ones still inside it. */
+    private fun recordIdentities(devices: List<UsbDevice>): List<String> {
+        val now = System.currentTimeMillis()
+        synchronized(seenIdentities) {
+            devices.forEach { seenIdentities.add(now to vidPid(it)) }
+            seenIdentities.removeAll { now - it.first >= UsbBusHintPolicy.IDENTITY_WINDOW_MS }
+            return UsbBusHintPolicy.identitiesInWindow(seenIdentities.toList(), now)
+        }
+    }
+
+    private fun vidPid(device: UsbDevice): String =
+        String.format(Locale.US, "%04X:%04X", device.vendorId, device.productId)
 
     /** One line per device: identity, our verdict, and every interface descriptor behind it. */
     fun describe(context: Context, device: UsbDevice, usbManager: UsbManager): String {

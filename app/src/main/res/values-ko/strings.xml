@@ -269,8 +269,11 @@
     <string name="add_new">새로 추가</string>
     <string name="cancel">취소</string>
     <string name="enable">활성화</string>
-    <string name="pref_stretch_screen_title">화면에 맞게 늘리기</string>
-    <string name="pref_stretch_screen_summary">화면 비율을 무시하고 전체 화면을 채웁니다(검정색 바 제거)</string>
+    <string name="video_fit_mode">화면 맞춤</string>
+    <string name="change_video_fit_mode">화면 맞춤 변경</string>
+    <string name="video_fit_mode_fill">늘려서 채우기 (여백 없음, 왜곡될 수 있음)</string>
+    <string name="video_fit_mode_contain">여백을 두고 맞추기 (잘림 없음, 왜곡 없음)</string>
+    <string name="video_fit_mode_cover">잘라서 채우기 (여백 없음, 왜곡 없음)</string>
     <string name="forced_scale">강제 화면 배율 조정(구형 기기 보정)</string>
     <string name="forced_scale_description">SurfaceView를 사용하는 일부 구형 기기에서 화면 크기 조정 문제를 보정합니다. 이미지가 왜곡되거나 위치가 어긋나 보일 때만 사용하세요.</string>
     <string name="hud_mirroring">HUD 모드 (좌우 반전)</string>
@@ -866,8 +869,6 @@
     <string name="pixel_aspect_ratio">Pixel aspect ratio</string>
     <string name="enter_pixel_aspect_ratio_value">Pixel aspect ratio x10000 (10000 = square pixels)</string>
     <string name="cannot_open_settings">Could not open system settings</string>
-    <string name="use_measured_touch_surface">Experimental touch alignment fix</string>
-    <string name="use_measured_touch_surface_description">Normalize touch input against the measured projection overlay. May help when small Android Auto controls feel shifted.</string>
     <string name="media_key_routing">Send Media Buttons To Android Auto</string>
     <string name="media_key_routing_always">Always</string>
     <string name="media_key_routing_auto">Automatic</string>
@@ -1086,6 +1087,8 @@
     <string name="wifi_direct_new_identity_none">다음 연결 시 선택됨</string>
     <string name="wifi_direct_new_identity_confirm">다음 연결부터 적용될 새 그룹 이름과 비밀번호를 선택합니다. 새 헤드유닛처럼 블루투스를 통해 설정됩니다.</string>
     <string name="wifi_direct_new_identity_done">다음 연결부터 새 네트워크 식별자가 사용됩니다.</string>
+    <string name="wifi_direct_new_identity_applied">새 네트워크 식별자를 설정하는 중입니다. 다음 연결 때 휴대폰에 전달됩니다.</string>
+    <string name="wifi_direct_stable_identity_description_legacy">이 Android 버전에서는 네트워크 이름을 시스템이 정하며 가능한 한 같은 이름을 유지합니다. 휴대폰이 이미 아는 네트워크에 다시 연결되도록 켜 두고, 저장된 네트워크를 계속 거부하면 아래에서 새 식별자를 사용하세요. 끄면 연결할 때마다 시스템이 네트워크를 잊습니다.</string>
     <string name="debug_video_low_latency">디코더 저지연 모드 요청</string>
     <string name="debug_video_low_latency_description">비디오 디코더 설정 시 벤더 저지연 MediaFormat 키를 적용합니다.</string>
     <string name="debug_video_feed_hold">느린 디코더 시뮬레이션</string>

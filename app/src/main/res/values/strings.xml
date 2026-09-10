@@ -334,6 +334,7 @@
     <string name="not_running">Not Running</string>
     <string name="no_android_auto_device_connected">No Android Auto Device connected. Please check USB connection.</string>
     <string name="no_usb_device_connected">No USB device connected to device.</string>
+    <string name="no_usb_host_support">This head unit does not support USB host mode, so wired Android Auto is not available on it. Use a wireless connection instead.</string>
     <string name="press_back_again_to_exit">Press back again to exit</string>
     <string name="back">Back</string>
     <string name="debug_mode">Debug Mode</string>
@@ -490,10 +491,11 @@
     <string name="add_new">Add new</string>
     <string name="cancel">Cancel</string>
     <string name="enable">Enable</string>
-    <string name="pref_stretch_screen_title">Stretch to fill screen</string>
-    <string name="pref_stretch_screen_summary">Ignores aspect ratio to fill the entire display (removes black bars)</string>
-    <string name="pref_optimize_ultrawide_title" translatable="false">Optimize for Ultrawide displays</string>
-    <string name="pref_optimize_ultrawide_summary" translatable="false">Forces 720p scaling, dynamic aspect ratio, and 1:1 touch overlay mapping for wide screens (1920x720 / 1780x720)</string>
+    <string name="video_fit_mode">Video fit</string>
+    <string name="change_video_fit_mode">Change video fit</string>
+    <string name="video_fit_mode_fill">Stretch to fill (no bars, may distort)</string>
+    <string name="video_fit_mode_contain">Fit with bars (no crop, no distortion)</string>
+    <string name="video_fit_mode_cover">Fill by cropping (no bars, no distortion)</string>
 
     <!-- More Features Settings -->
     <string name="category_more_features" translatable="false">More Features</string>
@@ -512,8 +514,6 @@
     <string name="forced_scale_description">Corrects scaling issues on some older devices using SurfaceView. Only use if the image looks distorted or shifted.</string>
     <string name="hud_mirroring">HUD Mode (Horizontal Flip)</string>
     <string name="hud_mirroring_description">Flips the display horizontally for windshield reflection (Head-Up Display). Requires TextureView or GLES20 view mode (does not work with SurfaceView).</string>
-    <string name="use_measured_touch_surface">Experimental touch alignment fix</string>
-    <string name="use_measured_touch_surface_description">Normalize touch input against the measured projection overlay. May help when small Android Auto controls feel shifted.</string>
 
 
     <!-- Audio Settings -->
@@ -828,6 +828,8 @@
     <string name="wifi_direct_new_identity_none">Chosen at the next connection</string>
     <string name="wifi_direct_new_identity_confirm">Picks a new name and password for the group, used from the next connection on. Your phone will be set up for it over Bluetooth as if this were a new head unit. Do this if the phone keeps trying a network it can no longer join.</string>
     <string name="wifi_direct_new_identity_done">A new network identity will be used from the next connection.</string>
+    <string name="wifi_direct_new_identity_applied">A new network identity is being set up now. Your phone will be asked to join it on the next connection.</string>
+    <string name="wifi_direct_stable_identity_description_legacy">On this Android version the network name comes from the system, which keeps the same one for as long as it can. Leave this on so your phone rejoins a network it already knows, and use a new identity below if it keeps refusing the saved one. Turn it off to make the system forget the network before every connection.</string>
     <string name="debug_video_low_latency">Request decoder low-latency mode</string>
     <string name="debug_video_low_latency_description">Sets the vendor low-latency MediaFormat key when configuring the video decoder. Falls back automatically if the decoder rejects it.</string>
     <string name="debug_video_feed_hold">Simulate a slow decoder</string>
@@ -1170,4 +1172,29 @@
     <string name="driver_none">None</string>
     <string name="show_all_devices">Show all Bluetooth devices</string>
     <string name="show_only_phones">Show only phones</string>
+    <string name="oem_app_management">OEM App Conflict Management (ADB)</string>
+    <string name="oem_app_management_desc">Detect and disable conflicting apps (Zlink, AutoKit, etc.)</string>
+    <string name="oem_app_explanation">Factory headunit companion apps (e.g. Zlink, AutoKit, SpeedPlay) often intercept USB and Bluetooth connections, preventing Open Headunit from connecting. You can disable them via Root or Self-ADB (port 5555).</string>
+    <string name="oem_app_backend_root">Execution method: Root (su) available</string>
+    <string name="oem_app_backend_adb">Execution method: Self-ADB (127.0.0.1:5555) connected</string>
+    <string name="oem_app_backend_none">Execution method: None. Enable Wireless Debugging or run \"adb tcpip 5555\"</string>
+    <string name="oem_app_autokill_switch">Auto-disable conflicting OEM apps on startup</string>
+    <string name="oem_app_autokill_switch_desc">Silences known conflicting apps and background daemons whenever Open Headunit starts.</string>
+    <string name="oem_app_autokill_enabled">Auto-disable active</string>
+    <string name="oem_app_none_detected">No known conflicting OEM apps detected.</string>
+    <string name="oem_app_btn_commands">Commands</string>
+    <string name="oem_app_btn_restore">Restore</string>
+    <string name="oem_app_btn_disable">Disable &amp; Stop</string>
+    <string name="oem_app_status_format">Installed: %1$s | Status: %2$s | Daemon: %3$s</string>
+    <string name="oem_app_state_installed">Yes</string>
+    <string name="oem_app_state_not_installed">No</string>
+    <string name="oem_app_state_enabled">Enabled</string>
+    <string name="oem_app_state_disabled">Disabled</string>
+    <string name="oem_app_state_running">Running</string>
+    <string name="oem_app_state_stopped">Stopped</string>
+    <string name="oem_app_commands_title">Prepared ADB / Shell Commands</string>
+    <string name="oem_app_action_success">Command executed successfully.</string>
+    <string name="oem_app_action_failed">Execution failed: %s</string>
+    <string name="copy_to_clipboard">Copy</string>
+    <string name="copied_to_clipboard">Copied to clipboard</string>
 </resources>

@@ -9,6 +9,7 @@ import android.content.Context
 import android.os.Build
 import android.os.IBinder
 import com.andrerinas.openheadunit.App
+import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.DriverCandidatePolicy
 import java.lang.reflect.Constructor
 import java.lang.reflect.Method
 
@@ -247,70 +248,123 @@ object BluetoothHelper {
      */
     fun isDeviceConnected(device: BluetoothDevice): Boolean = deviceConnectionState(device) == true
 
+    /** One bonded device with the policy's verdict on it. */
+    data class DriverCandidate(
+        val device: BluetoothDevice,
+        val classification: DriverCandidatePolicy.Classification,
+        val connected: Boolean
+    ) {
+        val verdict: DriverCandidatePolicy.Verdict get() = classification.verdict
+    }
+
     /**
-     * Determines whether a Bluetooth device is likely to be a smartphone / Android Auto candidate,
-     * as opposed to dedicated audio accessories (Bluetooth speakers, headphones, headsets),
-     * wearables (watches), or peripherals (keyboards, mice).
-     *
-     * Never filters out a device that the user previously connected to or designated as preferred.
-     * Safe on all Android versions (SDK 16+).
+     * Every bonded device classified, and the tier offered as a driver: the phones, else the
+     * devices nothing could classify, never the ones ruled out. Those stay reachable by a
+     * deliberate tap under "Show all"; nothing automatic reaches for them.
+     */
+    class DriverCandidates(val all: List<DriverCandidate>, val presenceReadable: Boolean) {
+        val offeredVerdict: DriverCandidatePolicy.Verdict =
+            DriverCandidatePolicy.offeredVerdict(all.map { it.verdict })
+        val offered: List<BluetoothDevice> =
+            if (offeredVerdict == DriverCandidatePolicy.Verdict.NOT_A_PHONE) emptyList()
+            else all.filter { it.verdict == offeredVerdict }.map { it.device }
+        val hidden: List<DriverCandidate> = all.filter { it.verdict != offeredVerdict || offered.isEmpty() }
+        val connectedAll: List<BluetoothDevice> = all.filter { it.connected }.map { it.device }
+        val connectedOffered: List<BluetoothDevice> =
+            connectedAll.filter { device -> offered.any { it.address == device.address } }
+
+        fun verdictOf(mac: String): DriverCandidatePolicy.Verdict =
+            all.firstOrNull { it.device.address.equals(mac, ignoreCase = true) }?.verdict
+                ?: DriverCandidatePolicy.Verdict.UNKNOWN
+
+        fun deviceFor(mac: String?): BluetoothDevice? =
+            mac?.let { m -> all.firstOrNull { it.device.address.equals(m, ignoreCase = true) }?.device }
+    }
+
+    @Volatile
+    private var lastCandidateSummary: String? = null
+
+    /**
+     * The bonded devices classified for driver selection and the wake poke. Enumerated every poke
+     * round and every resume, so the roll-up is INFO only when its composition changes.
+     */
+    @SuppressLint("MissingPermission")
+    fun driverCandidates(context: Context, preferredMac: String, lastConnectedMac: String): DriverCandidates {
+        val adapter = try { getBluetoothAdapter(context) } catch (e: Exception) { null }
+        val bonded = try { adapter?.bondedDevices?.toList() ?: emptyList() } catch (e: Exception) { emptyList() }
+        var presenceReadable = false
+        val all = bonded.map { device ->
+            val state = deviceConnectionState(device)
+            if (state != null) presenceReadable = true
+            val classification = classifyDevice(device, pinFor(device, preferredMac, lastConnectedMac))
+            AppLog.d(
+                "BluetoothHelper: driver candidate ${device.name} (${device.address}) -> " +
+                    "${classification.verdict}, ${DriverCandidatePolicy.reasonText(classification, deviceClassOf(device))}"
+            )
+            DriverCandidate(device, classification, state == true)
+        }
+        val candidates = DriverCandidates(all, presenceReadable)
+        val counts = DriverCandidatePolicy.Verdict.entries.joinToString(", ") { verdict ->
+            "${all.count { it.verdict == verdict }} ${verdict.name.lowercase().replace('_', ' ')}"
+        }
+        val hidden = candidates.hidden.joinToString {
+            "${it.device.name} (${it.classification.reason.name.lowercase().replace('_', ' ')})"
+        }
+        val summary = "BluetoothHelper: driver candidates: $counts" +
+            if (hidden.isEmpty()) "" else " - hidden: $hidden"
+        if (summary != lastCandidateSummary) {
+            lastCandidateSummary = summary
+            AppLog.i(summary)
+        } else {
+            AppLog.d(summary)
+        }
+        return candidates
+    }
+
+    /** The policy's verdict on one device, read from what the bond cached: records, class, type. */
+    @SuppressLint("MissingPermission")
+    fun classifyDevice(device: BluetoothDevice, pin: DriverCandidatePolicy.Pin): DriverCandidatePolicy.Classification {
+        val uuids = try { device.uuids?.map { it.uuid.toString() } } catch (e: Exception) { null }
+        val btClass = try { device.bluetoothClass } catch (e: Exception) { null }
+        val type = if (Build.VERSION.SDK_INT >= 18) {
+            try { device.type } catch (e: Exception) { DriverCandidatePolicy.DEVICE_TYPE_UNKNOWN }
+        } else {
+            DriverCandidatePolicy.DEVICE_TYPE_UNKNOWN
+        }
+        return DriverCandidatePolicy.classify(
+            uuids = uuids,
+            hasDeviceClass = btClass != null,
+            majorDeviceClass = btClass?.majorDeviceClass ?: 0,
+            deviceClass = btClass?.deviceClass ?: 0,
+            deviceType = type,
+            pin = pin
+        )
+    }
+
+    /** The last-connected MAC was written by a completed handshake; the preferred one was typed. */
+    fun pinFor(device: BluetoothDevice, preferredMac: String, lastConnectedMac: String): DriverCandidatePolicy.Pin {
+        val address = try { device.address } catch (_: Exception) { "" }
+        return when {
+            address.isEmpty() -> DriverCandidatePolicy.Pin.NONE
+            address.equals(lastConnectedMac, ignoreCase = true) -> DriverCandidatePolicy.Pin.PROVEN
+            address.equals(preferredMac, ignoreCase = true) -> DriverCandidatePolicy.Pin.USER
+            else -> DriverCandidatePolicy.Pin.NONE
+        }
+    }
+
+    private fun deviceClassOf(device: BluetoothDevice): Int =
+        try { device.bluetoothClass?.deviceClass ?: 0 } catch (e: Exception) { 0 }
+
+    /**
+     * Whether one device may stand as a phone, meaning it was not ruled out. Lists go through
+     * [driverCandidates]; this serves the pickers that ask about one device at a time.
      */
     fun isLikelyPhone(
         device: BluetoothDevice,
         preferredMac: String = "",
-        lastUsedMac: String = ""
-    ): Boolean {
-        val address = try { device.address } catch (_: Exception) { "" }
-        if (address.isNotEmpty()) {
-            if (address.equals(preferredMac, ignoreCase = true) || address.equals(lastUsedMac, ignoreCase = true)) {
-                return true
-            }
-        }
-
-        val btClass = try { device.bluetoothClass } catch (_: Exception) { null } ?: return true
-        val major = btClass.majorDeviceClass
-
-        // Definite non-phone peripherals: mice, keyboards, watches, printers
-        if (major == android.bluetooth.BluetoothClass.Device.Major.PERIPHERAL ||
-            major == android.bluetooth.BluetoothClass.Device.Major.WEARABLE ||
-            major == android.bluetooth.BluetoothClass.Device.Major.IMAGING) {
-            return false
-        }
-
-        // Filter out dedicated audio output accessories (speakers, headphones, headsets)
-        if (major == android.bluetooth.BluetoothClass.Device.Major.AUDIO_VIDEO) {
-            return when (btClass.deviceClass) {
-                android.bluetooth.BluetoothClass.Device.AUDIO_VIDEO_LOUDSPEAKER,
-                android.bluetooth.BluetoothClass.Device.AUDIO_VIDEO_HEADPHONES,
-                android.bluetooth.BluetoothClass.Device.AUDIO_VIDEO_WEARABLE_HEADSET,
-                android.bluetooth.BluetoothClass.Device.AUDIO_VIDEO_PORTABLE_AUDIO,
-                android.bluetooth.BluetoothClass.Device.AUDIO_VIDEO_HIFI_AUDIO -> false
-                else -> true
-            }
-        }
-
-        return true
-    }
-
-    /**
-     * Returns the list of bonded Bluetooth devices that are confirmed to be currently connected.
-     * Safe on all Android versions (SDK 16+).
-     */
-    fun getConnectedBluetoothDevices(context: Context): List<BluetoothDevice> {
-        val adapter = try {
-            getBluetoothAdapter(context)
-        } catch (e: Exception) {
-            null
-        } ?: return emptyList()
-
-        val bonded = try {
-            adapter.bondedDevices?.toList() ?: emptyList()
-        } catch (e: Exception) {
-            emptyList()
-        }
-
-        return bonded.filter { isDeviceConnected(it) }
-    }
+        lastConnectedMac: String = ""
+    ): Boolean = classifyDevice(device, pinFor(device, preferredMac, lastConnectedMac)).verdict !=
+        DriverCandidatePolicy.Verdict.NOT_A_PHONE
 
 
     /**

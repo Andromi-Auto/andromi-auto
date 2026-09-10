@@ -1,6 +1,10 @@
 package com.andrerinas.openheadunit
 
 import android.app.Activity
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import com.andrerinas.openheadunit.utils.OemAppManager
 import androidx.appcompat.app.AppCompatDelegate
 import android.app.Application
 import android.app.NotificationChannel
@@ -131,6 +135,12 @@ class App : Application(), Application.ActivityLifecycleCallbacks {
         // Apply app theme (runs the live manager when dynamic, or when a saved place
         // can force the app theme even over a static base).
         AppThemeManager.reapply(this, settings)
+
+        if (settings.autoKillOemApps) {
+            CoroutineScope(Dispatchers.IO).launch {
+                OemAppManager.runAutoKillIfEnabled(this@App)
+            }
+        }
     }
 
     private var unlockedInitDone = false

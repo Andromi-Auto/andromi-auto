@@ -105,13 +105,15 @@ class UsbNative {
         }
     }
 
+    /** libusb's code on failure, 0 on success. Our own pre-flight failures use codes libusb has
+     *  none for, so [AoaSwitchFailurePolicy] can tell them from LIBUSB_ERROR_IO. */
     fun accModeSwitch(): Int {
-        if (handlePtr == 0L) return -1
+        if (handlePtr == 0L) return AoaSwitchFailurePolicy.NO_HANDLE
         return try {
             accModeSwitch(handlePtr)
         } catch (e: Throwable) {
             AppLog.e("UsbNative: Exception during accModeSwitch: ${e.message}")
-            -1
+            AoaSwitchFailurePolicy.CALL_FAILED
         }
     }
 

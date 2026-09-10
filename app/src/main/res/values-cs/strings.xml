@@ -234,8 +234,11 @@
     <string name="add_new">Přidat nové</string>
     <string name="cancel">Zrušit</string>
     <string name="enable">Povolit</string>
-    <string name="pref_stretch_screen_title">Roztáhnout na celou obrazovku</string>
-    <string name="pref_stretch_screen_summary">Ignoruje poměr stran a vyplní celý displej (odstraní černé pruhy)</string>
+    <string name="video_fit_mode">Přizpůsobení obrazu</string>
+    <string name="change_video_fit_mode">Změnit přizpůsobení obrazu</string>
+    <string name="video_fit_mode_fill">Roztáhnout na celou plochu (bez pruhů, může deformovat)</string>
+    <string name="video_fit_mode_contain">Vejít se s pruhy (bez oříznutí a deformace)</string>
+    <string name="video_fit_mode_cover">Vyplnit oříznutím (bez pruhů a deformace)</string>
 
     <!-- Audio Settings -->
     <string name="forced_scale">Vynucené měřítko (Legacy oprava)</string>
@@ -868,8 +871,6 @@
     <string name="cannot_open_settings">Could not open system settings</string>
     <string name="static_bssid_enter_value">Enter BSSID (XX:XX:XX:XX:XX:XX)</string>
     <string name="static_bssid_desc">Nastavte BSSID pro bezdrátové spojení ručně. Potřeba jen tam, kde ji žádný zdroj v tomto zařízení neuvádí; protokol vypíše každý dotázaný zdroj.</string>
-    <string name="use_measured_touch_surface">Experimental touch alignment fix</string>
-    <string name="use_measured_touch_surface_description">Normalize touch input against the measured projection overlay. May help when small Android Auto controls feel shifted.</string>
     <string name="media_key_routing">Send Media Buttons To Android Auto</string>
     <string name="media_key_routing_always">Always</string>
     <string name="media_key_routing_auto">Automatic</string>
@@ -1089,6 +1090,8 @@
     <string name="wifi_direct_new_identity_none">Bude vybráno při příštím připojení</string>
     <string name="wifi_direct_new_identity_confirm">Zvolí nový název a heslo pro skupinu od příštího připojení. Telefon se nastaví přes Bluetooth jako pro novou hlavní jednotku.</string>
     <string name="wifi_direct_new_identity_done">Od příštího připojení bude použita nová identita sítě.</string>
+    <string name="wifi_direct_new_identity_applied">Nová identita sítě se právě nastavuje. Telefon bude vyzván, aby se k ní připojil při příštím připojení.</string>
+    <string name="wifi_direct_stable_identity_description_legacy">V této verzi Androidu určuje název sítě systém, který jej zachovává, dokud to jde. Nechte zapnuté, aby se telefon připojoval ke známé síti, a použijte novou identitu níže, pokud uloženou síť stále odmítá. Vypnutím systém zapomene síť před každým připojením.</string>
     <string name="debug_video_low_latency">Požádat o režim nízké latence dekodéru</string>
     <string name="debug_video_low_latency_description">Nastaví klíč MediaFormat nízké latence výrobce při konfiguraci videodekodéru.</string>
     <string name="debug_video_feed_hold">Simulovat pomalý dekodér</string>

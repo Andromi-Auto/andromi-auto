@@ -126,16 +126,35 @@ class SystemOptimizer(private val context: Context) {
         private const val LEGIBILITY_FACTOR = 1.1f
 
         /**
-         * The single source of truth for the largest resolution a physical panel warrants, shared
-         * by the recommended resolution, the runtime resolution cap (HeadUnitScreenConfig) and the
-         * DPI calculation, so all three always agree (issue #767). Bucketed by the panel's real
-         * pixels, in landscape terms (long side x short side); 1440p/4K are gated behind hardware
-         * HEVC on a recent enough Android, matching what the phone will actually stream. Mild
-         * downscaling (e.g. 1080p onto a 1024x600 panel) is allowed on purpose; only genuinely
-         * small panels are dropped to 720p/480p, which avoids the heavy per-frame downscale that
-         * overloads the MediaTek MDP scaler (issue #650).
+         * The largest resolution a physical panel warrants: the recommended label, the wizard, AUTO
+         * and the DPI all read this, so they agree (issue #767). Bucketed by the panel's real pixels
+         * in landscape terms; 1440p/4K are gated behind hardware HEVC on a recent enough Android.
+         * A recommendation, not a limit: the runtime cap is [hardCeiling] and it sits at or above.
          */
         fun panelCeiling(realWidthPx: Int, realHeightPx: Int, canHevc: Boolean): Settings.Resolution {
+            val longSide = maxOf(realWidthPx, realHeightPx)
+            val shortSide = minOf(realWidthPx, realHeightPx)
+            val hevcHiRes = canHevc && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N
+            // Keyed on the short side, matching NegotiatedResolutionPolicy.autoLadder in FILL: the
+            // rows are the only dimension a 16:9 buffer can match, and a wider panel is described
+            // by the pixel aspect ratio instead of by a margin that hides the extra rows.
+            return when {
+                longSide <= 0 -> Settings.Resolution._1280x720
+                longSide <= 800 && shortSide <= 480 -> Settings.Resolution._800x480
+                shortSide >= 2160 && hevcHiRes -> Settings.Resolution._3840x2160
+                shortSide >= 1440 && hevcHiRes -> Settings.Resolution._2560x1440
+                shortSide > 720 -> Settings.Resolution._1920x1080
+                else -> Settings.Resolution._1280x720
+            }
+        }
+
+        /**
+         * The largest buffer the panel can still *use*, as opposed to the one it warrants. A wide
+         * panel uses every column of a 1920-wide buffer and only hides rows behind a margin, which
+         * is not the per-frame downscale issue #650 is about, so refusing it would cost native
+         * width for a saving the user did not ask for. Only the runtime cap reads this.
+         */
+        fun hardCeiling(realWidthPx: Int, realHeightPx: Int, canHevc: Boolean): Settings.Resolution {
             val longSide = maxOf(realWidthPx, realHeightPx)
             val shortSide = minOf(realWidthPx, realHeightPx)
             val hevcHiRes = canHevc && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N

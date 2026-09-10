@@ -84,19 +84,35 @@ class Settings(private val context: Context) {
         get() = prefs.getInt("resolutionId", 0)
         set(value) = prefs.edit().putInt("resolutionId", value).apply()
 
-    // Flag to determine if the projection should stretch and ignore aspect ratio to fill the screen
-    var stretchToFill: Boolean
-        get() = prefs.getBoolean("stretch_to_fill", true)
-        set(value) { prefs.edit().putBoolean("stretch_to_fill", value).apply() }
+    // How the video is fitted into the panel, in CSS object-fit terms: FILL stretches,
+    // CONTAIN letterboxes, COVER crops. Migrated from the old "stretch_to_fill" boolean,
+    // which the legacy forcedScale/SurfaceView path read inverted (true = bars), so the
+    // migration has to branch on forced_scale rather than map the boolean straight across.
+    var videoFitMode: VideoFitMode
+        get() = VideoFitPolicy.resolve(
+            storedFitMode = if (prefs.contains("video-fit-mode")) prefs.getInt("video-fit-mode", VideoFitMode.FILL.value) else null,
+            legacyStretch = if (prefs.contains("stretch_to_fill")) prefs.getBoolean("stretch_to_fill", true) else null,
+            legacyForcedScale = prefs.getBoolean("forced_scale", false),
+            legacyViewMode = prefs.getInt("view-mode", 1)
+        )
+        set(value) { prefs.edit().putInt("video-fit-mode", value.value).apply() }
 
-    // Optimization for Ultrawide displays (1920x720 / 1780x720)
-    var optimizeUltrawide: Boolean
-        get() = prefs.getBoolean("optimize-ultrawide", false)
-        set(value) { prefs.edit().putBoolean("optimize-ultrawide", value).apply() }
+    enum class VideoFitMode(val value: Int) {
+        FILL(0),
+        CONTAIN(1),
+        COVER(2);
+
+        companion object {
+            private val map = values().associateBy(VideoFitMode::value)
+            fun fromInt(value: Int) = map[value]
+        }
+    }
 
     // Floating Launcher Overlay Button Settings
+    // Off by default: on it, MainActivity.checkOverlayPermission() sends a fresh install to the
+    // system overlay screen on first resume, for a feature the user has not asked for yet.
     var enableFloatingButton: Boolean
-        get() = prefs.getBoolean("enable-floating-button", true)
+        get() = prefs.getBoolean("enable-floating-button", false)
         set(value) { prefs.edit().putBoolean("enable-floating-button", value).apply() }
 
     var floatingButtonXPercent: Int
@@ -145,10 +161,6 @@ class Settings(private val context: Context) {
     var hudMirroring: Boolean
         get() = prefs.getBoolean("hud_mirroring", false)
         set(value) { prefs.edit().putBoolean("hud_mirroring", value).apply() }
-
-    var useMeasuredTouchSurface: Boolean
-        get() = prefs.getBoolean("use_measured_touch_surface", false)
-        set(value) { prefs.edit().putBoolean("use_measured_touch_surface", value).apply() }
 
     // UI Scale percentage for Home
     var uiScaleHomePercent: Int
@@ -588,6 +600,14 @@ class Settings(private val context: Context) {
     var wifiDirectStableIdentity: Boolean
         get() = prefs.getBoolean("wifi-direct-stable-identity", true)
         set(value) { prefs.edit().putBoolean("wifi-direct-stable-identity", value).apply() }
+
+    /**
+     * Below API 29 the platform names the group, so a "new identity" is a request to forget its
+     * stored profile at the next create. Persisted so a tap outlives the service and a reboot.
+     */
+    var wifiDirectRotationPending: Boolean
+        get() = prefs.getBoolean("wifi-direct-rotation-pending", false)
+        set(value) { prefs.edit().putBoolean("wifi-direct-rotation-pending", value).apply() }
 
     /**
      * The kept pair, or null before the first bring-up draws one.
@@ -2128,5 +2148,9 @@ class Settings(private val context: Context) {
     var nativeAaIgnoreExternalBt: Boolean
         get() = prefs.getBoolean("native-aa-ignore-external-bt", false)
         set(value) = prefs.edit().putBoolean("native-aa-ignore-external-bt", value).apply()
+
+    var autoKillOemApps: Boolean
+        get() = prefs.getBoolean("auto-kill-oem-apps", false)
+        set(value) = prefs.edit().putBoolean("auto-kill-oem-apps", value).apply()
 
 }

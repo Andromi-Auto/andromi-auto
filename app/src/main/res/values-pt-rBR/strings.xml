@@ -234,8 +234,11 @@
     <string name="add_new">Adicionar novo</string>
     <string name="cancel">Cancelar</string>
     <string name="enable">Ativar</string>
-    <string name="pref_stretch_screen_title">Esticar para preencher a tela</string>
-    <string name="pref_stretch_screen_summary">Ignora a proporção original para preencher todo o visor (remove as barras pretas)</string>
+    <string name="video_fit_mode">Ajuste do vídeo</string>
+    <string name="change_video_fit_mode">Alterar ajuste do vídeo</string>
+    <string name="video_fit_mode_fill">Esticar para preencher (sem barras, pode distorcer)</string>
+    <string name="video_fit_mode_contain">Ajustar com barras (sem corte nem distorção)</string>
+    <string name="video_fit_mode_cover">Preencher cortando (sem barras nem distorção)</string>
 
     <!-- Audio Settings -->
     <string name="forced_scale">Escala forçada (Modo de compatibilidade)</string>
@@ -869,8 +872,6 @@
     <string name="cannot_open_settings">Could not open system settings</string>
     <string name="static_bssid_enter_value">Enter BSSID (XX:XX:XX:XX:XX:XX)</string>
     <string name="static_bssid_desc">Defina o BSSID da conexão sem fio manualmente. Só é necessário quando nenhuma fonte deste dispositivo informa um; o registro nomeia cada fonte consultada.</string>
-    <string name="use_measured_touch_surface">Experimental touch alignment fix</string>
-    <string name="use_measured_touch_surface_description">Normalize touch input against the measured projection overlay. May help when small Android Auto controls feel shifted.</string>
     <string name="media_key_routing">Send Media Buttons To Android Auto</string>
     <string name="media_key_routing_always">Always</string>
     <string name="media_key_routing_auto">Automatic</string>
@@ -1090,6 +1091,8 @@
     <string name="wifi_direct_new_identity_none">Escolhida na próxima conexão</string>
     <string name="wifi_direct_new_identity_confirm">Escolhe um novo nome e senha para o grupo a partir da próxima conexão. O telefone será configurado por Bluetooth como se fosse uma nova central multimídia.</string>
     <string name="wifi_direct_new_identity_done">Uma nova identidade de rede será usada a partir da próxima conexão.</string>
+    <string name="wifi_direct_new_identity_applied">Uma nova identidade de rede está sendo configurada agora. O telefone será solicitado a entrar nela na próxima conexão.</string>
+    <string name="wifi_direct_stable_identity_description_legacy">Nesta versão do Android o nome da rede vem do sistema, que o mantém enquanto pode. Deixe ativado para que o telefone se reconecte a uma rede conhecida, e use uma nova identidade abaixo se ele continuar recusando a rede salva. Desative para que o sistema esqueça a rede antes de cada conexão.</string>
     <string name="debug_video_low_latency">Solicitar modo de baixa latência do decodificador</string>
     <string name="debug_video_low_latency_description">Define a chave proprietária MediaFormat de baixa latência ao configurar o decodificador de vídeo.</string>
     <string name="debug_video_feed_hold">Simular decodificador lento</string>
