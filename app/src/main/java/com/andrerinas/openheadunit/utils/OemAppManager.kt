@@ -72,6 +72,16 @@ object OemAppManager {
             ),
             daemonNames = listOf("speedplay", "tlink"),
             daemonScripts = emptyList()
+        ),
+        OemAppTarget(
+            id = "carlink",
+            displayName = "CarLink (FYT)",
+            packageCandidates = listOf(
+                "com.syu.carlink",
+                "com.syu.carlink2"
+            ),
+            daemonNames = listOf("carlink"),
+            daemonScripts = emptyList()
         )
     )
 
@@ -197,7 +207,7 @@ object OemAppManager {
     fun getDisableCommands(status: OemAppStatus): List<String> {
         val cmds = mutableListOf<String>()
         val pkg = status.installedPackage ?: status.target.packageCandidates.first()
-        cmds.add("pm disable --user 0 $pkg")
+        cmds.add("pm disable-user --user 0 $pkg")
         cmds.add("am force-stop $pkg")
         for (daemon in status.target.daemonNames) {
             cmds.add("pkill -f $daemon")
