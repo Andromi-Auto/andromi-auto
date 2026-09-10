@@ -52,8 +52,9 @@ object HeadUnitScreenConfig {
     private var realScreenWidthPx: Int = 0
     private var realScreenHeightPx: Int = 0
 
-    // The panel itself, orientation-normalised. Stable unless the display rotates, which is what
-    // makes it safe to fold into the settings hash the surface cache is keyed on.
+    // The panel itself, orientation-normalised. A ROM that counts a decoration on the wrong axis
+    // moves this reading by tens of px between two init() calls, so it is a sanity bound on a
+    // stored canvas and never an identity the cache is keyed on.
     private var physicalWidthPx: Int = 0
     private var physicalHeightPx: Int = 0
 
@@ -706,26 +707,24 @@ object HeadUnitScreenConfig {
      * Computes a hash of all settings that affect screen dimensions.
      * Used to invalidate the cached surface dimensions when settings change.
      */
-    fun computeSettingsHash(settings: Settings): Int {
-        var hash = 17
-        hash = 31 * hash + settings.resolutionId
-        hash = 31 * hash + settings.dpiPixelDensity
-        hash = 31 * hash + settings.pixelAspectRatioE4
-        hash = 31 * hash + settings.insetLeft
-        hash = 31 * hash + settings.insetTop
-        hash = 31 * hash + settings.insetRight
-        hash = 31 * hash + settings.insetBottom
-        hash = 31 * hash + settings.viewMode.ordinal
-        hash = 31 * hash + settings.screenOrientation.ordinal
-        hash = 31 * hash + settings.fullscreenMode.value
-        hash = 31 * hash + settings.videoFitMode.value
-        hash = 31 * hash + (if (settings.forcedScale) 1 else 0)
-        // The panel, not the anchor: folding the anchor in made the hash depend on state this call
-        // is about to replace, so a cached canvas could never match it after a cold start.
-        hash = 31 * hash + physicalWidthPx
-        hash = 31 * hash + physicalHeightPx
-        return hash
-    }
+    fun computeSettingsHash(settings: Settings): Int = ScreenSettingsHash.of(
+        resolutionId = settings.resolutionId,
+        dpiPixelDensity = settings.dpiPixelDensity,
+        pixelAspectRatioE4 = settings.pixelAspectRatioE4,
+        insetLeft = settings.insetLeft,
+        insetTop = settings.insetTop,
+        insetRight = settings.insetRight,
+        insetBottom = settings.insetBottom,
+        viewMode = settings.viewMode.ordinal,
+        screenOrientation = settings.screenOrientation.ordinal,
+        fullscreenMode = settings.fullscreenMode.value,
+        videoFitMode = settings.videoFitMode.value,
+        forcedScale = settings.forcedScale,
+        // The effective orientation, not the panel. A ROM that counts a decoration on the wrong
+        // axis moves the panel reading mid-connect, which discarded a good window measurement and
+        // then fell back to that same reading; rotation is what has to invalidate, and this is it.
+        normalisation = normalisation,
+    )
 
     fun lockResolution() {
         if (!isResolutionLocked) {
