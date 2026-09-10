@@ -14,7 +14,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import android.widget.LinearLayout
+import android.widget.ProgressBar
+import android.widget.TextView
 import android.widget.Toast
+import android.content.ClipData
+import android.content.ClipboardManager
+import com.andrerinas.openheadunit.utils.OemAppManager
 import androidx.activity.OnBackPressedCallback
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
@@ -200,6 +206,7 @@ class SettingsFragment : Fragment() {
     private var pendingHudMirroring: Boolean? = null
 
     private var pendingKillOnDisconnect: Boolean? = null
+    private var pendingAutoKillOemApps: Boolean? = null
     private var pendingRaiseProjectionDuringCall: Boolean? = null
 
     // Custom Insets
@@ -336,6 +343,7 @@ class SettingsFragment : Fragment() {
         pendingHudMirroring = settings.hudMirroring
 
         pendingKillOnDisconnect = settings.killOnDisconnect
+        pendingAutoKillOemApps = settings.autoKillOemApps
         pendingRaiseProjectionDuringCall = settings.raiseProjectionDuringCall
         pendingAutoEnableHotspot = settings.autoEnableHotspot
         pendingFakeSpeed = settings.fakeSpeed
@@ -466,6 +474,7 @@ class SettingsFragment : Fragment() {
         pendingForcedScale = settings.forcedScale
         pendingHudMirroring = settings.hudMirroring
         pendingKillOnDisconnect = settings.killOnDisconnect
+        pendingAutoKillOemApps = settings.autoKillOemApps
         pendingRaiseProjectionDuringCall = settings.raiseProjectionDuringCall
         pendingAutoEnableHotspot = settings.autoEnableHotspot
         pendingFakeSpeed = settings.fakeSpeed
@@ -627,6 +636,7 @@ class SettingsFragment : Fragment() {
         pendingHudMirroring?.let { settings.hudMirroring = it }
 
         pendingKillOnDisconnect?.let { settings.killOnDisconnect = it }
+        pendingAutoKillOemApps?.let { settings.autoKillOemApps = it }
         pendingRaiseProjectionDuringCall?.let { settings.raiseProjectionDuringCall = it }
         pendingAutoEnableHotspot?.let { settings.autoEnableHotspot = it }
         pendingFakeSpeed?.let { settings.fakeSpeed = it }
@@ -759,6 +769,7 @@ class SettingsFragment : Fragment() {
                         pendingGuidanceVolumeOffset != settings.guidanceVolumeOffset ||
                         pendingSystemVolumeOffset != settings.systemVolumeOffset ||
                         pendingKillOnDisconnect != settings.killOnDisconnect ||
+                        pendingAutoKillOemApps != settings.autoKillOemApps ||
                         pendingRaiseProjectionDuringCall != settings.raiseProjectionDuringCall ||
                         pendingAutoEnableHotspot != settings.autoEnableHotspot ||
                         pendingFakeSpeed != settings.fakeSpeed ||
@@ -1643,6 +1654,16 @@ class SettingsFragment : Fragment() {
         }
 
         // --- Navigation Settings ---
+                items.add(SettingItem.SettingEntry(
+            stableId = "oemAppManagement",
+            nameResId = R.string.oem_app_management,
+            value = if (pendingAutoKillOemApps ?: settings.autoKillOemApps) getString(R.string.oem_app_autokill_enabled) else getString(R.string.oem_app_management_desc),
+            searchKeywords = "zlink autokit speedplay tlink carplay adb root oem conflict kill stop disable",
+            onClick = {
+                showOemAppManagementDialog()
+            }
+        ))
+
         items.add(SettingItem.CategoryHeader("navigation", R.string.category_navigation))
 
         // The GPS source choice (this device vs the connected phone) only applies when a phone is
@@ -4523,4 +4544,146 @@ class SettingsFragment : Fragment() {
     companion object {
         private val SAVE_ITEM_ID = 1001
     }
+
+    private fun showOemAppManagementDialog() {
+        val context = requireContext()
+        val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_oem_app_manager, null)
+
+        val tvBackendStatus = dialogView.findViewById<TextView>(R.id.tvBackendStatus)
+        val switchAutoKill = dialogView.findViewById<com.google.android.material.switchmaterial.SwitchMaterial>(R.id.switchAutoKill)
+        val progressLoading = dialogView.findViewById<ProgressBar>(R.id.progressLoading)
+        val appsContainer = dialogView.findViewById<LinearLayout>(R.id.appsContainer)
+        val tvEmptyState = dialogView.findViewById<TextView>(R.id.tvEmptyState)
+
+        val currentAutoKill = pendingAutoKillOemApps ?: settings.autoKillOemApps
+        switchAutoKill.isChecked = currentAutoKill
+        switchAutoKill.setOnCheckedChangeListener { _, isChecked ->
+            pendingAutoKillOemApps = isChecked
+            settings.autoKillOemApps = isChecked
+            checkChanges()
+            updateSettingsList()
+        }
+
+        val alertDialog = MaterialAlertDialogBuilder(context, R.style.DarkAlertDialog)
+            .setTitle(R.string.oem_app_management)
+            .setView(dialogView)
+            .setPositiveButton(R.string.close) { dialog, _ -> dialog.dismiss() }
+            .create()
+
+        var updateUI: ((List<OemAppManager.OemAppStatus>, OemAppManager.ExecutionBackend) -> Unit)? = null
+
+        val loadStatus: () -> Unit = {
+            progressLoading.visibility = View.VISIBLE
+            viewLifecycleOwner.lifecycleScope.launch {
+                val backend = OemAppManager.checkAvailableBackend()
+                val statuses = OemAppManager.detectApps(context, checkDaemons = true)
+                progressLoading.visibility = View.GONE
+                updateUI?.invoke(statuses, backend)
+            }
+        }
+
+        updateUI = { statuses, backend ->
+            when (backend) {
+                OemAppManager.ExecutionBackend.ROOT -> {
+                    tvBackendStatus.setText(R.string.oem_app_backend_root)
+                    tvBackendStatus.setTextColor(ContextCompat.getColor(context, R.color.brand_teal))
+                }
+                OemAppManager.ExecutionBackend.ADB -> {
+                    tvBackendStatus.setText(R.string.oem_app_backend_adb)
+                    tvBackendStatus.setTextColor(ContextCompat.getColor(context, R.color.brand_teal))
+                }
+                OemAppManager.ExecutionBackend.NONE -> {
+                    tvBackendStatus.setText(R.string.oem_app_backend_none)
+                    tvBackendStatus.setTextColor(ContextCompat.getColor(context, R.color.material_orange_700))
+                }
+            }
+
+            appsContainer.removeAllViews()
+            var anyFound = false
+
+            for (status in statuses) {
+                val itemView = LayoutInflater.from(context).inflate(R.layout.item_oem_app, appsContainer, false)
+                val tvAppName = itemView.findViewById<TextView>(R.id.tvAppName)
+                val tvPackageName = itemView.findViewById<TextView>(R.id.tvPackageName)
+                val tvStatusBadge = itemView.findViewById<TextView>(R.id.tvStatusBadge)
+                val btnShowCommands = itemView.findViewById<MaterialButton>(R.id.btnShowCommands)
+                val btnRestore = itemView.findViewById<MaterialButton>(R.id.btnRestore)
+                val btnDisable = itemView.findViewById<MaterialButton>(R.id.btnDisable)
+
+                tvAppName.text = status.target.displayName
+                tvPackageName.text = status.installedPackage ?: status.target.packageCandidates.first()
+
+                val installedStr = if (status.isInstalled) getString(R.string.oem_app_state_installed) else getString(R.string.oem_app_state_not_installed)
+                val enabledStr = if (status.isEnabled) getString(R.string.oem_app_state_enabled) else getString(R.string.oem_app_state_disabled)
+                val runningStr = if (status.isRunning) getString(R.string.oem_app_state_running) else getString(R.string.oem_app_state_stopped)
+
+                tvStatusBadge.text = getString(R.string.oem_app_status_format, installedStr, enabledStr, runningStr)
+
+                if (status.isInstalled) {
+                    anyFound = true
+                }
+
+                btnDisable.isEnabled = backend != OemAppManager.ExecutionBackend.NONE && status.isInstalled
+                btnRestore.isEnabled = backend != OemAppManager.ExecutionBackend.NONE && status.isInstalled
+
+                btnShowCommands.setOnClickListener {
+                    val disableCmds = OemAppManager.getDisableCommands(status).joinToString("\n")
+                    val restoreCmds = OemAppManager.getRestoreCommands(status).joinToString("\n")
+                    val fullMsg = "--- " + getString(R.string.oem_app_btn_disable) + " ---\n" + disableCmds + "\n\n--- " + getString(R.string.oem_app_btn_restore) + " ---\n" + restoreCmds
+
+                    MaterialAlertDialogBuilder(context, R.style.DarkAlertDialog)
+                        .setTitle(R.string.oem_app_commands_title)
+                        .setMessage(fullMsg)
+                        .setPositiveButton(android.R.string.ok) { d, _ -> d.dismiss() }
+                        .setNeutralButton(R.string.copy_to_clipboard) { _, _ ->
+                            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
+                            clipboard?.setPrimaryClip(ClipData.newPlainText("ADB Commands", fullMsg))
+                            Toast.makeText(context, R.string.copied_to_clipboard, Toast.LENGTH_SHORT).show()
+                        }
+                        .show()
+                }
+
+                btnDisable.setOnClickListener {
+                    progressLoading.visibility = View.VISIBLE
+                    viewLifecycleOwner.lifecycleScope.launch {
+                        val (success, out) = OemAppManager.disableTarget(context, status)
+                        progressLoading.visibility = View.GONE
+                        if (success) {
+                            Toast.makeText(context, R.string.oem_app_action_success, Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(context, getString(R.string.oem_app_action_failed, out), Toast.LENGTH_LONG).show()
+                        }
+                        loadStatus()
+                    }
+                }
+
+                btnRestore.setOnClickListener {
+                    progressLoading.visibility = View.VISIBLE
+                    viewLifecycleOwner.lifecycleScope.launch {
+                        val (success, out) = OemAppManager.restoreTarget(context, status)
+                        progressLoading.visibility = View.GONE
+                        if (success) {
+                            Toast.makeText(context, R.string.oem_app_action_success, Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(context, getString(R.string.oem_app_action_failed, out), Toast.LENGTH_LONG).show()
+                        }
+                        loadStatus()
+                    }
+                }
+
+                appsContainer.addView(itemView)
+            }
+
+            tvEmptyState.visibility = if (anyFound) View.GONE else View.VISIBLE
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            val initialStatuses = OemAppManager.detectApps(context, checkDaemons = false)
+            updateUI?.invoke(initialStatuses, OemAppManager.ExecutionBackend.NONE)
+            loadStatus()
+        }
+
+        alertDialog.show()
+    }
+
 }
