@@ -99,7 +99,7 @@ android {
         minSdk = 16
         targetSdk = 36
         versionCode = 106
-        versionName = "3.3.2"
+        versionName = "3.4.0-beta1"
         setProperty("archivesBaseName", "${applicationId}_${versionName}")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true

@@ -80,11 +80,14 @@ adb shell am start -a android.intent.action.VIEW -d "headunit://connect?ip=192.1
 
 ## Planned
 - more customization options for the UI and the app itself
+- adb option to kill oem apps
+- byd steering wheel keys
 
 ## Changelog
-### v.3.3.2
+### v.3.4.0-beta1
 - USB: connect non-Pixel phones without fighting a fast-reverting dongle
 - Feat/automation command surface
+- Video-Fit and ultrawide touch enhancements with dynamic scaling and rework all the options, thanks to @o-jardenass and @Sesam17
 
 ### v.3.3.1
 - Added: Option to auto-resume media playback on quick reconnect if music was playing before disconnect
