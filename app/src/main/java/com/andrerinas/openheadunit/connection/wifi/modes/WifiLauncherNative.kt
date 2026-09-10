@@ -6,6 +6,7 @@ import com.andrerinas.openheadunit.App
 import com.andrerinas.openheadunit.connection.CommManager
 import com.andrerinas.openheadunit.connection.wifi.direct.GroupIdentityStability
 import com.andrerinas.openheadunit.connection.wifi.direct.StationStandDown
+import com.andrerinas.openheadunit.connection.wifi.direct.StationStandDownSettlePolicy
 import com.andrerinas.openheadunit.connection.wifi.direct.WifiDirectManager
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.NativeAaHandshakeManager
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.SoftApCredentialsProvider
@@ -78,8 +79,8 @@ class WifiLauncherNative : WifiLauncher {
                 softApCredentialsProvider?.start()
             } else if (wifiDirect != null) {
                 // Before the group, not after: wpa_supplicant only honours a channel while no group
-                // exists, and an associated station is what leaves it none to give. Opt-in, and a
-                // no-op on a unit that is not joined to anything.
+                // exists, and an associated station is what leaves it none to give. A no-op on a
+                // unit that is not joined to anything.
                 val stoodDown = StationStandDown.standDown(service)
 
                 // Start WiFi Direct as a "quiet host" (P2P Group for phone to join)
@@ -91,14 +92,11 @@ class WifiLauncherNative : WifiLauncher {
                     // in flight it remade a group underneath the one about to be asked for, and
                     // skipped the stand-down doing it.
                     wifiDirect.claimNativeCreateWindow("waiting for this unit to leave its own network")
-                    // Give the station its verify window to actually leave first. A group asked
-                    // for while it is still tearing down forms on the channel the stand-down was
-                    // meant to free, and stays there: a refresh no longer remakes a group.
-                    Handler(Looper.getMainLooper()).postDelayed({
-                        if (manager.active === this && manager.sharedServices.wifiDirectManager === wifiDirect) {
-                            wifiDirect.startNativeAaQuietHost()
-                        }
-                    }, StationStandDown.VERIFY_DELAY_MS)
+                    // A group asked for while the station is still tearing down forms on the
+                    // channel the stand-down was meant to free, and stays there. Ask whether it
+                    // has left rather than assuming the whole window is needed; the claim above
+                    // is held across every poll, so nothing else starts a create in the gap.
+                    awaitStandDownThenCreate(wifiDirect, waitedMs = 0L)
                 } else {
                     wifiDirect.startNativeAaQuietHost()
                 }
@@ -106,6 +104,31 @@ class WifiLauncherNative : WifiLauncher {
 
             // Start the official Bluetooth handshake servers
             handshakeManager?.start()
+
+            // The listeners are open now, so the phone can be woken while the group forms rather
+            // than after it. Refused unless there is genuinely nothing else to wait for.
+            handshakeManager?.triggerEarlyWake(service.userExitedAA)
+        }
+    }
+
+    /**
+     * Creates the group as soon as the station has actually left, or at the ceiling, whichever
+     * comes first. The create window stays claimed for every poll.
+     */
+    private fun awaitStandDownThenCreate(wifiDirect: WifiDirectManager, waitedMs: Long) {
+        if (manager.active !== this || manager.sharedServices.wifiDirectManager !== wifiDirect) return
+
+        val stillAssociated = StationStandDown.isStillAssociated(service)
+        when (StationStandDownSettlePolicy.step(stillAssociated, waitedMs)) {
+            StationStandDownSettlePolicy.Step.WAIT ->
+                Handler(Looper.getMainLooper()).postDelayed(
+                    { awaitStandDownThenCreate(wifiDirect, waitedMs + StationStandDownSettlePolicy.POLL_MS) },
+                    StationStandDownSettlePolicy.POLL_MS
+                )
+            StationStandDownSettlePolicy.Step.CREATE -> {
+                AppLog.i("WifiLauncherNative: creating the group ${waitedMs}ms after the stand-down (still joined=$stillAssociated).")
+                wifiDirect.startNativeAaQuietHost()
+            }
         }
     }
 

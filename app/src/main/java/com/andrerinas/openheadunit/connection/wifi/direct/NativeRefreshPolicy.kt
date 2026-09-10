@@ -14,11 +14,21 @@ object NativeRefreshPolicy {
     /** How long a createGroup is given to answer before a refresh stops waiting on it. */
     const val CREATE_GRACE_MS = 15_000L
 
+    /**
+     * How long an accepted create is given to turn into a group: the twenty one-second group-info
+     * reads, plus one. A refresh inside it used to remake the group underneath those reads.
+     */
+    const val GROUP_INFO_WINDOW_MS = 21_000L
+
     enum class Action { REDELIVER, WAIT, RECREATE }
 
     /** Whether a create asked for this long ago is still owed an answer. */
     fun withinCreateGrace(elapsedMs: Long?): Boolean =
         elapsedMs != null && elapsedMs in 0 until CREATE_GRACE_MS
+
+    /** Whether a create accepted this long ago is still owed a group. */
+    fun withinGroupInfoWindow(elapsedMs: Long?): Boolean =
+        elapsedMs != null && elapsedMs in 0 until GROUP_INFO_WINDOW_MS
 
     /**
      * The same question read off the stamp, for callers that have to decide before the group can
@@ -28,9 +38,22 @@ object NativeRefreshPolicy {
     fun createInFlight(requestedAtMs: Long, nowMs: Long): Boolean =
         requestedAtMs != 0L && withinCreateGrace(nowMs - requestedAtMs)
 
-    fun decide(groupExists: Boolean, isGroupOwner: Boolean, createInFlightForMs: Long?): Action = when {
+    fun decide(
+        groupExists: Boolean,
+        isGroupOwner: Boolean,
+        createInFlightForMs: Long?,
+        acceptedCreatePendingForMs: Long? = null,
+    ): Action = when {
         groupExists && isGroupOwner -> Action.REDELIVER
         withinCreateGrace(createInFlightForMs) -> Action.WAIT
+        withinGroupInfoWindow(acceptedCreatePendingForMs) -> Action.WAIT
         else -> Action.RECREATE
+    }
+
+    /** How long a WAIT asks again in: once the longer of the two windows is up, plus a little. */
+    fun recheckDelayMs(createInFlightForMs: Long?, acceptedCreatePendingForMs: Long?): Long {
+        val graceLeft = if (withinCreateGrace(createInFlightForMs)) CREATE_GRACE_MS - createInFlightForMs!! else 0L
+        val windowLeft = if (withinGroupInfoWindow(acceptedCreatePendingForMs)) GROUP_INFO_WINDOW_MS - acceptedCreatePendingForMs!! else 0L
+        return maxOf(graceLeft, windowLeft) + 500L
     }
 }

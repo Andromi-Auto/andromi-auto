@@ -31,6 +31,21 @@ object StationStandDown {
     const val VERIFY_DELAY_MS = 1_500L
 
     /**
+     * Whether this unit is still joined to its own network, or null when that cannot be read.
+     *
+     * Null is not "still there": an unreadable station must never hold the group up, which is what
+     * [StationStandDownSettlePolicy] does with it.
+     */
+    fun isStillAssociated(context: Context): Boolean? = try {
+        val wm = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as? WifiManager
+        @Suppress("DEPRECATION")
+        wm?.connectionInfo?.supplicantState?.let { it == SupplicantState.COMPLETED }
+    } catch (e: Exception) {
+        AppLog.d("StationStandDown: could not read the station back: ${e.message}")
+        null
+    }
+
+    /**
      * Leave the current network, recording it first so it can always be put back.
      *
      * The record is written before the call, not after: a crash between the two would otherwise
@@ -42,10 +57,11 @@ object StationStandDown {
         val settings = try {
             App.provide(context).settings
         } catch (e: Exception) {
-            AppLog.d("StationStandDown: settings unavailable, not standing down: ${e.message}")
+            // Without somewhere to record the network id there is no way back to it, and a
+            // stand-down we cannot undo is worse than one that never happened.
+            AppLog.d("StationStandDown: no store for the restore record, not standing down: ${e.message}")
             return false
         }
-        if (!settings.standDownStationForWifiDirect) return false
 
         try {
             val wm = context.applicationContext
@@ -59,7 +75,6 @@ object StationStandDown {
             val overlay = AppPermissions.isOverlayGranted(context)
 
             if (!StationStandDownPolicy.shouldStandDown(
-                    enabled = settings.standDownStationForWifiDirect,
                     sdkInt = Build.VERSION.SDK_INT,
                     canDrawOverlays = overlay,
                     associated = associated,
@@ -68,7 +83,7 @@ object StationStandDown {
             ) {
                 val why = StationStandDownPolicy.describeUnavailable(Build.VERSION.SDK_INT, overlay)
                 when {
-                    why != null -> AppLog.w("StationStandDown: $why")
+                    why != null -> AppLog.i("StationStandDown: $why")
                     !associated -> AppLog.i(
                         "StationStandDown: this unit is not joined to another WiFi network, so " +
                             "there is nothing to stand down before creating the group."
@@ -94,19 +109,14 @@ object StationStandDown {
             )
 
             Handler(Looper.getMainLooper()).postDelayed({
-                try {
-                    val still = wm.connectionInfo?.supplicantState == SupplicantState.COMPLETED
-                    if (still) {
-                        AppLog.w(
-                            "StationStandDown: this unit is still joined to its WiFi network " +
-                                "${VERIFY_DELAY_MS}ms later, so the group will have to share that " +
-                                "network's channel."
-                        )
-                    } else {
-                        AppLog.i("StationStandDown: this unit has left its WiFi network.")
-                    }
-                } catch (e: Exception) {
-                    AppLog.d("StationStandDown: could not read the station back: ${e.message}")
+                if (isStillAssociated(context) == true) {
+                    AppLog.w(
+                        "StationStandDown: this unit is still joined to its WiFi network " +
+                            "${VERIFY_DELAY_MS}ms later, so the group will have to share that " +
+                            "network's channel."
+                    )
+                } else {
+                    AppLog.i("StationStandDown: this unit has left its WiFi network.")
                 }
             }, VERIFY_DELAY_MS)
             return true

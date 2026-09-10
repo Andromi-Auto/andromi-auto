@@ -21,6 +21,7 @@ import com.andrerinas.openheadunit.connection.usb.UsbDeviceCompat
 import com.andrerinas.openheadunit.connection.wifi.direct.ObservedP2pGroup
 import com.andrerinas.openheadunit.connection.wifi.direct.StoredP2pIdentity
 import com.andrerinas.openheadunit.connection.wifi.modes.helper.HelperStrategy
+import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.NativeDriverSelectionPolicy
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.NativeStrategy
 import com.andrerinas.openheadunit.connection.wifi.WifiLauncherMode
 
@@ -83,10 +84,52 @@ class Settings(private val context: Context) {
         get() = prefs.getInt("resolutionId", 0)
         set(value) = prefs.edit().putInt("resolutionId", value).apply()
 
-    // Flag to determine if the projection should stretch and ignore aspect ratio to fill the screen
-    var stretchToFill: Boolean
-        get() = prefs.getBoolean("stretch_to_fill", true)
-        set(value) { prefs.edit().putBoolean("stretch_to_fill", value).apply() }
+    // How the video is fitted into the panel, in CSS object-fit terms: FILL stretches,
+    // CONTAIN letterboxes, COVER crops. Migrated from the old "stretch_to_fill" boolean,
+    // which the legacy forcedScale/SurfaceView path read inverted (true = bars), so the
+    // migration has to branch on forced_scale rather than map the boolean straight across.
+    var videoFitMode: VideoFitMode
+        get() = VideoFitPolicy.resolve(
+            storedFitMode = if (prefs.contains("video-fit-mode")) prefs.getInt("video-fit-mode", VideoFitMode.FILL.value) else null,
+            legacyStretch = if (prefs.contains("stretch_to_fill")) prefs.getBoolean("stretch_to_fill", true) else null,
+            legacyForcedScale = prefs.getBoolean("forced_scale", false),
+            legacyViewMode = prefs.getInt("view-mode", 1)
+        )
+        set(value) { prefs.edit().putInt("video-fit-mode", value.value).apply() }
+
+    enum class VideoFitMode(val value: Int) {
+        FILL(0),
+        CONTAIN(1),
+        COVER(2);
+
+        companion object {
+            private val map = values().associateBy(VideoFitMode::value)
+            fun fromInt(value: Int) = map[value]
+        }
+    }
+
+    // Floating Launcher Overlay Button Settings
+    // Off by default: on it, MainActivity.checkOverlayPermission() sends a fresh install to the
+    // system overlay screen on first resume, for a feature the user has not asked for yet.
+    var enableFloatingButton: Boolean
+        get() = prefs.getBoolean("enable-floating-button", false)
+        set(value) { prefs.edit().putBoolean("enable-floating-button", value).apply() }
+
+    var floatingButtonXPercent: Int
+        get() = prefs.getInt("floating-button-x-percent", 0)
+        set(value) { prefs.edit().putInt("floating-button-x-percent", value.coerceIn(0, 100)).apply() }
+
+    var floatingButtonYPercent: Int
+        get() = prefs.getInt("floating-button-y-percent", 54)
+        set(value) { prefs.edit().putInt("floating-button-y-percent", value.coerceIn(0, 100)).apply() }
+
+    var floatingButtonOpacityPercent: Int
+        get() = prefs.getInt("floating-button-opacity-percent", 80)
+        set(value) { prefs.edit().putInt("floating-button-opacity-percent", value.coerceIn(0, 100)).apply() }
+
+    var floatingButtonSizeDp: Int
+        get() = prefs.getInt("floating-button-size-dp", 60)
+        set(value) { prefs.edit().putInt("floating-button-size-dp", value.coerceIn(32, 120)).apply() }
 
     // Forced scale for older devices (SurfaceView fix)
     var forcedScale: Boolean
@@ -97,10 +140,6 @@ class Settings(private val context: Context) {
     var hudMirroring: Boolean
         get() = prefs.getBoolean("hud_mirroring", false)
         set(value) { prefs.edit().putBoolean("hud_mirroring", value).apply() }
-
-    var useMeasuredTouchSurface: Boolean
-        get() = prefs.getBoolean("use_measured_touch_surface", false)
-        set(value) { prefs.edit().putBoolean("use_measured_touch_surface", value).apply() }
 
     // UI Scale percentage for Home
     var uiScaleHomePercent: Int
@@ -243,6 +282,13 @@ class Settings(private val context: Context) {
         get() = prefs.getBoolean(KEY_LOG_CAPTURE_ENABLED, false)
         set(value) { prefs.edit().putBoolean(KEY_LOG_CAPTURE_ENABLED, value).apply() }
     val logLevel: Int get() = exporterLogLevel.logLevel
+
+    // Lets another app on the device rewrite this unit's settings and drive the log capture through
+    // AutomationReceiver. Off by default: the control verbs are harmless to fire by accident, these
+    // are not.
+    var allowExternalConfiguration: Boolean
+        get() = prefs.getBoolean(KEY_ALLOW_EXTERNAL_CONFIGURATION, false)
+        set(value) = prefs.edit().putBoolean(KEY_ALLOW_EXTERNAL_CONFIGURATION, value).apply()
 
     var viewMode: ViewMode
         get() {
@@ -512,25 +558,7 @@ class Settings(private val context: Context) {
         set(value) { prefs.edit().putBoolean("keep-dummy-vpn-during-session", value).apply() }
 
     /**
-     * Drops this unit's own WiFi association while the Native AA WiFi Direct group is brought up.
-     *
-     * On a single-radio unit an associated station leaves the group owner no free channel, so
-     * wpa_supplicant forces the group onto the station's channel or refuses to make one at all. That
-     * is the shape of a unit whose group never forms, and of one whose picture stutters because the
-     * group is sharing the home network's channel.
-     *
-     * Off by default, and deliberately not a general remedy: the same association is measured to be
-     * the *better* state once a session is running, on this same class of hardware. It is bounded to
-     * the bring-up and the network is put back on teardown. See
-     * [com.andrerinas.openheadunit.connection.wifi.direct.StationStandDownPolicy], which also holds
-     * the rule for whether the platform will honour it at all.
-     */
-    var standDownStationForWifiDirect: Boolean
-        get() = prefs.getBoolean("stand-down-station-for-wifi-direct", false)
-        set(value) { prefs.edit().putBoolean("stand-down-station-for-wifi-direct", value).apply() }
-
-    /**
-     * The network id disabled by the stand-down above, or -1 for none standing.
+     * The network id disabled by the WiFi Direct station stand-down, or -1 for none standing.
      *
      * Written before the network is disabled rather than after, so a crash in between still leaves a
      * record to restore from. Not a user setting; it exists so a force-stop cannot leave the unit
@@ -551,6 +579,14 @@ class Settings(private val context: Context) {
     var wifiDirectStableIdentity: Boolean
         get() = prefs.getBoolean("wifi-direct-stable-identity", true)
         set(value) { prefs.edit().putBoolean("wifi-direct-stable-identity", value).apply() }
+
+    /**
+     * Below API 29 the platform names the group, so a "new identity" is a request to forget its
+     * stored profile at the next create. Persisted so a tap outlives the service and a reboot.
+     */
+    var wifiDirectRotationPending: Boolean
+        get() = prefs.getBoolean("wifi-direct-rotation-pending", false)
+        set(value) { prefs.edit().putBoolean("wifi-direct-rotation-pending", value).apply() }
 
     /**
      * The kept pair, or null before the first bring-up draws one.
@@ -1402,6 +1438,7 @@ class Settings(private val context: Context) {
 
         /** SharedPreferences key; also used by [com.andrerinas.openheadunit.aap.AapService] for change listener. */
         const val KEY_LOG_LEVEL = "log-level"
+        const val KEY_ALLOW_EXTERNAL_CONFIGURATION = "allow-external-configuration"
         const val KEY_LOG_SOURCE = "log-source"
         const val KEY_LOG_LOCATION = "log-location"
         /** Persist whether log capture should be active across restarts. */
@@ -1917,6 +1954,24 @@ class Settings(private val context: Context) {
         get() = prefs.getBoolean("native-wifi-version-exchange", false)
         set(value) = prefs.edit().putBoolean("native-wifi-version-exchange", value).apply()
 
+    var nativeDriverSelectionMode: NativeDriverSelectionPolicy.Mode
+        get() = NativeDriverSelectionPolicy.Mode.fromId(
+            prefs.getInt("native-driver-selection-mode", NativeDriverSelectionPolicy.Mode.AUTO.id)
+        )
+        set(value) = prefs.edit().putInt("native-driver-selection-mode", value.id).apply()
+
+    var nativeDriverSelectionTimeoutSec: Int
+        get() = prefs.getInt("native-driver-selection-timeout", NativeDriverSelectionPolicy.DEFAULT_TIMEOUT_SEC)
+        set(value) = prefs.edit().putInt("native-driver-selection-timeout", NativeDriverSelectionPolicy.sanitizeTimeout(value)).apply()
+
+    var nativePreferredDeviceMac: String
+        get() = prefs.getString("native-preferred-device-mac", "") ?: ""
+        set(value) = prefs.edit().putString("native-preferred-device-mac", value).apply()
+
+    var lastConnectedNativeMac: String
+        get() = prefs.getString("last-connected-native-mac", "") ?: ""
+        set(value) = prefs.edit().putString("last-connected-native-mac", value).apply()
+
     // ---------------------------------------------------------------------------------------------
     // Standing connection failures.
     //
@@ -1966,6 +2021,11 @@ class Settings(private val context: Context) {
     var connectionIssueVideoLinkTooSlowAtEpochMs: Long
         get() = prefs.getLong("connection-issue-video-starved", 0L)
         set(value) = prefs.edit().putLong("connection-issue-video-starved", value).apply()
+
+    /** Every 5 GHz channel the pinned one was walked across was refused a group owner. */
+    var connectionIssueFiveGhzChannelRefusedAtEpochMs: Long
+        get() = prefs.getLong("connection-issue-5ghz-channel-refused", 0L)
+        set(value) = prefs.edit().putLong("connection-issue-5ghz-channel-refused", value).apply()
 
     /**
      * When the user last dismissed the failure banner.
