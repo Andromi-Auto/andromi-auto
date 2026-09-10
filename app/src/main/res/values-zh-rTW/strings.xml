@@ -233,8 +233,11 @@
     <string name="add_new">加入新的</string>
     <string name="cancel">取消</string>
     <string name="enable">啟用</string>
-    <string name="pref_stretch_screen_title">延展以填滿螢幕</string>
-    <string name="pref_stretch_screen_summary">忽略長寬比以填滿整個顯示器（移除黑邊）</string>
+    <string name="video_fit_mode">影像縮放方式</string>
+    <string name="change_video_fit_mode">變更影像縮放方式</string>
+    <string name="video_fit_mode_fill">拉伸填滿 (無黑邊，可能變形)</string>
+    <string name="video_fit_mode_contain">完整顯示 (有黑邊，不裁切不變形)</string>
+    <string name="video_fit_mode_cover">裁切填滿 (無黑邊，不變形)</string>
 
     <!-- Audio Settings -->
     <string name="forced_scale">強制縮放 (舊版修正)</string>
@@ -867,8 +870,6 @@
     <string name="cannot_open_settings">Could not open system settings</string>
     <string name="static_bssid_enter_value">Enter BSSID (XX:XX:XX:XX:XX:XX)</string>
     <string name="static_bssid_desc">手動設定無線連線的 BSSID。只有在本機沒有任何來源回報時才需要；記錄檔會列出詢問過的每個來源。</string>
-    <string name="use_measured_touch_surface">Experimental touch alignment fix</string>
-    <string name="use_measured_touch_surface_description">Normalize touch input against the measured projection overlay. May help when small Android Auto controls feel shifted.</string>
     <string name="media_key_routing">Send Media Buttons To Android Auto</string>
     <string name="media_key_routing_always">Always</string>
     <string name="media_key_routing_auto">Automatic</string>
@@ -1088,6 +1089,8 @@
     <string name="wifi_direct_new_identity_none">將於下次連線時選擇</string>
     <string name="wifi_direct_new_identity_confirm">為群組選擇新的名稱和密碼，並於下次連線時生效。手機將透過藍牙重新設定，猶如連至全新車機。</string>
     <string name="wifi_direct_new_identity_done">下次連線時將使用新的網路識別碼。</string>
+    <string name="wifi_direct_new_identity_applied">正在設定新的網路識別碼。下次連線時將要求您的手機加入該網路。</string>
+    <string name="wifi_direct_stable_identity_description_legacy">在此 Android 版本中，網路名稱由系統決定，並會盡可能維持不變。請保持開啟，讓手機重新連接已知的網路；若手機持續拒絕已儲存的網路，請在下方改用新的識別碼。關閉後，系統會在每次連線前忘記該網路。</string>
     <string name="debug_video_low_latency">請求解碼器低延遲模式</string>
     <string name="debug_video_low_latency_description">在設定視訊解碼器時設定廠商低延遲 MediaFormat 金鑰。</string>
     <string name="debug_video_feed_hold">模擬慢速解碼器</string>

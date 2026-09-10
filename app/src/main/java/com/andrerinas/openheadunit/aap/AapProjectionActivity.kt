@@ -58,6 +58,7 @@ import android.content.IntentFilter
 import com.andrerinas.openheadunit.view.ProjectionViewScaler
 import android.animation.ObjectAnimator
 import android.animation.PropertyValuesHolder
+import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.VideoView
 import com.bumptech.glide.Glide
@@ -893,6 +894,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
 
                             // Lock the resolution so that orientation changes don't cause re-negotiation
                             HeadUnitScreenConfig.lockResolution()
+                            HeadUnitScreenConfig.onMarginsDiverged = ::onMarginsDiverged
                             applyOrientationSettings()
 
                             // Handshake done. If the surface is already ready (e.g. reconnect
@@ -1754,40 +1756,31 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         val prevUsableW = HeadUnitScreenConfig.getUsableWidth()
         val prevUsableH = HeadUnitScreenConfig.getUsableHeight()
 
-        if (HeadUnitScreenConfig.updateSurfaceDimensions(width, height)) {
+        val anchorMoved = HeadUnitScreenConfig.updateSurfaceDimensions(width, height)
+
+        // What is cached is the usable area, which the screen config has already turned the right
+        // way up, so the orientation guard this used to carry could only reject a correct reading.
+        val shouldCache = !App.isPiPActive
+
+        // Cached whether or not the anchor moved: service discovery answers before any surface
+        // exists, so next session's announcement has only this to go on.
+        val canvasW = HeadUnitScreenConfig.getUsableWidth()
+        val canvasH = HeadUnitScreenConfig.getUsableHeight()
+        val canvasHash = HeadUnitScreenConfig.computeSettingsHash(settings)
+        if (shouldCache && (settings.cachedSurfaceWidth != canvasW ||
+                settings.cachedSurfaceHeight != canvasH ||
+                settings.cachedSurfaceSettingsHash != canvasHash)
+        ) {
+            settings.cachedSurfaceWidth = canvasW
+            settings.cachedSurfaceHeight = canvasH
+            settings.cachedSurfaceSettingsHash = canvasHash
+        } else if (!shouldCache) {
+            AppLog.i("[UI_DEBUG_FIX] Skipping surface dimension cache update due to transient orientation mismatch: ${width}x${height}")
+        }
+
+        if (anchorMoved) {
             AppLog.i("[UI_DEBUG_FIX] Surface mismatch! Expected: ${prevUsableW}x${prevUsableH}, Actual: ${width}x${height}")
-
-            // Cache the real surface size for next session only if orientation matches expected setting
-            val isTargetLandscape = settings.screenOrientation == Settings.ScreenOrientation.LANDSCAPE ||
-                settings.screenOrientation == Settings.ScreenOrientation.LANDSCAPE_REVERSE
-            val isTargetPortrait = settings.screenOrientation == Settings.ScreenOrientation.PORTRAIT ||
-                settings.screenOrientation == Settings.ScreenOrientation.PORTRAIT_REVERSE
-            val surfaceIsLandscape = width >= height
-
-            val shouldCache = when {
-                isTargetLandscape -> surfaceIsLandscape
-                isTargetPortrait -> !surfaceIsLandscape
-                else -> true
-            }
-
-            if (shouldCache) {
-                settings.cachedSurfaceWidth = HeadUnitScreenConfig.getUsableWidth()
-                settings.cachedSurfaceHeight = HeadUnitScreenConfig.getUsableHeight()
-                settings.cachedSurfaceSettingsHash = HeadUnitScreenConfig.computeSettingsHash(settings)
-            } else {
-                AppLog.i("[UI_DEBUG_FIX] Skipping surface dimension cache update due to transient orientation mismatch: ${width}x${height}")
-            }
-
-            if (commManager.connectionState.value is CommManager.ConnectionState.TransportStarted) {
-                // AA is already running → send corrected per-side margins dynamically
-                commManager.sendUpdateUiConfigRequest(
-                    HeadUnitScreenConfig.getLeftMargin(),
-                    HeadUnitScreenConfig.getTopMargin(),
-                    HeadUnitScreenConfig.getRightMargin(),
-                    HeadUnitScreenConfig.getBottomMargin()
-                )
-                AppLog.i("[UI_DEBUG_FIX] AA is already running, send corrected via sendUpdateUiConfigRequest")
-            }
+            reannounceMargins()
             // If transport not started yet, ServiceDiscoveryResponse will use the corrected values automatically.
         }
 
@@ -1870,6 +1863,42 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         }
     }
 
+    /**
+     * Send the panel's per-side margins to a running session. False when there is no session to
+     * tell, which leaves the announced margins standing so the next recalculate tries again.
+     * A surface change reaches here twice, through recalculate and then directly; one send.
+     */
+    private fun reannounceMargins(): Boolean {
+        if (commManager.connectionState.value !is CommManager.ConnectionState.TransportStarted) {
+            return false
+        }
+        if (HeadUnitScreenConfig.marginsMatchAnnounced()) return true
+        commManager.sendUpdateUiConfigRequest(
+            HeadUnitScreenConfig.getLeftMargin(),
+            HeadUnitScreenConfig.getTopMargin(),
+            HeadUnitScreenConfig.getRightMargin(),
+            HeadUnitScreenConfig.getBottomMargin()
+        )
+        HeadUnitScreenConfig.recordAnnouncedMargins(
+            HeadUnitScreenConfig.getWidthMargin(), HeadUnitScreenConfig.getHeightMargin()
+        )
+        AppLog.i("[UI_DEBUG_FIX] AA is already running, send corrected via sendUpdateUiConfigRequest")
+        return true
+    }
+
+    /**
+     * The margins moved after they were announced, which on a device whose insets are still
+     * settling also means the scale was computed against the old reading. Re-announce and redraw.
+     */
+    private fun onMarginsDiverged(): Boolean {
+        val reannounced = reannounceMargins()
+        runOnUiThread {
+            val view = projectionView as? View ?: return@runOnUiThread
+            ProjectionViewScaler.updateScale(view, videoDecoder.videoWidth, videoDecoder.videoHeight)
+        }
+        return reannounced
+    }
+
     private fun sendTouchEvent(event: MotionEvent) {
         val action = TouchEvent.motionEventToAction(event) ?: return
         val ts = SystemClock.elapsedRealtime()
@@ -1883,97 +1912,49 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         }
 
         val view = projectionView as View
-        val effectiveFullscreenMode = activityFullscreenOverride ?: settings.fullscreenMode
-        val measuredTouchSurfaceEnabled = settings.useMeasuredTouchSurface &&
-            effectiveFullscreenMode == Settings.FullscreenMode.IMMERSIVE
+        // The coordinates come from the overlay, so only the overlay can be the denominator. The
+        // screen config is the fallback for a touch that beats the first layout, and outside
+        // immersive it describes the display rather than the window this event was measured in.
         val overlay = touchOverlayView
-        val viewW = if (measuredTouchSurfaceEnabled) {
-            (overlay?.width ?: 0).takeIf { it > 0 }?.toFloat()
-                ?: view.width.takeIf { it > 0 }?.toFloat()
-                ?: HeadUnitScreenConfig.getUsableWidth().toFloat()
-        } else {
-            HeadUnitScreenConfig.getUsableWidth().toFloat()
-        }
-        val viewH = if (measuredTouchSurfaceEnabled) {
-            (overlay?.height ?: 0).takeIf { it > 0 }?.toFloat()
-                ?: view.height.takeIf { it > 0 }?.toFloat()
-                ?: HeadUnitScreenConfig.getUsableHeight().toFloat()
-        } else {
-            HeadUnitScreenConfig.getUsableHeight().toFloat()
-        }
+        val viewW = (overlay?.width ?: 0).takeIf { it > 0 }?.toFloat()
+            ?: view.width.takeIf { it > 0 }?.toFloat()
+            ?: HeadUnitScreenConfig.getUsableWidth().toFloat()
+        val viewH = (overlay?.height ?: 0).takeIf { it > 0 }?.toFloat()
+            ?: view.height.takeIf { it > 0 }?.toFloat()
+            ?: HeadUnitScreenConfig.getUsableHeight().toFloat()
 
         if (viewW <= 0 || viewH <= 0) return
 
         val marginW = HeadUnitScreenConfig.getWidthMargin().toFloat()
         val marginH = HeadUnitScreenConfig.getHeightMargin().toFloat()
 
-        // Logic check: When forcedScale is active, the visual behavior of 'stretchToFill'
-        // is inverted (True = Aspect Ratio Centered, False = Stretched to Screen).
-        // We adjust the touch mapping to match this visual reality.
-        val isStretch = if (HeadUnitScreenConfig.forcedScale) {
-            !settings.stretchToFill
-        } else {
-            settings.stretchToFill
-        }
-
         val pointerData = mutableListOf<Triple<Int, Int, Int>>()
         repeat(event.pointerCount) { pointerIndex ->
             val pointerId = event.getPointerId(pointerIndex)
-            if (measuredTouchSurfaceEnabled) {
-                val corrected = TouchCoordinateMapper.map(
-                    rawX = event.getX(pointerIndex),
-                    rawY = event.getY(pointerIndex),
-                    inputSurfaceWidth = viewW,
-                    inputSurfaceHeight = viewH,
-                    negotiatedWidth = videoW,
-                    negotiatedHeight = videoH,
-                    marginWidth = marginW,
-                    marginHeight = marginH,
-                    stretchToFill = isStretch,
-                    hudMirroring = settings.hudMirroring
-                )
+            val corrected = TouchCoordinateMapper.map(
+                rawX = event.getX(pointerIndex),
+                rawY = event.getY(pointerIndex),
+                inputSurfaceWidth = viewW,
+                inputSurfaceHeight = viewH,
+                negotiatedWidth = videoW,
+                negotiatedHeight = videoH,
+                marginWidth = marginW,
+                marginHeight = marginH,
+                fitMode = settings.videoFitMode,
+                hudMirroring = settings.hudMirroring
+            )
+            pointerData.add(Triple(pointerId, corrected.x, corrected.y))
+        }
 
-                pointerData.add(Triple(pointerId, corrected.x, corrected.y))
-            } else {
-                val rawPx = event.getX(pointerIndex)
-                val px = if (settings.hudMirroring) (viewW - rawPx) else rawPx
-                val py = event.getY(pointerIndex)
-
-                val videoX: Float
-                val videoY: Float
-
-                if (isStretch) {
-                    videoX = (px / viewW) * (videoW - marginW)
-                    videoY = (py / viewH) * (videoH - marginH)
-                } else {
-                    val uiW = videoW - marginW
-                    val uiH = videoH - marginH
-                    val uiRatio = uiW / uiH
-                    val viewRatio = viewW / viewH
-
-                    var displayedUiW = viewW
-                    var displayedUiH = viewH
-
-                    if (viewRatio > uiRatio) {
-                        displayedUiW = viewH * uiRatio
-                    } else {
-                        displayedUiH = viewW / uiRatio
-                    }
-
-                    val uiLeft = (viewW - displayedUiW) / 2f
-                    val uiTop = (viewH - displayedUiH) / 2f
-
-                    val localX = px - uiLeft
-                    val localY = py - uiTop
-
-                    videoX = (localX / displayedUiW) * uiW
-                    videoY = (localY / displayedUiH) * uiH
-                }
-
-                val correctedX = videoX.toInt().coerceIn(0, videoW)
-                val correctedY = videoY.toInt().coerceIn(0, videoH)
-                pointerData.add(Triple(pointerId, correctedX, correctedY))
-            }
+        // The only instrument that says whether a tap reached the pixel it looked like it hit.
+        // Verbose because it is one line per pointer per motion event.
+        if (AppLog.LOG_VERBOSE) {
+            val first = pointerData.firstOrNull()
+            AppLog.v(
+                "[UI_DEBUG] Touch map: raw=${event.getX(0).toInt()},${event.getY(0).toInt()} " +
+                    "-> video=${first?.second},${first?.third} view=${viewW.toInt()}x${viewH.toInt()} " +
+                    "video=${videoW}x${videoH} margin=${marginW.toInt()}x${marginH.toInt()} fit=${settings.videoFitMode}"
+            )
         }
 
         commManager.send(TouchEvent(ts, action, event.actionIndex, pointerData))
@@ -2033,6 +2014,8 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
 
     override fun onDestroy() {
         super.onDestroy()
+        HeadUnitScreenConfig.onMarginsDiverged = null
+        HeadUnitScreenConfig.clearAnnouncedMargins()
         closeCallRaiseEpisode("the projection is going away")
         unregisterAudioModeListener()
         if (isFinishReceiverRegistered) {

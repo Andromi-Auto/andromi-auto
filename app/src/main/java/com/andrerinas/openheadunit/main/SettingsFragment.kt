@@ -34,6 +34,7 @@ import com.andrerinas.openheadunit.aap.AapService
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.CredentialField
 import com.andrerinas.openheadunit.input.MediaKeyRoutingPolicy
 import com.andrerinas.openheadunit.connection.wifi.direct.P2pGroupIdentityPolicy
+import com.andrerinas.openheadunit.connection.wifi.direct.P2pIdentityRotationPolicy
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.NativeCredentialsPreflightPolicy
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.NativeDriverSelectionPolicy
 import com.andrerinas.openheadunit.aap.NativeTransport
@@ -169,6 +170,10 @@ class SettingsFragment : Fragment() {
     private var pendingScreenOrientation: Settings.ScreenOrientation? = null
     private var pendingAppLanguage: String? = null
     private var pendingFakeSpeed: Boolean? = null
+    private var pendingNarrowBandProfileCap: Boolean? = null
+    private var pendingDebugVideoLowLatency: Boolean? = null
+    private var pendingAllowExternalConfiguration: Boolean? = null
+    private var pendingKeepDummyVpnDuringSession: Boolean? = null
 
     private var pendingWifiConnectionMode: WifiLauncherMode? = null
     private var pendingHelperConnectionStrategy: HelperStrategy? = null
@@ -184,17 +189,21 @@ class SettingsFragment : Fragment() {
     private var pendingNativeDriverSelectionTimeout: Int? = null
     private var pendingNativePreferredDeviceMac: String? = null
     private var pendingWifiDirectBand: Int? = null
+    private var pendingWifiDirectStableIdentity: Boolean? = null
     private var pendingHotspotBand: Int? = null
     private var pendingFiveGhzChannel: Int? = null
     private var pendingHotspotSsid: String? = null
     private var pendingHotspotPassword: String? = null
     private var pendingHotspotInterface: String? = null
 
-    // Flag to determine if the projection should stretch to fill the screen
-    private var pendingStretchToFill: Boolean? = null
+    private var pendingEnableFloatingButton: Boolean? = null
+    private var pendingFloatingButtonSizeDp: Int? = null
+    private var pendingFloatingButtonOpacityPercent: Int? = null
+    private var pendingFloatingButtonXPercent: Int? = null
+    private var pendingFloatingButtonYPercent: Int? = null
+    private var pendingVideoFitMode: Settings.VideoFitMode? = null
     private var pendingForcedScale: Boolean? = null
     private var pendingHudMirroring: Boolean? = null
-    private var pendingUseMeasuredTouchSurface: Boolean? = null
 
     private var pendingKillOnDisconnect: Boolean? = null
     private var pendingAutoKillOemApps: Boolean? = null
@@ -235,11 +244,14 @@ class SettingsFragment : Fragment() {
     // afterwards, so this dialog is the one moment a Fragment has to be involved. AapService can
     // start the VPN with no Activity once this has run. On the Play Store flavor the toggle that
     // launches this is never rendered, because VpnControl.isVpnAvailable() is false there.
-    private var pendingKeepDummyVpn = false
+    private var vpnConsentRequested = false
     private val vpnConsentLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         val granted = result.resultCode == android.app.Activity.RESULT_OK
-        settings.keepDummyVpnDuringSession = granted && pendingKeepDummyVpn
-        pendingKeepDummyVpn = false
+        if (vpnConsentRequested) {
+            pendingKeepDummyVpnDuringSession = granted
+            checkChanges()
+        }
+        vpnConsentRequested = false
         if (!granted && VpnControl.consentDeniedRes != 0) {
             Toast.makeText(requireContext(), VpnControl.consentDeniedRes, Toast.LENGTH_LONG).show()
         }
@@ -321,11 +333,14 @@ class SettingsFragment : Fragment() {
         pendingScreenOrientation = settings.screenOrientation
         pendingAppLanguage = settings.appLanguage
 
-        // Initialize local state for stretch to fill
-        pendingStretchToFill = settings.stretchToFill
+        pendingEnableFloatingButton = settings.enableFloatingButton
+        pendingFloatingButtonSizeDp = settings.floatingButtonSizeDp
+        pendingFloatingButtonOpacityPercent = settings.floatingButtonOpacityPercent
+        pendingFloatingButtonXPercent = settings.floatingButtonXPercent
+        pendingFloatingButtonYPercent = settings.floatingButtonYPercent
+        pendingVideoFitMode = settings.videoFitMode
         pendingForcedScale = settings.forcedScale
         pendingHudMirroring = settings.hudMirroring
-        pendingUseMeasuredTouchSurface = settings.useMeasuredTouchSurface
 
         pendingKillOnDisconnect = settings.killOnDisconnect
         pendingAutoKillOemApps = settings.autoKillOemApps
@@ -333,6 +348,10 @@ class SettingsFragment : Fragment() {
         pendingAutoEnableHotspot = settings.autoEnableHotspot
         pendingFakeSpeed = settings.fakeSpeed
         pendingUseLibusb = settings.useLibusb
+        pendingNarrowBandProfileCap = settings.narrowBandProfileCap
+        pendingDebugVideoLowLatency = settings.debugVideoLowLatency
+        pendingAllowExternalConfiguration = settings.allowExternalConfiguration
+        pendingKeepDummyVpnDuringSession = settings.keepDummyVpnDuringSession
 
         pendingWifiConnectionMode = settings.wifiConnectionMode
         pendingHelperConnectionStrategy = settings.helperConnectionStrategy
@@ -347,6 +366,7 @@ class SettingsFragment : Fragment() {
         pendingNativeDriverSelectionTimeout = settings.nativeDriverSelectionTimeoutSec
         pendingNativePreferredDeviceMac = settings.nativePreferredDeviceMac
         pendingWifiDirectBand = settings.wifiDirectBand
+        pendingWifiDirectStableIdentity = settings.wifiDirectStableIdentity
         pendingHotspotBand = settings.hotspotBand
         pendingFiveGhzChannel = settings.fiveGhzChannel
         pendingHotspotSsid = settings.hotspotSsid
@@ -445,16 +465,24 @@ class SettingsFragment : Fragment() {
         pendingShowToastMessages = settings.showToastMessages
         pendingScreenOrientation = settings.screenOrientation
         pendingAppLanguage = settings.appLanguage
-        pendingStretchToFill = settings.stretchToFill
+        pendingEnableFloatingButton = settings.enableFloatingButton
+        pendingFloatingButtonSizeDp = settings.floatingButtonSizeDp
+        pendingFloatingButtonOpacityPercent = settings.floatingButtonOpacityPercent
+        pendingFloatingButtonXPercent = settings.floatingButtonXPercent
+        pendingFloatingButtonYPercent = settings.floatingButtonYPercent
+        pendingVideoFitMode = settings.videoFitMode
         pendingForcedScale = settings.forcedScale
         pendingHudMirroring = settings.hudMirroring
-        pendingUseMeasuredTouchSurface = settings.useMeasuredTouchSurface
         pendingKillOnDisconnect = settings.killOnDisconnect
         pendingAutoKillOemApps = settings.autoKillOemApps
         pendingRaiseProjectionDuringCall = settings.raiseProjectionDuringCall
         pendingAutoEnableHotspot = settings.autoEnableHotspot
         pendingFakeSpeed = settings.fakeSpeed
         pendingUseLibusb = settings.useLibusb
+        pendingNarrowBandProfileCap = settings.narrowBandProfileCap
+        pendingDebugVideoLowLatency = settings.debugVideoLowLatency
+        pendingAllowExternalConfiguration = settings.allowExternalConfiguration
+        pendingKeepDummyVpnDuringSession = settings.keepDummyVpnDuringSession
         pendingWifiConnectionMode = settings.wifiConnectionMode
         pendingHelperConnectionStrategy = settings.helperConnectionStrategy
         pendingWaitForWifi = settings.waitForWifiBeforeWifiDirect
@@ -468,6 +496,7 @@ class SettingsFragment : Fragment() {
         pendingNativeDriverSelectionTimeout = NativeDriverSelectionPolicy.DEFAULT_TIMEOUT_SEC
         pendingNativePreferredDeviceMac = ""
         pendingWifiDirectBand = settings.wifiDirectBand
+        pendingWifiDirectStableIdentity = settings.wifiDirectStableIdentity
         pendingHotspotBand = settings.hotspotBand
         pendingFiveGhzChannel = settings.fiveGhzChannel
         pendingHotspotSsid = settings.hotspotSsid
@@ -596,10 +625,15 @@ class SettingsFragment : Fragment() {
         val hudMirroringChanged = pendingHudMirroring != null && pendingHudMirroring != settings.hudMirroring
 
         // Save the stretch to fill preference
-        pendingStretchToFill?.let { settings.stretchToFill = it }
+        pendingEnableFloatingButton?.let { settings.enableFloatingButton = it }
+        pendingFloatingButtonSizeDp?.let { settings.floatingButtonSizeDp = it }
+        pendingFloatingButtonOpacityPercent?.let { settings.floatingButtonOpacityPercent = it }
+        pendingFloatingButtonXPercent?.let { settings.floatingButtonXPercent = it }
+        pendingFloatingButtonYPercent?.let { settings.floatingButtonYPercent = it }
+        FloatingButtonManager.update(requireContext())
+        pendingVideoFitMode?.let { settings.videoFitMode = it }
         pendingForcedScale?.let { settings.forcedScale = it }
         pendingHudMirroring?.let { settings.hudMirroring = it }
-        pendingUseMeasuredTouchSurface?.let { settings.useMeasuredTouchSurface = it }
 
         pendingKillOnDisconnect?.let { settings.killOnDisconnect = it }
         pendingAutoKillOemApps?.let { settings.autoKillOemApps = it }
@@ -607,6 +641,10 @@ class SettingsFragment : Fragment() {
         pendingAutoEnableHotspot?.let { settings.autoEnableHotspot = it }
         pendingFakeSpeed?.let { settings.fakeSpeed = it }
         pendingUseLibusb?.let { settings.useLibusb = it }
+        pendingNarrowBandProfileCap?.let { settings.narrowBandProfileCap = it }
+        pendingDebugVideoLowLatency?.let { settings.debugVideoLowLatency = it }
+        pendingAllowExternalConfiguration?.let { settings.allowExternalConfiguration = it }
+        pendingKeepDummyVpnDuringSession?.let { settings.keepDummyVpnDuringSession = it }
 
         val wirelessConfigBefore = wirelessRearmConfig()
         pendingWifiConnectionMode?.let { settings.wifiConnectionMode = it }
@@ -622,6 +660,7 @@ class SettingsFragment : Fragment() {
         pendingNativeDriverSelectionTimeout?.let { settings.nativeDriverSelectionTimeoutSec = it }
         pendingNativePreferredDeviceMac?.let { settings.nativePreferredDeviceMac = it }
         pendingWifiDirectBand?.let { settings.wifiDirectBand = it }
+        pendingWifiDirectStableIdentity?.let { settings.wifiDirectStableIdentity = it }
         pendingHotspotBand?.let { settings.hotspotBand = it }
         pendingFiveGhzChannel?.let { settings.fiveGhzChannel = it }
         pendingHotspotSsid?.let { settings.hotspotSsid = it }
@@ -714,10 +753,14 @@ class SettingsFragment : Fragment() {
                         pendingShowToastMessages != settings.showToastMessages ||
                         pendingScreenOrientation != settings.screenOrientation ||
                         pendingAppLanguage != settings.appLanguage ||
-                        pendingStretchToFill != settings.stretchToFill ||
+                        pendingEnableFloatingButton != settings.enableFloatingButton ||
+                        pendingFloatingButtonSizeDp != settings.floatingButtonSizeDp ||
+                        pendingFloatingButtonOpacityPercent != settings.floatingButtonOpacityPercent ||
+                        pendingFloatingButtonXPercent != settings.floatingButtonXPercent ||
+                        pendingFloatingButtonYPercent != settings.floatingButtonYPercent ||
+                        pendingVideoFitMode != settings.videoFitMode ||
                         pendingForcedScale != settings.forcedScale ||
                         pendingHudMirroring != settings.hudMirroring ||
-                        pendingUseMeasuredTouchSurface != settings.useMeasuredTouchSurface ||
                         pendingInsetLeft != settings.insetLeft ||
                         pendingInsetTop != settings.insetTop ||
                         pendingInsetRight != settings.insetRight ||
@@ -743,12 +786,17 @@ class SettingsFragment : Fragment() {
                         pendingNativeDriverSelectionTimeout != settings.nativeDriverSelectionTimeoutSec ||
                         pendingNativePreferredDeviceMac != settings.nativePreferredDeviceMac ||
                         pendingWifiDirectBand != settings.wifiDirectBand ||
+                        pendingWifiDirectStableIdentity != settings.wifiDirectStableIdentity ||
                         pendingHotspotBand != settings.hotspotBand ||
                         pendingFiveGhzChannel != settings.fiveGhzChannel ||
                         pendingHotspotSsid != settings.hotspotSsid ||
                         pendingHotspotPassword != settings.hotspotPassword ||
                         pendingHotspotInterface != settings.hotspotInterface ||
                         pendingUseLibusb != settings.useLibusb ||
+                        pendingNarrowBandProfileCap != settings.narrowBandProfileCap ||
+                        pendingDebugVideoLowLatency != settings.debugVideoLowLatency ||
+                        pendingAllowExternalConfiguration != settings.allowExternalConfiguration ||
+                        pendingKeepDummyVpnDuringSession != settings.keepDummyVpnDuringSession ||
                         pendingHideBatteryLevel != settings.hideBatteryLevel ||
                         pendingHidePhoneSignal != settings.hidePhoneSignal ||
                         pendingHideClock != settings.hideClock
@@ -757,6 +805,7 @@ class SettingsFragment : Fragment() {
 
         // Check for restart requirement
         requiresRestart = pendingResolution != settings.resolutionId ||
+                          pendingVideoFitMode != settings.videoFitMode ||
                           pendingVideoCodec != settings.videoCodec ||
                           pendingFpsLimit != settings.fpsLimit ||
                           pendingDpi != settings.dpiPixelDensity ||
@@ -1149,20 +1198,17 @@ class SettingsFragment : Fragment() {
                     nameResId = R.string.native_driver_preferred_device,
                     value = prefDeviceName,
                     onClick = { _ ->
+                        // Only a phone can be the preferred phone: a watch chosen here used to
+                        // count as one everywhere. A stored non-phone is cleared with None.
                         val likelyPhones = bonded.filter {
                             BluetoothHelper.isLikelyPhone(it, preferredMac = currentPrefMac)
                         }
-                        val otherDevices = bonded.filter { it !in likelyPhones }
 
                         val options = mutableListOf<Pair<String, String>>()
                         options.add("" to getString(R.string.driver_none))
                         likelyPhones.forEach { dev ->
                             val name = dev.name ?: "Unknown"
                             options.add(dev.address to "$name (${dev.address})")
-                        }
-                        otherDevices.forEach { dev ->
-                            val name = dev.name ?: "Unknown"
-                            options.add(dev.address to "🎧 $name (${dev.address})")
                         }
                         val labels = options.map { it.second }.toTypedArray()
                         val selectedIdx = options.indexOfFirst { it.first.equals(currentPrefMac, ignoreCase = true) }.coerceAtLeast(0)
@@ -1260,21 +1306,23 @@ class SettingsFragment : Fragment() {
                     // resources so it is absent from the Play Store build entirely.
                     nameResId = VpnControl.toggleNameRes,
                     descriptionResId = VpnControl.toggleDescriptionRes,
-                    isChecked = settings.keepDummyVpnDuringSession,
+                    isChecked = pendingKeepDummyVpnDuringSession ?: settings.keepDummyVpnDuringSession,
                     searchKeywords = "vpn offline tun stutter dropout audio video 2.4 ghz network scan",
                     onCheckedChanged = { isChecked ->
                         if (!isChecked) {
-                            settings.keepDummyVpnDuringSession = false
+                            pendingKeepDummyVpnDuringSession = false
+                            checkChanges()
                             updateSettingsList()
                         } else {
                             // Null once this app is already the prepared VPN app, which is the
                             // state AapService needs to start it with no Activity.
                             val consent = VpnControl.consentIntent(requireContext())
                             if (consent == null) {
-                                settings.keepDummyVpnDuringSession = true
+                                pendingKeepDummyVpnDuringSession = true
+                                checkChanges()
                                 updateSettingsList()
                             } else {
-                                pendingKeepDummyVpn = true
+                                vpnConsentRequested = true
                                 vpnConsentLauncher.launch(consent)
                             }
                         }
@@ -1523,6 +1571,88 @@ class SettingsFragment : Fragment() {
             ))
         }
 
+        // --- More Features Settings ---
+        items.add(SettingItem.CategoryHeader("moreFeatures", R.string.category_more_features))
+
+        val isFloatingButtonEnabled = pendingEnableFloatingButton ?: settings.enableFloatingButton
+
+        items.add(SettingItem.ToggleSettingEntry(
+            stableId = "enableFloatingButton",
+            nameResId = R.string.pref_enable_floating_button_title,
+            descriptionResId = R.string.pref_enable_floating_button_summary,
+            isChecked = isFloatingButtonEnabled,
+            onCheckedChanged = { isChecked ->
+                pendingEnableFloatingButton = isChecked
+                if (isChecked) {
+                    FloatingButtonManager.requestOverlayPermission(requireContext())
+                }
+                checkChanges()
+                updateSettingsList()
+            }
+        ))
+
+        if (isFloatingButtonEnabled) {
+            val size = pendingFloatingButtonSizeDp ?: settings.floatingButtonSizeDp
+            items.add(SettingItem.SliderSettingEntry(
+                stableId = "floatingButtonSizeDp",
+                nameResId = R.string.pref_floating_button_size_title,
+                value = "${size}dp",
+                sliderValue = size.toFloat(),
+                valueFrom = 32f,
+                valueTo = 120f,
+                stepSize = 1f,
+                onValueChanged = { newVal ->
+                    pendingFloatingButtonSizeDp = newVal.toInt()
+                    checkChanges()
+                }
+            ))
+
+            val opacity = pendingFloatingButtonOpacityPercent ?: settings.floatingButtonOpacityPercent
+            items.add(SettingItem.SliderSettingEntry(
+                stableId = "floatingButtonOpacityPercent",
+                nameResId = R.string.pref_floating_button_opacity_title,
+                value = "${opacity}%",
+                sliderValue = opacity.toFloat(),
+                valueFrom = 10f,
+                valueTo = 100f,
+                stepSize = 5f,
+                onValueChanged = { newVal ->
+                    pendingFloatingButtonOpacityPercent = newVal.toInt()
+                    checkChanges()
+                }
+            ))
+
+            val xPos = pendingFloatingButtonXPercent ?: settings.floatingButtonXPercent
+            items.add(SettingItem.SliderSettingEntry(
+                stableId = "floatingButtonXPercent",
+                nameResId = R.string.pref_floating_button_x_title,
+                value = "${xPos}%",
+                sliderValue = xPos.toFloat(),
+                valueFrom = 0f,
+                valueTo = 100f,
+                stepSize = 1f,
+                onValueChanged = { newVal ->
+                    pendingFloatingButtonXPercent = newVal.toInt()
+                    checkChanges()
+                }
+            ))
+
+            val yPos = pendingFloatingButtonYPercent ?: settings.floatingButtonYPercent
+            items.add(SettingItem.SliderSettingEntry(
+                stableId = "floatingButtonYPercent",
+                nameResId = R.string.pref_floating_button_y_title,
+                value = "${yPos}%",
+                sliderValue = yPos.toFloat(),
+                valueFrom = 0f,
+                valueTo = 100f,
+                stepSize = 1f,
+                onValueChanged = { newVal ->
+                    pendingFloatingButtonYPercent = newVal.toInt()
+                    checkChanges()
+                }
+            ))
+        }
+
         // --- Navigation Settings ---
                 items.add(SettingItem.SettingEntry(
             stableId = "oemAppManagement",
@@ -1725,17 +1855,24 @@ class SettingsFragment : Fragment() {
             }
         ))
 
-        // Add the toggle for Stretch to Fill
-        items.add(SettingItem.ToggleSettingEntry(
-            stableId = "stretchToFill",
-            nameResId = R.string.pref_stretch_screen_title,
-            descriptionResId = R.string.pref_stretch_screen_summary,
-            isChecked = pendingStretchToFill ?: settings.stretchToFill,
-            onCheckedChanged = { isChecked ->
-                pendingStretchToFill = isChecked
-                requiresRestart = true // Requires a reconnect to apply the new rendering bounds
-                checkChanges()
-                updateSettingsList()
+        // Video fit: how a mismatched-aspect video is fitted into the panel (object-fit style).
+        items.add(SettingItem.SettingEntry(
+            stableId = "videoFitMode",
+            nameResId = R.string.video_fit_mode,
+            value = resources.getStringArray(R.array.video_fit_mode)[(pendingVideoFitMode ?: settings.videoFitMode).value],
+            searchKeywords = resources.getStringArray(R.array.video_fit_mode).joinToString(" "),
+            onClick = { _ ->
+                val fitOptions = resources.getStringArray(R.array.video_fit_mode)
+                val currentIdx = (pendingVideoFitMode ?: settings.videoFitMode).value
+                MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
+                    .setTitle(R.string.change_video_fit_mode)
+                    .setSingleChoiceItems(fitOptions, currentIdx) { dialog, which ->
+                        pendingVideoFitMode = Settings.VideoFitMode.fromInt(which) ?: Settings.VideoFitMode.FILL
+                        checkChanges()
+                        dialog.dismiss()
+                        updateSettingsList()
+                    }
+                    .show()
             }
         ))
 
@@ -1746,18 +1883,6 @@ class SettingsFragment : Fragment() {
             isChecked = pendingHudMirroring ?: false,
             onCheckedChanged = { isChecked ->
                 pendingHudMirroring = isChecked
-                checkChanges()
-                updateSettingsList()
-            }
-        ))
-
-        items.add(SettingItem.ToggleSettingEntry(
-            stableId = "useMeasuredTouchSurface",
-            nameResId = R.string.use_measured_touch_surface,
-            descriptionResId = R.string.use_measured_touch_surface_description,
-            isChecked = pendingUseMeasuredTouchSurface ?: false,
-            onCheckedChanged = { isChecked ->
-                pendingUseMeasuredTouchSurface = isChecked
                 checkChanges()
                 updateSettingsList()
             }
@@ -1916,25 +2041,25 @@ class SettingsFragment : Fragment() {
             stableId = "narrowBandProfileCap",
             nameResId = R.string.narrow_band_profile_cap,
             descriptionResId = R.string.narrow_band_profile_cap_description,
-            isChecked = settings.narrowBandProfileCap,
+            isChecked = pendingNarrowBandProfileCap ?: settings.narrowBandProfileCap,
             searchKeywords = "2.4 GHz band resolution fps limit hotspot wifi direct video",
             onCheckedChanged = { isChecked ->
-                settings.narrowBandProfileCap = isChecked
+                pendingNarrowBandProfileCap = isChecked
+                checkChanges()
                 updateSettingsList()
             }
         ))
 
-        // Applied immediately rather than on confirm, unlike the rows above it: the configure
-        // ladder falls back on its own if the decoder rejects the key, so there is nothing to
-        // weigh up before trying it.
+        // Safe to try: the configure ladder falls back on its own if the decoder rejects the key.
         items.add(SettingItem.ToggleSettingEntry(
             stableId = "debugVideoLowLatency",
             nameResId = R.string.debug_video_low_latency,
             descriptionResId = R.string.debug_video_low_latency_description,
-            isChecked = settings.debugVideoLowLatency,
+            isChecked = pendingDebugVideoLowLatency ?: settings.debugVideoLowLatency,
             searchKeywords = "low latency vendor key decoder mediatek amlogic qualcomm exynos",
             onCheckedChanged = { isChecked ->
-                settings.debugVideoLowLatency = isChecked
+                pendingDebugVideoLowLatency = isChecked
+                checkChanges()
                 updateSettingsList()
             }
         ))
@@ -2423,9 +2548,10 @@ class SettingsFragment : Fragment() {
             stableId = "allowExternalConfiguration",
             nameResId = R.string.allow_external_configuration,
             descriptionResId = R.string.allow_external_configuration_description,
-            isChecked = settings.allowExternalConfiguration,
+            isChecked = pendingAllowExternalConfiguration ?: settings.allowExternalConfiguration,
             onCheckedChanged = { isChecked ->
-                settings.allowExternalConfiguration = isChecked
+                pendingAllowExternalConfiguration = isChecked
+                checkChanges()
                 updateSettingsList()
             }
         ))
@@ -3897,27 +4023,34 @@ class SettingsFragment : Fragment() {
      * Whether the group keeps its name and passphrase between bring-ups, and a way to draw new ones.
      *
      * Only where the group is ours to name: the hotspot's identity is the access point's own. The
-     * switch writes straight through rather than through the pending/apply pattern, because it is
-     * read at the next create and nothing needs re-arming for it. The "new identity" action replaces both halves
-     * together, which is the one rotation a phone's saved profile survives.
+     * switch is read at the next create, so Save needs no re-arm for it. The "new identity" action
+     * replaces both halves together, which is the one rotation a phone's saved profile survives.
      */
     private fun addWifiDirectIdentitySettings(items: MutableList<SettingItem>) {
+        // Below API 29 the app cannot name the group at all: the platform picks the name and keeps
+        // its own profile, so the toggle and the row describe that arrangement instead of this one.
+        val appNamesGroup = Build.VERSION.SDK_INT >= P2pIdentityRotationPolicy.NAMED_CREATE_SDK
         items.add(SettingItem.ToggleSettingEntry(
             stableId = "wifiDirectStableIdentity",
             nameResId = R.string.wifi_direct_stable_identity,
-            descriptionResId = R.string.wifi_direct_stable_identity_description,
-            isChecked = settings.wifiDirectStableIdentity,
+            descriptionResId = if (appNamesGroup) R.string.wifi_direct_stable_identity_description
+                else R.string.wifi_direct_stable_identity_description_legacy,
+            isChecked = pendingWifiDirectStableIdentity ?: settings.wifiDirectStableIdentity,
             searchKeywords = "persistent group ssid passphrase password same network reconnect faster",
             onCheckedChanged = { isChecked ->
-                settings.wifiDirectStableIdentity = isChecked
+                pendingWifiDirectStableIdentity = isChecked
+                checkChanges()
                 updateSettingsList()
             }
         ))
-        if (!settings.wifiDirectStableIdentity) return
+        if (pendingWifiDirectStableIdentity == false) return
         items.add(SettingItem.SettingEntry(
             stableId = "wifiDirectNewIdentity",
             nameResId = R.string.wifi_direct_new_identity,
-            value = settings.wifiDirectGroupIdentity?.networkName
+            // The name the app asked for where it names the group, and the one the last group
+            // actually came up under where the platform does.
+            value = (if (appNamesGroup) settings.wifiDirectGroupIdentity?.networkName
+                else settings.wifiDirectLastGroup?.ssid)
                 ?: getString(R.string.wifi_direct_new_identity_none),
             searchKeywords = "forget reset ssid passphrase password group name",
             onClick = { _ ->
@@ -3925,9 +4058,32 @@ class SettingsFragment : Fragment() {
                     .setTitle(R.string.wifi_direct_new_identity)
                     .setMessage(R.string.wifi_direct_new_identity_confirm)
                     .setPositiveButton(android.R.string.ok) { _, _ ->
-                        settings.wifiDirectGroupIdentity =
-                            P2pGroupIdentityPolicy.mint(AapService.wifiDirectName.value)
-                        Toast.makeText(requireContext(), R.string.wifi_direct_new_identity_done, Toast.LENGTH_LONG).show()
+                        if (appNamesGroup) {
+                            settings.wifiDirectGroupIdentity =
+                                P2pGroupIdentityPolicy.mint(AapService.wifiDirectName.value)
+                        } else {
+                            settings.wifiDirectRotationPending = true
+                        }
+                        requireContext().startService(
+                            Intent(requireContext(), AapService::class.java).apply {
+                                action = AapService.ACTION_ROTATE_WIFI_DIRECT_IDENTITY
+                            }
+                        )
+                        // The saved mode, not the pending one: the running launcher is what the
+                        // service asks, and it is still the authority on whether this applies now.
+                        // A handshake is invisible from here, so the toast can only be hopeful.
+                        val appliesNow = P2pIdentityRotationPolicy.applyNow(
+                            sessionLive = App.provide(requireContext()).commManager.isConnected,
+                            handshakeInFlight = false,
+                            nativeWifiDirectActive = settings.wifiConnectionMode == WifiLauncherMode.NATIVE &&
+                                settings.nativeApStrategy == NativeStrategy.WIFI_DIRECT,
+                        )
+                        Toast.makeText(
+                            requireContext(),
+                            if (appliesNow) R.string.wifi_direct_new_identity_applied
+                            else R.string.wifi_direct_new_identity_done,
+                            Toast.LENGTH_LONG
+                        ).show()
                         updateSettingsList()
                     }
                     .setNegativeButton(android.R.string.cancel, null)

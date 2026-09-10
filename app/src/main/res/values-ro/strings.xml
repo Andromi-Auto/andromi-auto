@@ -255,8 +255,11 @@
     <string name="add_new">Adaugă nou</string>
     <string name="cancel">Anulează</string>
     <string name="enable">Activează</string>
-    <string name="pref_stretch_screen_title">Întindere pentru a umple ecranul</string>
-    <string name="pref_stretch_screen_summary">Ignoră raportul de aspect pentru a umple întregul afișaj (elimină barele negre)</string>
+    <string name="video_fit_mode">Încadrarea imaginii</string>
+    <string name="change_video_fit_mode">Schimbă încadrarea imaginii</string>
+    <string name="video_fit_mode_fill">Întinde pentru umplere (fără bare, poate deforma)</string>
+    <string name="video_fit_mode_contain">Încadrează cu bare (fără decupare sau deformare)</string>
+    <string name="video_fit_mode_cover">Umple prin decupare (fără bare sau deformare)</string>
 
     <!-- Audio Settings -->
     <string name="forced_scale">Scalare forțată (Fix legacy)</string>
@@ -865,8 +868,6 @@
     <string name="cannot_open_settings">Could not open system settings</string>
     <string name="static_bssid_enter_value">Enter BSSID (XX:XX:XX:XX:XX:XX)</string>
     <string name="static_bssid_desc">Setați manual BSSID-ul pentru conexiunea wireless. Necesar doar când nicio sursă de pe acest dispozitiv nu indică una; jurnalul numește fiecare sursă interogată.</string>
-    <string name="use_measured_touch_surface">Experimental touch alignment fix</string>
-    <string name="use_measured_touch_surface_description">Normalize touch input against the measured projection overlay. May help when small Android Auto controls feel shifted.</string>
     <string name="media_key_routing">Send Media Buttons To Android Auto</string>
     <string name="media_key_routing_always">Always</string>
     <string name="media_key_routing_auto">Automatic</string>
@@ -1086,6 +1087,8 @@
     <string name="wifi_direct_new_identity_none">Se va alege la următoarea conexiune</string>
     <string name="wifi_direct_new_identity_confirm">Alege un nume și o parolă noi pentru grup începând cu următoarea conexiune.</string>
     <string name="wifi_direct_new_identity_done">O nouă identitate de rețea va fi utilizată de la următoarea conexiune.</string>
+    <string name="wifi_direct_new_identity_applied">O nouă identitate de rețea se configurează acum. Telefonului i se va cere să se conecteze la ea la următoarea conexiune.</string>
+    <string name="wifi_direct_stable_identity_description_legacy">Pe această versiune de Android numele rețelei este stabilit de sistem, care îl păstrează cât timp poate. Lasă opțiunea activată pentru ca telefonul să se reconecteze la o rețea cunoscută și încearcă o identitate nouă mai jos dacă refuză în continuare rețeaua salvată. Dezactiveaz-o pentru ca sistemul să uite rețeaua înainte de fiecare conexiune.</string>
     <string name="debug_video_low_latency">Solicită mod de latență redusă a decodorului</string>
     <string name="debug_video_low_latency_description">Setează cheia MediaFormat proprietară de latență redusă la configurarea decodorului video.</string>
     <string name="debug_video_feed_hold">Simulează un decodor lent</string>

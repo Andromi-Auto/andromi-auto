@@ -334,6 +334,7 @@
     <string name="not_running">Not Running</string>
     <string name="no_android_auto_device_connected">No Android Auto Device connected. Please check USB connection.</string>
     <string name="no_usb_device_connected">No USB device connected to device.</string>
+    <string name="no_usb_host_support">This head unit does not support USB host mode, so wired Android Auto is not available on it. Use a wireless connection instead.</string>
     <string name="press_back_again_to_exit">Press back again to exit</string>
     <string name="back">Back</string>
     <string name="debug_mode">Debug Mode</string>
@@ -490,14 +491,24 @@
     <string name="add_new">Add new</string>
     <string name="cancel">Cancel</string>
     <string name="enable">Enable</string>
-    <string name="pref_stretch_screen_title">Stretch to fill screen</string>
-    <string name="pref_stretch_screen_summary">Ignores aspect ratio to fill the entire display (removes black bars)</string>
+    <string name="video_fit_mode">Video fit</string>
+    <string name="change_video_fit_mode">Change video fit</string>
+    <string name="video_fit_mode_fill">Stretch to fill (no bars, may distort)</string>
+    <string name="video_fit_mode_contain">Fit with bars (no crop, no distortion)</string>
+    <string name="video_fit_mode_cover">Fill by cropping (no bars, no distortion)</string>
+
+    <!-- More Features Settings -->
+    <string name="category_more_features" translatable="false">More Features</string>
+    <string name="pref_enable_floating_button_title" translatable="false">Floating Launcher Button</string>
+    <string name="pref_enable_floating_button_summary" translatable="false">Displays a floating button over the OEM launcher and other apps to quickly return to Open Headunit</string>
+    <string name="pref_floating_button_size_title" translatable="false">Floating Button Size</string>
+    <string name="pref_floating_button_opacity_title" translatable="false">Floating Button Opacity</string>
+    <string name="pref_floating_button_x_title" translatable="false">Horizontal Position (X)</string>
+    <string name="pref_floating_button_y_title" translatable="false">Vertical Position (Y)</string>
     <string name="forced_scale">Forced Scale (Legacy Fix)</string>
     <string name="forced_scale_description">Corrects scaling issues on some older devices using SurfaceView. Only use if the image looks distorted or shifted.</string>
     <string name="hud_mirroring">HUD Mode (Horizontal Flip)</string>
     <string name="hud_mirroring_description">Flips the display horizontally for windshield reflection (Head-Up Display). Requires TextureView or GLES20 view mode (does not work with SurfaceView).</string>
-    <string name="use_measured_touch_surface">Experimental touch alignment fix</string>
-    <string name="use_measured_touch_surface_description">Normalize touch input against the measured projection overlay. May help when small Android Auto controls feel shifted.</string>
 
 
     <!-- Audio Settings -->
@@ -812,6 +823,8 @@
     <string name="wifi_direct_new_identity_none">Chosen at the next connection</string>
     <string name="wifi_direct_new_identity_confirm">Picks a new name and password for the group, used from the next connection on. Your phone will be set up for it over Bluetooth as if this were a new head unit. Do this if the phone keeps trying a network it can no longer join.</string>
     <string name="wifi_direct_new_identity_done">A new network identity will be used from the next connection.</string>
+    <string name="wifi_direct_new_identity_applied">A new network identity is being set up now. Your phone will be asked to join it on the next connection.</string>
+    <string name="wifi_direct_stable_identity_description_legacy">On this Android version the network name comes from the system, which keeps the same one for as long as it can. Leave this on so your phone rejoins a network it already knows, and use a new identity below if it keeps refusing the saved one. Turn it off to make the system forget the network before every connection.</string>
     <string name="debug_video_low_latency">Request decoder low-latency mode</string>
     <string name="debug_video_low_latency_description">Sets the vendor low-latency MediaFormat key when configuring the video decoder. Falls back automatically if the decoder rejects it.</string>
     <string name="debug_video_feed_hold">Simulate a slow decoder</string>

@@ -250,7 +250,7 @@
         android:id="@+id/splash_overlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/color_projection_blue"
+        android:background="@color/splash_background"
         android:clickable="true"
         android:focusable="true"
         android:gravity="center">
@@ -264,12 +264,12 @@
             <ImageView
                 android:layout_width="160dp"
                 android:layout_height="160dp"
-                android:src="@mipmap/ic_launcher_playstore" />
+                android:src="@drawable/splash_logo" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="-10dp"
+                android:layout_marginTop="14dp"
                 android:text="OPEN"
                 android:textColor="@color/splash_text_white"
                 android:textSize="35sp"

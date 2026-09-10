@@ -434,14 +434,15 @@
     <string name="add_new">Ajouter un nouveau</string>
     <string name="cancel">Annuler</string>
     <string name="enable">Activer</string>
-    <string name="pref_stretch_screen_title">Étirer pour remplir l\'écran</string>
-    <string name="pref_stretch_screen_summary">Ignore le ratio d\'aspect pour remplir tout l\'écran (supprime les bandes noires)</string>
+    <string name="video_fit_mode">Ajustement de la vidéo</string>
+    <string name="change_video_fit_mode">Modifier l\'ajustement de la vidéo</string>
+    <string name="video_fit_mode_fill">Étirer pour remplir (sans bandes, peut déformer)</string>
+    <string name="video_fit_mode_contain">Ajuster avec des bandes (sans rognage ni déformation)</string>
+    <string name="video_fit_mode_cover">Remplir en rognant (sans bandes ni déformation)</string>
     <string name="forced_scale">Échelle forcée (Correction héritée)</string>
     <string name="forced_scale_description">Corrige les problèmes de mise à l\'échelle sur certains appareils plus anciens utilisant SurfaceView. À utiliser uniquement si l\'image semble déformée ou décalée.</string>
     <string name="hud_mirroring">Mode HUD (Miroir horizontal)</string>
     <string name="hud_mirroring_description">Retourne l\'affichage horizontalement pour le reflet sur le pare-brise (Affichage Tête Haute). Nécessite le mode de vue TextureView ou GLES20 (ne fonctionne pas avec SurfaceView).</string>
-    <string name="use_measured_touch_surface">Correction expérimentale de l\'alignement tactile</string>
-    <string name="use_measured_touch_surface_description">Normaliser la saisie tactile par rapport à la superposition de projection mesurée. Peut aider lorsque les petits contrôles d\'Android Auto semblent décalés.</string>
 
 
     <!-- Audio Settings -->
@@ -1132,6 +1133,8 @@
     <string name="wifi_direct_new_identity_none">Choisie lors de la prochaine connexion</string>
     <string name="wifi_direct_new_identity_confirm">Choisit un nouveau nom et mot de passe pour le groupe, appliqués dès la prochaine connexion. Votre téléphone sera configuré via Bluetooth comme s\'il s\'agissait d\'un nouvel autoradio. Utilisez cette option si le téléphone persiste à essayer un réseau inaccessible.</string>
     <string name="wifi_direct_new_identity_done">Une nouvelle identité réseau sera utilisée dès la prochaine connexion.</string>
+    <string name="wifi_direct_new_identity_applied">Une nouvelle identité réseau est en cours de configuration. Votre téléphone sera invité à la rejoindre lors de la prochaine connexion.</string>
+    <string name="wifi_direct_stable_identity_description_legacy">Sur cette version d\'Android, le nom du réseau vient du système, qui le conserve aussi longtemps que possible. Laissez cette option activée pour que votre téléphone rejoigne un réseau connu, et essayez une nouvelle identité ci-dessous s\'il refuse toujours le réseau enregistré. Désactivez-la pour que le système oublie le réseau avant chaque connexion.</string>
     <string name="debug_video_feed_hold">Simuler un décodeur lent</string>
     <string name="oem_app_management">Gestion des conflits d\'apps OEM (ADB)</string>
     <string name="oem_app_management_desc">Détecter et désactiver les apps conflictuelles (Zlink, AutoKit, etc.)</string>

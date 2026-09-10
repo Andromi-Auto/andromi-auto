@@ -234,8 +234,11 @@
     <string name="add_new">Dodaj nowy</string>
     <string name="cancel">Anuluj</string>
     <string name="enable">Włącz</string>
-    <string name="pref_stretch_screen_title">Rozciągnij na cały ekran</string>
-    <string name="pref_stretch_screen_summary">Ignoruje proporcje ekranu, aby wypełnić cały wyświetlacz (usuwa czarne paski)</string>
+    <string name="video_fit_mode">Dopasowanie obrazu</string>
+    <string name="change_video_fit_mode">Zmień dopasowanie obrazu</string>
+    <string name="video_fit_mode_fill">Rozciągnij, aby wypełnić (bez pasów, może zniekształcać)</string>
+    <string name="video_fit_mode_contain">Dopasuj z pasami (bez przycinania i zniekształceń)</string>
+    <string name="video_fit_mode_cover">Wypełnij przycinaniem (bez pasów i zniekształceń)</string>
 
     <!-- Audio Settings -->
     <string name="forced_scale">Wymuszone skalowanie (Poprawka legacy)</string>
@@ -867,8 +870,6 @@
     <string name="cannot_open_settings">Could not open system settings</string>
     <string name="static_bssid_enter_value">Enter BSSID (XX:XX:XX:XX:XX:XX)</string>
     <string name="static_bssid_desc">Ustaw BSSID połączenia bezprzewodowego ręcznie. Potrzebne tylko wtedy, gdy żadne źródło w tym urządzeniu go nie podaje; dziennik wymienia każde odpytane źródło.</string>
-    <string name="use_measured_touch_surface">Experimental touch alignment fix</string>
-    <string name="use_measured_touch_surface_description">Normalize touch input against the measured projection overlay. May help when small Android Auto controls feel shifted.</string>
     <string name="media_key_routing">Send Media Buttons To Android Auto</string>
     <string name="media_key_routing_always">Always</string>
     <string name="media_key_routing_auto">Automatic</string>
@@ -1088,6 +1089,8 @@
     <string name="wifi_direct_new_identity_none">Zostanie wybrana przy następnym połączeniu</string>
     <string name="wifi_direct_new_identity_confirm">Wybiera nową nazwę i hasło dla grupy od następnego połączenia. Telefon zostanie skonfigurowany przez Bluetooth jak dla nowej stacji.</string>
     <string name="wifi_direct_new_identity_done">Nowa tożsamość sieci zostanie użyta od następnego połączenia.</string>
+    <string name="wifi_direct_new_identity_applied">Trwa konfigurowanie nowej tożsamości sieci. Telefon otrzyma ją przy następnym połączeniu.</string>
+    <string name="wifi_direct_stable_identity_description_legacy">W tej wersji Androida nazwę sieci ustala system i zachowuje ją tak długo, jak to możliwe. Zostaw tę opcję włączoną, aby telefon łączył się ze znaną siecią, a jeśli nadal odrzuca zapisaną, wypróbuj nową tożsamość poniżej. Wyłączenie sprawia, że system zapomina sieć przed każdym połączeniem.</string>
     <string name="debug_video_low_latency">Żądaj trybu niskiego opóźnienia dekodera</string>
     <string name="debug_video_low_latency_description">Ustawia klucz MediaFormat niskiego opóźnienia producenta podczas konfiguracji dekodera wideo.</string>
     <string name="debug_video_feed_hold">Symuluj wolny dekoder</string>

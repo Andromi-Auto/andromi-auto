@@ -39,7 +39,6 @@ class QuickSettingsFragment : DialogFragment() {
     private lateinit var toolbar: MaterialToolbar
     
     private var originalViewMode: Settings.ViewMode? = null
-    private var originalStretch: Boolean? = null
     private var originalScale: Boolean? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -56,7 +55,6 @@ class QuickSettingsFragment : DialogFragment() {
         
         settings = App.provide(requireContext()).settings
         originalViewMode = settings.viewMode
-        originalStretch = settings.stretchToFill
         originalScale = settings.forcedScale
 
         toolbar = view.findViewById<MaterialToolbar>(R.id.toolbar)
@@ -140,17 +138,11 @@ class QuickSettingsFragment : DialogFragment() {
             onClick = { showFullscreenDialog() }
         ))
 
-        items.add(SettingItem.ToggleSettingEntry(
-            stableId = "stretchToFill",
-            nameResId = R.string.pref_stretch_screen_title,
-            descriptionResId = R.string.pref_stretch_screen_summary,
-            isChecked = settings.stretchToFill,
-            onCheckedChanged = { isChecked ->
-                settings.stretchToFill = isChecked
-                settings.commit()
-                notifyChange(needsViewRecreate = true)
-                updateSettingsList()
-            }
+        items.add(SettingItem.SettingEntry(
+            stableId = "videoFitMode",
+            nameResId = R.string.video_fit_mode,
+            value = resources.getStringArray(R.array.video_fit_mode)[settings.videoFitMode.value],
+            onClick = { showVideoFitModeDialog() }
         ))
 
         items.add(SettingItem.ToggleSettingEntry(
@@ -261,6 +253,20 @@ class QuickSettingsFragment : DialogFragment() {
                 requireContext().sendBroadcast(Intent(AapService.ACTION_ORIENTATION_CHANGED).apply {
                     setPackage(requireContext().packageName)
                 })
+                dialog.dismiss()
+                updateSettingsList()
+            }
+            .show()
+    }
+
+    private fun showVideoFitModeDialog() {
+        val options = resources.getStringArray(R.array.video_fit_mode)
+        MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
+            .setTitle(R.string.change_video_fit_mode)
+            .setSingleChoiceItems(options, settings.videoFitMode.value) { dialog, which ->
+                settings.videoFitMode = Settings.VideoFitMode.fromInt(which) ?: Settings.VideoFitMode.FILL
+                settings.commit()
+                notifyChange(needsViewRecreate = true)
                 dialog.dismiss()
                 updateSettingsList()
             }

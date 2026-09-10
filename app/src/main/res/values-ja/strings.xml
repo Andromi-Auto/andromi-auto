@@ -258,8 +258,11 @@
     <string name="add_new">新規追加</string>
     <string name="cancel">キャンセル</string>
     <string name="enable">有効にする</string>
-    <string name="pref_stretch_screen_title">画面いっぱいに伸ばす</string>
-    <string name="pref_stretch_screen_summary">アスペクト比を無視して画面全体に表示します（黒帯を削除）。</string>
+    <string name="video_fit_mode">映像のフィット</string>
+    <string name="change_video_fit_mode">映像のフィットを変更</string>
+    <string name="video_fit_mode_fill">引き伸ばして全画面 (帯なし、ゆがむ場合あり)</string>
+    <string name="video_fit_mode_contain">帯を付けて全体表示 (切り取りやゆがみなし)</string>
+    <string name="video_fit_mode_cover">切り取って全画面 (帯やゆがみなし)</string>
 
 
     <!-- Audio Settings -->
@@ -872,8 +875,6 @@
     <string name="cannot_open_settings">Could not open system settings</string>
     <string name="static_bssid_enter_value">Enter BSSID (XX:XX:XX:XX:XX:XX)</string>
     <string name="static_bssid_desc">ワイヤレス接続のBSSIDを手動で設定します。この端末のどのソースも返さない場合にのみ必要です。ログには問い合わせたすべてのソースが記録されます。</string>
-    <string name="use_measured_touch_surface">Experimental touch alignment fix</string>
-    <string name="use_measured_touch_surface_description">Normalize touch input against the measured projection overlay. May help when small Android Auto controls feel shifted.</string>
     <string name="media_key_routing">Send Media Buttons To Android Auto</string>
     <string name="media_key_routing_always">Always</string>
     <string name="media_key_routing_auto">Automatic</string>
@@ -1093,6 +1094,8 @@
     <string name="wifi_direct_new_identity_none">次回の接続時に決定されます</string>
     <string name="wifi_direct_new_identity_confirm">次回の接続から使用するグループの新しい名前とパスワードを選択します。新しいヘッドユニットであるかのようにBluetooth経由で設定されます。</string>
     <string name="wifi_direct_new_identity_done">次回の接続から新しいネットワークIDが使用されます。</string>
+    <string name="wifi_direct_new_identity_applied">新しいネットワークIDを設定しています。次回の接続時にスマートフォンへ通知されます。</string>
+    <string name="wifi_direct_stable_identity_description_legacy">このAndroidバージョンではネットワーク名をシステムが決め、可能な限り同じ名前を維持します。スマートフォンが既知のネットワークに再接続できるようオンのままにし、保存済みのネットワークを拒否し続ける場合は下で新しいIDをお試しください。オフにすると、接続のたびにシステムがネットワークを忘れます。</string>
     <string name="debug_video_low_latency">デコーダーの低遅延モードを要求</string>
     <string name="debug_video_low_latency_description">ビデオデコーダー設定時にベンダー独自の低遅延MediaFormatキーを設定します。</string>
     <string name="debug_video_feed_hold">低速デコーダーをシミュレート</string>

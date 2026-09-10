@@ -150,14 +150,20 @@ class MainActivity : BaseActivity() {
         setTheme(R.style.AppTheme)
         val mainSettings = Settings(this)
         val isNightActive = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
-        if (mainSettings.appTheme == Settings.AppTheme.EXTREME_DARK ||
-            (mainSettings.useExtremeDarkMode && isNightActive)) {
+        val isExtremeDark = mainSettings.appTheme == Settings.AppTheme.EXTREME_DARK ||
+            (mainSettings.useExtremeDarkMode && isNightActive)
+        if (isExtremeDark) {
             theme.applyStyle(R.style.ThemeOverlay_ExtremeDark, true)
         } else if (mainSettings.useGradientBackground) {
             theme.applyStyle(R.style.ThemeOverlay_GradientBackground, true)
         }
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
+        if (isExtremeDark) {
+            findViewById<View>(R.id.splash_overlay)?.setBackgroundColor(
+                ContextCompat.getColor(this, R.color.extreme_dark_background)
+            )
+        }
         applyCustomHomeBackground()
 
         val appSettings = Settings(this)
@@ -930,6 +936,17 @@ class MainActivity : BaseActivity() {
 
         // Coming back from a failed attempt lands here, so this is where the reason gets said.
         updateConnectionIssueBanner()
+
+        checkOverlayPermission()
+    }
+
+    private fun checkOverlayPermission() {
+        val settings = App.provide(this).settings
+        if (settings.enableFloatingButton && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (!android.provider.Settings.canDrawOverlays(this)) {
+                FloatingButtonManager.requestOverlayPermission(this)
+            }
+        }
     }
 
     /**

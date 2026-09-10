@@ -114,6 +114,7 @@
     <string name="not_running">No ejecutando</string>
     <string name="no_android_auto_device_connected">No hay dispositivo Android Auto conectado. Revise el USB.</string>
     <string name="no_usb_device_connected">No hay dispositivo USB conectado.</string>
+    <string name="no_usb_host_support">Esta unidad no admite el modo host USB, por lo que Android Auto por cable no está disponible en ella. Usa una conexión inalámbrica.</string>
     <string name="press_back_again_to_exit">Pulse atrás otra vez para salir</string>
     <string name="back">Atrás</string>
     <string name="debug_mode">Modo depuración</string>
@@ -234,8 +235,11 @@
     <string name="add_new">Añadir nuevo</string>
     <string name="cancel">Cancelar</string>
     <string name="enable">Activar</string>
-    <string name="pref_stretch_screen_title">Estirar para llenar la pantalla</string>
-    <string name="pref_stretch_screen_summary">Ignora la relación de aspecto para rellenar toda la pantalla (elimina las barras negras)</string>
+    <string name="video_fit_mode">Ajuste de vídeo</string>
+    <string name="change_video_fit_mode">Cambiar ajuste de vídeo</string>
+    <string name="video_fit_mode_fill">Estirar para llenar (sin barras, puede deformar)</string>
+    <string name="video_fit_mode_contain">Ajustar con barras (sin recorte ni deformación)</string>
+    <string name="video_fit_mode_cover">Llenar recortando (sin barras ni deformación)</string>
 
     <!-- Audio Settings -->
     <string name="forced_scale">Escalado forzado (Corrección heredada)</string>
@@ -877,8 +881,6 @@
     <string name="cannot_open_settings">Could not open system settings</string>
     <string name="static_bssid_enter_value">Enter BSSID (XX:XX:XX:XX:XX:XX)</string>
     <string name="static_bssid_desc">Establece a mano la BSSID para el enlace inalámbrico. Solo hace falta si ninguna fuente de este dispositivo indica una; el registro nombra cada fuente consultada.</string>
-    <string name="use_measured_touch_surface">Experimental touch alignment fix</string>
-    <string name="use_measured_touch_surface_description">Normalize touch input against the measured projection overlay. May help when small Android Auto controls feel shifted.</string>
     <string name="media_key_routing">Send Media Buttons To Android Auto</string>
     <string name="media_key_routing_always">Always</string>
     <string name="media_key_routing_auto">Automatic</string>
@@ -1098,6 +1100,8 @@
     <string name="wifi_direct_new_identity_none">Se elegirá en la próxima conexión</string>
     <string name="wifi_direct_new_identity_confirm">Elige un nuevo nombre y contraseña para el grupo a partir de la próxima conexión. El teléfono se configurará por Bluetooth como si fuera una nueva unidad principal. Usa esto si el teléfono sigue intentando unirse a una red inaccesible.</string>
     <string name="wifi_direct_new_identity_done">Se utilizará una nueva identidad de red a partir de la próxima conexión.</string>
+    <string name="wifi_direct_new_identity_applied">Se está configurando una nueva identidad de red. Se pedirá al teléfono que se una a ella en la próxima conexión.</string>
+    <string name="wifi_direct_stable_identity_description_legacy">En esta versión de Android el nombre de la red lo decide el sistema, que lo mantiene mientras puede. Déjalo activado para que el teléfono vuelva a conectarse a una red conocida, y usa una nueva identidad abajo si sigue rechazando la guardada. Desactívalo para que el sistema olvide la red antes de cada conexión.</string>
     <string name="debug_video_low_latency">Solicitar modo de baja latencia del decodificador</string>
     <string name="debug_video_low_latency_description">Establece la clave MediaFormat de baja latencia del fabricante al configurar el decodificador de vídeo. Vuelve atrás automáticamente si el decodificador la rechaza.</string>
     <string name="debug_video_feed_hold">Simular decodificador lento</string>

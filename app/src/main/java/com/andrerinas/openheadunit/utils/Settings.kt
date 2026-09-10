@@ -84,10 +84,52 @@ class Settings(private val context: Context) {
         get() = prefs.getInt("resolutionId", 0)
         set(value) = prefs.edit().putInt("resolutionId", value).apply()
 
-    // Flag to determine if the projection should stretch and ignore aspect ratio to fill the screen
-    var stretchToFill: Boolean
-        get() = prefs.getBoolean("stretch_to_fill", true)
-        set(value) { prefs.edit().putBoolean("stretch_to_fill", value).apply() }
+    // How the video is fitted into the panel, in CSS object-fit terms: FILL stretches,
+    // CONTAIN letterboxes, COVER crops. Migrated from the old "stretch_to_fill" boolean,
+    // which the legacy forcedScale/SurfaceView path read inverted (true = bars), so the
+    // migration has to branch on forced_scale rather than map the boolean straight across.
+    var videoFitMode: VideoFitMode
+        get() = VideoFitPolicy.resolve(
+            storedFitMode = if (prefs.contains("video-fit-mode")) prefs.getInt("video-fit-mode", VideoFitMode.FILL.value) else null,
+            legacyStretch = if (prefs.contains("stretch_to_fill")) prefs.getBoolean("stretch_to_fill", true) else null,
+            legacyForcedScale = prefs.getBoolean("forced_scale", false),
+            legacyViewMode = prefs.getInt("view-mode", 1)
+        )
+        set(value) { prefs.edit().putInt("video-fit-mode", value.value).apply() }
+
+    enum class VideoFitMode(val value: Int) {
+        FILL(0),
+        CONTAIN(1),
+        COVER(2);
+
+        companion object {
+            private val map = values().associateBy(VideoFitMode::value)
+            fun fromInt(value: Int) = map[value]
+        }
+    }
+
+    // Floating Launcher Overlay Button Settings
+    // Off by default: on it, MainActivity.checkOverlayPermission() sends a fresh install to the
+    // system overlay screen on first resume, for a feature the user has not asked for yet.
+    var enableFloatingButton: Boolean
+        get() = prefs.getBoolean("enable-floating-button", false)
+        set(value) { prefs.edit().putBoolean("enable-floating-button", value).apply() }
+
+    var floatingButtonXPercent: Int
+        get() = prefs.getInt("floating-button-x-percent", 0)
+        set(value) { prefs.edit().putInt("floating-button-x-percent", value.coerceIn(0, 100)).apply() }
+
+    var floatingButtonYPercent: Int
+        get() = prefs.getInt("floating-button-y-percent", 54)
+        set(value) { prefs.edit().putInt("floating-button-y-percent", value.coerceIn(0, 100)).apply() }
+
+    var floatingButtonOpacityPercent: Int
+        get() = prefs.getInt("floating-button-opacity-percent", 80)
+        set(value) { prefs.edit().putInt("floating-button-opacity-percent", value.coerceIn(0, 100)).apply() }
+
+    var floatingButtonSizeDp: Int
+        get() = prefs.getInt("floating-button-size-dp", 60)
+        set(value) { prefs.edit().putInt("floating-button-size-dp", value.coerceIn(32, 120)).apply() }
 
     // Forced scale for older devices (SurfaceView fix)
     var forcedScale: Boolean
@@ -98,10 +140,6 @@ class Settings(private val context: Context) {
     var hudMirroring: Boolean
         get() = prefs.getBoolean("hud_mirroring", false)
         set(value) { prefs.edit().putBoolean("hud_mirroring", value).apply() }
-
-    var useMeasuredTouchSurface: Boolean
-        get() = prefs.getBoolean("use_measured_touch_surface", false)
-        set(value) { prefs.edit().putBoolean("use_measured_touch_surface", value).apply() }
 
     // UI Scale percentage for Home
     var uiScaleHomePercent: Int
@@ -541,6 +579,14 @@ class Settings(private val context: Context) {
     var wifiDirectStableIdentity: Boolean
         get() = prefs.getBoolean("wifi-direct-stable-identity", true)
         set(value) { prefs.edit().putBoolean("wifi-direct-stable-identity", value).apply() }
+
+    /**
+     * Below API 29 the platform names the group, so a "new identity" is a request to forget its
+     * stored profile at the next create. Persisted so a tap outlives the service and a reboot.
+     */
+    var wifiDirectRotationPending: Boolean
+        get() = prefs.getBoolean("wifi-direct-rotation-pending", false)
+        set(value) { prefs.edit().putBoolean("wifi-direct-rotation-pending", value).apply() }
 
     /**
      * The kept pair, or null before the first bring-up draws one.

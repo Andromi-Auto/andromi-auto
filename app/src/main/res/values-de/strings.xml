@@ -298,8 +298,11 @@
     <string name="add_new">Hinzufügen</string>
     <string name="cancel">Abbrechen</string>
     <string name="enable">Aktivieren</string>
-    <string name="pref_stretch_screen_title">Auf Bildschirmgröße strecken</string>
-    <string name="pref_stretch_screen_summary">Ignoriert das Seitenverhältnis, um das gesamte Display auszufüllen (entfernt schwarze Balken)</string>
+    <string name="video_fit_mode">Bildanpassung</string>
+    <string name="change_video_fit_mode">Bildanpassung ändern</string>
+    <string name="video_fit_mode_fill">Auf Vollbild strecken (keine Balken, kann verzerren)</string>
+    <string name="video_fit_mode_contain">Mit Balken einpassen (kein Beschnitt, keine Verzerrung)</string>
+    <string name="video_fit_mode_cover">Durch Beschneiden füllen (keine Balken, keine Verzerrung)</string>
     <string name="forced_scale">Erzwungene Skalierung (Legacy Fix)</string>
     <string name="forced_scale_description">Korrigiert Skalierungsprobleme auf einigen älteren Geräten mit SurfaceView. Nur verwenden, wenn das Bild verzerrt oder verschoben aussieht.</string>
     <string name="hud_mirroring">HUD-Modus (Horizontale Spiegelung)</string>
@@ -918,8 +921,6 @@
     <string name="dpi_size_l">L</string>
     <string name="dpi_size_xl">XL</string>
     <string name="dpi_value_format">%1$d DPI</string>
-    <string name="use_measured_touch_surface">Experimentelle Fixierung für Touch-Ausrichtung</string>
-    <string name="use_measured_touch_surface_description">Normalisiert Touch-Eingaben über dem gemessenen Projektionsbereich. Hilft, wenn kleine Android Auto Bedienelemente versetzt wirken.</string>
 
     <string-array name="vehicle_brands">
         <item>Google</item>
@@ -1090,6 +1091,8 @@
     <string name="wifi_direct_new_identity_none">Wird bei der nächsten Verbindung festgelegt</string>
     <string name="wifi_direct_new_identity_confirm">Wählt einen neuen Namen und ein neues Passwort für die Gruppe, gültig ab der nächsten Verbindung. Dein Smartphone wird dafür über Bluetooth eingerichtet, als wäre dies ein neues Headunit. Nutze dies, wenn das Smartphone versucht, sich mit einem nicht mehr erreichbaren Netzwerk zu verbinden.</string>
     <string name="wifi_direct_new_identity_done">Ab der nächsten Verbindung wird eine neue Netzwerkidentität verwendet.</string>
+    <string name="wifi_direct_new_identity_applied">Eine neue Netzwerkidentität wird jetzt eingerichtet. Dein Smartphone wird bei der nächsten Verbindung aufgefordert, ihr beizutreten.</string>
+    <string name="wifi_direct_stable_identity_description_legacy">In dieser Android-Version stammt der Netzwerkname vom System, das ihn so lange wie möglich beibehält. Lass die Option aktiviert, damit sich dein Smartphone wieder mit einem bekannten Netzwerk verbindet, und wähle unten eine neue Identität, falls es das gespeicherte Netzwerk weiterhin ablehnt. Deaktiviere sie, damit das System das Netzwerk vor jeder Verbindung vergisst.</string>
     <string name="debug_video_low_latency">Low-Latency-Modus für Decoder anfordern</string>
     <string name="debug_video_low_latency_description">Setzt beim Konfigurieren des Videodecoders den herstellerspezifischen Low-Latency-MediaFormat-Schlüssel. Fällt automatisch zurück, wenn der Decoder ihn ablehnt.</string>
     <string name="debug_video_feed_hold">Langsamen Decoder simulieren</string>

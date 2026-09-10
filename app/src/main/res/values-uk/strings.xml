@@ -234,8 +234,11 @@
     <string name="add_new">Додати новий</string>
     <string name="cancel">Скасувати</string>
     <string name="enable">Увімкнути</string>
-    <string name="pref_stretch_screen_title">Розтягнути на весь екран</string>
-    <string name="pref_stretch_screen_summary">Ігнорує співвідношення сторін для заповнення всього дисплея (прибирає чорні смуги)</string>
+    <string name="video_fit_mode">Вписування відео</string>
+    <string name="change_video_fit_mode">Змінити вписування відео</string>
+    <string name="video_fit_mode_fill">Розтягнути на весь екран (без смуг, можливі спотворення)</string>
+    <string name="video_fit_mode_contain">Вписати зі смугами (без обрізання та спотворень)</string>
+    <string name="video_fit_mode_cover">Заповнити обрізанням (без смуг і спотворень)</string>
 
     <!-- Audio Settings -->
     <string name="forced_scale">Примусове масштабування (Legacy Fix)</string>
@@ -869,8 +872,6 @@
     <string name="cannot_open_settings">Could not open system settings</string>
     <string name="static_bssid_enter_value">Enter BSSID (XX:XX:XX:XX:XX:XX)</string>
     <string name="static_bssid_desc">Задайте BSSID для бездротового з\'єднання вручну. Потрібно лише там, де жодне джерело на пристрої її не називає; у журналі перелічено кожне опитане джерело.</string>
-    <string name="use_measured_touch_surface">Experimental touch alignment fix</string>
-    <string name="use_measured_touch_surface_description">Normalize touch input against the measured projection overlay. May help when small Android Auto controls feel shifted.</string>
     <string name="media_key_routing">Send Media Buttons To Android Auto</string>
     <string name="media_key_routing_always">Always</string>
     <string name="media_key_routing_auto">Automatic</string>
@@ -1090,6 +1091,8 @@
     <string name="wifi_direct_new_identity_none">Буде вибрано при наступному підключенні</string>
     <string name="wifi_direct_new_identity_confirm">Вибирає нове ім\'я та пароль для групи з наступного підключення.</string>
     <string name="wifi_direct_new_identity_done">Нова ідентичність мережі використовуватиметься з наступного підключення.</string>
+    <string name="wifi_direct_new_identity_applied">Нова ідентичність мережі налаштовується зараз. Телефон отримає її під час наступного підключення.</string>
+    <string name="wifi_direct_stable_identity_description_legacy">У цій версії Android ім\'я мережі визначає система і зберігає його якомога довше. Залиште увімкненим, щоб телефон підключався до вже відомої мережі, і спробуйте нову ідентичність нижче, якщо він і далі відхиляє збережену. Вимкніть, щоб система забувала мережу перед кожним підключенням.</string>
     <string name="debug_video_low_latency">Запитати режим низької затримки декодера</string>
     <string name="debug_video_low_latency_description">Встановлює ключ MediaFormat низької затримки виробника під час налаштування відеодекодера.</string>
     <string name="debug_video_feed_hold">Імітувати повільний декодер</string>

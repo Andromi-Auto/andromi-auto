@@ -56,7 +56,16 @@ object SettingsBackupManager {
         "network-addresses" to ValueType.STRING_SET,
         "bt-address" to ValueType.STRING,
         "resolutionId" to ValueType.INT,
+        "video-fit-mode" to ValueType.INT,
+        // Older backups carry the boolean this replaced. parseImportJson drops keys it does
+        // not know, so without this an old backup loses the setting; Settings.videoFitMode
+        // migrates the restored boolean on first read.
         "stretch_to_fill" to ValueType.BOOLEAN,
+        "enable-floating-button" to ValueType.BOOLEAN,
+        "floating-button-x-percent" to ValueType.INT,
+        "floating-button-y-percent" to ValueType.INT,
+        "floating-button-opacity-percent" to ValueType.INT,
+        "floating-button-size-dp" to ValueType.INT,
         "forced_scale" to ValueType.BOOLEAN,
         "hud_mirroring" to ValueType.BOOLEAN,
         "ui-scale-home-percent" to ValueType.INT,
@@ -215,13 +224,13 @@ object SettingsBackupManager {
         "wifi-5ghz-channel" to ValueType.INT,
         "static-bssid" to ValueType.STRING,
         // Touch calibration fix and toast visibility.
-        "use_measured_touch_surface" to ValueType.BOOLEAN,
         "show-toast-messages" to ValueType.BOOLEAN,
         "usb-blacklist" to ValueType.STRING_SET
     )
 
     private val projectionRestartKeys = setOf(
         "resolutionId",
+        "video-fit-mode",
         "video-codec",
         "fps-limit",
         "dpi-pixel-density",

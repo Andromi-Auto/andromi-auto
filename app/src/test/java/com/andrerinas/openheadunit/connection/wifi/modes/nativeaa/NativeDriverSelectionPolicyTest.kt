@@ -611,4 +611,48 @@ class NativeDriverSelectionPolicyTest {
         assertFalse(NativeDriverSelectionPolicy.shouldRestateRefusal(-1L))
         assertFalse(NativeDriverSelectionPolicy.shouldRestateRefusal(Long.MIN_VALUE))
     }
+
+    // A watch that is connected must be scoped out before the counts reach the policy: the
+    // caller hands over phones only, and these pin what that buys.
+
+    @Test
+    fun `a connected watch scoped out keeps the one connected phone unambiguous`() {
+        assertFalse(NativeDriverSelectionPolicy.shouldShowSelector(Mode.AUTO, pairedCount = 2, connectedCount = 1))
+        assertTrue(NativeDriverSelectionPolicy.shouldShowSelector(Mode.AUTO, pairedCount = 2, connectedCount = 2))
+    }
+
+    @Test
+    fun `a connected device outside the phone list never wins over the phone`() {
+        val target = NativeDriverSelectionPolicy.resolveAutoConnectTarget(
+            preferredMac = "",
+            lastUsedMac = "",
+            connectedMacs = listOf("MAC_WATCH", "MAC_PHONE"),
+            pairedMacs = listOf("MAC_PHONE", "MAC_OTHER_PHONE")
+        )
+        assertEquals("MAC_PHONE", target)
+    }
+
+    @Test
+    fun `only a watch connected never returns the watch`() {
+        val target = NativeDriverSelectionPolicy.resolveAutoConnectTarget(
+            preferredMac = "",
+            lastUsedMac = "",
+            connectedMacs = listOf("MAC_WATCH"),
+            pairedMacs = listOf("MAC_PHONE", "MAC_OTHER_PHONE")
+        )
+        assertNull(target)
+    }
+
+    @Test
+    fun `a poke list naming only a watch is inert once the paired list is phones`() {
+        val lastUsed = NativeDriverSelectionPolicy.lastUsedMac("", setOf("MAC_WATCH"))
+        assertEquals("MAC_WATCH", lastUsed)
+        val target = NativeDriverSelectionPolicy.resolveAutoConnectTarget(
+            preferredMac = "",
+            lastUsedMac = lastUsed,
+            connectedMacs = emptyList(),
+            pairedMacs = listOf("MAC_PHONE", "MAC_OTHER_PHONE")
+        )
+        assertNull(target)
+    }
 }
