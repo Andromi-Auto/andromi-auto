@@ -233,8 +233,11 @@
     <string name="add_new">Új hozzáadása</string>
     <string name="cancel">Mégse</string>
     <string name="enable">Engedélyezés</string>
-    <string name="pref_stretch_screen_title">Kinyújtás teljes képernyőre</string>
-    <string name="pref_stretch_screen_summary">Figyelmen kívül hagyja a képarányt a teljes kijelző kitöltéséhez (eltávolítja a fekete sávokat)</string>
+    <string name="video_fit_mode">Képillesztés</string>
+    <string name="change_video_fit_mode">Képillesztés módosítása</string>
+    <string name="video_fit_mode_fill">Nyújtás kitöltéshez (nincsenek sávok, torzulhat)</string>
+    <string name="video_fit_mode_contain">Illesztés sávokkal (nincs levágás vagy torzulás)</string>
+    <string name="video_fit_mode_cover">Kitöltés levágással (nincsenek sávok vagy torzulás)</string>
 
     <!-- Audio Settings -->
     <string name="forced_scale">Kényszerített méretezés (Legacy javítás)</string>
@@ -864,8 +867,6 @@
     <string name="cannot_open_settings">Could not open system settings</string>
     <string name="static_bssid_enter_value">Enter BSSID (XX:XX:XX:XX:XX:XX)</string>
     <string name="static_bssid_desc">A vezeték nélküli kapcsolat BSSID-jének kézi megadása. Csak akkor kell, ha az eszközön egyetlen forrás sem ad meg egyet; a napló felsorolja az összes megkérdezett forrást.</string>
-    <string name="use_measured_touch_surface">Experimental touch alignment fix</string>
-    <string name="use_measured_touch_surface_description">Normalize touch input against the measured projection overlay. May help when small Android Auto controls feel shifted.</string>
     <string name="media_key_routing">Send Media Buttons To Android Auto</string>
     <string name="media_key_routing_always">Always</string>
     <string name="media_key_routing_auto">Automatic</string>

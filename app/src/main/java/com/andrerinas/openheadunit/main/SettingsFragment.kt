@@ -190,17 +190,14 @@ class SettingsFragment : Fragment() {
     private var pendingHotspotPassword: String? = null
     private var pendingHotspotInterface: String? = null
 
-    // Flag to determine if the projection should stretch to fill the screen
-    private var pendingStretchToFill: Boolean? = null
-    private var pendingOptimizeUltrawide: Boolean? = null
     private var pendingEnableFloatingButton: Boolean? = null
     private var pendingFloatingButtonSizeDp: Int? = null
     private var pendingFloatingButtonOpacityPercent: Int? = null
     private var pendingFloatingButtonXPercent: Int? = null
     private var pendingFloatingButtonYPercent: Int? = null
+    private var pendingVideoFitMode: Settings.VideoFitMode? = null
     private var pendingForcedScale: Boolean? = null
     private var pendingHudMirroring: Boolean? = null
-    private var pendingUseMeasuredTouchSurface: Boolean? = null
 
     private var pendingKillOnDisconnect: Boolean? = null
     private var pendingRaiseProjectionDuringCall: Boolean? = null
@@ -329,17 +326,14 @@ class SettingsFragment : Fragment() {
         pendingScreenOrientation = settings.screenOrientation
         pendingAppLanguage = settings.appLanguage
 
-        // Initialize local state for stretch to fill
-        pendingStretchToFill = settings.stretchToFill
-        pendingOptimizeUltrawide = settings.optimizeUltrawide
         pendingEnableFloatingButton = settings.enableFloatingButton
         pendingFloatingButtonSizeDp = settings.floatingButtonSizeDp
         pendingFloatingButtonOpacityPercent = settings.floatingButtonOpacityPercent
         pendingFloatingButtonXPercent = settings.floatingButtonXPercent
         pendingFloatingButtonYPercent = settings.floatingButtonYPercent
+        pendingVideoFitMode = settings.videoFitMode
         pendingForcedScale = settings.forcedScale
         pendingHudMirroring = settings.hudMirroring
-        pendingUseMeasuredTouchSurface = settings.useMeasuredTouchSurface
 
         pendingKillOnDisconnect = settings.killOnDisconnect
         pendingRaiseProjectionDuringCall = settings.raiseProjectionDuringCall
@@ -463,16 +457,14 @@ class SettingsFragment : Fragment() {
         pendingShowToastMessages = settings.showToastMessages
         pendingScreenOrientation = settings.screenOrientation
         pendingAppLanguage = settings.appLanguage
-        pendingStretchToFill = settings.stretchToFill
-        pendingOptimizeUltrawide = settings.optimizeUltrawide
         pendingEnableFloatingButton = settings.enableFloatingButton
         pendingFloatingButtonSizeDp = settings.floatingButtonSizeDp
         pendingFloatingButtonOpacityPercent = settings.floatingButtonOpacityPercent
         pendingFloatingButtonXPercent = settings.floatingButtonXPercent
         pendingFloatingButtonYPercent = settings.floatingButtonYPercent
+        pendingVideoFitMode = settings.videoFitMode
         pendingForcedScale = settings.forcedScale
         pendingHudMirroring = settings.hudMirroring
-        pendingUseMeasuredTouchSurface = settings.useMeasuredTouchSurface
         pendingKillOnDisconnect = settings.killOnDisconnect
         pendingRaiseProjectionDuringCall = settings.raiseProjectionDuringCall
         pendingAutoEnableHotspot = settings.autoEnableHotspot
@@ -624,17 +616,15 @@ class SettingsFragment : Fragment() {
         val hudMirroringChanged = pendingHudMirroring != null && pendingHudMirroring != settings.hudMirroring
 
         // Save the stretch to fill preference
-        pendingStretchToFill?.let { settings.stretchToFill = it }
-        pendingOptimizeUltrawide?.let { settings.optimizeUltrawide = it }
         pendingEnableFloatingButton?.let { settings.enableFloatingButton = it }
         pendingFloatingButtonSizeDp?.let { settings.floatingButtonSizeDp = it }
         pendingFloatingButtonOpacityPercent?.let { settings.floatingButtonOpacityPercent = it }
         pendingFloatingButtonXPercent?.let { settings.floatingButtonXPercent = it }
         pendingFloatingButtonYPercent?.let { settings.floatingButtonYPercent = it }
         FloatingButtonManager.update(requireContext())
+        pendingVideoFitMode?.let { settings.videoFitMode = it }
         pendingForcedScale?.let { settings.forcedScale = it }
         pendingHudMirroring?.let { settings.hudMirroring = it }
-        pendingUseMeasuredTouchSurface?.let { settings.useMeasuredTouchSurface = it }
 
         pendingKillOnDisconnect?.let { settings.killOnDisconnect = it }
         pendingRaiseProjectionDuringCall?.let { settings.raiseProjectionDuringCall = it }
@@ -753,16 +743,14 @@ class SettingsFragment : Fragment() {
                         pendingShowToastMessages != settings.showToastMessages ||
                         pendingScreenOrientation != settings.screenOrientation ||
                         pendingAppLanguage != settings.appLanguage ||
-                        pendingStretchToFill != settings.stretchToFill ||
-                        pendingOptimizeUltrawide != settings.optimizeUltrawide ||
                         pendingEnableFloatingButton != settings.enableFloatingButton ||
                         pendingFloatingButtonSizeDp != settings.floatingButtonSizeDp ||
                         pendingFloatingButtonOpacityPercent != settings.floatingButtonOpacityPercent ||
                         pendingFloatingButtonXPercent != settings.floatingButtonXPercent ||
                         pendingFloatingButtonYPercent != settings.floatingButtonYPercent ||
+                        pendingVideoFitMode != settings.videoFitMode ||
                         pendingForcedScale != settings.forcedScale ||
                         pendingHudMirroring != settings.hudMirroring ||
-                        pendingUseMeasuredTouchSurface != settings.useMeasuredTouchSurface ||
                         pendingInsetLeft != settings.insetLeft ||
                         pendingInsetTop != settings.insetTop ||
                         pendingInsetRight != settings.insetRight ||
@@ -806,6 +794,7 @@ class SettingsFragment : Fragment() {
 
         // Check for restart requirement
         requiresRestart = pendingResolution != settings.resolutionId ||
+                          pendingVideoFitMode != settings.videoFitMode ||
                           pendingVideoCodec != settings.videoCodec ||
                           pendingFpsLimit != settings.fpsLimit ||
                           pendingDpi != settings.dpiPixelDensity ||
@@ -1845,31 +1834,24 @@ class SettingsFragment : Fragment() {
             }
         ))
 
-        // Add the toggle for Stretch to Fill
-        items.add(SettingItem.ToggleSettingEntry(
-            stableId = "stretchToFill",
-            nameResId = R.string.pref_stretch_screen_title,
-            descriptionResId = R.string.pref_stretch_screen_summary,
-            isChecked = pendingStretchToFill ?: settings.stretchToFill,
-            onCheckedChanged = { isChecked ->
-                pendingStretchToFill = isChecked
-                requiresRestart = true // Requires a reconnect to apply the new rendering bounds
-                checkChanges()
-                updateSettingsList()
-            }
-        ))
-
-        // Add the toggle for Ultrawide Optimization
-        items.add(SettingItem.ToggleSettingEntry(
-            stableId = "optimizeUltrawide",
-            nameResId = R.string.pref_optimize_ultrawide_title,
-            descriptionResId = R.string.pref_optimize_ultrawide_summary,
-            isChecked = pendingOptimizeUltrawide ?: settings.optimizeUltrawide,
-            onCheckedChanged = { isChecked ->
-                pendingOptimizeUltrawide = isChecked
-                requiresRestart = true
-                checkChanges()
-                updateSettingsList()
+        // Video fit: how a mismatched-aspect video is fitted into the panel (object-fit style).
+        items.add(SettingItem.SettingEntry(
+            stableId = "videoFitMode",
+            nameResId = R.string.video_fit_mode,
+            value = resources.getStringArray(R.array.video_fit_mode)[(pendingVideoFitMode ?: settings.videoFitMode).value],
+            searchKeywords = resources.getStringArray(R.array.video_fit_mode).joinToString(" "),
+            onClick = { _ ->
+                val fitOptions = resources.getStringArray(R.array.video_fit_mode)
+                val currentIdx = (pendingVideoFitMode ?: settings.videoFitMode).value
+                MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
+                    .setTitle(R.string.change_video_fit_mode)
+                    .setSingleChoiceItems(fitOptions, currentIdx) { dialog, which ->
+                        pendingVideoFitMode = Settings.VideoFitMode.fromInt(which) ?: Settings.VideoFitMode.FILL
+                        checkChanges()
+                        dialog.dismiss()
+                        updateSettingsList()
+                    }
+                    .show()
             }
         ))
 
@@ -1880,18 +1862,6 @@ class SettingsFragment : Fragment() {
             isChecked = pendingHudMirroring ?: false,
             onCheckedChanged = { isChecked ->
                 pendingHudMirroring = isChecked
-                checkChanges()
-                updateSettingsList()
-            }
-        ))
-
-        items.add(SettingItem.ToggleSettingEntry(
-            stableId = "useMeasuredTouchSurface",
-            nameResId = R.string.use_measured_touch_surface,
-            descriptionResId = R.string.use_measured_touch_surface_description,
-            isChecked = pendingUseMeasuredTouchSurface ?: false,
-            onCheckedChanged = { isChecked ->
-                pendingUseMeasuredTouchSurface = isChecked
                 checkChanges()
                 updateSettingsList()
             }

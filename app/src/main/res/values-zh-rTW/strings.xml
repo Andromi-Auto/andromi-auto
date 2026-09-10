@@ -233,8 +233,11 @@
     <string name="add_new">加入新的</string>
     <string name="cancel">取消</string>
     <string name="enable">啟用</string>
-    <string name="pref_stretch_screen_title">延展以填滿螢幕</string>
-    <string name="pref_stretch_screen_summary">忽略長寬比以填滿整個顯示器（移除黑邊）</string>
+    <string name="video_fit_mode">影像縮放方式</string>
+    <string name="change_video_fit_mode">變更影像縮放方式</string>
+    <string name="video_fit_mode_fill">拉伸填滿 (無黑邊，可能變形)</string>
+    <string name="video_fit_mode_contain">完整顯示 (有黑邊，不裁切不變形)</string>
+    <string name="video_fit_mode_cover">裁切填滿 (無黑邊，不變形)</string>
 
     <!-- Audio Settings -->
     <string name="forced_scale">強制縮放 (舊版修正)</string>
@@ -867,8 +870,6 @@
     <string name="cannot_open_settings">Could not open system settings</string>
     <string name="static_bssid_enter_value">Enter BSSID (XX:XX:XX:XX:XX:XX)</string>
     <string name="static_bssid_desc">手動設定無線連線的 BSSID。只有在本機沒有任何來源回報時才需要；記錄檔會列出詢問過的每個來源。</string>
-    <string name="use_measured_touch_surface">Experimental touch alignment fix</string>
-    <string name="use_measured_touch_surface_description">Normalize touch input against the measured projection overlay. May help when small Android Auto controls feel shifted.</string>
     <string name="media_key_routing">Send Media Buttons To Android Auto</string>
     <string name="media_key_routing_always">Always</string>
     <string name="media_key_routing_auto">Automatic</string>

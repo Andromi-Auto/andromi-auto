@@ -237,8 +237,11 @@
     <string name="add_new">Добавить</string>
     <string name="cancel">Отмена</string>
     <string name="enable">Включить</string>
-    <string name="pref_stretch_screen_title">Растянуть на весь экран</string>
-    <string name="pref_stretch_screen_summary">Игнорирует соотношение сторон для заполнения всего дисплея (убирает черные полосы)</string>
+    <string name="video_fit_mode">Вписывание видео</string>
+    <string name="change_video_fit_mode">Изменить вписывание видео</string>
+    <string name="video_fit_mode_fill">Растянуть на весь экран (без полос, возможны искажения)</string>
+    <string name="video_fit_mode_contain">Вписать с полосами (без обрезки и искажений)</string>
+    <string name="video_fit_mode_cover">Заполнить обрезкой (без полос и искажений)</string>
 
     <!-- Audio Settings -->
     <string name="forced_scale">Принудительное масштабирование (Legacy Fix)</string>
@@ -867,8 +870,6 @@
     <string name="cannot_open_settings">Could not open system settings</string>
     <string name="static_bssid_enter_value">Enter BSSID (XX:XX:XX:XX:XX:XX)</string>
     <string name="static_bssid_desc">Задайте BSSID для беспроводного подключения вручную. Нужно только там, где ни один источник на устройстве его не называет; в журнале перечислен каждый опрошенный источник.</string>
-    <string name="use_measured_touch_surface">Experimental touch alignment fix</string>
-    <string name="use_measured_touch_surface_description">Normalize touch input against the measured projection overlay. May help when small Android Auto controls feel shifted.</string>
     <string name="media_key_routing">Send Media Buttons To Android Auto</string>
     <string name="media_key_routing_always">Always</string>
     <string name="media_key_routing_auto">Automatic</string>

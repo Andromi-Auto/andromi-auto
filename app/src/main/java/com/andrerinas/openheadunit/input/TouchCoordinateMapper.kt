@@ -1,5 +1,6 @@
 package com.andrerinas.openheadunit.input
 
+import com.andrerinas.openheadunit.utils.Settings
 import kotlin.math.roundToInt
 
 data class TouchCoordinate(
@@ -17,7 +18,7 @@ object TouchCoordinateMapper {
         negotiatedHeight: Int,
         marginWidth: Float,
         marginHeight: Float,
-        stretchToFill: Boolean,
+        fitMode: Settings.VideoFitMode,
         hudMirroring: Boolean
     ): TouchCoordinate {
         val surfaceW = inputSurfaceWidth.coerceAtLeast(1f)
@@ -26,11 +27,15 @@ object TouchCoordinateMapper {
 
         val uiW = negotiatedWidth - marginWidth
         val uiH = negotiatedHeight - marginHeight
+        // Android Auto draws at the buffer's top-left and leaves the announced margin at the
+        // bottom, measured from the coordinate it logged receiving. Centring the canvas here put
+        // every tap half the margin low, one control down. The renderer's centre pivot and the
+        // symmetric insets both suggest otherwise; neither describes what the phone does.
 
         val videoX: Float
         val videoY: Float
 
-        if (stretchToFill) {
+        if (fitMode == Settings.VideoFitMode.FILL) {
             videoX = (px / surfaceW) * uiW
             videoY = (rawY / surfaceH) * uiH
         } else {
@@ -40,7 +45,12 @@ object TouchCoordinateMapper {
             var displayedUiW = surfaceW
             var displayedUiH = surfaceH
 
-            if (viewRatio > uiRatio) {
+            // CONTAIN picks the smaller fit (letterboxed, <= surface); COVER picks the larger
+            // fit (cropped, >= surface) - same shape of math, opposite branch selection.
+            val screenIsRelativelyWider = viewRatio > uiRatio
+            val matchWidthToHeight = if (fitMode == Settings.VideoFitMode.COVER) !screenIsRelativelyWider else screenIsRelativelyWider
+
+            if (matchWidthToHeight) {
                 displayedUiW = surfaceH * uiRatio
             } else {
                 displayedUiH = surfaceW / uiRatio

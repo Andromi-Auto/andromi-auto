@@ -434,14 +434,15 @@
     <string name="add_new">Ajouter un nouveau</string>
     <string name="cancel">Annuler</string>
     <string name="enable">Activer</string>
-    <string name="pref_stretch_screen_title">Étirer pour remplir l\'écran</string>
-    <string name="pref_stretch_screen_summary">Ignore le ratio d\'aspect pour remplir tout l\'écran (supprime les bandes noires)</string>
+    <string name="video_fit_mode">Ajustement de la vidéo</string>
+    <string name="change_video_fit_mode">Modifier l\'ajustement de la vidéo</string>
+    <string name="video_fit_mode_fill">Étirer pour remplir (sans bandes, peut déformer)</string>
+    <string name="video_fit_mode_contain">Ajuster avec des bandes (sans rognage ni déformation)</string>
+    <string name="video_fit_mode_cover">Remplir en rognant (sans bandes ni déformation)</string>
     <string name="forced_scale">Échelle forcée (Correction héritée)</string>
     <string name="forced_scale_description">Corrige les problèmes de mise à l\'échelle sur certains appareils plus anciens utilisant SurfaceView. À utiliser uniquement si l\'image semble déformée ou décalée.</string>
     <string name="hud_mirroring">Mode HUD (Miroir horizontal)</string>
     <string name="hud_mirroring_description">Retourne l\'affichage horizontalement pour le reflet sur le pare-brise (Affichage Tête Haute). Nécessite le mode de vue TextureView ou GLES20 (ne fonctionne pas avec SurfaceView).</string>
-    <string name="use_measured_touch_surface">Correction expérimentale de l\'alignement tactile</string>
-    <string name="use_measured_touch_surface_description">Normaliser la saisie tactile par rapport à la superposition de projection mesurée. Peut aider lorsque les petits contrôles d\'Android Auto semblent décalés.</string>
 
 
     <!-- Audio Settings -->

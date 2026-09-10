@@ -234,8 +234,11 @@
     <string name="add_new">Dodaj nowy</string>
     <string name="cancel">Anuluj</string>
     <string name="enable">Włącz</string>
-    <string name="pref_stretch_screen_title">Rozciągnij na cały ekran</string>
-    <string name="pref_stretch_screen_summary">Ignoruje proporcje ekranu, aby wypełnić cały wyświetlacz (usuwa czarne paski)</string>
+    <string name="video_fit_mode">Dopasowanie obrazu</string>
+    <string name="change_video_fit_mode">Zmień dopasowanie obrazu</string>
+    <string name="video_fit_mode_fill">Rozciągnij, aby wypełnić (bez pasów, może zniekształcać)</string>
+    <string name="video_fit_mode_contain">Dopasuj z pasami (bez przycinania i zniekształceń)</string>
+    <string name="video_fit_mode_cover">Wypełnij przycinaniem (bez pasów i zniekształceń)</string>
 
     <!-- Audio Settings -->
     <string name="forced_scale">Wymuszone skalowanie (Poprawka legacy)</string>
@@ -867,8 +870,6 @@
     <string name="cannot_open_settings">Could not open system settings</string>
     <string name="static_bssid_enter_value">Enter BSSID (XX:XX:XX:XX:XX:XX)</string>
     <string name="static_bssid_desc">Ustaw BSSID połączenia bezprzewodowego ręcznie. Potrzebne tylko wtedy, gdy żadne źródło w tym urządzeniu go nie podaje; dziennik wymienia każde odpytane źródło.</string>
-    <string name="use_measured_touch_surface">Experimental touch alignment fix</string>
-    <string name="use_measured_touch_surface_description">Normalize touch input against the measured projection overlay. May help when small Android Auto controls feel shifted.</string>
     <string name="media_key_routing">Send Media Buttons To Android Auto</string>
     <string name="media_key_routing_always">Always</string>
     <string name="media_key_routing_auto">Automatic</string>

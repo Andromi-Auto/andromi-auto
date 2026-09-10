@@ -233,8 +233,11 @@
     <string name="add_new">Nieuwe toevoegen</string>
     <string name="cancel">Annuleren</string>
     <string name="enable">Inschakelen</string>
-    <string name="pref_stretch_screen_title">Uitrekken om scherm te vullen</string>
-    <string name="pref_stretch_screen_summary">Negeert de beeldverhouding om het volledige display te vullen (verwijdert zwarte balken)</string>
+    <string name="video_fit_mode">Videopassing</string>
+    <string name="change_video_fit_mode">Videopassing wijzigen</string>
+    <string name="video_fit_mode_fill">Uitrekken om te vullen (geen balken, kan vervormen)</string>
+    <string name="video_fit_mode_contain">Passend met balken (geen bijsnijden of vervorming)</string>
+    <string name="video_fit_mode_cover">Vullen door bij te snijden (geen balken of vervorming)</string>
 
     <!-- Audio Settings -->
     <string name="forced_scale">Geforceerde schaal (Legacy Fix)</string>
@@ -868,8 +871,6 @@
     <string name="cannot_open_settings">Could not open system settings</string>
     <string name="static_bssid_enter_value">Enter BSSID (XX:XX:XX:XX:XX:XX)</string>
     <string name="static_bssid_desc">Stel de BSSID voor de draadloze handshake handmatig in. Alleen nodig als geen enkele bron op dit apparaat er een noemt; het logboek noemt elke bevraagde bron.</string>
-    <string name="use_measured_touch_surface">Experimental touch alignment fix</string>
-    <string name="use_measured_touch_surface_description">Normalize touch input against the measured projection overlay. May help when small Android Auto controls feel shifted.</string>
     <string name="media_key_routing">Send Media Buttons To Android Auto</string>
     <string name="media_key_routing_always">Always</string>
     <string name="media_key_routing_auto">Automatic</string>

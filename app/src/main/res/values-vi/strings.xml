@@ -250,8 +250,11 @@
     <string name="add_new">Thêm mới</string>
     <string name="cancel">Huỷ</string>
     <string name="enable">Bật</string>
-    <string name="pref_stretch_screen_title">Kéo dãn lấp đầy màn hình</string>
-    <string name="pref_stretch_screen_summary">Bỏ qua tỉ lệ khung hình để lấp đầy màn hình (loại bỏ viền đen)</string>
+    <string name="video_fit_mode">Cách vừa khung hình</string>
+    <string name="change_video_fit_mode">Đổi cách vừa khung hình</string>
+    <string name="video_fit_mode_fill">Kéo giãn để lấp đầy (không viền, có thể méo)</string>
+    <string name="video_fit_mode_contain">Vừa khung có viền (không cắt, không méo)</string>
+    <string name="video_fit_mode_cover">Lấp đầy bằng cách cắt (không viền, không méo)</string>
     <string name="forced_scale">Tỉ lệ ép buộc (Khắc phục cho máy cũ)</string>
     <string name="forced_scale_description">Khắc phục lỗi tỉ lệ trên một số máy cũ dùng SurfaceView. Chỉ dùng khi hình bị méo hoặc lệch.</string>
     <string name="hud_mirroring">Chế độ HUD (Lật ngang)</string>
@@ -871,8 +874,6 @@
     <string name="cannot_open_settings">Could not open system settings</string>
     <string name="static_bssid_enter_value">Enter BSSID (XX:XX:XX:XX:XX:XX)</string>
     <string name="static_bssid_desc">Đặt BSSID cho kết nối không dây thủ công. Chỉ cần khi không nguồn nào trên thiết bị này cho biết; nhật ký nêu tên từng nguồn đã hỏi.</string>
-    <string name="use_measured_touch_surface">Experimental touch alignment fix</string>
-    <string name="use_measured_touch_surface_description">Normalize touch input against the measured projection overlay. May help when small Android Auto controls feel shifted.</string>
     <string name="media_key_routing">Send Media Buttons To Android Auto</string>
     <string name="media_key_routing_always">Always</string>
     <string name="media_key_routing_auto">Automatic</string>
