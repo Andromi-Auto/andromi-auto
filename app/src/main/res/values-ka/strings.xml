@@ -1070,6 +1070,8 @@
     <string name="wifi_direct_new_identity_none">შეირჩევა შემდეგი დაკავშირებისას</string>
     <string name="wifi_direct_new_identity_confirm">ირჩევს ახალ სახელსა და პაროლს შემდეგი დაკავშირებისთვის.</string>
     <string name="wifi_direct_new_identity_done">ახალი ქსელის იდენტიფიკატორი გამოყენებული იქნება შემდეგი დაკავშირებისას.</string>
+    <string name="wifi_direct_new_identity_applied">ახალი ქსელის იდენტიფიკატორი ახლა კონფიგურირდება. ტელეფონი მას შემდეგი დაკავშირებისას მიიღებს.</string>
+    <string name="wifi_direct_stable_identity_description_legacy">Android-ის ამ ვერსიაში ქსელის სახელს სისტემა ირჩევს და ინახავს მას რამდენადაც შესაძლებელია. დატოვეთ ჩართული, რომ ტელეფონი ნაცნობ ქსელს დაუკავშირდეს, და სცადეთ ახალი იდენტიფიკატორი ქვემოთ, თუ ის შენახულ ქსელს კვლავ უარყოფს. გამორთვისას სისტემა ქსელს ყოველ დაკავშირებამდე დაივიწყებს.</string>
     <string name="debug_video_low_latency">დეკოდერის დაბალი დაყოვნების რეჟიმის მოთხოვნა</string>
     <string name="debug_video_low_latency_description">აყენებს მწარმოებლის დაბალი დაყოვნების MediaFormat გასაღებს ვიდეო დეკოდერის კონფიგურაციისას.</string>
     <string name="debug_video_feed_hold">ნელი დეკოდერის სიმულაცია</string>

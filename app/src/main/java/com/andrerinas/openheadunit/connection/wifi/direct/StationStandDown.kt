@@ -31,6 +31,21 @@ object StationStandDown {
     const val VERIFY_DELAY_MS = 1_500L
 
     /**
+     * Whether this unit is still joined to its own network, or null when that cannot be read.
+     *
+     * Null is not "still there": an unreadable station must never hold the group up, which is what
+     * [StationStandDownSettlePolicy] does with it.
+     */
+    fun isStillAssociated(context: Context): Boolean? = try {
+        val wm = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as? WifiManager
+        @Suppress("DEPRECATION")
+        wm?.connectionInfo?.supplicantState?.let { it == SupplicantState.COMPLETED }
+    } catch (e: Exception) {
+        AppLog.d("StationStandDown: could not read the station back: ${e.message}")
+        null
+    }
+
+    /**
      * Leave the current network, recording it first so it can always be put back.
      *
      * The record is written before the call, not after: a crash between the two would otherwise
@@ -94,19 +109,14 @@ object StationStandDown {
             )
 
             Handler(Looper.getMainLooper()).postDelayed({
-                try {
-                    val still = wm.connectionInfo?.supplicantState == SupplicantState.COMPLETED
-                    if (still) {
-                        AppLog.w(
-                            "StationStandDown: this unit is still joined to its WiFi network " +
-                                "${VERIFY_DELAY_MS}ms later, so the group will have to share that " +
-                                "network's channel."
-                        )
-                    } else {
-                        AppLog.i("StationStandDown: this unit has left its WiFi network.")
-                    }
-                } catch (e: Exception) {
-                    AppLog.d("StationStandDown: could not read the station back: ${e.message}")
+                if (isStillAssociated(context) == true) {
+                    AppLog.w(
+                        "StationStandDown: this unit is still joined to its WiFi network " +
+                            "${VERIFY_DELAY_MS}ms later, so the group will have to share that " +
+                            "network's channel."
+                    )
+                } else {
+                    AppLog.i("StationStandDown: this unit has left its WiFi network.")
                 }
             }, VERIFY_DELAY_MS)
             return true

@@ -1088,6 +1088,8 @@
     <string name="wifi_direct_new_identity_none">Будет выбрано при следующем подключении</string>
     <string name="wifi_direct_new_identity_confirm">Выбирает новое имя и пароль для группы начиная со следующего подключения. Телефон настроится по Bluetooth как для новой магнитолы.</string>
     <string name="wifi_direct_new_identity_done">Новые параметры сети будут применены со следующего подключения.</string>
+    <string name="wifi_direct_new_identity_applied">Новые параметры сети настраиваются сейчас. Телефону будет предложено подключиться к этой сети при следующем подключении.</string>
+    <string name="wifi_direct_stable_identity_description_legacy">В этой версии Android имя сети выбирает система и сохраняет его так долго, как может. Оставьте параметр включённым, чтобы телефон подключался к уже известной сети, и попробуйте новые параметры ниже, если он продолжает отклонять сохранённую. Выключите, чтобы система забывала сеть перед каждым подключением.</string>
     <string name="debug_video_low_latency">Запросить режим низкой задержки декодера</string>
     <string name="debug_video_low_latency_description">Устанавливает ключ MediaFormat низкой задержки производителя при настройке видеодекодера.</string>
     <string name="debug_video_feed_hold">Имитировать медленный декодер</string>

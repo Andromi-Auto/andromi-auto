@@ -1088,6 +1088,8 @@
     <string name="wifi_direct_new_identity_none">Zostanie wybrana przy następnym połączeniu</string>
     <string name="wifi_direct_new_identity_confirm">Wybiera nową nazwę i hasło dla grupy od następnego połączenia. Telefon zostanie skonfigurowany przez Bluetooth jak dla nowej stacji.</string>
     <string name="wifi_direct_new_identity_done">Nowa tożsamość sieci zostanie użyta od następnego połączenia.</string>
+    <string name="wifi_direct_new_identity_applied">Trwa konfigurowanie nowej tożsamości sieci. Telefon otrzyma ją przy następnym połączeniu.</string>
+    <string name="wifi_direct_stable_identity_description_legacy">W tej wersji Androida nazwę sieci ustala system i zachowuje ją tak długo, jak to możliwe. Zostaw tę opcję włączoną, aby telefon łączył się ze znaną siecią, a jeśli nadal odrzuca zapisaną, wypróbuj nową tożsamość poniżej. Wyłączenie sprawia, że system zapomina sieć przed każdym połączeniem.</string>
     <string name="debug_video_low_latency">Żądaj trybu niskiego opóźnienia dekodera</string>
     <string name="debug_video_low_latency_description">Ustawia klucz MediaFormat niskiego opóźnienia producenta podczas konfiguracji dekodera wideo.</string>
     <string name="debug_video_feed_hold">Symuluj wolny dekoder</string>

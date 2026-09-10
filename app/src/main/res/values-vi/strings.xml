@@ -1092,6 +1092,8 @@
     <string name="wifi_direct_new_identity_none">Được chọn ở lần kết nối tiếp theo</string>
     <string name="wifi_direct_new_identity_confirm">Chọn tên và mật khẩu mới cho nhóm áp dụng từ lần kết nối tiếp theo.</string>
     <string name="wifi_direct_new_identity_done">Danh tính mạng mới sẽ được sử dụng từ lần kết nối tiếp theo.</string>
+    <string name="wifi_direct_new_identity_applied">Danh tính mạng mới đang được thiết lập. Điện thoại sẽ được yêu cầu tham gia mạng này ở lần kết nối tiếp theo.</string>
+    <string name="wifi_direct_stable_identity_description_legacy">Trên phiên bản Android này, tên mạng do hệ thống đặt và được giữ nguyên lâu nhất có thể. Hãy bật tùy chọn này để điện thoại kết nối lại với mạng đã biết, và thử một danh tính mới bên dưới nếu điện thoại vẫn từ chối mạng đã lưu. Tắt để hệ thống quên mạng trước mỗi lần kết nối.</string>
     <string name="debug_video_low_latency">Yêu cầu chế độ độ trễ thấp của bộ giải mã</string>
     <string name="debug_video_low_latency_description">Đặt khóa MediaFormat độ trễ thấp của nhà sản xuất khi định cấu hình bộ giải mã video.</string>
     <string name="debug_video_feed_hold">Mô phỏng bộ giải mã chậm</string>

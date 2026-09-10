@@ -1086,6 +1086,8 @@
     <string name="wifi_direct_new_identity_none">다음 연결 시 선택됨</string>
     <string name="wifi_direct_new_identity_confirm">다음 연결부터 적용될 새 그룹 이름과 비밀번호를 선택합니다. 새 헤드유닛처럼 블루투스를 통해 설정됩니다.</string>
     <string name="wifi_direct_new_identity_done">다음 연결부터 새 네트워크 식별자가 사용됩니다.</string>
+    <string name="wifi_direct_new_identity_applied">새 네트워크 식별자를 설정하는 중입니다. 다음 연결 때 휴대폰에 전달됩니다.</string>
+    <string name="wifi_direct_stable_identity_description_legacy">이 Android 버전에서는 네트워크 이름을 시스템이 정하며 가능한 한 같은 이름을 유지합니다. 휴대폰이 이미 아는 네트워크에 다시 연결되도록 켜 두고, 저장된 네트워크를 계속 거부하면 아래에서 새 식별자를 사용하세요. 끄면 연결할 때마다 시스템이 네트워크를 잊습니다.</string>
     <string name="debug_video_low_latency">디코더 저지연 모드 요청</string>
     <string name="debug_video_low_latency_description">비디오 디코더 설정 시 벤더 저지연 MediaFormat 키를 적용합니다.</string>
     <string name="debug_video_feed_hold">느린 디코더 시뮬레이션</string>

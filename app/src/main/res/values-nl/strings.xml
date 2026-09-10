@@ -1089,6 +1089,8 @@
     <string name="wifi_direct_new_identity_none">Gekozen bij de volgende verbinding</string>
     <string name="wifi_direct_new_identity_confirm">Kiest een nieuwe naam en wachtwoord voor de groep vanaf de volgende verbinding. Je telefoon wordt via Bluetooth ingesteld alsof dit een nieuwe head-unit is.</string>
     <string name="wifi_direct_new_identity_done">Vanaf de volgende verbinding wordt een nieuwe netwerkidentiteit gebruikt.</string>
+    <string name="wifi_direct_new_identity_applied">Er wordt nu een nieuwe netwerkidentiteit ingesteld. Je telefoon krijgt bij de volgende verbinding het verzoek om er verbinding mee te maken.</string>
+    <string name="wifi_direct_stable_identity_description_legacy">In deze Android-versie bepaalt het systeem de netwerknaam en houdt die zo lang mogelijk aan. Laat dit aan staan zodat je telefoon opnieuw verbindt met een bekend netwerk, en probeer hieronder een nieuwe identiteit als hij het opgeslagen netwerk blijft weigeren. Zet het uit om het systeem het netwerk voor elke verbinding te laten vergeten.</string>
     <string name="debug_video_low_latency">Lage-latentiemodus van decoder aanvragen</string>
     <string name="debug_video_low_latency_description">Stelt de propriëtaire MediaFormat-sleutel voor lage latentie in bij het configureren van de videodecoder.</string>
     <string name="debug_video_feed_hold">Trage decoder simuleren</string>

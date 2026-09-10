@@ -569,6 +569,14 @@ class Settings(private val context: Context) {
         set(value) { prefs.edit().putBoolean("wifi-direct-stable-identity", value).apply() }
 
     /**
+     * Below API 29 the platform names the group, so a "new identity" is a request to forget its
+     * stored profile at the next create. Persisted so a tap outlives the service and a reboot.
+     */
+    var wifiDirectRotationPending: Boolean
+        get() = prefs.getBoolean("wifi-direct-rotation-pending", false)
+        set(value) { prefs.edit().putBoolean("wifi-direct-rotation-pending", value).apply() }
+
+    /**
      * The kept pair, or null before the first bring-up draws one.
      *
      * Written by WifiDirectManager when the policy draws it, and by the settings screen's "new

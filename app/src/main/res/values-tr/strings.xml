@@ -1084,6 +1084,8 @@
     <string name="wifi_direct_new_identity_none">Sonraki bağlantıda belirlenecek</string>
     <string name="wifi_direct_new_identity_confirm">Sonraki bağlantıdan itibaren grup için yeni bir ad ve şifre belirler. Telefonunuz yeni bir ana üniteymiş gibi Bluetooth üzerinden ayarlanacaktır.</string>
     <string name="wifi_direct_new_identity_done">Bir sonraki bağlantıdan itibaren yeni ağ kimliği kullanılacaktır.</string>
+    <string name="wifi_direct_new_identity_applied">Yeni bir ağ kimliği şimdi hazırlanıyor. Telefonunuzdan bir sonraki bağlantıda bu ağa katılması istenecek.</string>
+    <string name="wifi_direct_stable_identity_description_legacy">Bu Android sürümünde ağ adını sistem belirler ve mümkün olduğu sürece aynı adı korur. Telefonunuzun bildiği bir ağa yeniden bağlanması için bunu açık bırakın; kaydedilmiş ağı reddetmeye devam ederse aşağıdan yeni bir kimlik deneyin. Kapatırsanız sistem her bağlantıdan önce ağı unutur.</string>
     <string name="debug_video_low_latency">Kod çözücü düşük gecikme modunu iste</string>
     <string name="debug_video_low_latency_description">Video kod çözücüyü yapılandırırken üreticinin düşük gecikmeli MediaFormat anahtarını ayarlar.</string>
     <string name="debug_video_feed_hold">Yavaş kod çözücüyü simüle et</string>

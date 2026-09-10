@@ -1087,6 +1087,8 @@
     <string name="wifi_direct_new_identity_none">سيتم الاختيار عند الاتصال التالي</string>
     <string name="wifi_direct_new_identity_confirm">يختار اسماً وكلمة مرور جديدة للمجموعة بدءاً من الاتصال التالي. سيتم إعداد هاتفك عبر البلوتوث وكأنها وحدة جديدة.</string>
     <string name="wifi_direct_new_identity_done">سيتم استخدام هوية شبكة جديدة بدءاً من الاتصال التالي.</string>
+    <string name="wifi_direct_new_identity_applied">يتم الآن إعداد هوية شبكة جديدة. سيُطلب من هاتفك الانضمام إليها عند الاتصال التالي.</string>
+    <string name="wifi_direct_stable_identity_description_legacy">في هذا الإصدار من أندرويد يأتي اسم الشبكة من النظام، الذي يحتفظ بالاسم نفسه ما دام ذلك ممكناً. اترك هذا الخيار مفعّلاً ليعاود هاتفك الاتصال بشبكة يعرفها، واستخدم هوية جديدة أدناه إذا استمر في رفض الشبكة المحفوظة. عطّله لينسى النظام الشبكة قبل كل اتصال.</string>
     <string name="debug_video_low_latency">طلب وضع زمن الوصول المنخفض لمفكك التشفير</string>
     <string name="debug_video_low_latency_description">يضبط مفتاح MediaFormat المخصص للكمون المنخفض عند تكوين مفكك تشفير الفيديو.</string>
     <string name="debug_video_feed_hold">محاكاة مفكك تشفير بطيء</string>

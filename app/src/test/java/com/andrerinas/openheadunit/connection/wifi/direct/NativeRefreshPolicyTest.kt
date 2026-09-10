@@ -44,4 +44,41 @@ class NativeRefreshPolicyTest {
     fun `a group we are only a client of is not ours to hand out`() {
         assertEquals(Action.RECREATE, NativeRefreshPolicy.decide(groupExists = true, isGroupOwner = false, createInFlightForMs = null))
     }
+
+    // --- an accepted create is left alone for the whole group-info window ---
+
+    @Test
+    fun `a create the platform accepted is not remade while it is still being read for`() {
+        // Past the grace, which is where the refresh used to remake the group under the reads.
+        assertEquals(
+            Action.WAIT,
+            NativeRefreshPolicy.decide(groupExists = false, isGroupOwner = false, createInFlightForMs = 16_000L, acceptedCreatePendingForMs = 16_000L)
+        )
+        assertEquals(
+            Action.WAIT,
+            NativeRefreshPolicy.decide(groupExists = false, isGroupOwner = false, createInFlightForMs = null, acceptedCreatePendingForMs = NativeRefreshPolicy.GROUP_INFO_WINDOW_MS - 1)
+        )
+    }
+
+    @Test
+    fun `an accepted create that outlived the group-info window is remade`() {
+        assertEquals(
+            Action.RECREATE,
+            NativeRefreshPolicy.decide(groupExists = false, isGroupOwner = false, createInFlightForMs = null, acceptedCreatePendingForMs = NativeRefreshPolicy.GROUP_INFO_WINDOW_MS)
+        )
+    }
+
+    @Test
+    fun `the group-info window covers the twenty one-second reads`() {
+        assertTrue(NativeRefreshPolicy.GROUP_INFO_WINDOW_MS > 20_000L)
+        assertTrue(NativeRefreshPolicy.GROUP_INFO_WINDOW_MS > NativeRefreshPolicy.CREATE_GRACE_MS)
+    }
+
+    @Test
+    fun `the recheck waits for the longer of the two windows`() {
+        assertEquals(NativeRefreshPolicy.CREATE_GRACE_MS - 1_000L + 500L, NativeRefreshPolicy.recheckDelayMs(1_000L, null))
+        assertEquals(NativeRefreshPolicy.GROUP_INFO_WINDOW_MS - 16_000L + 500L, NativeRefreshPolicy.recheckDelayMs(16_000L, 16_000L))
+        assertEquals(NativeRefreshPolicy.GROUP_INFO_WINDOW_MS - 2_000L + 500L, NativeRefreshPolicy.recheckDelayMs(2_000L, 2_000L))
+        assertEquals(500L, NativeRefreshPolicy.recheckDelayMs(null, null))
+    }
 }
