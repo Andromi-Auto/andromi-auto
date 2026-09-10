@@ -6,38 +6,127 @@ import com.andrerinas.openheadunit.utils.AppLog
 class CarKeysManager {
 
     private val all: Array<CarKeyReceiver> = CarKeyReceiver.newDefaultReceivers()
-    private val registered: MutableCollection<CarKeyReceiver> = ArrayList()
+    private val registered: MutableSet<CarKeyReceiver> = mutableSetOf()
 
-    fun registerReceivers(context: Context) {
-        if (registered.isNotEmpty())
-            return
+    private var isSessionActive = false
+    private var isLearningActive = false
 
+    /**
+     * Registers baseline (non-session-scoped) receivers like CarKeyBroadcastReceiver and CarBydReceiver.
+     * Safe to run throughout AapService lifecycle because they do not hijack system focus.
+     */
+    fun registerIdleReceivers(context: Context) {
         try {
             for (r in all) {
-                if (!r.isSupported)
+                if (!r.isSupported || r.isSessionScoped)
                     continue
 
-                r.register(context)
-                registered.add(r)
+                if (!registered.contains(r)) {
+                    r.register(context)
+                    registered.add(r)
+                }
             }
-
-            AppLog.d("AapService: ${registered.size} CarKeyReceivers registered")
+            AppLog.d("CarKeysManager: ${registered.size} idle CarKeyReceivers registered")
         } catch (e: Exception) {
-            AppLog.e("AapService: Failed to register CarKeyReceivers", e)
+            AppLog.e("CarKeysManager: Failed to register idle CarKeyReceivers", e)
         }
     }
 
-    fun unregisterReceivers() {
-        if (registered.isEmpty())
-            return
+    /**
+     * Called when projection session connects. Registers session-scoped receivers (e.g. CarFYTReceiver).
+     */
+    fun onSessionStarted(context: Context) {
+        isSessionActive = true
+        registerSessionReceivers(context)
+    }
 
+    /**
+     * Called when projection session disconnects. Unregisters session-scoped receivers unless key learning is active.
+     */
+    fun onSessionEnded() {
+        isSessionActive = false
+        if (!isLearningActive) {
+            unregisterSessionReceivers()
+        }
+    }
+
+    /**
+     * Called by KeymapFragment onResume to allow learning keys from session-scoped receivers (like FYT)
+     * while in the settings screen.
+     */
+    fun startLearning(context: Context) {
+        isLearningActive = true
+        registerIdleReceivers(context)
+        registerSessionReceivers(context)
+    }
+
+    /**
+     * Called by KeymapFragment onPause to release session-scoped receivers when leaving the key learning screen.
+     */
+    fun stopLearning() {
+        isLearningActive = false
+        if (!isSessionActive) {
+            unregisterSessionReceivers()
+        }
+    }
+
+    private fun registerSessionReceivers(context: Context) {
         try {
-            registered.forEach { it.unregister() }
+            for (r in all) {
+                if (!r.isSupported || !r.isSessionScoped)
+                    continue
+
+                if (!registered.contains(r)) {
+                    r.register(context)
+                    registered.add(r)
+                    AppLog.i("CarKeysManager: Registered session-scoped receiver ${r.javaClass.simpleName}")
+                }
+            }
         } catch (e: Exception) {
-            AppLog.e("AapService: Failed to unregister CarKeyReceiver", e)
+            AppLog.e("CarKeysManager: Failed to register session-scoped CarKeyReceivers", e)
+        }
+    }
+
+    private fun unregisterSessionReceivers() {
+        val toRemove = registered.filter { it.isSessionScoped }
+        for (r in toRemove) {
+            try {
+                r.unregister()
+                AppLog.i("CarKeysManager: Unregistered session-scoped receiver ${r.javaClass.simpleName}")
+            } catch (e: Exception) {
+                AppLog.e("CarKeysManager: Failed to unregister session-scoped receiver ${r.javaClass.simpleName}", e)
+            }
+            registered.remove(r)
+        }
+    }
+
+    /**
+     * Full teardown on AapService destroy.
+     */
+    fun unregisterAll() {
+        isSessionActive = false
+        isLearningActive = false
+        try {
+            for (r in registered) {
+                try {
+                    r.unregister()
+                } catch (e: Exception) {
+                    AppLog.e("CarKeysManager: Failed to unregister ${r.javaClass.simpleName}", e)
+                }
+            }
         } finally {
             registered.clear()
         }
+    }
+
+    /** Backward compatibility alias */
+    fun registerReceivers(context: Context) {
+        registerIdleReceivers(context)
+    }
+
+    /** Backward compatibility alias */
+    fun unregisterReceivers() {
+        unregisterAll()
     }
 
     fun isSUNeeded(): Boolean {

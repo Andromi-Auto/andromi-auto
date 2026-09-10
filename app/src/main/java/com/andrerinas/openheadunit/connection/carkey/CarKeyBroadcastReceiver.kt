@@ -83,8 +83,9 @@ class CarKeyBroadcastReceiver : BroadcastReceiver(), CarKeyReceiver {
             intent.extras?.let { putExtras(it) }
         })
 
-        // Try to abort broadcast to prevent other apps (like built-in radio) from reacting
-        if (isOrderedBroadcast) {
+        // Try to abort broadcast to prevent other apps (like built-in radio) from reacting,
+        // but ONLY while an active Android Auto projection session is ongoing.
+        if (isOrderedBroadcast && App.provide(context).commManager.isConnected) {
             abortBroadcast()
         }
 

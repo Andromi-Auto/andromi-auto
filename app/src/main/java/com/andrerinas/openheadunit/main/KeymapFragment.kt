@@ -16,8 +16,10 @@ import androidx.core.content.ContextCompat
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.andrerinas.openheadunit.App
 import com.andrerinas.openheadunit.R
 import com.andrerinas.openheadunit.contract.KeyIntent
+import com.andrerinas.openheadunit.input.BydPanelKey
 import com.andrerinas.openheadunit.utils.AppLog
 import com.andrerinas.openheadunit.utils.IntentFilters
 import com.andrerinas.openheadunit.utils.Settings
@@ -173,6 +175,7 @@ class KeymapFragment : Fragment(), MainActivity.KeyListener {
 
     override fun onResume() {
         super.onResume()
+        App.provide(requireContext()).carKeysManager.startLearning(requireContext())
         val filter = IntentFilters.keyEvent
         filter.addAction("com.andrerinas.openheadunit.DEBUG_KEY")
         ContextCompat.registerReceiver(requireContext(), keyCodeReceiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED)
@@ -180,6 +183,7 @@ class KeymapFragment : Fragment(), MainActivity.KeyListener {
 
     override fun onPause() {
         super.onPause()
+        context?.let { App.provide(it).carKeysManager.stopLearning() }
         context?.unregisterReceiver(keyCodeReceiver)
     }
 
@@ -206,7 +210,7 @@ class KeymapFragment : Fragment(), MainActivity.KeyListener {
         // Only ignore BACK if we are NOT in assignment mode
         if (keyCode == KeyEvent.KEYCODE_BACK && assignTargetCode == KeyEvent.KEYCODE_UNKNOWN) return false
 
-        val keyName = try { KeyEvent.keyCodeToString(keyCode).replace("KEYCODE_", "") } catch (e: Exception) { "UNKNOWN" }
+        val keyName = physicalKeyName(keyCode)
         val actionName = if (event.action == KeyEvent.ACTION_DOWN) "DOWN" else "UP"
         
         AppLog.i("KeymapFragment: Captured $keyName ($keyCode) $actionName")
@@ -236,6 +240,20 @@ class KeymapFragment : Fragment(), MainActivity.KeyListener {
         return false
     }
 
+    /**
+     * What to call a physical button in this screen. Proprietary buttons are carried as virtual key
+     * codes that `KeyEvent.keyCodeToString` renders as a bare number, which tells a user nothing
+     * about the button they just pressed, so the ones we can name get named.
+     */
+    private fun physicalKeyName(keyCode: Int): String {
+        BydPanelKey.label(keyCode)?.let { return it }
+        return try {
+            KeyEvent.keyCodeToString(keyCode).replace("KEYCODE_", "")
+        } catch (e: Exception) {
+            "UNKNOWN"
+        }
+    }
+
     inner class KeymapAdapter(
         private val items: List<KeymapItem>,
         private var codesMap: Map<Int, Int>,
@@ -260,7 +278,7 @@ class KeymapFragment : Fragment(), MainActivity.KeyListener {
             val physicalKey = codesMap[item.keyCode]
             
             if (physicalKey != null) {
-                holder.valueText.text = KeyEvent.keyCodeToString(physicalKey).replace("KEYCODE_", "")
+                holder.valueText.text = physicalKeyName(physicalKey)
             } else {
                 holder.valueText.text = getString(R.string.not_set)
             }

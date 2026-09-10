@@ -32,6 +32,7 @@ class CarFYTReceiver : CarKeyReceiver {
     }
 
     override val isSUNeeded = true
+    override val isSessionScoped = true
 
     override fun register(context: Context) {
         AppLog.i("CarKeyReceiver: Detected FYT device!")

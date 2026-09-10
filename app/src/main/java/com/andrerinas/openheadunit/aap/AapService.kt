@@ -51,6 +51,7 @@ import com.andrerinas.openheadunit.aap.protocol.messages.NightModeEvent
 import com.andrerinas.openheadunit.aap.protocol.proto.MediaPlayback
 import com.andrerinas.openheadunit.decoder.audio.MicRecorder
 import com.andrerinas.openheadunit.connection.CommManager
+import com.andrerinas.openheadunit.connection.carkey.CarKeysManager
 import com.andrerinas.openheadunit.connection.wifi.NetworkDiscovery
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.MediaMetadataCompat
@@ -136,6 +137,7 @@ class AapService : Service() {
     private val stationScanMonitor = StationScanMonitor()
     private val usbLauncherManager = UsbLauncherManager(this)
     private val selfLauncherManager = SelfLauncherManager(this, wifiLauncherManager)
+    private val carKeysManager by lazy { App.provide(this).carKeysManager }
 
     /**
      * Set when a link-loss teardown closed the session because station WiFi was going away.
@@ -933,6 +935,7 @@ class AapService : Service() {
         }
         observeConnectionState()
         registerReceivers()
+        carKeysManager.registerIdleReceivers(this)
 
         MicRecorder.foregroundClaim = object : MicRecorder.ForegroundMicrophoneClaim {
             override fun claim() = promoteForMicrophone()
@@ -1278,10 +1281,8 @@ class AapService : Service() {
         // asks for a wireless Native AA session, so a wired one gets no VPN either way.
         maybeStartSessionDummyVpn()
 
-        // Silent audio hack removed to prevent mixing/resampling stuttering issues
-
-        // Register the comprehensive steering wheel key receiver
-        App.provide(this).carKeysManager.registerReceivers(this)
+        // Activate session-scoped car key receivers (e.g. FYT)
+        carKeysManager.onSessionStarted(this)
 
         // Reactivate the existing MediaSession (created in onCreate, kept alive across disconnects)
         safeMediaSessionCall { it.isActive = true }
@@ -1461,7 +1462,7 @@ class AapService : Service() {
 
         // Release any permanent audio focus we may have requested when connected
         releasePermanentAudioFocus()
-        App.provide(this).carKeysManager.unregisterReceivers()
+        carKeysManager.onSessionEnded()
 
         if (!isDestroying) updateNotification()
         autoResumePlaybackJob?.cancel()
@@ -2347,7 +2348,7 @@ class AapService : Service() {
         btAutoDisconnectStandDown = false
         sessionConnectedAt = 0L
         stationScanMonitor.stop(this)
-        try { App.provide(this).carKeysManager.unregisterReceivers() } catch (e: Exception) { AppLog.w("AapService: Error unregistering carKeysManager: ${e.message}") }
+        try { carKeysManager.unregisterAll() } catch (e: Exception) { AppLog.w("AapService: Error unregistering carKeysManager: ${e.message}") }
         try { wifiAutoStartReceiver?.let { unregisterReceiver(it) } } catch (_: Exception) {}
         try {
             if (::uiModeManager.isInitialized) {

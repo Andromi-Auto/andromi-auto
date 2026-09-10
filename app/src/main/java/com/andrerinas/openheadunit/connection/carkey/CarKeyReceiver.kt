@@ -5,6 +5,7 @@ import android.content.Intent
 import android.view.KeyEvent
 import com.andrerinas.openheadunit.App
 import com.andrerinas.openheadunit.connection.CommManager
+import com.andrerinas.openheadunit.connection.carkey.byd.CarBydReceiver
 import com.andrerinas.openheadunit.connection.carkey.fyt.CarFYTReceiver
 import com.andrerinas.openheadunit.contract.KeyIntent
 import com.andrerinas.openheadunit.utils.AppLog
@@ -16,6 +17,7 @@ interface CarKeyReceiver {
         fun newDefaultReceivers(): Array<CarKeyReceiver> {
             return arrayOf(
                 CarKeyBroadcastReceiver(),
+                CarBydReceiver(),
                 CarFYTReceiver(),
             )
         }
@@ -24,6 +26,14 @@ interface CarKeyReceiver {
     val isSupported: Boolean
 
     val isSUNeeded: Boolean
+
+    /**
+     * Whether this receiver requires an active Android Auto projection session to be registered.
+     * Receivers that aggressively grab hardware focus (e.g., FYT binding IPC and setting sys.carlink.type=2)
+     * MUST be session-scoped so factory apps retain steering wheel control while OpenHU is idle.
+     */
+    val isSessionScoped: Boolean
+        get() = false
 
     @Throws(Exception::class)
     fun register(context: Context)
