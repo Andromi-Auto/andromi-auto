@@ -443,8 +443,6 @@
     <string name="forced_scale_description">Corrige les problèmes de mise à l\'échelle sur certains appareils plus anciens utilisant SurfaceView. À utiliser uniquement si l\'image semble déformée ou décalée.</string>
     <string name="hud_mirroring">Mode HUD (Miroir horizontal)</string>
     <string name="hud_mirroring_description">Retourne l\'affichage horizontalement pour le reflet sur le pare-brise (Affichage Tête Haute). Nécessite le mode de vue TextureView ou GLES20 (ne fonctionne pas avec SurfaceView).</string>
-    <string name="use_measured_touch_surface">Correction expérimentale de l\'alignement tactile</string>
-    <string name="use_measured_touch_surface_description">Normaliser la saisie tactile par rapport à la superposition de projection mesurée. Peut aider lorsque les petits contrôles d\'Android Auto semblent décalés.</string>
 
 
     <!-- Audio Settings -->

@@ -224,7 +224,6 @@ object SettingsBackupManager {
         "wifi-5ghz-channel" to ValueType.INT,
         "static-bssid" to ValueType.STRING,
         // Touch calibration fix and toast visibility.
-        "use_measured_touch_surface" to ValueType.BOOLEAN,
         "show-toast-messages" to ValueType.BOOLEAN,
         "usb-blacklist" to ValueType.STRING_SET
     )

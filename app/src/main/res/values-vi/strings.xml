@@ -874,8 +874,6 @@
     <string name="cannot_open_settings">Could not open system settings</string>
     <string name="static_bssid_enter_value">Enter BSSID (XX:XX:XX:XX:XX:XX)</string>
     <string name="static_bssid_desc">Đặt BSSID cho kết nối không dây thủ công. Chỉ cần khi không nguồn nào trên thiết bị này cho biết; nhật ký nêu tên từng nguồn đã hỏi.</string>
-    <string name="use_measured_touch_surface">Experimental touch alignment fix</string>
-    <string name="use_measured_touch_surface_description">Normalize touch input against the measured projection overlay. May help when small Android Auto controls feel shifted.</string>
     <string name="media_key_routing">Send Media Buttons To Android Auto</string>
     <string name="media_key_routing_always">Always</string>
     <string name="media_key_routing_auto">Automatic</string>

@@ -192,7 +192,6 @@ class SettingsFragment : Fragment() {
     private var pendingVideoFitMode: Settings.VideoFitMode? = null
     private var pendingForcedScale: Boolean? = null
     private var pendingHudMirroring: Boolean? = null
-    private var pendingUseMeasuredTouchSurface: Boolean? = null
 
     private var pendingKillOnDisconnect: Boolean? = null
     private var pendingRaiseProjectionDuringCall: Boolean? = null
@@ -326,7 +325,6 @@ class SettingsFragment : Fragment() {
         pendingVideoFitMode = settings.videoFitMode
         pendingForcedScale = settings.forcedScale
         pendingHudMirroring = settings.hudMirroring
-        pendingUseMeasuredTouchSurface = settings.useMeasuredTouchSurface
 
         pendingKillOnDisconnect = settings.killOnDisconnect
         pendingRaiseProjectionDuringCall = settings.raiseProjectionDuringCall
@@ -453,7 +451,6 @@ class SettingsFragment : Fragment() {
         pendingVideoFitMode = settings.videoFitMode
         pendingForcedScale = settings.forcedScale
         pendingHudMirroring = settings.hudMirroring
-        pendingUseMeasuredTouchSurface = settings.useMeasuredTouchSurface
         pendingKillOnDisconnect = settings.killOnDisconnect
         pendingRaiseProjectionDuringCall = settings.raiseProjectionDuringCall
         pendingAutoEnableHotspot = settings.autoEnableHotspot
@@ -609,7 +606,6 @@ class SettingsFragment : Fragment() {
         pendingVideoFitMode?.let { settings.videoFitMode = it }
         pendingForcedScale?.let { settings.forcedScale = it }
         pendingHudMirroring?.let { settings.hudMirroring = it }
-        pendingUseMeasuredTouchSurface?.let { settings.useMeasuredTouchSurface = it }
 
         pendingKillOnDisconnect?.let { settings.killOnDisconnect = it }
         pendingRaiseProjectionDuringCall?.let { settings.raiseProjectionDuringCall = it }
@@ -731,7 +727,6 @@ class SettingsFragment : Fragment() {
                         pendingVideoFitMode != settings.videoFitMode ||
                         pendingForcedScale != settings.forcedScale ||
                         pendingHudMirroring != settings.hudMirroring ||
-                        pendingUseMeasuredTouchSurface != settings.useMeasuredTouchSurface ||
                         pendingInsetLeft != settings.insetLeft ||
                         pendingInsetTop != settings.insetTop ||
                         pendingInsetRight != settings.insetRight ||
@@ -1839,18 +1834,6 @@ class SettingsFragment : Fragment() {
             isChecked = pendingHudMirroring ?: false,
             onCheckedChanged = { isChecked ->
                 pendingHudMirroring = isChecked
-                checkChanges()
-                updateSettingsList()
-            }
-        ))
-
-        items.add(SettingItem.ToggleSettingEntry(
-            stableId = "useMeasuredTouchSurface",
-            nameResId = R.string.use_measured_touch_surface,
-            descriptionResId = R.string.use_measured_touch_surface_description,
-            isChecked = pendingUseMeasuredTouchSurface ?: false,
-            onCheckedChanged = { isChecked ->
-                pendingUseMeasuredTouchSurface = isChecked
                 checkChanges()
                 updateSettingsList()
             }

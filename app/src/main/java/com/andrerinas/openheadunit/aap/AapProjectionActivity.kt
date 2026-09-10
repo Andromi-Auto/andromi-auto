@@ -1756,30 +1756,30 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         val prevUsableW = HeadUnitScreenConfig.getUsableWidth()
         val prevUsableH = HeadUnitScreenConfig.getUsableHeight()
 
-        if (HeadUnitScreenConfig.updateSurfaceDimensions(width, height)) {
+        val anchorMoved = HeadUnitScreenConfig.updateSurfaceDimensions(width, height)
+
+        // What is cached is the usable area, which the screen config has already turned the right
+        // way up, so the orientation guard this used to carry could only reject a correct reading.
+        val shouldCache = !App.isPiPActive
+
+        // Cached whether or not the anchor moved: service discovery answers before any surface
+        // exists, so next session's announcement has only this to go on.
+        val canvasW = HeadUnitScreenConfig.getUsableWidth()
+        val canvasH = HeadUnitScreenConfig.getUsableHeight()
+        val canvasHash = HeadUnitScreenConfig.computeSettingsHash(settings)
+        if (shouldCache && (settings.cachedSurfaceWidth != canvasW ||
+                settings.cachedSurfaceHeight != canvasH ||
+                settings.cachedSurfaceSettingsHash != canvasHash)
+        ) {
+            settings.cachedSurfaceWidth = canvasW
+            settings.cachedSurfaceHeight = canvasH
+            settings.cachedSurfaceSettingsHash = canvasHash
+        } else if (!shouldCache) {
+            AppLog.i("[UI_DEBUG_FIX] Skipping surface dimension cache update due to transient orientation mismatch: ${width}x${height}")
+        }
+
+        if (anchorMoved) {
             AppLog.i("[UI_DEBUG_FIX] Surface mismatch! Expected: ${prevUsableW}x${prevUsableH}, Actual: ${width}x${height}")
-
-            // Cache the real surface size for next session only if orientation matches expected setting
-            val isTargetLandscape = settings.screenOrientation == Settings.ScreenOrientation.LANDSCAPE ||
-                settings.screenOrientation == Settings.ScreenOrientation.LANDSCAPE_REVERSE
-            val isTargetPortrait = settings.screenOrientation == Settings.ScreenOrientation.PORTRAIT ||
-                settings.screenOrientation == Settings.ScreenOrientation.PORTRAIT_REVERSE
-            val surfaceIsLandscape = width >= height
-
-            val shouldCache = when {
-                isTargetLandscape -> surfaceIsLandscape
-                isTargetPortrait -> !surfaceIsLandscape
-                else -> true
-            }
-
-            if (shouldCache) {
-                settings.cachedSurfaceWidth = HeadUnitScreenConfig.getUsableWidth()
-                settings.cachedSurfaceHeight = HeadUnitScreenConfig.getUsableHeight()
-                settings.cachedSurfaceSettingsHash = HeadUnitScreenConfig.computeSettingsHash(settings)
-            } else {
-                AppLog.i("[UI_DEBUG_FIX] Skipping surface dimension cache update due to transient orientation mismatch: ${width}x${height}")
-            }
-
             reannounceMargins()
             // If transport not started yet, ServiceDiscoveryResponse will use the corrected values automatically.
         }
@@ -1912,24 +1912,16 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         }
 
         val view = projectionView as View
-        val effectiveFullscreenMode = activityFullscreenOverride ?: settings.fullscreenMode
-        val measuredTouchSurfaceEnabled = settings.useMeasuredTouchSurface &&
-            effectiveFullscreenMode == Settings.FullscreenMode.IMMERSIVE
+        // The coordinates come from the overlay, so only the overlay can be the denominator. The
+        // screen config is the fallback for a touch that beats the first layout, and outside
+        // immersive it describes the display rather than the window this event was measured in.
         val overlay = touchOverlayView
-        val viewW = if (measuredTouchSurfaceEnabled) {
-            (overlay?.width ?: 0).takeIf { it > 0 }?.toFloat()
-                ?: view.width.takeIf { it > 0 }?.toFloat()
-                ?: HeadUnitScreenConfig.getUsableWidth().toFloat()
-        } else {
-            HeadUnitScreenConfig.getUsableWidth().toFloat()
-        }
-        val viewH = if (measuredTouchSurfaceEnabled) {
-            (overlay?.height ?: 0).takeIf { it > 0 }?.toFloat()
-                ?: view.height.takeIf { it > 0 }?.toFloat()
-                ?: HeadUnitScreenConfig.getUsableHeight().toFloat()
-        } else {
-            HeadUnitScreenConfig.getUsableHeight().toFloat()
-        }
+        val viewW = (overlay?.width ?: 0).takeIf { it > 0 }?.toFloat()
+            ?: view.width.takeIf { it > 0 }?.toFloat()
+            ?: HeadUnitScreenConfig.getUsableWidth().toFloat()
+        val viewH = (overlay?.height ?: 0).takeIf { it > 0 }?.toFloat()
+            ?: view.height.takeIf { it > 0 }?.toFloat()
+            ?: HeadUnitScreenConfig.getUsableHeight().toFloat()
 
         if (viewW <= 0 || viewH <= 0) return
 
@@ -1939,8 +1931,6 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         val pointerData = mutableListOf<Triple<Int, Int, Int>>()
         repeat(event.pointerCount) { pointerIndex ->
             val pointerId = event.getPointerId(pointerIndex)
-            // measuredTouchSurfaceEnabled already chose viewW/viewH above; the mapping is the same
-            // either way, so there is one implementation of it now.
             val corrected = TouchCoordinateMapper.map(
                 rawX = event.getX(pointerIndex),
                 rawY = event.getY(pointerIndex),

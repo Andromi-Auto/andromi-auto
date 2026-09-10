@@ -65,7 +65,9 @@ class SettingsActivity : BaseActivity() {
         }
 
         val root = findViewById<View>(R.id.settings_nav_host)
-        SystemUI.apply(window, root, appSettings.fullscreenMode)
+        // Never the projection: this window has a search box and its own decor, so its content area
+        // is not the canvas the video is drawn into.
+        SystemUI.apply(window, root, appSettings.fullscreenMode, notesCanvas = false)
     }
 
     override fun onResume() {
@@ -119,7 +121,7 @@ class SettingsActivity : BaseActivity() {
         if (hasFocus) {
             val appSettings = Settings(this)
             val root = findViewById<View>(R.id.settings_nav_host)
-            SystemUI.apply(window, root, appSettings.fullscreenMode)
+            SystemUI.apply(window, root, appSettings.fullscreenMode, notesCanvas = false)
         }
     }
 }

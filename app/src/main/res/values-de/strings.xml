@@ -921,8 +921,6 @@
     <string name="dpi_size_l">L</string>
     <string name="dpi_size_xl">XL</string>
     <string name="dpi_value_format">%1$d DPI</string>
-    <string name="use_measured_touch_surface">Experimentelle Fixierung für Touch-Ausrichtung</string>
-    <string name="use_measured_touch_surface_description">Normalisiert Touch-Eingaben über dem gemessenen Projektionsbereich. Hilft, wenn kleine Android Auto Bedienelemente versetzt wirken.</string>
 
     <string-array name="vehicle_brands">
         <item>Google</item>

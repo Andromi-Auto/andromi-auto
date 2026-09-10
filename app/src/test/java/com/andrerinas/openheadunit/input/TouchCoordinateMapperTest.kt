@@ -47,6 +47,33 @@ class TouchCoordinateMapperTest {
         assertEquals(443, point.y)
     }
 
+    // #809 in Screen mode Normal: the events come from an overlay the ROM sidebar narrowed, while
+    // the screen config still described the display. Dividing by the config figure sent a tap on
+    // the bottom row to the row below the buffer and every tap left of where it landed.
+    @Test
+    fun `the denominator is the surface the events came from`() {
+        fun at(surfaceW: Float, surfaceH: Float) = TouchCoordinateMapper.map(
+            rawX = 1740f,
+            rawY = 715f,
+            inputSurfaceWidth = surfaceW,
+            inputSurfaceHeight = surfaceH,
+            negotiatedWidth = 1280,
+            negotiatedHeight = 720,
+            marginWidth = 0f,
+            marginHeight = 0f,
+            fitMode = Settings.VideoFitMode.FILL,
+            hudMirroring = false
+        )
+
+        val measured = at(1748f, 720f)
+        assertEquals(1274, measured.x)
+        assertEquals(715, measured.y)
+
+        val fromDisplayMetrics = at(1920f, 642f)
+        assertEquals(1160, fromDisplayMetrics.x)
+        assertEquals(720, fromDisplayMetrics.y)
+    }
+
     // The panel the ultra-wide work is measured on: a 1280x720 buffer with no margin at all, so
     // the mapping is the panel scaled straight onto the buffer.
     @Test
