@@ -41,8 +41,17 @@ object UsbDeviceIdentityPolicy {
 
     private const val APPLE_VID = 0x05AC
     private const val GOOGLE_VID = 0x18D1
-    private const val PID_ACCESSORY = 0x2D00
-    private const val PID_ACCESSORY_ADB = 0x2D01
+
+    /**
+     * The four accessory PIDs that carry an accessory interface, matching AOSP's own
+     * `car-usb-handler`. 0x2D02 and 0x2D03 are the audio-only modes and have nothing to talk to.
+     */
+    private val ACCESSORY_PIDS = setOf(
+        0x2D00, // accessory
+        0x2D01, // accessory + ADB
+        0x2D04, // accessory + audio
+        0x2D05, // accessory + audio + ADB
+    )
 
     /**
      * `iInterface` on the vendor-class interface. Three different products present the identical
@@ -101,15 +110,22 @@ object UsbDeviceIdentityPolicy {
             }
         }
 
+        // A device whose interfaces are only a CDC-ACM pair is a serial port: a vendor dongle's own
+        // channel, not a phone. Named apart from the fall-through because "no Android interface"
+        // reads like a descriptor we failed to find rather than one we recognised.
+        if (device.interfaces.isNotEmpty() && device.interfaces.all { isCdcSerial(it) }) {
+            return Verdict(false, "CDC-ACM serial device, not a phone")
+        }
+
         return Verdict(false, "no Android interface")
     }
 
     /**
      * The post-switch identity. Kept here rather than in the caller so the accepted PID set has one
-     * definition, because widening it is a known pending change.
+     * definition, because sixteen call sites read it.
      */
     fun isInAccessoryMode(vendorId: Int, productId: Int): Boolean =
-        vendorId == GOOGLE_VID && (productId == PID_ACCESSORY || productId == PID_ACCESSORY_ADB)
+        vendorId == GOOGLE_VID && productId in ACCESSORY_PIDS
 
     private fun unambiguousMatch(iface: Interface): String? = when {
         // ADB.
@@ -153,6 +169,10 @@ object UsbDeviceIdentityPolicy {
 
     private fun isVendorClass(iface: Interface): Boolean =
         iface.ifaceClass == 0xFF && iface.subclass == 0xFF && iface.protocol == 0x00
+
+    /** The CDC control interface in ACM subclass, or the CDC-data interface that carries it. */
+    private fun isCdcSerial(iface: Interface): Boolean =
+        (iface.ifaceClass == 0x02 && iface.subclass == 0x02) || iface.ifaceClass == 0x0A
 
     private fun hex(value: Int): String = "0x%02X".format(value)
 }

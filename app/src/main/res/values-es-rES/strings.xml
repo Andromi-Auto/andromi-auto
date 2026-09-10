@@ -114,6 +114,7 @@
     <string name="not_running">No ejecutando</string>
     <string name="no_android_auto_device_connected">No hay dispositivo Android Auto conectado. Revise el USB.</string>
     <string name="no_usb_device_connected">No hay dispositivo USB conectado.</string>
+    <string name="no_usb_host_support">Esta unidad no admite el modo host USB, por lo que Android Auto por cable no está disponible en ella. Usa una conexión inalámbrica.</string>
     <string name="press_back_again_to_exit">Pulse atrás otra vez para salir</string>
     <string name="back">Atrás</string>
     <string name="debug_mode">Modo depuración</string>
