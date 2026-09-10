@@ -1,11 +1,12 @@
 # Changelog
-### v.3.4.0-beta1
+### v.3.4.0-beta2 (unreleased)
 - USB: connect non-Pixel phones without fighting a fast-reverting dongle
 - Feat/automation command surface
 - Video-Fit and ultrawide touch enhancements with dynamic scaling and rework all the options, thanks to @o-jardenass and @Sesam17
 - Several enhancements for native mode, thanks to @o-jardenass
 - Added darkmode for splashscreen
 - Added ADB-Server to disable/close OEM apps like Zlink, Autokit etc. to reduce conflicts with OpenHU
+- Added Support for BYD Steering wheel keys, thanks to @nicoruy
 
 ### v.3.3.1
 - Added: Option to auto-resume media playback on quick reconnect if music was playing before disconnect

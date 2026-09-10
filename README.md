@@ -81,7 +81,6 @@ adb shell am start -a android.intent.action.VIEW -d "headunit://connect?ip=192.1
 ## Planned
 - more customization options for the UI and the app itself
 - adb option to kill oem apps
-- byd steering wheel keys
 
 ## Changelog
 ### v.3.4.0-beta2 (unreleased)
@@ -91,6 +90,7 @@ adb shell am start -a android.intent.action.VIEW -d "headunit://connect?ip=192.1
 - Several enhancements for native mode, thanks to @o-jardenass
 - Added darkmode for splashscreen
 - Added ADB-Server to disable/close OEM apps like Zlink, Autokit etc. to reduce conflicts with OpenHU
+- Added Support for BYD Steering wheel keys, thanks to @nicoruy
 
 ### v.3.3.1
 - Added: Option to auto-resume media playback on quick reconnect if music was playing before disconnect
