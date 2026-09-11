@@ -954,6 +954,12 @@
     <string name="wifi_direct_band_5ghz">Yalnızca 5 GHz</string>
     <string name="wifi_direct_band_24ghz">Yalnızca 2.4 GHz</string>
     <string name="wifi_direct_band_hint">Otomatik 5 GHz ister ve 2.4 GHz\'e geri döner.</string>
+    <string name="stand_down_station">Bağlanırken ünitenin kendi Wi-Fi ağından ayrıl</string>
+    <string name="stand_down_station_auto">Otomatik</string>
+    <string name="stand_down_station_always">Her zaman</string>
+    <string name="stand_down_station_never">Asla</string>
+    <string name="stand_down_station_hint">Otomatik, bu ünitenin kendi ağından yalnızca radyosunda 5 GHz bandı varsa ve o ağ 2.4 GHz\'de çalışıyorsa ayrılır; böylece WiFi Direct grubu kendine ait bir 5 GHz kanalına sahip olabilir. Yalnızca 2.4 GHz destekleyen bir ünitede bağlı kalır, çünkü ayrılmak üniteyi yalnızca ağ aramaya iter; ağ zaten 5 GHz\'deyse de aynı şekilde bağlı kalır. Oturum bittiğinde ağa yeniden katılınır. Görüntü takılıyorsa Her zaman veya Asla seçeneğini deneyin.</string>
+    <string name="stand_down_station_needs_overlay">Bu Android sürümünde «diğer uygulamaların üzerinde görüntüleme» izni gerektirir.</string>
     <string name="connection_issue_banner_bt_silent">Telefonunuz Bluetooth ile bağlandı ancak veri alamadı. USB, Wireless Helper veya Auto moduna geçmek için dokunun.</string>
     <string name="connection_issue_banner_bssid">Bu cihazdaki hiçbir kaynak kendi WiFi MAC adresini (BSSID) bildirmedi, bu yüzden telefonunuz hangi ağa katılacağını hiç öğrenemedi. Hepsi denendi, izin gerektirmeyen biri de dahil. Diğerlerinin önünü açan konumu açmak ya da adresi elle girmek için dokunun.</string>
     <string name="connection_issue_banner_hotspot_off">Bu cihazın erişim noktası kapalı olduğundan telefonun bağlanacağı bir ağ yoktu. Bağlanmadan önce erişim noktasını açın veya uygulamanın sizin için açması için dokunun.</string>

@@ -962,6 +962,12 @@
     <string name="wifi_direct_band_5ghz">Solo 5 GHz</string>
     <string name="wifi_direct_band_24ghz">Solo 2.4 GHz</string>
     <string name="wifi_direct_band_hint">Automatico richiede 5 GHz e ripiega su 2.4 GHz.</string>
+    <string name="stand_down_station">Disconnetti il Wi-Fi dell\'unità durante la connessione</string>
+    <string name="stand_down_station_auto">Automatico</string>
+    <string name="stand_down_station_always">Sempre</string>
+    <string name="stand_down_station_never">Mai</string>
+    <string name="stand_down_station_hint">Automatico abbandona la rete propria dell\'unità solo quando la sua radio dispone della banda 5 GHz e quella rete è su 2.4 GHz, così il gruppo WiFi Direct può avere un canale 5 GHz tutto per sé. Resta connesso su un\'unità solo 2.4 GHz, dove abbandonare la rete farebbe solo cercare altre reti, e anche quando la rete è già su 5 GHz. La rete viene ricollegata al termine della sessione. Prova Sempre o Mai se l\'immagine si blocca.</string>
+    <string name="stand_down_station_needs_overlay">Richiede l\'autorizzazione «visualizzazione sopra altre app» su questa versione di Android.</string>
     <string name="connection_issue_banner_bt_silent">Il telefono si è connesso tramite Bluetooth, ma non ha ricevuto dati. Tocca per passare a USB, Wireless Helper o Auto.</string>
     <string name="connection_issue_banner_bssid">Nessuna fonte su questa unità ha indicato il suo indirizzo MAC WiFi (BSSID), quindi il telefono non ha mai saputo a quale rete collegarsi. Sono state provate tutte, compresa una che non richiede alcun permesso. Tocca per attivare la posizione, che sblocca le altre, o per inserire l\'indirizzo a mano.</string>
     <string name="connection_issue_banner_hotspot_off">L\'hotspot di questa unità è disattivato, quindi non c\'era alcuna rete a cui connettere il telefono. Attiva l\'hotspot prima di connetterti o tocca per consentire all\'app di attivarlo automaticamente.</string>

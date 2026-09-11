@@ -962,6 +962,12 @@
     <string name="wifi_direct_band_5ghz">Chỉ 5 GHz</string>
     <string name="wifi_direct_band_24ghz">Chỉ 2.4 GHz</string>
     <string name="wifi_direct_band_hint">Tự động yêu cầu 5 GHz và chuyển về 2.4 GHz.</string>
+    <string name="stand_down_station">Ngắt kết nối Wi-Fi riêng khi kết nối</string>
+    <string name="stand_down_station_auto">Tự động</string>
+    <string name="stand_down_station_always">Luôn luôn</string>
+    <string name="stand_down_station_never">Không bao giờ</string>
+    <string name="stand_down_station_hint">Tự động chỉ rời khỏi mạng riêng của thiết bị này khi radio của nó có băng tần 5 GHz và mạng đó đang ở 2.4 GHz, để nhóm WiFi Direct có thể có riêng một kênh 5 GHz. Thiết bị vẫn giữ kết nối trên đơn vị chỉ hỗ trợ 2.4 GHz, vì rời mạng chỉ khiến thiết bị tìm kiếm mạng khác, và cũng giữ kết nối khi mạng đã ở 5 GHz. Mạng sẽ được kết nối lại khi phiên kết thúc. Hãy thử Luôn luôn hoặc Không bao giờ nếu hình ảnh bị giật.</string>
+    <string name="stand_down_station_needs_overlay">Cần có quyền «hiển thị trên các ứng dụng khác» trên phiên bản Android này.</string>
     <string name="connection_issue_banner_bt_silent">Điện thoại đã kết nối qua Bluetooth nhưng không nhận được dữ liệu. Nhấn để chuyển sang USB, Wireless Helper hoặc Auto.</string>
     <string name="connection_issue_banner_bssid">Không nguồn nào trên thiết bị này cho biết địa chỉ MAC WiFi (BSSID) của chính nó, nên điện thoại không bao giờ biết cần tham gia mạng nào. Tất cả đều đã được thử, kể cả một nguồn không cần quyền nào. Chạm để bật Vị trí, thứ mở khóa các nguồn còn lại, hoặc để nhập địa chỉ thủ công.</string>
     <string name="connection_issue_banner_hotspot_off">Điểm phát sóng của thiết bị này đang tắt nên không có mạng để điện thoại kết nối. Hãy bật điểm phát sóng trước khi kết nối hoặc nhấn để ứng dụng tự bật giúp bạn.</string>

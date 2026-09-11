@@ -959,6 +959,12 @@
     <string name="wifi_direct_band_5ghz">Alleen 5 GHz</string>
     <string name="wifi_direct_band_24ghz">Alleen 2,4 GHz</string>
     <string name="wifi_direct_band_hint">Automatisch vraagt 5 GHz aan en valt terug op 2,4 GHz.</string>
+    <string name="stand_down_station">Verbinding met eigen Wi-Fi verbreken tijdens verbinden</string>
+    <string name="stand_down_station_auto">Automatisch</string>
+    <string name="stand_down_station_always">Altijd</string>
+    <string name="stand_down_station_never">Nooit</string>
+    <string name="stand_down_station_hint">Automatisch verlaat het eigen netwerk van deze unit alleen wanneer de radio een 5 GHz-band heeft en dat netwerk op 2,4 GHz draait, zodat de WiFi Direct-groep een eigen 5 GHz-kanaal kan krijgen. Op een unit met alleen 2,4 GHz blijft het verbonden, omdat verlaten de unit alleen naar netwerken zou laten zoeken, en ook wanneer het netwerk al op 5 GHz zit. Het netwerk wordt na afloop van de sessie opnieuw verbonden. Probeer Altijd of Nooit als het beeld hapert.</string>
+    <string name="stand_down_station_needs_overlay">Vereist de toestemming «weergeven over andere apps» op deze Android-versie.</string>
     <string name="connection_issue_banner_bt_silent">Je telefoon is via Bluetooth verbonden, maar ontving geen gegevens. Tik om over te schakelen naar USB, Wireless Helper of Auto.</string>
     <string name="connection_issue_banner_bssid">Geen enkele bron op dit apparaat noemde het eigen WiFi-MAC-adres (BSSID), dus je telefoon hoorde nooit met welk netwerk hij moest verbinden. Alle bronnen zijn geprobeerd, ook een die geen toestemming nodig heeft. Tik om locatie aan te zetten, wat de rest vrijgeeft, of om het adres met de hand in te voeren.</string>
     <string name="connection_issue_banner_hotspot_off">De hotspot van dit apparaat staat uit, dus er was geen netwerk om je telefoon mee te verbinden. Schakel de hotspot in voordat je verbinding maakt, of tik om de app deze voor je te laten inschakelen.</string>

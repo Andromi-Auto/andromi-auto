@@ -1006,6 +1006,12 @@
     <string name="wifi_direct_band_5ghz">5 GHz uniquement</string>
     <string name="wifi_direct_band_24ghz">2,4 GHz uniquement</string>
     <string name="wifi_direct_band_hint">Auto demande 5 GHz avec repli sur 2,4 GHz. Le 2,4 GHz est fiable jusqu\'à 720p, choisissez 5 GHz au-delà.</string>
+    <string name="stand_down_station">Quitter le réseau Wi-Fi de l\'appareil lors de la connexion</string>
+    <string name="stand_down_station_auto">Automatique</string>
+    <string name="stand_down_station_always">Toujours</string>
+    <string name="stand_down_station_never">Jamais</string>
+    <string name="stand_down_station_hint">Auto ne quitte le réseau Wi-Fi propre de cet appareil que lorsque sa radio dispose d\'une bande 5 GHz et que ce réseau est en 2,4 GHz, afin que le groupe WiFi Direct puisse disposer d\'un canal 5 GHz pour lui seul. Il reste connecté sur un appareil limité au 2,4 GHz, où quitter le réseau ne ferait que le pousser à rechercher des réseaux, ainsi que lorsque le réseau est déjà en 5 GHz. Le réseau est rejoint à nouveau à la fin de la session. Essayez Toujours ou Jamais si l\'image saccade.</string>
+    <string name="stand_down_station_needs_overlay">Nécessite l\'autorisation « afficher sur d\'autres applications » sur cette version d\'Android.</string>
     <string name="connection_issue_banner_bt_silent">Votre téléphone s\'est connecté en Bluetooth, mais n\'a reçu aucun paquet. Touchez pour passer en USB, Wireless Helper ou Auto.</string>
     <string name="connection_issue_banner_bssid">Aucune source de cet appareil n\'a donné sa propre adresse MAC WiFi (BSSID), votre téléphone n\'a donc jamais su à quel réseau se connecter. Toutes les sources ont été essayées, dont une qui ne demande aucune autorisation. Touchez pour activer la localisation, ce qui débloque les autres, ou pour saisir l\'adresse à la main.</string>
     <string name="connection_issue_banner_hotspot_off">Le point d\'accès de cet appareil est désactivé, aucun réseau n\'était donc disponible pour votre téléphone. Activez le point d\'accès avant de vous connecter ou touchez pour laisser l\'application l\'activer pour vous.</string>

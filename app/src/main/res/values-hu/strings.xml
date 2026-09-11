@@ -955,6 +955,12 @@
     <string name="wifi_direct_band_5ghz">Csak 5 GHz</string>
     <string name="wifi_direct_band_24ghz">Csak 2,4 GHz</string>
     <string name="wifi_direct_band_hint">Az Automatikus 5 GHz-et kér, és 2,4 GHz-re vált vissza.</string>
+    <string name="stand_down_station">Saját Wi-Fi lekapcsolása csatlakozáskor</string>
+    <string name="stand_down_station_auto">Automatikus</string>
+    <string name="stand_down_station_always">Mindig</string>
+    <string name="stand_down_station_never">Soha</string>
+    <string name="stand_down_station_hint">Az Automatikus csak akkor hagyja el az egység saját Wi-Fi hálózatát, ha a rádiója rendelkezik 5 GHz-es sávval, és az a hálózat 2,4 GHz-en fut, hogy a WiFi Direct csoport saját 5 GHz-es csatornát kaphasson. Egy csak 2,4 GHz-es egységen kapcsolódva marad, mert a kilépés csak hálózatkeresésre késztetné, és akkor is, ha a hálózat már 5 GHz-en van. A munkamenet végén a hálózat újra csatlakozik. Ha a kép akadozik, próbáld a Mindig vagy a Soha beállítást.</string>
+    <string name="stand_down_station_needs_overlay">Ehhez az Android-verzióhoz a «megjelenítés más alkalmazások felett» engedély szükséges.</string>
     <string name="connection_issue_banner_bt_silent">A telefon Bluetooth-on csatlakozott, de nem érkezett adat. Érintse meg az USB, Wireless Helper vagy Auto módra váltáshoz.</string>
     <string name="connection_issue_banner_bssid">Az egységen egyetlen forrás sem adta meg a saját WiFi MAC-címét (BSSID), így a telefon soha nem tudta meg, melyik hálózathoz csatlakozzon. Mindegyiket megpróbáltuk, azt is, amelyik nem igényel engedélyt. Koppintson a helymeghatározás bekapcsolásához, ami a többit feloldja, vagy a cím kézi megadásához.</string>
     <string name="connection_issue_banner_hotspot_off">Az egység hotspotja ki van kapcsolva, így a telefonnak nem volt mihez csatlakoznia. Kapcsolja be a hotspotot a csatlakozás előtt, vagy érintse meg, hogy az alkalmazás bekapcsolja Ön helyett.</string>

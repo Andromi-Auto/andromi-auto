@@ -968,6 +968,12 @@
     <string name="wifi_direct_band_5ghz">Solo 5 GHz</string>
     <string name="wifi_direct_band_24ghz">Solo 2.4 GHz</string>
     <string name="wifi_direct_band_hint">Automático solicita 5 GHz y recurre a 2.4 GHz.</string>
+    <string name="stand_down_station">Desconectar del Wi-Fi propio al conectar</string>
+    <string name="stand_down_station_auto">Automático</string>
+    <string name="stand_down_station_always">Siempre</string>
+    <string name="stand_down_station_never">Nunca</string>
+    <string name="stand_down_station_hint">Automático solo abandona la red propia de esta unidad cuando su radio tiene banda de 5 GHz y esa red está en 2.4 GHz, para que el grupo WiFi Direct pueda tener un canal de 5 GHz solo para él. Permanece conectado en una unidad que solo tiene 2.4 GHz, donde abandonar la red solo hace que la unidad busque redes, y también cuando la red ya está en 5 GHz. La red se reconecta al finalizar la sesión. Prueba Siempre o Nunca si la imagen se entrecorta.</string>
+    <string name="stand_down_station_needs_overlay">Requiere el permiso «mostrar sobre otras aplicaciones» en esta versión de Android.</string>
     <string name="connection_issue_banner_bt_silent">Su teléfono se conectó por Bluetooth, pero no recibió datos. Toque para cambiar a USB, Wireless Helper o Auto.</string>
     <string name="connection_issue_banner_bssid">Ninguna fuente de esta unidad indicó su propia dirección MAC de WiFi (BSSID), así que tu teléfono nunca supo a qué red conectarse. Se probaron todas, incluida una que no necesita permisos. Toca para activar la ubicación, lo que desbloquea las demás, o para introducir la dirección a mano.</string>
     <string name="connection_issue_banner_hotspot_off">El punto de acceso de esta unidad está desactivado, por lo que no había red a la que conectar su teléfono. Active el punto de acceso antes de conectar o toque para permitir que la app lo active por usted.</string>

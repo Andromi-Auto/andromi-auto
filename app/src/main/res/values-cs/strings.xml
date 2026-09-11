@@ -959,6 +959,12 @@
     <string name="wifi_direct_band_5ghz">Pouze 5 GHz</string>
     <string name="wifi_direct_band_24ghz">Pouze 2,4 GHz</string>
     <string name="wifi_direct_band_hint">Automaticky požaduje 5 GHz a přechází na 2,4 GHz.</string>
+    <string name="stand_down_station">Odpojit vlastní Wi-Fi během připojování</string>
+    <string name="stand_down_station_auto">Automaticky</string>
+    <string name="stand_down_station_always">Vždy</string>
+    <string name="stand_down_station_never">Nikdy</string>
+    <string name="stand_down_station_hint">Automaticky opustí vlastní Wi-Fi jednotky jen tehdy, když má její rádio pásmo 5 GHz a tato síť běží na 2,4 GHz, aby skupina WiFi Direct mohla mít vlastní kanál 5 GHz. Na jednotce s pouze 2,4 GHz zůstává připojeno, protože opuštění by jen přimělo jednotku hledat sítě, a stejně tak když je síť už na 5 GHz. Síť se znovu připojí po skončení relace. Pokud obraz trhá, zkuste Vždy nebo Nikdy.</string>
+    <string name="stand_down_station_needs_overlay">Vyžaduje oprávnění «zobrazit přes ostatní aplikace» na této verzi Androidu.</string>
     <string name="connection_issue_banner_bt_silent">Telefon se připojil přes Bluetooth, ale nepřijal žádná data. Klepnutím přepněte na USB, Wireless Helper nebo Auto.</string>
     <string name="connection_issue_banner_bssid">Žádný zdroj v této jednotce neuvedl její vlastní WiFi MAC adresu (BSSID), takže se telefon nikdy nedozvěděl, k jaké síti se má připojit. Vyzkoušeny byly všechny, včetně jednoho, který nepotřebuje žádné oprávnění. Klepnutím zapněte polohu, což odemkne ostatní, nebo zadejte adresu ručně.</string>
     <string name="connection_issue_banner_hotspot_off">Hotspot této jednotky je vypnutý, takže telefon neměl síť, ke které by se připojil. Před připojením hotspot zapněte nebo klepněte, aby jej aplikace zapnula za vás.</string>

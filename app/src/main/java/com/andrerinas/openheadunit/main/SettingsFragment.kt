@@ -40,6 +40,7 @@ import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.NativeDriverSe
 import com.andrerinas.openheadunit.aap.NativeTransport
 import com.andrerinas.openheadunit.connection.wifi.FiveGhzChannelPolicy
 import com.andrerinas.openheadunit.connection.wifi.direct.P2pBandPreference
+import com.andrerinas.openheadunit.connection.wifi.direct.StationStandDownPolicy
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.HotspotBandPreference
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.PreflightReport
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.SoftApBssidPolicy
@@ -190,6 +191,7 @@ class SettingsFragment : Fragment() {
     private var pendingNativePreferredDeviceMac: String? = null
     private var pendingWifiDirectBand: Int? = null
     private var pendingWifiDirectStableIdentity: Boolean? = null
+    private var pendingStationStandDownMode: Int? = null
     private var pendingHotspotBand: Int? = null
     private var pendingFiveGhzChannel: Int? = null
     private var pendingHotspotSsid: String? = null
@@ -369,6 +371,7 @@ class SettingsFragment : Fragment() {
         pendingNativePreferredDeviceMac = settings.nativePreferredDeviceMac
         pendingWifiDirectBand = settings.wifiDirectBand
         pendingWifiDirectStableIdentity = settings.wifiDirectStableIdentity
+        pendingStationStandDownMode = settings.stationStandDownMode
         pendingHotspotBand = settings.hotspotBand
         pendingFiveGhzChannel = settings.fiveGhzChannel
         pendingHotspotSsid = settings.hotspotSsid
@@ -500,6 +503,7 @@ class SettingsFragment : Fragment() {
         pendingNativePreferredDeviceMac = ""
         pendingWifiDirectBand = settings.wifiDirectBand
         pendingWifiDirectStableIdentity = settings.wifiDirectStableIdentity
+        pendingStationStandDownMode = settings.stationStandDownMode
         pendingHotspotBand = settings.hotspotBand
         pendingFiveGhzChannel = settings.fiveGhzChannel
         pendingHotspotSsid = settings.hotspotSsid
@@ -665,6 +669,7 @@ class SettingsFragment : Fragment() {
         pendingNativePreferredDeviceMac?.let { settings.nativePreferredDeviceMac = it }
         pendingWifiDirectBand?.let { settings.wifiDirectBand = it }
         pendingWifiDirectStableIdentity?.let { settings.wifiDirectStableIdentity = it }
+        pendingStationStandDownMode?.let { settings.stationStandDownMode = it }
         pendingHotspotBand?.let { settings.hotspotBand = it }
         pendingFiveGhzChannel?.let { settings.fiveGhzChannel = it }
         pendingHotspotSsid?.let { settings.hotspotSsid = it }
@@ -792,6 +797,7 @@ class SettingsFragment : Fragment() {
                         pendingNativePreferredDeviceMac != settings.nativePreferredDeviceMac ||
                         pendingWifiDirectBand != settings.wifiDirectBand ||
                         pendingWifiDirectStableIdentity != settings.wifiDirectStableIdentity ||
+                        pendingStationStandDownMode != settings.stationStandDownMode ||
                         pendingHotspotBand != settings.hotspotBand ||
                         pendingFiveGhzChannel != settings.fiveGhzChannel ||
                         pendingHotspotSsid != settings.hotspotSsid ||
@@ -1156,6 +1162,7 @@ class SettingsFragment : Fragment() {
                 }
 
                 addWifiDirectIdentitySettings(items)
+                addStationStandDownSetting(items)
             }
 
             // Multi-Driver Selection settings for Native AA
@@ -4045,6 +4052,38 @@ class SettingsFragment : Fragment() {
         items.add(SettingItem.InfoBanner(
             stableId = "fiveGhzChannelHint",
             textResId = R.string.five_ghz_channel_hint
+        ))
+    }
+
+    /**
+     * Whether this unit leaves its own WiFi network for the bring-up. Only where the platform would
+     * honour it: below Android 10 anything may ask, from 10 to 14 the overlay permission gets past
+     * the framework's check and the hint says so, and from 15 there is no route, so no row.
+     */
+    private fun addStationStandDownSetting(items: MutableList<SettingItem>) {
+        if (!StationStandDownPolicy.isAvailable(Build.VERSION.SDK_INT, true)) return
+        items.add(SettingItem.SegmentedButtonSettingEntry(
+            stableId = "stationStandDownMode",
+            nameResId = R.string.stand_down_station,
+            options = listOf(
+                getString(R.string.stand_down_station_auto),
+                getString(R.string.stand_down_station_always),
+                getString(R.string.stand_down_station_never)
+            ),
+            selectedIndex = (pendingStationStandDownMode ?: 0).coerceIn(0, 2),
+            onOptionSelected = { index ->
+                pendingStationStandDownMode = index
+                checkChanges()
+                updateSettingsList()
+            }
+        ))
+        val overlayGranted = AppPermissions.isOverlayGranted(requireContext())
+        val hint = getString(R.string.stand_down_station_hint)
+        items.add(SettingItem.InfoBanner(
+            stableId = "stationStandDownHint",
+            textResId = R.string.stand_down_station_hint,
+            text = if (StationStandDownPolicy.isAvailable(Build.VERSION.SDK_INT, overlayGranted)) hint
+                else getString(R.string.stand_down_station_needs_overlay) + " " + hint
         ))
     }
 

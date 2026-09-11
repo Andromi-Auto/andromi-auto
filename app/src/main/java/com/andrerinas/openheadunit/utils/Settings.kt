@@ -579,6 +579,19 @@ class Settings(private val context: Context) {
         set(value) { prefs.edit().putBoolean("keep-dummy-vpn-during-session", value).apply() }
 
     /**
+     * Whether this unit leaves its own WiFi network for the WiFi Direct bring-up, as a
+     * [com.andrerinas.openheadunit.connection.wifi.direct.StationStandDownMode] value. A user who
+     * had turned the 3.3.1 switch on keeps it as ALWAYS.
+     */
+    var stationStandDownMode: Int
+        get() = when {
+            prefs.contains("stand-down-station-mode") -> prefs.getInt("stand-down-station-mode", 0)
+            prefs.getBoolean("stand-down-station-for-wifi-direct", false) -> 1
+            else -> 0
+        }
+        set(value) { prefs.edit().putInt("stand-down-station-mode", value).apply() }
+
+    /**
      * The network id disabled by the WiFi Direct station stand-down, or -1 for none standing.
      *
      * Written before the network is disabled rather than after, so a crash in between still leaves a

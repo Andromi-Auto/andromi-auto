@@ -13,6 +13,13 @@ open class WifiLauncherManager(val service: AapService) {
     var active: WifiLauncher? = null
         private set
 
+    /**
+     * Whether [active] is running. stop() leaves the launcher in place at every sequence but LAST,
+     * so this is what separates "this mode is already up" from "stopped, and still here".
+     */
+    var activeIsStarted: Boolean = false
+        private set
+
 
     val isActive: Boolean get() = active != null
 
@@ -34,8 +41,15 @@ open class WifiLauncherManager(val service: AapService) {
         if (active == newLauncher)
             throw IllegalArgumentException("newLauncher is already active")
 
-        if (!force && (active?.hasSameStartConfiguration(newLauncher) ?: false)) {
-            AppLog.d("WifiLauncher: WiFi Mode ${newLauncher.mode}.mode with same start-configuration is already initialized.")
+        // Informational rather than debug: this refusal is why a documented re-arm could do
+        // nothing at all, and a reporter's log is at INFO.
+        if (WifiLauncherRestartPolicy.refusesRestart(
+                activeIsStarted = activeIsStarted,
+                sameConfiguration = active?.hasSameStartConfiguration(newLauncher) ?: false,
+                force = force,
+            )
+        ) {
+            AppLog.i("WifiLauncher: WiFi Mode ${newLauncher.mode}.mode with same start-configuration is already initialized.")
             return
         }
 
@@ -74,6 +88,7 @@ open class WifiLauncherManager(val service: AapService) {
         active = newLauncher
         sharedServices.update(newLauncher)
         active?.start(noInfoToasts)
+        activeIsStarted = true
     }
 
     /**
@@ -86,6 +101,7 @@ open class WifiLauncherManager(val service: AapService) {
      */
     fun stop(seq: WifiLauncherStopSequence = WifiLauncherStopSequence.ANY) {
         active?.stop(seq)
+        activeIsStarted = false
 
         if (seq.handledAt(WifiLauncherStopSequence.LAST)) {
             sharedServices.stopAll()

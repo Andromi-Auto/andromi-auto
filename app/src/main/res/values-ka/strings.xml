@@ -940,6 +940,12 @@
     <string name="wifi_direct_band_5ghz">მხოლოდ 5 GHz</string>
     <string name="wifi_direct_band_24ghz">მხოლოდ 2.4 GHz</string>
     <string name="wifi_direct_band_hint">ავტომატური ითხოვს 5 GHz-ს და გადადის 2.4 GHz-ზე.</string>
+    <string name="stand_down_station">საკუთარი Wi-Fi-ს გათიშვა დაკავშირებისას</string>
+    <string name="stand_down_station_auto">ავტომატური</string>
+    <string name="stand_down_station_always">ყოველთვის</string>
+    <string name="stand_down_station_never">არასდროს</string>
+    <string name="stand_down_station_hint">ავტომატური ტოვებს ამ მოწყობილობის საკუთარ ქსელს მხოლოდ მაშინ, როცა მისი რადიოს გააჩნია 5 GHz დიაპაზონი და ეს ქსელი მუშაობს 2.4 GHz-ზე, რათა WiFi Direct ჯგუფმა მიიღოს საკუთარი 5 GHz არხი. ის რჩება შეერთებული მხოლოდ 2.4 GHz-ის მქონე მოწყობილობაზე, სადაც ქსელის დატოვება მხოლოდ ქსელების ძებნას გამოიწვევს, ასევე მაშინ, როცა ქსელი უკვე 5 GHz-ზეა. სესიის დასრულებისას ქსელს ისევ უერთდება. თუ სურათი კრიალებს, სცადეთ ყოველთვის ან არასდროს.</string>
+    <string name="stand_down_station_needs_overlay">საჭიროებს ნებართვას «სხვა აპებზე ჩვენება» Android-ის ამ ვერსიაზე.</string>
     <string name="connection_issue_banner_bt_silent">ტელეფონი დაუკავშირდა Bluetooth-ით, მაგრამ მონაცემები ვერ მიიღო. დააჭირეთ USB, Wireless Helper ან Auto რეჟიმზე გადასართავად.</string>
     <string name="connection_issue_banner_bssid">ამ მოწყობილობის არცერთმა წყარომ არ დაასახელა მისივე WiFi MAC მისამართი (BSSID), ამიტომ ტელეფონმა ვერასდროს გაიგო, რომელ ქსელს უნდა დაუკავშირდეს. ყველა წყარო შემოწმდა, მათ შორის ის, რომელსაც ნებართვა არ სჭირდება. შეეხეთ, რომ ჩართოთ მდებარეობა, რაც დანარჩენებს გახსნის, ან რომ მისამართი ხელით შეიყვანოთ.</string>
     <string name="connection_issue_banner_hotspot_off">ამ მოწყობილობის Hotspot გამორთულია, ამიტომ ქსელი არ იყო ხელმისაწვდომი ტელეფონის დასაკავშირებლად. ჩართეთ Hotspot დაკავშირებამდე ან შეეხეთ, რათა აპმა ჩართოს თქვენ ნაცვლად.</string>

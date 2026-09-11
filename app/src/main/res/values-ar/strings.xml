@@ -957,6 +957,12 @@
     <string name="wifi_direct_band_5ghz">5 غيغاهرتز فقط</string>
     <string name="wifi_direct_band_24ghz">2.4 غيغاهرتز فقط</string>
     <string name="wifi_direct_band_hint">يطلب التلقائي 5 غيغاهرتز ويرجع إلى 2.4 غيغاهرتز.</string>
+    <string name="stand_down_station">قطع اتصال Wi-Fi للوحدة أثناء الاتصال</string>
+    <string name="stand_down_station_auto">تلقائي</string>
+    <string name="stand_down_station_always">دائمًا</string>
+    <string name="stand_down_station_never">أبدًا</string>
+    <string name="stand_down_station_hint">تلقائي يقطع اتصال شبكة الوحدة الخاصة فقط عندما يدعم جهاز اللاسلكي نطاق 5 غيغاهرتز وتكون تلك الشبكة على 2.4 غيغاهرتز، لكي تحصل مجموعة WiFi Direct على قناة 5 غيغاهرتز لنفسها. يبقى متصلاً على وحدة تدعم 2.4 غيغاهرتز فقط، حيث يؤدي القطع فقط إلى جعل الوحدة تبحث عن شبكات، وكذلك عندما تكون الشبكة على 5 غيغاهرتز بالفعل. تتم إعادة الانضمام إلى الشبكة عند انتهاء الجلسة. جرّب دائمًا أو أبدًا إذا كانت الصورة تتقطّع.</string>
+    <string name="stand_down_station_needs_overlay">يتطلب إذن «الظهور فوق التطبيقات الأخرى» في هذا الإصدار من أندرويد.</string>
     <string name="connection_issue_banner_bt_silent">اتصل هاتفك عبر البلوتوث، لكن لم تصله أي بيانات من هذه الوحدة. انقر للتبديل إلى USB أو Wireless Helper أو Auto.</string>
     <string name="connection_issue_banner_bssid">لم يذكر أي مصدر في هذا الجهاز عنوان MAC الخاص بشبكة WiFi‏ (BSSID)، لذا لم يعرف هاتفك أبدًا بأي شبكة يتصل. جُرّبت كل المصادر، بما فيها مصدر لا يحتاج أي إذن. اضغط لتشغيل الموقع، وهو ما يفتح بقية المصادر، أو لإدخال العنوان يدويًا.</string>
     <string name="connection_issue_banner_hotspot_off">نقطة اتصال هذا الجهاز متوقفة، لذا لم تكن هناك شبكة ليتصل بها هاتفك. قم بتشغيل نقطة الاتصال قبل الاتصال، أو انقر للسماح للتطبيق بتشغيلها نيابة عنك.</string>

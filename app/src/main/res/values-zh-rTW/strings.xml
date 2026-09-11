@@ -958,6 +958,12 @@
     <string name="wifi_direct_band_5ghz">僅 5 GHz</string>
     <string name="wifi_direct_band_24ghz">僅 2.4 GHz</string>
     <string name="wifi_direct_band_hint">自動會優先要求 5 GHz，必要時降至 2.4 GHz。</string>
+    <string name="stand_down_station">連線時中斷車機本身的 Wi-Fi</string>
+    <string name="stand_down_station_auto">自動</string>
+    <string name="stand_down_station_always">永遠</string>
+    <string name="stand_down_station_never">從不</string>
+    <string name="stand_down_station_hint">自動僅在車機本身的無線電支援 5 GHz 頻段、且該網路正使用 2.4 GHz 時才會離開車機自身的網路，讓 WiFi Direct 群組能獨享 5 GHz 頻道。在僅支援 2.4 GHz 的車機上會保持連線，因為離開只會讓車機重新搜尋網路；當網路已經是 5 GHz 時也一樣保持連線。工作階段結束後會重新加入該網路。若畫面卡頓，可以試試「永遠」或「從不」。</string>
+    <string name="stand_down_station_needs_overlay">在此 Android 版本上需要「顯示在其他應用程式上層」的權限。</string>
     <string name="connection_issue_banner_bt_silent">手機已透過藍牙連線，但未收到任何資料。請輕觸以切換至 USB、Wireless Helper 或 Auto 模式。</string>
     <string name="connection_issue_banner_bssid">此主機沒有任何來源回報自己的 WiFi MAC 位址（BSSID），因此手機始終不知道該加入哪個網路。所有來源都已嘗試，包括一個不需要權限的來源。輕觸以開啟定位（可解除其餘來源的封鎖），或手動輸入位址。</string>
     <string name="connection_issue_banner_hotspot_off">此主機的熱點已關閉，因此沒有可供手機加入的網路。連線前請先開啟熱點，或輕觸讓應用程式為您開啟。</string>

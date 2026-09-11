@@ -965,6 +965,12 @@
     <string name="wifi_direct_band_5ghz">Nur 5 GHz</string>
     <string name="wifi_direct_band_24ghz">Nur 2,4 GHz</string>
     <string name="wifi_direct_band_hint">Automatisch fordert 5 GHz an und weicht auf 2,4 GHz aus (auf Android 9 und älter wird zuerst ein 5-GHz-Kanal angefordert). 2,4 GHz reicht bis 720p, darüber wird 5 GHz empfohlen.</string>
+    <string name="stand_down_station">WLAN-Verbindung dieses Geräts beim Verbinden trennen</string>
+    <string name="stand_down_station_auto">Automatisch</string>
+    <string name="stand_down_station_always">Immer</string>
+    <string name="stand_down_station_never">Nie</string>
+    <string name="stand_down_station_hint">Automatisch verlässt das eigene Netzwerk dieses Geräts nur, wenn dessen Funkmodul ein 5-GHz-Band hat und dieses Netzwerk auf 2,4 GHz läuft, damit die WiFi-Direct-Gruppe einen eigenen 5-GHz-Kanal erhalten kann. Auf einem Gerät mit nur 2,4 GHz bleibt es verbunden, da ein Verlassen das Gerät nur nach Netzwerken suchen ließe, ebenso wenn das Netzwerk bereits auf 5 GHz läuft. Das Netzwerk wird nach Sitzungsende wieder verbunden. Bei ruckelndem Bild „Immer“ oder „Nie“ ausprobieren.</string>
+    <string name="stand_down_station_needs_overlay">Erfordert auf dieser Android-Version die Berechtigung „Über anderen Apps anzeigen“.</string>
     <string name="connection_issue_banner_bt_silent">Dein Telefon hat sich über Bluetooth verbunden, aber nichts von diesem Gerät gesendetes kam an. Dies ist ein Bluetooth-Problem des Headunits. Tippe hier, um auf USB, Wireless Helper oder Auto zu wechseln.</string>
     <string name="connection_issue_banner_bssid">Keine Quelle auf diesem Gerät hat dessen eigene WLAN-MAC-Adresse (BSSID) genannt, deshalb erfuhr dein Telefon nie, mit welchem Netzwerk es sich verbinden soll. Alle Quellen wurden versucht, auch eine, die keine Berechtigung braucht. Tippe hier, um den Standort einzuschalten, was die übrigen freigibt, oder um die Adresse von Hand einzugeben.</string>
     <string name="connection_issue_banner_hotspot_off">Der Hotspot dieses Geräts ist ausgeschaltet, sodass kein Netzwerk vorhanden war, mit dem sich dein Telefon verbinden konnte. Schalte den Hotspot vor dem Verbinden ein oder tippe hier, damit die App ihn für dich einschaltet.</string>

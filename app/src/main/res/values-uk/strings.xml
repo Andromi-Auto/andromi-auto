@@ -960,6 +960,12 @@
     <string name="wifi_direct_band_5ghz">Лише 5 ГГц</string>
     <string name="wifi_direct_band_24ghz">Лише 2.4 ГГц</string>
     <string name="wifi_direct_band_hint">Авто запитує 5 ГГц і переходить на 2.4 ГГц.</string>
+    <string name="stand_down_station">Відключати власний Wi-Fi під час з\'єднання</string>
+    <string name="stand_down_station_auto">Авто</string>
+    <string name="stand_down_station_always">Завжди</string>
+    <string name="stand_down_station_never">Ніколи</string>
+    <string name="stand_down_station_hint">Авто залишає власну мережу цього пристрою лише тоді, коли його радіомодуль підтримує діапазон 5 ГГц, а ця мережа працює на 2.4 ГГц, щоб група WiFi Direct могла отримати окремий канал 5 ГГц. На пристрої лише з 2.4 ГГц з\'єднання зберігається, оскільки вихід із мережі лише змусить пристрій шукати мережі, а також коли мережа вже на 5 ГГц. Мережа повторно приєднується після завершення сеансу. Якщо зображення підвисає, спробуйте Завжди або Ніколи.</string>
+    <string name="stand_down_station_needs_overlay">Потрібен дозвіл «відображення поверх інших додатків» на цій версії Android.</string>
     <string name="connection_issue_banner_bt_silent">Телефон підключився через Bluetooth, але не отримав даних. Торкніться, щоб перейти на USB, Wireless Helper або Auto.</string>
     <string name="connection_issue_banner_bssid">Жодне джерело на цьому пристрої не назвало його власну MAC-адресу WiFi (BSSID), тож телефон так і не дізнався, до якої мережі під\'єднуватися. Перевірено всі, зокрема те, якому не потрібні дозволи. Торкніться, щоб увімкнути геолокацію, яка розблоковує решту, або щоб ввести адресу вручну.</string>
     <string name="connection_issue_banner_hotspot_off">Точку доступу цього пристрою вимкнено, тому телефон не мав мережі для підключення. Увімкніть точку доступу перед підключенням або торкніться, щоб програма ввімкнула її за вас.</string>

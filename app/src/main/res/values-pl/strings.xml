@@ -958,6 +958,12 @@
     <string name="wifi_direct_band_5ghz">Tylko 5 GHz</string>
     <string name="wifi_direct_band_24ghz">Tylko 2,4 GHz</string>
     <string name="wifi_direct_band_hint">Automatycznie żąda 5 GHz i przełącza na 2,4 GHz.</string>
+    <string name="stand_down_station">Odłącz od własnego Wi-Fi podczas łączenia</string>
+    <string name="stand_down_station_auto">Automatycznie</string>
+    <string name="stand_down_station_always">Zawsze</string>
+    <string name="stand_down_station_never">Nigdy</string>
+    <string name="stand_down_station_hint">Automatycznie opuszcza własną sieć tej jednostki tylko wtedy, gdy jej radio ma pasmo 5 GHz, a ta sieć działa na 2,4 GHz, aby grupa WiFi Direct mogła mieć własny kanał 5 GHz. Pozostaje połączona na jednostce obsługującej tylko 2,4 GHz, ponieważ opuszczenie sieci sprawiłoby jedynie, że jednostka szukałaby sieci, oraz zawsze, gdy sieć jest już na 5 GHz. Sieć jest ponownie łączona po zakończeniu sesji. Jeśli obraz się zacina, wypróbuj opcję Zawsze lub Nigdy.</string>
+    <string name="stand_down_station_needs_overlay">Wymaga uprawnienia «wyświetlanie nad innymi aplikacjami» w tej wersji Androida.</string>
     <string name="connection_issue_banner_bt_silent">Telefon połączył się przez Bluetooth, ale nie odebrał danych. Dotknij, aby przełączyć na USB, Wireless Helper lub Auto.</string>
     <string name="connection_issue_banner_bssid">Żadne źródło w tym urządzeniu nie podało jego własnego adresu MAC WiFi (BSSID), więc telefon nigdy nie dowiedział się, z jaką siecią ma się połączyć. Sprawdzono wszystkie, w tym jedno, które nie wymaga żadnych uprawnień. Dotknij, aby włączyć lokalizację, co odblokowuje pozostałe, albo aby wpisać adres ręcznie.</string>
     <string name="connection_issue_banner_hotspot_off">Hotspot tego urządzenia jest wyłączony, więc telefon nie miał sieci, z którą mógłby się połączyć. Włącz hotspot przed połączeniem lub dotknij, aby aplikacja włączyła go za Ciebie.</string>

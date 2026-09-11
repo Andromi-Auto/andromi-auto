@@ -963,6 +963,12 @@
     <string name="wifi_direct_band_5ghz">5GHzのみ</string>
     <string name="wifi_direct_band_24ghz">2.4GHzのみ</string>
     <string name="wifi_direct_band_hint">自動は5GHzを要求し、2.4GHzにフォールバックします。</string>
+    <string name="stand_down_station">接続中にユニット自身のWi-Fiを切断</string>
+    <string name="stand_down_station_auto">自動</string>
+    <string name="stand_down_station_always">常に</string>
+    <string name="stand_down_station_never">しない</string>
+    <string name="stand_down_station_hint">自動は、このユニットの無線が5GHz帯に対応していて、かつそのネットワークが2.4GHzで動作している場合にのみ自身のネットワークから離れ、WiFi Directグループが専用の5GHzチャンネルを使えるようにします。2.4GHz専用のユニットでは接続を維持します。離脱してもネットワークを探し直すだけだからです。ネットワークがすでに5GHzの場合も同様です。セッション終了時にネットワークに再接続します。映像がカクつく場合は「常に」または「しない」を試してください。</string>
+    <string name="stand_down_station_needs_overlay">このAndroidバージョンでは「他のアプリの上に重ねて表示」の権限が必要です。</string>
     <string name="connection_issue_banner_bt_silent">Bluetoothで接続されましたがデータを受信できませんでした。タップしてUSB、Wireless Helper、またはAutoに切り替えてください。</string>
     <string name="connection_issue_banner_bssid">このユニットのどのソースも自身のWiFi MACアドレス（BSSID）を返さなかったため、スマートフォンはどのネットワークに接続すべきか分かりませんでした。権限が不要なものも含め、すべてのソースを試しています。タップすると、他のソースの取得を可能にする位置情報をオンにするか、アドレスを手動で入力できます。</string>
     <string name="connection_issue_banner_hotspot_off">このユニットのホットスポットがオフになっているため、スマートフォンが接続するネットワークがありませんでした。接続する前にホットスポットをオンにするか、タップしてアプリにオンにさせてください。</string>
