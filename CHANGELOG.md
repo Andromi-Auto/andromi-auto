@@ -7,6 +7,8 @@
 - Added darkmode for splashscreen
 - Added ADB-Server to disable/close OEM apps like Zlink, Autokit etc. to reduce conflicts with OpenHU
 - Added Support for BYD Steering wheel keys, thanks to @nicoruy
+- Added floating Exit Button, thanks to @Sesan17
+- Added Log to clipboard, thanks to @peter9811
 
 ### v.3.3.1
 - Added: Option to auto-resume media playback on quick reconnect if music was playing before disconnect
