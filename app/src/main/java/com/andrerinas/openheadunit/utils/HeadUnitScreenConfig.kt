@@ -660,13 +660,6 @@ object HeadUnitScreenConfig {
     fun getUsableWidth(): Int = screenWidthPx
     fun getUsableHeight(): Int = screenHeightPx
 
-    fun isUltrawideEnabled(): Boolean {
-        val w = getUsableWidth().coerceAtLeast(realScreenWidthPx).coerceAtLeast(physicalWidthPx)
-        val h = getUsableHeight().coerceAtLeast(realScreenHeightPx).coerceAtLeast(physicalHeightPx)
-        if (h <= 0) return w >= 1700
-        val ratio = w.toFloat() / h.toFloat()
-        return ratio >= 1.95f || w >= 1700
-    }
 
     // These are half the total margin, distributed symmetrically.
     fun getLeftMargin(): Int = getWidthMargin() / 2
