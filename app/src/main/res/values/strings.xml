@@ -498,13 +498,18 @@
     <string name="video_fit_mode_cover">Fill by cropping (no bars, no distortion)</string>
 
     <!-- More Features Settings -->
-    <string name="category_more_features" translatable="false">More Features</string>
-    <string name="pref_enable_floating_button_title" translatable="false">Floating Launcher Button</string>
-    <string name="pref_enable_floating_button_summary" translatable="false">Displays a floating button over the OEM launcher and other apps to quickly return to Open Headunit</string>
-    <string name="pref_floating_button_size_title" translatable="false">Floating Button Size</string>
-    <string name="pref_floating_button_opacity_title" translatable="false">Floating Button Opacity</string>
-    <string name="pref_floating_button_x_title" translatable="false">Horizontal Position (X)</string>
-    <string name="pref_floating_button_y_title" translatable="false">Vertical Position (Y)</string>
+    <string name="category_more_features">More Features</string>
+    <string name="pref_enable_floating_button_title">Floating Launcher Button</string>
+    <string name="pref_enable_floating_button_summary">Displays a floating button over the OEM launcher and other apps to quickly return to Open Headunit</string>
+    <string name="pref_floating_button_size_title">Floating Button Size</string>
+    <string name="pref_floating_button_opacity_title">Floating Button Opacity</string>
+    <string name="pref_floating_button_x_title">Horizontal Position (X)</string>
+    <string name="pref_floating_button_y_title">Vertical Position (Y)</string>
+    <string name="pref_aa_exit_action_title">Android Auto Exit Action</string>
+    <string name="pref_aa_exit_action_summary">Action when tapping Exit inside the Android Auto app drawer</string>
+    <string name="aa_exit_action_oem_launcher">Return to OEM Launcher (Minimize)</string>
+    <string name="aa_exit_action_app_home">Return to App Home</string>
+    <string name="aa_exit_action_disconnect">Disconnect Session</string>
     <string name="forced_scale">Forced Scale (Legacy Fix)</string>
     <string name="forced_scale_description">Corrects scaling issues on some older devices using SurfaceView. Only use if the image looks distorted or shifted.</string>
     <string name="hud_mirroring">HUD Mode (Horizontal Flip)</string>
@@ -721,6 +726,8 @@
     <string name="logs_exported">Logs Exported</string>
     <string name="log_saved_to">Log saved to:\n%s</string>
     <string name="share">Share</string>
+    <string name="logs_copied_to_clipboard">Logs copied to clipboard. If the log was larger than ~250 KB, only the beginning and end were copied to stay under the Android clipboard limit; the full log is saved at:\n%s</string>
+    <string name="logs_copy_to_clipboard_failed">Failed to copy logs to clipboard</string>
     <string name="close">Close</string>
     <string name="failed_export_logs">Failed to export logs</string>
     <string name="failed_export_in_silent_logs">Unable to export logs: Silent logging level selected</string>

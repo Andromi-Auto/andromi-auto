@@ -1092,4 +1092,50 @@
     <string name="debug_video_low_latency">디코더 저지연 모드 요청</string>
     <string name="debug_video_low_latency_description">비디오 디코더 설정 시 벤더 저지연 MediaFormat 키를 적용합니다.</string>
     <string name="debug_video_feed_hold">느린 디코더 시뮬레이션</string>
+
+    <string name="category_more_features">추가 기능</string>
+    <string name="pref_enable_floating_button_title">플로팅 런처 버튼</string>
+    <string name="pref_enable_floating_button_summary">순정 런처 및 다른 앱 위에 플로팅 버튼을 표시하여 Open Headunit으로 빠르게 복귀합니다</string>
+    <string name="pref_floating_button_size_title">플로팅 버튼 크기</string>
+    <string name="pref_floating_button_opacity_title">플로팅 버튼 불투명도</string>
+    <string name="pref_floating_button_x_title">수평 위치 (X)</string>
+    <string name="pref_floating_button_y_title">수직 위치 (Y)</string>
+    <string name="pref_aa_exit_action_title">Android Auto 종료 시 동작</string>
+    <string name="pref_aa_exit_action_summary">Android Auto 앱 서랍에서 종료를 탭했을 때의 동작</string>
+    <string name="aa_exit_action_oem_launcher">순정 런처로 복귀 (최소화)</string>
+    <string name="aa_exit_action_app_home">앱 홈 화면으로 복귀</string>
+    <string name="aa_exit_action_disconnect">세션 연결 해제</string>
+    <string name="logs_copied_to_clipboard">로그가 클립보드에 복사되었습니다. 250 KB를 초과할 경우 안드로이드 제한으로 인해 시작과 끝부분만 복사되었습니다. 전체 로그 저장 경로:
+%s</string>
+    <string name="logs_copy_to_clipboard_failed">로그를 클립보드에 복사하지 못했습니다</string>
+    <string name="connecting_driver">%s(으)로 Android Auto 시작 중</string>
+    <string name="connecting_driver_disconnected">%s 연결이 끊어짐, 깨우는 중...</string>
+    <string name="driver_device_disconnected">연결 해제됨, 곧 연결을 재개합니다</string>
+    <string name="no_usb_host_support">이 헤드유닛은 USB 호스트 모드를 지원하지 않으므로 유선 Android Auto를 사용할 수 없습니다. 무선 연결을 사용해 주세요.</string>
+
+    <string name="oem_app_management">OEM 앱 충돌 관리 (ADB)</string>
+    <string name="oem_app_management_desc">충돌하는 앱(Zlink, AutoKit 등) 감지 및 비활성화</string>
+    <string name="oem_app_explanation">순정 헤드유닛 앱이 USB 및 블루투스 연결을 가로채는 경우가 많습니다. Root 또는 Self-ADB(5555 포트)를 통해 비활성화할 수 있습니다.</string>
+    <string name="oem_app_backend_root">실행 방법: Root (su) 사용 가능</string>
+    <string name="oem_app_backend_adb">실행 방법: Self-ADB (127.0.0.1:5555) 연결됨</string>
+    <string name="oem_app_backend_none">실행 방법: 없음. 무선 디버깅을 켜거나 "adb tcpip 5555"를 실행하세요</string>
+    <string name="oem_app_autokill_switch">시작 시 충돌하는 OEM 앱 자동 비활성화</string>
+    <string name="oem_app_autokill_switch_desc">Open Headunit이 시작될 때 충돌 앱 및 데몬을 자동으로 종료합니다.</string>
+    <string name="oem_app_autokill_enabled">자동 비활성화 활성</string>
+    <string name="oem_app_none_detected">충돌하는 OEM 앱이 감지되지 않았습니다.</string>
+    <string name="oem_app_btn_commands">명령어</string>
+    <string name="oem_app_btn_restore">복원</string>
+    <string name="oem_app_btn_disable">비활성화 및 중지</string>
+    <string name="oem_app_status_format">설치됨: %1$s | 상태: %2$s | 데몬: %3$s</string>
+    <string name="oem_app_state_installed">예</string>
+    <string name="oem_app_state_not_installed">아니요</string>
+    <string name="oem_app_state_enabled">활성화됨</string>
+    <string name="oem_app_state_disabled">비활성화됨</string>
+    <string name="oem_app_state_running">실행 중</string>
+    <string name="oem_app_state_stopped">중지됨</string>
+    <string name="oem_app_commands_title">준비된 ADB / Shell 명령어</string>
+    <string name="oem_app_action_success">명령어가 성공적으로 실행되었습니다.</string>
+    <string name="oem_app_action_failed">실행 실패: %s</string>
+    <string name="copy_to_clipboard">복사</string>
+    <string name="copied_to_clipboard">클립보드에 복사됨</string>
 </resources>

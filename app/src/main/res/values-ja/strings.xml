@@ -1099,4 +1099,50 @@
     <string name="debug_video_low_latency">デコーダーの低遅延モードを要求</string>
     <string name="debug_video_low_latency_description">ビデオデコーダー設定時にベンダー独自の低遅延MediaFormatキーを設定します。</string>
     <string name="debug_video_feed_hold">低速デコーダーをシミュレート</string>
+
+    <string name="category_more_features">その他の機能</string>
+    <string name="pref_enable_floating_button_title">フローティングランチャーボタン</string>
+    <string name="pref_enable_floating_button_summary">純正ランチャーや他のアプリの上にフローティングボタンを表示し、Open Headunitに素早く戻れるようにします</string>
+    <string name="pref_floating_button_size_title">ボタンのサイズ</string>
+    <string name="pref_floating_button_opacity_title">ボタンの不透明度</string>
+    <string name="pref_floating_button_x_title">水平位置 (X)</string>
+    <string name="pref_floating_button_y_title">垂直位置 (Y)</string>
+    <string name="pref_aa_exit_action_title">Android Auto 終了時の動作</string>
+    <string name="pref_aa_exit_action_summary">Android Autoのアプリ一覧で「終了」をタップしたときの動作</string>
+    <string name="aa_exit_action_oem_launcher">純正ランチャーに戻る (最小化)</string>
+    <string name="aa_exit_action_app_home">アプリのホーム画面に戻る</string>
+    <string name="aa_exit_action_disconnect">セッションを切断する</string>
+    <string name="logs_copied_to_clipboard">ログをクリップボードにコピーしました。250 KBを超える場合は上限を遵守するため先頭と末尾のみコピーされました。全ログの保存先:
+%s</string>
+    <string name="logs_copy_to_clipboard_failed">ログのコピーに失敗しました</string>
+    <string name="connecting_driver">%s で Android Auto を起動中</string>
+    <string name="connecting_driver_disconnected">%s は切断されています。復帰中...</string>
+    <string name="driver_device_disconnected">切断中 (自動復帰します)</string>
+    <string name="no_usb_host_support">このヘッドユニットはUSBホストモードに対応していないため、有線Android Autoは利用できません。ワイヤレス接続をご利用ください。</string>
+
+    <string name="oem_app_management">OEMアプリ競合管理 (ADB)</string>
+    <string name="oem_app_management_desc">競合するアプリ (Zlink、AutoKitなど) を検出して無効化</string>
+    <string name="oem_app_explanation">工場出荷時の車載アプリがUSBやBluetoothを占有することがあります。RootまたはSelf-ADB (ポート5555) で無効化できます。</string>
+    <string name="oem_app_backend_root">実行方法: Root (su) 利用可能</string>
+    <string name="oem_app_backend_adb">実行方法: Self-ADB (127.0.0.1:5555) 接続済み</string>
+    <string name="oem_app_backend_none">実行方法: なし。ワイヤレスデバッグを有効にするか「adb tcpip 5555」を実行してください</string>
+    <string name="oem_app_autokill_switch">起動時に競合するOEMアプリを自動無効化</string>
+    <string name="oem_app_autokill_switch_desc">Open Headunitの起動時に競合するアプリやデーモンを停止します。</string>
+    <string name="oem_app_autokill_enabled">自動無効化が有効</string>
+    <string name="oem_app_none_detected">競合するOEMアプリは見つかりませんでした。</string>
+    <string name="oem_app_btn_commands">コマンド</string>
+    <string name="oem_app_btn_restore">復元</string>
+    <string name="oem_app_btn_disable">無効化＆停止</string>
+    <string name="oem_app_status_format">インストール: %1$s | 状態: %2$s | デーモン: %3$s</string>
+    <string name="oem_app_state_installed">はい</string>
+    <string name="oem_app_state_not_installed">いいえ</string>
+    <string name="oem_app_state_enabled">有効</string>
+    <string name="oem_app_state_disabled">無効</string>
+    <string name="oem_app_state_running">実行中</string>
+    <string name="oem_app_state_stopped">停止</string>
+    <string name="oem_app_commands_title">作成済み ADB / Shell コマンド</string>
+    <string name="oem_app_action_success">コマンドが正常に実行されました。</string>
+    <string name="oem_app_action_failed">実行に失敗しました: %s</string>
+    <string name="copy_to_clipboard">コピー</string>
+    <string name="copied_to_clipboard">クリップボードにコピーしました</string>
 </resources>

@@ -44,14 +44,14 @@ object SettingsBackupManager {
         val changedKeys: Set<String>
     )
 
-    private enum class ValueType {
+    internal enum class ValueType {
         BOOLEAN,
         INT,
         STRING,
         STRING_SET
     }
 
-    private val backupKeys = linkedMapOf(
+    internal val backupKeys = linkedMapOf(
         "allow-devices" to ValueType.STRING_SET,
         "network-addresses" to ValueType.STRING_SET,
         "bt-address" to ValueType.STRING,
@@ -66,6 +66,7 @@ object SettingsBackupManager {
         "floating-button-y-percent" to ValueType.INT,
         "floating-button-opacity-percent" to ValueType.INT,
         "floating-button-size-dp" to ValueType.INT,
+        "aa-exit-action" to ValueType.INT,
         "forced_scale" to ValueType.BOOLEAN,
         "hud_mirroring" to ValueType.BOOLEAN,
         "ui-scale-home-percent" to ValueType.INT,

@@ -1098,4 +1098,50 @@
     <string name="debug_video_low_latency">Yêu cầu chế độ độ trễ thấp của bộ giải mã</string>
     <string name="debug_video_low_latency_description">Đặt khóa MediaFormat độ trễ thấp của nhà sản xuất khi định cấu hình bộ giải mã video.</string>
     <string name="debug_video_feed_hold">Mô phỏng bộ giải mã chậm</string>
+
+    <string name="category_more_features">Tính năng khác</string>
+    <string name="pref_enable_floating_button_title">Nút khởi chạy nổi</string>
+    <string name="pref_enable_floating_button_summary">Hiển thị nút nổi trên trình khởi chạy gốc và các ứng dụng khác để nhanh chóng quay lại Open Headunit</string>
+    <string name="pref_floating_button_size_title">Kích thước nút nổi</string>
+    <string name="pref_floating_button_opacity_title">Độ mờ nút nổi</string>
+    <string name="pref_floating_button_x_title">Vị trí ngang (X)</string>
+    <string name="pref_floating_button_y_title">Vị trí dọc (Y)</string>
+    <string name="pref_aa_exit_action_title">Hành động khi thoát Android Auto</string>
+    <string name="pref_aa_exit_action_summary">Hành động khi nhấn Thoát trong danh sách ứng dụng Android Auto</string>
+    <string name="aa_exit_action_oem_launcher">Quay lại trình khởi chạy OEM (Thu nhỏ)</string>
+    <string name="aa_exit_action_app_home">Quay lại trang chủ ứng dụng</string>
+    <string name="aa_exit_action_disconnect">Ngắt kết nối phiên</string>
+    <string name="logs_copied_to_clipboard">Đã sao chép nhật ký vào khay nhớ tạm. Nếu nhật ký lớn hơn ~250 KB, chỉ phần đầu và cuối được sao chép theo giới hạn Android; nhật ký đầy đủ được lưu tại:
+%s</string>
+    <string name="logs_copy_to_clipboard_failed">Không thể sao chép nhật ký vào khay nhớ tạm</string>
+    <string name="connecting_driver">Đang khởi động Android Auto với %s</string>
+    <string name="connecting_driver_disconnected">%s đã ngắt kết nối, đang đánh thức...</string>
+    <string name="driver_device_disconnected">Đã ngắt kết nối, sẽ được đánh thức</string>
+    <string name="no_usb_host_support">Đầu phát này không hỗ trợ chế độ USB host nên không thể dùng Android Auto có dây. Vui lòng sử dụng kết nối không dây.</string>
+
+    <string name="oem_app_management">Quản lý xung đột ứng dụng OEM (ADB)</string>
+    <string name="oem_app_management_desc">Phát hiện và vô hiệu hóa các ứng dụng xung đột (Zlink, AutoKit, v.v.)</string>
+    <string name="oem_app_explanation">Các ứng dụng gốc thường chiếm quyền kết nối USB và Bluetooth. Bạn có thể vô hiệu hóa chúng qua Root hoặc Self-ADB (cổng 5555).</string>
+    <string name="oem_app_backend_root">Phương thức thực thi: Có sẵn Root (su)</string>
+    <string name="oem_app_backend_adb">Phương thức thực thi: Đã kết nối Self-ADB (127.0.0.1:5555)</string>
+    <string name="oem_app_backend_none">Phương thức thực thi: Không có. Hãy bật Gỡ lỗi không dây hoặc chạy "adb tcpip 5555"</string>
+    <string name="oem_app_autokill_switch">Tự động tắt ứng dụng OEM xung đột khi khởi động</string>
+    <string name="oem_app_autokill_switch_desc">Tắt các ứng dụng và tiến trình xung đột khi Open Headunit khởi động.</string>
+    <string name="oem_app_autokill_enabled">Tự động vô hiệu hóa đang hoạt động</string>
+    <string name="oem_app_none_detected">Không phát hiện ứng dụng OEM xung đột nào.</string>
+    <string name="oem_app_btn_commands">Lệnh</string>
+    <string name="oem_app_btn_restore">Khôi phục</string>
+    <string name="oem_app_btn_disable">Vô hiệu hóa &amp; Dừng</string>
+    <string name="oem_app_status_format">Đã cài: %1$s | Trạng thái: %2$s | Tiến trình: %3$s</string>
+    <string name="oem_app_state_installed">Có</string>
+    <string name="oem_app_state_not_installed">Không</string>
+    <string name="oem_app_state_enabled">Đã bật</string>
+    <string name="oem_app_state_disabled">Đã tắt</string>
+    <string name="oem_app_state_running">Đang chạy</string>
+    <string name="oem_app_state_stopped">Đã dừng</string>
+    <string name="oem_app_commands_title">Lệnh ADB / Shell chuẩn bị sẵn</string>
+    <string name="oem_app_action_success">Lệnh đã được thực thi thành công.</string>
+    <string name="oem_app_action_failed">Thực thi thất bại: %s</string>
+    <string name="copy_to_clipboard">Sao chép</string>
+    <string name="copied_to_clipboard">Đã sao chép vào khay nhớ tạm</string>
 </resources>

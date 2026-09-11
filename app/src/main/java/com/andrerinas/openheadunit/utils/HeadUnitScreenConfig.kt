@@ -21,7 +21,7 @@ object HeadUnitScreenConfig {
     private var isPortraitScaled: Boolean = false
     private var isInitialized: Boolean = false
     private var lastSettingsHash: Int = 0
-    
+
     // How the negotiated video is fitted into the panel (FILL/CONTAIN/COVER, see Settings.VideoFitMode).
     private var videoFitMode: Settings.VideoFitMode = Settings.VideoFitMode.FILL
 
@@ -478,7 +478,7 @@ object HeadUnitScreenConfig {
                 AppLog.i("[UI_DEBUG] CarScreen: RESOLUTION LOCKED to $negotiatedResolutionType. Usable area is ${screenWidthPx}x${screenHeightPx}. Skipping re-negotiation.")
             }
         }
-        
+
         // A locked session keeps what it already negotiated. This used to fall through to the
         // manual branch, where AUTO carries no codec and the fallback landed on 480p.
         NegotiatedResolutionPolicy.select(
@@ -525,7 +525,7 @@ object HeadUnitScreenConfig {
         scaleFactor = fit.scaleFactor
         // Null on a small screen, where the previous value deliberately stands.
         fit.isPortraitScaled?.let { isPortraitScaled = it }
-        
+
         AppLog.i("[UI_DEBUG] CarScreen isSmallScreen: $isSmallScreen, scaleFactor: $scaleFactor, portraitScaled: $isPortraitScaled, shape=${marginStrategy()}, margins: w=${getWidthMargin()}, h=${getHeightMargin()}")
 
         if (!notifyingMarginDivergence &&
@@ -659,6 +659,7 @@ object HeadUnitScreenConfig {
 
     fun getUsableWidth(): Int = screenWidthPx
     fun getUsableHeight(): Int = screenHeightPx
+
 
     // These are half the total margin, distributed symmetrically.
     fun getLeftMargin(): Int = getWidthMargin() / 2

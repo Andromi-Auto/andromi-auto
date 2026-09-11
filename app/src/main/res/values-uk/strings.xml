@@ -1096,4 +1096,50 @@
     <string name="debug_video_low_latency">Запитати режим низької затримки декодера</string>
     <string name="debug_video_low_latency_description">Встановлює ключ MediaFormat низької затримки виробника під час налаштування відеодекодера.</string>
     <string name="debug_video_feed_hold">Імітувати повільний декодер</string>
+
+    <string name="category_more_features">Додаткові функції</string>
+    <string name="pref_enable_floating_button_title">Плаваюча кнопка запуску</string>
+    <string name="pref_enable_floating_button_summary">Відображає плаваючу кнопку поверх штатного лаунчера та інших програм для швидкого повернення до Open Headunit</string>
+    <string name="pref_floating_button_size_title">Розмір плаваючої кнопки</string>
+    <string name="pref_floating_button_opacity_title">Прозорість плаваючої кнопки</string>
+    <string name="pref_floating_button_x_title">Горизонтальне положення (X)</string>
+    <string name="pref_floating_button_y_title">Вертикальне положення (Y)</string>
+    <string name="pref_aa_exit_action_title">Дія при виході з Android Auto</string>
+    <string name="pref_aa_exit_action_summary">Дія при натисканні «Вихід» у списку програм Android Auto</string>
+    <string name="aa_exit_action_oem_launcher">Повернутися до штатного лаунчера (Згорнути)</string>
+    <string name="aa_exit_action_app_home">Повернутися на головний екран програми</string>
+    <string name="aa_exit_action_disconnect">Розірвати з\'єднання</string>
+    <string name="logs_copied_to_clipboard">Журнали скопійовано в буфер обміну. Якщо розмір перевищував ~250 КБ, скопійовано лише початок і кінець згідно з обмеженнями Android; повний файл збережено в:
+%s</string>
+    <string name="logs_copy_to_clipboard_failed">Не вдалося скопіювати журнали в буфер обміну</string>
+    <string name="connecting_driver">Запуск Android Auto з %s</string>
+    <string name="connecting_driver_disconnected">%s відключено, пробудження...</string>
+    <string name="driver_device_disconnected">Відключено, буде активовано</string>
+    <string name="no_usb_host_support">Цей головний пристрій не підтримує режим USB-хоста, тому дротовий Android Auto недоступний. Використовуйте бездротове підключення.</string>
+
+    <string name="oem_app_management">Керування конфліктами штатних програм (ADB)</string>
+    <string name="oem_app_management_desc">Виявлення та вимкнення конфліктних програм (Zlink, AutoKit тощо)</string>
+    <string name="oem_app_explanation">Штатні програми часто перехоплюють з\'єднання USB та Bluetooth. Їх можна вимкнути через Root або Self-ADB (порт 5555).</string>
+    <string name="oem_app_backend_root">Метод виконання: Доступний Root (su)</string>
+    <string name="oem_app_backend_adb">Метод виконання: Self-ADB (127.0.0.1:5555) підключено</string>
+    <string name="oem_app_backend_none">Метод виконання: Немає. Увімкніть бездротове налагодження або виконайте "adb tcpip 5555"</string>
+    <string name="oem_app_autokill_switch">Автоматично вимикати конфліктні програми OEM при запуску</string>
+    <string name="oem_app_autokill_switch_desc">Зупиняє конфліктні програми та фонові служби під час запуску Open Headunit.</string>
+    <string name="oem_app_autokill_enabled">Автоматичне вимкнення активне</string>
+    <string name="oem_app_none_detected">Конфліктних програм OEM не виявлено.</string>
+    <string name="oem_app_btn_commands">Команди</string>
+    <string name="oem_app_btn_restore">Відновити</string>
+    <string name="oem_app_btn_disable">Вимкнути та зупинити</string>
+    <string name="oem_app_status_format">Встановлено: %1$s | Стан: %2$s | Демон: %3$s</string>
+    <string name="oem_app_state_installed">Так</string>
+    <string name="oem_app_state_not_installed">Ні</string>
+    <string name="oem_app_state_enabled">Увімкнено</string>
+    <string name="oem_app_state_disabled">Вимкнено</string>
+    <string name="oem_app_state_running">Працює</string>
+    <string name="oem_app_state_stopped">Зупинено</string>
+    <string name="oem_app_commands_title">Підготовлені команди ADB / Shell</string>
+    <string name="oem_app_action_success">Команду успішно виконано.</string>
+    <string name="oem_app_action_failed">Помилка виконання: %s</string>
+    <string name="copy_to_clipboard">Копіювати</string>
+    <string name="copied_to_clipboard">Скопійовано в буфер обміну</string>
 </resources>

@@ -1098,4 +1098,50 @@
     <string name="debug_video_low_latency">Richiedi modalità a bassa latenza del decoder</string>
     <string name="debug_video_low_latency_description">Imposta la chiave proprietaria MediaFormat a bassa latenza durante la configurazione del decoder video.</string>
     <string name="debug_video_feed_hold">Simula un decoder lento</string>
+
+    <string name="category_more_features">Altre funzionalità</string>
+    <string name="pref_enable_floating_button_title">Pulsante mobile di avvio</string>
+    <string name="pref_enable_floating_button_summary">Mostra un pulsante mobile sopra il launcher OEM e altre app per tornare rapidamente a Open Headunit</string>
+    <string name="pref_floating_button_size_title">Dimensione del pulsante mobile</string>
+    <string name="pref_floating_button_opacity_title">Opacità del pulsante mobile</string>
+    <string name="pref_floating_button_x_title">Posizione orizzontale (X)</string>
+    <string name="pref_floating_button_y_title">Posizione verticale (Y)</string>
+    <string name="pref_aa_exit_action_title">Azione di uscita da Android Auto</string>
+    <string name="pref_aa_exit_action_summary">Azione quando si tocca Esci nel menu delle app di Android Auto</string>
+    <string name="aa_exit_action_oem_launcher">Torna al launcher OEM (Riduci a icona)</string>
+    <string name="aa_exit_action_app_home">Torna alla schermata principale dell\'app</string>
+    <string name="aa_exit_action_disconnect">Disconnetti sessione</string>
+    <string name="logs_copied_to_clipboard">Registri copiati negli appunti. Se superavano ~250 KB, sono stati copiati solo l\'inizio e la fine per rispettare i limiti di Android; il file completo è salvato in:
+%s</string>
+    <string name="logs_copy_to_clipboard_failed">Impossibile copiare i registri negli appunti</string>
+    <string name="connecting_driver">Avvio di Android Auto con %s</string>
+    <string name="connecting_driver_disconnected">%s è disconnesso, riattivazione...</string>
+    <string name="driver_device_disconnected">Disconnesso, verrà riattivato</string>
+    <string name="no_usb_host_support">Questa unità non supporta la modalità host USB; Android Auto via cavo non è disponibile. Usa una connessione wireless.</string>
+
+    <string name="oem_app_management">Gestione conflitti app OEM (ADB)</string>
+    <string name="oem_app_management_desc">Rileva e disabilita app in conflitto (Zlink, AutoKit, ecc.)</string>
+    <string name="oem_app_explanation">Le app preinstallate di fabbrica spesso intercettano USB e Bluetooth. È possibile disabilitarle tramite Root o Self-ADB (porta 5555).</string>
+    <string name="oem_app_backend_root">Metodo di esecuzione: Root (su) disponibile</string>
+    <string name="oem_app_backend_adb">Metodo di esecuzione: Self-ADB (127.0.0.1:5555) connesso</string>
+    <string name="oem_app_backend_none">Metodo di esecuzione: Nessuno. Abilita debug wireless o esegui "adb tcpip 5555"</string>
+    <string name="oem_app_autokill_switch">Disabilita automaticamente app OEM in conflitto all\'avvio</string>
+    <string name="oem_app_autokill_switch_desc">Silenzia le app e i daemon in conflitto all\'avvio di Open Headunit.</string>
+    <string name="oem_app_autokill_enabled">Disabilitazione automatica attiva</string>
+    <string name="oem_app_none_detected">Nessuna app OEM in conflitto rilevata.</string>
+    <string name="oem_app_btn_commands">Comandi</string>
+    <string name="oem_app_btn_restore">Ripristina</string>
+    <string name="oem_app_btn_disable">Disabilita e arresta</string>
+    <string name="oem_app_status_format">Installata: %1$s | Stato: %2$s | Daemon: %3$s</string>
+    <string name="oem_app_state_installed">Sì</string>
+    <string name="oem_app_state_not_installed">No</string>
+    <string name="oem_app_state_enabled">Abilitata</string>
+    <string name="oem_app_state_disabled">Disabilitata</string>
+    <string name="oem_app_state_running">In esecuzione</string>
+    <string name="oem_app_state_stopped">Arrestata</string>
+    <string name="oem_app_commands_title">Comandi ADB / Shell preparati</string>
+    <string name="oem_app_action_success">Comando eseguito con successo.</string>
+    <string name="oem_app_action_failed">Esecuzione fallita: %s</string>
+    <string name="copy_to_clipboard">Copia</string>
+    <string name="copied_to_clipboard">Copiato negli appunti</string>
 </resources>

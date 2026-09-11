@@ -1092,4 +1092,50 @@
     <string name="debug_video_low_latency">Solicită mod de latență redusă a decodorului</string>
     <string name="debug_video_low_latency_description">Setează cheia MediaFormat proprietară de latență redusă la configurarea decodorului video.</string>
     <string name="debug_video_feed_hold">Simulează un decodor lent</string>
+
+    <string name="category_more_features">Mai multe funcții</string>
+    <string name="pref_enable_floating_button_title">Buton plutitor lansator</string>
+    <string name="pref_enable_floating_button_summary">Afișează un buton plutitor peste lansatorul OEM și alte aplicații pentru a reveni rapid la Open Headunit</string>
+    <string name="pref_floating_button_size_title">Dimensiune buton plutitor</string>
+    <string name="pref_floating_button_opacity_title">Opacitate buton plutitor</string>
+    <string name="pref_floating_button_x_title">Poziție orizontală (X)</string>
+    <string name="pref_floating_button_y_title">Poziție verticală (Y)</string>
+    <string name="pref_aa_exit_action_title">Acțiune la ieșirea din Android Auto</string>
+    <string name="pref_aa_exit_action_summary">Acțiune la apăsarea pe Ieșire din meniul Android Auto</string>
+    <string name="aa_exit_action_oem_launcher">Revenire la lansatorul OEM (Minimizare)</string>
+    <string name="aa_exit_action_app_home">Revenire la ecranul principal al aplicației</string>
+    <string name="aa_exit_action_disconnect">Deconectare sesiune</string>
+    <string name="logs_copied_to_clipboard">Jurnale copiate în clipboard. Dacă fișierul a depășit ~250 KB, s-au copiat doar începutul și sfârșitul pentru limita Android; jurnalul complet este la:
+%s</string>
+    <string name="logs_copy_to_clipboard_failed">Nu s-au putut copia jurnalele în clipboard</string>
+    <string name="connecting_driver">Pornire Android Auto cu %s</string>
+    <string name="connecting_driver_disconnected">%s este deconectat, se reactivează...</string>
+    <string name="driver_device_disconnected">Deconectat, va fi reactivat</string>
+    <string name="no_usb_host_support">Această unitate nu acceptă modul gazdă USB, deci Android Auto prin cablu nu este disponibil. Folosiți conexiunea wireless.</string>
+
+    <string name="oem_app_management">Gestionare conflicte aplicații OEM (ADB)</string>
+    <string name="oem_app_management_desc">Detectați și dezactivați aplicațiile conflictuale (Zlink, AutoKit etc.)</string>
+    <string name="oem_app_explanation">Aplicațiile din fabrică interceptează adesea conexiunile USB și Bluetooth. Le puteți dezactiva prin Root sau Self-ADB (portul 5555).</string>
+    <string name="oem_app_backend_root">Metodă de execuție: Root (su) disponibil</string>
+    <string name="oem_app_backend_adb">Metodă de execuție: Self-ADB (127.0.0.1:5555) conectat</string>
+    <string name="oem_app_backend_none">Metodă de execuție: Niciuna. Activați Depanarea wireless sau rulați "adb tcpip 5555"</string>
+    <string name="oem_app_autokill_switch">Dezactivare automată la pornire a aplicațiilor OEM</string>
+    <string name="oem_app_autokill_switch_desc">Oprește aplicațiile conflictuale cunoscute la pornirea Open Headunit.</string>
+    <string name="oem_app_autokill_enabled">Dezactivare automată activă</string>
+    <string name="oem_app_none_detected">Nu s-au detectat aplicații OEM conflictuale.</string>
+    <string name="oem_app_btn_commands">Comenzi</string>
+    <string name="oem_app_btn_restore">Restaurare</string>
+    <string name="oem_app_btn_disable">Dezactivare și oprire</string>
+    <string name="oem_app_status_format">Instalată: %1$s | Stare: %2$s | Daemon: %3$s</string>
+    <string name="oem_app_state_installed">Da</string>
+    <string name="oem_app_state_not_installed">Nu</string>
+    <string name="oem_app_state_enabled">Activată</string>
+    <string name="oem_app_state_disabled">Dezactivată</string>
+    <string name="oem_app_state_running">Rulează</string>
+    <string name="oem_app_state_stopped">Oprită</string>
+    <string name="oem_app_commands_title">Comenzi ADB / Shell pregătite</string>
+    <string name="oem_app_action_success">Comandă executată cu succes.</string>
+    <string name="oem_app_action_failed">Execuție eșuată: %s</string>
+    <string name="copy_to_clipboard">Copiază</string>
+    <string name="copied_to_clipboard">Copiat în clipboard</string>
 </resources>

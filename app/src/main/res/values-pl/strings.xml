@@ -1094,4 +1094,50 @@
     <string name="debug_video_low_latency">Żądaj trybu niskiego opóźnienia dekodera</string>
     <string name="debug_video_low_latency_description">Ustawia klucz MediaFormat niskiego opóźnienia producenta podczas konfiguracji dekodera wideo.</string>
     <string name="debug_video_feed_hold">Symuluj wolny dekoder</string>
+
+    <string name="category_more_features">Więcej funkcji</string>
+    <string name="pref_enable_floating_button_title">Pływający przycisk launchera</string>
+    <string name="pref_enable_floating_button_summary">Wyświetla pływający przycisk nad launcherem OEM i innymi aplikacjami, aby szybko powrócić do Open Headunit</string>
+    <string name="pref_floating_button_size_title">Rozmiar pływającego przycisku</string>
+    <string name="pref_floating_button_opacity_title">Przezroczystość pływającego przycisku</string>
+    <string name="pref_floating_button_x_title">Pozycja pozioma (X)</string>
+    <string name="pref_floating_button_y_title">Pozycja pionowa (Y)</string>
+    <string name="pref_aa_exit_action_title">Działanie przy wyjściu z Android Auto</string>
+    <string name="pref_aa_exit_action_summary">Działanie po dotknięciu Wyjdź w menu aplikacji Android Auto</string>
+    <string name="aa_exit_action_oem_launcher">Powrót do launchera OEM (Minimalizuj)</string>
+    <string name="aa_exit_action_app_home">Powrót do ekranu głównego aplikacji</string>
+    <string name="aa_exit_action_disconnect">Rozłącz sesję</string>
+    <string name="logs_copied_to_clipboard">Dzienniki skopiowane do schowka. Jeśli dziennik przekraczał ~250 KB, skopiowano tylko początek i koniec ze względu na limit Androida; pełny plik zapisano w:
+%s</string>
+    <string name="logs_copy_to_clipboard_failed">Nie udało się skopiować dzienników do schowka</string>
+    <string name="connecting_driver">Uruchamianie Android Auto z %s</string>
+    <string name="connecting_driver_disconnected">%s jest rozłączony, wybudzanie...</string>
+    <string name="driver_device_disconnected">Rozłączony, zostanie wybudzony</string>
+    <string name="no_usb_host_support">Ta jednostka nie obsługuje trybu hosta USB, więc przewodowy Android Auto nie jest dostępny. Użyj połączenia bezprzewodowego.</string>
+
+    <string name="oem_app_management">Zarządzanie konfliktami aplikacji OEM (ADB)</string>
+    <string name="oem_app_management_desc">Wykrywaj i wyłączaj konfliktowe aplikacje (Zlink, AutoKit itp.)</string>
+    <string name="oem_app_explanation">Fabryczne aplikacje często przechwytują połączenia USB i Bluetooth. Możesz je wyłączyć przez Root lub Self-ADB (port 5555).</string>
+    <string name="oem_app_backend_root">Metoda wykonania: Root (su) dostępny</string>
+    <string name="oem_app_backend_adb">Metoda wykonania: Self-ADB (127.0.0.1:5555) połączony</string>
+    <string name="oem_app_backend_none">Metoda wykonania: Brak. Włącz debugowanie bezprzewodowe lub uruchom "adb tcpip 5555"</string>
+    <string name="oem_app_autokill_switch">Automatycznie wyłączaj aplikacje OEM przy starcie</string>
+    <string name="oem_app_autokill_switch_desc">Wycisza konfliktowe aplikacje i demony w tle po uruchomieniu Open Headunit.</string>
+    <string name="oem_app_autokill_enabled">Automatyczne wyłączanie aktywne</string>
+    <string name="oem_app_none_detected">Nie wykryto konfliktowych aplikacji OEM.</string>
+    <string name="oem_app_btn_commands">Polecenia</string>
+    <string name="oem_app_btn_restore">Przywróć</string>
+    <string name="oem_app_btn_disable">Wyłącz i zatrzymaj</string>
+    <string name="oem_app_status_format">Zainstalowana: %1$s | Status: %2$s | Demon: %3$s</string>
+    <string name="oem_app_state_installed">Tak</string>
+    <string name="oem_app_state_not_installed">Nie</string>
+    <string name="oem_app_state_enabled">Włączona</string>
+    <string name="oem_app_state_disabled">Wyłączona</string>
+    <string name="oem_app_state_running">Uruchomiona</string>
+    <string name="oem_app_state_stopped">Zatrzymana</string>
+    <string name="oem_app_commands_title">Przygotowane polecenia ADB / Shell</string>
+    <string name="oem_app_action_success">Polecenie wykonane pomyślnie.</string>
+    <string name="oem_app_action_failed">Wykonanie nie powiodło się: %s</string>
+    <string name="copy_to_clipboard">Kopiuj</string>
+    <string name="copied_to_clipboard">Skopiowano do schowka</string>
 </resources>

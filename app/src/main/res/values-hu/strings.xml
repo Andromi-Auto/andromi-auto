@@ -1091,4 +1091,50 @@
     <string name="debug_video_low_latency">Dekóder alacsony késleltetésű mód kérése</string>
     <string name="debug_video_low_latency_description">Beállítja a gyártói alacsony késleltetésű MediaFormat kulcsot a videódekóder konfigurálásakor.</string>
     <string name="debug_video_feed_hold">Lassú dekóder szimulálása</string>
+
+    <string name="category_more_features">További funkciók</string>
+    <string name="pref_enable_floating_button_title">Lebegő indítógomb</string>
+    <string name="pref_enable_floating_button_summary">Lebegő gomb megjelenítése az OEM indító és egyéb alkalmazások felett az Open Headunit gyors eléréséhez</string>
+    <string name="pref_floating_button_size_title">Lebegő gomb mérete</string>
+    <string name="pref_floating_button_opacity_title">Lebegő gomb átlátszatlansága</string>
+    <string name="pref_floating_button_x_title">Vízszintes pozíció (X)</string>
+    <string name="pref_floating_button_y_title">Függőleges pozíció (Y)</string>
+    <string name="pref_aa_exit_action_title">Android Auto kilépési művelet</string>
+    <string name="pref_aa_exit_action_summary">Művelet az Android Auto alkalmazásfiók Kilépés gombjára koppintáskor</string>
+    <string name="aa_exit_action_oem_launcher">Vissza az OEM indítóhoz (Kicsinyítés)</string>
+    <string name="aa_exit_action_app_home">Vissza az alkalmazás kezdőlapjára</string>
+    <string name="aa_exit_action_disconnect">Kapcsolat bontása</string>
+    <string name="logs_copied_to_clipboard">Naplók a vágólapra másolva. Ha a napló nagyobb volt mint ~250 KB, az Android vágólap korlátai miatt csak az eleje és vége másolódott; a teljes napló mentve:
+%s</string>
+    <string name="logs_copy_to_clipboard_failed">Nem sikerült a naplókat a vágólapra másolni</string>
+    <string name="connecting_driver">Android Auto indítása ezzel: %s</string>
+    <string name="connecting_driver_disconnected">%s lekapcsolódott, felébresztés...</string>
+    <string name="driver_device_disconnected">Lekapcsolva, fel lesz ébresztve</string>
+    <string name="no_usb_host_support">Ez a fejegység nem támogatja az USB-gazdagép módot, ezért a vezetékes Android Auto nem érhető el. Használjon vezeték nélküli kapcsolatot.</string>
+
+    <string name="oem_app_management">OEM alkalmazás-konfliktusok kezelése (ADB)</string>
+    <string name="oem_app_management_desc">Konfliktusos alkalmazások észlelése és letiltása (Zlink, AutoKit stb.)</string>
+    <string name="oem_app_explanation">A gyári kísérőalkalmazások gyakran blokkolják az USB és Bluetooth kapcsolatokat. Letilthatja őket Root vagy Self-ADB (5555-ös port) használatával.</string>
+    <string name="oem_app_backend_root">Végrehajtási mód: Root (su) elérhető</string>
+    <string name="oem_app_backend_adb">Végrehajtási mód: Self-ADB (127.0.0.1:5555) csatlakoztatva</string>
+    <string name="oem_app_backend_none">Végrehajtási mód: Nincs. Kapcsolja be a vezeték nélküli hibakeresést vagy futtassa az "adb tcpip 5555" parancsot</string>
+    <string name="oem_app_autokill_switch">Konfliktusos OEM alkalmazások automatikus letiltása indításkor</string>
+    <string name="oem_app_autokill_switch_desc">Elcsendesíti az ismert háttérfolyamatokat az Open Headunit indításakor.</string>
+    <string name="oem_app_autokill_enabled">Automatikus letiltás aktív</string>
+    <string name="oem_app_none_detected">Nem észlelhetők konfliktusos OEM alkalmazások.</string>
+    <string name="oem_app_btn_commands">Parancsok</string>
+    <string name="oem_app_btn_restore">Visszaállítás</string>
+    <string name="oem_app_btn_disable">Letiltás és leállítás</string>
+    <string name="oem_app_status_format">Telepítve: %1$s | Állapot: %2$s | Démon: %3$s</string>
+    <string name="oem_app_state_installed">Igen</string>
+    <string name="oem_app_state_not_installed">Nem</string>
+    <string name="oem_app_state_enabled">Engedélyezve</string>
+    <string name="oem_app_state_disabled">Letiltva</string>
+    <string name="oem_app_state_running">Fut</string>
+    <string name="oem_app_state_stopped">Leállítva</string>
+    <string name="oem_app_commands_title">Előkészített ADB / Shell parancsok</string>
+    <string name="oem_app_action_success">A parancs sikeresen lefutott.</string>
+    <string name="oem_app_action_failed">Végrehajtási hiba: %s</string>
+    <string name="copy_to_clipboard">Másolás</string>
+    <string name="copied_to_clipboard">Vágólapra másolva</string>
 </resources>
