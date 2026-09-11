@@ -1094,4 +1094,50 @@
     <string name="debug_video_low_latency">Запросить режим низкой задержки декодера</string>
     <string name="debug_video_low_latency_description">Устанавливает ключ MediaFormat низкой задержки производителя при настройке видеодекодера.</string>
     <string name="debug_video_feed_hold">Имитировать медленный декодер</string>
+
+    <string name="category_more_features">Дополнительные функции</string>
+    <string name="pref_enable_floating_button_title">Плавающая кнопка запуска</string>
+    <string name="pref_enable_floating_button_summary">Отображает плавающую кнопку поверх штатного лаунчера и других приложений для быстрого возврата в Open Headunit</string>
+    <string name="pref_floating_button_size_title">Размер плавающей кнопки</string>
+    <string name="pref_floating_button_opacity_title">Прозрачность плавающей кнопки</string>
+    <string name="pref_floating_button_x_title">Горизонтальное положение (X)</string>
+    <string name="pref_floating_button_y_title">Вертикальное положение (Y)</string>
+    <string name="pref_aa_exit_action_title">Действие при выходе из Android Auto</string>
+    <string name="pref_aa_exit_action_summary">Действие при нажатии «Выход» в списке приложений Android Auto</string>
+    <string name="aa_exit_action_oem_launcher">Возврат к штатному лаунчеру (Свернуть)</string>
+    <string name="aa_exit_action_app_home">Возврат на главный экран приложения</string>
+    <string name="aa_exit_action_disconnect">Отключить сессию</string>
+    <string name="logs_copied_to_clipboard">Логи скопированы в буфер обмена. Если файл превышал ~250 КБ, скопированы только начало и конец во избежание лимитов Android; полный лог сохранён в:
+%s</string>
+    <string name="logs_copy_to_clipboard_failed">Не удалось скопировать логи в буфер обмена</string>
+    <string name="connecting_driver">Запуск Android Auto с %s</string>
+    <string name="connecting_driver_disconnected">%s отключён, выполняется пробуждение...</string>
+    <string name="driver_device_disconnected">Отключён, будет активирован</string>
+    <string name="no_usb_host_support">Это головное устройство не поддерживает режим USB-хоста, поэтому проводной Android Auto недоступен. Используйте беспроводное подключение.</string>
+
+    <string name="oem_app_management">Управление конфликтами штатных приложений (ADB)</string>
+    <string name="oem_app_management_desc">Обнаружение и отключение конфликтующих приложений (Zlink, AutoKit и др.)</string>
+    <string name="oem_app_explanation">Штатные приложения часто перехватывают USB и Bluetooth соединения. Вы можете отключить их через Root или Self-ADB (порт 5555).</string>
+    <string name="oem_app_backend_root">Метод выполнения: Доступен Root (su)</string>
+    <string name="oem_app_backend_adb">Метод выполнения: Self-ADB (127.0.0.1:5555) подключён</string>
+    <string name="oem_app_backend_none">Метод выполнения: Нет. Включите беспроводную отладку или выполните "adb tcpip 5555"</string>
+    <string name="oem_app_autokill_switch">Автоматически отключать конфликтующие OEM-приложения при запуске</string>
+    <string name="oem_app_autokill_switch_desc">Останавливает конфликтующие службы и процессы при старте Open Headunit.</string>
+    <string name="oem_app_autokill_enabled">Автоотключение активно</string>
+    <string name="oem_app_none_detected">Конфликтующих OEM-приложений не обнаружено.</string>
+    <string name="oem_app_btn_commands">Команды</string>
+    <string name="oem_app_btn_restore">Восстановить</string>
+    <string name="oem_app_btn_disable">Отключить и остановить</string>
+    <string name="oem_app_status_format">Установлено: %1$s | Статус: %2$s | Демон: %3$s</string>
+    <string name="oem_app_state_installed">Да</string>
+    <string name="oem_app_state_not_installed">Нет</string>
+    <string name="oem_app_state_enabled">Включено</string>
+    <string name="oem_app_state_disabled">Отключено</string>
+    <string name="oem_app_state_running">Работает</string>
+    <string name="oem_app_state_stopped">Остановлено</string>
+    <string name="oem_app_commands_title">Подготовленные команды ADB / Shell</string>
+    <string name="oem_app_action_success">Команда успешно выполнена.</string>
+    <string name="oem_app_action_failed">Ошибка выполнения: %s</string>
+    <string name="copy_to_clipboard">Копировать</string>
+    <string name="copied_to_clipboard">Скопировано в буфер обмена</string>
 </resources>

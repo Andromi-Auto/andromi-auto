@@ -1090,4 +1090,50 @@
     <string name="debug_video_low_latency">Kod çözücü düşük gecikme modunu iste</string>
     <string name="debug_video_low_latency_description">Video kod çözücüyü yapılandırırken üreticinin düşük gecikmeli MediaFormat anahtarını ayarlar.</string>
     <string name="debug_video_feed_hold">Yavaş kod çözücüyü simüle et</string>
+
+    <string name="category_more_features">Daha Fazla Özellik</string>
+    <string name="pref_enable_floating_button_title">Kayan Başlatıcı Düğmesi</string>
+    <string name="pref_enable_floating_button_summary">Open Headunit\'e hızlıca dönmek için OEM başlatıcı ve diğer uygulamaların üzerinde kayan bir düğme gösterir</string>
+    <string name="pref_floating_button_size_title">Kayan Düğme Boyutu</string>
+    <string name="pref_floating_button_opacity_title">Kayan Düğme Opaklığı</string>
+    <string name="pref_floating_button_x_title">Yatay Konum (X)</string>
+    <string name="pref_floating_button_y_title">Dikey Konum (Y)</string>
+    <string name="pref_aa_exit_action_title">Android Auto Çıkış Eylemi</string>
+    <string name="pref_aa_exit_action_summary">Android Auto uygulama çekmecesinde Çıkış\'a dokunulduğunda yapılacak eylem</string>
+    <string name="aa_exit_action_oem_launcher">OEM Başlatıcıya Dön (Küçült)</string>
+    <string name="aa_exit_action_app_home">Uygulama Ana Sayfasına Dön</string>
+    <string name="aa_exit_action_disconnect">Oturumu Kapat</string>
+    <string name="logs_copied_to_clipboard">Günlükler panoya kopyalandı. Günlük ~250 KB\'tan büyükse Android pano sınırını aşmamak için yalnızca başı ve sonu kopyalandı; tam günlük şuraya kaydedildi:
+%s</string>
+    <string name="logs_copy_to_clipboard_failed">Günlükler panoya kopyalanamadı</string>
+    <string name="connecting_driver">%s ile Android Auto başlatılıyor</string>
+    <string name="connecting_driver_disconnected">%s bağlantısı kesildi, uyandırılıyor...</string>
+    <string name="driver_device_disconnected">Bağlantı kesildi, uyandırılacak</string>
+    <string name="no_usb_host_support">Bu ana ünite USB ana bilgisayar modunu desteklemiyor, bu nedenle kablolu Android Auto kullanılamaz. Lütfen kablosuz bağlantı kullanın.</string>
+
+    <string name="oem_app_management">OEM Uygulama Çakışma Yönetimi (ADB)</string>
+    <string name="oem_app_management_desc">Çakışan uygulamaları algılayıp devre dışı bırakın (Zlink, AutoKit vb.)</string>
+    <string name="oem_app_explanation">Fabrika çıkışı uygulamalar USB ve Bluetooth bağlantılarını kesebilir. Bunları Root veya Self-ADB (port 5555) ile kapatabilirsiniz.</string>
+    <string name="oem_app_backend_root">Yürütme yöntemi: Root (su) mevcut</string>
+    <string name="oem_app_backend_adb">Yürütme yöntemi: Self-ADB (127.0.0.1:5555) bağlı</string>
+    <string name="oem_app_backend_none">Yürütme yöntemi: Yok. Kablosuz Hata Ayıklamayı açın veya "adb tcpip 5555" çalıştırın</string>
+    <string name="oem_app_autokill_switch">Başlangıçta çakışan OEM uygulamalarını otomatik devre dışı bırak</string>
+    <string name="oem_app_autokill_switch_desc">Open Headunit başladığında çakışan uygulamaları ve servisleri susturur.</string>
+    <string name="oem_app_autokill_enabled">Otomatik devre dışı bırakma etkin</string>
+    <string name="oem_app_none_detected">Çakışan OEM uygulaması algılanmadı.</string>
+    <string name="oem_app_btn_commands">Komutlar</string>
+    <string name="oem_app_btn_restore">Geri Yükle</string>
+    <string name="oem_app_btn_disable">Devre Dışı Bırak ve Durdur</string>
+    <string name="oem_app_status_format">Yüklü: %1$s | Durum: %2$s | Daemon: %3$s</string>
+    <string name="oem_app_state_installed">Evet</string>
+    <string name="oem_app_state_not_installed">Hayır</string>
+    <string name="oem_app_state_enabled">Etkin</string>
+    <string name="oem_app_state_disabled">Devre dışı</string>
+    <string name="oem_app_state_running">Çalışıyor</string>
+    <string name="oem_app_state_stopped">Durduruldu</string>
+    <string name="oem_app_commands_title">Hazırlanmış ADB / Kabuk Komutları</string>
+    <string name="oem_app_action_success">Komut başarıyla çalıştırıldı.</string>
+    <string name="oem_app_action_failed">Yürütme başarısız: %s</string>
+    <string name="copy_to_clipboard">Kopyala</string>
+    <string name="copied_to_clipboard">Panoya kopyalandı</string>
 </resources>

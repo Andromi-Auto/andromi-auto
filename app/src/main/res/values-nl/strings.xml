@@ -1095,4 +1095,50 @@
     <string name="debug_video_low_latency">Lage-latentiemodus van decoder aanvragen</string>
     <string name="debug_video_low_latency_description">Stelt de propriëtaire MediaFormat-sleutel voor lage latentie in bij het configureren van de videodecoder.</string>
     <string name="debug_video_feed_hold">Trage decoder simuleren</string>
+
+    <string name="category_more_features">Meer functies</string>
+    <string name="pref_enable_floating_button_title">Zwevende startknop</string>
+    <string name="pref_enable_floating_button_summary">Toont een zwevende knop over het OEM-startscherm en andere apps om snel terug te keren naar Open Headunit</string>
+    <string name="pref_floating_button_size_title">Grootte van zwevende knop</string>
+    <string name="pref_floating_button_opacity_title">Transparantie van zwevende knop</string>
+    <string name="pref_floating_button_x_title">Horizontale positie (X)</string>
+    <string name="pref_floating_button_y_title">Verticale positie (Y)</string>
+    <string name="pref_aa_exit_action_title">Actie bij afsluiten Android Auto</string>
+    <string name="pref_aa_exit_action_summary">Actie bij aantikken van Afsluiten in de app-lade van Android Auto</string>
+    <string name="aa_exit_action_oem_launcher">Terug naar OEM-startscherm (Minimaliseren)</string>
+    <string name="aa_exit_action_app_home">Terug naar app-startscherm</string>
+    <string name="aa_exit_action_disconnect">Sessie verbreken</string>
+    <string name="logs_copied_to_clipboard">Logboeken gekopieerd naar klembord. Was het log groter dan ~250 KB, dan zijn alleen begin en einde gekopieerd om onder de Android-limiet te blijven; het volledige bestand staat in:
+%s</string>
+    <string name="logs_copy_to_clipboard_failed">Kopiëren van logboeken naar klembord mislukt</string>
+    <string name="connecting_driver">Android Auto starten met %s</string>
+    <string name="connecting_driver_disconnected">%s is niet verbonden, bezig met activeren...</string>
+    <string name="driver_device_disconnected">Verbroken, wordt geactiveerd</string>
+    <string name="no_usb_host_support">Deze headunit ondersteunt geen USB-hostmodus; bekabelde Android Auto is niet beschikbaar. Gebruik een draadloze verbinding.</string>
+
+    <string name="oem_app_management">OEM-app conflictbeheer (ADB)</string>
+    <string name="oem_app_management_desc">Conflicterende apps detecteren en uitschakelen (Zlink, AutoKit, etc.)</string>
+    <string name="oem_app_explanation">Fabrieks-apps vangen vaak USB- en Bluetooth-verbindingen af. Je kunt ze uitschakelen via Root of Self-ADB (poort 5555).</string>
+    <string name="oem_app_backend_root">Uitvoeringsmethode: Root (su) beschikbaar</string>
+    <string name="oem_app_backend_adb">Uitvoeringsmethode: Self-ADB (127.0.0.1:5555) verbonden</string>
+    <string name="oem_app_backend_none">Uitvoeringsmethode: Geen. Schakel draadloos debuggen in of voer "adb tcpip 5555" uit</string>
+    <string name="oem_app_autokill_switch">Conflicterende OEM-apps automatisch uitschakelen bij opstarten</string>
+    <string name="oem_app_autokill_switch_desc">Onderdrukt bekende conflicterende apps en daemons bij het starten van Open Headunit.</string>
+    <string name="oem_app_autokill_enabled">Automatisch uitschakelen actief</string>
+    <string name="oem_app_none_detected">Geen conflicterende OEM-apps gevonden.</string>
+    <string name="oem_app_btn_commands">Opdrachten</string>
+    <string name="oem_app_btn_restore">Herstellen</string>
+    <string name="oem_app_btn_disable">Uitschakelen en stoppen</string>
+    <string name="oem_app_status_format">Geïnstalleerd: %1$s | Status: %2$s | Daemon: %3$s</string>
+    <string name="oem_app_state_installed">Ja</string>
+    <string name="oem_app_state_not_installed">Nee</string>
+    <string name="oem_app_state_enabled">Ingeschakeld</string>
+    <string name="oem_app_state_disabled">Uitgeschakeld</string>
+    <string name="oem_app_state_running">Actief</string>
+    <string name="oem_app_state_stopped">Gestopt</string>
+    <string name="oem_app_commands_title">Voorbereide ADB- / Shell-opdrachten</string>
+    <string name="oem_app_action_success">Opdracht succesvol uitgevoerd.</string>
+    <string name="oem_app_action_failed">Uitvoering mislukt: %s</string>
+    <string name="copy_to_clipboard">Kopiëren</string>
+    <string name="copied_to_clipboard">Gekopieerd naar klembord</string>
 </resources>

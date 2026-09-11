@@ -435,7 +435,7 @@ object LogExporter {
 
     // Capped at 250 KB to guarantee safe Android Binder IPC transaction limits on older
     // Android versions (Android 4.1 - 7.x have a shared 1 MB process-wide Binder buffer).
-    private const val CLIPBOARD_SAFE_LIMIT_BYTES = 250 * 1024
+    internal const val CLIPBOARD_SAFE_LIMIT_BYTES = 250 * 1024
 
     suspend fun copyLogToClipboard(context: Context, verbosity: LogLevel): Boolean = withContext(Dispatchers.IO) {
         if (verbosity == LogLevel.SILENT) {
@@ -460,7 +460,7 @@ object LogExporter {
         }
     }
 
-    private fun readLogFileForClipboard(file: File): String {
+    internal fun readLogFileForClipboard(file: File): String {
         val fileLen = file.length()
         if (fileLen <= CLIPBOARD_SAFE_LIMIT_BYTES) {
             return file.readText(Charsets.UTF_8)

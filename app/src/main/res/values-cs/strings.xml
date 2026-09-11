@@ -1095,4 +1095,50 @@
     <string name="debug_video_low_latency">Požádat o režim nízké latence dekodéru</string>
     <string name="debug_video_low_latency_description">Nastaví klíč MediaFormat nízké latence výrobce při konfiguraci videodekodéru.</string>
     <string name="debug_video_feed_hold">Simulovat pomalý dekodér</string>
+
+    <string name="category_more_features">Další funkce</string>
+    <string name="pref_enable_floating_button_title">Plovoucí tlačítko spouštěče</string>
+    <string name="pref_enable_floating_button_summary">Zobrazí plovoucí tlačítko nad OEM spouštěčem a jinými aplikacemi pro rychlý návrat do Open Headunit</string>
+    <string name="pref_floating_button_size_title">Velikost plovoucího tlačítka</string>
+    <string name="pref_floating_button_opacity_title">Průhlednost plovoucího tlačítka</string>
+    <string name="pref_floating_button_x_title">Vodorovná pozice (X)</string>
+    <string name="pref_floating_button_y_title">Svislá pozice (Y)</string>
+    <string name="pref_aa_exit_action_title">Akce při ukončení Android Auto</string>
+    <string name="pref_aa_exit_action_summary">Akce po klepnutí na Ukončit v nabídce aplikací Android Auto</string>
+    <string name="aa_exit_action_oem_launcher">Návrat do OEM spouštěče (Minimalizovat)</string>
+    <string name="aa_exit_action_app_home">Návrat na domovskou obrazovku aplikace</string>
+    <string name="aa_exit_action_disconnect">Odpojit relaci</string>
+    <string name="logs_copied_to_clipboard">Protokoly zkopírovány do schránky. Pokud byl soubor větší než ~250 KB, byl zkopírován pouze začátek a konec kvůli limitu schránky Androidu; celý protokol je v:
+%s</string>
+    <string name="logs_copy_to_clipboard_failed">Kopírování protokolů do schránky se nezdařilo</string>
+    <string name="connecting_driver">Spouštění Android Auto s %s</string>
+    <string name="connecting_driver_disconnected">%s je odpojen, probouzí se...</string>
+    <string name="driver_device_disconnected">Odpojeno, bude probuzeno</string>
+    <string name="no_usb_host_support">Tato hlavní jednotka nepodporuje režim USB hostitele, kabelové Android Auto není k dispozici. Použijte bezdrátové připojení.</string>
+
+    <string name="oem_app_management">Správa konfliktů OEM aplikací (ADB)</string>
+    <string name="oem_app_management_desc">Zjištění a zakázání konfliktních aplikací (Zlink, AutoKit atd.)</string>
+    <string name="oem_app_explanation">Tovární aplikace často blokují připojení USB a Bluetooth. Můžete je zakázat pomocí Root nebo Self-ADB (port 5555).</string>
+    <string name="oem_app_backend_root">Způsob spuštění: K dispozici Root (su)</string>
+    <string name="oem_app_backend_adb">Způsob spuštění: Self-ADB (127.0.0.1:5555) připojeno</string>
+    <string name="oem_app_backend_none">Způsob spuštění: Žádný. Povolte bezdrátové ladění nebo spusťte "adb tcpip 5555"</string>
+    <string name="oem_app_autokill_switch">Automaticky zakázat konfliktní OEM aplikace při spuštění</string>
+    <string name="oem_app_autokill_switch_desc">Umlčí známé konfliktní aplikace a démony při spuštění Open Headunit.</string>
+    <string name="oem_app_autokill_enabled">Automatické zakázání aktivní</string>
+    <string name="oem_app_none_detected">Nebyly zjištěny žádné konfliktní OEM aplikace.</string>
+    <string name="oem_app_btn_commands">Příkazy</string>
+    <string name="oem_app_btn_restore">Obnovit</string>
+    <string name="oem_app_btn_disable">Zakázat a zastavit</string>
+    <string name="oem_app_status_format">Nainstalováno: %1$s | Stav: %2$s | Démon: %3$s</string>
+    <string name="oem_app_state_installed">Ano</string>
+    <string name="oem_app_state_not_installed">Ne</string>
+    <string name="oem_app_state_enabled">Povoleno</string>
+    <string name="oem_app_state_disabled">Zakázáno</string>
+    <string name="oem_app_state_running">Spuštěno</string>
+    <string name="oem_app_state_stopped">Zastaveno</string>
+    <string name="oem_app_commands_title">Připravené ADB / Shell příkazy</string>
+    <string name="oem_app_action_success">Příkaz byl úspěšně proveden.</string>
+    <string name="oem_app_action_failed">Provedení selhalo: %s</string>
+    <string name="copy_to_clipboard">Kopírovat</string>
+    <string name="copied_to_clipboard">Zkopírováno do schránky</string>
 </resources>

@@ -1121,4 +1121,28 @@
     <string name="oem_app_action_failed">Ausführung fehlgeschlagen: %s</string>
     <string name="copy_to_clipboard">Kopieren</string>
     <string name="copied_to_clipboard">In Zwischenablage kopiert</string>
+
+    <!-- More Features & Floating Button -->
+    <string name="category_more_features">Weitere Funktionen</string>
+    <string name="pref_enable_floating_button_title">Schwebender Launcher-Button</string>
+    <string name="pref_enable_floating_button_summary">Zeigt einen schwebenden Button über dem OEM-Launcher und anderen Apps an, um schnell zu Open Headunit zurückzukehren</string>
+    <string name="pref_floating_button_size_title">Größe des schwebenden Buttons</string>
+    <string name="pref_floating_button_opacity_title">Deckkraft des schwebenden Buttons</string>
+    <string name="pref_floating_button_x_title">Horizontale Position (X)</string>
+    <string name="pref_floating_button_y_title">Vertikale Position (Y)</string>
+    <string name="pref_aa_exit_action_title">Aktion beim Beenden von Android Auto</string>
+    <string name="pref_aa_exit_action_summary">Aktion beim Antippen von „Beenden“ in der App-Übersicht von Android Auto</string>
+    <string name="aa_exit_action_oem_launcher">Zurück zum OEM-Launcher (Minimieren)</string>
+    <string name="aa_exit_action_app_home">Zurück zum App-Hauptmenü</string>
+    <string name="aa_exit_action_disconnect">Verbindung trennen</string>
+
+    <!-- Logs & Clipboard -->
+    <string name="logs_copied_to_clipboard">Logs in die Zwischenablage kopiert. War das Log größer als ~250 KB, wurden Anfang und Ende kopiert, um das Android-Clipboard-Limit einzuhalten; die vollständige Log-Datei ist gespeichert unter:\n%s</string>
+    <string name="logs_copy_to_clipboard_failed">Fehler beim Kopieren der Logs in die Zwischenablage</string>
+
+    <!-- Driver & USB Host -->
+    <string name="connecting_driver">Android Auto wird mit %s gestartet</string>
+    <string name="connecting_driver_disconnected">%s ist getrennt, wird geweckt...</string>
+    <string name="driver_device_disconnected">Getrennt, wird geweckt</string>
+    <string name="no_usb_host_support">Dieses Radio unterstützt keinen USB-Host-Modus, daher ist kabelgebundenes Android Auto nicht verfügbar. Bitte stattdessen eine kabellose Verbindung nutzen.</string>
 </resources>

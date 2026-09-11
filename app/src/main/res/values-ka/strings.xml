@@ -1076,4 +1076,50 @@
     <string name="debug_video_low_latency">დეკოდერის დაბალი დაყოვნების რეჟიმის მოთხოვნა</string>
     <string name="debug_video_low_latency_description">აყენებს მწარმოებლის დაბალი დაყოვნების MediaFormat გასაღებს ვიდეო დეკოდერის კონფიგურაციისას.</string>
     <string name="debug_video_feed_hold">ნელი დეკოდერის სიმულაცია</string>
+
+    <string name="category_more_features">მეტი ფუნქცია</string>
+    <string name="pref_enable_floating_button_title">მცურავი ღილაკი</string>
+    <string name="pref_enable_floating_button_summary">აჩვენებს მცურავ ღილაკს სისტემურ ლაუნჩერსა და აპებზე Open Headunit-ში სწრაფად დასაბრუნებლად</string>
+    <string name="pref_floating_button_size_title">მცურავი ღილაკის ზომა</string>
+    <string name="pref_floating_button_opacity_title">მცურავი ღილაკის გამჭვირვალობა</string>
+    <string name="pref_floating_button_x_title">ჰორიზონტალური პოზიცია (X)</string>
+    <string name="pref_floating_button_y_title">ვერტიკალური პოზიცია (Y)</string>
+    <string name="pref_aa_exit_action_title">Android Auto-დან გასვლის მოქმედება</string>
+    <string name="pref_aa_exit_action_summary">მოქმედება Android Auto-ს მენიუში გასვლაზე დაჭერისას</string>
+    <string name="aa_exit_action_oem_launcher">სისტემურ ლაუნჩერზე დაბრუნება (ჩაკეცვა)</string>
+    <string name="aa_exit_action_app_home">აპლიკაციის მთავარზე დაბრუნება</string>
+    <string name="aa_exit_action_disconnect">სესიის გათიშვა</string>
+    <string name="logs_copied_to_clipboard">ჟურნალი დაკოპირდა ბუფერში. თუ ფაილი აღემატებოდა ~250 კბ-ს, დაკოპირდა მხოლოდ დასაწყისი და დასასრული Android-ის ლიმიტის გამო; სრული ჟურნალი შენახულია:
+%s</string>
+    <string name="logs_copy_to_clipboard_failed">ჟურნალის ბუფერში კოპირება ვერ მოხერხდა</string>
+    <string name="connecting_driver">Android Auto-ს გაშვება %s-ით</string>
+    <string name="connecting_driver_disconnected">%s გათიშულია, ხდება გამოღვიძება...</string>
+    <string name="driver_device_disconnected">გათიშულია, გაიღვიძებს</string>
+    <string name="no_usb_host_support">ამ მოწყობილობას არ აქვს USB მასპინძლის (Host) მხარდაჭერა, ამიტომ სადენიანი Android Auto მიუწვდომელია. გამოიყენეთ უსადენო კავშირი.</string>
+
+    <string name="oem_app_management">OEM აპების კონფლიქტების მართვა (ADB)</string>
+    <string name="oem_app_management_desc">კონფლიქტური აპების გამოვლენა და გათიშვა (Zlink, AutoKit და ა.შ.)</string>
+    <string name="oem_app_explanation">ქარხნული აპლიკაციები ხშირად იკავებენ USB და Bluetooth კავშირებს. შეგიძლიათ გათიშოთ Root-ით ან Self-ADB-ით (პორტი 5555).</string>
+    <string name="oem_app_backend_root">შესრულების მეთოდი: Root (su) ხელმისაწვდომია</string>
+    <string name="oem_app_backend_adb">შესრულების მეთოდი: Self-ADB (127.0.0.1:5555) დაკავშირებულია</string>
+    <string name="oem_app_backend_none">შესრულების მეთოდი: არ არის. ჩართეთ Wireless Debugging ან გაუშვით "adb tcpip 5555"</string>
+    <string name="oem_app_autokill_switch">კონფლიქტური OEM აპების ავტო-გათიშვა გაშვებისას</string>
+    <string name="oem_app_autokill_switch_desc">აჩუმებს ცნობილ კონფლიქტურ აპებსა და პროცესებს Open Headunit-ის გაშვებისას.</string>
+    <string name="oem_app_autokill_enabled">ავტო-გათიშვა აქტიურია</string>
+    <string name="oem_app_none_detected">კონფლიქტური OEM აპლიკაციები არ მოიძებნა.</string>
+    <string name="oem_app_btn_commands">ბრძანებები</string>
+    <string name="oem_app_btn_restore">აღდგენა</string>
+    <string name="oem_app_btn_disable">გათიშვა და შეჩერება</string>
+    <string name="oem_app_status_format">დაინსტალირებულია: %1$s | სტატუსი: %2$s | პროცესი: %3$s</string>
+    <string name="oem_app_state_installed">დიახ</string>
+    <string name="oem_app_state_not_installed">არა</string>
+    <string name="oem_app_state_enabled">ჩართულია</string>
+    <string name="oem_app_state_disabled">გათიშულია</string>
+    <string name="oem_app_state_running">მუშაობს</string>
+    <string name="oem_app_state_stopped">შეჩერებულია</string>
+    <string name="oem_app_commands_title">მომზადებული ADB / Shell ბრძანებები</string>
+    <string name="oem_app_action_success">ბრძანება წარმატებით შესრულდა.</string>
+    <string name="oem_app_action_failed">შესრულება ვერ მოხერხდა: %s</string>
+    <string name="copy_to_clipboard">კოპირება</string>
+    <string name="copied_to_clipboard">დაკოპირდა ბუფერში</string>
 </resources>

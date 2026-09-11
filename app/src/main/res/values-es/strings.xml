@@ -1104,4 +1104,49 @@
     <string name="debug_video_low_latency">Solicitar modo de baja latencia del decodificador</string>
     <string name="debug_video_low_latency_description">Establece la clave MediaFormat de baja latencia del fabricante al configurar el decodificador de vídeo. Vuelve atrás automáticamente si el decodificador la rechaza.</string>
     <string name="debug_video_feed_hold">Simular decodificador lento</string>
+
+    <string name="category_more_features">Más funciones</string>
+    <string name="pref_enable_floating_button_title">Botón flotante del iniciador</string>
+    <string name="pref_enable_floating_button_summary">Muestra un botón flotante sobre el iniciador OEM y otras apps para volver rápidamente a Open Headunit</string>
+    <string name="pref_floating_button_size_title">Tamaño del botón flotante</string>
+    <string name="pref_floating_button_opacity_title">Opacidad del botón flotante</string>
+    <string name="pref_floating_button_x_title">Posición horizontal (X)</string>
+    <string name="pref_floating_button_y_title">Posición vertical (Y)</string>
+    <string name="pref_aa_exit_action_title">Acción al salir de Android Auto</string>
+    <string name="pref_aa_exit_action_summary">Acción al pulsar Salir dentro del menú de apps de Android Auto</string>
+    <string name="aa_exit_action_oem_launcher">Volver al iniciador OEM (Minimizar)</string>
+    <string name="aa_exit_action_app_home">Volver al inicio de la app</string>
+    <string name="aa_exit_action_disconnect">Desconectar sesión</string>
+    <string name="logs_copied_to_clipboard">Registros copiados al portapapeles. Si superaban ~250 KB, solo se copiaron el inicio y el final para no exceder el límite de Android; el registro completo está en:
+%s</string>
+    <string name="logs_copy_to_clipboard_failed">Error al copiar los registros al portapapeles</string>
+    <string name="connecting_driver">Iniciando Android Auto con %s</string>
+    <string name="connecting_driver_disconnected">%s está desconectado, activando...</string>
+    <string name="driver_device_disconnected">Desconectado, se activará</string>
+
+    <string name="oem_app_management">Gestión de conflictos de apps OEM (ADB)</string>
+    <string name="oem_app_management_desc">Detectar y deshabilitar apps en conflicto (Zlink, AutoKit, etc.)</string>
+    <string name="oem_app_explanation">Las apps de fábrica (p. ej. Zlink, AutoKit, SpeedPlay) a menudo interceptan conexiones USB y Bluetooth. Puedes deshabilitarlas mediante Root o Self-ADB (puerto 5555).</string>
+    <string name="oem_app_backend_root">Método de ejecución: Root (su) disponible</string>
+    <string name="oem_app_backend_adb">Método de ejecución: Self-ADB (127.0.0.1:5555) conectado</string>
+    <string name="oem_app_backend_none">Método de ejecución: Ninguno. Activa depuración inalámbrica o ejecuta "adb tcpip 5555"</string>
+    <string name="oem_app_autokill_switch">Deshabilitar apps OEM en conflicto al inicio</string>
+    <string name="oem_app_autokill_switch_desc">Silencia apps y daemons conocidos en conflicto al iniciar Open Headunit.</string>
+    <string name="oem_app_autokill_enabled">Deshabilitación automática activa</string>
+    <string name="oem_app_none_detected">No se detectaron apps OEM en conflicto.</string>
+    <string name="oem_app_btn_commands">Comandos</string>
+    <string name="oem_app_btn_restore">Restaurar</string>
+    <string name="oem_app_btn_disable">Deshabilitar y detener</string>
+    <string name="oem_app_status_format">Instalada: %1$s | Estado: %2$s | Daemon: %3$s</string>
+    <string name="oem_app_state_installed">Sí</string>
+    <string name="oem_app_state_not_installed">No</string>
+    <string name="oem_app_state_enabled">Habilitada</string>
+    <string name="oem_app_state_disabled">Deshabilitada</string>
+    <string name="oem_app_state_running">En ejecución</string>
+    <string name="oem_app_state_stopped">Detenida</string>
+    <string name="oem_app_commands_title">Comandos ADB / Shell preparados</string>
+    <string name="oem_app_action_success">Comando ejecutado con éxito.</string>
+    <string name="oem_app_action_failed">Error de ejecución: %s</string>
+    <string name="copy_to_clipboard">Copiar</string>
+    <string name="copied_to_clipboard">Copiado al portapapeles</string>
 </resources>

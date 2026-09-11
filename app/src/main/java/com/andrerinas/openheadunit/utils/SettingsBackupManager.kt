@@ -44,14 +44,14 @@ object SettingsBackupManager {
         val changedKeys: Set<String>
     )
 
-    private enum class ValueType {
+    internal enum class ValueType {
         BOOLEAN,
         INT,
         STRING,
         STRING_SET
     }
 
-    private val backupKeys = linkedMapOf(
+    internal val backupKeys = linkedMapOf(
         "allow-devices" to ValueType.STRING_SET,
         "network-addresses" to ValueType.STRING_SET,
         "bt-address" to ValueType.STRING,
