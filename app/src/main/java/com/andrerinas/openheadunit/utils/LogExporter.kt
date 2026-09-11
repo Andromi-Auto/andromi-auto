@@ -433,7 +433,9 @@ object LogExporter {
         context.startActivity(chooser)
     }
 
-    private const val CLIPBOARD_SAFE_LIMIT_BYTES = 800 * 1024
+    // Capped at 250 KB to guarantee safe Android Binder IPC transaction limits on older
+    // Android versions (Android 4.1 - 7.x have a shared 1 MB process-wide Binder buffer).
+    private const val CLIPBOARD_SAFE_LIMIT_BYTES = 250 * 1024
 
     suspend fun copyLogToClipboard(context: Context, verbosity: LogLevel): Boolean = withContext(Dispatchers.IO) {
         if (verbosity == LogLevel.SILENT) {
@@ -463,8 +465,8 @@ object LogExporter {
         if (fileLen <= CLIPBOARD_SAFE_LIMIT_BYTES) {
             return file.readText(Charsets.UTF_8)
         }
-        val headBytes = CLIPBOARD_SAFE_LIMIT_BYTES / 4
-        val tailBytes = 3 * CLIPBOARD_SAFE_LIMIT_BYTES / 4
+        val headBytes = 50 * 1024L
+        val tailBytes = (CLIPBOARD_SAFE_LIMIT_BYTES - headBytes).coerceAtLeast(0L)
         val head = FileInputStream(file).use { fis ->
             val buf = ByteArray(headBytes.toInt())
             var read = 0
@@ -477,14 +479,19 @@ object LogExporter {
         }
         val skipAmount = (fileLen - tailBytes).coerceAtLeast(0L)
         val tail = FileInputStream(file).use { fis ->
-            fis.skip(skipAmount)
+            var skipped = 0L
+            while (skipped < skipAmount) {
+                val n = fis.skip(skipAmount - skipped)
+                if (n <= 0) break
+                skipped += n
+            }
             fis.reader(Charsets.UTF_8).readText()
         }
         val kbTotal = fileLen / 1024
         val kbCopied = CLIPBOARD_SAFE_LIMIT_BYTES / 1024
         val omittedBytes = (fileLen - headBytes - tailBytes).coerceAtLeast(0L)
         return buildString {
-            append("[TRUNCATED for clipboard: full log is ${kbTotal} KB; only first ~${kbCopied} KB shown below.]\n")
+            append("[TRUNCATED for clipboard: full log is ${kbTotal} KB; only ~${kbCopied} KB shown below.]\n")
             append("=== BEGINNING OF LOG ===\n")
             append(head)
             append("\n\n=== [${String.format("%,d", omittedBytes)} bytes omitted in the middle] ===\n\n")
