@@ -282,7 +282,7 @@
     <string name="separate_audio_streams">音声ストリームの分離</string>
     <string name="separate_audio_streams_description">「メディア」「音声案内」「システム音」の各チャンネルに、共有の 1 つのマルチメディアストリームではなく専用の出力ストリームを割り当てます（一部の端末では正しく動作しない場合があります）。</string>
     <string name="use_aac_audio">AAC Audioを利用する</string>
-    <string name="use_aac_audio_description">帯域幅を節約するために、音声にAACコーデックを使用します（実験的機能）。</string>
+    <string name="use_aac_audio_description">帯域幅を節約するために、音声にAACコーデックを使用します（実験的機能）。2.4 GHzで動作するワイヤレスセッションでは、\"2.4 GHzの回線では映像を下げる\"がオンになっている間、この設定は自動的にオンになります。</string>
     <string name="attach_hw_dsp_equalizer">ハードウェアDSPイコライザートリガー</string>
     <string name="attach_hw_dsp_equalizer_description">オーディオセッションにダミーのイコライザーエフェクトをアタッチし、一部のヘッドユニットでハードウェアDSPルーティングを強制します。ViPER4Android / ViperFXを使用している場合や、古いAndroidで音声がこもる場合は無効にしてください。</string>
     <string name="audio_volume_offset">オーディオボリュームオフセット</string>
@@ -975,8 +975,8 @@
     <string name="connection_issue_banner_wifi_direct_refused">このユニットのWiFiはスマートフォンが接続しようとしたWiFi Directネットワークを作成できず、アプリ側で強制することもできません。このユニットが別のWiFiネットワークに接続されている場合は、切断してみてください。タップしてこのユニット独自のホットスポットを代わりに使用します。</string>
     <string name="connection_issue_banner_wifi_direct_cycled">このユニット上の別のアプリがWiFi Directのオンとオフを繰り返しているため、スマートフォンが接続するネットワークを作成できません。原因は多くの場合プリインストールのミラーリングアプリ（CarLife、ZLink、CarPlayなど）で、無効化を試す価値があります。タップしてこのユニット自身のホットスポットを使用します。</string>
     <string name="connection_issue_banner_hotspot_config">ホットスポット名とパスワードを取得できませんでした。タップして手動で入力してください。</string>
-    <string name="narrow_band_profile_cap">2.4 GHzのみの無線では映像を下げる</string>
-    <string name="narrow_band_profile_cap_description">このユニットのWiFiに5 GHz帯がない場合、上の設定ではなく最大720p、30 fpsをスマートフォンに要求します。この種の回線では、フルレートの映像がまったく届かない一方、低いレートでは維持されることが確認されています。設定どおりの値を使いたい場合はオフにしてください。</string>
+    <string name="narrow_band_profile_cap">2.4 GHzの回線では映像を下げる</string>
+    <string name="narrow_band_profile_cap_description">このセッションが2.4 GHzで動作している場合、このユニットのWiFiに5 GHz帯がないためであれ、ネットワークがそちらで確立されたためであれ、上記の設定ではなく最大720p、30 fps、およびAAC音声をスマートフォンに要求します。この種の回線では、フルレートの映像がまったく届かない一方、低いレートでは維持されることが確認されています。設定どおりの値を使いたい場合はオフにしてください。</string>
     <string name="connection_issue_banner_video_link_too_slow">スマートフォンが1フレームも届かないうちに映像を断念する状態が数回続きました。WiFi回線が映像を運ぶには遅すぎます。タップするとFPS上限を30に下げます。解像度を下げることやAAC音声も有効です。</string>
     <string name="connection_issue_banner_five_ghz_channel_refused">この機器は選択したどの5 GHzチャンネルでもWiFi Directネットワークを作成せず、自身のWi-Fiドライバーが選んだチャンネルで開始しました。そのチャンネルは、規制の厳しい国のスマートフォンからは見えないことがよくあります。タップしてWiFi Directの帯域を2.4 GHzに設定してください。すべての国で許可されていますが、1080pではなく720pになります。</string>
     <string name="connection_issue_banner_dismiss">閉じる</string>

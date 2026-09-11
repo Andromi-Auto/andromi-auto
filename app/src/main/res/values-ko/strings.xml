@@ -294,7 +294,7 @@
     <string name="separate_audio_streams">오디오 스트림 분리</string>
     <string name="separate_audio_streams_description">미디어, 안내 음성, 시스템 사운드 채널에 공용 멀티미디어 스트림 하나 대신 각각의 출력 스트림을 지정합니다(일부 기기에서는 제대로 작동하지 않을 수 있습니다).</string>
     <string name="use_aac_audio">AAC 오디오 사용</string>
-    <string name="use_aac_audio_description">대역폭 절약을 위해 오디오에 AAC 코덱을 사용합니다(실험적).</string>
+    <string name="use_aac_audio_description">대역폭 절약을 위해 오디오에 AAC 코덱을 사용합니다(실험적). 2.4GHz에서 실행되는 무선 세션에서는 \"2.4GHz 연결에서 영상 낮추기\"가 켜져 있는 동안 이 설정이 자동으로 켜집니다.</string>
     <string name="attach_hw_dsp_equalizer">하드웨어 DSP 이퀄라이저 트리거</string>
     <string name="attach_hw_dsp_equalizer_description">오디오 세션에 더미 이퀄라이저 효과를 연결하여 특정 헤드유닛에서 하드웨어 DSP 라우팅을 강제합니다. ViPER4Android / ViperFX를 사용 중이거나 이전 안드로이드 버전에서 소리가 먹먹하게 들리는 경우 비활성화 상태로 유지하세요.</string>
     <string name="audio_volume_offset">오디오 볼륨 보정</string>
@@ -968,8 +968,8 @@
     <string name="connection_issue_banner_wifi_direct_refused">이 기기의 WiFi가 휴대전화가 연결하려는 WiFi Direct 네트워크를 생성하지 못했으며, 앱에서 이를 강제할 수 없습니다. 기기가 다른 WiFi 네트워크에 연결되어 있다면 연결을 해제해 보세요. 이 기기의 자체 핫스팟을 대신 사용하려면 탭하세요.</string>
     <string name="connection_issue_banner_wifi_direct_cycled">이 기기의 다른 앱이 WiFi Direct를 계속 껐다 켜고 있어 휴대전화가 연결할 네트워크를 만들 수 없습니다. 보통 기본 설치된 미러링 앱(CarLife, ZLink, CarPlay 등)이 원인이며, 비활성화해 볼 만합니다. 이 기기의 자체 핫스팟을 대신 사용하려면 탭하세요.</string>
     <string name="connection_issue_banner_hotspot_config">핫스팟 이름과 비밀번호를 읽을 수 없습니다. 직접 입력하려면 탭하세요.</string>
-    <string name="narrow_band_profile_cap">2.4GHz 전용 무선에서 영상 낮추기</string>
-    <string name="narrow_band_profile_cap_description">이 기기의 WiFi에 5GHz 대역이 없으면 위 설정 대신 최대 720p, 30fps를 휴대전화에 요청합니다. 이런 연결에서는 최대 속도 스트림이 화면을 전혀 전달하지 못하고 낮춘 스트림은 유지되는 것으로 측정되었습니다. 설정한 값 그대로 받으려면 끄세요.</string>
+    <string name="narrow_band_profile_cap">2.4GHz 연결에서 영상 낮추기</string>
+    <string name="narrow_band_profile_cap_description">이 세션이 2.4GHz에서 실행 중이면, 이 기기의 WiFi에 5GHz 대역이 없어서든 네트워크가 그쪽에서 형성되어서든, 위 설정 대신 최대 720p, 30fps, 그리고 AAC 오디오를 휴대전화에 요청합니다. 이런 연결에서는 최대 속도 스트림이 화면을 전혀 전달하지 못하고 낮춘 스트림은 유지되는 것으로 측정되었습니다. 설정한 값 그대로 받으려면 끄세요.</string>
     <string name="connection_issue_banner_video_link_too_slow">휴대전화가 프레임이 하나도 도착하기 전에 영상을 포기하는 일이 연달아 여러 번 있었습니다. WiFi 연결이 화면을 전달하기에 너무 느립니다. 탭하면 FPS 제한을 30으로 낮춥니다. 해상도를 낮추거나 AAC 오디오를 쓰는 것도 도움이 됩니다.</string>
     <string name="connection_issue_banner_five_ghz_channel_refused">이 기기는 선택한 어떤 5GHz 채널에도 WiFi Direct 네트워크를 올리지 않고, 자체 Wi-Fi 드라이버가 고른 채널에서 시작했습니다. 그 채널은 규제가 엄격한 국가의 휴대폰에서는 아예 보이지 않는 경우가 많습니다. 탭하여 WiFi Direct 대역을 모든 국가에서 허용되는 2.4GHz로 설정하세요. 이 대역에서는 1080p가 아닌 720p로 예상됩니다.</string>
     <string name="connection_issue_banner_dismiss">닫기</string>

@@ -257,7 +257,7 @@
     <string name="separate_audio_streams">Oddzielne strumienie audio</string>
     <string name="separate_audio_streams_description">Przydziela kanałom Multimedia, Wskazówki i Dźwięki systemowe osobne strumienie wyjściowe zamiast jednego wspólnego strumienia multimedialnego (na niektórych urządzeniach może nie działać poprawnie).</string>
     <string name="use_aac_audio">Użyj dźwięku AAC</string>
-    <string name="use_aac_audio_description">Użyj kodeka AAC dla dźwięku, aby oszczędzać przepustowość (Eksperymentalne).</string>
+    <string name="use_aac_audio_description">Użyj kodeka AAC dla dźwięku, aby oszczędzać przepustowość (Eksperymentalne). W sesji bezprzewodowej działającej na 2,4 GHz ta opcja włącza się automatycznie, gdy włączone jest \"Niższy obraz przy łączu 2,4 GHz\".</string>
     <string name="attach_hw_dsp_equalizer">Wyzwalacz korektora DSP hardware</string>
     <string name="attach_hw_dsp_equalizer_description">Dołącza atrapę korektora graficznego do sesji audio, aby wymusić trasowanie HW DSP w wybranych stacjach multimedialnych. Pozostaw wyłączone, jeśli używasz ViPER4Android / ViperFX lub jeśli dźwięk jest przytłumiony na starszych wersjach systemu Android.</string>
     <string name="audio_volume_offset">Przesunięcie głośności</string>
@@ -970,8 +970,8 @@
     <string name="connection_issue_banner_wifi_direct_refused">Moduł Wi-Fi tego urządzenia nie mógł utworzyć sieci Wi-Fi Direct, z którą miał połączyć się telefon, a aplikacja nie może tego wymusić. Jeśli urządzenie jest połączone z inną siecią Wi-Fi, spróbuj ją rozłączyć. Dotknij, aby użyć hotspotu tego urządzenia.</string>
     <string name="connection_issue_banner_wifi_direct_cycled">Inna aplikacja na tym urządzeniu bez przerwy wyłącza i włącza Wi-Fi Direct, więc nie da się utworzyć sieci, z którą połączy się telefon. Zwykle przyczyną jest fabrycznie zainstalowana aplikacja do projekcji (CarLife, ZLink, CarPlay i podobne) i warto ją wyłączyć. Dotknij, aby użyć hotspotu tego urządzenia.</string>
     <string name="connection_issue_banner_hotspot_config">Nie udało się uzyskać nazwy i hasła hotspotu. Dotknij, aby wprowadzić je ręcznie.</string>
-    <string name="narrow_band_profile_cap">Niższy obraz przy radiu tylko 2,4 GHz</string>
-    <string name="narrow_band_profile_cap_description">Gdy Wi-Fi tego urządzenia nie ma pasma 5 GHz, żądaj od telefonu najwyżej 720p i 30 kl./s zamiast ustawień powyżej. Na takim łączu zmierzono, że strumień o pełnej przepływności nie przenosił obrazu w ogóle, a niższy działał. Wyłącz to, aby dostać dokładnie to, co ustawiono.</string>
+    <string name="narrow_band_profile_cap">Niższy obraz przy łączu 2,4 GHz</string>
+    <string name="narrow_band_profile_cap_description">Gdy ta sesja działa na 2,4 GHz, niezależnie czy dlatego, że Wi-Fi tego urządzenia nie ma pasma 5 GHz, czy dlatego, że sieć powstała na nim, żądaj od telefonu najwyżej 720p i 30 kl./s zamiast ustawień powyżej, a także dźwięku AAC. Na takim łączu zmierzono, że strumień o pełnej przepływności nie przenosił obrazu w ogóle, a niższy działał. Wyłącz to, aby dostać dokładnie to, co ustawiono.</string>
     <string name="connection_issue_banner_video_link_too_slow">Telefon kilka razy z rzędu porzucił obraz, zanim dotarła choć jedna klatka. Łącze Wi-Fi jest za wolne, aby przenieść obraz. Dotknij, aby obniżyć limit FPS do 30; pomoże też niższa rozdzielczość i dźwięk AAC.</string>
     <string name="connection_issue_banner_five_ghz_channel_refused">To urządzenie odmówiło umieszczenia sieci WiFi Direct na jakimkolwiek wybranym przez ciebie kanale 5 GHz i uruchomiło ją na kanale wybranym przez własny sterownik Wi-Fi. Tego kanału telefony w krajach o surowszych przepisach często w ogóle nie widzą. Dotknij, aby ustawić pasmo WiFi Direct na 2,4 GHz, dozwolone we wszystkich krajach; spodziewaj się na nim 720p zamiast 1080p.</string>
     <string name="connection_issue_banner_dismiss">Zamknij</string>

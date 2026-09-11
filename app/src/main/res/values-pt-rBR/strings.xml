@@ -257,7 +257,7 @@
     <string name="separate_audio_streams">Separar fluxos de áudio</string>
     <string name="separate_audio_streams_description">Dá aos canais Mídia, Orientação e Sons do sistema fluxos de saída próprios em vez de um único fluxo multimídia compartilhado (pode não funcionar corretamente em alguns dispositivos).</string>
     <string name="use_aac_audio">Usar áudio AAC</string>
-    <string name="use_aac_audio_description">Usa o codec AAC para áudio para economizar banda (experimental).</string>
+    <string name="use_aac_audio_description">Usa o codec AAC para áudio para economizar banda (experimental). Em uma sessão sem fio rodando em 2,4 GHz, isso é ativado automaticamente enquanto \"Reduzir o vídeo em um enlace de 2,4 GHz\" estiver ativado.</string>
     <string name="attach_hw_dsp_equalizer">Ativador de equalizador DSP via hardware</string>
     <string name="attach_hw_dsp_equalizer_description">Anexa um efeito de equalizador fictício à sessão de áudio para forçar o roteamento por DSP via hardware em algumas centrais multimídia. Mantenha desativado se usar ViPER4Android / ViperFX ou se o som ficar abafado em versões antigas do Android.</string>
     <string name="audio_volume_offset">Ajustes de volume</string>
@@ -972,8 +972,8 @@
     <string name="connection_issue_banner_wifi_direct_refused">O Wi-Fi desta unidade não pôde criar a rede Wi-Fi Direct à qual seu telefone iria se conectar, e o aplicativo não pode forçá-la. Se esta unidade estiver conectada a outra rede Wi-Fi, tente desconectá-la. Toque para usar o ponto de acesso próprio desta unidade.</string>
     <string name="connection_issue_banner_wifi_direct_cycled">Outro aplicativo desta unidade fica desligando e ligando o WiFi Direct, então nenhuma rede pode ser criada para o telefone entrar. A causa costuma ser um aplicativo de projeção pré-instalado (CarLife, ZLink, CarPlay e semelhantes), e vale a pena desativá-lo. Toque para usar o ponto de acesso próprio desta unidade.</string>
     <string name="connection_issue_banner_hotspot_config">Não foi possível obter nome e senha do ponto de acesso. Toque para inserir manualmente.</string>
-    <string name="narrow_band_profile_cap">Reduzir o vídeo em rádio somente 2,4 GHz</string>
-    <string name="narrow_band_profile_cap_description">Quando o WiFi desta unidade não tem faixa de 5 GHz, pedir ao telefone no máximo 720p e 30 fps em vez das configurações acima. Em um enlace assim, mediu-se que um fluxo em taxa cheia não levava imagem alguma, enquanto um mais baixo se manteve. Desative isto para receber exatamente o que você pediu.</string>
+    <string name="narrow_band_profile_cap">Reduzir o vídeo em um enlace de 2,4 GHz</string>
+    <string name="narrow_band_profile_cap_description">Quando esta sessão roda em 2,4 GHz, seja porque o WiFi desta unidade não tem faixa de 5 GHz ou porque a rede surgiu ali, pedir ao telefone no máximo 720p e 30 fps em vez das configurações acima, e áudio AAC. Em um enlace assim, mediu-se que um fluxo em taxa cheia não levava imagem alguma, enquanto um mais baixo se manteve. Desative isto para receber exatamente o que você pediu.</string>
     <string name="connection_issue_banner_video_link_too_slow">Seu telefone desistiu do vídeo antes de chegar um único quadro, várias vezes seguidas. O enlace WiFi é lento demais para carregar a imagem. Toque para baixar o limite de FPS para 30; resolução menor e áudio AAC também ajudam.</string>
     <string name="connection_issue_banner_five_ghz_channel_refused">Esta unidade se recusou a colocar sua rede WiFi Direct em qualquer canal de 5 GHz que você escolheu, então ela subiu no canal escolhido pelo próprio driver WiFi. Esse canal muitas vezes é um que telefones em países mais restritivos nem conseguem ver. Toque para definir a banda do WiFi Direct em 2,4 GHz, permitida em todos os países; espere 720p em vez de 1080p nela.</string>
     <string name="connection_issue_banner_dismiss">Fechar</string>

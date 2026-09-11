@@ -257,7 +257,7 @@
     <string name="separate_audio_streams">فصل تيارات الصوت</string>
     <string name="separate_audio_streams_description">يمنح قنوات الوسائط والإرشادات وأصوات النظام تدفقات إخراج خاصة بها بدلًا من تدفق وسائط واحد مشترك (قد لا يعمل بشكل صحيح على بعض الأجهزة).</string>
     <string name="use_aac_audio">استخدام ترميز AAC للصوت</string>
-    <string name="use_aac_audio_description">استخدام ترميز AAC للصوت لتوفير عرض النطاق الترددي (تجريبي).</string>
+    <string name="use_aac_audio_description">استخدام ترميز AAC للصوت لتوفير عرض النطاق الترددي (تجريبي). في جلسة لاسلكية تعمل على 2.4 غيغاهرتز، يُفعَّل هذا تلقائيًا طالما أن \"خفض الفيديو على وصلة 2.4 غيغاهرتز\" مفعّل.</string>
     <string name="attach_hw_dsp_equalizer">مشغل معادل الصوت DSP للأجهزة</string>
     <string name="attach_hw_dsp_equalizer_description">يربط تأثير معادل صوت وهمي بجلسة الصوت لفرض التوجيه عبر DSP للأجهزة في وحدات معينة. اتركه معطلاً إذا كنت تستخدم ViPER4Android / ViperFX أو إذا كان الصوت مكتوماً على إصدارات Android القديمة.</string>
     <string name="audio_volume_offset">تعويض مستوى الصوت</string>
@@ -969,8 +969,8 @@
     <string name="connection_issue_banner_wifi_direct_refused">تعذر على شبكة WiFi في هذا الجهاز إنشاء شبكة WiFi Direct التي كان هاتفك سينضم إليها، ولا يمكن للتطبيق فرض ذلك. إذا كان هذا الجهاز متصلاً بشبكة WiFi أخرى، فيُرجى محاولة فصلها. انقر لاستخدام نقطة اتصال هذا الجهاز بدلاً من ذلك.</string>
     <string name="connection_issue_banner_wifi_direct_cycled">يقوم تطبيق آخر على هذه الوحدة بإيقاف WiFi Direct وتشغيله باستمرار، لذا يتعذّر إنشاء أي شبكة ينضم إليها هاتفك. السبب المعتاد هو تطبيق عرض مثبّت مسبقًا (CarLife أو ZLink أو CarPlay وما شابه)، ويستحق تعطيله المحاولة. انقر لاستخدام نقطة الاتصال الخاصة بهذه الوحدة بدلاً من ذلك.</string>
     <string name="connection_issue_banner_hotspot_config">تعذر الحصول على اسم نقطة الاتصال وكلمة المرور. انقر لإدخالهما يدويًا.</string>
-    <string name="narrow_band_profile_cap">خفض الفيديو على راديو 2.4 غيغاهرتز فقط</string>
-    <string name="narrow_band_profile_cap_description">عندما لا يدعم WiFi هذه الوحدة نطاق 5 غيغاهرتز، اطلب من الهاتف 720p و30 إطارًا في الثانية كحد أقصى بدلاً من الإعدادات أعلاه. على وصلة كهذه أظهرت القياسات أن البث بالمعدل الكامل لا ينقل أي صورة، بينما يصمد البث الأقل. أوقف هذا الخيار للحصول على ما طلبته بالضبط.</string>
+    <string name="narrow_band_profile_cap">خفض الفيديو على وصلة 2.4 غيغاهرتز</string>
+    <string name="narrow_band_profile_cap_description">عندما تعمل هذه الجلسة على 2.4 غيغاهرتز، سواء لأن WiFi هذه الوحدة لا يدعم نطاق 5 غيغاهرتز أو لأن الشبكة نشأت عليه، اطلب من الهاتف 720p و30 إطارًا في الثانية كحد أقصى بدلاً من الإعدادات أعلاه، وصوت AAC. على وصلة كهذه أظهرت القياسات أن البث بالمعدل الكامل لا ينقل أي صورة على الإطلاق، بينما يصمد البث الأقل. أوقف هذا الخيار للحصول على ما طلبته بالضبط.</string>
     <string name="connection_issue_banner_video_link_too_slow">تخلّى هاتفك عن الفيديو قبل وصول إطار واحد، عدة مرات متتالية. وصلة WiFi أبطأ من أن تنقل الصورة. انقر لخفض حد الإطارات إلى 30؛ كما يفيد خفض الدقة واستخدام صوت AAC.</string>
     <string name="connection_issue_banner_five_ghz_channel_refused">رفض هذا الجهاز وضع شبكة WiFi Direct على أي قناة 5 غيغاهرتز اخترتها، فبدأت على القناة التي اختارها برنامج تشغيل الواي فاي الخاص به. غالباً ما تكون تلك القناة غير مرئية للهواتف في الدول ذات القيود الأشد. اضغط هنا لضبط نطاق WiFi Direct على 2.4 غيغاهرتز، وهو مسموح في كل الدول؛ توقع جودة 720p بدلاً من 1080p عليه.</string>
     <string name="connection_issue_banner_dismiss">تجاهل</string>

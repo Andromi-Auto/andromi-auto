@@ -257,7 +257,7 @@
     <string name="separate_audio_streams">Oddělit zvukové streamy</string>
     <string name="separate_audio_streams_description">Přidělí kanálům Média, Navigace a Systémové zvuky vlastní výstupní streamy místo jediného sdíleného multimediálního streamu (na některých zařízeních nemusí fungovat správně).</string>
     <string name="use_aac_audio">Použít AAC audio</string>
-    <string name="use_aac_audio_description">Použít kodek AAC pro zvuk pro úsporu šířky pásma (experimentální).</string>
+    <string name="use_aac_audio_description">Použít kodek AAC pro zvuk pro úsporu šířky pásma (experimentální). Při bezdrátovém připojení běžícím na 2,4 GHz se toto zapne automaticky, pokud je zapnuto \"Snížit video na spojení 2,4 GHz\".</string>
     <string name="attach_hw_dsp_equalizer">Spouštěč HW DSP ekvalizéru</string>
     <string name="attach_hw_dsp_equalizer_description">Připojí k relaci zvuku virtuální ekvalizér pro vynucení směrování přes HW DSP na specifických autorádiích. Ponechte vypnuté, pokud používáte ViPER4Android / ViperFX nebo pokud je zvuk na starších verzích Androidu tlumený.</string>
     <string name="audio_volume_offset">Posun hlasitosti</string>
@@ -971,8 +971,8 @@
     <string name="connection_issue_banner_wifi_direct_refused">Wi-Fi této jednotky nemohla vytvořit síť Wi-Fi Direct, ke které se měl telefon připojit, a aplikace to nemůže vynutit. Pokud je jednotka připojena k jiné síti Wi-Fi, zkuste ji odpojit. Klepnutím použijte vlastní hotspot této jednotky.</string>
     <string name="connection_issue_banner_wifi_direct_cycled">Jiná aplikace v této jednotce stále vypíná a zapíná Wi-Fi Direct, takže nelze vytvořit žádnou síť, ke které by se telefon připojil. Obvyklou příčinou je předinstalovaná projekční aplikace (CarLife, ZLink, CarPlay a podobné) a stojí za to ji vypnout. Klepnutím použijte vlastní hotspot této jednotky.</string>
     <string name="connection_issue_banner_hotspot_config">Jednotka neposkytla název a heslo hotspotu. Klepnutím je zadejte ručně.</string>
-    <string name="narrow_band_profile_cap">Snížit video na rádiu jen s 2,4 GHz</string>
-    <string name="narrow_band_profile_cap_description">Když Wi-Fi této jednotky nemá pásmo 5 GHz, žádat telefon nejvýše o 720p a 30 fps místo nastavení výše. Na takovém spoji bylo naměřeno, že plný datový tok nepřenesl vůbec žádný obraz, zatímco nižší vydržel. Vypněte to, pokud chcete dostat přesně to, co jste nastavili.</string>
+    <string name="narrow_band_profile_cap">Snížit video na spojení 2,4 GHz</string>
+    <string name="narrow_band_profile_cap_description">Když toto sezení běží na 2,4 GHz, ať už proto, že Wi-Fi této jednotky nemá pásmo 5 GHz, nebo proto, že síť na něm vznikla, žádat telefon nejvýše o 720p a 30 fps místo nastavení výše, a o zvuk AAC. Na takovém spoji bylo naměřeno, že plný datový tok nepřenesl vůbec žádný obraz, zatímco nižší vydržel. Vypněte to, pokud chcete dostat přesně to, co jste nastavili.</string>
     <string name="connection_issue_banner_video_link_too_slow">Telefon několikrát po sobě vzdal video dřív, než dorazil jediný snímek. Spoj Wi-Fi je pro přenos obrazu příliš pomalý. Klepnutím snížíte limit FPS na 30; pomůže i nižší rozlišení a zvuk AAC.</string>
     <string name="connection_issue_banner_five_ghz_channel_refused">Tato jednotka odmítla umístit síť WiFi Direct na jakýkoli kanál 5 GHz, který jsi zvolil, a spustila ji na kanálu vybraném jejím vlastním ovladačem Wi-Fi. Tento kanál telefony v zemích s přísnějšími pravidly často vůbec nevidí. Klepnutím nastavíš pásmo WiFi Direct na 2,4 GHz, které je povoleno všude; počítej na něm s 720p místo 1080p.</string>
     <string name="connection_issue_banner_dismiss">Zavřít</string>

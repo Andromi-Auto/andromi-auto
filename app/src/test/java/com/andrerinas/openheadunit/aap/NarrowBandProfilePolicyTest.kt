@@ -81,6 +81,22 @@ class NarrowBandProfilePolicyTest {
         assertTrue(Settings.Resolution._800x480.width * Settings.Resolution._800x480.height < ceiling.width * ceiling.height)
     }
 
+    // --- the audio codec -----------------------------------------------------------------------
+
+    @Test
+    fun `AAC is announced where the cap applies, and wherever the user asked for it`() {
+        for (supports in listOf(true, false, null)) {
+            for (wireless in listOf(true, false)) {
+                for (capEnabled in listOf(true, false)) {
+                    val label = "$supports/$wireless/$capEnabled"
+                    val capped = NarrowBandProfilePolicy.caps(supports, wireless, capEnabled)
+                    assertTrue(label, NarrowBandProfilePolicy.useAac(true, supports, wireless, capEnabled))
+                    assertEquals(label, capped, NarrowBandProfilePolicy.useAac(false, supports, wireless, capEnabled))
+                }
+            }
+        }
+    }
+
     // --- what it says --------------------------------------------------------------------------
 
     @Test
@@ -93,6 +109,8 @@ class NarrowBandProfilePolicyTest {
         assertTrue(advice, advice.contains("AAC"))
         // The claim it must never make again, now that it does change something.
         assertFalse(advice, advice.contains("Nothing here has been changed for you"))
+        // AAC's saving is unmeasured; the line names the codec, not a figure.
+        assertFalse(advice, advice.contains("tenth"))
     }
 
     @Test
@@ -131,5 +149,77 @@ class NarrowBandProfilePolicyTest {
                 }
             }
         }
+    }
+
+    @Test
+    fun `a five gigahertz radio on a two point four network is narrow`() {
+        assertTrue(NarrowBandProfilePolicy.runsNarrow(supports5Ghz = true, sessionFrequencyMhz = 2437))
+        assertTrue(
+            NarrowBandProfilePolicy.caps(
+                supports5Ghz = true, wirelessSession = true, capEnabled = true,
+                sessionFrequencyMhz = 2437
+            )
+        )
+    }
+
+    @Test
+    fun `a group on five gigahertz is not narrow`() {
+        assertFalse(NarrowBandProfilePolicy.runsNarrow(supports5Ghz = true, sessionFrequencyMhz = 5180))
+        assertFalse(
+            NarrowBandProfilePolicy.caps(
+                supports5Ghz = true, wirelessSession = true, capEnabled = true,
+                sessionFrequencyMhz = 5180
+            )
+        )
+    }
+
+    @Test
+    fun `an unreadable frequency leaves the radio to answer`() {
+        assertFalse(NarrowBandProfilePolicy.runsNarrow(supports5Ghz = true, sessionFrequencyMhz = 0))
+        assertTrue(NarrowBandProfilePolicy.runsNarrow(supports5Ghz = false, sessionFrequencyMhz = 0))
+    }
+
+    @Test
+    fun `a wired session is never capped by the network it is not on`() {
+        assertFalse(
+            NarrowBandProfilePolicy.caps(
+                supports5Ghz = true, wirelessSession = false, capEnabled = true,
+                sessionFrequencyMhz = 2437
+            )
+        )
+    }
+
+    @Test
+    fun `the band the network came up on caps the frame rate and announces AAC`() {
+        assertEquals(
+            NarrowBandProfilePolicy.CAPPED_FRAME_RATE,
+            NarrowBandProfilePolicy.cappedFrameRate(
+                fpsLimit = 60, supports5Ghz = true, wirelessSession = true, capEnabled = true,
+                sessionFrequencyMhz = 2437
+            )
+        )
+        assertTrue(
+            NarrowBandProfilePolicy.useAac(
+                userChoice = false, supports5Ghz = true, wirelessSession = true, capEnabled = true,
+                sessionFrequencyMhz = 2437
+            )
+        )
+    }
+
+    @Test
+    fun `the advice names the network rather than the radio when the radio has the band`() {
+        val advice = NarrowBandProfilePolicy.advice(
+            supports5Ghz = true, fpsLimit = 60, wirelessSession = true, capEnabled = true,
+            sessionFrequencyMhz = 2437
+        )
+        assertTrue(advice!!.startsWith("This session's network is on 2.4 GHz"))
+    }
+
+    @Test
+    fun `the advice still names the radio when the band is absent`() {
+        val advice = NarrowBandProfilePolicy.advice(
+            supports5Ghz = false, fpsLimit = 60, wirelessSession = true, capEnabled = true
+        )
+        assertTrue(advice!!.startsWith("This unit has no 5 GHz band"))
     }
 }

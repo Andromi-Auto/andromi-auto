@@ -277,7 +277,7 @@
     <string name="separate_audio_streams">Ayrı Ses Akışları</string>
     <string name="separate_audio_streams_description">Medya, Yönlendirme ve Sistem sesleri kanallarına tek bir ortak multimedya akışı yerine kendi çıkış akışlarını verir (bazı cihazlarda düzgün çalışmayabilir).</string>
     <string name="use_aac_audio">AAC Ses Kullan</string>
-    <string name="use_aac_audio_description">Bant genişliğinden tasarruf etmek için ses için AAC kodeğini kullan (Deneysel).</string>
+    <string name="use_aac_audio_description">Bant genişliğinden tasarruf etmek için ses için AAC kodeğini kullan (Deneysel). 2,4 GHz üzerinde çalışan kablosuz bir oturumda, \"2,4 GHz bağlantıda videoyu düşür\" açıkken bu otomatik olarak açılır.</string>
     <string name="attach_hw_dsp_equalizer">Donanım DSP Ekolayzır Tetikleyici</string>
     <string name="attach_hw_dsp_equalizer_description">Belirli multimedya cihazlarında donanım DSP yönlendirmesini zorlamak için ses oturumuna sahte bir ekolayzır efekti ekler. ViPER4Android / ViperFX kullanıyorsanız veya eski Android sürümlerinde ses boğuk çıkıyorsa kapalı tutun.</string>
     <string name="audio_volume_offset">Ses Seviyesi Dengesi (Offset)</string>
@@ -966,8 +966,8 @@
     <string name="connection_issue_banner_wifi_direct_refused">Bu cihazın Wi-Fi\'ı, telefonunuzun katılacağı Wi-Fi Direct ağını oluşturamadı ve uygulama bunu zorlayamaz. Cihaz başka bir Wi-Fi ağına bağlıysa bağlantısını kesmeyi deneyin. Bunun yerine bu cihazın kendi erişim noktasını kullanmak için dokunun.</string>
     <string name="connection_issue_banner_wifi_direct_cycled">Bu cihazdaki başka bir uygulama Wi-Fi Direct\'i sürekli kapatıp açıyor, bu yüzden telefonunuzun katılacağı bir ağ oluşturulamıyor. Genellikle önceden yüklü bir yansıtma uygulaması (CarLife, ZLink, CarPlay ve benzerleri) buna yol açar, devre dışı bırakmayı denemeye değer. Bunun yerine bu cihazın kendi erişim noktasını kullanmak için dokunun.</string>
     <string name="connection_issue_banner_hotspot_config">Erişim noktası adı ve şifresi alınamadı. Manuel girmek için dokunun.</string>
-    <string name="narrow_band_profile_cap">Yalnızca 2,4 GHz radyoda videoyu düşür</string>
-    <string name="narrow_band_profile_cap_description">Bu cihazın Wi-Fi\'ında 5 GHz bandı yoksa, yukarıdaki ayarlar yerine telefondan en fazla 720p ve 30 fps iste. Böyle bir bağlantıda tam hızlı akışın hiç görüntü taşımadığı, daha düşüğünün ise tutunduğu ölçüldü. İstediğiniz ayarların aynen uygulanması için bunu kapatın.</string>
+    <string name="narrow_band_profile_cap">2,4 GHz bağlantıda videoyu düşür</string>
+    <string name="narrow_band_profile_cap_description">Bu oturum 2,4 GHz üzerinde çalışıyorsa, bunun nedeni bu cihazın Wi-Fi\'ında 5 GHz bandı olmaması veya ağın orada kurulmuş olması olsun, yukarıdaki ayarlar yerine telefondan en fazla 720p ve 30 fps ile AAC ses iste. Böyle bir bağlantıda tam hızlı akışın hiç görüntü taşımadığı, daha düşüğünün ise tutunduğu ölçüldü. İstediğiniz ayarların aynen uygulanması için bunu kapatın.</string>
     <string name="connection_issue_banner_video_link_too_slow">Telefonunuz üst üste birkaç kez, tek bir kare bile gelmeden videodan vazgeçti. Wi-Fi bağlantısı görüntüyü taşıyamayacak kadar yavaş. FPS sınırını 30\'a düşürmek için dokunun; daha düşük çözünürlük ve AAC ses de yardımcı olur.</string>
     <string name="connection_issue_banner_five_ghz_channel_refused">Bu ünite WiFi Direct ağını seçtiğin hiçbir 5 GHz kanalına koymayı reddetti ve kendi WiFi sürücüsünün seçtiği kanalda başlattı. Bu kanal çoğu zaman daha katı ülkelerdeki telefonların göremediği bir kanaldır. WiFi Direct bandını her ülkede izin verilen 2,4 GHz olarak ayarlamak için dokun; burada 1080p yerine 720p bekle.</string>
     <string name="connection_issue_banner_dismiss">Kapat</string>

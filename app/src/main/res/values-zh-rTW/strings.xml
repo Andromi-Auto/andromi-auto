@@ -256,7 +256,7 @@
     <string name="separate_audio_streams">分離音訊串流</string>
     <string name="separate_audio_streams_description">讓媒體、語音導引和系統音效頻道各自使用專屬的輸出串流，而非共用單一多媒體串流（在某些裝置上可能無法正常運作）。</string>
     <string name="use_aac_audio">使用 AAC 音訊</string>
-    <string name="use_aac_audio_description">使用 AAC 編碼器進行音訊處理以節省頻寬 (實驗性)。</string>
+    <string name="use_aac_audio_description">使用 AAC 編碼器進行音訊處理以節省頻寬 (實驗性)。在 2.4 GHz 上執行的無線工作階段中，只要\"在 2.4 GHz 連線時降低影像\"已開啟，此選項就會自動開啟。</string>
     <string name="attach_hw_dsp_equalizer">硬體 DSP 等化器觸發器</string>
     <string name="attach_hw_dsp_equalizer_description">在音訊工作階段附加虛擬等化器效果，以在特定車機上強制進行硬體 DSP 路由。如果使用 ViPER4Android / ViperFX 或舊版 Android 上音訊沉悶，請保持停用。</string>
     <string name="audio_volume_offset">音量偏移</string>
@@ -970,8 +970,8 @@
     <string name="connection_issue_banner_wifi_direct_refused">此主機的 WiFi 無法建立手機要加入的 WiFi Direct 網路，且應用程式無法強制建立。若此主機已連線至其他 WiFi 網路，建議嘗試中斷連線。輕觸以改用此主機本身的熱點。</string>
     <string name="connection_issue_banner_wifi_direct_cycled">此主機上的其他應用程式不斷關閉又開啟 WiFi Direct，因此無法建立手機要加入的網路。通常原因是預先安裝的投影應用程式（CarLife、ZLink、CarPlay 之類），建議停用試試。輕觸以改用此主機本身的熱點。</string>
     <string name="connection_issue_banner_hotspot_config">無法取得熱點名稱與密碼。輕觸以手動輸入。</string>
-    <string name="narrow_band_profile_cap">僅有 2.4 GHz 無線時降低影像</string>
-    <string name="narrow_band_profile_cap_description">當此主機的 WiFi 沒有 5 GHz 頻段時，改為向手機要求最高 720p 與 30 fps，而非上方的設定。實測顯示在這種連線上，全速串流完全傳不出畫面，較低的設定則能維持。若要完全依照您的設定，請關閉此選項。</string>
+    <string name="narrow_band_profile_cap">在 2.4 GHz 連線時降低影像</string>
+    <string name="narrow_band_profile_cap_description">當此工作階段在 2.4 GHz 上執行時，無論是因為此主機的 WiFi 沒有 5 GHz 頻段，還是因為網路在該頻段上建立，都會改為向手機要求最高 720p 與 30 fps，以及 AAC 音訊，而非上方的設定。實測顯示在這種連線上，全速串流完全傳不出畫面，較低的設定則能維持。若要完全依照您的設定，請關閉此選項。</string>
     <string name="connection_issue_banner_video_link_too_slow">手機連續多次在第一個影格送達前就放棄影像。WiFi 連線太慢，無法承載畫面。輕觸以將 FPS 上限降為 30；降低解析度與改用 AAC 音訊也有幫助。</string>
     <string name="connection_issue_banner_five_ghz_channel_refused">這台主機拒絕將 WiFi Direct 網路建立在你所選的任何 5 GHz 頻道上，因此改用它自己的 WiFi 驅動程式挑選的頻道。該頻道往往是法規較嚴格國家的手機根本看不到的頻道。點選以將 WiFi Direct 頻段設為 2.4 GHz，這是所有國家都允許的頻段；在該頻段上預期為 720p 而非 1080p。</string>
     <string name="connection_issue_banner_dismiss">關閉</string>
