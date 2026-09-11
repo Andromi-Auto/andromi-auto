@@ -1,0 +1,99 @@
+package com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.zbt
+
+import android.os.SystemClock
+import com.andrerinas.openheadunit.utils.AppLog
+
+/**
+ * Whether this unit's vendor Bluetooth daemon will carry Android Auto.
+ *
+ * Detection marks a class of hardware, and part of that class reaches its module over Binder with
+ * nothing on the daemon's port. Asking is the only way to tell those apart, so this dials once,
+ * remembers the answer, and hands it to [com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.ExternalBtTransportPolicy].
+ *
+ * The dial blocks for up to about seven seconds, so it must never run on the main thread. Callers on
+ * a UI path read [cached] instead, which is a volatile read and does no I/O.
+ */
+object ZbtDaemonReachability {
+
+    /**
+     * How long to wait for the daemon's first frame once it has taken our `RequestInit`. One read
+     * timeout: a daemon that is really there starts its state burst immediately.
+     */
+    const val HELLO_BUDGET_MS = 3_000L
+
+    /** How long an answer is trusted. A daemon down at app start can be up by the next attempt. */
+    const val RECHECK_AFTER_MS = 10 * 60_000L
+
+    @Volatile
+    private var answer: Boolean? = null
+
+    @Volatile
+    private var answeredAt = 0L
+
+    /** The last answer, or null if there is none or it has gone stale. Never dials. */
+    fun cached(nowMs: Long = SystemClock.elapsedRealtime()): Boolean? =
+        answer?.takeIf { nowMs - answeredAt < RECHECK_AFTER_MS }
+
+    /** Record what actually happened. The carrier's own open is a better measurement than a dial. */
+    fun record(reachable: Boolean, nowMs: Long = SystemClock.elapsedRealtime()) {
+        answer = reachable
+        answeredAt = nowMs
+    }
+
+    /** Forget the answer, so the next caller measures again. */
+    fun forget() {
+        answer = null
+        answeredAt = 0L
+    }
+
+    /**
+     * The cached answer, dialling once if there is none. Blocking; never call from the main thread.
+     *
+     * Synchronized so two callers arriving together dial once between them rather than each.
+     */
+    @Synchronized
+    fun resolve(
+        nowMs: () -> Long = { SystemClock.elapsedRealtime() },
+        dial: () -> Boolean = ::dialOnce
+    ): Boolean {
+        cached(nowMs())?.let { return it }
+        val reachable = dial()
+        record(reachable, nowMs())
+        return reachable
+    }
+
+    /**
+     * Connect, send `RequestInit`, and wait for one frame back. [ZbtByteChannel.open] does the
+     * connect and the send, so a reply is the whole answer.
+     */
+    private fun dialOnce(): Boolean {
+        val channel = try {
+            ZbtByteChannel.open(bufferRfcommData = false)
+        } catch (e: Exception) {
+            AppLog.i(
+                "NativeAA: [ZBT] nothing is listening on 127.0.0.1:3152, so the module cannot " +
+                    "carry Android Auto on this unit (${e.message})."
+            )
+            return false
+        }
+        try {
+            val deadline = SystemClock.elapsedRealtime() + HELLO_BUDGET_MS
+            while (SystemClock.elapsedRealtime() < deadline) {
+                if (channel.pumpOnce(deadline) == ZbtByteChannel.Pump.FRAME) {
+                    AppLog.i(
+                        "NativeAA: [ZBT] the vendor daemon answered on 127.0.0.1:3152, so this " +
+                            "unit can carry Android Auto over its Bluetooth module."
+                    )
+                    return true
+                }
+            }
+            AppLog.w(
+                "NativeAA: [ZBT] the daemon took our RequestInit and said nothing in " +
+                    "${HELLO_BUDGET_MS / 1000}s, so the module route is treated as unavailable."
+            )
+            return false
+        } finally {
+            channel.close()
+        }
+    }
+}
