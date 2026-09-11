@@ -185,6 +185,11 @@
     <string name="usb_auto_connect_description">Uygulama açıldığında bilinen bir USB cihazına otomatik olarak bağlan.</string>
     <string name="auto_start_bt_label">Bluetooth ile otomatik başlat</string>
     <string name="auto_start_bt_description">Belirli bir Bluetooth cihazı bağlandığında Open Headunit\'ı otomatik olarak aç.</string>
+    <string name="auto_start_offer_title">Otomatik başlatılsın mı?</string>
+    <string name="auto_start_offer_message">Uygulamanın bu cihazla otomatik başlatılmasını ister misin, %1$s?</string>
+    <string name="auto_start_offer_yes">Evet</string>
+    <string name="auto_start_offer_no">Hayır</string>
+    <string name="auto_start_offer_countdown">%1$d sn sonra Hayır</string>
     <string name="auto_start_wifi_label">WiFi ile otomatik başlat</string>
     <string name="auto_start_wifi_description">Belirli bir WiFi SSID\'sine bağlandığında Open Headunit\'ı otomatik olarak aç.</string>
     <string name="auto_start_wifi_ssid_label">WiFi SSID</string>
@@ -1054,7 +1059,6 @@
     <string name="driver_device_last_used">Son Bağlanan</string>
     <string name="driver_selection_auto_in">%2$s cihazına %1$ds içinde otomatik bağlanılıyor...</string>
     <string name="driver_selection_dialog_title">Sürücü Telefonunu Seçin</string>
-    <string name="connecting_to_device">%s cihazına bağlanılıyor...</string>
     <string name="driver_none">Yok</string>
     <string name="show_all_devices">Tüm Bluetooth cihazlarını göster</string>
     <string name="show_only_phones">Yalnızca telefonları göster</string>

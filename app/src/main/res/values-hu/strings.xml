@@ -162,6 +162,11 @@
     <string name="usb_auto_connect_description">Az alkalmazás megnyitásakor automatikus csatlakozás egy ismert USB-eszközhöz.</string>
     <string name="auto_start_bt_label">Bluetooth automatikus indítás</string>
     <string name="auto_start_bt_description">A Open Headunit automatikus megnyitása, amikor egy adott Bluetooth-eszköz csatlakozik.</string>
+    <string name="auto_start_offer_title">Automatikus indítás?</string>
+    <string name="auto_start_offer_message">Szeretnéd, hogy az alkalmazás automatikusan elinduljon ezzel az eszközzel, %1$s?</string>
+    <string name="auto_start_offer_yes">Igen</string>
+    <string name="auto_start_offer_no">Nem</string>
+    <string name="auto_start_offer_countdown">Nem %1$d mp múlva</string>
     <string name="auto_start_wifi_label">WiFi automatikus indítás</string>
     <string name="auto_start_wifi_description">A Open Headunit automatikus megnyitása egy adott WiFi SSID-hez való csatlakozáskor.</string>
     <string name="auto_start_wifi_ssid_label">WiFi SSID</string>
@@ -1055,7 +1060,6 @@
     <string name="driver_device_last_used">Utoljára csatlakoztatva</string>
     <string name="driver_selection_auto_in">Automatikus csatlakozás ide: %2$s %1$d mp múlva...</string>
     <string name="driver_selection_dialog_title">Válassza ki a vezető telefonját</string>
-    <string name="connecting_to_device">Csatlakozás ide: %s...</string>
     <string name="driver_none">Nincs</string>
     <string name="show_all_devices">Összes Bluetooth-eszköz megjelenítése</string>
     <string name="show_only_phones">Csak telefonok megjelenítése</string>

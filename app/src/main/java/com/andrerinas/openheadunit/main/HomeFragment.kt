@@ -678,11 +678,11 @@ class HomeFragment : Fragment() {
         if (requestDriverSelection) {
             requestDriverSelection = false
             showNativeAaDeviceSelector(autoCountdown = false)
-        } else if (appSettings.wifiConnectionMode == WifiLauncherMode.NATIVE &&
-            !hasCheckedNativeDriverSelection &&
-            !commManager.isConnected
-        ) {
-            checkNativeDriverSelectionOnStartup()
+        } else if (appSettings.wifiConnectionMode == WifiLauncherMode.NATIVE && !commManager.isConnected) {
+            // The driver check runs once. Nothing it puts on screen blocks the clean-up below any
+            // more, which only rewrites a setting and never waits for a free screen.
+            if (!hasCheckedNativeDriverSelection) checkNativeDriverSelectionOnStartup()
+            checkAutoStartOffer(AutoStartOfferPolicy.Trigger.HOME_SCREEN)
         }
 
         activity?.let { act ->
@@ -718,13 +718,14 @@ class HomeFragment : Fragment() {
         }
     }
 
-    private fun checkNativeDriverSelectionOnStartup() {
-        if (!isAdded) return
+    /** @return whether this put something on screen, or started connecting, so nothing else should. */
+    private fun checkNativeDriverSelectionOnStartup(): Boolean {
+        if (!isAdded) return false
         hasCheckedNativeDriverSelection = true
         val appSettings = App.provide(requireContext()).settings
-        if (appSettings.nativeDriverSelectionMode == NativeDriverSelectionPolicy.Mode.DISABLED) return
+        if (appSettings.nativeDriverSelectionMode == NativeDriverSelectionPolicy.Mode.DISABLED) return false
         val adapter = BluetoothHelper.getBluetoothAdapter(requireContext())
-        if (adapter == null || !adapter.isEnabled) return
+        if (adapter == null || !adapter.isEnabled) return false
 
         // Only the classified phones count, so a connected watch neither becomes the driver nor
         // hides the one phone that is unambiguously here.
@@ -755,11 +756,45 @@ class HomeFragment : Fragment() {
 
         if (shouldShow) {
             showNativeAaDeviceSelector(autoCountdown = true)
+            return true
         } else if (appSettings.nativeDriverSelectionMode == NativeDriverSelectionPolicy.Mode.AUTO && autoTargetMac != null) {
             val targetDev = cands.deviceFor(autoTargetMac)
             val devName = targetDev?.name ?: autoTargetMac
             AppLog.i("HomeFragment: Unambiguous driver ($devName) - auto-connecting directly without prompt")
             connectToNativeDevice(autoTargetMac, devName, connectedMacs)
+            return true
+        }
+        return false
+    }
+
+    /**
+     * The home screen's half of the auto-start offer, which is the two-phone clean-up only.
+     *
+     * The question itself is asked at the first frame of a session, by AapProjectionActivity: a
+     * phone can wake this unit on its own, and nobody is here to be asked. [AutoStartOfferPolicy].
+     */
+    private fun checkAutoStartOffer(trigger: AutoStartOfferPolicy.Trigger) {
+        if (!isAdded) return
+        val appSettings = App.provide(requireContext()).settings
+        val adapter = BluetoothHelper.getBluetoothAdapter(requireContext())
+        if (adapter == null || !adapter.isEnabled) return
+
+        val connectedMac = appSettings.lastConnectedNativeMac
+        val cands = BluetoothHelper.driverCandidates(
+            requireContext(), appSettings.nativePreferredDeviceMac, connectedMac
+        )
+        val action = AutoStartOfferPolicy.decide(
+            phonesPaired = cands.offered.size,
+            connectedMac = connectedMac,
+            answeredMacs = appSettings.autoStartOfferAnsweredMacs,
+            autoStartConfigured = appSettings.autoStartBluetoothDeviceMacs.isNotEmpty(),
+        )
+        if (!AutoStartOfferPolicy.actsNow(action, trigger)) return
+        if (action == AutoStartOfferPolicy.Action.RESET) {
+            AppLog.i("HomeFragment: more than one phone is paired, so the Bluetooth auto-start device is cleared.")
+            appSettings.autoStartBluetoothDeviceMacs = emptySet()
+            appSettings.autoStartBluetoothDeviceName = ""
+            Settings.syncAutoStartBtMacsToDeviceStorage(requireContext(), emptySet())
         }
     }
 
@@ -1035,8 +1070,9 @@ class HomeFragment : Fragment() {
     }
 
     /**
-     * Wakes [mac] and shows the connect UI. A phone with no live Bluetooth link still has to be
-     * woken and may never answer, so it gets the non-blocking pill until the connection advances.
+     * Wakes [mac] and shows the connect UI. The wake may take several rounds or never be answered,
+     * so every path gets the non-blocking pill with its step line; the full-screen overlay takes
+     * over once the phone answers. The pill names the phone, so no toast repeats it.
      */
     private fun connectToNativeDevice(mac: String, name: String, connectedMacs: Collection<String>) {
         val reachable = NativeDriverSelectionPolicy.connectUiIsImmediate(mac, connectedMacs)
@@ -1047,16 +1083,15 @@ class HomeFragment : Fragment() {
                          else getString(R.string.connecting_driver_disconnected, name)
         (requireActivity() as? MainActivity)?.beginAutoConnect(
             "Native-AA driver: $name",
-            if (reachable) MainActivity.ConnectionUiMode.OVERLAY
-            else MainActivity.ConnectionUiMode.PILL_THEN_OVERLAY,
-            statusText
+            MainActivity.ConnectionUiMode.PILL_THEN_OVERLAY,
+            statusText,
+            statusTextIsWakeClaim = !reachable
         )
         val intent = Intent(requireContext(), AapService::class.java).apply {
             action = AapService.ACTION_NATIVE_AA_POKE
             putExtra(AapService.EXTRA_MAC, mac)
         }
         ContextCompat.startForegroundService(requireContext(), intent)
-        Toast.makeText(requireContext(), getString(R.string.connecting_to_device, name), Toast.LENGTH_SHORT).show()
     }
 
     private fun showNearbyDeviceSelector() {

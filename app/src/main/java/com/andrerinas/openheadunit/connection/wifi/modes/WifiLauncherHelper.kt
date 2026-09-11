@@ -6,6 +6,8 @@ import android.os.Build
 import android.widget.Toast
 import com.andrerinas.openheadunit.App
 import com.andrerinas.openheadunit.R
+import com.andrerinas.openheadunit.connection.ConnectionStage
+import com.andrerinas.openheadunit.connection.ConnectionStageTracker
 import com.andrerinas.openheadunit.connection.wifi.modes.helper.NearbyManager
 import com.andrerinas.openheadunit.connection.wifi.modes.helper.HelperStrategy
 import com.andrerinas.openheadunit.connection.wifi.WifiLauncher
@@ -53,6 +55,7 @@ class WifiLauncherHelper : WifiLauncher {
 
     override fun start(noInfoToasts: Boolean) {
         AppLog.i("WifiLauncher: Using strategy $strategy.")
+        ConnectionStageTracker.report(ConnectionStage.SEARCHING)
 
         when (strategy) {
             HelperStrategy.COMMON_WIFI -> { /* #startDiscovery(oneShot = false) handled by SharedServices */ }
@@ -61,6 +64,7 @@ class WifiLauncherHelper : WifiLauncher {
                 val wifiDirect = manager.sharedServices.wifiDirectManager!!
 
                 if (wifiManager.isWifiEnabled) {
+                    ConnectionStageTracker.report(ConnectionStage.CREATING_NETWORK)
                     wifiDirect.makeVisible()
                 } else if (!noInfoToasts) {
                     ToastUtils.showToast(service, service.getString(R.string.wifi_disabled_info), Toast.LENGTH_SHORT)
@@ -77,6 +81,7 @@ class WifiLauncherHelper : WifiLauncher {
         if (settings.autoEnableHotspot && strategy == HelperStrategy.HEADUNIT_HOTSPOT) {
             service.serviceScope.launch {
                 AppLog.i("AapService: Auto-enabling hotspot for Helper mode...")
+                ConnectionStageTracker.report(ConnectionStage.PREPARING_NETWORK)
                 HotspotManager.setHotspotEnabled(service, true)
             }
         }

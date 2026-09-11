@@ -204,21 +204,21 @@
 
     </FrameLayout>
 
-    <!-- Auto-connect status pill: non-blocking indicator shown during
-         automatic background connection attempts. Anchored to bottom-center
-         to avoid overlapping with the top wifi_direct_info pill and the
-         bottom-right Exit button. Home buttons remain tappable; user can
-         tap the pill to cancel. -->
+    <!-- Bring-up status pill: up whenever the connection stack is armed, second line naming the
+         step, third line the WiFi Direct channel (once toasts, which drew over this pill).
+         Anchored to bottom-center to clear the top wifi_direct_info pill and the bottom-right
+         Exit button. Home buttons remain tappable; a tap cancels an attempt in flight and does
+         nothing otherwise. -->
     <LinearLayout
         android:id="@+id/auto_connect_pill"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|center_horizontal"
         android:layout_marginBottom="16dp"
-        android:paddingLeft="14dp"
-        android:paddingRight="14dp"
-        android:paddingTop="6dp"
-        android:paddingBottom="6dp"
+        android:paddingLeft="15dp"
+        android:paddingRight="15dp"
+        android:paddingTop="7dp"
+        android:paddingBottom="7dp"
         android:background="@drawable/bg_pill_translucent"
         android:gravity="center_vertical"
         android:orientation="horizontal"
@@ -228,20 +228,51 @@
         tools:visibility="visible">
 
         <ProgressBar
-            android:layout_width="18dp"
-            android:layout_height="18dp"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
             android:indeterminate="true"
             android:indeterminateTint="@android:color/white" />
 
-        <TextView
-            android:id="@+id/auto_connect_pill_text"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:text="@string/android_auto_starting"
-            android:textColor="@color/text_primary"
-            android:textSize="13sp"
-            android:textStyle="bold" />
+            android:layout_marginStart="11dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/auto_connect_pill_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/android_auto_starting"
+                android:textColor="@color/text_primary"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/auto_connect_pill_stage_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="1dp"
+                android:alpha="0.8"
+                android:textColor="@color/text_primary"
+                android:textSize="12sp"
+                android:visibility="gone"
+                tools:text="Creating the WiFi network"
+                tools:visibility="visible" />
+
+            <TextView
+                android:id="@+id/auto_connect_pill_network_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="1dp"
+                android:alpha="0.8"
+                android:textColor="@color/text_primary"
+                android:textSize="12sp"
+                android:visibility="gone"
+                tools:text="WiFi Direct on 5 GHz (5805 MHz)"
+                tools:visibility="visible" />
+
+        </LinearLayout>
 
     </LinearLayout>
 

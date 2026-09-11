@@ -162,6 +162,11 @@
     <string name="usb_auto_connect_description">應用程式開啟時自動連接到已知的 USB 裝置。</string>
     <string name="auto_start_bt_label">藍牙自動啟動</string>
     <string name="auto_start_bt_description">當特定藍牙裝置連接時，自動開啟 Open Headunit。</string>
+    <string name="auto_start_offer_title">自動啟動？</string>
+    <string name="auto_start_offer_message">要在此裝置（%1$s）上自動啟動應用程式嗎？</string>
+    <string name="auto_start_offer_yes">是</string>
+    <string name="auto_start_offer_no">否</string>
+    <string name="auto_start_offer_countdown">%1$d 秒後選「否」</string>
     <string name="auto_start_wifi_label">Wi-Fi 自動啟動</string>
     <string name="auto_start_wifi_description">當連接到特定 Wi-Fi SSID 時，自動開啟 Open Headunit。</string>
     <string name="auto_start_wifi_ssid_label">Wi-Fi SSID</string>
@@ -1058,7 +1063,6 @@
     <string name="driver_device_last_used">上次連線</string>
     <string name="driver_selection_auto_in">將在 %1$d 秒後自動連線至 %2$s...</string>
     <string name="driver_selection_dialog_title">選擇駕駛手機</string>
-    <string name="connecting_to_device">正在連線至 %s...</string>
     <string name="driver_none">無</string>
     <string name="show_all_devices">顯示所有藍牙裝置</string>
     <string name="show_only_phones">僅顯示手機</string>

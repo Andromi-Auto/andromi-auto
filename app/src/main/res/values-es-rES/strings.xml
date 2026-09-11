@@ -164,6 +164,11 @@
     <string name="usb_auto_connect_description">Se conecta automáticamente a un dispositivo USB conocido tan pronto como se abre la aplicación.</string>
     <string name="auto_start_bt_label">Autoinicio por Bluetooth</string>
     <string name="auto_start_bt_description">Abrir Open Headunit automáticamente al conectar un dispositivo Bluetooth.</string>
+    <string name="auto_start_offer_title">¿Iniciar automáticamente?</string>
+    <string name="auto_start_offer_message">¿Quieres que la aplicación se inicie automáticamente con este dispositivo, %1$s?</string>
+    <string name="auto_start_offer_yes">Sí</string>
+    <string name="auto_start_offer_no">No</string>
+    <string name="auto_start_offer_countdown">No en %1$d s</string>
     <string name="auto_start_wifi_label">Inicio automático por WiFi</string>
     <string name="auto_start_wifi_description">Abrir Open Headunit automáticamente al conectarse a una red WiFi específica.</string>
     <string name="auto_start_wifi_ssid_label">SSID WiFi</string>
@@ -1069,7 +1074,6 @@
     <string name="driver_device_last_used">Último conectado</string>
     <string name="driver_selection_auto_in">Conectando automáticamente a %2$s en %1$ds...</string>
     <string name="driver_selection_dialog_title">Seleccionar teléfono del conductor</string>
-    <string name="connecting_to_device">Conectando a %s...</string>
     <string name="driver_none">Ninguno</string>
     <string name="show_all_devices">Mostrar todos los dispositivos Bluetooth</string>
     <string name="show_only_phones">Mostrar solo teléfonos</string>

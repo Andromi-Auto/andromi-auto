@@ -7,6 +7,8 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import com.andrerinas.openheadunit.App
+import com.andrerinas.openheadunit.connection.ConnectionStage
+import com.andrerinas.openheadunit.connection.ConnectionStageTracker
 import com.andrerinas.openheadunit.utils.AppLog
 import com.andrerinas.openheadunit.utils.AppPermissions
 
@@ -97,6 +99,7 @@ object StationStandDown {
                 return false
             }
 
+            ConnectionStageTracker.report(ConnectionStage.PREPARING_NETWORK)
             settings.stationStandDownNetworkId = networkId
             @Suppress("DEPRECATION")
             val disabled = wm.disableNetwork(networkId)

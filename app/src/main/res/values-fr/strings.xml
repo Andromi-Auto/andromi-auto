@@ -355,6 +355,11 @@
     <string name="usb_auto_connect_description">Se connecter automatiquement à un appareil USB connu lorsque l\'application s\'ouvre.</string>
     <string name="auto_start_bt_label">Démarrage auto sur Bluetooth</string>
     <string name="auto_start_bt_description">Ouvrir automatiquement Open Headunit lorsqu\'un appareil Bluetooth spécifique se connecte.</string>
+    <string name="auto_start_offer_title">Démarrer automatiquement ?</string>
+    <string name="auto_start_offer_message">Veux-tu lancer l\'application automatiquement avec cet appareil, %1$s ?</string>
+    <string name="auto_start_offer_yes">Oui</string>
+    <string name="auto_start_offer_no">Non</string>
+    <string name="auto_start_offer_countdown">Non dans %1$d s</string>
     <string name="listen_for_usb_devices_label">Écouter les appareils USB</string>
     <string name="listen_for_usb_devices_description">Afficher l\'invite du système Android lorsqu\'un appareil USB est branché.</string>
     <string name="show_toast_messages">Afficher les messages toast</string>
@@ -1106,7 +1111,6 @@
     <string name="driver_device_last_used">Dernier connecté</string>
     <string name="driver_selection_auto_in">Connexion automatique à %2$s dans %1$ds...</string>
     <string name="driver_selection_dialog_title">Sélectionner le téléphone du conducteur</string>
-    <string name="connecting_to_device">Connexion à %s...</string>
     <string name="driver_none">Aucun</string>
     <string name="show_all_devices">Afficher tous les appareils Bluetooth</string>
     <string name="show_only_phones">Afficher uniquement les téléphones</string>

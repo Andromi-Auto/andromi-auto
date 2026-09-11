@@ -9,6 +9,8 @@ import com.andrerinas.openheadunit.App
 import com.andrerinas.openheadunit.R
 import com.andrerinas.openheadunit.aap.AapService
 import com.andrerinas.openheadunit.connection.CommManager
+import com.andrerinas.openheadunit.connection.ConnectionStage
+import com.andrerinas.openheadunit.connection.ConnectionStageTracker
 import com.andrerinas.openheadunit.utils.AppLog
 import com.andrerinas.openheadunit.utils.ToastUtils
 import java.util.concurrent.atomic.AtomicBoolean
@@ -76,6 +78,7 @@ class UsbLauncherManager(val service: AapService) {
         val permissionIntent = UsbReceiver.createPermissionPendingIntent(service)
 
         AppLog.i("Requesting USB permission for ${UsbDeviceCompat(device).uniqueName}")
+        ConnectionStageTracker.report(ConnectionStage.USB_SWITCHING)
 
         try {
             ToastUtils.showToast(service, service.getString(R.string.requesting_usb_permission), Toast.LENGTH_SHORT)
@@ -156,6 +159,7 @@ class UsbLauncherManager(val service: AapService) {
             if (UsbDeviceCompat.isInAccessoryMode(device)) {
                 val deviceName = UsbDeviceCompat(device).uniqueName
                 AppLog.i("Found device already in accessory mode: $deviceName")
+                ConnectionStageTracker.beginAttempt(ConnectionStage.USB_ATTACHED)
                 isSwitchingToProjection.set(true)
                 service.serviceScope.launch {
                     try {
@@ -177,6 +181,8 @@ class UsbLauncherManager(val service: AapService) {
                 if (settings.isConnectingDevice(deviceCompat)) {
                     if (usbManager.hasPermission(device)) {
                         AppLog.i("Found known USB device with permission: ${deviceCompat.uniqueName}. Switching to accessory mode.")
+                        ConnectionStageTracker.beginAttempt(ConnectionStage.USB_ATTACHED)
+                        ConnectionStageTracker.report(ConnectionStage.USB_SWITCHING)
                         isSwitchingToProjection.set(true)
                         val usbMode = UsbAccessoryMode(usbManager)
                         service.serviceScope.launch(Dispatchers.IO) {
@@ -301,6 +307,7 @@ class UsbLauncherManager(val service: AapService) {
             delay(UsbAccessoryHandoffPolicy.PERMISSION_POLL_INTERVAL_MS)
             if (usbManager.hasPermission(device)) {
                 AppLog.i("Accessory-mode permission arrived after ${System.currentTimeMillis() - startedAt}ms: $deviceName")
+                ConnectionStageTracker.report(ConnectionStage.PHONE_ANSWERED)
                 return true
             }
         }

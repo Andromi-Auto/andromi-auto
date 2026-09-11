@@ -311,10 +311,6 @@ class AapService : Service() {
     @Volatile
     var userExitCooldownUntil = 0L
 
-    /** elapsedRealtime when the current session reached Connected, or 0 when nothing is up. */
-    @Volatile
-    private var sessionConnectedAt = 0L
-
     /**
      * Pending "a watched Bluetooth device went away" timers, one per address. Touched only from
      * the main thread, where the receiver and the timer bodies both run, so it needs no locking.
@@ -1045,7 +1041,6 @@ class AapService : Service() {
                     is CommManager.ConnectionState.Connecting ->
                         emitSessionState(SessionStateIntent.STATE_CONNECTING)
                     is CommManager.ConnectionState.Connected -> {
-                        sessionConnectedAt = SystemClock.elapsedRealtime()
                         emitSessionState(SessionStateIntent.STATE_CONNECTED)
                         onConnected()
                     }
@@ -1449,7 +1444,6 @@ class AapService : Service() {
      * 4. Scheduling a reconnect attempt if applicable (see [scheduleReconnectIfNeeded])
      */
     private fun onDisconnected(state: CommManager.ConnectionState.Disconnected) {
-        sessionConnectedAt = 0L
         cancelAllBtAutoDisconnects()
         usbLauncherManager.setSwitchingToProjection(false)
         releaseWifiLock()
@@ -1874,11 +1868,11 @@ class AapService : Service() {
 
     private fun fireBtAutoDisconnect(mac: String) {
         val sessionUp = isSessionUp()
-        val ageMs = if (sessionConnectedAt == 0L) 0L else SystemClock.elapsedRealtime() - sessionConnectedAt
+        val ownCloseMs = (wifiLauncherManager.active as? WifiLauncherNative)?.handshakeManager?.msSinceOwnSocketClose(mac)
         // The device coming back cancels the job on this same thread, so a job that runs never
         // saw it return; the parameter exists so the rule is complete where it is tested.
-        if (!BtAutoDisconnectPolicy.shouldEndSession(sessionUp, ageMs, deviceCameBack = false)) {
-            AppLog.i("AapService: Bluetooth auto-disconnect: not ending the session for $mac (up=$sessionUp, age=${ageMs}ms).")
+        if (!BtAutoDisconnectPolicy.shouldEndSession(sessionUp, deviceCameBack = false, msSinceOwnSocketClose = ownCloseMs)) {
+            AppLog.i("AapService: Bluetooth auto-disconnect: not ending the session for $mac (up=$sessionUp, ownCloseMs=$ownCloseMs).")
             return
         }
         AppLog.i("AapService: Bluetooth auto-disconnect: $mac stayed away; ending the session the way the Exit button does.")
@@ -2352,7 +2346,6 @@ class AapService : Service() {
         try { unregisterReceiver(btAutoDisconnectReceiver) } catch (_: Exception) {}
         cancelAllBtAutoDisconnects()
         btAutoDisconnectStandDown = false
-        sessionConnectedAt = 0L
         stationScanMonitor.stop(this)
         try { carKeysManager.unregisterAll() } catch (e: Exception) { AppLog.w("AapService: Error unregistering carKeysManager: ${e.message}") }
         try { wifiAutoStartReceiver?.let { unregisterReceiver(it) } } catch (_: Exception) {}

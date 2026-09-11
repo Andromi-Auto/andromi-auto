@@ -1,0 +1,50 @@
+package com.andrerinas.openheadunit.connection
+
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+
+/**
+ * Where bring-up reports the step it is on, for MainActivity's status pill.
+ *
+ * A plain object rather than a field on AppComponent: reporters sit in WifiDirectManager,
+ * NativeAaHandshakeManager and UsbLauncherManager, several on background threads, and App.provide()
+ * is not Direct Boot safe. StateFlow.value is safe to set from any thread.
+ */
+object ConnectionStageTracker {
+
+    private val _stage = MutableStateFlow<ConnectionStage?>(null)
+    private val _network = MutableStateFlow<ConnectionNetworkDetail?>(null)
+
+    /** Null means the stack is down and the pill is hidden. */
+    val stage = _stage.asStateFlow()
+
+    /** The group the pill's third line describes; null while there is none. */
+    val network = _network.asStateFlow()
+
+    /** A step of the attempt already running. Ignored if it would rewind the display. */
+    fun report(candidate: ConnectionStage) {
+        if (ConnectionStagePolicy.shouldApply(_stage.value, candidate)) _stage.value = candidate
+    }
+
+    /** A genuine restart: the floor drops so [opening] shows even though it ranks lower. The
+     *  network line is the group owner's to clear, because a failed attempt leaves the group up. */
+    fun beginAttempt(opening: ConnectionStage) {
+        _stage.value = opening
+    }
+
+    /** A step that ended with nothing to show: [from] gives way to [to], and any other stage stays. */
+    fun retreat(from: ConnectionStage, to: ConnectionStage) {
+        if (ConnectionStagePolicy.shouldRetreat(_stage.value, from)) _stage.value = to
+    }
+
+    /** The group came up, changed, or (null) went down. Equal deliveries are conflated. */
+    fun reportNetwork(detail: ConnectionNetworkDetail?) {
+        _network.value = detail
+    }
+
+    /** The stack is down. */
+    fun clear() {
+        _stage.value = null
+        _network.value = null
+    }
+}

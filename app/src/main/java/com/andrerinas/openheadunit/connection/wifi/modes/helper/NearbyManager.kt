@@ -7,6 +7,8 @@ import android.os.Build
 import android.os.ParcelFileDescriptor
 import android.widget.Toast
 import androidx.core.content.ContextCompat
+import com.andrerinas.openheadunit.connection.ConnectionStage
+import com.andrerinas.openheadunit.connection.ConnectionStageTracker
 import com.andrerinas.openheadunit.utils.AppLog
 import com.andrerinas.openheadunit.utils.Settings
 import com.andrerinas.openheadunit.utils.ToastUtils
@@ -105,6 +107,7 @@ class NearbyManager(
             return
         }
         AppLog.i("NearbyManager: Starting Nearby (Discoverer only)...")
+        ConnectionStageTracker.report(ConnectionStage.SEARCHING)
         isRunning = true
         _discoveredEndpoints.value = emptyList()
         startDiscovery()
@@ -198,6 +201,7 @@ class NearbyManager(
     private val endpointDiscoveryCallback = object : EndpointDiscoveryCallback() {
         override fun onEndpointFound(endpointId: String, info: DiscoveredEndpointInfo) {
             AppLog.i("NearbyManager: Endpoint FOUND: ${info.endpointName} ($endpointId)")
+            ConnectionStageTracker.report(ConnectionStage.PHONE_ANSWERED)
             val current = _discoveredEndpoints.value.toMutableList()
             if (current.none { it.id == endpointId }) {
                 current.add(DiscoveredEndpoint(endpointId, info.endpointName))
@@ -257,6 +261,7 @@ class NearbyManager(
                     activeEndpointId = endpointId
                     networkAtConnect = currentNetworkHandle()
                     AppLog.i("NearbyManager: Connected successfully!")
+                    ConnectionStageTracker.report(ConnectionStage.PHONE_JOINING)
 
                     // The upgrade may already have been reported while this callback was in flight.
                     maybeBuildTunnel(endpointId)
@@ -338,6 +343,7 @@ class NearbyManager(
         if (lastQuality[endpointId] != BandwidthInfo.Quality.HIGH) return
 
         AppLog.i("NearbyManager: Wi-Fi Bandwidth Upgrade successful (Quality: HIGH). Initiating stream tunnel...")
+        ConnectionStageTracker.report(ConnectionStage.PHONE_JOINING)
 
         upgradeTimeoutJob?.cancel()
         upgradeTimeoutJob = null

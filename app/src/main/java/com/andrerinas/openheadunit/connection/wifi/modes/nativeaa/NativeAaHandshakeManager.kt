@@ -27,11 +27,14 @@ import android.content.pm.PackageManager
 import androidx.core.content.ContextCompat
 import com.andrerinas.openheadunit.App
 import com.andrerinas.openheadunit.connection.CommManager
+import com.andrerinas.openheadunit.connection.ConnectionStage
+import com.andrerinas.openheadunit.connection.ConnectionStageTracker
 import com.andrerinas.openheadunit.connection.wifi.modes.WifiLauncherNative
 import com.andrerinas.openheadunit.utils.Settings
 import java.io.DataInputStream
 import java.io.OutputStream
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Manages the official Android Auto Wireless Bluetooth handshake.
@@ -191,6 +194,9 @@ class NativeAaHandshakeManager(
     @Volatile private var handsFreeSkipLoggedFor: String? = null
     // The chosen wake targets last reported as not phones, so the line prints on a change only.
     @Volatile private var droppedPokeTargetsLogged: Set<String>? = null
+    // When this manager last closed a socket to each phone, so a Bluetooth loss that follows one
+    // can be told apart from the phone leaving. See BtAutoDisconnectPolicy.
+    private val ownSocketCloseAt = ConcurrentHashMap<String, Long>()
 
     /**
      * The credentials to hand the phone, as one value.
@@ -774,6 +780,7 @@ class NativeAaHandshakeManager(
                 if (serviceName == null) {
                     aaServerSocket = server
                     AppLog.i("NativeAA: ACTIVELY LISTENING on Android Auto UUID ($AA_UUID) on radio [$radioName]... Waiting for phone to connect back!")
+                    ConnectionStageTracker.report(ConnectionStage.WAITING_FOR_PHONE)
                 } else {
                     extraAaServerSockets.add(server)
                     AppLog.i("NativeAA: ACTIVELY LISTENING on Android Auto UUID on secondary radio '$serviceName' [$radioName]")
@@ -792,10 +799,13 @@ class NativeAaHandshakeManager(
                             }
                         }
                         if (!shouldAcceptHandshake(remoteAddress)) {
-                            try { socket.close() } catch (_: Exception) {}
+                            closePhoneSocket(socket)
                             continue
                         }
                         if (refuseWhileBackedOff(socket)) continue
+                        // After the gate, not at the log line above: a refused connection is not
+                        // the phone answering.
+                        ConnectionStageTracker.report(ConnectionStage.PHONE_ANSWERED)
                         // [FIX] Launch handshake in a separate coroutine so the server can accept the next connection!
                         scope.launch(Dispatchers.IO + CoroutineName("NativeAa-Handshake-${socket.remoteDevice.address}")) {
                             handleHandshake(socket, radioName)
@@ -1160,7 +1170,7 @@ class NativeAaHandshakeManager(
             AppLog.d("NativeAA: HFP responder error ($label): ${e.message}")
         } finally {
             if (closeWhenDone) {
-                try { socket.close() } catch (e: Exception) {}
+                closePhoneSocket(socket)
                 AppLog.i("NativeAA: HFP socket for ${socket.remoteDevice.address} closed.")
             }
         }
@@ -1204,6 +1214,17 @@ class NativeAaHandshakeManager(
         }
         return bondReadingFor(device)
     }
+
+    /** Closes a socket to a phone and records that the close was ours. */
+    private fun closePhoneSocket(socket: BluetoothSocket) {
+        val mac = try { socket.remoteDevice?.address } catch (_: Exception) { null }
+        if (!mac.isNullOrEmpty()) ownSocketCloseAt[mac.uppercase()] = SystemClock.elapsedRealtime()
+        try { socket.close() } catch (_: Exception) {}
+    }
+
+    /** How long ago this manager last closed a socket to [mac], or null if it never has. */
+    fun msSinceOwnSocketClose(mac: String): Long? =
+        ownSocketCloseAt[mac.uppercase()]?.let { SystemClock.elapsedRealtime() - it }
 
     private fun classifyChosen(device: BluetoothDevice): DriverCandidatePolicy.Verdict =
         BluetoothHelper.classifyDevice(
@@ -1369,7 +1390,7 @@ class NativeAaHandshakeManager(
                     AppLog.i("NativeAA: Poke via $profile to ${device.name ?: "unnamed"} (${device.address}) failed: ${e.message}")
                 } finally {
                     pokeConnectingTo = null
-                    try { socket?.close() } catch (e: Exception) {}
+                    socket?.let { closePhoneSocket(it) }
                 }
             }
             return false
@@ -1649,6 +1670,8 @@ class NativeAaHandshakeManager(
 
                 if (devicesToPoke.isEmpty()) {
                     AppLog.w("NativeAA: No paired Bluetooth devices found to poke.")
+                    // The credentials handler already said "waking" before this loop ran.
+                    ConnectionStageTracker.retreat(ConnectionStage.WAKING_PHONE, ConnectionStage.WAITING_FOR_PHONE)
                     return@launch
                 }
 
@@ -1685,6 +1708,7 @@ class NativeAaHandshakeManager(
                     if (!awaitPokeSlot(device)) continue
 
                     AppLog.i("NativeAA: Attempting active poke to device: ${device.name} (${device.address})...")
+                    ConnectionStageTracker.report(ConnectionStage.WAKING_PHONE)
                     pokeDevice(device, holdMs = 15000)
                 }
 
@@ -1715,6 +1739,9 @@ class NativeAaHandshakeManager(
                 // prompt's own deadline is what ends the wait.
                 if (promptTookOver) continue
 
+                // This loop never gives up, so nothing else would take the pill off "waking" when
+                // a round ends unanswered. A phone that did answer has already moved it higher.
+                ConnectionStageTracker.retreat(ConnectionStage.WAKING_PHONE, ConnectionStage.WAITING_FOR_PHONE)
                 delay(POKE_RETRY_GAP_MS)
             }
         }
@@ -1771,8 +1798,12 @@ class NativeAaHandshakeManager(
                     for (round in 1..NativeDriverSelectionPolicy.CHOSEN_WAKE_ROUNDS) {
                         if (!isActive() || !isActive || isHandshakeInFlight() || isHandoffSettling()) break
                         AppLog.i("NativeAA: Attempting manual poke to ${device.name}...")
-                        pokeDevice(device, holdMs = 20000)
+                        // The pill shows this wake like the retry loop's: waking while a round
+                        // runs, back to waiting after one the phone did not answer.
+                        ConnectionStageTracker.report(ConnectionStage.WAKING_PHONE)
+                        val answered = pokeDevice(device, holdMs = 20000)
                         AppLog.i("NativeAA: Manual poke to ${device.name} finished.")
+                        if (!answered) ConnectionStageTracker.retreat(ConnectionStage.WAKING_PHONE, ConnectionStage.WAITING_FOR_PHONE)
                         if (round < NativeDriverSelectionPolicy.CHOSEN_WAKE_ROUNDS) delay(POKE_RETRY_GAP_MS)
                     }
                 } finally {
@@ -1807,7 +1838,7 @@ class NativeAaHandshakeManager(
         } else {
             AppLog.d("NativeAA: Dropping Android Auto connection — still backed off after $consecutiveHandshakeFailures failed handshakes.")
         }
-        try { socket.close() } catch (e: Exception) {}
+        closePhoneSocket(socket)
         return true
     }
 
@@ -1897,7 +1928,7 @@ class NativeAaHandshakeManager(
                 commManager.connectionState.value is CommManager.ConnectionState.Connecting) {
                 AppLog.i("NativeAA: USB/other session already active. Aborting BT handshake so phone does not start a parallel wireless attempt.")
                 abortedLocally = true
-                try { socket.close() } catch (_: Exception) {}
+                closePhoneSocket(socket)
                 return@withContext
             }
 
@@ -1962,6 +1993,8 @@ class NativeAaHandshakeManager(
                     WppAction.SendInfoResponse -> {
                         AppLog.i("NativeAA: Phone ready for WiFi association. Delivering credentials...")
                         AppLog.i("NativeAA: [TX] Sending WifiInfoResponse (Type 3) with full credentials in 1000ms...")
+                        // The one site that really is sending credentials to the phone.
+                        ConnectionStageTracker.report(ConnectionStage.SENDING_CREDENTIALS)
                         delay(1000) // [FIX] Increased delay to give phone more processing time
                         // Read again here rather than trusting the snapshot this exchange started
                         // with. A group removed inside the pause above leaves the phone hunting an
@@ -2344,7 +2377,7 @@ class NativeAaHandshakeManager(
             // point to cancel at — so its thread is stranded from here on.
             readerJob?.cancel()
             inbound.close()
-            try { socket.close() } catch (e: Exception) {}
+            closePhoneSocket(socket)
             AppLog.i("NativeAA: BT Handshake socket closed.")
         }
     }
@@ -2430,11 +2463,13 @@ class NativeAaHandshakeManager(
                     // The hint is the phone's own words for a refusal, and the only one it sends.
                     val hint = if (s.hasErrorMessageHint()) " hint=\"${s.errorMessageHint}\"" else ""
                     AppLog.i("NativeAA: [RX] WifiConnectStatus status=${WppStatus.describe(if (s.hasStatus()) s.status else null)}$hint (SUCCESS = the phone got onto our network)")
+                    ConnectionStageTracker.report(ConnectionStage.PHONE_JOINING)
                 }
                 WppMessageType.START_RESPONSE -> {
                     val r = Wireless.WifiStartResponse.parseFrom(msg.payload)
                     val port = if (r.hasPort()) ":${r.port}" else ""
                     AppLog.i("NativeAA: [RX] WifiStartResponse ip=${r.ipAddress}$port status=${WppStatus.describe(if (r.hasStatus()) r.status else null)}")
+                    ConnectionStageTracker.report(ConnectionStage.PHONE_JOINING)
                 }
             }
         } catch (e: Exception) {
@@ -2601,6 +2636,7 @@ class NativeAaHandshakeManager(
         unregisterBtStateReceiver()
         resetSelectionState()
         manualPokeInFlight = false
+        ownSocketCloseAt.clear()
         wppTcpServer?.stop()
         wppTcpServer = null
         try { aaServerSocket?.close() } catch (e: Exception) {}

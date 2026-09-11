@@ -163,6 +163,11 @@
     <string name="usb_auto_connect_description">Автоматически подключаться к известному USB-устройству при запуске приложения.</string>
     <string name="auto_start_bt_label">Автозапуск при Bluetooth</string>
     <string name="auto_start_bt_description">Автоматически открывать Open Headunit при подключении определенного Bluetooth-устройства.</string>
+    <string name="auto_start_offer_title">Запускать автоматически?</string>
+    <string name="auto_start_offer_message">Запускать приложение автоматически с этим устройством, %1$s?</string>
+    <string name="auto_start_offer_yes">Да</string>
+    <string name="auto_start_offer_no">Нет</string>
+    <string name="auto_start_offer_countdown">Нет через %1$d с</string>
     <string name="auto_start_wifi_label">Автозапуск при Wi‑Fi</string>
     <string name="auto_start_wifi_description">Автоматически открывать Open Headunit при подключении к определенной Wi‑Fi сети (SSID).</string>
     <string name="auto_start_wifi_ssid_label">SSID Wi‑Fi</string>
@@ -1058,7 +1063,6 @@
     <string name="driver_device_last_used">Последний подключенный</string>
     <string name="driver_selection_auto_in">Автоподключение к %2$s через %1$dс...</string>
     <string name="driver_selection_dialog_title">Выберите телефон водителя</string>
-    <string name="connecting_to_device">Подключение к %s...</string>
     <string name="driver_none">Нет</string>
     <string name="show_all_devices">Показать все Bluetooth-устройства</string>
     <string name="show_only_phones">Показать только телефоны</string>

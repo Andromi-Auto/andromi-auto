@@ -188,6 +188,11 @@
     <string name="usb_auto_connect_description">アプリケーションが開始された時に既知のUSBデバイスに接続されると自動的に接続します。</string>
     <string name="auto_start_bt_label">Bluetooth自動開始</string>
     <string name="auto_start_bt_description">特定のBluetoothデバイスが接続されたときに、Open Headunitを自動的に起動します。</string>
+    <string name="auto_start_offer_title">自動的に起動しますか?</string>
+    <string name="auto_start_offer_message">このデバイス (%1$s) でアプリを自動的に起動しますか?</string>
+    <string name="auto_start_offer_yes">はい</string>
+    <string name="auto_start_offer_no">いいえ</string>
+    <string name="auto_start_offer_countdown">%1$d秒後に「いいえ」</string>
     <string name="auto_start_wifi_label">Wi-Fi自動起動</string>
     <string name="auto_start_wifi_description">特定のWi-Fi SSIDに接続されたときにOpen Headunitを自動的に起動します。</string>
     <string name="auto_start_wifi_ssid_label">Wi-Fi SSID</string>
@@ -1063,7 +1068,6 @@
     <string name="driver_device_last_used">前回接続</string>
     <string name="driver_selection_auto_in">%1$d秒後に %2$s に自動接続します...</string>
     <string name="driver_selection_dialog_title">ドライバーのスマートフォンを選択</string>
-    <string name="connecting_to_device">%s に接続中...</string>
     <string name="driver_none">なし</string>
     <string name="show_all_devices">すべてのBluetoothデバイスを表示</string>
     <string name="show_only_phones">スマートフォンのみ表示</string>

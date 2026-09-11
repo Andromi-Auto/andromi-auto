@@ -4,6 +4,8 @@ import android.os.Handler
 import android.os.Looper
 import com.andrerinas.openheadunit.App
 import com.andrerinas.openheadunit.connection.CommManager
+import com.andrerinas.openheadunit.connection.ConnectionStage
+import com.andrerinas.openheadunit.connection.ConnectionStageTracker
 import com.andrerinas.openheadunit.connection.wifi.direct.GroupIdentityStability
 import com.andrerinas.openheadunit.connection.wifi.direct.StationStandDown
 import com.andrerinas.openheadunit.connection.wifi.direct.StationStandDownSettlePolicy
@@ -17,8 +19,15 @@ import com.andrerinas.openheadunit.connection.wifi.WifiLauncherMode
 import com.andrerinas.openheadunit.connection.wifi.WifiLauncherStopSequence
 import com.andrerinas.openheadunit.main.SettingsActivity
 import com.andrerinas.openheadunit.utils.AppLog
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 
 class WifiLauncherNative : WifiLauncher {
+
+    private companion object {
+        /** Safety net over the teardown's own settle budget, so a hotspot that will not go never strands a bring-up. */
+        private const val HOTSPOT_TEARDOWN_CEILING_MS = 10_000L
+    }
 
     val strategy: NativeStrategy
 
@@ -76,6 +85,7 @@ class WifiLauncherNative : WifiLauncher {
                 // Read this device's own access point instead of hosting a P2P group. The AP
                 // itself is the user's to switch on; the provider only resolves and watches it.
                 AppLog.i("AapService: Native AA on the head unit hotspot — resolving access point credentials.")
+                ConnectionStageTracker.report(ConnectionStage.PREPARING_NETWORK)
                 softApCredentialsProvider?.start()
             } else if (wifiDirect != null) {
                 // Before the group, not after: wpa_supplicant only honours a channel while no group
@@ -98,7 +108,7 @@ class WifiLauncherNative : WifiLauncher {
                     // is held across every poll, so nothing else starts a create in the gap.
                     awaitStandDownThenCreate(wifiDirect, waitedMs = 0L)
                 } else {
-                    wifiDirect.startNativeAaQuietHost()
+                    createWhenRadioIsFree(wifiDirect)
                 }
             }
 
@@ -127,8 +137,36 @@ class WifiLauncherNative : WifiLauncher {
                 )
             StationStandDownSettlePolicy.Step.CREATE -> {
                 AppLog.i("WifiLauncherNative: creating the group ${waitedMs}ms after the stand-down (still joined=$stillAssociated).")
-                wifiDirect.startNativeAaQuietHost()
+                createWhenRadioIsFree(wifiDirect)
             }
+        }
+    }
+
+    /**
+     * Creates the group once the hotspot teardown that frees this radio has actually finished.
+     *
+     * A single-radio chip cannot host a group, or even be asked to switch WiFi on, while its own
+     * access point still holds it — and that teardown is started moments earlier on another thread.
+     */
+    private fun createWhenRadioIsFree(wifiDirect: WifiDirectManager) {
+        val teardown = manager.sharedServices.hotspotTeardown
+        if (teardown == null || teardown.isCompleted) {
+            wifiDirect.startNativeAaQuietHost()
+            return
+        }
+        AppLog.i("WifiLauncherNative: waiting for this unit's hotspot to go down before creating the group.")
+        service.serviceScope.launch {
+            val freed = withTimeoutOrNull(HOTSPOT_TEARDOWN_CEILING_MS) { teardown.join() } != null
+            if (manager.active !== this@WifiLauncherNative ||
+                manager.sharedServices.wifiDirectManager !== wifiDirect
+            ) return@launch
+            if (!freed) {
+                AppLog.w(
+                    "WifiLauncherNative: this unit's hotspot had not gone down after " +
+                        "${HOTSPOT_TEARDOWN_CEILING_MS / 1000}s; creating the group anyway."
+                )
+            }
+            wifiDirect.startNativeAaQuietHost()
         }
     }
 
@@ -268,6 +306,7 @@ class WifiLauncherNative : WifiLauncher {
             commManager.connectionState.value is CommManager.ConnectionState.Connecting) {
             AppLog.i("AapService: USB/other session already active. Skipping auto-poke to avoid pulling phone into wireless flow.")
         } else if (!service.userExitedAA) {
+            ConnectionStageTracker.report(ConnectionStage.WAKING_PHONE)
             handshakeManager?.triggerPoke()
         } else {
             AppLog.i("AapService: userExitedAA is true. Skipping auto-poke.")

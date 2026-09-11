@@ -1129,6 +1129,16 @@ class Settings(private val context: Context) {
         get() = prefs.getString("auto-start-bt-name", "")!!
         set(value) { prefs.edit().putString("auto-start-bt-name", value).apply() }
 
+    /**
+     * Phones the auto-start offer has already been answered for, so a "no" is not asked twice.
+     *
+     * Keyed by address rather than a single flag: a new phone in the car is a new question, and the
+     * answer given about the old one says nothing about it.
+     */
+    var autoStartOfferAnsweredMacs: Set<String>
+        get() = prefs.getStringSet("auto-start-offer-answered-macs", null) ?: emptySet()
+        set(value) { prefs.edit().putStringSet("auto-start-offer-answered-macs", value).apply() }
+
     var autoStartBluetoothDeviceMac: String
         get() = autoStartBluetoothDeviceMacs.firstOrNull() ?: ""
         set(value) {

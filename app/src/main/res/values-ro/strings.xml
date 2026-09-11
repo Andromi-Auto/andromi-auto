@@ -184,6 +184,11 @@
     <string name="usb_auto_connect_description">Conectează automat un dispozitiv USB cunoscut când deschizi aplicația.</string>
     <string name="auto_start_bt_label">Pornire automată pe Bluetooth</string>
     <string name="auto_start_bt_description">Deschide automat Open Headunit când se conectează un anumit dispozitiv Bluetooth.</string>
+    <string name="auto_start_offer_title">Pornire automată?</string>
+    <string name="auto_start_offer_message">Vrei să pornești automat aplicația cu acest dispozitiv, %1$s?</string>
+    <string name="auto_start_offer_yes">Da</string>
+    <string name="auto_start_offer_no">Nu</string>
+    <string name="auto_start_offer_countdown">Nu în %1$d s</string>
     <string name="auto_start_wifi_label">Pornire automată pe WiFi</string>
     <string name="auto_start_wifi_description">Deschide automat Open Headunit când se conectează la un SSID WiFi specific.</string>
     <string name="auto_start_wifi_ssid_label">SSID WiFi</string>
@@ -1056,7 +1061,6 @@
     <string name="driver_device_last_used">Ultimul conectat</string>
     <string name="driver_selection_auto_in">Conectare automată la %2$s în %1$ds...</string>
     <string name="driver_selection_dialog_title">Selectați telefonul șoferului</string>
-    <string name="connecting_to_device">Se conectează la %s...</string>
     <string name="driver_none">Niciunul</string>
     <string name="show_all_devices">Afișează toate dispozitivele Bluetooth</string>
     <string name="show_only_phones">Afișează doar telefoanele</string>

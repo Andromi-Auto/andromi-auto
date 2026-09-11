@@ -163,6 +163,11 @@
     <string name="usb_auto_connect_description">الاتصال تلقائيا بجهاز USB معروف عند فتح التطبيق.</string>
     <string name="auto_start_bt_label">التشغيل التلقائي عبر البلوتوث</string>
     <string name="auto_start_bt_description">فتح Open Headunit تلقائيا عند اتصال جهاز بلوتوث محدد.</string>
+    <string name="auto_start_offer_title">بدء تلقائي؟</string>
+    <string name="auto_start_offer_message">هل تريد تشغيل التطبيق تلقائيًا مع هذا الجهاز، %1$s؟</string>
+    <string name="auto_start_offer_yes">نعم</string>
+    <string name="auto_start_offer_no">لا</string>
+    <string name="auto_start_offer_countdown">لا خلال %1$d ثانية</string>
     <string name="auto_start_wifi_label">تشغيل تلقائي عبر الواي فاي</string>
     <string name="auto_start_wifi_description">فتح Open Headunit تلقائياً عند الاتصال بشبكة واي فاي محددة (SSID).</string>
     <string name="auto_start_wifi_ssid_label">اسم شبكة الواي فاي (SSID)</string>
@@ -1057,7 +1062,6 @@
     <string name="driver_device_last_used">آخر اتصال</string>
     <string name="driver_selection_auto_in">الاتصال التلقائي بـ %2$s خلال %1$d ثوانٍ...</string>
     <string name="driver_selection_dialog_title">اختر هاتف السائق</string>
-    <string name="connecting_to_device">جارٍ الاتصال بـ %s...</string>
     <string name="driver_none">لا يوجد</string>
     <string name="show_all_devices">عرض جميع أجهزة البلوتوث</string>
     <string name="show_only_phones">عرض الهواتف فقط</string>

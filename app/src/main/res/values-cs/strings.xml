@@ -163,6 +163,11 @@
     <string name="usb_auto_connect_description">Automatically connect to a known USB device when the application is opened.</string>
     <string name="auto_start_bt_label">Automaticky spustit při Bluetooth</string>
     <string name="auto_start_bt_description">Automaticky otevřít Open Headunit při připojení konkrétního Bluetooth zařízení.</string>
+    <string name="auto_start_offer_title">Spustit automaticky?</string>
+    <string name="auto_start_offer_message">Chcete aplikaci automaticky spouštět s tímto zařízením, %1$s?</string>
+    <string name="auto_start_offer_yes">Ano</string>
+    <string name="auto_start_offer_no">Ne</string>
+    <string name="auto_start_offer_countdown">Ne za %1$d s</string>
     <string name="auto_start_wifi_label">Automatické spuštění přes Wi-Fi</string>
     <string name="auto_start_wifi_description">Automaticky otevřít Open Headunit při připojení k určité Wi-Fi síti (SSID).</string>
     <string name="auto_start_wifi_ssid_label">SSID Wi-Fi</string>
@@ -1059,7 +1064,6 @@
     <string name="driver_device_last_used">Naposledy připojeno</string>
     <string name="driver_selection_auto_in">Automatické připojení k %2$s za %1$ds...</string>
     <string name="driver_selection_dialog_title">Vyberte telefon řidiče</string>
-    <string name="connecting_to_device">Připojování k %s...</string>
     <string name="driver_none">Žádný</string>
     <string name="show_all_devices">Zobrazit všechna zařízení Bluetooth</string>
     <string name="show_only_phones">Zobrazit pouze telefony</string>

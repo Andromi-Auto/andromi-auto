@@ -2,6 +2,8 @@ package com.andrerinas.openheadunit.connection.wifi
 
 import com.andrerinas.openheadunit.App
 import com.andrerinas.openheadunit.aap.AapService
+import com.andrerinas.openheadunit.connection.ConnectionStage
+import com.andrerinas.openheadunit.connection.ConnectionStageTracker
 import com.andrerinas.openheadunit.utils.AppLog
 import com.andrerinas.openheadunit.utils.Settings
 
@@ -62,6 +64,8 @@ open class WifiLauncherManager(val service: AapService) {
         }
 
         AppLog.i("WifiLauncher: Initializing WiFi Mode: ${newLauncher.mode}")
+        // The stack is coming up, so the status pill appears here and is cleared in stop().
+        ConnectionStageTracker.beginAttempt(ConnectionStage.ARMED)
 
         // stop old launcher
         active?.stop(WifiLauncherStopSequence.ANY)
@@ -86,6 +90,7 @@ open class WifiLauncherManager(val service: AapService) {
         if (seq.handledAt(WifiLauncherStopSequence.LAST)) {
             sharedServices.stopAll()
             active = null
+            ConnectionStageTracker.clear()
         }
     }
 

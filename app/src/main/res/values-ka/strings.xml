@@ -190,6 +190,11 @@
     <string name="usb_auto_connect_description">ცნობილ USB მოწყობილობასთან ავტომატური დაკავშირება აპლიკაციის გახსნისას.</string>
     <string name="auto_start_bt_label">ავტო-გაშვება Bluetooth-ით</string>
     <string name="auto_start_bt_description">Open Headunit-ის ავტომატური გახსნა კონკრეტული Bluetooth მოწყობილობის დაკავშირებისას.</string>
+    <string name="auto_start_offer_title">ავტომატურად გაეშვას?</string>
+    <string name="auto_start_offer_message">გსურს აპლიკაციის ავტომატური გაშვება ამ მოწყობილობასთან, %1$s?</string>
+    <string name="auto_start_offer_yes">დიახ</string>
+    <string name="auto_start_offer_no">არა</string>
+    <string name="auto_start_offer_countdown">არა %1$d წმ-ში</string>
     <string name="listen_for_usb_devices_label">USB მოწყობილობების მონიტორინგი</string>
     <string name="listen_for_usb_devices_description">USB მოწყობილობის შეერთებისას Android სისტემური მოთხოვნის ჩვენება.</string>
     <string name="show_toast_messages">Toast შეტყობინებების ჩვენება</string>
@@ -1040,7 +1045,6 @@
     <string name="driver_device_last_used">ბოლოს დაკავშირებული</string>
     <string name="driver_selection_auto_in">ავტომატური დაკავშირება %2$s-თან %1$d წამში...</string>
     <string name="driver_selection_dialog_title">აირჩიეთ მძღოლის ტელეფონი</string>
-    <string name="connecting_to_device">%s-თან დაკავშირება...</string>
     <string name="driver_none">არცერთი</string>
     <string name="show_all_devices">ყველა Bluetooth მოწყობილობის ჩვენება</string>
     <string name="show_only_phones">მხოლოდ ტელეფონების ჩვენება</string>
