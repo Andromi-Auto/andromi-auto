@@ -30,7 +30,7 @@ object BluetoothWakePolicy {
      * Deliberately not a setting. A selectable HSP-AG-only mode was built and removed once the rig
      * measured a successful HSP-AG poke leaving this unit's hands-free link down for three minutes,
      * the same outcome as HFP-AG: a phone serves both records from one headset connection, so which
-     * one is asked for was never the lever. [shouldPoke] is.
+     * one is asked for was never the lever. [wakeDecision] is.
      */
     val POKE_TARGETS: List<UUID> = listOf(HFP_AG_UUID, HSP_AG_UUID)
 
@@ -58,7 +58,7 @@ object BluetoothWakePolicy {
         /** No link. Nothing for a poke to displace. */
         ABSENT,
 
-        /** The adapter would not say. Pokes anyway — see [shouldPoke]. */
+        /** The adapter would not say. Pokes anyway, see [wakeDecision]. */
         UNREADABLE;
 
         companion object {
@@ -72,26 +72,65 @@ object BluetoothWakePolicy {
         }
     }
 
+    /** What the poke target's own connection to this unit reads as, from `BluetoothDevice.isConnected()`. */
+    enum class TargetLink {
+        CONNECTED,
+        ABSENT,
+
+        /** The hidden method is unreachable on this ROM. Never taken as absence. */
+        UNREADABLE;
+
+        companion object {
+            fun of(connected: Boolean?): TargetLink = when (connected) {
+                true -> CONNECTED
+                false -> ABSENT
+                null -> UNREADABLE
+            }
+        }
+    }
+
+    /** Why a poke went out, or did not, with a hands-free link in the picture. */
+    enum class WakeReason {
+        /** No hands-free link in either role, so nothing a poke could displace. */
+        NO_LINK,
+
+        /** A driver switch names the phone being left as the link's holder. */
+        SWITCH_TARGET,
+
+        /** Only the gateway role is up: this unit is the phone side, so the peer is a car kit or headset. */
+        GATEWAY_ONLY,
+
+        /** The target holds no connection to this unit at all, so the link cannot be its. */
+        TARGET_ABSENT,
+
+        /** The target is connected while a link is up; taken as its link. */
+        TARGET_CONNECTED,
+
+        /** The target's state could not be read while our own client link is up. */
+        TARGET_UNREADABLE
+    }
+
+    data class WakeDecision(val poke: Boolean, val reason: WakeReason)
+
     /**
-     * Whether the wake poke may run, given what this head unit's own hands-free link is doing.
-     *
-     * Measured, not theorised: a poke that connects takes the phone's single hands-free slot and
-     * this unit's own client is dropped to make room. `HfpClientConnectionService` logged its
-     * disconnect from the same peer 4 ms after `socket.connect()` returned, and the link stayed down
-     * eight minutes until a Bluetooth adapter cycle. The user sees a head unit reporting Bluetooth
-     * disconnected while the phone reports it connected, and calls coming out of the phone.
-     *
-     * Skipping costs nothing, because a live hands-free link *is* the ACL connection a poke exists
-     * to create. Units where the poke is load-bearing have no such link to read, so they keep
-     * today's behaviour — as does [HandsFreeLink.UNREADABLE], since an adapter that will not report
-     * its profiles must not silently disable a mechanism some units cannot connect without.
-     *
-     * That reasoning only holds while the link could be the poke target's own. The read is
-     * adapter-wide, so during a driver switch it reports the phone being left, and standing the wake
-     * down for it strands the switch: [linkIsAnotherPhones] says the link is somebody else's.
+     * Whether the wake poke may run. A poke that connects takes the phone's single hands-free slot
+     * and this unit's own client link to it is dropped to make room, so a link that could be the
+     * target's stands the poke down. Every other link is somebody else's.
      */
-    fun shouldPoke(handsFreeLink: HandsFreeLink, linkIsAnotherPhones: Boolean = false): Boolean =
-        handsFreeLink != HandsFreeLink.CONNECTED || linkIsAnotherPhones
+    fun wakeDecision(
+        clientRoleLink: HandsFreeLink,
+        gatewayRoleLink: HandsFreeLink,
+        targetLink: TargetLink,
+        linkIsAnotherPhones: Boolean = false
+    ): WakeDecision = when {
+        clientRoleLink != HandsFreeLink.CONNECTED && gatewayRoleLink != HandsFreeLink.CONNECTED ->
+            WakeDecision(true, WakeReason.NO_LINK)
+        linkIsAnotherPhones -> WakeDecision(true, WakeReason.SWITCH_TARGET)
+        clientRoleLink == HandsFreeLink.ABSENT -> WakeDecision(true, WakeReason.GATEWAY_ONLY)
+        targetLink == TargetLink.CONNECTED -> WakeDecision(false, WakeReason.TARGET_CONNECTED)
+        targetLink == TargetLink.ABSENT -> WakeDecision(true, WakeReason.TARGET_ABSENT)
+        else -> WakeDecision(false, WakeReason.TARGET_UNREADABLE)
+    }
 
     /** What a stored Auto Start MAC's pairing state read as, when the poke went looking for it. */
     enum class BondReading {

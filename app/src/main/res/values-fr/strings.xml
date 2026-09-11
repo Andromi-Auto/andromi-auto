@@ -772,6 +772,7 @@
 
     <string name="supported_nativeaa">Support sans fil amélioré</string>
     <string name="supported_nativeaa_desc">Bonne nouvelle ! Ton appareil supporte le mode \"Sans fil natif\", qui offre une expérience Android Auto plus fluide. \n\nPour l\'activer, nous devons rafraîchir ton cache Bluetooth. S\'il te plaît :\n1. Supprime le couplage existant sur ton téléphone\n2. Clique sur OK pour redémarrer le Bluetooth\n3. Couple à nouveau ton téléphone\n\nVeux-tu passer en mode AA natif maintenant ?</string>
+    <string name="native_aa_poke_not_running">Le Bluetooth sans fil ne tourne pas sur cet autoradio. Vérifiez les réglages.</string>
     <string name="not_supported_nativeaa">Le sans fil natif ne semble pas supporté</string>
     <string name="not_supported_nativeaa_desc">Ton appareil pourrait ne pas supporter les fonctionnalités Bluetooth ou Wi-Fi requises pour le sans fil natif. Tu peux quand même essayer, mais si ça échoue, utilise plutôt le mode \"Assistant sans fil\" ou \"Auto (Serveur Headunit)\".</string>
     <string name="external_bt_nativeaa">Le sans fil natif ne peut pas fonctionner sur cet autoradio</string>

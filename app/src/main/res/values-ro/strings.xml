@@ -472,6 +472,7 @@
     <string name="hotspot_permission_title">Permisiune necesară</string>
     <string name="hotspot_permission_message">Funcția de hotspot necesită permisiunea \"Modificare setări de sistem\". Vă rugăm să o activați pe ecranul următor.</string>
 
+    <string name="native_aa_poke_not_running">Bluetooth-ul wireless nu rulează pe această unitate. Verifică setările.</string>
     <string name="not_supported_nativeaa">Conexiunea Wireless Nativă pare să nu fie suportată</string>
     <string name="not_supported_nativeaa_desc">Este posibil ca dispozitivul tău să nu suporte funcțiile Bluetooth sau Wi-Fi necesare pentru Wireless Nativ. Poți încerca oricum, dar dacă nu reușești, te rugăm să folosești modul „Wireless Helper” sau „Auto (Headunit Server)”.</string>
     <string name="shortcut_selfmode_title">Mod Self</string>

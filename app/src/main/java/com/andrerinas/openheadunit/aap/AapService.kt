@@ -1615,8 +1615,14 @@ class AapService : Service() {
                 userExitedAA = true
             }
 
-            App.provide(this@AapService).audioDecoder.stop()
-            App.provide(this@AapService).videoDecoder.stop("AapService::onDisconnect")
+            // The decoders are shared, and a fast reconnect can have the next session up before this
+            // disconnect gets here: stopping them then blanks the new session's picture.
+            if (commManager.isConnected) {
+                AppLog.i("AapService: a session is already connected, so its decoders are left running")
+            } else {
+                App.provide(this@AapService).audioDecoder.stop()
+                App.provide(this@AapService).videoDecoder.stop("AapService::onDisconnect")
+            }
         }
 
         // [FIX] Set cooldown flag for ALL user exits (not just USB).
@@ -2481,6 +2487,10 @@ class AapService : Service() {
                                     (why?.let { " ($it)" } ?: "") + ", so nothing could answer the phone. Starting them before the poke."
                             )
                             activeLauncher.handshakeManager?.start()
+                            // start() logs why it gave up; the person who pressed the button gets told too.
+                            if (activeLauncher.handshakeManager?.notStartedReason() != null) {
+                                ToastUtils.showToast(this, getString(R.string.native_aa_poke_not_running))
+                            }
                         } else if (activeLauncher is WifiLauncherNative && activeLauncher.handshakeManager?.isActive() != true) {
                             // A completed handoff closes the AA listeners while leaving the manager
                             // running, and start() returns immediately on isRunning, so calling it here
@@ -2592,7 +2602,16 @@ class AapService : Service() {
                     groupUp = launcher?.hasLiveNetwork(),
                     networkComingUp = networkComingUp
                 )
-                if (!actions.doesNothing) {
+                if (actions.doesNothing) {
+                    val veto = BtAutoStartRearmPolicy.vetoReason(
+                        sessionUp = sessionUp,
+                        handshakeActive = launcher?.handshakeManager?.isActive(),
+                        attemptInFlight = attemptInFlight,
+                        groupUp = launcher?.hasLiveNetwork(),
+                        networkComingUp = networkComingUp
+                    )
+                    AppLog.i("AapService: Bluetooth auto-start: nothing to do, ${veto ?: "this mode needs no rebuild"}.")
+                } else {
                     AppLog.i("AapService: Bluetooth auto-start: $actions")
                 }
                 if (actions.clearUserExit) {

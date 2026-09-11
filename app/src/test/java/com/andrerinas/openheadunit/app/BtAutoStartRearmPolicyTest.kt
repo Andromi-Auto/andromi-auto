@@ -2,6 +2,7 @@ package com.andrerinas.openheadunit.app
 
 import com.andrerinas.openheadunit.connection.wifi.WifiLauncherMode
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -224,4 +225,34 @@ class BtAutoStartRearmPolicyTest {
         assertTrue(actions.clearUserExit)
     }
 
+
+    @Test
+    fun `a vetoed arrival names the veto that fired`() {
+        assertEquals(
+            "a session is already up",
+            BtAutoStartRearmPolicy.vetoReason(true, null, null, null, null)
+        )
+        assertEquals(
+            "a handshake attempt is already in flight",
+            BtAutoStartRearmPolicy.vetoReason(false, null, true, null, null)
+        )
+        assertEquals(
+            "the network has been asked for and has not answered yet",
+            BtAutoStartRearmPolicy.vetoReason(false, null, false, null, true)
+        )
+        assertEquals(
+            "a handshake is running on a group that is still up",
+            BtAutoStartRearmPolicy.vetoReason(false, true, false, true, false)
+        )
+    }
+
+    @Test
+    fun `an arrival with nothing in the way has no veto`() {
+        assertNull(BtAutoStartRearmPolicy.vetoReason(false, false, false, true, false))
+    }
+
+    @Test
+    fun `a stranded handshake with no network is not a veto`() {
+        assertNull(BtAutoStartRearmPolicy.vetoReason(false, true, false, false, false))
+    }
 }

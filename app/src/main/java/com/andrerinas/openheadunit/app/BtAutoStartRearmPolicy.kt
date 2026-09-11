@@ -40,10 +40,11 @@ object BtAutoStartRearmPolicy {
     ): BtAutoStartActions {
         // A network that has been asked for and has not answered is work in progress, exactly like
         // an attempt in flight: everything below would read it as "cannot accept" and rebuild.
-        if (sessionUp || attemptInFlight == true || networkComingUp == true) return BtAutoStartActions.NONE
         // An active handshake suppresses everything only while its group is still up; a handshake
         // stranded with no network is a state to rebuild out of, not one to protect.
-        if (handshakeActive == true && groupUp != false) return BtAutoStartActions.NONE
+        if (vetoReason(sessionUp, handshakeActive, attemptInFlight, groupUp, networkComingUp) != null) {
+            return BtAutoStartActions.NONE
+        }
 
         val forceRearm = mode == WifiLauncherMode.NATIVE
         return BtAutoStartActions(
@@ -51,6 +52,26 @@ object BtAutoStartRearmPolicy {
             forceRearmWireless = forceRearm,
             armWirelessIfIdle = !forceRearm && wirelessSelected && !wirelessArmed
         )
+    }
+
+    /**
+     * Why this arrival is left alone, or null when nothing vetoes it.
+     *
+     * A veto used to leave no line at all, so a round that measured one had to infer which of the
+     * four fired from the absence of every branch below it. The order is [actionsFor]'s.
+     */
+    fun vetoReason(
+        sessionUp: Boolean,
+        handshakeActive: Boolean?,
+        attemptInFlight: Boolean?,
+        groupUp: Boolean?,
+        networkComingUp: Boolean?
+    ): String? = when {
+        sessionUp -> "a session is already up"
+        attemptInFlight == true -> "a handshake attempt is already in flight"
+        networkComingUp == true -> "the network has been asked for and has not answered yet"
+        handshakeActive == true && groupUp != false -> "a handshake is running on a group that is still up"
+        else -> null
     }
 
     /**

@@ -472,6 +472,7 @@
     <string name="hotspot_permission_title">Permissão necessária</string>
     <string name="hotspot_permission_message">O recurso de ponto de acesso requer a permissão \"Modificar configurações do sistema\". Por favor, ative-a na próxima tela.</string>
 
+    <string name="native_aa_poke_not_running">O Bluetooth sem fio não está em execução nesta central. Verifique as configurações.</string>
     <string name="not_supported_nativeaa">O modo Sem Fio Nativo pode não ser compatível</string>
     <string name="not_supported_nativeaa_desc">Seu dispositivo pode não ser compatível com os recursos de Bluetooth ou Wi-Fi necessários para o modo Sem Fio Nativo. Você pode tentar de qualquer maneira, mas se falhar, use o modo \"Wireless Helper\" ou \"Auto (Headunit Server)\".</string>
     <string name="shortcut_selfmode_title">Modo Próprio (Self Mode)</string>

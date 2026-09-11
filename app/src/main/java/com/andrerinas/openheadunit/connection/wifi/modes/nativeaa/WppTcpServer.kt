@@ -295,10 +295,23 @@ class WppTcpServer(
             }
         }
 
-        feed(WppEvent.SocketReady)
-        if (callbacks.credentials() != null) feed(WppEvent.CredentialsReady)
+        // A phone that re-dials while its projection is up must hear nothing: a version request
+        // restarts wireless setup on its side and drops the live AAP session. Asked before the first
+        // send and ahead of every message, because a phone that answers each tick never leaves the
+        // loop idle long enough for a check that waits for silence.
+        if (callbacks.projectionSessionUp()) {
+            AppLog.i("WppTcpServer: projection already up; holding the re-dialled control channel open without a handshake")
+            feed(WppEvent.TcpSessionUp)
+        } else {
+            feed(WppEvent.SocketReady)
+            if (callbacks.credentials() != null) feed(WppEvent.CredentialsReady)
+        }
 
         while (running && !session.isTerminal()) {
+            if (callbacks.projectionSessionUp()) {
+                feed(WppEvent.TcpSessionUp)
+                continue
+            }
             var msg: NativeAaHandshakeManager.ProtobufMessage? = null
             if (readerClosed) {
                 delay(TICK_MS)
@@ -333,10 +346,6 @@ class WppTcpServer(
                     AppLog.w("WppTcpServer: no credentials after ${CREDENTIALS_WAIT_MS / 1000}s; ending the exchange")
                     feed(WppEvent.CredentialsUnavailable)
                 }
-                continue
-            }
-            if (callbacks.projectionSessionUp()) {
-                feed(WppEvent.TcpSessionUp)
                 continue
             }
             val timeout = session.currentStageTimeoutMs()

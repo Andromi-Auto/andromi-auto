@@ -472,6 +472,7 @@
     <string name="hotspot_permission_title">Потрібен дозвіл</string>
     <string name="hotspot_permission_message">Функція точки доступу потребує дозволу \"Зміна системних налаштувань\". Будь ласка, увімкніть його на наступному екрані.</string>
 
+    <string name="native_aa_poke_not_running">Бездротовий Bluetooth на цьому пристрої не працює. Перевірте налаштування.</string>
     <string name="not_supported_nativeaa">Нативний бездротовий режим, схоже, не підтримується</string>
     <string name="not_supported_nativeaa_desc">Ваш пристрій може не підтримувати необхідні функції Bluetooth або Wi-Fi для нативного бездротового режиму. Ви можете спробувати в будь-якому випадку, але якщо не вдасться, використовуйте режим «Wireless Helper» або «Auto (Headunit Server)».</string>
     <string name="shortcut_selfmode_title">Self Mode</string>

@@ -55,6 +55,34 @@ class DriverCandidatePolicyTest {
     }
 
     @Test
+    fun `an uncategorized class with a gateway record is unknown, not a phone`() {
+        assertVerdict(
+            Verdict.UNKNOWN, Reason.GATEWAY_BUT_CLASS_UNCATEGORIZED,
+            classify(uuids = listOf(audioGateway), major = DriverCandidatePolicy.MAJOR_UNCATEGORIZED, deviceClass = 0x1f00)
+        )
+        assertVerdict(
+            Verdict.UNKNOWN, Reason.GATEWAY_BUT_CLASS_UNCATEGORIZED,
+            classify(uuids = listOf(headsetGateway, handsFree), major = DriverCandidatePolicy.MAJOR_UNCATEGORIZED, deviceClass = 0x1f00)
+        )
+        assertEquals(
+            "advertises the Audio Gateway record but its device class is uncategorized",
+            DriverCandidatePolicy.reasonText(classify(uuids = listOf(audioGateway), major = DriverCandidatePolicy.MAJOR_UNCATEGORIZED))
+        )
+    }
+
+    @Test
+    fun `a pin lifts an uncategorized gateway device`() {
+        assertVerdict(
+            Verdict.PHONE, Reason.PINNED,
+            classify(uuids = listOf(audioGateway), major = DriverCandidatePolicy.MAJOR_UNCATEGORIZED, pin = Pin.USER)
+        )
+        assertVerdict(
+            Verdict.PHONE, Reason.PINNED,
+            classify(uuids = listOf(audioGateway), major = DriverCandidatePolicy.MAJOR_UNCATEGORIZED, pin = Pin.PROVEN)
+        )
+    }
+
+    @Test
     fun `the reason names both the record and the class that overruled it`() {
         val nav = classify(uuids = listOf(audioGateway), major = DriverCandidatePolicy.MAJOR_AUDIO_VIDEO, deviceClass = DriverCandidatePolicy.AV_HANDSFREE)
         assertEquals(

@@ -533,6 +533,7 @@
 
     <string name="supported_nativeaa">Verbesserte kabellose Unterstützung</string>
     <string name="supported_nativeaa_desc">Gute Nachrichten! Ihr Gerät unterstützt den Modus „Natives WLAN“, der ein reibungsloseres Android Auto-Erlebnis bietet. \n\nUm dies zu aktivieren, müssen wir Ihren Bluetooth-Cache aktualisieren. Bitte: \n1. Entfernen Sie die vorhandene Kopplung auf Ihrem Telefon \n2. Klicken Sie auf OK, um Bluetooth neu zu starten \n3. Koppeln Sie Ihr Telefon erneut \n\nMöchten Sie jetzt in den nativen AA-Modus wechseln?</string>
+    <string name="native_aa_poke_not_running">Das drahtlose Bluetooth läuft auf dieser Headunit nicht. Sieh in den Einstellungen nach.</string>
     <string name="not_supported_nativeaa">Natives WLAN scheint nicht unterstützt zu werden</string>
     <string name="not_supported_nativeaa_desc">Ihr Gerät unterstützt möglicherweise nicht die erforderlichen Bluetooth- oder WLAN-Funktionen für natives WLAN. Sie können es trotzdem versuchen, aber wenn es fehlschlägt, verwenden Sie bitte stattdessen den „Wireless Helper“ oder den Modus „Auto (Headunit Server)“.</string>
 

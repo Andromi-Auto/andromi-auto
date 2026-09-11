@@ -12,7 +12,7 @@ object DriverCandidatePolicy {
 
     enum class Reason {
         AUDIO_GATEWAY, HANDS_FREE_UNIT, LOW_ENERGY_ONLY, CLASS_PHONE, CLASS_NOT_PHONE,
-        GATEWAY_BUT_CLASS_NOT_PHONE, PINNED, NO_SIGNAL
+        GATEWAY_BUT_CLASS_NOT_PHONE, GATEWAY_BUT_CLASS_UNCATEGORIZED, PINNED, NO_SIGNAL
     }
 
     data class Classification(val verdict: Verdict, val reason: Reason)
@@ -40,6 +40,7 @@ object DriverCandidatePolicy {
     const val MAJOR_WEARABLE = 0x0700
     const val MAJOR_TOY = 0x0800
     const val MAJOR_HEALTH = 0x0900
+    const val MAJOR_UNCATEGORIZED = 0x1f00
     const val AV_WEARABLE_HEADSET = 0x0404
     const val AV_HANDSFREE = 0x0408
     const val AV_MICROPHONE = 0x0410
@@ -63,6 +64,8 @@ object DriverCandidatePolicy {
      * [uuids] are the bond's cached service records, null or empty when never fetched. A ruled-out
      * class beats the gateway record, then the records beat the rest; an LE-only bond cannot carry
      * the RFCOMM link at all; a class nobody ruled out is UNKNOWN, and a USER pin lifts only that.
+     * A gateway record on an Uncategorized class is UNKNOWN too: an intercom or two-way radio
+     * advertises it for call passthrough and sets no class, and one was picked as the driver.
      */
     fun classify(
         uuids: Collection<String>?,
@@ -81,12 +84,13 @@ object DriverCandidatePolicy {
                 (majorDeviceClass == MAJOR_AUDIO_VIDEO && deviceClass in NON_PHONE_AUDIO)
             )
         if (gateway && ruledOutByClass) return Classification(Verdict.NOT_A_PHONE, Reason.GATEWAY_BUT_CLASS_NOT_PHONE)
-        if (gateway) return Classification(Verdict.PHONE, Reason.AUDIO_GATEWAY)
-        if (records.any { it in CAR_SIDE_UUIDS }) return Classification(Verdict.NOT_A_PHONE, Reason.HANDS_FREE_UNIT)
-
-        if (deviceType == DEVICE_TYPE_LE) return Classification(Verdict.NOT_A_PHONE, Reason.LOW_ENERGY_ONLY)
+        val uncategorized = hasDeviceClass && majorDeviceClass == MAJOR_UNCATEGORIZED
+        if (gateway && !uncategorized) return Classification(Verdict.PHONE, Reason.AUDIO_GATEWAY)
 
         val byClass = when {
+            gateway -> Classification(Verdict.UNKNOWN, Reason.GATEWAY_BUT_CLASS_UNCATEGORIZED)
+            records.any { it in CAR_SIDE_UUIDS } -> Classification(Verdict.NOT_A_PHONE, Reason.HANDS_FREE_UNIT)
+            deviceType == DEVICE_TYPE_LE -> Classification(Verdict.NOT_A_PHONE, Reason.LOW_ENERGY_ONLY)
             !hasDeviceClass -> Classification(Verdict.UNKNOWN, Reason.NO_SIGNAL)
             majorDeviceClass == MAJOR_PHONE -> Classification(Verdict.PHONE, Reason.CLASS_PHONE)
             ruledOutByClass -> Classification(Verdict.NOT_A_PHONE, Reason.CLASS_NOT_PHONE)
@@ -112,6 +116,8 @@ object DriverCandidatePolicy {
         Reason.CLASS_NOT_PHONE -> "device class 0x%04x is not a phone".format(deviceClass)
         Reason.GATEWAY_BUT_CLASS_NOT_PHONE ->
             "advertises the Audio Gateway record but device class 0x%04x is not a phone".format(deviceClass)
+        Reason.GATEWAY_BUT_CLASS_UNCATEGORIZED ->
+            "advertises the Audio Gateway record but its device class is uncategorized"
         Reason.PINNED -> if (classification.verdict == Verdict.PHONE) "vouched for by a stored MAC" else "pinned"
         Reason.NO_SIGNAL -> "no service record or device class says either way"
     }
