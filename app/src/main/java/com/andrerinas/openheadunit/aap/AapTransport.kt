@@ -71,7 +71,7 @@ class AapTransport(
         audioManager: AudioManager,
         internal val settings: Settings,
         private val notification: BackgroundNotification,
-        private val context: Context,
+        val context: Context,
         private val onAaMediaMetadata: ((MediaPlayback.MediaMetaData) -> Unit)? = null,
         private val onAaPlaybackStatus: ((MediaPlayback.MediaPlaybackStatus) -> Unit)? = null,
         private val externalSsl: AapSslContext? = null)

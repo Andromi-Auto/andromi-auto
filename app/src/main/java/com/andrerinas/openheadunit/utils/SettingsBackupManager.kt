@@ -66,6 +66,7 @@ object SettingsBackupManager {
         "floating-button-y-percent" to ValueType.INT,
         "floating-button-opacity-percent" to ValueType.INT,
         "floating-button-size-dp" to ValueType.INT,
+        "aa-exit-action" to ValueType.INT,
         "forced_scale" to ValueType.BOOLEAN,
         "hud_mirroring" to ValueType.BOOLEAN,
         "ui-scale-home-percent" to ValueType.INT,
