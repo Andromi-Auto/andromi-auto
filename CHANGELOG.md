@@ -1,5 +1,5 @@
 # Changelog
-### v.3.4.0-beta2 (unreleased)
+### v.3.4.0-beta2
 - USB: connect non-Pixel phones without fighting a fast-reverting dongle
 - Feat/automation command surface
 - Video-Fit and ultrawide touch enhancements with dynamic scaling and rework all the options, thanks to @o-jardenass and @Sesam17
@@ -9,6 +9,7 @@
 - Added Support for BYD Steering wheel keys, thanks to @nicoruy
 - Added floating Exit Button, thanks to @Sesan17
 - Added Log to clipboard, thanks to @peter9811
+- Native for External BT's + Connection Status pill + AAC improvements to @o-jardenass
 
 ### v.3.3.1
 - Added: Option to auto-resume media playback on quick reconnect if music was playing before disconnect
