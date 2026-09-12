@@ -50,6 +50,7 @@ import com.andrerinas.openheadunit.utils.Settings
 import android.os.SystemClock
 import com.andrerinas.openheadunit.connection.wifi.WifiLauncherMode
 import com.andrerinas.openheadunit.utils.SystemUI
+import com.andrerinas.openheadunit.utils.ToastUtils
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
@@ -209,7 +210,7 @@ class MainActivity : BaseActivity() {
                     finish()
                 } else {
                     lastBackPressTime = System.currentTimeMillis()
-                    Toast.makeText(this@MainActivity, R.string.press_back_again_to_exit, Toast.LENGTH_SHORT).show()
+                    ToastUtils.showToast(this@MainActivity, R.string.press_back_again_to_exit, Toast.LENGTH_SHORT, force = true)
                 }
             }
         })

@@ -19,6 +19,7 @@ import com.andrerinas.openheadunit.utils.Settings
 import com.andrerinas.openheadunit.utils.AppLog
 import android.widget.Toast
 import com.andrerinas.openheadunit.utils.LogExporter
+import com.andrerinas.openheadunit.utils.ToastUtils
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.appbar.MaterialToolbar
 import kotlinx.coroutines.launch
@@ -406,7 +407,7 @@ class QuickSettingsFragment : DialogFragment() {
         val context = requireContext()
         val exporterLevel = settings.exporterLogLevel
         if (exporterLevel == LogExporter.LogLevel.SILENT) {
-            Toast.makeText(context, getString(R.string.failed_export_in_silent_logs), Toast.LENGTH_LONG).show()
+            ToastUtils.showToast(context, getString(R.string.failed_export_in_silent_logs), Toast.LENGTH_LONG, force = true)
             return
         }
 
@@ -441,7 +442,7 @@ class QuickSettingsFragment : DialogFragment() {
                                     .setPositiveButton(R.string.close, null)
                                     .show()
                             } else {
-                                Toast.makeText(requireContext(), getString(R.string.logs_copy_to_clipboard_failed), Toast.LENGTH_LONG).show()
+                                ToastUtils.showToast(requireContext(), getString(R.string.logs_copy_to_clipboard_failed), Toast.LENGTH_LONG, force = true)
                             }
                         }
                     }
@@ -450,7 +451,7 @@ class QuickSettingsFragment : DialogFragment() {
                     }
                     .show()
             } else {
-                Toast.makeText(context, getString(R.string.failed_export_logs), Toast.LENGTH_SHORT).show()
+                ToastUtils.showToast(context, getString(R.string.failed_export_logs), Toast.LENGTH_SHORT, force = true)
             }
         }
     }

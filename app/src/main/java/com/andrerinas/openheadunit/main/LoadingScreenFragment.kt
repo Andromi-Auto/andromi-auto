@@ -26,6 +26,7 @@ import com.andrerinas.openheadunit.utils.AppLog
 import com.andrerinas.openheadunit.utils.PickMediaContract
 import com.andrerinas.openheadunit.utils.Settings
 import com.andrerinas.openheadunit.utils.SettingsBackupManager
+import com.andrerinas.openheadunit.utils.ToastUtils
 import com.bumptech.glide.Glide
 import com.google.android.material.appbar.MaterialToolbar
 import kotlinx.coroutines.Dispatchers
@@ -75,7 +76,7 @@ class LoadingScreenFragment : Fragment() {
         if (granted) {
             showFallbackMediaPicker(useDownloads = true)
         } else {
-            Toast.makeText(context, R.string.storage_permission_denied_backup, Toast.LENGTH_LONG).show()
+            ToastUtils.showToast(context, R.string.storage_permission_denied_backup, Toast.LENGTH_LONG, force = true)
         }
     }
 
@@ -90,7 +91,7 @@ class LoadingScreenFragment : Fragment() {
             setupViews(view)
         } catch (e: Exception) {
             AppLog.e("LoadingScreenFragment setup failed: ${e.message}")
-            Toast.makeText(context, R.string.loading_screen_file_error, Toast.LENGTH_SHORT).show()
+            ToastUtils.showToast(context, R.string.loading_screen_file_error, Toast.LENGTH_SHORT, force = true)
             navigateBack()
         }
     }
@@ -200,7 +201,7 @@ class LoadingScreenFragment : Fragment() {
                 showNoFilePickerDialog()
             } catch (e: Exception) {
                 AppLog.e("File picker failed: ${e.message}")
-                Toast.makeText(context, R.string.loading_screen_file_error, Toast.LENGTH_SHORT).show()
+                ToastUtils.showToast(context, R.string.loading_screen_file_error, Toast.LENGTH_SHORT, force = true)
             }
         }
 
@@ -442,7 +443,7 @@ class LoadingScreenFragment : Fragment() {
             else -> null
         }
         if (mediaType == null) {
-            Toast.makeText(ctx, R.string.loading_screen_unsupported_format, Toast.LENGTH_SHORT).show()
+            ToastUtils.showToast(ctx, R.string.loading_screen_unsupported_format, Toast.LENGTH_SHORT, force = true)
             return
         }
 
@@ -498,10 +499,10 @@ class LoadingScreenFragment : Fragment() {
 
             when (outcome) {
                 CopyOutcome.TOO_LARGE -> {
-                    Toast.makeText(ctx, R.string.loading_screen_file_too_large, Toast.LENGTH_SHORT).show()
+                    ToastUtils.showToast(ctx, R.string.loading_screen_file_too_large, Toast.LENGTH_SHORT, force = true)
                 }
                 CopyOutcome.FAILED -> {
-                    Toast.makeText(ctx, R.string.loading_screen_file_error, Toast.LENGTH_SHORT).show()
+                    ToastUtils.showToast(ctx, R.string.loading_screen_file_error, Toast.LENGTH_SHORT, force = true)
                 }
                 CopyOutcome.OK -> {
                     settings.loadingScreenMediaPath = destFile.absolutePath

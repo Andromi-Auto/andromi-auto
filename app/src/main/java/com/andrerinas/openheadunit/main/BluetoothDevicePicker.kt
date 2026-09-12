@@ -9,6 +9,7 @@ import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
 import com.andrerinas.openheadunit.R
 import com.andrerinas.openheadunit.utils.BluetoothHelper
+import com.andrerinas.openheadunit.utils.ToastUtils
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 /**
@@ -57,7 +58,7 @@ object BluetoothDevicePicker {
         val bondedMacs = bondedDevices.map { it.address }.toSet()
         val orphanMacs = selectedMacs.filterNot { it in bondedMacs }
         if (bondedDevices.isEmpty() && orphanMacs.isEmpty()) {
-            Toast.makeText(context, R.string.no_paired_bt_devices, Toast.LENGTH_LONG).show()
+            ToastUtils.showToast(context, R.string.no_paired_bt_devices, Toast.LENGTH_LONG, force = true)
             return false
         }
 

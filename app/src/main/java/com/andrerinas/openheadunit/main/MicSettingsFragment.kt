@@ -17,6 +17,7 @@ import com.andrerinas.openheadunit.aap.AapService
 import com.andrerinas.openheadunit.main.settings.SettingItem
 import com.andrerinas.openheadunit.main.settings.SettingsAdapter
 import com.andrerinas.openheadunit.utils.Settings
+import com.andrerinas.openheadunit.utils.ToastUtils
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -125,7 +126,7 @@ class MicSettingsFragment : Fragment() {
 
         if (requiresRestart) {
             if (App.provide(requireContext()).commManager.isConnected) {
-                Toast.makeText(context, getString(R.string.stopping_service), Toast.LENGTH_SHORT).show()
+                ToastUtils.showToast(context, getString(R.string.stopping_service), Toast.LENGTH_SHORT, force = true)
                 val stopServiceIntent = Intent(requireContext(), AapService::class.java).apply {
                     action = AapService.ACTION_STOP_SERVICE
                 }
@@ -136,7 +137,7 @@ class MicSettingsFragment : Fragment() {
         hasChanges = false
         requiresRestart = false
         updateSaveButtonState()
-        Toast.makeText(context, getString(R.string.settings_saved), Toast.LENGTH_SHORT).show()
+        ToastUtils.showToast(context, getString(R.string.settings_saved), Toast.LENGTH_SHORT, force = true)
     }
 
     private fun checkChanges() {

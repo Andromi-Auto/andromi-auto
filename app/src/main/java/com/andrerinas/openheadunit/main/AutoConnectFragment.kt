@@ -18,6 +18,7 @@ import com.andrerinas.openheadunit.main.settings.AutoConnectAdapter
 import com.andrerinas.openheadunit.main.settings.AutoConnectMethod
 import com.andrerinas.openheadunit.main.settings.AutoConnectTouchCallback
 import com.andrerinas.openheadunit.utils.Settings
+import com.andrerinas.openheadunit.utils.ToastUtils
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
 
@@ -269,6 +270,6 @@ class AutoConnectFragment : Fragment() {
         hasChanges = false
         updateSaveButtonState()
 
-        Toast.makeText(context, getString(R.string.settings_saved), Toast.LENGTH_SHORT).show()
+        ToastUtils.showToast(context, getString(R.string.settings_saved), Toast.LENGTH_SHORT, force = true)
     }
 }

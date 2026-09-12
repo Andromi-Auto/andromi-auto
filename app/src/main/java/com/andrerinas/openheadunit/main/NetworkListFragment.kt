@@ -30,6 +30,7 @@ import com.andrerinas.openheadunit.aap.AapService
 import com.andrerinas.openheadunit.connection.wifi.NetworkDiscovery
 import com.andrerinas.openheadunit.utils.AppLog
 import com.andrerinas.openheadunit.utils.Settings
+import com.andrerinas.openheadunit.utils.ToastUtils
 import com.andrerinas.openheadunit.utils.changeLastBit
 import com.andrerinas.openheadunit.utils.toInetAddress
 import com.google.android.material.appbar.MaterialToolbar
@@ -167,7 +168,7 @@ class NetworkListFragment : Fragment(), NetworkDiscovery.Listener {
             // Auto-connect to the first found device during a manual scan
             if (scanDialog?.isShowing == true) {
                 scanDialog?.dismiss()
-                Toast.makeText(context, getString(R.string.found_connecting, ip), Toast.LENGTH_SHORT).show()
+                ToastUtils.showToast(context, getString(R.string.found_connecting, ip), Toast.LENGTH_SHORT)
 
                 val ctx = context ?: return@runOnUiThread
                 (activity as? MainActivity)?.beginAutoConnect(
@@ -197,7 +198,7 @@ class NetworkListFragment : Fragment(), NetworkDiscovery.Listener {
             if (scanDialog?.isShowing == true) {
                 scanDialog?.dismiss()
                 if (adapter.addressList.size <= 2) { // Only localhost and current IP
-                    Toast.makeText(context, getString(R.string.no_devices_found), Toast.LENGTH_SHORT).show()
+                    ToastUtils.showToast(context, getString(R.string.no_devices_found), Toast.LENGTH_SHORT, force = true)
                 }
             }
         }

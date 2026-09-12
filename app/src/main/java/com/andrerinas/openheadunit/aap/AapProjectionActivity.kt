@@ -1109,7 +1109,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
 
                 // Show one-time gesture hint
                 if (!settings.gestureHintShown) {
-                    Toast.makeText(this@AapProjectionActivity, R.string.gesture_hint, Toast.LENGTH_LONG).show()
+                    ToastUtils.showToast(this@AapProjectionActivity, R.string.gesture_hint, Toast.LENGTH_LONG, force = true)
                     settings.gestureHintShown = true
                 }
 
@@ -1642,7 +1642,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
             } catch (e: Exception) {
                 AppLog.e("Failed to enter PiP mode: ${e.message}")
                 e.printStackTrace()
-                Toast.makeText(this, "PiP failed: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
+                ToastUtils.showToast(this, "PiP failed: ${e.localizedMessage}", Toast.LENGTH_SHORT, force = true)
             }
         } else {
             AppLog.w("PiP mode not supported on this Android version (SDK < 26)")

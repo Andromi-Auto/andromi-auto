@@ -38,6 +38,7 @@ import com.andrerinas.openheadunit.utils.ColorUtils
 import com.andrerinas.openheadunit.utils.HomeUiHelper
 import com.andrerinas.openheadunit.utils.PickImageContract
 import com.andrerinas.openheadunit.utils.Settings
+import com.andrerinas.openheadunit.utils.ToastUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -203,7 +204,7 @@ class CustomizationFragment : Fragment() {
                 imagePicker.launch(Unit)
             } catch (e: Exception) {
                 AppLog.e("Failed to launch image picker: ${e.message}")
-                Toast.makeText(requireContext(), R.string.loading_screen_file_error, Toast.LENGTH_SHORT).show()
+                ToastUtils.showToast(requireContext(), R.string.loading_screen_file_error, Toast.LENGTH_SHORT, force = true)
             }
         }
 
@@ -285,7 +286,7 @@ class CustomizationFragment : Fragment() {
                             imagePicker.launch(Unit)
                         } catch (e: Exception) {
                             AppLog.e("Failed to launch image picker: ${e.message}")
-                            Toast.makeText(requireContext(), R.string.loading_screen_file_error, Toast.LENGTH_SHORT).show()
+                            ToastUtils.showToast(requireContext(), R.string.loading_screen_file_error, Toast.LENGTH_SHORT, force = true)
                         }
                     }
                 }
@@ -317,7 +318,7 @@ class CustomizationFragment : Fragment() {
             settings.customWifiButtonColor = grayColor
             settings.customSettingsButtonColor = grayColor
             refreshUI()
-            Toast.makeText(requireContext(), R.string.btn_make_all_monochrome, Toast.LENGTH_SHORT).show()
+            ToastUtils.showToast(requireContext(), R.string.btn_make_all_monochrome, Toast.LENGTH_SHORT, force = true)
         }
 
         // Button Scale listeners
@@ -473,7 +474,7 @@ class CustomizationFragment : Fragment() {
                     refreshUI()
                     notifyMainActivityBackgroundChanged()
                 } else {
-                    Toast.makeText(ctx, R.string.loading_screen_file_error, Toast.LENGTH_SHORT).show()
+                    ToastUtils.showToast(ctx, R.string.loading_screen_file_error, Toast.LENGTH_SHORT, force = true)
                 }
             }
         }

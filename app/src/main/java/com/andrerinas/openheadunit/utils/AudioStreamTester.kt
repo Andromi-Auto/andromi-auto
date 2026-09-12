@@ -124,15 +124,16 @@ object AudioStreamTester {
         } catch (e: RuntimeException) {
             // The device does not have this stream - a stored value from another head unit.
             AppLog.e("AudioStreamTester: stream $stream is not available on this device", e)
-            Toast.makeText(context, R.string.audio_stream_test_failed, Toast.LENGTH_SHORT).show()
+            ToastUtils.showToast(context, R.string.audio_stream_test_failed, Toast.LENGTH_SHORT, force = true)
             return
         }
         if (volume == 0) {
-            Toast.makeText(
+            ToastUtils.showToast(
                 context,
                 context.getString(R.string.audio_stream_muted_warning, label(context, stream)),
-                Toast.LENGTH_LONG
-            ).show()
+                Toast.LENGTH_LONG,
+                force = true
+            )
         }
 
         // Whatever the last tap started stops here, so the two are heard one after the other.
@@ -144,7 +145,7 @@ object AudioStreamTester {
             // The platform hands out a limited number of tone generators and refuses when the
             // audio hardware is busy; a failed audition must not take the settings screen down.
             AppLog.e("AudioStreamTester: tone generator unavailable for stream $stream", e)
-            Toast.makeText(context, R.string.audio_stream_test_failed, Toast.LENGTH_SHORT).show()
+            ToastUtils.showToast(context, R.string.audio_stream_test_failed, Toast.LENGTH_SHORT, force = true)
             return
         }
 

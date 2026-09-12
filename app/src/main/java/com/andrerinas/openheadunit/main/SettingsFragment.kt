@@ -59,6 +59,7 @@ import com.andrerinas.openheadunit.utils.LocaleHelper
 import com.andrerinas.openheadunit.BuildConfig
 import com.andrerinas.openheadunit.utils.LogExporter
 import com.andrerinas.openheadunit.utils.SettingsBackupManager
+import com.andrerinas.openheadunit.utils.ToastUtils
 import com.andrerinas.openheadunit.utils.VpnControl
 import com.andrerinas.openheadunit.utils.DialogUtils
 import com.andrerinas.openheadunit.utils.ProjectionSetupQrDialog
@@ -253,7 +254,7 @@ class SettingsFragment : Fragment() {
         if (isGranted) {
             handleNativeAaSelection()
         } else {
-            Toast.makeText(requireContext(), R.string.bt_permission_denied, Toast.LENGTH_LONG).show()
+            ToastUtils.showToast(requireContext(), R.string.bt_permission_denied, Toast.LENGTH_LONG, force = true)
         }
     }
 
@@ -270,7 +271,7 @@ class SettingsFragment : Fragment() {
         }
         vpnConsentRequested = false
         if (!granted && VpnControl.consentDeniedRes != 0) {
-            Toast.makeText(requireContext(), VpnControl.consentDeniedRes, Toast.LENGTH_LONG).show()
+            ToastUtils.showToast(requireContext(), VpnControl.consentDeniedRes, Toast.LENGTH_LONG, force = true)
         }
         updateSettingsList()
     }
@@ -281,7 +282,7 @@ class SettingsFragment : Fragment() {
         if (isGranted) {
             action?.invoke()
         } else {
-            Toast.makeText(requireContext(), R.string.storage_permission_denied_backup, Toast.LENGTH_LONG).show()
+            ToastUtils.showToast(requireContext(), R.string.storage_permission_denied_backup, Toast.LENGTH_LONG, force = true)
         }
     }
 
@@ -793,7 +794,7 @@ class SettingsFragment : Fragment() {
 
         if (requiresRestart) {
             if (App.provide(requireContext()).commManager.isConnected) {
-                Toast.makeText(context, getString(R.string.stopping_service), Toast.LENGTH_SHORT).show()
+                ToastUtils.showToast(context, getString(R.string.stopping_service), Toast.LENGTH_SHORT, force = true)
                 val stopServiceIntent = Intent(requireContext(), AapService::class.java).apply {
                     action = AapService.ACTION_STOP_SERVICE
                 }
@@ -807,7 +808,7 @@ class SettingsFragment : Fragment() {
         updateSaveButtonState()
         updateSettingsList()
 
-        Toast.makeText(context, getString(R.string.settings_saved), Toast.LENGTH_SHORT).show()
+        ToastUtils.showToast(context, getString(R.string.settings_saved), Toast.LENGTH_SHORT, force = true)
 
         if (languageChanged || hudMirroringChanged) {
             requireActivity().recreate()
@@ -1575,9 +1576,9 @@ class SettingsFragment : Fragment() {
                             when {
                                 trimmed.isEmpty() -> pendingStaticBSSID = "0"
                                 SoftApBssidPolicy.isUsable(trimmed) -> pendingStaticBSSID = trimmed
-                                else -> Toast.makeText(
-                                    requireContext(), R.string.preflight_invalid_bssid, Toast.LENGTH_LONG
-                                ).show()
+                                else -> ToastUtils.showToast(
+                                    requireContext(), R.string.preflight_invalid_bssid, Toast.LENGTH_LONG, force = true
+                                )
                             }
                             checkChanges()
                             updateSettingsList()
@@ -1610,9 +1611,9 @@ class SettingsFragment : Fragment() {
                         when {
                             trimmed.isEmpty() -> pendingBluetoothAddress = ""
                             SoftApBssidPolicy.isUsable(trimmed) -> pendingBluetoothAddress = trimmed
-                            else -> Toast.makeText(
-                                requireContext(), R.string.invalid_bluetooth_address, Toast.LENGTH_LONG
-                            ).show()
+                            else -> ToastUtils.showToast(
+                                requireContext(), R.string.invalid_bluetooth_address, Toast.LENGTH_LONG, force = true
+                            )
                         }
                         checkChanges()
                         updateSettingsList()
@@ -2820,7 +2821,7 @@ class SettingsFragment : Fragment() {
                 val context = requireContext()
                 val exporterLevel = settings.exporterLogLevel
                 if (exporterLevel == LogExporter.LogLevel.SILENT) {
-                    Toast.makeText(context, getString(R.string.start_log_capture_in_silent), Toast.LENGTH_LONG).show()
+                    ToastUtils.showToast(context, getString(R.string.start_log_capture_in_silent), Toast.LENGTH_LONG, force = true)
                     return@SettingEntry
                 }
 
@@ -2852,7 +2853,7 @@ class SettingsFragment : Fragment() {
                 val context = requireContext()
                 val exporterLevel = settings.exporterLogLevel
                 if (exporterLevel == LogExporter.LogLevel.SILENT) {
-                    Toast.makeText(context, getString(R.string.failed_export_in_silent_logs), Toast.LENGTH_LONG).show()
+                    ToastUtils.showToast(context, getString(R.string.failed_export_in_silent_logs), Toast.LENGTH_LONG, force = true)
                     return@SettingEntry
                 }
 
@@ -2882,7 +2883,7 @@ class SettingsFragment : Fragment() {
                             }
                             .show()
                     } else {
-                        Toast.makeText(context, getString(R.string.failed_export_logs), Toast.LENGTH_SHORT).show()
+                        ToastUtils.showToast(context, getString(R.string.failed_export_logs), Toast.LENGTH_SHORT, force = true)
                     }
                 }
             }
@@ -3242,10 +3243,10 @@ class SettingsFragment : Fragment() {
                 withContext(Dispatchers.IO) {
                     SettingsBackupManager.exportToUri(appContext, uri)
                 }
-                Toast.makeText(requireContext(), R.string.settings_exported, Toast.LENGTH_LONG).show()
+                ToastUtils.showToast(requireContext(), R.string.settings_exported, Toast.LENGTH_LONG, force = true)
             } catch (e: Exception) {
                 if (e is CancellationException) throw e
-                Toast.makeText(requireContext(), getString(R.string.settings_export_failed, e.localizedMessage ?: ""), Toast.LENGTH_LONG).show()
+                ToastUtils.showToast(requireContext(), getString(R.string.settings_export_failed, e.localizedMessage ?: ""), Toast.LENGTH_LONG, force = true)
             }
         }
     }
@@ -3260,7 +3261,7 @@ class SettingsFragment : Fragment() {
                 showSettingsExportedDialog(file)
             } catch (e: Exception) {
                 if (e is CancellationException) throw e
-                Toast.makeText(requireContext(), getString(R.string.settings_export_failed, e.localizedMessage ?: ""), Toast.LENGTH_LONG).show()
+                ToastUtils.showToast(requireContext(), getString(R.string.settings_export_failed, e.localizedMessage ?: ""), Toast.LENGTH_LONG, force = true)
             }
         }
     }
@@ -3292,7 +3293,7 @@ class SettingsFragment : Fragment() {
                 showSettingsExportedDialog(file)
             } catch (e: Exception) {
                 if (e is CancellationException) throw e
-                Toast.makeText(requireContext(), getString(R.string.settings_export_failed, e.localizedMessage ?: ""), Toast.LENGTH_LONG).show()
+                ToastUtils.showToast(requireContext(), getString(R.string.settings_export_failed, e.localizedMessage ?: ""), Toast.LENGTH_LONG, force = true)
             }
         }
     }
@@ -3316,7 +3317,7 @@ class SettingsFragment : Fragment() {
                 shareSettingsBackup(file)
             } catch (e: Exception) {
                 if (e is CancellationException) throw e
-                Toast.makeText(requireContext(), getString(R.string.settings_export_failed, e.localizedMessage ?: ""), Toast.LENGTH_LONG).show()
+                ToastUtils.showToast(requireContext(), getString(R.string.settings_export_failed, e.localizedMessage ?: ""), Toast.LENGTH_LONG, force = true)
             }
         }
     }
@@ -3380,7 +3381,7 @@ class SettingsFragment : Fragment() {
                 handleResetSettings(snapshot, result)
             } catch (e: Exception) {
                 if (e is CancellationException) throw e
-                Toast.makeText(appContext, appContext.getString(R.string.settings_reset_failed, e.localizedMessage ?: ""), Toast.LENGTH_LONG).show()
+                ToastUtils.showToast(appContext, appContext.getString(R.string.settings_reset_failed, e.localizedMessage ?: ""), Toast.LENGTH_LONG, force = true)
             }
         }
     }
@@ -3400,7 +3401,7 @@ class SettingsFragment : Fragment() {
         ctx.sendBroadcast(nightModeUpdateIntent)
 
         if (SettingsBackupManager.requiresProjectionRestart(result.changedKeys) && App.provide(ctx).commManager.isConnected) {
-            Toast.makeText(ctx, ctx.getString(R.string.stopping_service), Toast.LENGTH_SHORT).show()
+            ToastUtils.showToast(ctx, ctx.getString(R.string.stopping_service), Toast.LENGTH_SHORT, force = true)
             val stopServiceIntent = Intent(ctx, AapService::class.java).apply {
                 action = AapService.ACTION_STOP_SERVICE
             }
@@ -3413,7 +3414,7 @@ class SettingsFragment : Fragment() {
         updateSaveButtonState()
         updateSettingsList()
 
-        Toast.makeText(ctx, R.string.settings_reset, Toast.LENGTH_LONG).show()
+        ToastUtils.showToast(ctx, R.string.settings_reset, Toast.LENGTH_LONG, force = true)
 
         if (shouldRecreateAfterImport(snapshot)) {
             activity?.recreate()
@@ -3556,7 +3557,7 @@ class SettingsFragment : Fragment() {
                 handleImportedSettings(snapshot, result)
             } catch (e: Exception) {
                 if (e is CancellationException) throw e
-                Toast.makeText(requireContext(), getString(R.string.settings_import_failed, e.localizedMessage ?: ""), Toast.LENGTH_LONG).show()
+                ToastUtils.showToast(requireContext(), getString(R.string.settings_import_failed, e.localizedMessage ?: ""), Toast.LENGTH_LONG, force = true)
             }
         }
     }
@@ -3572,7 +3573,7 @@ class SettingsFragment : Fragment() {
                 handleImportedSettings(snapshot, result)
             } catch (e: Exception) {
                 if (e is CancellationException) throw e
-                Toast.makeText(requireContext(), getString(R.string.settings_import_failed, e.localizedMessage ?: ""), Toast.LENGTH_LONG).show()
+                ToastUtils.showToast(requireContext(), getString(R.string.settings_import_failed, e.localizedMessage ?: ""), Toast.LENGTH_LONG, force = true)
             }
         }
     }
@@ -3608,7 +3609,7 @@ class SettingsFragment : Fragment() {
         ctx.sendBroadcast(nightModeUpdateIntent)
 
         if (SettingsBackupManager.requiresProjectionRestart(result.changedKeys) && App.provide(ctx).commManager.isConnected) {
-            Toast.makeText(ctx, getString(R.string.stopping_service), Toast.LENGTH_SHORT).show()
+            ToastUtils.showToast(ctx, getString(R.string.stopping_service), Toast.LENGTH_SHORT, force = true)
             val stopServiceIntent = Intent(ctx, AapService::class.java).apply {
                 action = AapService.ACTION_STOP_SERVICE
             }
@@ -3621,11 +3622,12 @@ class SettingsFragment : Fragment() {
         updateSaveButtonState()
         updateSettingsList()
 
-        Toast.makeText(
+        ToastUtils.showToast(
             ctx,
             getString(R.string.settings_imported, result.importedKeys, result.skippedKeys),
-            Toast.LENGTH_LONG
-        ).show()
+            Toast.LENGTH_LONG,
+            force = true
+        )
 
         if (shouldRecreateAfterImport(snapshot)) {
             activity?.recreate()
@@ -4036,7 +4038,7 @@ class SettingsFragment : Fragment() {
                 confirmed = true
                 if (hasDisableableConflicts) {
                     disableKillOnDisconnectConflicts()
-                    Toast.makeText(context, getString(R.string.kill_on_disconnect_conflicts_disabled), Toast.LENGTH_LONG).show()
+                    ToastUtils.showToast(context, getString(R.string.kill_on_disconnect_conflicts_disabled), Toast.LENGTH_LONG, force = true)
                 }
                 pendingKillOnDisconnect = true
                 checkChanges()
@@ -4265,12 +4267,13 @@ class SettingsFragment : Fragment() {
                             nativeWifiDirectActive = settings.wifiConnectionMode == WifiLauncherMode.NATIVE &&
                                 settings.nativeApStrategy == NativeStrategy.WIFI_DIRECT,
                         )
-                        Toast.makeText(
+                        ToastUtils.showToast(
                             requireContext(),
                             if (appliesNow) R.string.wifi_direct_new_identity_applied
                             else R.string.wifi_direct_new_identity_done,
-                            Toast.LENGTH_LONG
-                        ).show()
+                            Toast.LENGTH_LONG,
+                            force = true
+                        )
                         updateSettingsList()
                     }
                     .setNegativeButton(android.R.string.cancel, null)
@@ -4725,7 +4728,7 @@ class SettingsFragment : Fragment() {
                         next()
                     }
                     else -> {
-                        Toast.makeText(requireContext(), R.string.preflight_invalid_bssid, Toast.LENGTH_LONG).show()
+                        ToastUtils.showToast(requireContext(), R.string.preflight_invalid_bssid, Toast.LENGTH_LONG, force = true)
                         // Ask again rather than move on: this is the field where a wrong value does
                         // more harm than no value.
                         promptForField(missing, index)
@@ -4865,7 +4868,7 @@ class SettingsFragment : Fragment() {
                         .setNeutralButton(R.string.copy_to_clipboard) { _, _ ->
                             val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
                             clipboard?.setPrimaryClip(ClipData.newPlainText("ADB Commands", fullMsg))
-                            Toast.makeText(context, R.string.copied_to_clipboard, Toast.LENGTH_SHORT).show()
+                            ToastUtils.showToast(context, R.string.copied_to_clipboard, Toast.LENGTH_SHORT, force = true)
                         }
                         .show()
                 }
@@ -4876,9 +4879,9 @@ class SettingsFragment : Fragment() {
                         val (success, out) = OemAppManager.disableTarget(context, status)
                         progressLoading.visibility = View.GONE
                         if (success) {
-                            Toast.makeText(context, R.string.oem_app_action_success, Toast.LENGTH_SHORT).show()
+                            ToastUtils.showToast(context, R.string.oem_app_action_success, Toast.LENGTH_SHORT, force = true)
                         } else {
-                            Toast.makeText(context, getString(R.string.oem_app_action_failed, out), Toast.LENGTH_LONG).show()
+                            ToastUtils.showToast(context, getString(R.string.oem_app_action_failed, out), Toast.LENGTH_LONG, force = true)
                         }
                         loadStatus()
                     }
@@ -4890,9 +4893,9 @@ class SettingsFragment : Fragment() {
                         val (success, out) = OemAppManager.restoreTarget(context, status)
                         progressLoading.visibility = View.GONE
                         if (success) {
-                            Toast.makeText(context, R.string.oem_app_action_success, Toast.LENGTH_SHORT).show()
+                            ToastUtils.showToast(context, R.string.oem_app_action_success, Toast.LENGTH_SHORT, force = true)
                         } else {
-                            Toast.makeText(context, getString(R.string.oem_app_action_failed, out), Toast.LENGTH_LONG).show()
+                            ToastUtils.showToast(context, getString(R.string.oem_app_action_failed, out), Toast.LENGTH_LONG, force = true)
                         }
                         loadStatus()
                     }
