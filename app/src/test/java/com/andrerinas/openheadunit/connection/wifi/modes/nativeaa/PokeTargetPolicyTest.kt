@@ -8,6 +8,7 @@ import org.junit.Test
 class PokeTargetPolicyTest {
 
     private val phone = setOf("A0:46:5A:97:E4:95")
+    private val car = setOf("00:1E:B8:12:34:56")
 
     /**
      * The narrowing a user asks for by turning the opt-in off: wake this phone or nothing. Widening
@@ -52,5 +53,39 @@ class PokeTargetPolicyTest {
     fun `a handshaked device is adopted only when nothing is chosen`() {
         assertTrue(PokeTargetPolicy.adoptsHandshakedDevice(emptySet()))
         assertFalse(PokeTargetPolicy.adoptsHandshakedDevice(phone))
+    }
+
+    /**
+     * The seeded case: the list is copied from the auto-start trigger list, which may name the
+     * car's own Bluetooth. A list of only that is a list of nothing, so the opt-in decides.
+     */
+    @Test
+    fun `a selection of only non-phones falls back to every paired device when opted in`() {
+        assertEquals(
+            PokeTargets.AllPaired,
+            PokeTargetPolicy.targets(selected = car, allPairedOptIn = true, notPhones = car)
+        )
+    }
+
+    @Test
+    fun `a selection of only non-phones pokes nothing when opted out`() {
+        assertEquals(
+            PokeTargets.None,
+            PokeTargetPolicy.targets(selected = car, allPairedOptIn = false, notPhones = car)
+        )
+    }
+
+    @Test
+    fun `a mixed selection offers the phones and reports the rest dropped`() {
+        assertEquals(
+            PokeTargets.Selected(phone, dropped = car),
+            PokeTargetPolicy.targets(selected = phone + car, allPairedOptIn = false, notPhones = car)
+        )
+    }
+
+    @Test
+    fun `adoption treats a selection of only non-phones as empty`() {
+        assertTrue(PokeTargetPolicy.adoptsHandshakedDevice(car, notPhones = car))
+        assertFalse(PokeTargetPolicy.adoptsHandshakedDevice(phone + car, notPhones = car))
     }
 }

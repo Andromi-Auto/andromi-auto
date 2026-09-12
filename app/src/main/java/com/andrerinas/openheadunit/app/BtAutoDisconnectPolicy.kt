@@ -11,10 +11,11 @@ enum class BtAutoDisconnectArm { IGNORE, ARM, CANCEL }
 object BtAutoDisconnectPolicy {
 
     /**
-     * How long a session must have run before a Bluetooth loss may end it. The handshake socket
-     * closes seconds after the handoff and looks exactly like the phone leaving.
+     * How long after this app itself closed a socket to the device a Bluetooth loss is taken as
+     * that close rather than the device leaving. The handshake and poke sockets close seconds
+     * after the handoff and the OS then reports the phone's link gone.
      */
-    const val MIN_SESSION_AGE_MS = 60_000L
+    const val OWN_SOCKET_CLOSE_GRACE_MS = 15_000L
 
     const val MAX_DELAY_SECONDS = 3600
 
@@ -25,7 +26,8 @@ object BtAutoDisconnectPolicy {
 
     fun graceDelayMs(delaySeconds: Int): Long = delaySeconds.coerceIn(0, MAX_DELAY_SECONDS) * 1000L
 
-    /** Asked once the grace delay has run out. */
-    fun shouldEndSession(sessionUp: Boolean, sessionAgeMs: Long, deviceCameBack: Boolean): Boolean =
-        sessionUp && !deviceCameBack && sessionAgeMs >= MIN_SESSION_AGE_MS
+    /** Asked once the grace delay has run out; [msSinceOwnSocketClose] is null if we never closed one. */
+    fun shouldEndSession(sessionUp: Boolean, deviceCameBack: Boolean, msSinceOwnSocketClose: Long?): Boolean =
+        sessionUp && !deviceCameBack &&
+            (msSinceOwnSocketClose == null || msSinceOwnSocketClose >= OWN_SOCKET_CLOSE_GRACE_MS)
 }

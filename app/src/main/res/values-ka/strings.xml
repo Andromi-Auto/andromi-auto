@@ -190,6 +190,11 @@
     <string name="usb_auto_connect_description">ცნობილ USB მოწყობილობასთან ავტომატური დაკავშირება აპლიკაციის გახსნისას.</string>
     <string name="auto_start_bt_label">ავტო-გაშვება Bluetooth-ით</string>
     <string name="auto_start_bt_description">Open Headunit-ის ავტომატური გახსნა კონკრეტული Bluetooth მოწყობილობის დაკავშირებისას.</string>
+    <string name="auto_start_offer_title">ავტომატურად გაეშვას?</string>
+    <string name="auto_start_offer_message">გსურს აპლიკაციის ავტომატური გაშვება ამ მოწყობილობასთან, %1$s?</string>
+    <string name="auto_start_offer_yes">დიახ</string>
+    <string name="auto_start_offer_no">არა</string>
+    <string name="auto_start_offer_countdown">არა %1$d წმ-ში</string>
     <string name="listen_for_usb_devices_label">USB მოწყობილობების მონიტორინგი</string>
     <string name="listen_for_usb_devices_description">USB მოწყობილობის შეერთებისას Android სისტემური მოთხოვნის ჩვენება.</string>
     <string name="show_toast_messages">Toast შეტყობინებების ჩვენება</string>
@@ -280,7 +285,7 @@
     <string name="separate_audio_streams">აუდიო ნაკადების განცალკევება</string>
     <string name="separate_audio_streams_description">აძლევს არხებს მედია, მითითებები და სისტემური ხმები ცალკე გამომავალ ნაკადებს ერთი საერთო მულტიმედიური ნაკადის ნაცვლად (ზოგიერთ მოწყობილობაზე შესაძლოა გამართულად არ იმუშაოს).</string>
     <string name="use_aac_audio">AAC აუდიოს გამოყენება</string>
-    <string name="use_aac_audio_description">AAC კოდეკის გამოყენება აუდიოსთვის გამტარუნარიანობის დასაზოგად (ექსპერიმენტული).</string>
+    <string name="use_aac_audio_description">AAC კოდეკის გამოყენება აუდიოსთვის გამტარუნარიანობის დასაზოგად (ექსპერიმენტული). 2.4 გჰც-ზე მომუშავე უსადენო სესიისას, ეს ავტომატურად ირთვება, სანამ \"ვიდეოს დაწევა 2.4 გჰც კავშირზე\" ჩართულია.</string>
     <string name="attach_hw_dsp_equalizer">აპარატურული DSP ეკვალაიზერის ტრიგერი</string>
     <string name="attach_hw_dsp_equalizer_description">ამატებს ფიქტიურ ეკვალაიზერის ეფექტს აუდიო სესიას აპარატურული DSP მარშრუტიზაციის იძულებით ჩართვისთვის. დატოვეთ გამორთული თუ იყენებთ ViPER4Android / ViperFX-ს ან თუ ხმა დახშულია ძველ Android ვერსიებზე.</string>
     <string name="audio_volume_offset">აუდიო ხმის ოფსეტი (Offset)</string>
@@ -520,6 +525,7 @@
 
     <string name="supported_nativeaa">გაუმჯობესებული უსადენო მხარდაჭერა</string>
     <string name="supported_nativeaa_desc">შესანიშნავი სიახლე! თქვენს მოწყობილობას აქვს \"Native Wireless\" რეჟიმის მხარდაჭერა, რაც უზრუნველყოფს Android Auto-ს უფრო სტაბილურ მუშაობას. \n\nამის გასააქტიურებლად საჭიროა Bluetooth ქეშის განახლება. გთხოვთ: \n1. წაშალეთ არსებული კავშირი (pairing) ტელეფონში \n2. დააჭირეთ OK-ს Bluetooth-ის გადასატვირთად \n3. ხელახლა დააწყვილეთ ტელეფონი \n\nგსურთ გადახვიდეთ Native AA რეჟიმზე ახლავე?</string>
+    <string name="native_aa_poke_not_running">უსადენო Bluetooth ამ მოწყობილობაზე არ მუშაობს. შეამოწმეთ პარამეტრები.</string>
     <string name="not_supported_nativeaa">Native Wireless მხარდაჭერა ვერ მოიძებნა</string>
     <string name="not_supported_nativeaa_desc">თქვენს მოწყობილობას შესაძლოა არ ჰქონდეს Native Wireless-ისთვის საჭირო Bluetooth ან Wi-Fi ფუნქციების მხარდაჭერა. შეგიძლიათ მაინც სცადოთ, მაგრამ თუ არ იმუშავებს, გამოიყენეთ რეჟიმი \"Wireless Helper\" ან \"Auto (Headunit Server)\".</string>
 
@@ -822,7 +828,17 @@
     <string name="boot_loop_paused_native_wifi_direct">This device restarted three times in a row shortly after Open Headunit started wireless, so wireless was left off this time. On some head units the WiFi chipset takes the whole system down when a phone joins a WiFi Direct network. Try switching Android Auto mode to the head unit hotspot. USB still works.</string>
     <string name="vehicle_make_hint">A real car brand shows that brand\'s logo on the Android Auto exit button, but Android Auto then stops listing apps installed from outside the Play Store. Set it back to \"Google\" to get those apps listed again.</string>
     <string name="external_bt_nativeaa">Native Wireless cannot work on this head unit</string>
-    <string name="external_bt_nativeaa_desc">This head unit uses its own Bluetooth module (%1$s) instead of the one Android exposes to apps. Your phone pairs with that module, so anything this app sends over Bluetooth never reaches it — the connection will look like it is working and then stall.\n\nThis is a hardware limitation and cannot be worked around from the app. Please use USB, or the \"Wireless Helper\" or \"Auto (Headunit Server)\" mode, which do not need the Bluetooth handshake.</string>
+    <string name="external_bt_nativeaa_desc">თქვენი ტელეფონი წყვილდება ამ მოწყობილობის საკუთარ Bluetooth მოდულთან (%1$s), და არა იმასთან, რომელსაც Android აპებს აწვდის, ამიტომ უსადენო ხელის ჩამორთმევა მასთან ვერასდროს მიაღწევდა.\n\nამ აპს ამ მოდულამდე მისასვლელი მხოლოდ ZJ/ZLink სერვისის გავლით აქვს, რომელსაც ეს მოწყობილობა არ უშვებს. ამის ნაცვლად გამოიყენეთ USB ან რომელიმე WiFi რეჟიმი.</string>
+    <string name="external_bt_module_nativeaa">მშობლიური უსადენო ZJ/ZLink მოდულის მეშვეობით</string>
+    <string name="external_bt_module_nativeaa_desc">თქვენი ტელეფონი წყვილდება ამ მოწყობილობის საკუთარ Bluetooth მოდულთან (%1$s), და არა იმასთან, რომელსაც Android აპებს აწვდის, ამიტომ ხელის ჩამორთმევა გაივლის მოდულის ZJ/ZLink სერვისის გავლით.\n\nექსპერიმენტულია და ეს ერთადერთი სერვისია შესასვლელი. თუ ტელეფონი Android Auto-ს არასდროს იწყებს, გამოიყენეთ USB ან რომელიმე WiFi რეჟიმი.</string>
+    <string name="external_bt_transport">დაკავშირება მოწყობილობის Bluetooth მოდულით</string>
+    <string name="external_bt_transport_description">ექსპერიმენტულია და მხოლოდ იმ მოწყობილობებისთვის, რომლებსაც აქვთ ZJ/ZLink Bluetooth სერვისი. უსადენო Android Auto-ს ხელის ჩამორთმევას აგზავნის ამ მოწყობილობის საკუთარი Bluetooth ჩიპით, სწორედ იმით, რომელთანაც თქვენი ტელეფონია დაწყვილებული, და არა იმ Bluetooth-ით, რომელსაც Android აპებს აწვდის.\n\nჯერ გაუშვით „მოწყობილობის Bluetooth მოდულის შემოწმება“. თუ შემოწმება ამ სერვისს ვერ იპოვის, ეს პარამეტრი თქვენს მოწყობილობაზე ვერაფერს გააკეთებს და მშობლიური უსადენო აქ ვერ იმუშავებს. თუ იპოვის, ჩართეთ ეს და აირჩიეთ მშობლიური. გთხოვთ, ორივე შემთხვევაში გაიტანოთ ჟურნალი.</string>
+    <string name="zbt_probe_title">მოწყობილობის Bluetooth მოდულის შემოწმება</string>
+    <string name="zbt_probe_idle">შესასრულებლად შეეხეთ</string>
+    <string name="zbt_probe_running">მიმდინარეობს…</string>
+    <string name="zbt_probe_message">ეკითხება ამ მოწყობილობის ცალკე Bluetooth ჩიპს, შეუძლია თუ არა Android Auto-ს კავშირის გატარება, შემდეგ კი დაახლოებით წუთნახევარს აკვირდება. ამ პარამეტრის ქვემოთ არსებული ხაზი აჩვენებს, რა ხდება, და მოწყობილობაზე სხვა არაფერს ეხება.\n\n„გაღვიძება და დაკვირვება“ დამატებით სთხოვს ჩიპს, Android Auto-სთვის ხელახლა დაუკავშირდეს თქვენს ტელეფონს. მხოლოდ ეს ნაწილი ცვლის რამეს და მოწყობილობის გადატვირთვა მას აუქმებს. გთხოვთ, შემდეგ გაიტანოთ ჟურნალი და დაურთოთ.</string>
+    <string name="zbt_probe_watch_only">მხოლოდ დაკვირვება</string>
+    <string name="zbt_probe_wake_and_watch">გაღვიძება და დაკვირვება</string>
     <string name="native_ap_transport">Network transport</string>
     <string name="native_ap_transport_wifi_direct">WiFi Direct</string>
     <string name="native_ap_transport_hotspot">Hotspot</string>
@@ -934,14 +950,20 @@
     <string name="wifi_direct_band_5ghz">მხოლოდ 5 GHz</string>
     <string name="wifi_direct_band_24ghz">მხოლოდ 2.4 GHz</string>
     <string name="wifi_direct_band_hint">ავტომატური ითხოვს 5 GHz-ს და გადადის 2.4 GHz-ზე.</string>
+    <string name="stand_down_station">საკუთარი Wi-Fi-ს გათიშვა დაკავშირებისას</string>
+    <string name="stand_down_station_auto">ავტომატური</string>
+    <string name="stand_down_station_always">ყოველთვის</string>
+    <string name="stand_down_station_never">არასდროს</string>
+    <string name="stand_down_station_hint">ავტომატური ტოვებს ამ მოწყობილობის საკუთარ ქსელს მხოლოდ მაშინ, როცა მისი რადიოს გააჩნია 5 GHz დიაპაზონი და ეს ქსელი მუშაობს 2.4 GHz-ზე, რათა WiFi Direct ჯგუფმა მიიღოს საკუთარი 5 GHz არხი. ის რჩება შეერთებული მხოლოდ 2.4 GHz-ის მქონე მოწყობილობაზე, სადაც ქსელის დატოვება მხოლოდ ქსელების ძებნას გამოიწვევს, ასევე მაშინ, როცა ქსელი უკვე 5 GHz-ზეა. სესიის დასრულებისას ქსელს ისევ უერთდება. თუ სურათი კრიალებს, სცადეთ ყოველთვის ან არასდროს.</string>
+    <string name="stand_down_station_needs_overlay">საჭიროებს ნებართვას «სხვა აპებზე ჩვენება» Android-ის ამ ვერსიაზე.</string>
     <string name="connection_issue_banner_bt_silent">ტელეფონი დაუკავშირდა Bluetooth-ით, მაგრამ მონაცემები ვერ მიიღო. დააჭირეთ USB, Wireless Helper ან Auto რეჟიმზე გადასართავად.</string>
     <string name="connection_issue_banner_bssid">ამ მოწყობილობის არცერთმა წყარომ არ დაასახელა მისივე WiFi MAC მისამართი (BSSID), ამიტომ ტელეფონმა ვერასდროს გაიგო, რომელ ქსელს უნდა დაუკავშირდეს. ყველა წყარო შემოწმდა, მათ შორის ის, რომელსაც ნებართვა არ სჭირდება. შეეხეთ, რომ ჩართოთ მდებარეობა, რაც დანარჩენებს გახსნის, ან რომ მისამართი ხელით შეიყვანოთ.</string>
     <string name="connection_issue_banner_hotspot_off">ამ მოწყობილობის Hotspot გამორთულია, ამიტომ ქსელი არ იყო ხელმისაწვდომი ტელეფონის დასაკავშირებლად. ჩართეთ Hotspot დაკავშირებამდე ან შეეხეთ, რათა აპმა ჩართოს თქვენ ნაცვლად.</string>
     <string name="connection_issue_banner_wifi_direct_refused">ამ მოწყობილობის WiFi-მ ვერ შექმნა WiFi Direct ქსელი, რომელსაც თქვენი ტელეფონი უნდა შეერთებოდა, და აპლიკაციას არ შეუძლია ამის იძულება. თუ მოწყობილობა სხვა WiFi-ს უკავშირდება, სცადეთ მისი გათიშვა. შეეხეთ, რათა გამოიყენოთ ამ მოწყობილობის საკუთარი Hotspot.</string>
     <string name="connection_issue_banner_wifi_direct_cycled">ამ მოწყობილობაზე სხვა აპლიკაცია მუდმივად თიშავს და რთავს WiFi Direct-ს, ამიტომ ვერ იქმნება ქსელი, რომელსაც თქვენი ტელეფონი შეუერთდებოდა. ჩვეულებრივ მიზეზი წინასწარ დაყენებული პროექციის აპლიკაციაა (CarLife, ZLink, CarPlay და მსგავსები) და ღირს მისი გათიშვა. შეეხეთ ამ მოწყობილობის საკუთარი Hotspot-ის გამოსაყენებლად.</string>
     <string name="connection_issue_banner_hotspot_config">Hotspot-ის სახელი და პაროლი ვერ მოიძებნა. შეიყვანეთ ხელით.</string>
-    <string name="narrow_band_profile_cap">ვიდეოს დაწევა მხოლოდ 2.4 გჰც რადიოზე</string>
-    <string name="narrow_band_profile_cap_description">როცა ამ მოწყობილობის WiFi-ს არ აქვს 5 გჰც დიაპაზონი, ზემოთ მითითებული პარამეტრების ნაცვლად ტელეფონს მოთხოვეთ მაქსიმუმ 720p და წამში 30 კადრი. ასეთ კავშირზე გაზომვამ აჩვენა, რომ სრული სიჩქარის ნაკადი საერთოდ არ გადმოსცემდა სურათს, დაბალი კი ინარჩუნებდა. გამორთეთ, რომ ზუსტად ის მიიღოთ, რაც მიუთითეთ.</string>
+    <string name="narrow_band_profile_cap">ვიდეოს დაწევა 2.4 გჰც კავშირზე</string>
+    <string name="narrow_band_profile_cap_description">როცა ეს სესია მუშაობს 2.4 გჰც-ზე, იმის მიუხედავად, ამ მოწყობილობის WiFi-ს არ აქვს 5 გჰც დიაპაზონი თუ ქსელი იქ ჩაირთო, ზემოთ მითითებული პარამეტრების ნაცვლად ტელეფონს მოთხოვეთ მაქსიმუმ 720p და წამში 30 კადრი, ასევე AAC აუდიო. ასეთ კავშირზე გაზომვამ აჩვენა, რომ სრული სიჩქარის ნაკადი საერთოდ არ გადმოსცემდა სურათს, დაბალი კი ინარჩუნებდა. გამორთეთ, რომ ზუსტად ის მიიღოთ, რაც მიუთითეთ.</string>
     <string name="connection_issue_banner_video_link_too_slow">თქვენმა ტელეფონმა ზედიზედ რამდენჯერმე შეწყვიტა ვიდეო ერთი კადრის მოსვლამდეც კი. WiFi კავშირი ძალიან ნელია სურათის გადასაცემად. შეეხეთ FPS-ის ზღვრის 30-მდე დასაწევად; ასევე დაეხმარება დაბალი გარჩევადობა და AAC აუდიო.</string>
     <string name="connection_issue_banner_five_ghz_channel_refused">ამ მოწყობილობამ უარი თქვა WiFi Direct ქსელის თქვენ მიერ არჩეულ რომელიმე 5 გჰც არხზე განთავსებაზე და ის საკუთარი Wi-Fi დრაივერის არჩეულ არხზე აამუშავა. ეს არხი ხშირად ისეთია, რომელსაც მკაცრი რეგულაციის ქვეყნებში ტელეფონები ვერც კი ხედავენ. შეეხეთ WiFi Direct დიაპაზონის 2.4 გჰც-ზე დასაყენებლად, რომელიც ყველა ქვეყანაშია ნებადართული; მოელოდეთ 720p-ს 1080p-ის ნაცვლად.</string>
     <string name="connection_issue_banner_dismiss">დახურვა</string>
@@ -1039,7 +1061,6 @@
     <string name="driver_device_last_used">ბოლოს დაკავშირებული</string>
     <string name="driver_selection_auto_in">ავტომატური დაკავშირება %2$s-თან %1$d წამში...</string>
     <string name="driver_selection_dialog_title">აირჩიეთ მძღოლის ტელეფონი</string>
-    <string name="connecting_to_device">%s-თან დაკავშირება...</string>
     <string name="driver_none">არცერთი</string>
     <string name="show_all_devices">ყველა Bluetooth მოწყობილობის ჩვენება</string>
     <string name="show_only_phones">მხოლოდ ტელეფონების ჩვენება</string>

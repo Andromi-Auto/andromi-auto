@@ -33,7 +33,7 @@ object HfpServiceRecordPolicy {
      * A completed link means the phone routes calls here and this app cannot play them, so a real
      * hands-free device goes first: a readable, positive [handsFreeLink] stands the stand-in down.
      * Only that stands it down, matching [shouldRegisterDummyHfp] and
-     * [BluetoothWakePolicy.shouldPoke], because a question that could not be asked is not a question
+     * [BluetoothWakePolicy.wakeDecision], because a question that could not be asked is not a question
      * answered yes.
      *
      * Asked once, when a socket is about to be spoken on, and never re-asked. Dropping a link the

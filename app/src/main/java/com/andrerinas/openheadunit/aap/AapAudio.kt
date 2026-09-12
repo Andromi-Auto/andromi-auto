@@ -15,6 +15,7 @@ import com.andrerinas.openheadunit.decoder.audio.AudioStreamCatalog
 import com.andrerinas.openheadunit.decoder.audio.PlaybackFocusPolicy
 import com.andrerinas.openheadunit.utils.AppLog
 import com.andrerinas.openheadunit.utils.Settings
+import java.util.concurrent.ConcurrentHashMap
 
 internal class AapAudio(
         private val audioDecoder: AudioDecoder,
@@ -33,6 +34,9 @@ internal class AapAudio(
     private val systemVolumeOffset = settings.systemVolumeOffset
     private val audioLatencyMultiplier = settings.audioLatencyMultiplier
     private val useAacAudio = settings.useAacAudio
+    // The codec each sink actually carries, from the phone's Media Sink Setup. The setting alone
+    // used to decide, and the band cap now announces AAC the setting knows nothing about.
+    private val sinkIsAac = ConcurrentHashMap<Int, Boolean>()
     private val audioQueueCapacity = settings.audioQueueCapacity
     private val enableAudioSink = settings.enableAudioSink
     private val attachHwDspEqualizer = settings.attachHwDspEqualizer
@@ -320,8 +324,11 @@ internal class AapAudio(
             audioLatencyMultiplier.coerceAtMost(4)
         }
 
-        AppLog.i("AudioDecoder.start: channel=$channel, stream=$stream, gain=$gain, sampleRate=${config.sampleRate}, numberOfBits=${config.numberOfBits}, numberOfChannels=${config.numberOfChannels}, isAac=$useAacAudio, latencyMultiplier=$effectiveMultiplier, queueCapacity=$audioQueueCapacity, attachHwDspEqualizer=$attachHwDspEqualizer")
-        audioDecoder.start(channel, stream, config.sampleRate, config.numberOfBits, config.numberOfChannels, useAacAudio, gain, effectiveMultiplier, audioQueueCapacity, staticAudioFocus, attachHwDspEqualizer)
+        val fromSetup = sinkIsAac[channel]
+        val isAac = fromSetup ?: useAacAudio
+        val codecSource = if (fromSetup != null) "setup" else "setting"
+        AppLog.i("AudioDecoder.start: channel=$channel, stream=$stream, gain=$gain, sampleRate=${config.sampleRate}, numberOfBits=${config.numberOfBits}, numberOfChannels=${config.numberOfChannels}, isAac=$isAac, source=$codecSource, latencyMultiplier=$effectiveMultiplier, queueCapacity=$audioQueueCapacity, attachHwDspEqualizer=$attachHwDspEqualizer")
+        audioDecoder.start(channel, stream, config.sampleRate, config.numberOfBits, config.numberOfChannels, isAac, gain, effectiveMultiplier, audioQueueCapacity, staticAudioFocus, attachHwDspEqualizer)
         onAudioPlaybackStarted(channel)
     }
 
@@ -411,6 +418,18 @@ internal class AapAudio(
         }
     }
 
+    /** Records the codec the phone named for [channel] in its Media Sink Setup. */
+    fun noteSinkCodec(channel: Int, setupType: Int) {
+        if (!Channel.isAudio(channel)) return
+        val aac = AudioSinkCodecPolicy.isAac(setupType)
+        if (aac == null) {
+            AppLog.w("AapAudio: sink setup type $setupType on ${Channel.name(channel)} is not an audio codec, keeping isAac=$useAacAudio from the setting")
+            sinkIsAac.remove(channel)
+        } else {
+            sinkIsAac[channel] = aac
+        }
+    }
+
     fun precreateAudioTrack(channel: Int) {
         if (!staticAudioFocus) return
         if (channel != Channel.ID_AU2) return
@@ -449,6 +468,8 @@ internal class AapAudio(
 
     fun restartAudio() {
         AppLog.i("AapAudio: Restarting all audio tracks")
+        // sinkIsAac is kept: the phone sets a sink up once per session, and a restarted track
+        // still carries the codec that setup named.
         audioDecoder.stop()
     }
 

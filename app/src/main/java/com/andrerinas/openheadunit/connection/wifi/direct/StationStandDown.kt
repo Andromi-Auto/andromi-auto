@@ -7,6 +7,8 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import com.andrerinas.openheadunit.App
+import com.andrerinas.openheadunit.connection.ConnectionStage
+import com.andrerinas.openheadunit.connection.ConnectionStageTracker
 import com.andrerinas.openheadunit.utils.AppLog
 import com.andrerinas.openheadunit.utils.AppPermissions
 
@@ -73,12 +75,22 @@ object StationStandDown {
             val associated = info?.supplicantState == SupplicantState.COMPLETED
             val networkId = info?.networkId ?: -1
             val overlay = AppPermissions.isOverlayGranted(context)
+            val mode = StationStandDownMode.fromSetting(settings.stationStandDownMode)
+            val supports5Ghz = WifiBandCapability.supports5Ghz(context)
+            val groupBand = P2pBandPreference.fromSetting(settings.wifiDirectBand)
+            val stationFrequency = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                info?.frequency ?: 0
+            } else 0
 
             if (!StationStandDownPolicy.shouldStandDown(
+                    mode = mode,
                     sdkInt = Build.VERSION.SDK_INT,
                     canDrawOverlays = overlay,
                     associated = associated,
-                    networkId = networkId
+                    networkId = networkId,
+                    supports5Ghz = supports5Ghz,
+                    stationFrequencyMhz = stationFrequency,
+                    groupBand = groupBand,
                 )
             ) {
                 val why = StationStandDownPolicy.describeUnavailable(Build.VERSION.SDK_INT, overlay)
@@ -88,15 +100,21 @@ object StationStandDown {
                         "StationStandDown: this unit is not joined to another WiFi network, so " +
                             "there is nothing to stand down before creating the group."
                     )
-                    else -> AppLog.w(
+                    networkId < 0 -> AppLog.w(
                         "StationStandDown: this unit is joined to a network the app is not allowed " +
                             "to name, so it will not be disabled. Turning Location on usually makes " +
                             "it readable."
+                    )
+                    else -> AppLog.i(
+                        "StationStandDown: " + StationStandDownPolicy.describeSkipped(
+                            mode, supports5Ghz, stationFrequency, groupBand
+                        )
                     )
                 }
                 return false
             }
 
+            ConnectionStageTracker.report(ConnectionStage.PREPARING_NETWORK)
             settings.stationStandDownNetworkId = networkId
             @Suppress("DEPRECATION")
             val disabled = wm.disableNetwork(networkId)
@@ -104,8 +122,9 @@ object StationStandDown {
             wm.disconnect()
             AppLog.i(
                 "StationStandDown: asked this unit to leave its WiFi network so the group can have " +
-                    "the radio to itself (disableNetwork returned $disabled). It is rejoined when " +
-                    "the session ends."
+                    "the radio to itself (mode=$mode, station on ${stationFrequency}MHz, " +
+                    "5GHz=$supports5Ghz, group asking for $groupBand, disableNetwork returned " +
+                    "$disabled). It is rejoined when the session ends."
             )
 
             Handler(Looper.getMainLooper()).postDelayed({

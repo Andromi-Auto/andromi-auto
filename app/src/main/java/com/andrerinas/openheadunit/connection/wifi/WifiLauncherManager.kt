@@ -2,6 +2,8 @@ package com.andrerinas.openheadunit.connection.wifi
 
 import com.andrerinas.openheadunit.App
 import com.andrerinas.openheadunit.aap.AapService
+import com.andrerinas.openheadunit.connection.ConnectionStage
+import com.andrerinas.openheadunit.connection.ConnectionStageTracker
 import com.andrerinas.openheadunit.utils.AppLog
 import com.andrerinas.openheadunit.utils.Settings
 
@@ -9,6 +11,13 @@ open class WifiLauncherManager(val service: AapService) {
 
     val sharedServices: WifiLauncherSharedServices = WifiLauncherSharedServices(service)
     var active: WifiLauncher? = null
+        private set
+
+    /**
+     * Whether [active] is running. stop() leaves the launcher in place at every sequence but LAST,
+     * so this is what separates "this mode is already up" from "stopped, and still here".
+     */
+    var activeIsStarted: Boolean = false
         private set
 
 
@@ -32,8 +41,15 @@ open class WifiLauncherManager(val service: AapService) {
         if (active == newLauncher)
             throw IllegalArgumentException("newLauncher is already active")
 
-        if (!force && (active?.hasSameStartConfiguration(newLauncher) ?: false)) {
-            AppLog.d("WifiLauncher: WiFi Mode ${newLauncher.mode}.mode with same start-configuration is already initialized.")
+        // Informational rather than debug: this refusal is why a documented re-arm could do
+        // nothing at all, and a reporter's log is at INFO.
+        if (WifiLauncherRestartPolicy.refusesRestart(
+                activeIsStarted = activeIsStarted,
+                sameConfiguration = active?.hasSameStartConfiguration(newLauncher) ?: false,
+                force = force,
+            )
+        ) {
+            AppLog.i("WifiLauncher: WiFi Mode ${newLauncher.mode}.mode with same start-configuration is already initialized.")
             return
         }
 
@@ -62,6 +78,8 @@ open class WifiLauncherManager(val service: AapService) {
         }
 
         AppLog.i("WifiLauncher: Initializing WiFi Mode: ${newLauncher.mode}")
+        // The stack is coming up, so the status pill appears here and is cleared in stop().
+        ConnectionStageTracker.beginAttempt(ConnectionStage.ARMED)
 
         // stop old launcher
         active?.stop(WifiLauncherStopSequence.ANY)
@@ -70,6 +88,7 @@ open class WifiLauncherManager(val service: AapService) {
         active = newLauncher
         sharedServices.update(newLauncher)
         active?.start(noInfoToasts)
+        activeIsStarted = true
     }
 
     /**
@@ -82,10 +101,12 @@ open class WifiLauncherManager(val service: AapService) {
      */
     fun stop(seq: WifiLauncherStopSequence = WifiLauncherStopSequence.ANY) {
         active?.stop(seq)
+        activeIsStarted = false
 
         if (seq.handledAt(WifiLauncherStopSequence.LAST)) {
             sharedServices.stopAll()
             active = null
+            ConnectionStageTracker.clear()
         }
     }
 

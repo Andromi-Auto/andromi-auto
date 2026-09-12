@@ -59,6 +59,16 @@ class AudioTrackWrapper(
     private val writeSemaphore = java.util.concurrent.Semaphore(3)
     private var equalizer: Equalizer? = null
 
+    // AAC decoder health. A failed or dead decoder drops its frames rather than playing the
+    // compressed bytes as PCM, and the run loop rebuilds it within AacDecoderRecoveryPolicy's budget.
+    @Volatile private var decoderFailed = false
+    @Volatile private var rebuildRequested = false
+    private var decoderRebuilds = 0
+    private var lastRebuildMs = 0L
+    private var droppedAacChunks = 0L
+    private var aacFramesQueued = 0L
+    private val trackChannelCount: Int = channelCount
+
     // Limit queue capacity to provide backpressure to the network thread if audio playback is slow
     private val dataQueue = if (audioQueueCapacity > 0)
         LinkedBlockingQueue<AudioChunk>(audioQueueCapacity)
@@ -153,14 +163,14 @@ class AudioTrackWrapper(
             }
         }
 
-        if (isAac) {
-            initDecoder(sampleRateInHz, channelCount)
+        if (isAac && !initDecoder(sampleRateInHz, channelCount)) {
+            decoderFailed = true
         }
 
         this.start()
     }
 
-    private fun initDecoder(sampleRate: Int, channels: Int) {
+    private fun initDecoder(sampleRate: Int, channels: Int): Boolean {
         try {
             val mime = "audio/mp4a-latm"
             val format = MediaFormat.createAudioFormat(mime, sampleRate, channels)
@@ -228,10 +238,18 @@ class AudioTrackWrapper(
 
                     override fun onError(codec: MediaCodec, e: MediaCodec.CodecException) {
                         AppLog.e("AAC Codec Error", e)
+                        rebuildRequested = true
                     }
 
                     override fun onOutputFormatChanged(codec: MediaCodec, format: MediaFormat) {
-                        AppLog.i("AAC Output Format Changed: $format")
+                        val outRate = try { format.getInteger(MediaFormat.KEY_SAMPLE_RATE) } catch (e: Exception) { -1 }
+                        val outChannels = try { format.getInteger(MediaFormat.KEY_CHANNEL_COUNT) } catch (e: Exception) { -1 }
+                        if (outRate != sampleRate || outChannels != trackChannelCount) {
+                            AppLog.w("AAC decoder output is $outRate Hz x $outChannels but the track plays " +
+                                "$sampleRate Hz x $trackChannelCount; audio will run at the wrong speed")
+                        } else {
+                            AppLog.i("AAC Output Format Changed: $format")
+                        }
                     }
                 }
 
@@ -246,9 +264,75 @@ class AudioTrackWrapper(
             decoder?.configure(format, null, null, 0)
             decoder?.start()
             AppLog.i("AAC Decoder started for $sampleRate Hz, $channels channels (Async)")
+            return true
         } catch (e: Exception) {
-            AppLog.e("Failed to init AAC decoder", e)
+            AppLog.e("Failed to init AAC decoder; this sink's frames will be dropped, not played as PCM", e)
+            try { decoder?.release() } catch (ignored: Exception) { }
+            decoder = null
+            return false
         }
+    }
+
+    /** One rebuild, from the run loop: release() must never run on the codec's own callback thread. */
+    private fun rebuildDecoder() {
+        rebuildRequested = false
+        val now = SystemClock.elapsedRealtime()
+        val since = if (lastRebuildMs == 0L) Long.MAX_VALUE else now - lastRebuildMs
+        if (!AacDecoderRecoveryPolicy.allowsRebuild(decoderRebuilds, since)) {
+            if (!decoderFailed) {
+                AppLog.w("AudioTrackWrapper: AAC decoder failed again (rebuilds=$decoderRebuilds), giving up on this sink")
+            }
+            decoderFailed = true
+            return
+        }
+        decoderRebuilds++
+        lastRebuildMs = now
+        releaseDecoder()
+        quitCodecThread()
+        AppLog.w("AudioTrackWrapper: rebuilding the AAC decoder ($decoderRebuilds of ${AacDecoderRecoveryPolicy.MAX_REBUILDS})")
+        decoderFailed = !initDecoder(sampleRate, trackChannelCount)
+    }
+
+    private fun releaseDecoder() {
+        try {
+            decoder?.stop()
+        } catch (ignored: Exception) {
+        }
+        try {
+            decoder?.release()
+        } catch (e: Exception) {
+            AppLog.e("Error releasing audio decoder", e)
+        }
+        decoder = null
+        // After release() no callback of the old codec is running, so these indices are all stale.
+        freeInputBuffers.clear()
+    }
+
+    private fun quitCodecThread() {
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+                codecHandlerThread?.quitSafely()
+            } else {
+                codecHandlerThread?.quit()
+            }
+            codecHandlerThread = null
+        } catch (e: Exception) {
+            AppLog.e("Error quitting codec thread", e)
+        }
+    }
+
+    private fun dropAacChunk() {
+        droppedAacChunks++
+        if (droppedAacChunks == 1L) {
+            AppLog.w("AudioTrackWrapper: no working AAC decoder, dropping this sink's frames")
+        }
+    }
+
+    /** 1024 samples per AAC-LC access unit: a monotonic stamp for decoders that drop on 0. */
+    private fun nextAacPtsUs(): Long {
+        val pts = if (sampleRate > 0) aacFramesQueued * 1024L * 1_000_000L / sampleRate else 0L
+        aacFramesQueued++
+        return pts
     }
 
     private fun writeToTrack(buffer: ByteArray) {
@@ -319,8 +403,11 @@ class AudioTrackWrapper(
                 maybeStartPlayback(0)
                 if (chunk != null) {
                     try {
-                        if (isAac && decoder != null) {
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        if (isAac) {
+                            if (rebuildRequested) rebuildDecoder()
+                            if (decoder == null || decoderFailed) {
+                                dropAacChunk()
+                            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                                 queueInput(chunk.data, chunk.size)
                             } else {
                                 decodeSync(chunk.data, chunk.size)
@@ -342,7 +429,8 @@ class AudioTrackWrapper(
             }
         }
         cleanup()
-        AppLog.i("AudioTrackWrapper thread finished.")
+        val dropped = if (droppedAacChunks > 0) " ($droppedAacChunks AAC frames dropped)" else ""
+        AppLog.i("AudioTrackWrapper thread finished.$dropped")
     }
 
     @Suppress("DEPRECATION")
@@ -354,7 +442,7 @@ class AudioTrackWrapper(
                 val inputBuffer = dec.inputBuffers[inputIndex]
                 inputBuffer.clear()
                 inputBuffer.put(inputData, 0, size)
-                dec.queueInputBuffer(inputIndex, 0, size, 0, 0)
+                dec.queueInputBuffer(inputIndex, 0, size, nextAacPtsUs(), 0)
             }
 
             val info = MediaCodec.BufferInfo()
@@ -370,6 +458,7 @@ class AudioTrackWrapper(
             }
         } catch (e: Exception) {
             AppLog.e("Error in decodeSync", e)
+            rebuildRequested = true
         }
     }
 
@@ -390,7 +479,7 @@ class AudioTrackWrapper(
 
                 inputBuffer?.clear()
                 inputBuffer?.put(inputData, 0, size)
-                decoder?.queueInputBuffer(inputIndex, 0, size, 0, 0)
+                decoder?.queueInputBuffer(inputIndex, 0, size, nextAacPtsUs(), 0)
             } else {
                 AppLog.w("AAC Input Buffer timeout (200ms) - dropping frame")
             }
@@ -398,6 +487,7 @@ class AudioTrackWrapper(
             throw e
         } catch (e: Exception) {
             AppLog.e("Error queuing AAC input", e)
+            rebuildRequested = true
         }
     }
 
@@ -591,13 +681,7 @@ class AudioTrackWrapper(
         audioBufferPool.clear()
 
         // 1. Stop the decoder to stop producing new output buffers
-        try {
-            decoder?.stop()
-            decoder?.release()
-            decoder = null
-        } catch (e: Exception) {
-            AppLog.e("Error releasing audio decoder", e)
-        }
+        releaseDecoder()
 
         // 2. Wait for AAC writes that were already submitted to the executor
         writeExecutor.shutdown()
@@ -672,16 +756,7 @@ class AudioTrackWrapper(
         }
 
         // 5. Clean up the codec handler thread
-        try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-                codecHandlerThread?.quitSafely()
-            } else {
-                codecHandlerThread?.quit()
-            }
-            codecHandlerThread = null
-        } catch (e: Exception) {
-            AppLog.e("Error quitting codec thread", e)
-        }
+        quitCodecThread()
     }
 
     private fun obtainAudioBuffer(size: Int): ByteArray {

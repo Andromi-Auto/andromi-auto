@@ -18,7 +18,7 @@ class BluetoothWakePolicyTest {
 
     /**
      * The poke is load-bearing on some head units — they never connect without it — so the list may
-     * never be emptied to disable it. Standing a poke down is [BluetoothWakePolicy.shouldPoke]'s
+     * never be emptied to disable it. Standing a poke down is [BluetoothWakePolicy.wakeDecision]'s
      * decision, taken per attempt, and not this list's.
      */
     @Test
@@ -43,18 +43,33 @@ class BluetoothWakePolicyTest {
 
     // --- the guard: never poke a link we would destroy ---
 
+    private val CONNECTED = BluetoothWakePolicy.HandsFreeLink.CONNECTED
+    private val ABSENT = BluetoothWakePolicy.HandsFreeLink.ABSENT
+    private val LINK_UNREADABLE = BluetoothWakePolicy.HandsFreeLink.UNREADABLE
+
+    private fun decide(
+        client: BluetoothWakePolicy.HandsFreeLink,
+        gateway: BluetoothWakePolicy.HandsFreeLink = ABSENT,
+        target: BluetoothWakePolicy.TargetLink = BluetoothWakePolicy.TargetLink.UNREADABLE,
+        anotherPhones: Boolean = false
+    ) = BluetoothWakePolicy.wakeDecision(client, gateway, target, anotherPhones)
+
     /**
      * The measured failure: a poke that connects takes the phone's one hands-free slot, this unit's
      * own client is dropped 4 ms later, and it does not come back without a Bluetooth adapter cycle.
      */
     @Test
-    fun `a live hands-free link is never poked`() {
-        assertFalse(BluetoothWakePolicy.shouldPoke(BluetoothWakePolicy.HandsFreeLink.CONNECTED))
+    fun `a live client link to a phone that may be the target is never poked`() {
+        val decision = decide(client = CONNECTED, target = BluetoothWakePolicy.TargetLink.CONNECTED)
+        assertFalse(decision.poke)
+        assertEquals(BluetoothWakePolicy.WakeReason.TARGET_CONNECTED, decision.reason)
     }
 
     @Test
     fun `no hands-free link means there is nothing to destroy, so poke`() {
-        assertTrue(BluetoothWakePolicy.shouldPoke(BluetoothWakePolicy.HandsFreeLink.ABSENT))
+        val decision = decide(client = ABSENT, gateway = ABSENT)
+        assertTrue(decision.poke)
+        assertEquals(BluetoothWakePolicy.WakeReason.NO_LINK, decision.reason)
     }
 
     /**
@@ -63,21 +78,22 @@ class BluetoothWakePolicyTest {
      */
     @Test
     fun `an unreadable adapter still pokes`() {
-        assertTrue(BluetoothWakePolicy.shouldPoke(BluetoothWakePolicy.HandsFreeLink.UNREADABLE))
+        assertTrue(decide(client = LINK_UNREADABLE, gateway = LINK_UNREADABLE).poke)
+        assertTrue(decide(client = LINK_UNREADABLE, gateway = ABSENT).poke)
     }
 
     @Test
     fun `the three-valued profile read maps onto the three states`() {
-        assertEquals(BluetoothWakePolicy.HandsFreeLink.CONNECTED, BluetoothWakePolicy.HandsFreeLink.of(true))
-        assertEquals(BluetoothWakePolicy.HandsFreeLink.ABSENT, BluetoothWakePolicy.HandsFreeLink.of(false))
-        assertEquals(BluetoothWakePolicy.HandsFreeLink.UNREADABLE, BluetoothWakePolicy.HandsFreeLink.of(null))
+        assertEquals(CONNECTED, BluetoothWakePolicy.HandsFreeLink.of(true))
+        assertEquals(ABSENT, BluetoothWakePolicy.HandsFreeLink.of(false))
+        assertEquals(LINK_UNREADABLE, BluetoothWakePolicy.HandsFreeLink.of(null))
     }
 
-    /** Exactly one state suppresses the poke; if a fourth is ever added it has to choose out loud. */
     @Test
-    fun `only a connected link suppresses the poke`() {
-        val suppressed = BluetoothWakePolicy.HandsFreeLink.values().filterNot { BluetoothWakePolicy.shouldPoke(it) }
-        assertEquals(listOf(BluetoothWakePolicy.HandsFreeLink.CONNECTED), suppressed)
+    fun `the target's own connection read maps onto three states`() {
+        assertEquals(BluetoothWakePolicy.TargetLink.CONNECTED, BluetoothWakePolicy.TargetLink.of(true))
+        assertEquals(BluetoothWakePolicy.TargetLink.ABSENT, BluetoothWakePolicy.TargetLink.of(false))
+        assertEquals(BluetoothWakePolicy.TargetLink.UNREADABLE, BluetoothWakePolicy.TargetLink.of(null))
     }
 
     /**
@@ -86,29 +102,65 @@ class BluetoothWakePolicyTest {
      */
     @Test
     fun `a hands-free link that is another phone's does not suppress the poke`() {
-        assertTrue(BluetoothWakePolicy.shouldPoke(BluetoothWakePolicy.HandsFreeLink.CONNECTED, true))
+        val decision = decide(client = CONNECTED, target = BluetoothWakePolicy.TargetLink.CONNECTED, anotherPhones = true)
+        assertTrue(decision.poke)
+        assertEquals(BluetoothWakePolicy.WakeReason.SWITCH_TARGET, decision.reason)
     }
 
+    /**
+     * The car's case: a head unit that is itself a phone serves the car's kit as the audio gateway.
+     * A phone is never on the far end of that role, so the target cannot be the link's holder.
+     */
     @Test
-    fun `a hands-free link that could be this phone's still suppresses the poke`() {
-        assertFalse(BluetoothWakePolicy.shouldPoke(BluetoothWakePolicy.HandsFreeLink.CONNECTED, false))
-    }
-
-    /** Only a connected link was ever the reason to stand down, so the new input changes nothing else. */
-    @Test
-    fun `whose link it is only matters while one is up`() {
-        for (owned in listOf(true, false)) {
-            assertTrue(BluetoothWakePolicy.shouldPoke(BluetoothWakePolicy.HandsFreeLink.ABSENT, owned))
-            assertTrue(BluetoothWakePolicy.shouldPoke(BluetoothWakePolicy.HandsFreeLink.UNREADABLE, owned))
+    fun `a gateway-role link to the car does not stand the poke down`() {
+        for (target in BluetoothWakePolicy.TargetLink.entries) {
+            val decision = decide(client = ABSENT, gateway = CONNECTED, target = target)
+            assertTrue("target $target", decision.poke)
+            assertEquals(BluetoothWakePolicy.WakeReason.GATEWAY_ONLY, decision.reason)
         }
     }
 
-    /** Every existing caller passes one argument and must keep today's answer. */
+    /** Only a positive "no client link" reading names the gateway as the sole holder. */
     @Test
-    fun `the default is that the link may be the poke target's own`() {
-        for (state in BluetoothWakePolicy.HandsFreeLink.values()) {
-            assertEquals(BluetoothWakePolicy.shouldPoke(state, false), BluetoothWakePolicy.shouldPoke(state))
-        }
+    fun `an unreadable client role beside a gateway link is judged by the target`() {
+        assertFalse(decide(client = LINK_UNREADABLE, gateway = CONNECTED, target = BluetoothWakePolicy.TargetLink.CONNECTED).poke)
+        assertTrue(decide(client = LINK_UNREADABLE, gateway = CONNECTED, target = BluetoothWakePolicy.TargetLink.ABSENT).poke)
+        assertFalse(decide(client = LINK_UNREADABLE, gateway = CONNECTED, target = BluetoothWakePolicy.TargetLink.UNREADABLE).poke)
+    }
+
+    @Test
+    fun `a target with no connection at all cannot hold the link, so poke`() {
+        val decision = decide(client = CONNECTED, target = BluetoothWakePolicy.TargetLink.ABSENT)
+        assertTrue(decision.poke)
+        assertEquals(BluetoothWakePolicy.WakeReason.TARGET_ABSENT, decision.reason)
+    }
+
+    /** A null from the hidden isConnected() is not absence; the link may still be the target's. */
+    @Test
+    fun `an unreadable target behind our own client link still stands down`() {
+        val decision = decide(client = CONNECTED, target = BluetoothWakePolicy.TargetLink.UNREADABLE)
+        assertFalse(decision.poke)
+        assertEquals(BluetoothWakePolicy.WakeReason.TARGET_UNREADABLE, decision.reason)
+    }
+
+    /** The two stand-down reasons are the only ones; a new reason has to choose out loud. */
+    @Test
+    fun `only a possibly-own client link ever suppresses the poke`() {
+        val suppressed = mutableSetOf<BluetoothWakePolicy.WakeReason>()
+        for (client in BluetoothWakePolicy.HandsFreeLink.entries)
+            for (gateway in BluetoothWakePolicy.HandsFreeLink.entries)
+                for (target in BluetoothWakePolicy.TargetLink.entries)
+                    for (another in listOf(true, false)) {
+                        val decision = decide(client, gateway, target, another)
+                        if (!decision.poke) {
+                            suppressed.add(decision.reason)
+                            assertTrue("$client/$gateway/$target", client != ABSENT && !another)
+                        }
+                    }
+        assertEquals(
+            setOf(BluetoothWakePolicy.WakeReason.TARGET_CONNECTED, BluetoothWakePolicy.WakeReason.TARGET_UNREADABLE),
+            suppressed
+        )
     }
 
     // --- pairing: strict about poking, lenient about forgetting ---

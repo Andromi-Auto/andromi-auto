@@ -17,6 +17,7 @@ import com.andrerinas.openheadunit.aap.VehicleTypePolicy
 import com.andrerinas.openheadunit.main.settings.SettingItem
 import com.andrerinas.openheadunit.main.settings.SettingsAdapter
 import com.andrerinas.openheadunit.utils.Settings
+import com.andrerinas.openheadunit.utils.ToastUtils
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -138,7 +139,7 @@ class VehicleInfoFragment : Fragment() {
         hasChanges = false
         updateSaveButtonState()
 
-        Toast.makeText(context, getString(R.string.settings_saved), Toast.LENGTH_SHORT).show()
+        ToastUtils.showToast(context, getString(R.string.settings_saved), Toast.LENGTH_SHORT, force = true)
     }
 
     private fun checkChanges() {

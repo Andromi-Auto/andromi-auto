@@ -359,6 +359,26 @@ object HotspotManager {
         }
     }
 
+    /**
+     * Asks the access point down and waits for it to actually go.
+     *
+     * For a caller that has to run *behind* the teardown rather than alongside it: asking WiFi to
+     * come on while a soft AP still holds a single-radio chip is a request the framework defers or
+     * drops. Blocks, so call it off the main thread.
+     *
+     * @return true when no access point is up by the time it returns.
+     */
+    fun disableAndAwaitDown(context: Context): Boolean {
+        // Asked for unconditionally, as this caller always did: the request also cancels a start
+        // that is in flight, which looking for an access point first would miss.
+        setHotspotEnabled(context, false)
+        val down = awaitApDown(context)
+        if (!down) {
+            AppLog.w("HotspotManager: the access point was still up ${RADIO_SETTLE_TIMEOUT_MS / 1000}s after being asked down; carrying on without it.")
+        }
+        return down
+    }
+
     /** Polls until no soft AP is running, or the budget expires. */
     private fun awaitApDown(context: Context): Boolean {
         val deadline = System.currentTimeMillis() + RADIO_SETTLE_TIMEOUT_MS

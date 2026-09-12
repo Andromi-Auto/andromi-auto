@@ -142,6 +142,22 @@ class SoftApNetworkPolicyTest {
     }
 
     @Test
+    fun `a Qualcomm cellular interface is not an access point`() {
+        // The same shape on Qualcomm hardware: rmnet_data0 holds the cellular address, and a phone
+        // handed it gets a network name with no BSSID behind it.
+        assertNull(
+            SoftApNetworkPolicy.pickApInterface(listOf(iface("rmnet_data0", ipv4 = "10.115.8.22")))
+        )
+        assertEquals(
+            "wlan2",
+            SoftApNetworkPolicy.pickApInterface(
+                listOf(iface("rmnet_data0", ipv4 = "10.115.8.22"), iface("wlan2", ipv4 = "192.168.43.1"))
+            )?.name
+        )
+        assertFalse(SoftApNetworkPolicy.isApHost(iface("rmnet_data0", ipv4 = "10.115.8.22")))
+    }
+
+    @Test
     fun `an interface named for the station role is excluded`() {
         assertNull(SoftApNetworkPolicy.pickApInterface(listOf(iface("sta0"))))
         assertEquals(

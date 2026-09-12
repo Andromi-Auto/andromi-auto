@@ -1,5 +1,7 @@
 package com.andrerinas.openheadunit.connection.wifi.modes
 
+import com.andrerinas.openheadunit.connection.ConnectionStage
+import com.andrerinas.openheadunit.connection.ConnectionStageTracker
 import com.andrerinas.openheadunit.connection.wifi.WifiLauncher
 import com.andrerinas.openheadunit.connection.wifi.WifiLauncherManager
 import com.andrerinas.openheadunit.connection.wifi.WifiLauncherMode
@@ -24,6 +26,7 @@ class WifiLauncherAuto(
     override fun start(noInfoToasts: Boolean) {
         // Auto discovery for standard server mode via NSD/mDNS
         // #startDiscovery(oneShot = false) handled by SharedServices
+        ConnectionStageTracker.report(ConnectionStage.SEARCHING)
     }
 
     override fun stop(seq: WifiLauncherStopSequence) {

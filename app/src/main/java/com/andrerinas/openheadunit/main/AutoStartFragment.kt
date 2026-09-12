@@ -29,6 +29,7 @@ import com.andrerinas.openheadunit.utils.AppPermissions
 import com.andrerinas.openheadunit.connection.wifi.WifiLauncherMode
 import com.andrerinas.openheadunit.utils.Settings
 import com.andrerinas.openheadunit.utils.BluetoothHelper
+import com.andrerinas.openheadunit.utils.ToastUtils
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -268,7 +269,7 @@ class AutoStartFragment : Fragment() {
         hasChanges = false
         updateSaveButtonState()
 
-        Toast.makeText(context, getString(R.string.settings_saved), Toast.LENGTH_SHORT).show()
+        ToastUtils.showToast(context, getString(R.string.settings_saved), Toast.LENGTH_SHORT, force = true)
     }
 
     private fun checkChanges() {
@@ -513,7 +514,7 @@ class AutoStartFragment : Fragment() {
             }
             if (disabled) {
                 AppLog.w("Overlay permission not granted, disabling auto-start settings")
-                Toast.makeText(requireContext(), getString(R.string.overlay_permission_denied_auto_start_disabled), Toast.LENGTH_LONG).show()
+                ToastUtils.showToast(requireContext(), getString(R.string.overlay_permission_denied_auto_start_disabled), Toast.LENGTH_LONG, force = true)
                 checkChanges()
                 updateSettingsList()
             }

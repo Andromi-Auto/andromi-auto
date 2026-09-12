@@ -122,6 +122,7 @@ internal class AapControlMedia(
 
         // Pushing AudioFocusNotification
         if (Channel.isAudio(channel)) {
+            aapAudio.noteSinkCodec(channel, request.type)
             aapAudio.precreateAudioTrack(channel)
             val focusNotification = Control.AudioFocusNotification.newBuilder()
                 .setFocusState(Control.AudioFocusNotification.AudioFocusStateType.STATE_GAIN)

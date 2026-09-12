@@ -28,6 +28,9 @@ import com.andrerinas.openheadunit.R
 import com.andrerinas.openheadunit.aap.AapService
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.NativeHandoffPolicy
 import com.andrerinas.openheadunit.connection.CommManager
+import com.andrerinas.openheadunit.connection.ConnectionNetworkDetail
+import com.andrerinas.openheadunit.connection.ConnectionStage
+import com.andrerinas.openheadunit.connection.ConnectionStageTracker
 import com.andrerinas.openheadunit.connection.wifi.FiveGhzChannelPolicy
 import com.andrerinas.openheadunit.connection.wifi.WifiLauncherMode
 import com.andrerinas.openheadunit.connection.wifi.modes.helper.HelperStrategy
@@ -50,6 +53,9 @@ import java.net.Socket
 class WifiDirectManager(private val context: Context) : WifiP2pManager.ConnectionInfoListener, WifiP2pManager.GroupInfoListener {
 
     private companion object {
+        /** How many two-second rounds to spend waiting for the WiFi radio before saying it will not come on. */
+        private const val MAX_WIFI_ENABLE_ATTEMPTS = 5
+
         /** Where a head unit's baked-in WiFi country tends to live when telephony has none. */
         private val COUNTRY_PROPERTY_KEYS = listOf(
             "ro.boot.wificountrycode",
@@ -232,6 +238,14 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
      */
     @Volatile
     private var nativeCreateRequestedAtMs = 0L
+
+    /**
+     * Bring-ups spent asking a radio that is off to come on, so one that never will stops asking.
+     *
+     * Unbounded, the two-second retry below re-entered forever on a unit whose WiFi the platform
+     * will not switch on, and said nothing after the first pass.
+     */
+    private var wifiEnableAttempts = 0
 
     /**
      * When a createGroup of ours was accepted and no group has arrived since, or 0.
@@ -707,6 +721,7 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
                         isConnected = false
                         isClientConnected = false
                         lastNativeGroupStatusMessage = null
+                        ConnectionStageTracker.reportNetwork(null)
                         isGroupCreatingOrCreated = false
                         cancelNativeJoinWatchdog()
                     }
@@ -812,6 +827,7 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
 
             val goIp = info.groupOwnerAddress?.hostAddress ?: "unknown"
             AppLog.i("WifiDirectManager: Group formed. Owner: $isGroupOwner, GO IP: $goIp")
+            ConnectionStageTracker.report(ConnectionStage.CREATING_NETWORK)
 
             if (isGroupOwner) {
                 // [FIX] requestDeviceInfo is async — call requestGroupInfo only AFTER the callback
@@ -1090,6 +1106,9 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
                 )
             }
 
+            // The band the session actually runs on, for the narrow-band profile cap: a 5 GHz-capable
+            // unit hosting a 2.4 GHz group is on the same narrow link a 2.4 GHz-only one is.
+            WifiBandCapability.reportSessionFrequency(frequency)
             val band = if (frequency > 4000) "5GHz" else if (frequency > 0) "2.4GHz" else "unknown"
             val channelLabel = if (WifiP2pChannelPolicy.is24GHz(frequency)) ", ${WifiP2pChannelPolicy.describe(frequency)}" else ""
             // Names the request beside the result: a group that came up on 5745 after the user asked
@@ -1141,7 +1160,9 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
                 } else if (shouldRetryNativeGroupFor5Ghz(frequency)) {
                     native5GhzBandMismatchRetries++
                     AppLog.w("WifiDirectManager: Native AA group was requested as 5GHz but came up on $frequency MHz ($band). Recreating 5GHz group (mismatch retry $native5GhzBandMismatchRetries/$MAX_NATIVE_5GHZ_BAND_MISMATCH_RETRIES).")
-                    showToast("Native AA WiFi Direct started on $band. Retrying 5GHz...")
+                    ConnectionStageTracker.reportNetwork(
+                        ConnectionNetworkDetail(frequency, ConnectionNetworkDetail.Note.RETRYING_5GHZ)
+                    )
                     removeGroupAndRetryNative5Ghz()
                     return
                 }
@@ -1164,7 +1185,13 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
                     if (ssid != lastUnfriendlyChannelSsid) {
                         lastUnfriendlyChannelSsid = ssid
                         AppLog.e("WifiDirectManager: WiFi Direct group came up on ${WifiP2pChannelPolicy.describe(frequency)} ($frequency MHz). Carrying on, but a phone limited to channels 1-11 will not find this network: it will scan and never see the SSID. Restarting this unit's WiFi, or giving it a WiFi country code, is what moves the group off channel 12/13.")
-                        showToast("WiFi Direct is on ${WifiP2pChannelPolicy.describe(frequency)}, which most phones cannot join. Restart WiFi and try again.")
+                    }
+                    // Said on the pill for as long as the group lives, not in a toast that covered
+                    // it. The Native branch below reports the same group and carries the note itself.
+                    if (!isNativeAaMode()) {
+                        ConnectionStageTracker.reportNetwork(
+                            ConnectionNetworkDetail(frequency, ConnectionNetworkDetail.Note.CLIENT_UNFRIENDLY_CHANNEL)
+                        )
                     }
                 } else if (frequency > 0) {
                     lastUnfriendlyChannelSsid = null
@@ -1206,6 +1233,9 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
                             )
                         } else if (finalIp != null) {
                             AppLog.i("WifiDirectManager: SUCCESS - Providing credentials to listener. SSID=$ssid, IP=$finalIp, BSSID=$bssid, identity stable=${GroupIdentityStabilityPolicy.label(deliveryStability)}")
+                            // Our own listener, not the phone, and it fires three or four times
+                            // per group — so it stays on the network step and re-reports as a no-op.
+                            ConnectionStageTracker.report(ConnectionStage.CREATING_NETWORK)
                             onCredentialsReady?.invoke(ssid, psk, finalIp, bssid, deliveryStability)
                         } else {
                             AppLog.e("WifiDirectManager: FAILED to get valid IP for credentials delivery.")
@@ -1660,7 +1690,6 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
     fun startNativeAaQuietHost() {
         registerReceiverIfNeeded()
         isGroupCreatingOrCreated = true
-        claimNativeCreateWindow("bringing the Native AA group up")
         markP2pRequest()
         var mgr = manager
         var ch = channel
@@ -1691,19 +1720,42 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
             }
         }
 
-        // Ensure WiFi is enabled (Required for P2P)
+        // Ensure WiFi is enabled (Required for P2P). Nothing is claimed above this point on purpose:
+        // a create window taken before the radio is known to be on stayed standing through every
+        // retry below, which made isCreatingGroup permanently true and vetoed the Bluetooth
+        // auto-start rebuild that is the only thing that frees this radio again.
         val wifiManager = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
         if (!wifiManager.isWifiEnabled) {
-            AppLog.i("WifiDirectManager: WiFi is disabled but needed for Native AA. Attempting to enable...")
-            if (Build.VERSION.SDK_INT < 29) {
-                @Suppress("DEPRECATION")
-                wifiManager.isWifiEnabled = true
-            } else {
-                showToast("Native AA requires Wi-Fi. Please turn it on.")
-                // We return for now, the user must turn it on. In the future we could open settings.
+            // Counted so the lines below are said once per bring-up: a credential refresh re-enters
+            // this method every ten seconds while the handshake waits for one.
+            val attempt = ++wifiEnableAttempts
+            if (Build.VERSION.SDK_INT >= 29) {
+                if (attempt == 1) {
+                    AppLog.i("WifiDirectManager: WiFi is off and this Android does not let an app switch it on.")
+                    showToast("Native AA requires Wi-Fi. Please turn it on.")
+                }
                 isGroupCreatingOrCreated = false
                 releaseNativeCreateWindow("WiFi is off and only the user can turn it on")
                 return
+            }
+            if (attempt > MAX_WIFI_ENABLE_ATTEMPTS) {
+                if (attempt == MAX_WIFI_ENABLE_ATTEMPTS + 1) {
+                    AppLog.w(
+                        "WifiDirectManager: WiFi is still off after $MAX_WIFI_ENABLE_ATTEMPTS attempts to " +
+                            "switch it on, so the group cannot be created. Switch WiFi on for this unit."
+                    )
+                    showToast("Native AA requires Wi-Fi. Please turn it on.")
+                }
+                isGroupCreatingOrCreated = false
+                releaseNativeCreateWindow("WiFi is off and would not come on")
+                return
+            }
+            AppLog.i("WifiDirectManager: WiFi is disabled but needed for Native AA. Attempting to enable (attempt $attempt of $MAX_WIFI_ENABLE_ATTEMPTS)...")
+            try {
+                @Suppress("DEPRECATION")
+                wifiManager.isWifiEnabled = true
+            } catch (e: Exception) {
+                AppLog.w("WifiDirectManager: Could not ask the platform to enable WiFi: ${e.message}")
             }
             // Wait a bit for WiFi to wake up
             handler.postDelayed({
@@ -1714,10 +1766,16 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
             }, 2000L)
             return
         }
+        wifiEnableAttempts = 0
 
+        claimNativeCreateWindow("bringing the Native AA group up")
         AppLog.i("WifiDirectManager: startNativeAaQuietHost() requested. Removing old group if any...")
+        // A real restart, not a stray callback: the group goes away and is built again, so the
+        // pill is allowed to fall back to this step.
+        ConnectionStageTracker.beginAttempt(ConnectionStage.PREPARING_NETWORK)
         nativeGroupCreationMode = NATIVE_GROUP_MODE_UNKNOWN
         lastNativeGroupStatusMessage = null
+        ConnectionStageTracker.reportNetwork(null)
         native5GhzBandMismatchRetries = 0
         nativeRequestedBand = NativeGroupBandPolicy.Band.UNSPECIFIED
         nativeRequestedFrequency = 0
@@ -1826,6 +1884,7 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
             else NativeGroupBandPolicy.requestedFrequencyMhz(band, chosenChannel)
 
         AppLog.i("WifiDirectManager: Attempting createGroup for Native AA (Attempt $retryCount)...")
+        ConnectionStageTracker.report(ConnectionStage.CREATING_NETWORK)
         // Said on every bring-up, including the default one: a line that only appears in the unusual
         // case is a line whose absence tells a reader nothing. Same for the radio's own answer,
         // which two open issues spent weeks guessing at.
@@ -1873,6 +1932,7 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
                 mgr.createGroup(ch, config, object : WifiP2pManager.ActionListener {
                     override fun onSuccess() {
                         AppLog.i("WifiDirectManager: $bandLabel createGroup SUCCESS!")
+                        ConnectionStageTracker.report(ConnectionStage.CREATING_NETWORK)
                         noteAcceptedCreate(P2pCreateWedgePolicy.Variant.BANDED)
                         noteGroupFormed()
                         // Only a create that carried the frequency disproves the record. A group
@@ -2263,6 +2323,7 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
         variant: P2pCreateWedgePolicy.Variant,
     ) {
         AppLog.i("WifiDirectManager: Standard createGroup SUCCESS!")
+        ConnectionStageTracker.report(ConnectionStage.CREATING_NETWORK)
         noteAcceptedCreate(variant)
         noteGroupFormed()
         // Read before releaseLegacyChannelRestriction() clears the flag. A group formed while the
@@ -2464,7 +2525,11 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
 
         lastNativeGroupStatusMessage = message
         AppLog.i("WifiDirectManager: $message, SSID=$ssid")
-        showToast(message)
+        // The pill's third line, in place of a toast that covered the pill on every bring-up.
+        val note =
+            if (WifiP2pChannelPolicy.isClientUnfriendly(frequency)) ConnectionNetworkDetail.Note.CLIENT_UNFRIENDLY_CHANNEL
+            else ConnectionNetworkDetail.Note.NONE
+        ConnectionStageTracker.reportNetwork(ConnectionNetworkDetail(frequency, note))
     }
 
     private fun showToast(message: String) {
@@ -2663,9 +2728,12 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
 
     fun stop() {
         AppLog.i("WifiDirectManager: Stopping and cleaning up...")
+        WifiBandCapability.reportSessionFrequency(0)
         generation++
         credentialsEpoch++
         isGroupCreatingOrCreated = false
+        // Counted per bring-up, not per process: a mode the user re-arms is asking us to try again.
+        wifiEnableAttempts = 0
         acceptedCreateWithoutGroupSinceMs = 0L
         wedgeCancelSpentForStampMs = 0L
         stuckCreateCancels = 0
@@ -2685,6 +2753,7 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
         forgetPerGroupKeys()
         nativeRecreateCount = 0
         lastNativeGroupStatusMessage = null
+        ConnectionStageTracker.reportNetwork(null)
         legacyChannelAttempt = 0
         lastGroupRefusalReportAtMs = 0L
         churnWindowStartedAtMs = 0L

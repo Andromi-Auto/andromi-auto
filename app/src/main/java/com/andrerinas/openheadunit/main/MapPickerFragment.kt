@@ -28,6 +28,7 @@ import com.andrerinas.openheadunit.location.GeofenceLocation
 import com.andrerinas.openheadunit.location.LocationHolder
 import com.andrerinas.openheadunit.utils.AppThemeManager
 import com.andrerinas.openheadunit.utils.Settings
+import com.andrerinas.openheadunit.utils.ToastUtils
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.slider.Slider
@@ -66,7 +67,7 @@ class MapPickerFragment : Fragment() {
     private val requestLocationPermission =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
             if (granted) useCurrentLocation() else
-                Toast.makeText(requireContext(), R.string.geofence_no_location, Toast.LENGTH_SHORT).show()
+                ToastUtils.showToast(requireContext(), R.string.geofence_no_location, Toast.LENGTH_SHORT, force = true)
         }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -244,7 +245,7 @@ class MapPickerFragment : Fragment() {
         val fix = LocationHolder.currentLocation(requireContext(), maxAgeMs = 0)
             ?: LocationHolder.bestEffortDeviceFix(requireContext())
         if (fix == null) {
-            Toast.makeText(requireContext(), R.string.geofence_no_location, Toast.LENGTH_SHORT).show()
+            ToastUtils.showToast(requireContext(), R.string.geofence_no_location, Toast.LENGTH_SHORT, force = true)
             return
         }
         currentLat = fix.latitude
@@ -273,7 +274,7 @@ class MapPickerFragment : Fragment() {
             // here no longer reverts to GPS when the settings screen was not saved first.
             settings.useFixedSunriseLocation = true
             applyThemeConfigChange()
-            Toast.makeText(requireContext(), R.string.geofence_saved, Toast.LENGTH_SHORT).show()
+            ToastUtils.showToast(requireContext(), R.string.geofence_saved, Toast.LENGTH_SHORT, force = true)
             findNavController().navigateUp()
             return
         }
@@ -293,7 +294,7 @@ class MapPickerFragment : Fragment() {
         if (idx >= 0) list[idx] = updated else list.add(updated)
         settings.geofenceLocations = list
         applyThemeConfigChange()
-        Toast.makeText(requireContext(), R.string.geofence_saved, Toast.LENGTH_SHORT).show()
+        ToastUtils.showToast(requireContext(), R.string.geofence_saved, Toast.LENGTH_SHORT, force = true)
         findNavController().navigateUp()
     }
 

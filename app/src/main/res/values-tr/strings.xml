@@ -185,6 +185,11 @@
     <string name="usb_auto_connect_description">Uygulama açıldığında bilinen bir USB cihazına otomatik olarak bağlan.</string>
     <string name="auto_start_bt_label">Bluetooth ile otomatik başlat</string>
     <string name="auto_start_bt_description">Belirli bir Bluetooth cihazı bağlandığında Open Headunit\'ı otomatik olarak aç.</string>
+    <string name="auto_start_offer_title">Otomatik başlatılsın mı?</string>
+    <string name="auto_start_offer_message">Uygulamanın bu cihazla otomatik başlatılmasını ister misin, %1$s?</string>
+    <string name="auto_start_offer_yes">Evet</string>
+    <string name="auto_start_offer_no">Hayır</string>
+    <string name="auto_start_offer_countdown">%1$d sn sonra Hayır</string>
     <string name="auto_start_wifi_label">WiFi ile otomatik başlat</string>
     <string name="auto_start_wifi_description">Belirli bir WiFi SSID\'sine bağlandığında Open Headunit\'ı otomatik olarak aç.</string>
     <string name="auto_start_wifi_ssid_label">WiFi SSID</string>
@@ -272,7 +277,7 @@
     <string name="separate_audio_streams">Ayrı Ses Akışları</string>
     <string name="separate_audio_streams_description">Medya, Yönlendirme ve Sistem sesleri kanallarına tek bir ortak multimedya akışı yerine kendi çıkış akışlarını verir (bazı cihazlarda düzgün çalışmayabilir).</string>
     <string name="use_aac_audio">AAC Ses Kullan</string>
-    <string name="use_aac_audio_description">Bant genişliğinden tasarruf etmek için ses için AAC kodeğini kullan (Deneysel).</string>
+    <string name="use_aac_audio_description">Bant genişliğinden tasarruf etmek için ses için AAC kodeğini kullan (Deneysel). 2,4 GHz üzerinde çalışan kablosuz bir oturumda, \"2,4 GHz bağlantıda videoyu düşür\" açıkken bu otomatik olarak açılır.</string>
     <string name="attach_hw_dsp_equalizer">Donanım DSP Ekolayzır Tetikleyici</string>
     <string name="attach_hw_dsp_equalizer_description">Belirli multimedya cihazlarında donanım DSP yönlendirmesini zorlamak için ses oturumuna sahte bir ekolayzır efekti ekler. ViPER4Android / ViperFX kullanıyorsanız veya eski Android sürümlerinde ses boğuk çıkıyorsa kapalı tutun.</string>
     <string name="audio_volume_offset">Ses Seviyesi Dengesi (Offset)</string>
@@ -475,6 +480,7 @@
 
     <string name="supported_nativeaa">Gelişmiş Kablosuz Desteği</string>
     <string name="supported_nativeaa_desc">Harika haber! Cihazınız, daha sorunsuz bir Android Auto deneyimi sağlayan \"Native Wireless\" (Yerel Kablosuz) modunu destekliyor. \n\nBunu etkinleştirmek için Bluetooth önbelleğinizi yenilememiz gerekiyor. Lütfen: \n1. Telefonunuzdaki mevcut eşleşmeyi kaldırın \n2. Bluetooth\'u yeniden başlatmak için Tamam\'a tıklayın \n3. Telefonunuzu tekrar eşleştirin \n\nŞimdi Native AA moduna geçmek ister misiniz?</string>
+    <string name="native_aa_poke_not_running">Bu ana ünitede kablosuz Bluetooth çalışmıyor. Ayarları kontrol edin.</string>
     <string name="not_supported_nativeaa">Yerel Kablosuz desteklenmiyor gibi görünüyor</string>
     <string name="not_supported_nativeaa_desc">Cihazınız Yerel Kablosuz için gereken Bluetooth veya Wi-Fi özelliklerini desteklemiyor olabilir. Yine de deneyebilirsiniz ancak başarısız olursa lütfen bunun yerine \"Kablosuz Yardımcı\" veya \"Otomatik (Headunit Sunucusu)\" modunu kullanın.</string>
 
@@ -889,7 +895,17 @@
     <string name="boot_loop_paused_native_wifi_direct">This device restarted three times in a row shortly after Open Headunit started wireless, so wireless was left off this time. On some head units the WiFi chipset takes the whole system down when a phone joins a WiFi Direct network. Try switching Android Auto mode to the head unit hotspot. USB still works.</string>
     <string name="vehicle_make_hint">A real car brand shows that brand\'s logo on the Android Auto exit button, but Android Auto then stops listing apps installed from outside the Play Store. Set it back to \"Google\" to get those apps listed again.</string>
     <string name="external_bt_nativeaa">Native Wireless cannot work on this head unit</string>
-    <string name="external_bt_nativeaa_desc">This head unit uses its own Bluetooth module (%1$s) instead of the one Android exposes to apps. Your phone pairs with that module, so anything this app sends over Bluetooth never reaches it — the connection will look like it is working and then stall.\n\nThis is a hardware limitation and cannot be worked around from the app. Please use USB, or the \"Wireless Helper\" or \"Auto (Headunit Server)\" mode, which do not need the Bluetooth handshake.</string>
+    <string name="external_bt_nativeaa_desc">Telefonunuz, Android\'in uygulamalara sunduğu Bluetooth yerine bu ana ünitenin kendi Bluetooth modülüyle (%1$s) eşleşir, bu yüzden kablosuz el sıkışması ona hiçbir zaman ulaşmaz.\n\nBu uygulama o modüle yalnızca bu ana ünitenin çalıştırmadığı bir ZJ/ZLink hizmeti üzerinden ulaşabilir. Bunun yerine USB\'yi veya bir WiFi modunu kullanın.</string>
+    <string name="external_bt_module_nativeaa">ZJ/ZLink modülü üzerinden Yerel Kablosuz</string>
+    <string name="external_bt_module_nativeaa_desc">Telefonunuz, Android\'in uygulamalara sunduğu Bluetooth yerine bu ana ünitenin kendi Bluetooth modülüyle (%1$s) eşleşir, bu yüzden el sıkışması modülün ZJ/ZLink hizmeti üzerinden gönderilecek.\n\nDeneyseldir ve girişin tek yolu bu hizmettir. Telefon Android Auto\'yu hiç başlatmazsa USB\'yi veya bir WiFi modunu kullanın.</string>
+    <string name="external_bt_transport">Ana ünitenin Bluetooth modülü üzerinden bağlan</string>
+    <string name="external_bt_transport_description">Deneyseldir ve yalnızca ZJ/ZLink Bluetooth hizmeti olan cihazlar içindir. Kablosuz Android Auto el sıkışmasını, Android\'in uygulamalara sunduğu Bluetooth yerine bu cihazın kendi Bluetooth yongası üzerinden, yani telefonunuzun gerçekten eşleştiği yonga üzerinden gönderir.\n\nÖnce «Ana ünitenin Bluetooth modülünü test et» işlemini çalıştırın. Test bu hizmeti bulamazsa bu ayar cihazınızda hiçbir şey yapamaz ve Yerel Kablosuz burada çalışmaz. Bulursa bunu açın ve Yerel modu seçin. Lütfen her iki durumda da günlüğü dışa aktarın.</string>
+    <string name="zbt_probe_title">Ana ünitenin Bluetooth modülünü test et</string>
+    <string name="zbt_probe_idle">Çalıştırmak için dokunun</string>
+    <string name="zbt_probe_running">Çalışıyor…</string>
+    <string name="zbt_probe_message">Bu cihazın ayrı Bluetooth yongasına bir Android Auto bağlantısı taşıyıp taşıyamayacağını sorar, sonra yaklaşık bir buçuk dakika izler. Bu ayarın altındaki satır ne olduğunu gösterir ve cihazda başka hiçbir şeye dokunulmaz.\n\n«Uyandır ve izle» ayrıca yongadan Android Auto için telefonunuza yeniden bağlanmasını ister. Bir şeyi değiştiren tek kısım budur ve cihazı yeniden başlatmak bunu geri alır. Lütfen sonrasında günlüğü dışa aktarıp ekleyin.</string>
+    <string name="zbt_probe_watch_only">Yalnızca izle</string>
+    <string name="zbt_probe_wake_and_watch">Uyandır ve izle</string>
     <string name="native_ap_transport">Network transport</string>
     <string name="native_ap_transport_wifi_direct">WiFi Direct</string>
     <string name="native_ap_transport_hotspot">Hotspot</string>
@@ -948,14 +964,20 @@
     <string name="wifi_direct_band_5ghz">Yalnızca 5 GHz</string>
     <string name="wifi_direct_band_24ghz">Yalnızca 2.4 GHz</string>
     <string name="wifi_direct_band_hint">Otomatik 5 GHz ister ve 2.4 GHz\'e geri döner.</string>
+    <string name="stand_down_station">Bağlanırken ünitenin kendi Wi-Fi ağından ayrıl</string>
+    <string name="stand_down_station_auto">Otomatik</string>
+    <string name="stand_down_station_always">Her zaman</string>
+    <string name="stand_down_station_never">Asla</string>
+    <string name="stand_down_station_hint">Otomatik, bu ünitenin kendi ağından yalnızca radyosunda 5 GHz bandı varsa ve o ağ 2.4 GHz\'de çalışıyorsa ayrılır; böylece WiFi Direct grubu kendine ait bir 5 GHz kanalına sahip olabilir. Yalnızca 2.4 GHz destekleyen bir ünitede bağlı kalır, çünkü ayrılmak üniteyi yalnızca ağ aramaya iter; ağ zaten 5 GHz\'deyse de aynı şekilde bağlı kalır. Oturum bittiğinde ağa yeniden katılınır. Görüntü takılıyorsa Her zaman veya Asla seçeneğini deneyin.</string>
+    <string name="stand_down_station_needs_overlay">Bu Android sürümünde «diğer uygulamaların üzerinde görüntüleme» izni gerektirir.</string>
     <string name="connection_issue_banner_bt_silent">Telefonunuz Bluetooth ile bağlandı ancak veri alamadı. USB, Wireless Helper veya Auto moduna geçmek için dokunun.</string>
     <string name="connection_issue_banner_bssid">Bu cihazdaki hiçbir kaynak kendi WiFi MAC adresini (BSSID) bildirmedi, bu yüzden telefonunuz hangi ağa katılacağını hiç öğrenemedi. Hepsi denendi, izin gerektirmeyen biri de dahil. Diğerlerinin önünü açan konumu açmak ya da adresi elle girmek için dokunun.</string>
     <string name="connection_issue_banner_hotspot_off">Bu cihazın erişim noktası kapalı olduğundan telefonun bağlanacağı bir ağ yoktu. Bağlanmadan önce erişim noktasını açın veya uygulamanın sizin için açması için dokunun.</string>
     <string name="connection_issue_banner_wifi_direct_refused">Bu cihazın Wi-Fi\'ı, telefonunuzun katılacağı Wi-Fi Direct ağını oluşturamadı ve uygulama bunu zorlayamaz. Cihaz başka bir Wi-Fi ağına bağlıysa bağlantısını kesmeyi deneyin. Bunun yerine bu cihazın kendi erişim noktasını kullanmak için dokunun.</string>
     <string name="connection_issue_banner_wifi_direct_cycled">Bu cihazdaki başka bir uygulama Wi-Fi Direct\'i sürekli kapatıp açıyor, bu yüzden telefonunuzun katılacağı bir ağ oluşturulamıyor. Genellikle önceden yüklü bir yansıtma uygulaması (CarLife, ZLink, CarPlay ve benzerleri) buna yol açar, devre dışı bırakmayı denemeye değer. Bunun yerine bu cihazın kendi erişim noktasını kullanmak için dokunun.</string>
     <string name="connection_issue_banner_hotspot_config">Erişim noktası adı ve şifresi alınamadı. Manuel girmek için dokunun.</string>
-    <string name="narrow_band_profile_cap">Yalnızca 2,4 GHz radyoda videoyu düşür</string>
-    <string name="narrow_band_profile_cap_description">Bu cihazın Wi-Fi\'ında 5 GHz bandı yoksa, yukarıdaki ayarlar yerine telefondan en fazla 720p ve 30 fps iste. Böyle bir bağlantıda tam hızlı akışın hiç görüntü taşımadığı, daha düşüğünün ise tutunduğu ölçüldü. İstediğiniz ayarların aynen uygulanması için bunu kapatın.</string>
+    <string name="narrow_band_profile_cap">2,4 GHz bağlantıda videoyu düşür</string>
+    <string name="narrow_band_profile_cap_description">Bu oturum 2,4 GHz üzerinde çalışıyorsa, bunun nedeni bu cihazın Wi-Fi\'ında 5 GHz bandı olmaması veya ağın orada kurulmuş olması olsun, yukarıdaki ayarlar yerine telefondan en fazla 720p ve 30 fps ile AAC ses iste. Böyle bir bağlantıda tam hızlı akışın hiç görüntü taşımadığı, daha düşüğünün ise tutunduğu ölçüldü. İstediğiniz ayarların aynen uygulanması için bunu kapatın.</string>
     <string name="connection_issue_banner_video_link_too_slow">Telefonunuz üst üste birkaç kez, tek bir kare bile gelmeden videodan vazgeçti. Wi-Fi bağlantısı görüntüyü taşıyamayacak kadar yavaş. FPS sınırını 30\'a düşürmek için dokunun; daha düşük çözünürlük ve AAC ses de yardımcı olur.</string>
     <string name="connection_issue_banner_five_ghz_channel_refused">Bu ünite WiFi Direct ağını seçtiğin hiçbir 5 GHz kanalına koymayı reddetti ve kendi WiFi sürücüsünün seçtiği kanalda başlattı. Bu kanal çoğu zaman daha katı ülkelerdeki telefonların göremediği bir kanaldır. WiFi Direct bandını her ülkede izin verilen 2,4 GHz olarak ayarlamak için dokun; burada 1080p yerine 720p bekle.</string>
     <string name="connection_issue_banner_dismiss">Kapat</string>
@@ -1053,7 +1075,6 @@
     <string name="driver_device_last_used">Son Bağlanan</string>
     <string name="driver_selection_auto_in">%2$s cihazına %1$ds içinde otomatik bağlanılıyor...</string>
     <string name="driver_selection_dialog_title">Sürücü Telefonunu Seçin</string>
-    <string name="connecting_to_device">%s cihazına bağlanılıyor...</string>
     <string name="driver_none">Yok</string>
     <string name="show_all_devices">Tüm Bluetooth cihazlarını göster</string>
     <string name="show_only_phones">Yalnızca telefonları göster</string>

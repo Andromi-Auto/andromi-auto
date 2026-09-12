@@ -9,6 +9,7 @@ import android.util.Log
 import androidx.core.content.FileProvider
 import com.andrerinas.openheadunit.BuildConfig
 import com.andrerinas.openheadunit.connection.wifi.WifiLauncherMode
+import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.NativeAaHandshakeManager
 import com.andrerinas.openheadunit.decoder.video.VideoFaultInjector
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -146,9 +147,17 @@ object LogExporter {
             "view:${settings.viewMode.name} forceSw:${settings.forceSoftwareDecoding} " +
             "swDecoder:${settings.softwareVideoDecoder.name} | " +
             "wifi=mode:${settings.wifiConnectionMode} strategy:${wifiTransport(settings)} | " +
+            // Which Bluetooth this unit will use. A capture that shows the handshake doing nothing
+            // reads completely differently once the header says the route was blocked.
+            "bt=${bluetoothRoute(context)} | " +
             "logLevel=${settings.exporterLogLevel.name} | " +
             "debug=${debugLevers(settings)}"
     }
+
+    /** Internal radio, or the external module and the route chosen for it. Both reads are cheap. */
+    private fun bluetoothRoute(context: Context): String =
+        if (BluetoothHelper.externalBtEvidence == null) "internal"
+        else "module:${NativeAaHandshakeManager.transportRoute(context)}"
 
     /**
      * The transport selector that the reported mode actually reads.

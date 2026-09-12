@@ -33,57 +33,169 @@ class StationStandDownPolicyTest {
 
     // --- shouldStandDown ---
 
+    private fun decide(
+        mode: StationStandDownMode = StationStandDownMode.AUTO,
+        sdkInt: Int = 27,
+        canDrawOverlays: Boolean = false,
+        associated: Boolean = true,
+        networkId: Int = 3,
+        supports5Ghz: Boolean? = true,
+        stationFrequencyMhz: Int = 2437,
+        groupBand: P2pBandPreference = P2pBandPreference.AUTO,
+    ) = StationStandDownPolicy.shouldStandDown(
+        mode, sdkInt, canDrawOverlays, associated, networkId, supports5Ghz, stationFrequencyMhz,
+        groupBand
+    )
+
     @Test
-    fun `stands down when joined on a platform that allows it, with nothing to ask`() {
+    fun `auto stands down a 5 GHz radio whose station sits on 2_4 GHz`() {
+        assertTrue(decide(supports5Ghz = true, stationFrequencyMhz = 2437))
+        assertTrue(decide(supports5Ghz = true, stationFrequencyMhz = 2462))
+    }
+
+    @Test
+    fun `auto leaves a 5 GHz station when the group is being asked for on 2_4 GHz`() {
+        // Measured on the rig: under AUTO that split never finished joining, under ALWAYS the same
+        // setup connected in under a minute and ran stable.
         assertTrue(
-            StationStandDownPolicy.shouldStandDown(
-                sdkInt = 27, canDrawOverlays = false,
-                associated = true, networkId = 3
+            decide(
+                supports5Ghz = true, stationFrequencyMhz = 5745,
+                groupBand = P2pBandPreference.FORCE_2_4GHZ
             )
         )
+        assertFalse(
+            decide(
+                supports5Ghz = true, stationFrequencyMhz = 5745,
+                groupBand = P2pBandPreference.AUTO
+            )
+        )
+        assertFalse(
+            decide(
+                supports5Ghz = true, stationFrequencyMhz = 5745,
+                groupBand = P2pBandPreference.FORCE_5GHZ
+            )
+        )
+    }
+
+    @Test
+    fun `a 2_4 GHz group on a radio with no 5 GHz band still keeps the station, which would only scan`() {
+        assertFalse(
+            decide(
+                supports5Ghz = false, stationFrequencyMhz = 2437,
+                groupBand = P2pBandPreference.FORCE_2_4GHZ
+            )
+        )
+    }
+
+    @Test
+    fun `auto keeps the station joined on a radio with no 5 GHz band, which only scans if it leaves`() {
+        assertFalse(decide(supports5Ghz = false, stationFrequencyMhz = 2437))
+        assertFalse(decide(supports5Ghz = false, stationFrequencyMhz = 0))
+    }
+
+    @Test
+    fun `auto keeps a station that is already on 5 GHz, the state measured to run clean`() {
+        assertFalse(decide(supports5Ghz = true, stationFrequencyMhz = 5500))
+        assertFalse(decide(supports5Ghz = null, stationFrequencyMhz = 5745))
+    }
+
+    @Test
+    fun `auto treats an unknown band and an unreadable frequency as a unit that can gain a band`() {
+        assertTrue(decide(supports5Ghz = null, stationFrequencyMhz = 0))
+        assertTrue(decide(supports5Ghz = true, stationFrequencyMhz = 0))
+    }
+
+    @Test
+    fun `always stands down whatever the band says`() {
+        assertTrue(decide(mode = StationStandDownMode.ALWAYS, supports5Ghz = false, stationFrequencyMhz = 2437))
+        assertTrue(decide(mode = StationStandDownMode.ALWAYS, supports5Ghz = true, stationFrequencyMhz = 5500))
+    }
+
+    @Test
+    fun `never keeps the station joined whatever the band says`() {
+        assertFalse(decide(mode = StationStandDownMode.NEVER, supports5Ghz = true, stationFrequencyMhz = 2437))
+        assertFalse(decide(mode = StationStandDownMode.NEVER, supports5Ghz = null, stationFrequencyMhz = 0))
     }
 
     @Test
     fun `never when nothing is joined`() {
-        assertFalse(
-            StationStandDownPolicy.shouldStandDown(
-                sdkInt = 27, canDrawOverlays = true,
-                associated = false, networkId = 3
-            )
-        )
+        for (mode in StationStandDownMode.values()) {
+            assertFalse(mode.name, decide(mode = mode, associated = false, canDrawOverlays = true))
+        }
     }
 
     @Test
     fun `never on a hidden network id, which is what a redacted read looks like`() {
-        assertFalse(
-            StationStandDownPolicy.shouldStandDown(
-                sdkInt = 27, canDrawOverlays = true,
-                associated = true, networkId = -1
-            )
-        )
+        for (mode in StationStandDownMode.values()) {
+            assertFalse(mode.name, decide(mode = mode, networkId = -1, canDrawOverlays = true))
+        }
     }
 
     @Test
     fun `never where the platform would refuse the call`() {
-        assertFalse(
-            StationStandDownPolicy.shouldStandDown(
-                sdkInt = 35, canDrawOverlays = true,
-                associated = true, networkId = 3
-            )
-        )
+        for (mode in StationStandDownMode.values()) {
+            assertFalse(mode.name, decide(mode = mode, sdkInt = 35, canDrawOverlays = true))
+        }
     }
 
     @Test
-    fun `the platform gate is the whole of it once a network is joined`() {
+    fun `the platform gate is the whole of it once a 2_4 GHz network is joined`() {
         for (sdk in 21..36) {
             for (overlay in listOf(false, true)) {
                 assertEquals(
                     "api $sdk overlay=$overlay",
                     StationStandDownPolicy.isAvailable(sdk, overlay),
-                    StationStandDownPolicy.shouldStandDown(sdk, overlay, associated = true, networkId = 3)
+                    decide(sdkInt = sdk, canDrawOverlays = overlay)
                 )
             }
         }
+    }
+
+    @Test
+    fun `the 5 GHz band starts above 4000 MHz`() {
+        assertFalse(StationStandDownPolicy.isFiveGhz(2484))
+        assertFalse(StationStandDownPolicy.isFiveGhz(0))
+        assertTrue(StationStandDownPolicy.isFiveGhz(5170))
+        assertTrue(StationStandDownPolicy.isFiveGhz(5825))
+    }
+
+    // --- describeSkipped: exactly the complement of the mode's own decision ---
+
+    @Test
+    fun `a reason is given exactly when the mode leaves the station joined`() {
+        for (mode in StationStandDownMode.values()) {
+            for (band in listOf(null, false, true)) {
+                for (freq in listOf(0, 2437, 5500)) {
+                    for (group in P2pBandPreference.values()) {
+                        val stands = decide(
+                            mode = mode, supports5Ghz = band,
+                            stationFrequencyMhz = freq, groupBand = group
+                        )
+                        val why = StationStandDownPolicy.describeSkipped(mode, band, freq, group)
+                        assertEquals("$mode band=$band freq=$freq group=$group", stands, why == null)
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `the reasons name what decided`() {
+        assertTrue(
+            StationStandDownPolicy.describeSkipped(
+                StationStandDownMode.AUTO, false, 2437, P2pBandPreference.AUTO
+            )!!.contains("no 5 GHz band")
+        )
+        assertTrue(
+            StationStandDownPolicy.describeSkipped(
+                StationStandDownMode.AUTO, true, 5500, P2pBandPreference.AUTO
+            )!!.contains("5500 MHz")
+        )
+        assertTrue(
+            StationStandDownPolicy.describeSkipped(
+                StationStandDownMode.NEVER, true, 2437, P2pBandPreference.AUTO
+            )!!.contains("setting")
+        )
     }
 
     // --- describeUnavailable: exactly the complement of isAvailable ---

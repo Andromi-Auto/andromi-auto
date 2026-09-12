@@ -18,6 +18,7 @@ import com.andrerinas.openheadunit.App
 import com.andrerinas.openheadunit.R
 import com.andrerinas.openheadunit.utils.Settings
 import com.andrerinas.openheadunit.utils.SystemOptimizer
+import com.andrerinas.openheadunit.utils.ToastUtils
 import com.andrerinas.openheadunit.view.DpiPickerView
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
@@ -128,7 +129,7 @@ class DpiSettingsFragment : Fragment() {
         findNavController().previousBackStackEntry?.savedStateHandle?.set(KEY_DPI_RESULT, value)
         initialValue = value
         updateSaveButtonState()
-        Toast.makeText(requireContext(), R.string.settings_saved, Toast.LENGTH_SHORT).show()
+        ToastUtils.showToast(requireContext(), R.string.settings_saved, Toast.LENGTH_SHORT, force = true)
     }
 
     private fun handleBackPress() {

@@ -311,10 +311,6 @@ class AapService : Service() {
     @Volatile
     var userExitCooldownUntil = 0L
 
-    /** elapsedRealtime when the current session reached Connected, or 0 when nothing is up. */
-    @Volatile
-    private var sessionConnectedAt = 0L
-
     /**
      * Pending "a watched Bluetooth device went away" timers, one per address. Touched only from
      * the main thread, where the receiver and the timer bodies both run, so it needs no locking.
@@ -1045,7 +1041,6 @@ class AapService : Service() {
                     is CommManager.ConnectionState.Connecting ->
                         emitSessionState(SessionStateIntent.STATE_CONNECTING)
                     is CommManager.ConnectionState.Connected -> {
-                        sessionConnectedAt = SystemClock.elapsedRealtime()
                         emitSessionState(SessionStateIntent.STATE_CONNECTED)
                         onConnected()
                     }
@@ -1449,7 +1444,6 @@ class AapService : Service() {
      * 4. Scheduling a reconnect attempt if applicable (see [scheduleReconnectIfNeeded])
      */
     private fun onDisconnected(state: CommManager.ConnectionState.Disconnected) {
-        sessionConnectedAt = 0L
         cancelAllBtAutoDisconnects()
         usbLauncherManager.setSwitchingToProjection(false)
         releaseWifiLock()
@@ -1615,8 +1609,14 @@ class AapService : Service() {
                 userExitedAA = true
             }
 
-            App.provide(this@AapService).audioDecoder.stop()
-            App.provide(this@AapService).videoDecoder.stop("AapService::onDisconnect")
+            // The decoders are shared, and a fast reconnect can have the next session up before this
+            // disconnect gets here: stopping them then blanks the new session's picture.
+            if (commManager.isConnected) {
+                AppLog.i("AapService: a session is already connected, so its decoders are left running")
+            } else {
+                App.provide(this@AapService).audioDecoder.stop()
+                App.provide(this@AapService).videoDecoder.stop("AapService::onDisconnect")
+            }
         }
 
         // [FIX] Set cooldown flag for ALL user exits (not just USB).
@@ -1868,11 +1868,11 @@ class AapService : Service() {
 
     private fun fireBtAutoDisconnect(mac: String) {
         val sessionUp = isSessionUp()
-        val ageMs = if (sessionConnectedAt == 0L) 0L else SystemClock.elapsedRealtime() - sessionConnectedAt
+        val ownCloseMs = (wifiLauncherManager.active as? WifiLauncherNative)?.handshakeManager?.msSinceOwnSocketClose(mac)
         // The device coming back cancels the job on this same thread, so a job that runs never
         // saw it return; the parameter exists so the rule is complete where it is tested.
-        if (!BtAutoDisconnectPolicy.shouldEndSession(sessionUp, ageMs, deviceCameBack = false)) {
-            AppLog.i("AapService: Bluetooth auto-disconnect: not ending the session for $mac (up=$sessionUp, age=${ageMs}ms).")
+        if (!BtAutoDisconnectPolicy.shouldEndSession(sessionUp, deviceCameBack = false, msSinceOwnSocketClose = ownCloseMs)) {
+            AppLog.i("AapService: Bluetooth auto-disconnect: not ending the session for $mac (up=$sessionUp, ownCloseMs=$ownCloseMs).")
             return
         }
         AppLog.i("AapService: Bluetooth auto-disconnect: $mac stayed away; ending the session the way the Exit button does.")
@@ -2346,7 +2346,6 @@ class AapService : Service() {
         try { unregisterReceiver(btAutoDisconnectReceiver) } catch (_: Exception) {}
         cancelAllBtAutoDisconnects()
         btAutoDisconnectStandDown = false
-        sessionConnectedAt = 0L
         stationScanMonitor.stop(this)
         try { carKeysManager.unregisterAll() } catch (e: Exception) { AppLog.w("AapService: Error unregistering carKeysManager: ${e.message}") }
         try { wifiAutoStartReceiver?.let { unregisterReceiver(it) } } catch (_: Exception) {}
@@ -2481,6 +2480,10 @@ class AapService : Service() {
                                     (why?.let { " ($it)" } ?: "") + ", so nothing could answer the phone. Starting them before the poke."
                             )
                             activeLauncher.handshakeManager?.start()
+                            // start() logs why it gave up; the person who pressed the button gets told too.
+                            if (activeLauncher.handshakeManager?.notStartedReason() != null) {
+                                ToastUtils.showToast(this, getString(R.string.native_aa_poke_not_running))
+                            }
                         } else if (activeLauncher is WifiLauncherNative && activeLauncher.handshakeManager?.isActive() != true) {
                             // A completed handoff closes the AA listeners while leaving the manager
                             // running, and start() returns immediately on isRunning, so calling it here
@@ -2592,7 +2595,16 @@ class AapService : Service() {
                     groupUp = launcher?.hasLiveNetwork(),
                     networkComingUp = networkComingUp
                 )
-                if (!actions.doesNothing) {
+                if (actions.doesNothing) {
+                    val veto = BtAutoStartRearmPolicy.vetoReason(
+                        sessionUp = sessionUp,
+                        handshakeActive = launcher?.handshakeManager?.isActive(),
+                        attemptInFlight = attemptInFlight,
+                        groupUp = launcher?.hasLiveNetwork(),
+                        networkComingUp = networkComingUp
+                    )
+                    AppLog.i("AapService: Bluetooth auto-start: nothing to do, ${veto ?: "this mode needs no rebuild"}.")
+                } else {
                     AppLog.i("AapService: Bluetooth auto-start: $actions")
                 }
                 if (actions.clearUserExit) {

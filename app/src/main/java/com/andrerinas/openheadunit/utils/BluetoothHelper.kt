@@ -101,41 +101,38 @@ object BluetoothHelper {
     private const val PROFILE_HEADSET_CLIENT = 16
 
     /**
-     * Whether this head unit currently holds a Bluetooth hands-free link, in either role.
-     *
-     * Null when the adapter will not say. Callers must treat that as "no link known" rather than
-     * "no link", because the only decision hanging off this is whether to skip an action that is
-     * load-bearing elsewhere.
-     *
+     * Whether this unit holds a hands-free link, adapter-wide; null when the adapter will not say.
      * `HEADSET_CLIENT` is the role a head unit plays and the one the wake poke was measured
-     * destroying. [includeGatewayRole] adds `HEADSET`, the role the *phone* plays, because some OEM
-     * stacks report a hands-free connection under it instead. Callers want different widths because
-     * they pay differently for a false "yes": the poke asks "would connecting take the phone's
-     * slot", where over-reporting costs one skipped poke, so it reads both. Standing in as a
-     * hands-free device asks "is a real one already here", where over-reporting costs the whole
-     * wireless session, and a gateway link on this device is this unit's own headset rather than
-     * anything competing with the stand-in, so it reads the client role alone.
-     *
-     * Profile-wide, not per-device: `getProfileConnectionState` answers for the adapter, and the
-     * per-device equivalents are system-only. On a head unit paired with one phone that distinction
-     * does not arise; where it does, this errs toward reporting a link.
+     * destroying. [includeGatewayRole] adds `HEADSET`, the phone's role, which some OEM stacks report
+     * a hands-free connection under.
      */
     fun handsFreeLinkState(context: Context, includeGatewayRole: Boolean = true): Boolean? {
+        val roles = if (includeGatewayRole) {
+            intArrayOf(PROFILE_HEADSET_CLIENT, BluetoothProfile.HEADSET)
+        } else {
+            intArrayOf(PROFILE_HEADSET_CLIENT)
+        }
+        return profileLinkState(context, roles, "hands-free")
+    }
+
+    /**
+     * Whether this unit holds a hands-free link in the gateway role alone: it is the phone side of
+     * that link, so the other end is a car kit or headset, never a phone the wake poke could reach.
+     */
+    fun gatewayHandsFreeLinkState(context: Context): Boolean? =
+        profileLinkState(context, intArrayOf(BluetoothProfile.HEADSET), "gateway hands-free")
+
+    private fun profileLinkState(context: Context, roles: IntArray, what: String): Boolean? {
         val resolved = try {
             getBluetoothAdapter(context)
         } catch (e: Exception) {
-            AppLog.w("BluetoothHelper: could not resolve an adapter for the hands-free check: ${e.message}")
+            AppLog.w("BluetoothHelper: could not resolve an adapter for the $what check: ${e.message}")
             return null
         }
         val adapter = resolved ?: return false
         val enabled = try { adapter.isEnabled } catch (e: Exception) { null }
         if (enabled == false) return false
 
-        val roles = if (includeGatewayRole) {
-            intArrayOf(PROFILE_HEADSET_CLIENT, BluetoothProfile.HEADSET)
-        } else {
-            intArrayOf(PROFILE_HEADSET_CLIENT)
-        }
         var readAnyState = false
         for (profile in roles) {
             val state = try {

@@ -399,6 +399,13 @@
     <string name="usb_auto_connect_description">Automatically connect to a known USB device when the application is opened.</string>
     <string name="auto_start_bt_label">Auto-start on Bluetooth</string>
     <string name="auto_start_bt_description">Automatically open Open Headunit when a specific Bluetooth device connects.</string>
+    <!-- Asked once, after the first connection, when this unit is paired to exactly one phone. -->
+    <string name="auto_start_offer_title">Start automatically?</string>
+    <string name="auto_start_offer_message">Do you want to auto-start the app with this device, %1$s?</string>
+    <!-- Own strings rather than android.R.string.yes/no, which render as OK and Cancel from Android 9. -->
+    <string name="auto_start_offer_yes">Yes</string>
+    <string name="auto_start_offer_no">No</string>
+    <string name="auto_start_offer_countdown">No in %1$ds</string>
     <string name="listen_for_usb_devices_label">Listen for USB Devices</string>
     <string name="listen_for_usb_devices_description">Show the Android system prompt when a USB device is plugged in.</string>
     <string name="show_toast_messages">Show Toast Messages</string>
@@ -590,7 +597,7 @@
     <string name="onb_audio_help">Pick the system stream each Android Auto channel plays on, and tap the speaker to hear it. If a channel stays silent in the car, moving it to another stream is usually the fix.</string>
     <string name="onb_audio_more_hint">You can change these again later under Settings → Audio Streams.</string>
     <string name="use_aac_audio">Use AAC Audio</string>
-    <string name="use_aac_audio_description">Use AAC codec for audio to save bandwidth (Experimental).</string>
+    <string name="use_aac_audio_description">Use AAC codec for audio to save bandwidth (Experimental). On a wireless session running on 2.4 GHz this is on automatically while \"Lower video on a 2.4 GHz link\" is on.</string>
     <string name="attach_hw_dsp_equalizer">Hardware DSP Equalizer Trigger</string>
     <string name="attach_hw_dsp_equalizer_description">Attaches a dummy Equalizer effect to the audio session to force hardware DSP routing on specific headunits. Keep disabled if using ViPER4Android / ViperFX or if sound is muffled on older Android versions.</string>
     <string name="audio_volume_offset">Audio Volume Offset</string>
@@ -741,6 +748,28 @@
     <string name="failed_start_android_auto">Failed to start Android Auto</string>
     <string name="failed_self_mode_android10">Self-mode is likely blocked by Google on Android 10 (AA 16.4+).</string>
     <string name="android_auto_starting">Android Auto is starting…</string>
+
+    <!-- Second line of the home-screen status pill: the bring-up step the app is on. -->
+    <string name="stage_armed">Waiting for your phone</string>
+    <string name="stage_usb_attached">USB device connected</string>
+    <string name="stage_preparing_network">Preparing the network</string>
+    <string name="stage_searching">Looking for your phone</string>
+    <string name="stage_usb_switching">Switching your phone to Android Auto</string>
+    <string name="stage_creating_network">Creating the WiFi network</string>
+    <string name="stage_waiting_for_phone">Waiting for your phone to connect</string>
+    <string name="stage_waking_phone">Waking your phone</string>
+    <string name="stage_phone_answered">Your phone answered</string>
+    <string name="stage_sending_credentials">Sending network details to your phone</string>
+    <string name="stage_phone_joining">Your phone is joining the network</string>
+    <string name="stage_connecting">Connecting</string>
+    <string name="stage_securing">Securing the connection</string>
+    <string name="stage_starting_projection">Starting Android Auto</string>
+    <!-- Third line of the home-screen status pill: the WiFi Direct group, in place of the toasts that covered the pill. -->
+    <string name="network_detail_5ghz">WiFi Direct on 5 GHz (%1$d MHz)</string>
+    <string name="network_detail_24ghz">WiFi Direct on 2.4 GHz, channel %1$d</string>
+    <string name="network_detail_unknown">WiFi Direct network is up</string>
+    <string name="network_detail_retrying_5ghz">WiFi Direct came up on 2.4 GHz, retrying 5 GHz</string>
+    <string name="network_detail_unfriendly_channel">WiFi Direct is on channel %1$d, which most phones cannot join. Restart WiFi.</string>
     <string name="connection_interrupted">Connection lost</string>
     <string name="connection_interrupted_detail">Retrying…</string>
     <string name="renderer_fallback_surface">The video kept freezing, so the display was switched to SurfaceView for this session. If it is stable, set View mode to SurfaceView in Settings.</string>
@@ -908,10 +937,13 @@
 
     <string name="supported_nativeaa">Enhanced Wireless Support</string>
     <string name="supported_nativeaa_desc">Great news! Your device supports \"Native Wireless\" mode, which provides a more seamless Android Auto experience. \n\nTo enable this, we need to refresh your Bluetooth cache. Please: \n1. Remove the existing pairing on your phone \n2. Click OK to restart Bluetooth \n3. Re-pair your phone \n\nWould you like to switch to Native AA mode now?</string>
+    <string name="native_aa_poke_not_running">Wireless Bluetooth is not running on this head unit. Check Settings.</string>
     <string name="not_supported_nativeaa">Native Wireless seems not supported</string>
     <string name="not_supported_nativeaa_desc">Your device might not support the required Bluetooth or Wi-Fi features for Native Wireless. You can try it anyway, but if it fails, please use the \"Wireless Helper\" or \"Auto (Headunit Server)\" mode instead.</string>
     <string name="external_bt_nativeaa">Native Wireless cannot work on this head unit</string>
-    <string name="external_bt_nativeaa_desc">This head unit uses its own Bluetooth module (%1$s) instead of the one Android exposes to apps. Your phone pairs with that module, so anything this app sends over Bluetooth never reaches it — the connection will look like it is working and then stall.\n\nThis is a hardware limitation and cannot be worked around from the app. Please use USB, or the \"Wireless Helper\" or \"Auto (Headunit Server)\" mode, which do not need the Bluetooth handshake.</string>
+    <string name="external_bt_nativeaa_desc">Your phone pairs with this unit\'s own Bluetooth module (%1$s), not with the Bluetooth that Android gives to apps, so the wireless handshake would never reach it.\n\nThis app can only reach that module through a ZJ/ZLink service, which this unit is not running. Use USB or a WiFi mode instead.</string>
+    <string name="external_bt_module_nativeaa">Native Wireless through the ZJ/ZLink module</string>
+    <string name="external_bt_module_nativeaa_desc">Your phone pairs with this unit\'s own Bluetooth module (%1$s), not with the Bluetooth that Android gives to apps, so the handshake will be sent through the module\'s ZJ/ZLink service.\n\nExperimental, and that one service is the only way in. If your phone never starts Android Auto, use USB or a WiFi mode.</string>
 
     <string name="wait_for_wifi">Wait for WiFi before WiFi Direct</string>
     <string name="wait_for_wifi_description">On boot, wait for WiFi to connect before starting WiFi Direct. Enable this if your head unit needs a few seconds to connect to WiFi after power on.</string>
@@ -998,6 +1030,12 @@
     <string name="wifi_direct_band_5ghz">5 GHz only</string>
     <string name="wifi_direct_band_24ghz">2.4 GHz only</string>
     <string name="wifi_direct_band_hint">Auto asks for 5 GHz and falls back to 2.4 GHz, and on Android 9 and older asks for a 5 GHz channel first. 2.4 GHz is reliable up to 720p, so pick 5 GHz only above that.</string>
+    <string name="stand_down_station">Leave this unit\'s WiFi network while connecting</string>
+    <string name="stand_down_station_auto">Auto</string>
+    <string name="stand_down_station_always">Always</string>
+    <string name="stand_down_station_never">Never</string>
+    <string name="stand_down_station_hint">Auto leaves this unit\'s own network only when its radio has a 5 GHz band and that network is on 2.4 GHz, so the WiFi Direct group can have a 5 GHz channel to itself. It stays joined on a 2.4 GHz-only unit, where leaving only makes the unit scan for networks, and whenever the network is already on 5 GHz. The network is rejoined when the session ends. Try Always or Never if the picture stutters.</string>
+    <string name="stand_down_station_needs_overlay">Needs the \"display over other apps\" permission on this Android version.</string>
     <string name="hotspot_interface_override">Hotspot network interface</string>
     <string name="hotspot_interface_override_message">Leave blank to work it out automatically. Set this if the log says more than one interface could be the access point, or picks the wrong one. The name is the one the log reports after &quot;Providing credentials from&quot;, or the entry holding your hotspot\'s address in &quot;ip -brief addr&quot; from a shell. Common names: ap0, wlan0, wlan1, wlan2, softap0, ra0.</string>
     <string name="hotspot_ssid_override">Hotspot name (manual)</string>
@@ -1014,8 +1052,8 @@
     <string name="connection_issue_banner_hotspot_config">This unit will not tell the app its hotspot name and password, so your phone had nothing to join. Tap to enter them by hand.</string>
     <string name="connection_issue_banner_wifi_direct_refused">This unit\'s WiFi would not create the WiFi Direct network your phone was going to join, and the app cannot make it. If this unit is joined to another WiFi network, disconnecting it is worth trying. Tap to use this unit\'s own hotspot instead.</string>
     <string name="connection_issue_banner_wifi_direct_cycled">Another app on this unit keeps switching WiFi Direct off and on, so no network can be created for your phone to join. A preinstalled projection app (CarLife, ZLink, CarPlay and the like) is the usual cause, and disabling it is worth trying. Tap to use this unit\'s own hotspot instead.</string>
-    <string name="narrow_band_profile_cap">Lower video on a 2.4 GHz-only radio</string>
-    <string name="narrow_band_profile_cap_description">When this unit\'s WiFi has no 5 GHz band, ask the phone for at most 720p and 30 fps instead of the settings above. On such a link a full-rate stream was measured to carry no picture at all, while a lower one held. Turn this off to be given what you asked for.</string>
+    <string name="narrow_band_profile_cap">Lower video on a 2.4 GHz link</string>
+    <string name="narrow_band_profile_cap_description">When this session runs on 2.4 GHz, whether because this unit\'s WiFi has no 5 GHz band or because the network came up there, ask the phone for at most 720p and 30 fps instead of the settings above, and for AAC audio. On such a link a full-rate stream was measured to carry no picture at all, while a lower one held. Turn this off to be given what you asked for.</string>
     <string name="connection_issue_banner_video_link_too_slow">Your phone gave up on the video before a single frame arrived, several times in a row. The WiFi link is too slow to carry the picture. Tap to lower the FPS limit to 30; a lower resolution and AAC audio also help.</string>
     <string name="connection_issue_banner_five_ghz_channel_refused">This unit refused to put its WiFi Direct network on any 5 GHz channel you chose, so it went up on the one its own WiFi driver picked. That channel is often one phones in stricter countries cannot even see. Tap to set the WiFi Direct band to 2.4 GHz, which every country allows; expect 720p rather than 1080p on it.</string>
     <string name="connection_issue_banner_dismiss">Dismiss</string>
@@ -1039,6 +1077,16 @@
     <string name="native_aa_complete_hfp_slc_description">Some phones will not start wireless Android Auto until this unit\'s Bluetooth counts as connected, not just paired. On by default; turn it off if calls on this device stop working.</string>
     <string name="native_aa_ignore_external_bt">Ignore the Bluetooth compatibility check</string>
     <string name="native_aa_ignore_external_bt_description">This unit looks like it keeps Bluetooth on a separate module that Android cannot reach, so wireless Android Auto is switched off automatically. Off by default. Turn it on only if you think that is wrong: where it is right, the connection fails silently and the log looks healthy.</string>
+
+    <!-- The external Bluetooth module probe (Advanced; only on units the detection flags). -->
+    <string name="zbt_probe_title">Test the head unit\'s Bluetooth module</string>
+    <string name="zbt_probe_idle">Tap to run</string>
+    <string name="zbt_probe_running">Running…</string>
+    <string name="zbt_probe_message">Asks this unit\'s separate Bluetooth chip whether it will carry an Android Auto connection, then watches for about a minute and a half. The line under this setting shows what is happening, and nothing else on the unit is touched.\n\nWake and watch also asks the chip to reconnect to your phone for Android Auto. That is the only part that changes anything, and restarting the unit undoes it. Please export the log afterwards and attach it.</string>
+    <string name="zbt_probe_watch_only">Watch only</string>
+    <string name="zbt_probe_wake_and_watch">Wake and watch</string>
+    <string name="external_bt_transport">Connect through the head unit\'s Bluetooth module</string>
+    <string name="external_bt_transport_description">Experimental, and only for units that have a ZJ/ZLink Bluetooth service. Sends the wireless Android Auto handshake through this unit\'s own Bluetooth chip, the one your phone is actually paired with, instead of the Bluetooth Android exposes to apps.\n\nRun \"Test the head unit\'s Bluetooth module\" first. If it does not find that service, this setting can do nothing on your unit and Native Wireless will not work here whatever you set. If it does, turn this on and choose Native. Please export the log either way.</string>
     <string name="native_aa_setup_qr_title">Set up by QR code</string>
     <string name="native_aa_setup_qr_description">Show a code the phone can scan</string>
     <string name="native_aa_setup_qr_content_description">QR code for setting up wireless Android Auto</string>
@@ -1168,7 +1216,6 @@
     <string name="driver_device_last_used">Last Connected</string>
     <string name="driver_selection_auto_in">Auto-connecting to %2$s in %1$ds...</string>
     <string name="driver_selection_dialog_title">Select Driver Phone</string>
-    <string name="connecting_to_device">Connecting to %s...</string>
     <string name="connecting_driver">Starting Android Auto with %s</string>
     <string name="connecting_driver_disconnected">%s is disconnected, waking it...</string>
     <string name="driver_none">None</string>

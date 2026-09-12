@@ -76,7 +76,14 @@ class HfpServiceRecordPolicyTest {
         // Collapsing either one alone would silently disable a mechanism on a radio that will not
         // report its profiles.
         for (link in BluetoothWakePolicy.HandsFreeLink.entries) {
-            assertEquals(BluetoothWakePolicy.shouldPoke(link), opens(link = link))
+            assertEquals(
+                BluetoothWakePolicy.wakeDecision(
+                    clientRoleLink = link,
+                    gatewayRoleLink = BluetoothWakePolicy.HandsFreeLink.ABSENT,
+                    targetLink = BluetoothWakePolicy.TargetLink.UNREADABLE
+                ).poke,
+                opens(link = link)
+            )
         }
     }
 }

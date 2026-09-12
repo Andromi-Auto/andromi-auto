@@ -25,6 +25,7 @@ import com.andrerinas.openheadunit.main.settings.SettingItem
 import com.andrerinas.openheadunit.main.settings.SettingsAdapter
 import com.andrerinas.openheadunit.utils.AppThemeManager
 import com.andrerinas.openheadunit.utils.Settings
+import com.andrerinas.openheadunit.utils.ToastUtils
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -265,7 +266,7 @@ class DarkModeFragment : Fragment(), SensorEventListener {
 
         if (requiresRestart) {
             if (App.provide(requireContext()).commManager.isConnected) {
-                Toast.makeText(context, getString(R.string.stopping_service), Toast.LENGTH_SHORT).show()
+                ToastUtils.showToast(context, getString(R.string.stopping_service), Toast.LENGTH_SHORT, force = true)
                 val stopServiceIntent = Intent(requireContext(), AapService::class.java).apply {
                     action = AapService.ACTION_STOP_SERVICE
                 }
@@ -278,7 +279,7 @@ class DarkModeFragment : Fragment(), SensorEventListener {
         requiresRestart = false
         updateSaveButtonState()
 
-        Toast.makeText(context, getString(R.string.settings_saved), Toast.LENGTH_SHORT).show()
+        ToastUtils.showToast(context, getString(R.string.settings_saved), Toast.LENGTH_SHORT, force = true)
 
         // Signal visual change so all activities (including MainActivity) pick up changes
         if (extremeDarkChanged || themeChanged ||
@@ -551,7 +552,7 @@ class DarkModeFragment : Fragment(), SensorEventListener {
                     checkChanges()
                     updateSettingsList()
                 } else {
-                    Toast.makeText(ctx, R.string.coordinates_invalid, Toast.LENGTH_SHORT).show()
+                    ToastUtils.showToast(ctx, R.string.coordinates_invalid, Toast.LENGTH_SHORT, force = true)
                 }
             }
             .setNeutralButton(R.string.geofence_pick_on_map) { _, _ ->

@@ -6,6 +6,8 @@ import android.content.Intent
 import android.content.IntentFilter
 import androidx.core.content.ContextCompat
 import com.andrerinas.openheadunit.R
+import com.andrerinas.openheadunit.connection.ConnectionStage
+import com.andrerinas.openheadunit.connection.ConnectionStageTracker
 import com.andrerinas.openheadunit.utils.AppLog
 import com.andrerinas.openheadunit.utils.ConnectionIssue
 import com.andrerinas.openheadunit.utils.ConnectionIssues
@@ -408,6 +410,8 @@ class SoftApCredentialsProvider(
         }
 
         AppLog.i("SoftApCredentials: SUCCESS - Providing credentials from ${iface.name}: SSID=$ssid, IP=$ip, BSSID=${bssid.ifEmpty { "<none>" }}")
+        // Our own listener, not the phone — same reasoning as WifiDirectManager's delivery.
+        ConnectionStageTracker.report(ConnectionStage.CREATING_NETWORK)
         // The record is what this hardware did, and only the device naming its own access point
         // disproves it. Retiring it on a manual override wiped the one durable instruction left to
         // the user who had typed the name and not the password - and decide() can never raise it

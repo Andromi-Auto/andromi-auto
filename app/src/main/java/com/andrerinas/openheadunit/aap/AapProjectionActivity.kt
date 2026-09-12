@@ -7,6 +7,7 @@ import android.graphics.Color
 import android.graphics.Typeface
 import android.os.Build
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.os.SystemClock
 import android.view.Gravity
 import android.view.KeyEvent
@@ -41,6 +42,7 @@ import com.andrerinas.openheadunit.decoder.video.SoftwareYuvFrameSink
 import com.andrerinas.openheadunit.decoder.video.VideoDecoder
 import com.andrerinas.openheadunit.decoder.video.VideoDimensionsListener
 import com.andrerinas.openheadunit.utils.AppLog
+import com.andrerinas.openheadunit.utils.BluetoothHelper
 import com.andrerinas.openheadunit.connection.self.SelfModeCallRaisePolicy
 import com.andrerinas.openheadunit.decoder.audio.CallState
 import com.andrerinas.openheadunit.utils.IntentFilters
@@ -67,6 +69,7 @@ import com.andrerinas.openheadunit.main.QuickSettingsFragment
 import com.andrerinas.openheadunit.main.RenameNotice
 import com.andrerinas.openheadunit.main.Aa174Notice
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.andrerinas.openheadunit.main.AutoStartOfferPolicy
 import com.andrerinas.openheadunit.main.MainActivity
 import java.io.File
 import java.util.concurrent.Executors
@@ -562,6 +565,9 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
     // leaves a black screen while audio keeps working. A broken SurfaceView cannot be detected
     // automatically (it reports no drawn frames), so we ask the user directly.
     private var rendererBanner: View? = null
+    private var autoStartOfferBanner: View? = null
+    private var autoStartOfferResolved = false
+    private var autoStartOfferTimer: CountDownTimer? = null
     private var rendererConfirmResolved = false
     private var projectionStartMs = 0L
     private val rendererConfirmNoFrameMs = 6000L
@@ -738,6 +744,130 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         runOnUiThread {
             rendererBanner?.let { (it.parent as? FrameLayout)?.removeView(it) }
             rendererBanner = null
+        }
+    }
+
+    /**
+     * Offers Bluetooth auto-start for the one phone that just connected, once, over the picture.
+     *
+     * Asked here rather than on the home screen: a phone can wake this unit by itself, so nobody is
+     * on that screen for the sessions the question is about. [AutoStartOfferPolicy] holds the rules.
+     */
+    private fun maybeOfferAutoStart() {
+        if (autoStartOfferResolved || autoStartOfferBanner != null) return
+        // One bottom bar at a time - both sit at Gravity.BOTTOM and would stack on each other.
+        if (rendererBanner != null) return
+        if (settings.wifiConnectionMode !=
+            com.andrerinas.openheadunit.connection.wifi.WifiLauncherMode.NATIVE
+        ) return
+        val adapter = BluetoothHelper.getBluetoothAdapter(this)
+        if (adapter == null || !adapter.isEnabled) return
+
+        val connectedMac = settings.lastConnectedNativeMac
+        val cands = BluetoothHelper.driverCandidates(
+            this, settings.nativePreferredDeviceMac, connectedMac
+        )
+        val action = AutoStartOfferPolicy.decide(
+            phonesPaired = cands.offered.size,
+            connectedMac = connectedMac,
+            answeredMacs = settings.autoStartOfferAnsweredMacs,
+            autoStartConfigured = settings.autoStartBluetoothDeviceMacs.isNotEmpty(),
+        )
+        if (!AutoStartOfferPolicy.actsNow(
+                action, AutoStartOfferPolicy.Trigger.PROJECTION_START
+            )
+        ) return
+        showAutoStartOfferBanner(connectedMac, cands.deviceFor(connectedMac)?.name ?: connectedMac)
+    }
+
+    /** A dismissible bottom bar: "Start automatically?" with Yes / No and a countdown to No. */
+    private fun showAutoStartOfferBanner(mac: String, name: String) {
+        runOnUiThread {
+            if (autoStartOfferResolved || autoStartOfferBanner != null) return@runOnUiThread
+            val container = findViewById<FrameLayout>(R.id.container) ?: return@runOnUiThread
+            // Said out loud, both halves: a prompt that leaves no trace in a capture has cost this
+            // thread three rounds, and the answer decides whether the app starts itself from now on.
+            AppLog.i("AapProjectionActivity: the Bluetooth auto-start offer is up for %s (%s).", name, mac)
+
+            fun resolve(outcome: String, turnOn: Boolean) {
+                if (autoStartOfferResolved) return
+                autoStartOfferResolved = true
+                autoStartOfferTimer?.cancel()
+                autoStartOfferTimer = null
+                // Marked on every outcome, the timeout included, so the question is put once per
+                // phone. An expiry is the No it counts as.
+                settings.autoStartOfferAnsweredMacs = settings.autoStartOfferAnsweredMacs + mac
+                if (turnOn) {
+                    settings.autoStartBluetoothDeviceMacs = setOf(mac)
+                    settings.autoStartBluetoothDeviceName = name
+                    Settings.syncAutoStartBtMacsToDeviceStorage(this, setOf(mac))
+                }
+                AppLog.i("AapProjectionActivity: the Bluetooth auto-start offer was answered %s.", outcome)
+                dismissAutoStartOfferBanner()
+            }
+
+            fun dp(v: Int) = (v * resources.displayMetrics.density).toInt()
+            val bar = LinearLayout(this).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = Gravity.CENTER_VERTICAL
+                setBackgroundColor(0xE6000000.toInt())
+                setPadding(dp(16), dp(10), dp(16), dp(10))
+            }
+            val label = TextView(this).apply {
+                text = getString(R.string.auto_start_offer_message, name)
+                setTextColor(Color.WHITE)
+                layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+            }
+            val countdown = TextView(this).apply {
+                setTextColor(Color.LTGRAY)
+                setPadding(dp(8), 0, dp(8), 0)
+                text = getString(
+                    R.string.auto_start_offer_countdown,
+                    (AutoStartOfferPolicy.OFFER_TIMEOUT_MS / 1000L).toInt()
+                )
+            }
+            val yes = Button(this).apply {
+                text = getString(R.string.auto_start_offer_yes)
+                setOnClickListener { resolve("yes", turnOn = true) }
+            }
+            val no = Button(this).apply {
+                text = getString(R.string.auto_start_offer_no)
+                setOnClickListener { resolve("no", turnOn = false) }
+            }
+            bar.addView(label)
+            bar.addView(countdown)
+            bar.addView(yes)
+            bar.addView(no)
+            bar.layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.WRAP_CONTENT,
+                Gravity.BOTTOM
+            )
+            container.addView(bar)
+            autoStartOfferBanner = bar
+            bar.bringToFront()
+
+            autoStartOfferTimer?.cancel()
+            autoStartOfferTimer = object : CountDownTimer(AutoStartOfferPolicy.OFFER_TIMEOUT_MS, 1000L) {
+                override fun onTick(millisUntilFinished: Long) {
+                    countdown.text = getString(
+                        R.string.auto_start_offer_countdown,
+                        ((millisUntilFinished + 999) / 1000).toInt()
+                    )
+                }
+
+                override fun onFinish() {
+                    resolve("by running out", turnOn = false)
+                }
+            }
+            autoStartOfferTimer?.start()
+        }
+    }
+
+    private fun dismissAutoStartOfferBanner() {
+        runOnUiThread {
+            autoStartOfferBanner?.let { (it.parent as? FrameLayout)?.removeView(it) }
+            autoStartOfferBanner = null
         }
     }
 
@@ -979,9 +1109,11 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
 
                 // Show one-time gesture hint
                 if (!settings.gestureHintShown) {
-                    Toast.makeText(this@AapProjectionActivity, R.string.gesture_hint, Toast.LENGTH_LONG).show()
+                    ToastUtils.showToast(this@AapProjectionActivity, R.string.gesture_hint, Toast.LENGTH_LONG, force = true)
                     settings.gestureHintShown = true
                 }
+
+                maybeOfferAutoStart()
             }
         }
 
@@ -1510,7 +1642,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
             } catch (e: Exception) {
                 AppLog.e("Failed to enter PiP mode: ${e.message}")
                 e.printStackTrace()
-                Toast.makeText(this, "PiP failed: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
+                ToastUtils.showToast(this, "PiP failed: ${e.localizedMessage}", Toast.LENGTH_SHORT, force = true)
             }
         } else {
             AppLog.w("PiP mode not supported on this Android version (SDK < 26)")
@@ -2015,6 +2147,8 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
 
     override fun onDestroy() {
         super.onDestroy()
+        autoStartOfferTimer?.cancel()
+        autoStartOfferTimer = null
         HeadUnitScreenConfig.onMarginsDiverged = null
         HeadUnitScreenConfig.clearAnnouncedMargins()
         closeCallRaiseEpisode("the projection is going away")

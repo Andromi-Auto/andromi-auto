@@ -179,6 +179,11 @@
     <string name="usb_auto_connect_description">Tự động kết nối thiết bị USB đã biết khi mở ứng dụng.</string>
     <string name="auto_start_bt_label">Tự khởi động khi có Bluetooth</string>
     <string name="auto_start_bt_description">Tự động mở Open Headunit khi một thiết bị Bluetooth nhất định kết nối.</string>
+    <string name="auto_start_offer_title">Tự động khởi động?</string>
+    <string name="auto_start_offer_message">Bạn có muốn tự động khởi động ứng dụng với thiết bị này, %1$s không?</string>
+    <string name="auto_start_offer_yes">Có</string>
+    <string name="auto_start_offer_no">Không</string>
+    <string name="auto_start_offer_countdown">Không sau %1$d giây</string>
     <string name="listen_for_usb_devices_label">Lắng nghe thiết bị USB</string>
     <string name="listen_for_usb_devices_description">Hiển thị yêu cầu hệ thống Android khi cắm thiết bị USB.</string>
     <string name="show_toast_messages">Hiển thị thông báo Toast</string>
@@ -270,7 +275,7 @@
     <string name="separate_audio_streams">Tách luồng âm thanh</string>
     <string name="separate_audio_streams_description">Cấp cho các kênh Đa phương tiện, Chỉ dẫn và Âm thanh hệ thống luồng đầu ra riêng thay vì một luồng đa phương tiện dùng chung (có thể không hoạt động đúng trên một số thiết bị).</string>
     <string name="use_aac_audio">Dùng âm thanh AAC</string>
-    <string name="use_aac_audio_description">Dùng codec AAC để tiết kiệm băng thông (Thử nghiệm).</string>
+    <string name="use_aac_audio_description">Dùng codec AAC để tiết kiệm băng thông (Thử nghiệm). Trong phiên không dây chạy trên 2,4 GHz, tùy chọn này tự động bật trong khi \"Giảm video trên đường truyền 2,4 GHz\" đang bật.</string>
     <string name="attach_hw_dsp_equalizer">Bộ kích hoạt bộ cân bằng DSP phần cứng</string>
     <string name="attach_hw_dsp_equalizer_description">Gắn hiệu ứng bộ cân bằng giả vào phiên âm thanh để buộc định tuyến DSP phần cứng trên một số màn hình. Giữ tắt nếu sử dụng ViPER4Android / ViperFX hoặc nếu âm thanh bị nghẹt trên các phiên bản Android cũ.</string>
     <string name="audio_volume_offset">Bù âm lượng</string>
@@ -494,6 +499,7 @@
 
     <string name="supported_nativeaa">Hỗ trợ không dây nâng cao</string>
     <string name="supported_nativeaa_desc">Tin tốt! Máy của bạn hỗ trợ chế độ \"Native Wireless\", mang lại trải nghiệm Android Auto liền mạch hơn. \n\nĐể bật, cần làm mới bộ nhớ đệm Bluetooth. Vui lòng: \n1. Xoá ghép nối hiện có trên điện thoại \n2. Bấm OK để khởi động lại Bluetooth \n3. Ghép nối lại điện thoại \n\nBạn có muốn chuyển sang chế độ Native AA bây giờ?</string>
+    <string name="native_aa_poke_not_running">Bluetooth không dây không chạy trên đầu phát này. Hãy kiểm tra phần cài đặt.</string>
     <string name="not_supported_nativeaa">Có vẻ chưa hỗ trợ Native Wireless</string>
     <string name="not_supported_nativeaa_desc">Máy của bạn có thể không hỗ trợ các tính năng Bluetooth hoặc Wi-Fi cần cho Native Wireless. Bạn vẫn có thể thử, nhưng nếu thất bại hãy dùng chế độ \"Wireless Helper\" hoặc \"Auto (Headunit Server)\".</string>
 
@@ -897,7 +903,17 @@
     <string name="boot_loop_paused_native_wifi_direct">This device restarted three times in a row shortly after Open Headunit started wireless, so wireless was left off this time. On some head units the WiFi chipset takes the whole system down when a phone joins a WiFi Direct network. Try switching Android Auto mode to the head unit hotspot. USB still works.</string>
     <string name="vehicle_make_hint">A real car brand shows that brand\'s logo on the Android Auto exit button, but Android Auto then stops listing apps installed from outside the Play Store. Set it back to \"Google\" to get those apps listed again.</string>
     <string name="external_bt_nativeaa">Native Wireless cannot work on this head unit</string>
-    <string name="external_bt_nativeaa_desc">This head unit uses its own Bluetooth module (%1$s) instead of the one Android exposes to apps. Your phone pairs with that module, so anything this app sends over Bluetooth never reaches it — the connection will look like it is working and then stall.\n\nThis is a hardware limitation and cannot be worked around from the app. Please use USB, or the \"Wireless Helper\" or \"Auto (Headunit Server)\" mode, which do not need the Bluetooth handshake.</string>
+    <string name="external_bt_nativeaa_desc">Điện thoại của bạn ghép nối với mô-đun Bluetooth riêng của đầu phát này (%1$s), không phải Bluetooth mà Android cung cấp cho ứng dụng, nên quá trình bắt tay không dây sẽ không bao giờ đến được đó.\n\nỨng dụng này chỉ có thể tiếp cận mô-đun đó qua một dịch vụ ZJ/ZLink, mà đầu phát này không chạy dịch vụ đó. Hãy dùng USB hoặc một chế độ WiFi thay vào đó.</string>
+    <string name="external_bt_module_nativeaa">Không dây gốc qua mô-đun ZJ/ZLink</string>
+    <string name="external_bt_module_nativeaa_desc">Điện thoại của bạn ghép nối với mô-đun Bluetooth riêng của đầu phát này (%1$s), không phải Bluetooth mà Android cung cấp cho ứng dụng, nên quá trình bắt tay sẽ được gửi qua dịch vụ ZJ/ZLink của mô-đun.\n\nĐây là tính năng thử nghiệm, và dịch vụ duy nhất đó là con đường duy nhất để vào. Nếu điện thoại không bao giờ khởi động Android Auto, hãy dùng USB hoặc một chế độ WiFi.</string>
+    <string name="external_bt_transport">Kết nối qua mô-đun Bluetooth của đầu phát</string>
+    <string name="external_bt_transport_description">Thử nghiệm, và chỉ dành cho máy có dịch vụ Bluetooth ZJ/ZLink. Gửi quá trình bắt tay Android Auto không dây qua chính con chip Bluetooth của máy này, con chip mà điện thoại của bạn thực sự ghép nối, thay vì qua Bluetooth mà Android cung cấp cho ứng dụng.\n\nHãy chạy «Kiểm tra mô-đun Bluetooth của đầu phát» trước. Nếu bài kiểm tra không tìm thấy dịch vụ đó, tuỳ chọn này không làm được gì trên máy của bạn và không dây gốc sẽ không hoạt động ở đây. Nếu tìm thấy, hãy bật tuỳ chọn này và chọn Gốc. Vui lòng xuất nhật ký trong cả hai trường hợp.</string>
+    <string name="zbt_probe_title">Kiểm tra mô-đun Bluetooth của đầu phát</string>
+    <string name="zbt_probe_idle">Chạm để chạy</string>
+    <string name="zbt_probe_running">Đang chạy…</string>
+    <string name="zbt_probe_message">Hỏi con chip Bluetooth riêng của máy này xem nó có mang được kết nối Android Auto hay không, rồi theo dõi khoảng một phút rưỡi. Dòng bên dưới tuỳ chọn này cho biết điều gì đang diễn ra, và không có gì khác trên máy bị đụng đến.\n\n«Đánh thức và theo dõi» còn yêu cầu con chip kết nối lại với điện thoại của bạn cho Android Auto. Đó là phần duy nhất thay đổi điều gì đó, và khởi động lại máy sẽ hoàn tác. Sau đó vui lòng xuất nhật ký và đính kèm.</string>
+    <string name="zbt_probe_watch_only">Chỉ theo dõi</string>
+    <string name="zbt_probe_wake_and_watch">Đánh thức và theo dõi</string>
     <string name="native_ap_transport">Network transport</string>
     <string name="native_ap_transport_wifi_direct">WiFi Direct</string>
     <string name="native_ap_transport_hotspot">Hotspot</string>
@@ -956,14 +972,20 @@
     <string name="wifi_direct_band_5ghz">Chỉ 5 GHz</string>
     <string name="wifi_direct_band_24ghz">Chỉ 2.4 GHz</string>
     <string name="wifi_direct_band_hint">Tự động yêu cầu 5 GHz và chuyển về 2.4 GHz.</string>
+    <string name="stand_down_station">Ngắt kết nối Wi-Fi riêng khi kết nối</string>
+    <string name="stand_down_station_auto">Tự động</string>
+    <string name="stand_down_station_always">Luôn luôn</string>
+    <string name="stand_down_station_never">Không bao giờ</string>
+    <string name="stand_down_station_hint">Tự động chỉ rời khỏi mạng riêng của thiết bị này khi radio của nó có băng tần 5 GHz và mạng đó đang ở 2.4 GHz, để nhóm WiFi Direct có thể có riêng một kênh 5 GHz. Thiết bị vẫn giữ kết nối trên đơn vị chỉ hỗ trợ 2.4 GHz, vì rời mạng chỉ khiến thiết bị tìm kiếm mạng khác, và cũng giữ kết nối khi mạng đã ở 5 GHz. Mạng sẽ được kết nối lại khi phiên kết thúc. Hãy thử Luôn luôn hoặc Không bao giờ nếu hình ảnh bị giật.</string>
+    <string name="stand_down_station_needs_overlay">Cần có quyền «hiển thị trên các ứng dụng khác» trên phiên bản Android này.</string>
     <string name="connection_issue_banner_bt_silent">Điện thoại đã kết nối qua Bluetooth nhưng không nhận được dữ liệu. Nhấn để chuyển sang USB, Wireless Helper hoặc Auto.</string>
     <string name="connection_issue_banner_bssid">Không nguồn nào trên thiết bị này cho biết địa chỉ MAC WiFi (BSSID) của chính nó, nên điện thoại không bao giờ biết cần tham gia mạng nào. Tất cả đều đã được thử, kể cả một nguồn không cần quyền nào. Chạm để bật Vị trí, thứ mở khóa các nguồn còn lại, hoặc để nhập địa chỉ thủ công.</string>
     <string name="connection_issue_banner_hotspot_off">Điểm phát sóng của thiết bị này đang tắt nên không có mạng để điện thoại kết nối. Hãy bật điểm phát sóng trước khi kết nối hoặc nhấn để ứng dụng tự bật giúp bạn.</string>
     <string name="connection_issue_banner_wifi_direct_refused">Wi-Fi của thiết bị này không thể tạo mạng Wi-Fi Direct để điện thoại kết nối và ứng dụng không thể ép buộc. Nếu thiết bị đang kết nối với mạng Wi-Fi khác, hãy thử ngắt kết nối. Nhấn để sử dụng điểm phát sóng của thiết bị này.</string>
     <string name="connection_issue_banner_wifi_direct_cycled">Một ứng dụng khác trên thiết bị này liên tục tắt rồi bật Wi-Fi Direct, nên không thể tạo mạng cho điện thoại kết nối. Nguyên nhân thường gặp là ứng dụng chiếu màn hình cài sẵn (CarLife, ZLink, CarPlay và tương tự), nên thử tắt nó. Nhấn để sử dụng điểm phát sóng của thiết bị này.</string>
     <string name="connection_issue_banner_hotspot_config">Không thể lấy tên và mật khẩu điểm phát sóng. Nhấn để nhập thủ công.</string>
-    <string name="narrow_band_profile_cap">Giảm video khi sóng chỉ có 2,4 GHz</string>
-    <string name="narrow_band_profile_cap_description">Khi Wi-Fi của thiết bị này không có băng tần 5 GHz, yêu cầu điện thoại tối đa 720p và 30 fps thay cho các cài đặt ở trên. Trên đường truyền như vậy, đo được luồng ở tốc độ đầy đủ không mang được hình ảnh nào, còn luồng thấp hơn thì trụ được. Tắt tùy chọn này để nhận đúng những gì bạn đã đặt.</string>
+    <string name="narrow_band_profile_cap">Giảm video trên đường truyền 2,4 GHz</string>
+    <string name="narrow_band_profile_cap_description">Khi phiên này chạy trên 2,4 GHz, cho dù vì Wi-Fi của thiết bị này không có băng tần 5 GHz hay vì mạng được thiết lập trên đó, yêu cầu điện thoại tối đa 720p và 30 fps thay cho các cài đặt ở trên, và âm thanh AAC. Trên đường truyền như vậy, đo được luồng ở tốc độ đầy đủ không mang được hình ảnh nào, còn luồng thấp hơn thì trụ được. Tắt tùy chọn này để nhận đúng những gì bạn đã đặt.</string>
     <string name="connection_issue_banner_video_link_too_slow">Điện thoại đã bỏ dở video trước khi có dù chỉ một khung hình, nhiều lần liên tiếp. Đường truyền Wi-Fi quá chậm để tải hình ảnh. Nhấn để hạ giới hạn FPS xuống 30; giảm độ phân giải và dùng âm thanh AAC cũng có ích.</string>
     <string name="connection_issue_banner_five_ghz_channel_refused">Thiết bị này đã từ chối đặt mạng WiFi Direct trên bất kỳ kênh 5 GHz nào bạn chọn, nên nó khởi tạo trên kênh do trình điều khiển WiFi của chính nó chọn. Kênh đó thường là kênh mà điện thoại ở các nước có quy định nghiêm ngặt hơn thậm chí không thấy được. Chạm để đặt băng tần WiFi Direct thành 2,4 GHz, được phép ở mọi quốc gia; hãy chờ đợi 720p thay vì 1080p.</string>
     <string name="connection_issue_banner_dismiss">Bỏ qua</string>
@@ -1061,7 +1083,6 @@
     <string name="driver_device_last_used">Kết nối gần nhất</string>
     <string name="driver_selection_auto_in">Tự động kết nối với %2$s sau %1$ds...</string>
     <string name="driver_selection_dialog_title">Chọn điện thoại người lái</string>
-    <string name="connecting_to_device">Đang kết nối với %s...</string>
     <string name="driver_none">Không có</string>
     <string name="show_all_devices">Hiển thị tất cả thiết bị Bluetooth</string>
     <string name="show_only_phones">Chỉ hiển thị điện thoại</string>

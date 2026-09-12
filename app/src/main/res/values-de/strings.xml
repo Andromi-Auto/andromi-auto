@@ -218,6 +218,11 @@
     <string name="usb_auto_connect_description">Verbindet sich automatisch mit einem bekannten USB-Gerät, sobald die App geöffnet wird.</string>
     <string name="auto_start_bt_label">Auto-Start bei Bluetooth</string>
     <string name="auto_start_bt_description">Startet Open Headunit automatisch, wenn sich ein bestimmtes Bluetooth-Gerät verbindet.</string>
+    <string name="auto_start_offer_title">Automatisch starten?</string>
+    <string name="auto_start_offer_message">Soll die App mit diesem Gerät automatisch gestartet werden, %1$s?</string>
+    <string name="auto_start_offer_yes">Ja</string>
+    <string name="auto_start_offer_no">Nein</string>
+    <string name="auto_start_offer_countdown">Nein in %1$d s</string>
     <string name="auto_start_wifi_label">Auto-Start bei WLAN</string>
     <string name="auto_start_wifi_description">Öffnet Open Headunit automatisch, wenn eine Verbindung zu einer bestimmten WLAN-SSID besteht.</string>
     <string name="auto_start_wifi_ssid_label">WLAN-SSID</string>
@@ -317,7 +322,7 @@
     <string name="separate_audio_streams">Separate Audio-Streams</string>
     <string name="separate_audio_streams_description">Gibt den Kanälen Medien, Ansagen und Systemtöne eigene Ausgabestreams statt eines gemeinsamen Multimedia-Streams (funktioniert auf manchen Geräten möglicherweise nicht korrekt).</string>
     <string name="use_aac_audio">AAC-Audio verwenden</string>
-    <string name="use_aac_audio_description">Verwendet den AAC-Codec für Audio, um Bandbreite zu sparen (Experimentell).</string>
+    <string name="use_aac_audio_description">Verwendet den AAC-Codec für Audio, um Bandbreite zu sparen (Experimentell). Bei einer kabellosen Verbindung, die auf 2,4 GHz läuft, wird dies automatisch aktiviert, solange \"Video bei einer 2,4-GHz-Verbindung verringern\" aktiviert ist.</string>
     <string name="attach_hw_dsp_equalizer">Hardware DSP Equalizer-Trigger</string>
     <string name="attach_hw_dsp_equalizer_description">Hängt einen Dummy-Equalizer-Effekt an die Audio-Session an, um auf spezifischen Headunits das HW-DSP-Routing zu erzwingen. Deaktiviert lassen bei Nutzung von ViPER4Android / ViperFX oder wenn der Ton auf älteren Android-Versionen dumpf klingt.</string>
     <string name="audio_volume_offset">Lautstärke-Offsets</string>
@@ -533,6 +538,7 @@
 
     <string name="supported_nativeaa">Verbesserte kabellose Unterstützung</string>
     <string name="supported_nativeaa_desc">Gute Nachrichten! Ihr Gerät unterstützt den Modus „Natives WLAN“, der ein reibungsloseres Android Auto-Erlebnis bietet. \n\nUm dies zu aktivieren, müssen wir Ihren Bluetooth-Cache aktualisieren. Bitte: \n1. Entfernen Sie die vorhandene Kopplung auf Ihrem Telefon \n2. Klicken Sie auf OK, um Bluetooth neu zu starten \n3. Koppeln Sie Ihr Telefon erneut \n\nMöchten Sie jetzt in den nativen AA-Modus wechseln?</string>
+    <string name="native_aa_poke_not_running">Das drahtlose Bluetooth läuft auf dieser Headunit nicht. Sieh in den Einstellungen nach.</string>
     <string name="not_supported_nativeaa">Natives WLAN scheint nicht unterstützt zu werden</string>
     <string name="not_supported_nativeaa_desc">Ihr Gerät unterstützt möglicherweise nicht die erforderlichen Bluetooth- oder WLAN-Funktionen für natives WLAN. Sie können es trotzdem versuchen, aber wenn es fehlschlägt, verwenden Sie bitte stattdessen den „Wireless Helper“ oder den Modus „Auto (Headunit Server)“.</string>
 
@@ -902,7 +908,17 @@
     <string name="boot_loop_paused_native_wifi_direct">Das Gerät hat mehrfach kurz nach dem Wireless-Start neu gestartet. Bei einigen Headunits überlastet der WiFi-Chip bei WiFi Direct Verbindungen. Versuche auf den Headunit-Hotspot-Modus zu wechseln. USB funktioniert weiterhin.</string>
     <string name="vehicle_make_hint">Eine echte Automarke zeigt deren Logo auf dem Beenden-Button von Android Auto. Android Auto blendet dann jedoch Apps aus, die nicht aus dem Play Store stammen. Setze es auf \"Google\" zurück, um diese wieder anzuzeigen.</string>
     <string name="external_bt_nativeaa">Natives Wireless auf dieser Headunit nicht möglich</string>
-    <string name="external_bt_nativeaa_desc">Diese Headunit nutzt ein eigenes Bluetooth-Modul (%1$s), das Android nicht für Apps bereitstellt. Das Handy koppelt sich mit diesem Modul, wodurch Bluetooth-Handshake-Daten die App nicht erreichen. Bitte nutze USB, Wireless Helper oder den Headunit Server Modus.</string>
+    <string name="external_bt_nativeaa_desc">Dein Handy koppelt sich mit dem eigenen Bluetooth-Modul dieser Headunit (%1$s), nicht mit dem, das Android für Apps bereitstellt, deshalb würde der drahtlose Handshake es nie erreichen.\n\nDiese App kann dieses Modul nur über einen ZJ/ZLink-Dienst erreichen, den diese Headunit nicht ausführt. Nutze stattdessen USB oder einen WLAN-Modus.</string>
+    <string name="external_bt_module_nativeaa">Natives Wireless über das ZJ/ZLink-Modul</string>
+    <string name="external_bt_module_nativeaa_desc">Dein Handy koppelt sich mit dem eigenen Bluetooth-Modul dieser Headunit (%1$s), nicht mit dem, das Android für Apps bereitstellt, deshalb wird der Handshake über den ZJ/ZLink-Dienst des Moduls gesendet.\n\nExperimentell, und dieser eine Dienst ist der einzige Weg hinein. Startet das Handy Android Auto nie, nutze USB oder einen WLAN-Modus.</string>
+    <string name="external_bt_transport">Über das Bluetooth-Modul der Headunit verbinden</string>
+    <string name="external_bt_transport_description">Experimentell, und nur für Geräte mit einem ZJ/ZLink-Bluetooth-Dienst. Sendet den Handshake für kabelloses Android Auto über den eigenen Bluetooth-Chip dieses Geräts, also den, mit dem dein Handy tatsächlich gekoppelt ist, statt über das Bluetooth, das Android für Apps bereitstellt.\n\nFühre zuerst \"Bluetooth-Modul der Headunit testen\" aus. Findet der Test diesen Dienst nicht, kann diese Einstellung auf deinem Gerät nichts bewirken und natives Wireless wird hier nicht funktionieren. Findet er ihn, schalte dies ein und wähle Nativ. Bitte exportiere in beiden Fällen das Protokoll.</string>
+    <string name="zbt_probe_title">Bluetooth-Modul der Headunit testen</string>
+    <string name="zbt_probe_idle">Zum Ausführen tippen</string>
+    <string name="zbt_probe_running">Läuft…</string>
+    <string name="zbt_probe_message">Fragt den separaten Bluetooth-Chip dieses Geräts, ob er eine Android-Auto-Verbindung tragen kann, und beobachtet dann etwa anderthalb Minuten lang. Die Zeile unter dieser Einstellung zeigt, was passiert, und sonst wird am Gerät nichts verändert.\n\nWecken und beobachten bittet den Chip zusätzlich, sich für Android Auto mit deinem Handy zu verbinden. Nur dieser Teil verändert etwas, und ein Neustart des Geräts macht es rückgängig. Bitte exportiere danach das Protokoll und hänge es an.</string>
+    <string name="zbt_probe_watch_only">Nur beobachten</string>
+    <string name="zbt_probe_wake_and_watch">Wecken und beobachten</string>
     <string name="native_ap_transport">Netzwerk-Transport</string>
     <string name="native_ap_transport_wifi_direct">WiFi Direct</string>
     <string name="native_ap_transport_hotspot">Hotspot</string>
@@ -959,14 +975,20 @@
     <string name="wifi_direct_band_5ghz">Nur 5 GHz</string>
     <string name="wifi_direct_band_24ghz">Nur 2,4 GHz</string>
     <string name="wifi_direct_band_hint">Automatisch fordert 5 GHz an und weicht auf 2,4 GHz aus (auf Android 9 und älter wird zuerst ein 5-GHz-Kanal angefordert). 2,4 GHz reicht bis 720p, darüber wird 5 GHz empfohlen.</string>
+    <string name="stand_down_station">WLAN-Verbindung dieses Geräts beim Verbinden trennen</string>
+    <string name="stand_down_station_auto">Automatisch</string>
+    <string name="stand_down_station_always">Immer</string>
+    <string name="stand_down_station_never">Nie</string>
+    <string name="stand_down_station_hint">Automatisch verlässt das eigene Netzwerk dieses Geräts nur, wenn dessen Funkmodul ein 5-GHz-Band hat und dieses Netzwerk auf 2,4 GHz läuft, damit die WiFi-Direct-Gruppe einen eigenen 5-GHz-Kanal erhalten kann. Auf einem Gerät mit nur 2,4 GHz bleibt es verbunden, da ein Verlassen das Gerät nur nach Netzwerken suchen ließe, ebenso wenn das Netzwerk bereits auf 5 GHz läuft. Das Netzwerk wird nach Sitzungsende wieder verbunden. Bei ruckelndem Bild „Immer“ oder „Nie“ ausprobieren.</string>
+    <string name="stand_down_station_needs_overlay">Erfordert auf dieser Android-Version die Berechtigung „Über anderen Apps anzeigen“.</string>
     <string name="connection_issue_banner_bt_silent">Dein Telefon hat sich über Bluetooth verbunden, aber nichts von diesem Gerät gesendetes kam an. Dies ist ein Bluetooth-Problem des Headunits. Tippe hier, um auf USB, Wireless Helper oder Auto zu wechseln.</string>
     <string name="connection_issue_banner_bssid">Keine Quelle auf diesem Gerät hat dessen eigene WLAN-MAC-Adresse (BSSID) genannt, deshalb erfuhr dein Telefon nie, mit welchem Netzwerk es sich verbinden soll. Alle Quellen wurden versucht, auch eine, die keine Berechtigung braucht. Tippe hier, um den Standort einzuschalten, was die übrigen freigibt, oder um die Adresse von Hand einzugeben.</string>
     <string name="connection_issue_banner_hotspot_off">Der Hotspot dieses Geräts ist ausgeschaltet, sodass kein Netzwerk vorhanden war, mit dem sich dein Telefon verbinden konnte. Schalte den Hotspot vor dem Verbinden ein oder tippe hier, damit die App ihn für dich einschaltet.</string>
     <string name="connection_issue_banner_wifi_direct_refused">Das WLAN dieses Geräts konnte das WiFi-Direct-Netzwerk nicht erstellen, mit dem sich dein Telefon verbinden sollte, und die App kann es nicht erzwingen. Wenn dieses Gerät mit einem anderen WLAN verbunden ist, trenne die Verbindung testweise. Tippe hier, um stattdessen den eigenen Hotspot dieses Geräts zu nutzen.</string>
     <string name="connection_issue_banner_wifi_direct_cycled">Eine andere App auf diesem Gerät schaltet WiFi Direct ständig aus und wieder ein, deshalb kann kein Netzwerk für dein Telefon erstellt werden. Meist ist eine vorinstallierte Projektions-App (CarLife, ZLink, CarPlay und ähnliche) die Ursache, sie zu deaktivieren ist einen Versuch wert. Tippe hier, um stattdessen den eigenen Hotspot dieses Geräts zu nutzen.</string>
     <string name="connection_issue_banner_hotspot_config">Dieses Gerät kann Hotspot-Name und -Passwort nicht an die App übergeben. Tippe hier, um sie manuell einzugeben.</string>
-    <string name="narrow_band_profile_cap">Video bei reinem 2,4-GHz-Funk verringern</string>
-    <string name="narrow_band_profile_cap_description">Wenn das WLAN dieses Geräts kein 5-GHz-Band hat, statt der Einstellungen oben höchstens 720p und 30 fps vom Telefon anfordern. Auf einer solchen Verbindung wurde gemessen, dass ein Stream mit voller Rate gar kein Bild überträgt, ein niedrigerer dagegen schon. Schalte dies aus, um genau das zu bekommen, was du eingestellt hast.</string>
+    <string name="narrow_band_profile_cap">Video bei einer 2,4-GHz-Verbindung verringern</string>
+    <string name="narrow_band_profile_cap_description">Wenn diese Sitzung auf 2,4 GHz läuft, egal ob weil das WLAN dieses Geräts kein 5-GHz-Band hat oder weil das Netzwerk dort entstanden ist, statt der Einstellungen oben höchstens 720p und 30 fps sowie AAC-Audio vom Telefon anfordern. Auf einer solchen Verbindung wurde gemessen, dass ein Stream mit voller Rate gar kein Bild überträgt, ein niedrigerer dagegen schon. Schalte dies aus, um genau das zu bekommen, was du eingestellt hast.</string>
     <string name="connection_issue_banner_video_link_too_slow">Dein Telefon hat das Video mehrmals hintereinander abgebrochen, bevor auch nur ein Bild ankam. Die WLAN-Verbindung ist zu langsam für das Bild. Tippe hier, um die FPS-Grenze auf 30 zu senken; eine niedrigere Auflösung und AAC-Audio helfen ebenfalls.</string>
     <string name="connection_issue_banner_five_ghz_channel_refused">Dieses Gerät hat sich geweigert, sein WiFi-Direct-Netzwerk auf einen von dir gewählten 5-GHz-Kanal zu legen, und hat es auf dem Kanal seines eigenen WLAN-Treibers gestartet. Diesen Kanal können Telefone in Ländern mit strengeren Regeln oft gar nicht sehen. Tippe hier, um das WiFi-Direct-Band auf 2,4 GHz zu setzen, das überall erlaubt ist; erwarte dort 720p statt 1080p.</string>
     <string name="connection_issue_banner_dismiss">Schließen</string>
@@ -1059,7 +1081,6 @@
     <string name="driver_device_last_used">Zuletzt verbunden</string>
     <string name="driver_selection_auto_in">Verbindet automatisch mit %2$s in %1$ds...</string>
     <string name="driver_selection_dialog_title">Fahrer-Smartphone wählen</string>
-    <string name="connecting_to_device">Verbinde mit %s...</string>
     <string name="driver_none">Keines</string>
     <string name="show_all_devices">Alle Bluetooth-Geräte anzeigen</string>
     <string name="show_only_phones">Nur Smartphones anzeigen</string>

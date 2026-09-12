@@ -579,6 +579,19 @@ class Settings(private val context: Context) {
         set(value) { prefs.edit().putBoolean("keep-dummy-vpn-during-session", value).apply() }
 
     /**
+     * Whether this unit leaves its own WiFi network for the WiFi Direct bring-up, as a
+     * [com.andrerinas.openheadunit.connection.wifi.direct.StationStandDownMode] value. A user who
+     * had turned the 3.3.1 switch on keeps it as ALWAYS.
+     */
+    var stationStandDownMode: Int
+        get() = when {
+            prefs.contains("stand-down-station-mode") -> prefs.getInt("stand-down-station-mode", 0)
+            prefs.getBoolean("stand-down-station-for-wifi-direct", false) -> 1
+            else -> 0
+        }
+        set(value) { prefs.edit().putInt("stand-down-station-mode", value).apply() }
+
+    /**
      * The network id disabled by the WiFi Direct station stand-down, or -1 for none standing.
      *
      * Written before the network is disabled rather than after, so a crash in between still leaves a
@@ -1128,6 +1141,16 @@ class Settings(private val context: Context) {
     var autoStartBluetoothDeviceName: String
         get() = prefs.getString("auto-start-bt-name", "")!!
         set(value) { prefs.edit().putString("auto-start-bt-name", value).apply() }
+
+    /**
+     * Phones the auto-start offer has already been answered for, so a "no" is not asked twice.
+     *
+     * Keyed by address rather than a single flag: a new phone in the car is a new question, and the
+     * answer given about the old one says nothing about it.
+     */
+    var autoStartOfferAnsweredMacs: Set<String>
+        get() = prefs.getStringSet("auto-start-offer-answered-macs", null) ?: emptySet()
+        set(value) { prefs.edit().putStringSet("auto-start-offer-answered-macs", value).apply() }
 
     var autoStartBluetoothDeviceMac: String
         get() = autoStartBluetoothDeviceMacs.firstOrNull() ?: ""
@@ -2152,5 +2175,13 @@ class Settings(private val context: Context) {
     var autoKillOemApps: Boolean
         get() = prefs.getBoolean("auto-kill-oem-apps", false)
         set(value) = prefs.edit().putBoolean("auto-kill-oem-apps", value).apply()
+
+    // Carry the Native AA Bluetooth handshake over this unit's own Bluetooth module, through the
+    // vendor daemon, instead of android.bluetooth. Only offered where ExternalBtPolicy has fired.
+    // Off by default: detection marks a class of hardware, and part of that class reaches its
+    // module over Binder with nothing on the daemon's port.
+    var externalBtZbtTransport: Boolean
+        get() = prefs.getBoolean("external-bt-zbt-transport", false)
+        set(value) = prefs.edit().putBoolean("external-bt-zbt-transport", value).apply()
 
 }

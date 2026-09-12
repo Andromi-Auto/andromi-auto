@@ -32,6 +32,7 @@ import com.andrerinas.openheadunit.connection.usb.UsbDeviceCompat
 import com.andrerinas.openheadunit.connection.usb.UsbDeviceDiagnostics
 import com.andrerinas.openheadunit.connection.usb.UsbReceiver
 import com.andrerinas.openheadunit.utils.Settings
+import com.andrerinas.openheadunit.utils.ToastUtils
 import com.google.android.material.appbar.MaterialToolbar
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -209,7 +210,7 @@ class UsbListFragment : Fragment() {
             } else {
                 if (mSettings.isUsbDeviceBlacklisted(device.wrappedDevice)) {
                     // The row already says "Blacklisted" and the button used to connect anyway.
-                    Toast.makeText(mContext, R.string.blacklisted, Toast.LENGTH_SHORT).show()
+                    ToastUtils.showToast(mContext, R.string.blacklisted, Toast.LENGTH_SHORT, force = true)
                     return
                 }
                 if (App.provide(mContext).commManager.isConnected) {
@@ -223,7 +224,7 @@ class UsbListFragment : Fragment() {
                 } else if (device.isInAccessoryMode) {
                     // Device is in Accessory Mode but we are NOT connected.
                     // Start connection immediately.
-                    Toast.makeText(mContext, R.string.android_auto_starting, Toast.LENGTH_SHORT).show()
+                    ToastUtils.showToast(mContext, R.string.android_auto_starting, Toast.LENGTH_SHORT)
                     (mContext as? MainActivity)?.beginAutoConnect(
                         "manual USB list (accessory mode)",
                         MainActivity.ConnectionUiMode.OVERLAY
@@ -243,19 +244,19 @@ class UsbListFragment : Fragment() {
                             val switched = usbMode.connectAndSwitch(device.wrappedDevice, useLibusb)
                             withContext(Dispatchers.Main) {
                                 if (switched) {
-                                    Toast.makeText(mContext, R.string.switching_to_android_auto, Toast.LENGTH_SHORT).show()
+                                    ToastUtils.showToast(mContext, R.string.switching_to_android_auto, Toast.LENGTH_SHORT)
                                     (mContext as? MainActivity)?.beginAutoConnect(
                                         "manual USB list (AOA switch)",
                                         MainActivity.ConnectionUiMode.OVERLAY
                                     )
                                 } else {
-                                    Toast.makeText(mContext, R.string.switch_failed, Toast.LENGTH_SHORT).show()
+                                    ToastUtils.showToast(mContext, R.string.switch_failed, Toast.LENGTH_SHORT, force = true)
                                 }
                                 notifyDataSetChanged()
                             }
                         }
                     } else {
-                        Toast.makeText(mContext, R.string.requesting_usb_permission, Toast.LENGTH_SHORT).show()
+                        ToastUtils.showToast(mContext, R.string.requesting_usb_permission, Toast.LENGTH_SHORT)
                         ContextCompat.startForegroundService(mContext, Intent(mContext, AapService::class.java))
                         usbManager.requestPermission(
                             device.wrappedDevice,

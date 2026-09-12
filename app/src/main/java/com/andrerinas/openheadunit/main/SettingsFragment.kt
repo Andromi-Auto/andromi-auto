@@ -32,6 +32,8 @@ import com.andrerinas.openheadunit.App
 import com.andrerinas.openheadunit.R
 import com.andrerinas.openheadunit.aap.AapService
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.CredentialField
+import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.zbt.ZbtProbe
+import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.zbt.ZbtDaemonReachability
 import com.andrerinas.openheadunit.input.MediaKeyRoutingPolicy
 import com.andrerinas.openheadunit.connection.wifi.direct.P2pGroupIdentityPolicy
 import com.andrerinas.openheadunit.connection.wifi.direct.P2pIdentityRotationPolicy
@@ -40,6 +42,7 @@ import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.NativeDriverSe
 import com.andrerinas.openheadunit.aap.NativeTransport
 import com.andrerinas.openheadunit.connection.wifi.FiveGhzChannelPolicy
 import com.andrerinas.openheadunit.connection.wifi.direct.P2pBandPreference
+import com.andrerinas.openheadunit.connection.wifi.direct.StationStandDownPolicy
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.HotspotBandPreference
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.PreflightReport
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.SoftApBssidPolicy
@@ -56,6 +59,7 @@ import com.andrerinas.openheadunit.utils.LocaleHelper
 import com.andrerinas.openheadunit.BuildConfig
 import com.andrerinas.openheadunit.utils.LogExporter
 import com.andrerinas.openheadunit.utils.SettingsBackupManager
+import com.andrerinas.openheadunit.utils.ToastUtils
 import com.andrerinas.openheadunit.utils.VpnControl
 import com.andrerinas.openheadunit.utils.DialogUtils
 import com.andrerinas.openheadunit.utils.ProjectionSetupQrDialog
@@ -74,8 +78,12 @@ import com.andrerinas.openheadunit.connection.wifi.WifiLauncherMode
 import com.andrerinas.openheadunit.connection.wifi.WirelessRearmPolicy
 import java.io.File
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -182,14 +190,23 @@ class SettingsFragment : Fragment() {
     private var pendingWaitForWifiTimeout: Int? = null
     private var pendingBluetoothManagerServiceName: String? = null
     private var pendingNativeAaIgnoreExternalBt: Boolean? = null
+    private var pendingExternalBtZbtTransport: Boolean? = null
     private var pendingNativeWifiVersionExchange: Boolean? = null
     private var pendingNativeAaCompleteHfpSlc: Boolean? = null
+
+    // The probe's verdict is not a pending setting: it changes nothing and there is nothing to
+    // save. It lives in the companion object with the job that produces it. This one is
+    // per-view, because it is the thing that repaints the row.
+    private var zbtProbeFollowJob: Job? = null
+    /** Resolves which external-BT route the Native AA dialog should describe. Cancelled on exit. */
+    private var externalBtRouteJob: Job? = null
     private var pendingNativeApTransport: NativeStrategy? = null
     private var pendingNativeDriverSelectionMode: NativeDriverSelectionPolicy.Mode? = null
     private var pendingNativeDriverSelectionTimeout: Int? = null
     private var pendingNativePreferredDeviceMac: String? = null
     private var pendingWifiDirectBand: Int? = null
     private var pendingWifiDirectStableIdentity: Boolean? = null
+    private var pendingStationStandDownMode: Int? = null
     private var pendingHotspotBand: Int? = null
     private var pendingFiveGhzChannel: Int? = null
     private var pendingHotspotSsid: String? = null
@@ -237,7 +254,7 @@ class SettingsFragment : Fragment() {
         if (isGranted) {
             handleNativeAaSelection()
         } else {
-            Toast.makeText(requireContext(), R.string.bt_permission_denied, Toast.LENGTH_LONG).show()
+            ToastUtils.showToast(requireContext(), R.string.bt_permission_denied, Toast.LENGTH_LONG, force = true)
         }
     }
 
@@ -254,7 +271,7 @@ class SettingsFragment : Fragment() {
         }
         vpnConsentRequested = false
         if (!granted && VpnControl.consentDeniedRes != 0) {
-            Toast.makeText(requireContext(), VpnControl.consentDeniedRes, Toast.LENGTH_LONG).show()
+            ToastUtils.showToast(requireContext(), VpnControl.consentDeniedRes, Toast.LENGTH_LONG, force = true)
         }
         updateSettingsList()
     }
@@ -265,7 +282,7 @@ class SettingsFragment : Fragment() {
         if (isGranted) {
             action?.invoke()
         } else {
-            Toast.makeText(requireContext(), R.string.storage_permission_denied_backup, Toast.LENGTH_LONG).show()
+            ToastUtils.showToast(requireContext(), R.string.storage_permission_denied_backup, Toast.LENGTH_LONG, force = true)
         }
     }
 
@@ -361,6 +378,7 @@ class SettingsFragment : Fragment() {
         pendingWaitForWifiTimeout = settings.waitForWifiTimeout
         pendingBluetoothManagerServiceName = settings.bluetoothManagerServiceName
         pendingNativeAaIgnoreExternalBt = settings.nativeAaIgnoreExternalBt
+        pendingExternalBtZbtTransport = settings.externalBtZbtTransport
         pendingNativeWifiVersionExchange = settings.nativeWifiVersionExchange
         pendingNativeAaCompleteHfpSlc = settings.nativeAaCompleteHfpSlc
         pendingNativeApTransport = settings.nativeApStrategy
@@ -369,6 +387,7 @@ class SettingsFragment : Fragment() {
         pendingNativePreferredDeviceMac = settings.nativePreferredDeviceMac
         pendingWifiDirectBand = settings.wifiDirectBand
         pendingWifiDirectStableIdentity = settings.wifiDirectStableIdentity
+        pendingStationStandDownMode = settings.stationStandDownMode
         pendingHotspotBand = settings.hotspotBand
         pendingFiveGhzChannel = settings.fiveGhzChannel
         pendingHotspotSsid = settings.hotspotSsid
@@ -492,6 +511,7 @@ class SettingsFragment : Fragment() {
         pendingWaitForWifiTimeout = settings.waitForWifiTimeout
         pendingBluetoothManagerServiceName = settings.bluetoothManagerServiceName
         pendingNativeAaIgnoreExternalBt = settings.nativeAaIgnoreExternalBt
+        pendingExternalBtZbtTransport = settings.externalBtZbtTransport
         pendingNativeWifiVersionExchange = settings.nativeWifiVersionExchange
         pendingNativeAaCompleteHfpSlc = settings.nativeAaCompleteHfpSlc
         pendingNativeApTransport = settings.nativeApStrategy
@@ -500,6 +520,7 @@ class SettingsFragment : Fragment() {
         pendingNativePreferredDeviceMac = ""
         pendingWifiDirectBand = settings.wifiDirectBand
         pendingWifiDirectStableIdentity = settings.wifiDirectStableIdentity
+        pendingStationStandDownMode = settings.stationStandDownMode
         pendingHotspotBand = settings.hotspotBand
         pendingFiveGhzChannel = settings.fiveGhzChannel
         pendingHotspotSsid = settings.hotspotSsid
@@ -517,6 +538,73 @@ class SettingsFragment : Fragment() {
         pendingHideBatteryLevel = settings.hideBatteryLevel
         pendingHidePhoneSignal = settings.hidePhoneSignal
         pendingHideClock = settings.hideClock
+    }
+
+    /**
+     * Explain what the probe does, then run it off the main thread if the user agrees.
+     *
+     * Asked rather than run on tap because the name alone does not say that it touches nothing. On
+     * a head unit that already refuses to connect, an unexplained "test" invites the fear that it
+     * will make things worse.
+     */
+    private fun confirmAndRunZbtProbe() {
+        // Same builder and theme as every other dialog here. A bare AlertDialog.Builder came up
+        // unthemed on a 1024x600 unit with no reachable button, and two rounds were spent on a probe
+        // that never ran. The message stays short for the same reason: a taller one pushes the
+        // button bar off a 600-pixel screen.
+        MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
+            .setTitle(R.string.zbt_probe_title)
+            .setMessage(R.string.zbt_probe_message)
+            .setNegativeButton(android.R.string.cancel, null)
+            .setNeutralButton(R.string.zbt_probe_watch_only) { _, _ ->
+                startZbtProbe(askModuleToReconnect = false)
+            }
+            .setPositiveButton(R.string.zbt_probe_wake_and_watch) { _, _ ->
+                startZbtProbe(askModuleToReconnect = true)
+            }
+            .show()
+    }
+
+    /**
+     * Start the probe, unless one is already running, and follow it on screen while it does.
+     *
+     * The work and the UI refresh are on deliberately different scopes. The probe outlives this
+     * screen (see the companion object); the refresh must not, so it is a view-scoped loop that
+     * reads the shared verdict and stops when the run does.
+     */
+    private fun startZbtProbe(askModuleToReconnect: Boolean) {
+        if (zbtProbeJob?.isActive != true) {
+            zbtProbeResult = getString(R.string.zbt_probe_running)
+            zbtProbeJob = zbtProbeScope.launch {
+                val verdict = try {
+                    // The row shows every stage because the run lasts about two minutes. A probe
+                    // showing one unchanging word for that long reads as hung.
+                    ZbtProbe.run(
+                        askModuleToReconnect = askModuleToReconnect,
+                        onProgress = { text -> zbtProbeResult = text },
+                        keepGoing = { isActive }
+                    )
+                } catch (e: Throwable) {
+                    // Never let a probe take the settings screen down with it.
+                    AppLog.e("SettingsFragment: external Bluetooth probe failed", e)
+                    "Probe failed: ${e.javaClass.simpleName}"
+                }
+                zbtProbeResult = verdict
+            }
+        }
+        followZbtProbe()
+    }
+
+    /** Repaint the probe's row until the run ends. Cheap, and only alive while the view is. */
+    private fun followZbtProbe() {
+        if (zbtProbeFollowJob?.isActive == true) return
+        zbtProbeFollowJob = viewLifecycleOwner.lifecycleScope.launch {
+            do {
+                updateSettingsList()
+                delay(500)
+            } while (zbtProbeJob?.isActive == true)
+            updateSettingsList()
+        }
     }
 
     private fun setupToolbar() {
@@ -657,6 +745,7 @@ class SettingsFragment : Fragment() {
         pendingWaitForWifiTimeout?.let { settings.waitForWifiTimeout = it }
         pendingBluetoothManagerServiceName?.let { settings.bluetoothManagerServiceName = it }
         pendingNativeAaIgnoreExternalBt?.let { settings.nativeAaIgnoreExternalBt = it }
+        pendingExternalBtZbtTransport?.let { settings.externalBtZbtTransport = it }
         pendingNativeWifiVersionExchange?.let { settings.nativeWifiVersionExchange = it }
         pendingNativeAaCompleteHfpSlc?.let { settings.nativeAaCompleteHfpSlc = it }
         pendingNativeApTransport?.let { settings.nativeApStrategy = it }
@@ -665,6 +754,7 @@ class SettingsFragment : Fragment() {
         pendingNativePreferredDeviceMac?.let { settings.nativePreferredDeviceMac = it }
         pendingWifiDirectBand?.let { settings.wifiDirectBand = it }
         pendingWifiDirectStableIdentity?.let { settings.wifiDirectStableIdentity = it }
+        pendingStationStandDownMode?.let { settings.stationStandDownMode = it }
         pendingHotspotBand?.let { settings.hotspotBand = it }
         pendingFiveGhzChannel?.let { settings.fiveGhzChannel = it }
         pendingHotspotSsid?.let { settings.hotspotSsid = it }
@@ -704,7 +794,7 @@ class SettingsFragment : Fragment() {
 
         if (requiresRestart) {
             if (App.provide(requireContext()).commManager.isConnected) {
-                Toast.makeText(context, getString(R.string.stopping_service), Toast.LENGTH_SHORT).show()
+                ToastUtils.showToast(context, getString(R.string.stopping_service), Toast.LENGTH_SHORT, force = true)
                 val stopServiceIntent = Intent(requireContext(), AapService::class.java).apply {
                     action = AapService.ACTION_STOP_SERVICE
                 }
@@ -718,7 +808,7 @@ class SettingsFragment : Fragment() {
         updateSaveButtonState()
         updateSettingsList()
 
-        Toast.makeText(context, getString(R.string.settings_saved), Toast.LENGTH_SHORT).show()
+        ToastUtils.showToast(context, getString(R.string.settings_saved), Toast.LENGTH_SHORT, force = true)
 
         if (languageChanged || hudMirroringChanged) {
             requireActivity().recreate()
@@ -784,6 +874,7 @@ class SettingsFragment : Fragment() {
                         pendingWaitForWifiTimeout != settings.waitForWifiTimeout ||
                         pendingBluetoothManagerServiceName != settings.bluetoothManagerServiceName ||
                         pendingNativeAaIgnoreExternalBt != settings.nativeAaIgnoreExternalBt ||
+                        pendingExternalBtZbtTransport != settings.externalBtZbtTransport ||
                         pendingNativeWifiVersionExchange != settings.nativeWifiVersionExchange ||
                         pendingNativeAaCompleteHfpSlc != settings.nativeAaCompleteHfpSlc ||
                         pendingNativeApTransport != settings.nativeApStrategy ||
@@ -792,6 +883,7 @@ class SettingsFragment : Fragment() {
                         pendingNativePreferredDeviceMac != settings.nativePreferredDeviceMac ||
                         pendingWifiDirectBand != settings.wifiDirectBand ||
                         pendingWifiDirectStableIdentity != settings.wifiDirectStableIdentity ||
+                        pendingStationStandDownMode != settings.stationStandDownMode ||
                         pendingHotspotBand != settings.hotspotBand ||
                         pendingFiveGhzChannel != settings.fiveGhzChannel ||
                         pendingHotspotSsid != settings.hotspotSsid ||
@@ -1156,6 +1248,7 @@ class SettingsFragment : Fragment() {
                 }
 
                 addWifiDirectIdentitySettings(items)
+                addStationStandDownSetting(items)
             }
 
             // Multi-Driver Selection settings for Native AA
@@ -1336,6 +1429,36 @@ class SettingsFragment : Fragment() {
             }
         }
 
+        // Only on units whose Bluetooth is an external module, where the native route is refused
+        // outright and this is the one thing that might change that. Everywhere else it would be an
+        // action with no meaning.
+        //
+        // Deliberately outside the Native AA block: the reporters who need this are on units where
+        // that mode does not work, so requiring them to select it first would hide the diagnostic
+        // behind the very setting it is diagnosing.
+        if (BluetoothHelper.externalBtEvidence != null) {
+            items.add(SettingItem.ToggleSettingEntry(
+                stableId = "externalBtZbtTransport",
+                nameResId = R.string.external_bt_transport,
+                descriptionResId = R.string.external_bt_transport_description,
+                isChecked = pendingExternalBtZbtTransport ?: settings.externalBtZbtTransport,
+                searchKeywords = "zbt zlink external bluetooth module transport handshake vendor daemon",
+                onCheckedChanged = { isChecked ->
+                    pendingExternalBtZbtTransport = isChecked
+                    checkChanges()
+                    updateSettingsList()
+                }
+            ))
+
+            items.add(SettingItem.SettingEntry(
+                stableId = "zbtProbe",
+                nameResId = R.string.zbt_probe_title,
+                value = zbtProbeResult ?: getString(R.string.zbt_probe_idle),
+                searchKeywords = "zbt zlink external bluetooth module probe test vendor daemon rfcomm",
+                onClick = { _ -> confirmAndRunZbtProbe() }
+            ))
+        }
+
         // Sub-setting for Headunit Server (Manual vs Auto)
         if (pendingWifiConnectionMode == WifiLauncherMode.MANUAL || pendingWifiConnectionMode == WifiLauncherMode.AUTO) {
             items.add(SettingItem.SegmentedButtonSettingEntry(
@@ -1453,9 +1576,9 @@ class SettingsFragment : Fragment() {
                             when {
                                 trimmed.isEmpty() -> pendingStaticBSSID = "0"
                                 SoftApBssidPolicy.isUsable(trimmed) -> pendingStaticBSSID = trimmed
-                                else -> Toast.makeText(
-                                    requireContext(), R.string.preflight_invalid_bssid, Toast.LENGTH_LONG
-                                ).show()
+                                else -> ToastUtils.showToast(
+                                    requireContext(), R.string.preflight_invalid_bssid, Toast.LENGTH_LONG, force = true
+                                )
                             }
                             checkChanges()
                             updateSettingsList()
@@ -1488,9 +1611,9 @@ class SettingsFragment : Fragment() {
                         when {
                             trimmed.isEmpty() -> pendingBluetoothAddress = ""
                             SoftApBssidPolicy.isUsable(trimmed) -> pendingBluetoothAddress = trimmed
-                            else -> Toast.makeText(
-                                requireContext(), R.string.invalid_bluetooth_address, Toast.LENGTH_LONG
-                            ).show()
+                            else -> ToastUtils.showToast(
+                                requireContext(), R.string.invalid_bluetooth_address, Toast.LENGTH_LONG, force = true
+                            )
                         }
                         checkChanges()
                         updateSettingsList()
@@ -2698,7 +2821,7 @@ class SettingsFragment : Fragment() {
                 val context = requireContext()
                 val exporterLevel = settings.exporterLogLevel
                 if (exporterLevel == LogExporter.LogLevel.SILENT) {
-                    Toast.makeText(context, getString(R.string.start_log_capture_in_silent), Toast.LENGTH_LONG).show()
+                    ToastUtils.showToast(context, getString(R.string.start_log_capture_in_silent), Toast.LENGTH_LONG, force = true)
                     return@SettingEntry
                 }
 
@@ -2730,7 +2853,7 @@ class SettingsFragment : Fragment() {
                 val context = requireContext()
                 val exporterLevel = settings.exporterLogLevel
                 if (exporterLevel == LogExporter.LogLevel.SILENT) {
-                    Toast.makeText(context, getString(R.string.failed_export_in_silent_logs), Toast.LENGTH_LONG).show()
+                    ToastUtils.showToast(context, getString(R.string.failed_export_in_silent_logs), Toast.LENGTH_LONG, force = true)
                     return@SettingEntry
                 }
 
@@ -2760,7 +2883,7 @@ class SettingsFragment : Fragment() {
                             }
                             .show()
                     } else {
-                        Toast.makeText(context, getString(R.string.failed_export_logs), Toast.LENGTH_SHORT).show()
+                        ToastUtils.showToast(context, getString(R.string.failed_export_logs), Toast.LENGTH_SHORT, force = true)
                     }
                 }
             }
@@ -3120,10 +3243,10 @@ class SettingsFragment : Fragment() {
                 withContext(Dispatchers.IO) {
                     SettingsBackupManager.exportToUri(appContext, uri)
                 }
-                Toast.makeText(requireContext(), R.string.settings_exported, Toast.LENGTH_LONG).show()
+                ToastUtils.showToast(requireContext(), R.string.settings_exported, Toast.LENGTH_LONG, force = true)
             } catch (e: Exception) {
                 if (e is CancellationException) throw e
-                Toast.makeText(requireContext(), getString(R.string.settings_export_failed, e.localizedMessage ?: ""), Toast.LENGTH_LONG).show()
+                ToastUtils.showToast(requireContext(), getString(R.string.settings_export_failed, e.localizedMessage ?: ""), Toast.LENGTH_LONG, force = true)
             }
         }
     }
@@ -3138,7 +3261,7 @@ class SettingsFragment : Fragment() {
                 showSettingsExportedDialog(file)
             } catch (e: Exception) {
                 if (e is CancellationException) throw e
-                Toast.makeText(requireContext(), getString(R.string.settings_export_failed, e.localizedMessage ?: ""), Toast.LENGTH_LONG).show()
+                ToastUtils.showToast(requireContext(), getString(R.string.settings_export_failed, e.localizedMessage ?: ""), Toast.LENGTH_LONG, force = true)
             }
         }
     }
@@ -3170,7 +3293,7 @@ class SettingsFragment : Fragment() {
                 showSettingsExportedDialog(file)
             } catch (e: Exception) {
                 if (e is CancellationException) throw e
-                Toast.makeText(requireContext(), getString(R.string.settings_export_failed, e.localizedMessage ?: ""), Toast.LENGTH_LONG).show()
+                ToastUtils.showToast(requireContext(), getString(R.string.settings_export_failed, e.localizedMessage ?: ""), Toast.LENGTH_LONG, force = true)
             }
         }
     }
@@ -3194,7 +3317,7 @@ class SettingsFragment : Fragment() {
                 shareSettingsBackup(file)
             } catch (e: Exception) {
                 if (e is CancellationException) throw e
-                Toast.makeText(requireContext(), getString(R.string.settings_export_failed, e.localizedMessage ?: ""), Toast.LENGTH_LONG).show()
+                ToastUtils.showToast(requireContext(), getString(R.string.settings_export_failed, e.localizedMessage ?: ""), Toast.LENGTH_LONG, force = true)
             }
         }
     }
@@ -3258,7 +3381,7 @@ class SettingsFragment : Fragment() {
                 handleResetSettings(snapshot, result)
             } catch (e: Exception) {
                 if (e is CancellationException) throw e
-                Toast.makeText(appContext, appContext.getString(R.string.settings_reset_failed, e.localizedMessage ?: ""), Toast.LENGTH_LONG).show()
+                ToastUtils.showToast(appContext, appContext.getString(R.string.settings_reset_failed, e.localizedMessage ?: ""), Toast.LENGTH_LONG, force = true)
             }
         }
     }
@@ -3278,7 +3401,7 @@ class SettingsFragment : Fragment() {
         ctx.sendBroadcast(nightModeUpdateIntent)
 
         if (SettingsBackupManager.requiresProjectionRestart(result.changedKeys) && App.provide(ctx).commManager.isConnected) {
-            Toast.makeText(ctx, ctx.getString(R.string.stopping_service), Toast.LENGTH_SHORT).show()
+            ToastUtils.showToast(ctx, ctx.getString(R.string.stopping_service), Toast.LENGTH_SHORT, force = true)
             val stopServiceIntent = Intent(ctx, AapService::class.java).apply {
                 action = AapService.ACTION_STOP_SERVICE
             }
@@ -3291,7 +3414,7 @@ class SettingsFragment : Fragment() {
         updateSaveButtonState()
         updateSettingsList()
 
-        Toast.makeText(ctx, R.string.settings_reset, Toast.LENGTH_LONG).show()
+        ToastUtils.showToast(ctx, R.string.settings_reset, Toast.LENGTH_LONG, force = true)
 
         if (shouldRecreateAfterImport(snapshot)) {
             activity?.recreate()
@@ -3434,7 +3557,7 @@ class SettingsFragment : Fragment() {
                 handleImportedSettings(snapshot, result)
             } catch (e: Exception) {
                 if (e is CancellationException) throw e
-                Toast.makeText(requireContext(), getString(R.string.settings_import_failed, e.localizedMessage ?: ""), Toast.LENGTH_LONG).show()
+                ToastUtils.showToast(requireContext(), getString(R.string.settings_import_failed, e.localizedMessage ?: ""), Toast.LENGTH_LONG, force = true)
             }
         }
     }
@@ -3450,7 +3573,7 @@ class SettingsFragment : Fragment() {
                 handleImportedSettings(snapshot, result)
             } catch (e: Exception) {
                 if (e is CancellationException) throw e
-                Toast.makeText(requireContext(), getString(R.string.settings_import_failed, e.localizedMessage ?: ""), Toast.LENGTH_LONG).show()
+                ToastUtils.showToast(requireContext(), getString(R.string.settings_import_failed, e.localizedMessage ?: ""), Toast.LENGTH_LONG, force = true)
             }
         }
     }
@@ -3486,7 +3609,7 @@ class SettingsFragment : Fragment() {
         ctx.sendBroadcast(nightModeUpdateIntent)
 
         if (SettingsBackupManager.requiresProjectionRestart(result.changedKeys) && App.provide(ctx).commManager.isConnected) {
-            Toast.makeText(ctx, getString(R.string.stopping_service), Toast.LENGTH_SHORT).show()
+            ToastUtils.showToast(ctx, getString(R.string.stopping_service), Toast.LENGTH_SHORT, force = true)
             val stopServiceIntent = Intent(ctx, AapService::class.java).apply {
                 action = AapService.ACTION_STOP_SERVICE
             }
@@ -3499,11 +3622,12 @@ class SettingsFragment : Fragment() {
         updateSaveButtonState()
         updateSettingsList()
 
-        Toast.makeText(
+        ToastUtils.showToast(
             ctx,
             getString(R.string.settings_imported, result.importedKeys, result.skippedKeys),
-            Toast.LENGTH_LONG
-        ).show()
+            Toast.LENGTH_LONG,
+            force = true
+        )
 
         if (shouldRecreateAfterImport(snapshot)) {
             activity?.recreate()
@@ -3865,6 +3989,10 @@ class SettingsFragment : Fragment() {
             settings = App.provide(requireContext()).settings
             updateSettingsList()
         }
+
+        // A probe started before the vendor's projection app took the screen is still running. Pick
+        // its row back up, so coming back here shows where it got to rather than a stale line.
+        if (zbtProbeJob?.isActive == true) followZbtProbe()
     }
 
     private fun getKillOnDisconnectConflicts(): List<String> {
@@ -3910,7 +4038,7 @@ class SettingsFragment : Fragment() {
                 confirmed = true
                 if (hasDisableableConflicts) {
                     disableKillOnDisconnectConflicts()
-                    Toast.makeText(context, getString(R.string.kill_on_disconnect_conflicts_disabled), Toast.LENGTH_LONG).show()
+                    ToastUtils.showToast(context, getString(R.string.kill_on_disconnect_conflicts_disabled), Toast.LENGTH_LONG, force = true)
                 }
                 pendingKillOnDisconnect = true
                 checkChanges()
@@ -4049,6 +4177,38 @@ class SettingsFragment : Fragment() {
     }
 
     /**
+     * Whether this unit leaves its own WiFi network for the bring-up. Only where the platform would
+     * honour it: below Android 10 anything may ask, from 10 to 14 the overlay permission gets past
+     * the framework's check and the hint says so, and from 15 there is no route, so no row.
+     */
+    private fun addStationStandDownSetting(items: MutableList<SettingItem>) {
+        if (!StationStandDownPolicy.isAvailable(Build.VERSION.SDK_INT, true)) return
+        items.add(SettingItem.SegmentedButtonSettingEntry(
+            stableId = "stationStandDownMode",
+            nameResId = R.string.stand_down_station,
+            options = listOf(
+                getString(R.string.stand_down_station_auto),
+                getString(R.string.stand_down_station_always),
+                getString(R.string.stand_down_station_never)
+            ),
+            selectedIndex = (pendingStationStandDownMode ?: 0).coerceIn(0, 2),
+            onOptionSelected = { index ->
+                pendingStationStandDownMode = index
+                checkChanges()
+                updateSettingsList()
+            }
+        ))
+        val overlayGranted = AppPermissions.isOverlayGranted(requireContext())
+        val hint = getString(R.string.stand_down_station_hint)
+        items.add(SettingItem.InfoBanner(
+            stableId = "stationStandDownHint",
+            textResId = R.string.stand_down_station_hint,
+            text = if (StationStandDownPolicy.isAvailable(Build.VERSION.SDK_INT, overlayGranted)) hint
+                else getString(R.string.stand_down_station_needs_overlay) + " " + hint
+        ))
+    }
+
+    /**
      * Whether the group keeps its name and passphrase between bring-ups, and a way to draw new ones.
      *
      * Only where the group is ours to name: the hotspot's identity is the access point's own. The
@@ -4107,12 +4267,13 @@ class SettingsFragment : Fragment() {
                             nativeWifiDirectActive = settings.wifiConnectionMode == WifiLauncherMode.NATIVE &&
                                 settings.nativeApStrategy == NativeStrategy.WIFI_DIRECT,
                         )
-                        Toast.makeText(
+                        ToastUtils.showToast(
                             requireContext(),
                             if (appliesNow) R.string.wifi_direct_new_identity_applied
                             else R.string.wifi_direct_new_identity_done,
-                            Toast.LENGTH_LONG
-                        ).show()
+                            Toast.LENGTH_LONG,
+                            force = true
+                        )
                         updateSettingsList()
                     }
                     .setNegativeButton(android.R.string.cancel, null)
@@ -4337,18 +4498,19 @@ class SettingsFragment : Fragment() {
         // the generic "try it anyway".
         val externalBtEvidence = BluetoothHelper.externalBtEvidence
         if (externalBtEvidence != null) {
-            MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
-                .setTitle(R.string.external_bt_nativeaa)
-                .setMessage(getString(R.string.external_bt_nativeaa_desc, externalBtEvidence))
-                // Selecting the mode is still allowed: the detection marks a class of hardware
-                // rather than measuring this one, and the Advanced settings carry a switch that
-                // starts the route anyway. Without it the mode stays off, and the log says why.
-                .setPositiveButton(android.R.string.ok) { dialog, _ ->
-                    acceptNativeAaMode()
-                    dialog.dismiss()
+            // Unless there is a route to that chip, in which case the flat refusal below would be
+            // wrong: either the user turned the transport on, or the daemon answered when asked.
+            // The dial is a socket connect, so it never happens on this thread.
+            val chosen = pendingExternalBtZbtTransport ?: settings.externalBtZbtTransport
+            externalBtRouteJob?.cancel()
+            externalBtRouteJob = viewLifecycleOwner.lifecycleScope.launch {
+                val viaModule = if (chosen) true else {
+                    ZbtDaemonReachability.cached()
+                        ?: withContext(Dispatchers.IO) { ZbtDaemonReachability.resolve() }
                 }
-                .setNegativeButton(android.R.string.cancel, null)
-                .show()
+                if (!isAdded) return@launch
+                showExternalBtNativeAaDialog(externalBtEvidence, viaModule)
+            }
             return
         }
         if (NativeAaHandshakeManager.checkCompatibility(requireContext())) {
@@ -4372,6 +4534,25 @@ class SettingsFragment : Fragment() {
                 .setNegativeButton(android.R.string.cancel, null)
                 .show()
         }
+    }
+
+    /** The external-module dialog, once the route it should describe is known. */
+    private fun showExternalBtNativeAaDialog(externalBtEvidence: String, viaModule: Boolean) {
+        MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
+            .setTitle(if (viaModule) R.string.external_bt_module_nativeaa else R.string.external_bt_nativeaa)
+            .setMessage(
+                if (viaModule) getString(R.string.external_bt_module_nativeaa_desc, externalBtEvidence)
+                else getString(R.string.external_bt_nativeaa_desc, externalBtEvidence)
+            )
+            // Selecting the mode is still allowed either way. With a route to the module it is a
+            // real choice; without one the mode is stored but the route stays switched off at
+            // connection time, so turning the transport on later needs no second visit here.
+            .setPositiveButton(android.R.string.ok) { dialog, _ ->
+                acceptNativeAaMode()
+                dialog.dismiss()
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
     }
 
     /**
@@ -4547,7 +4728,7 @@ class SettingsFragment : Fragment() {
                         next()
                     }
                     else -> {
-                        Toast.makeText(requireContext(), R.string.preflight_invalid_bssid, Toast.LENGTH_LONG).show()
+                        ToastUtils.showToast(requireContext(), R.string.preflight_invalid_bssid, Toast.LENGTH_LONG, force = true)
                         // Ask again rather than move on: this is the field where a wrong value does
                         // more harm than no value.
                         promptForField(missing, index)
@@ -4572,6 +4753,26 @@ class SettingsFragment : Fragment() {
 
     companion object {
         private val SAVE_ITEM_ID = 1001
+
+        /**
+         * The external-Bluetooth probe runs here rather than on the fragment's scope, and its
+         * verdict lives here rather than on the instance.
+         *
+         * Its listening phase asks the user to start a wireless connection, which on these units
+         * means the vendor's projection app taking the display and destroying this fragment's view.
+         * A view-scoped job would die with it and report that nothing arrived during a run it was
+         * never allowed to finish, which is exactly the answer the probe exists to distinguish.
+         *
+         * Nothing here holds a Context, so outliving the screen leaks nothing.
+         */
+        private val zbtProbeScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+        @Volatile
+        private var zbtProbeJob: Job? = null
+
+        /** Latest probe verdict or progress line, or null if it has never been run. */
+        @Volatile
+        private var zbtProbeResult: String? = null
     }
 
     private fun showOemAppManagementDialog() {
@@ -4667,7 +4868,7 @@ class SettingsFragment : Fragment() {
                         .setNeutralButton(R.string.copy_to_clipboard) { _, _ ->
                             val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
                             clipboard?.setPrimaryClip(ClipData.newPlainText("ADB Commands", fullMsg))
-                            Toast.makeText(context, R.string.copied_to_clipboard, Toast.LENGTH_SHORT).show()
+                            ToastUtils.showToast(context, R.string.copied_to_clipboard, Toast.LENGTH_SHORT, force = true)
                         }
                         .show()
                 }
@@ -4678,9 +4879,9 @@ class SettingsFragment : Fragment() {
                         val (success, out) = OemAppManager.disableTarget(context, status)
                         progressLoading.visibility = View.GONE
                         if (success) {
-                            Toast.makeText(context, R.string.oem_app_action_success, Toast.LENGTH_SHORT).show()
+                            ToastUtils.showToast(context, R.string.oem_app_action_success, Toast.LENGTH_SHORT, force = true)
                         } else {
-                            Toast.makeText(context, getString(R.string.oem_app_action_failed, out), Toast.LENGTH_LONG).show()
+                            ToastUtils.showToast(context, getString(R.string.oem_app_action_failed, out), Toast.LENGTH_LONG, force = true)
                         }
                         loadStatus()
                     }
@@ -4692,9 +4893,9 @@ class SettingsFragment : Fragment() {
                         val (success, out) = OemAppManager.restoreTarget(context, status)
                         progressLoading.visibility = View.GONE
                         if (success) {
-                            Toast.makeText(context, R.string.oem_app_action_success, Toast.LENGTH_SHORT).show()
+                            ToastUtils.showToast(context, R.string.oem_app_action_success, Toast.LENGTH_SHORT, force = true)
                         } else {
-                            Toast.makeText(context, getString(R.string.oem_app_action_failed, out), Toast.LENGTH_LONG).show()
+                            ToastUtils.showToast(context, getString(R.string.oem_app_action_failed, out), Toast.LENGTH_LONG, force = true)
                         }
                         loadStatus()
                     }

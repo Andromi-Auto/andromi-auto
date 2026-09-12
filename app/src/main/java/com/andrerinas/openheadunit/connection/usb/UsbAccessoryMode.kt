@@ -4,6 +4,8 @@ import android.hardware.usb.UsbConstants
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbDeviceConnection
 import android.hardware.usb.UsbManager
+import com.andrerinas.openheadunit.connection.ConnectionStage
+import com.andrerinas.openheadunit.connection.ConnectionStageTracker
 import com.andrerinas.openheadunit.utils.Utils
 import com.andrerinas.openheadunit.utils.AppLog
 
@@ -93,6 +95,7 @@ class UsbAccessoryMode(private val usbMgr: UsbManager) {
         // len < 0: phone disconnected before the ACK because it started re-enumerating
         //          immediately upon receipt — the command was still received. Treat as success.
         AppLog.i("Acc start sent (len=$len). Waiting for re-enumeration...")
+        ConnectionStageTracker.report(ConnectionStage.USB_SWITCHING)
         try { Thread.sleep(500) } catch (e: Exception) {}
         return true
     }

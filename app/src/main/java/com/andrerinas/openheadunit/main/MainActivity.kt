@@ -17,6 +17,7 @@ import android.os.Bundle
 import android.view.KeyEvent
 import android.view.View
 import android.widget.FrameLayout
+import android.widget.TextView
 import android.widget.ImageView
 import android.widget.Toast
 import android.widget.VideoView
@@ -36,6 +37,10 @@ import com.andrerinas.openheadunit.aap.NativeTransport
 import com.andrerinas.openheadunit.app.BaseActivity
 import com.andrerinas.openheadunit.app.BtAutoStartRearmPolicy
 import com.andrerinas.openheadunit.connection.CommManager
+import com.andrerinas.openheadunit.connection.ConnectionNetworkDetail
+import com.andrerinas.openheadunit.connection.ConnectionNetworkDetailPolicy
+import com.andrerinas.openheadunit.connection.ConnectionStage
+import com.andrerinas.openheadunit.connection.ConnectionStageTracker
 import com.andrerinas.openheadunit.utils.AppLog
 import com.andrerinas.openheadunit.utils.AppPermissions
 import com.andrerinas.openheadunit.utils.ConnectionIssue
@@ -45,6 +50,7 @@ import com.andrerinas.openheadunit.utils.Settings
 import android.os.SystemClock
 import com.andrerinas.openheadunit.connection.wifi.WifiLauncherMode
 import com.andrerinas.openheadunit.utils.SystemUI
+import com.andrerinas.openheadunit.utils.ToastUtils
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
@@ -67,6 +73,9 @@ class MainActivity : BaseActivity() {
     private val viewModel: MainViewModel by viewModels()
 
     private var autoConnectWatchdog: Job? = null
+    private var renderedStage: ConnectionStage? = null
+    private var loggedStage: ConnectionStage? = null
+    private var renderedNetwork: ConnectionNetworkDetail? = null
     private var autoConnectKenBurnsAnim: ObjectAnimator? = null
 
     /**
@@ -191,7 +200,7 @@ class MainActivity : BaseActivity() {
                 // user isn't trapped if a manual connection attempt hangs. Pill
                 // mode is non-blocking, so Back falls through to its normal
                 // navigation behavior there.
-                if (autoConnectInProgress && autoConnectMode == ConnectionUiMode.OVERLAY) {
+                if (overlayOwnsScreen()) {
                     cancelAutoConnect()
                     return
                 }
@@ -201,7 +210,7 @@ class MainActivity : BaseActivity() {
                     finish()
                 } else {
                     lastBackPressTime = System.currentTimeMillis()
-                    Toast.makeText(this@MainActivity, R.string.press_back_again_to_exit, Toast.LENGTH_SHORT).show()
+                    ToastUtils.showToast(this@MainActivity, R.string.press_back_again_to_exit, Toast.LENGTH_SHORT, force = true)
                 }
             }
         })
@@ -248,6 +257,7 @@ class MainActivity : BaseActivity() {
         }
 
         observeConnectionStateForOverlay()
+        observeConnectionStage()
     }
 
     /**
@@ -263,16 +273,32 @@ class MainActivity : BaseActivity() {
      *        and the user has the show-text option enabled, this string is shown
      *        instead of the generic "Android Auto is starting…". Used by the
      *        Nearby selector to surface the picked device name.
+     * @param statusTextIsWakeClaim true when [customStatusText] says the phone is
+     *        disconnected and being woken; such a text is dropped once the phone
+     *        answers, so it never follows onto the projection screen.
      */
     @JvmOverloads
-    fun beginAutoConnect(reason: String, mode: ConnectionUiMode, customStatusText: String? = null) {
-        if (autoConnectInProgress) return
+    fun beginAutoConnect(
+        reason: String,
+        mode: ConnectionUiMode,
+        customStatusText: String? = null,
+        statusTextIsWakeClaim: Boolean = false
+    ) {
+        // The flag is on the companion and the watchdog on this instance's scope, so an attempt
+        // can reach here with nothing watching it at all: spend it if it is over, re-arm it if not.
+        endAutoConnectIfExpired()
+        if (autoConnectInProgress) {
+            ensureAutoConnectWatchdog(rearmed = true)
+            return
+        }
         val commManager = App.provide(this).commManager
         // If we are already past the connection phase, no indicator is needed.
         if (commManager.isConnected) return
         AppLog.i("Auto-connect: begin ($reason, mode=$mode)")
         autoConnectInProgress = true
         autoConnectMode = mode
+        autoConnectDeadlineElapsed =
+            AutoConnectAttemptPolicy.deadlineAt(mode, SystemClock.elapsedRealtime())
         // Seed hasAdvancedToActiveState from the current connection state. If
         // something else (e.g. AapService responding to a USB attach) already
         // moved the state into Connecting before we got here, the StateFlow
@@ -285,6 +311,7 @@ class MainActivity : BaseActivity() {
                 currentState is CommManager.ConnectionState.Connected ||
                 currentState is CommManager.ConnectionState.StartingTransport
         autoConnectStatusText = customStatusText
+        autoConnectStatusIsWakeClaim = statusTextIsWakeClaim
         // Hand the status text off to AapProjectionActivity so its own loading
         // screen continues to show the same context-specific label after the
         // handshake completes and AAP takes over the UI. AAP reads and clears
@@ -298,6 +325,10 @@ class MainActivity : BaseActivity() {
      * Dispatches to the pill or overlay show-method based on [autoConnectMode].
      */
     private fun showAutoConnectUi() {
+        // Here rather than in the show-methods, so no mode can start an attempt that outlives its
+        // own UI. The promotion to OVERLAY comes back through here, and the bound belongs to the
+        // attempt rather than to the UI it is wearing.
+        ensureAutoConnectWatchdog(rearmed = false)
         when (autoConnectMode) {
             ConnectionUiMode.PILL,
             ConnectionUiMode.PILL_THEN_OVERLAY -> showAutoConnectPill()
@@ -341,6 +372,13 @@ class MainActivity : BaseActivity() {
                         is CommManager.ConnectionState.Connected,
                         is CommManager.ConnectionState.StartingTransport -> {
                             hasAdvancedToActiveState = true
+                            ConnectionStageTracker.report(
+                                if (state is CommManager.ConnectionState.StartingTransport) {
+                                    ConnectionStage.SECURING
+                                } else {
+                                    ConnectionStage.CONNECTING
+                                }
+                            )
                             // The pill/overlay should already be visible (set when auto-connect
                             // was requested); ensure it is in case the request raced with
                             // setContentView or the activity was recreated mid-attempt.
@@ -351,16 +389,19 @@ class MainActivity : BaseActivity() {
                                     AppLog.i("Auto-connect: a phone is answering, taking the full screen.")
                                     autoConnectMode = ConnectionUiMode.OVERLAY
                                     hideAutoConnectPill()
-                                    // The pill said this phone was disconnected. It is answering now,
+                                    // A pill that said this phone was disconnected is answered now,
                                     // so that text must not follow it onto the projection screen.
-                                    autoConnectStatusText = null
-                                    AapProjectionActivity.pendingStatusText = null
+                                    if (autoConnectStatusIsWakeClaim) {
+                                        autoConnectStatusText = null
+                                        AapProjectionActivity.pendingStatusText = null
+                                    }
                                 }
                                 showAutoConnectUi()
                             }
                         }
                         is CommManager.ConnectionState.HandshakeComplete,
                         is CommManager.ConnectionState.TransportStarted -> {
+                            ConnectionStageTracker.report(ConnectionStage.STARTING_PROJECTION)
                             // AapProjectionActivity is launching (HandshakeComplete) or
                             // has launched (TransportStarted). Hide our overlay so we
                             // don't keep video/animation resources alive while AAP
@@ -394,17 +435,25 @@ class MainActivity : BaseActivity() {
         autoConnectWatchdog?.cancel()
         autoConnectWatchdog = null
         autoConnectInProgress = false
+        autoConnectDeadlineElapsed = 0L
         hasAdvancedToActiveState = false
         autoConnectStatusText = null
+        autoConnectStatusIsWakeClaim = false
         if (!success) {
             // Failure path: AAP is not going to launch, so clear the handover
             // value so it can't appear on a later, unrelated connection. On
             // success we leave it alone, AAP either already consumed it in
             // onCreate or is about to.
             AapProjectionActivity.pendingStatusText = null
+            // The stack is still armed after a failure, so the pill stays up and falls back to its
+            // resting line. beginAttempt, not report: ARMED ranks below whatever it reached.
+            if (AutoConnectAttemptPolicy.resetsStageOnFailure(autoConnectMode) &&
+                ConnectionStageTracker.stage.value != null
+            ) {
+                ConnectionStageTracker.beginAttempt(ConnectionStage.ARMED)
+            }
+            renderStagePill(ConnectionStageTracker.stage.value)
         }
-        // Pill cleanup is cheap and safe to run regardless of mode.
-        hideAutoConnectPill()
         if (success) {
             // Launch the projection activity directly rather than waiting for the
             // phone to request video focus (AapControl.gainVideoFocus() -> AapBroadcastReceiver).
@@ -425,22 +474,22 @@ class MainActivity : BaseActivity() {
     }
 
     private fun showAutoConnectPill() {
-        // Watchdog backstop applies to pill mode too so the indicator can't
-        // get stuck if the connection attempt never produces an event.
-        if (autoConnectWatchdog?.isActive != true) {
-            startAutoConnectWatchdog()
-        }
-
         val pill = findViewById<View>(R.id.auto_connect_pill) ?: return
-        val pillText = findViewById<android.widget.TextView>(R.id.auto_connect_pill_text)
+        val pillText = findViewById<TextView>(R.id.auto_connect_pill_text)
         pillText?.text = autoConnectStatusText ?: getString(R.string.android_auto_starting)
         if (pill.visibility == View.VISIBLE) return
 
+        // After the guard, so a pill that is merely changing step still gets the crossfade below.
+        // Reading the tracker here is what restores the step line after an activity recreate.
+        applyStageText(ConnectionStageTracker.stage.value, animate = false)
+        applyNetworkText(ConnectionStageTracker.network.value, animate = false)
         pill.visibility = View.VISIBLE
         pill.bringToFront()
-        // Suppress the launch splash if it is still up so the pill is visible
-        // immediately on auto-connect from a cold start.
-        findViewById<View>(R.id.splash_overlay)?.visibility = View.GONE
+        // Only for a real attempt. The pill is up whenever the stack is armed, which is from app
+        // start, and cutting the branding splash short on every launch is not this feature's call.
+        if (autoConnectInProgress) {
+            findViewById<View>(R.id.splash_overlay)?.visibility = View.GONE
+        }
     }
 
     private fun hideAutoConnectPill() {
@@ -449,25 +498,174 @@ class MainActivity : BaseActivity() {
         pill.visibility = View.GONE
     }
 
-    private fun startAutoConnectWatchdog() {
-        autoConnectWatchdog?.cancel()
-        autoConnectWatchdog = lifecycleScope.launch {
-            delay(AUTO_CONNECT_WATCHDOG_MS)
-            if (autoConnectInProgress) {
-                AppLog.w("Auto-connect overlay: watchdog timeout, hiding")
-                endAutoConnect(success = false)
+    /**
+     * Drives the pill off [ConnectionStageTracker]: it is up whenever the connection stack is
+     * armed, not only during an auto-connect attempt, and its second line names the current step.
+     */
+    private fun observeConnectionStage() {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                ConnectionStageTracker.stage.collect { renderStagePill(it) }
+            }
+        }
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                ConnectionStageTracker.network.collect { renderNetworkLine(it) }
             }
         }
     }
 
-    private fun showAutoConnectOverlay() {
-        // Watchdog is owned by this activity's lifecycleScope, so it must be
-        // (re)started here to survive configuration changes that recreate the
-        // activity while autoConnectInProgress remains true.
-        if (autoConnectWatchdog?.isActive != true) {
-            startAutoConnectWatchdog()
+    /** The pill's third line, logged like the step so a screenshot can be read against the log. */
+    private fun renderNetworkLine(detail: ConnectionNetworkDetail?) {
+        if (detail != renderedNetwork) {
+            renderedNetwork = detail
+            AppLog.i("MainActivity: status pill network: ${detail?.let { networkText(it) } ?: "none"}")
         }
+        applyNetworkText(detail, animate = true)
+    }
 
+    private fun networkText(detail: ConnectionNetworkDetail): String {
+        val line = ConnectionNetworkDetailPolicy.lineFor(detail)
+        return getString(line.id, *line.args.toTypedArray())
+    }
+
+    /** Sets the pill's third line. Not announced: the channel is not a step. */
+    private fun applyNetworkText(detail: ConnectionNetworkDetail?, animate: Boolean) {
+        val networkText = findViewById<TextView>(R.id.auto_connect_pill_network_text) ?: return
+        if (detail == null) {
+            networkText.animate().cancel()
+            networkText.visibility = View.GONE
+            return
+        }
+        val label = networkText(detail)
+        if (networkText.visibility == View.VISIBLE && networkText.text == label) return
+
+        networkText.animate().cancel()
+        if (!animate || networkText.visibility != View.VISIBLE) {
+            networkText.text = label
+            networkText.alpha = if (animate) 0f else STAGE_TEXT_ALPHA
+            networkText.visibility = View.VISIBLE
+            if (animate) networkText.animate().alpha(STAGE_TEXT_ALPHA).setDuration(STAGE_FADE_IN_MS).start()
+            return
+        }
+        networkText.animate().alpha(0f).setDuration(STAGE_FADE_OUT_MS).withEndAction {
+            networkText.text = label
+            networkText.animate().alpha(STAGE_TEXT_ALPHA).setDuration(STAGE_FADE_IN_MS).start()
+        }.start()
+    }
+
+    /**
+     * Applies the current stage to the pill. Called on every emission and again whenever an
+     * attempt ends, because the flow conflates a repeat of the value it already holds.
+     */
+    private fun renderStagePill(stage: ConnectionStage?) {
+        // PILL_THEN_OVERLAY hands the screen to the overlay part-way through an attempt.
+        // Re-raising the pill under it would undo that promotion.
+        val shown = if (stage == null || overlayOwnsScreen()) null else stage
+        // What the user is actually being told, which no other line records. A reporter's
+        // screenshot and their log can then be read against each other. A step the overlay hides
+        // is still named: without that, a session where an auto-connect happened to be in flight
+        // and one where it did not leave different traces of the same bring-up.
+        if (stage != loggedStage || shown != renderedStage) {
+            loggedStage = stage
+            renderedStage = shown
+            val step = when {
+                shown != null -> shown.name
+                stage != null -> "${stage.name} (not shown, the overlay owns the screen)"
+                else -> "hidden"
+            }
+            AppLog.i("MainActivity: status pill step: $step")
+        }
+        if (shown == null) {
+            hideAutoConnectPill()
+        } else {
+            showAutoConnectPill()
+            applyStageText(shown, animate = true)
+        }
+    }
+
+    /**
+     * Sets the pill's second line. The crossfade doubles as cover for the pill resizing, which it
+     * does on every step because it wraps its content and the labels are translated.
+     */
+    private fun applyStageText(stage: ConnectionStage?, animate: Boolean) {
+        val stageText = findViewById<TextView>(R.id.auto_connect_pill_stage_text) ?: return
+        if (stage == null) {
+            stageText.animate().cancel()
+            stageText.visibility = View.GONE
+            return
+        }
+        val label = getString(stage.label)
+        if (stageText.visibility == View.VISIBLE && stageText.text == label) return
+
+        stageText.animate().cancel()
+        if (!animate) {
+            stageText.text = label
+            stageText.alpha = STAGE_TEXT_ALPHA
+            stageText.visibility = View.VISIBLE
+            return
+        }
+        // A discrete announcement per step, not an accessibilityLiveRegion: the pill is now
+        // permanently on screen, and a live region on one of those floods a screen reader.
+        findViewById<View>(R.id.auto_connect_pill)?.announceForAccessibility(label)
+        if (stageText.visibility != View.VISIBLE) {
+            stageText.text = label
+            stageText.alpha = 0f
+            stageText.visibility = View.VISIBLE
+            stageText.animate().alpha(STAGE_TEXT_ALPHA).setDuration(STAGE_FADE_IN_MS).start()
+            return
+        }
+        stageText.animate().alpha(0f).setDuration(STAGE_FADE_OUT_MS).withEndAction {
+            stageText.text = label
+            stageText.animate().alpha(STAGE_TEXT_ALPHA).setDuration(STAGE_FADE_IN_MS).start()
+        }.start()
+    }
+
+    /**
+     * Arms the bound when nothing is watching it. The bound lives on the activity that armed it and
+     * that activity does not survive a rebuild, so whoever is alive re-arms what is left of it.
+     */
+    private fun ensureAutoConnectWatchdog(rearmed: Boolean) {
+        if (!autoConnectInProgress) return
+        if (autoConnectWatchdog?.isActive == true) return
+        startAutoConnectWatchdog(rearmed)
+    }
+
+    /** @param rearmed whether this activity inherited the attempt rather than starting it. */
+    private fun startAutoConnectWatchdog(rearmed: Boolean) {
+        autoConnectWatchdog?.cancel()
+        val deadline = autoConnectDeadlineElapsed
+        val left = AutoConnectAttemptPolicy.remainingMs(deadline, SystemClock.elapsedRealtime())
+        val inherited = if (rearmed) ", re-armed" else ""
+        AppLog.i(
+            "Auto-connect: this attempt gives up in ${left / 1000}s (mode=$autoConnectMode$inherited)"
+        )
+        autoConnectWatchdog = lifecycleScope.launch {
+            // delay() is a postDelayed on the uptime clock, which stops while the unit is
+            // suspended, so the deadline is re-read after each sleep rather than assumed spent.
+            var remaining = left
+            while (autoConnectInProgress && remaining > 0L) {
+                delay(remaining)
+                remaining = AutoConnectAttemptPolicy.remainingMs(
+                    deadline, SystemClock.elapsedRealtime()
+                )
+            }
+            endAutoConnectIfExpired()
+        }
+    }
+
+    /** Ends an attempt whose bound has passed, wherever that is first noticed. */
+    private fun endAutoConnectIfExpired() {
+        if (!autoConnectInProgress) return
+        if (!AutoConnectAttemptPolicy.hasExpired(
+                autoConnectDeadlineElapsed, SystemClock.elapsedRealtime()
+            )
+        ) return
+        AppLog.w("Auto-connect: nothing answered this attempt (mode=$autoConnectMode), ending it")
+        endAutoConnect(success = false)
+    }
+
+    private fun showAutoConnectOverlay() {
         val overlay = findViewById<View>(R.id.auto_connect_loading_overlay) ?: return
         if (overlay.visibility == View.VISIBLE) return
 
@@ -934,6 +1132,11 @@ class MainActivity : BaseActivity() {
             bringProjectionToFront()
         }
 
+        // Every coroutine bound dies with the activity that owned it, and a resume is the one
+        // thing a recreated one always does, so the deadline is read here and re-armed here.
+        endAutoConnectIfExpired()
+        ensureAutoConnectWatchdog(rearmed = true)
+
         // Coming back from a failed attempt lands here, so this is where the reason gets said.
         updateConnectionIssueBanner()
 
@@ -1159,13 +1362,9 @@ class MainActivity : BaseActivity() {
             "Boot auto-start", "USB auto-start", "WiFi auto-start", LAUNCH_SOURCE_BLUETOOTH
         )
 
-        /**
-         * Hard upper bound for how long the auto-connect overlay may stay visible
-         * without the connection state advancing through the success path. Covers
-         * USB open hangs and silent AOA-mode-switch failures, which today produce
-         * no event for the observer to react to.
-         */
-        private const val AUTO_CONNECT_WATCHDOG_MS = 30_000L
+        private const val STAGE_TEXT_ALPHA = 0.8f
+        private const val STAGE_FADE_OUT_MS = 100L
+        private const val STAGE_FADE_IN_MS = 150L
 
         /**
          * `true` while the loading indicator should be (or is) covering the home
@@ -1182,6 +1381,22 @@ class MainActivity : BaseActivity() {
         @Volatile var autoConnectMode: ConnectionUiMode = ConnectionUiMode.OVERLAY
 
         /**
+         * When the in-progress attempt runs out, on the clock that keeps running while the unit
+         * sleeps. On the companion with the flag it bounds, so a recreated activity re-arms for
+         * the time that is left instead of starting the bound again or losing it.
+         */
+        @Volatile var autoConnectDeadlineElapsed: Long = 0L
+
+        /**
+         * Whether the full-screen overlay is up, which is the only auto-connect UI that takes the
+         * screen. The pill is not: it is up whenever the stack is armed, so treating it as busy
+         * suppresses anything that waits for a free screen for as long as the app runs.
+         */
+        @JvmStatic
+        fun overlayOwnsScreen(): Boolean =
+            autoConnectInProgress && autoConnectMode == ConnectionUiMode.OVERLAY
+
+        /**
          * Optional override for the status text (e.g. "Connecting to Pixel 8…"
          * from the Nearby selector). When `null`, the default
          * `R.string.android_auto_starting` is used. Kept on the companion so
@@ -1189,6 +1404,9 @@ class MainActivity : BaseActivity() {
          * attempt.
          */
         @Volatile var autoConnectStatusText: String? = null
+
+        /** Whether [autoConnectStatusText] claims the phone is disconnected and being woken. */
+        @Volatile var autoConnectStatusIsWakeClaim: Boolean = false
 
         /**
          * Tracks whether the connection attempt has reached an active state

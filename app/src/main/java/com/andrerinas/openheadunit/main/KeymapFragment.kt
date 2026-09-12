@@ -23,6 +23,7 @@ import com.andrerinas.openheadunit.input.BydPanelKey
 import com.andrerinas.openheadunit.utils.AppLog
 import com.andrerinas.openheadunit.utils.IntentFilters
 import com.andrerinas.openheadunit.utils.Settings
+import com.andrerinas.openheadunit.utils.ToastUtils
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -110,7 +111,7 @@ class KeymapFragment : Fragment(), MainActivity.KeyListener {
         resetButton?.setOnClickListener {
             settings.keyCodes = mutableMapOf()
             adapter.updateCodes(settings.keyCodes)
-            Toast.makeText(requireContext(), getString(R.string.key_mappings_reset), Toast.LENGTH_SHORT).show()
+            ToastUtils.showToast(requireContext(), getString(R.string.key_mappings_reset), Toast.LENGTH_SHORT, force = true)
         }
     }
 
@@ -230,7 +231,7 @@ class KeymapFragment : Fragment(), MainActivity.KeyListener {
                 adapter.updateCodes(codesMap)
                 
                 val targetName = getString(keyList.find { it.keyCode == assignTargetCode }?.nameResId ?: R.string.keymap)
-                Toast.makeText(requireContext(), getString(R.string.key_assigned, keyName, targetName), Toast.LENGTH_SHORT).show()
+                ToastUtils.showToast(requireContext(), getString(R.string.key_assigned, keyName, targetName), Toast.LENGTH_SHORT, force = true)
                 
                 assignDialog?.dismiss()
             }

@@ -41,28 +41,34 @@ class BtAutoDisconnectPolicyTest {
 
     @Test
     fun `nothing is ended when nothing is projecting`() {
-        assertFalse(BtAutoDisconnectPolicy.shouldEndSession(sessionUp = false, sessionAgeMs = 600_000L, deviceCameBack = false))
+        assertFalse(BtAutoDisconnectPolicy.shouldEndSession(sessionUp = false, deviceCameBack = false, msSinceOwnSocketClose = null))
     }
 
     /**
      * The Native handoff case: the handshake socket closes seconds into the session and the OS
-     * reports the phone's link gone. A session that young is never ended on a Bluetooth event.
+     * reports the phone's link gone. A loss that follows our own close is that close, not the phone.
      */
     @Test
-    fun `a session younger than the settle window is left alone`() {
-        val limit = BtAutoDisconnectPolicy.MIN_SESSION_AGE_MS
-        assertFalse(BtAutoDisconnectPolicy.shouldEndSession(sessionUp = true, sessionAgeMs = limit - 1, deviceCameBack = false))
-        assertTrue(BtAutoDisconnectPolicy.shouldEndSession(sessionUp = true, sessionAgeMs = limit, deviceCameBack = false))
+    fun `a loss inside our own socket-close grace is left alone`() {
+        val grace = BtAutoDisconnectPolicy.OWN_SOCKET_CLOSE_GRACE_MS
+        assertFalse(BtAutoDisconnectPolicy.shouldEndSession(sessionUp = true, deviceCameBack = false, msSinceOwnSocketClose = grace - 1))
+        assertTrue(BtAutoDisconnectPolicy.shouldEndSession(sessionUp = true, deviceCameBack = false, msSinceOwnSocketClose = grace))
+    }
+
+    /** A transport that never opens a Bluetooth socket to the phone gets no grace, and needs none. */
+    @Test
+    fun `a loss with no own close behind it ends the session`() {
+        assertTrue(BtAutoDisconnectPolicy.shouldEndSession(sessionUp = true, deviceCameBack = false, msSinceOwnSocketClose = null))
     }
 
     @Test
     fun `a device that came back during the grace delay saves the session`() {
-        assertFalse(BtAutoDisconnectPolicy.shouldEndSession(sessionUp = true, sessionAgeMs = 600_000L, deviceCameBack = true))
+        assertFalse(BtAutoDisconnectPolicy.shouldEndSession(sessionUp = true, deviceCameBack = true, msSinceOwnSocketClose = null))
     }
 
     @Test
     fun `a watched device that stays away ends a settled session`() {
-        assertTrue(BtAutoDisconnectPolicy.shouldEndSession(sessionUp = true, sessionAgeMs = 600_000L, deviceCameBack = false))
+        assertTrue(BtAutoDisconnectPolicy.shouldEndSession(sessionUp = true, deviceCameBack = false, msSinceOwnSocketClose = 600_000L))
     }
 
     @Test
