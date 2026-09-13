@@ -88,6 +88,21 @@ object ZbtProbe {
     ): String {
         AppLog.i("ZbtProbe: starting — external Bluetooth module probe")
 
+        // The daemon serves one program at a time. Dialling a second socket beside our own live
+        // carrier gets it accepted and never answered, which reads exactly like a dead daemon.
+        if (ZbtDaemonReachability.carrierLive() || ZbtDaemonReachability.carrierWantsClient()) {
+            AppLog.i("ZbtProbe: our own carrier holds the module's client slot; not dialling beside it.")
+            return busyCarrierVerdict()
+        }
+
+        // The carrier can arm underneath a run that started before it. Polled between frames rather
+        // than read once at the top, so the slot goes back within a frame instead of at the end.
+        var yielded = false
+        val keepProbing: () -> Boolean = {
+            if (ZbtDaemonReachability.carrierWantsClient()) yielded = true
+            !yielded && keepGoing()
+        }
+
         var helloFrames = 0
         var controlFrames = 0
         var rfcommFrames = 0
@@ -144,8 +159,8 @@ object ZbtProbe {
             // link state. The channel has already sent it.
             onProgress("Asking the Bluetooth module…")
             val helloDeadline = System.currentTimeMillis() + HELLO_BUDGET_MS
-            while (System.currentTimeMillis() < helloDeadline && keepGoing()) {
-                val pump = channel.pumpOnce(helloDeadline, keepGoing)
+            while (System.currentTimeMillis() < helloDeadline && keepProbing()) {
+                val pump = channel.pumpOnce(helloDeadline, keepProbing)
                 if (pump == ZbtByteChannel.Pump.ENDED) break
                 // A gap after the burst means the burst is over; there is nothing else coming until
                 // something happens on the module.
@@ -153,7 +168,10 @@ object ZbtProbe {
                 if (helloFrames > 0) onProgress("Module answered — $helloFrames message(s)…")
             }
 
+            if (yielded) return carrierTookOverVerdict()
+
             if (helloFrames == 0) {
+                if (ZbtDaemonReachability.carrierLive()) return busyCarrierVerdict()
                 return if (channel.isFinished) {
                     "Something is listening on port ${ZbtByteChannel.PORT}, but it closed the " +
                         "connection without answering."
@@ -181,11 +199,11 @@ object ZbtProbe {
             var versionRequestAt = 0L
             var rfcommBeforeVersionRequest = 0
 
-            while (System.currentTimeMillis() < deadline && keepGoing()) {
+            while (System.currentTimeMillis() < deadline && keepProbing()) {
                 // Wake at whichever comes first: the end of the watch, the next summary line, or the
                 // next link-state poll. Between those the pump is simply waiting for the phone.
                 val wakeAt = minOf(deadline, nextSummary, nextLinkInfo)
-                if (channel.pumpOnce(wakeAt, keepGoing) == ZbtByteChannel.Pump.ENDED) {
+                if (channel.pumpOnce(wakeAt, keepProbing) == ZbtByteChannel.Pump.ENDED) {
                     AppLog.w("ZbtProbe: the daemon ended the connection during the watch")
                     break
                 }
@@ -221,6 +239,8 @@ object ZbtProbe {
                     channel.requestLinkInfo()
                 }
             }
+
+            if (yielded) return carrierTookOverVerdict()
 
             return verdict(
                 rfcommFrames = rfcommFrames,
@@ -287,6 +307,27 @@ object ZbtProbe {
         return if (known && fits) "(reads as WPP type $type, $declared byte payload)"
         else "(not WPP framing: type $type, declares $declared of ${bytes.size - WppFraming.HEADER_SIZE})"
     }
+
+    /**
+     * What to say when this app's own connection already holds the module's one client slot.
+     *
+     * A busy daemon is proof the route works, so this must never be reported as silence.
+     */
+    internal fun busyCarrierVerdict(): String =
+        "This unit is already carrying Android Auto over the module. The module gives it to one " +
+            "program at a time, and that program is this app right now, so the route works. " +
+            "To test it on its own, turn the module transport off first."
+
+    /**
+     * What to say when a real connection claimed the module while this test was running.
+     *
+     * Giving the slot back is the right outcome: holding it kept a connection waiting 90 seconds
+     * on the unit this was measured on.
+     */
+    internal fun carrierTookOverVerdict(): String =
+        "This unit started carrying Android Auto over the module while the test was running, so " +
+            "the test stopped and gave the module back. The module gives it to one program at a " +
+            "time. To test it on its own, turn the module transport off first."
 
     internal fun verdict(
         rfcommFrames: Int,

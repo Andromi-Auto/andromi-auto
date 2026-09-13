@@ -39,6 +39,8 @@ class ZbtAaCarrier(
     private val isHandshakeInFlight: () -> Boolean,
     private val mayServeHandshake: () -> Boolean,
     private val onPhoneEvidence: () -> Unit,
+    /** The module's own Bluetooth address, the first time the daemon names it. */
+    private val onModuleAddress: (String) -> Unit = {},
     private val retryDelayMs: () -> Long = { ZbtAttemptPolicy.MIN_ATTEMPT_INTERVAL_MS },
     private val openChannel: (
         onControl: (Int, ByteArray) -> Unit,
@@ -111,48 +113,57 @@ class ZbtAaCarrier(
         carrierJob = currentCoroutineContext()[Job]
         var loudAboutNoDaemon = true
         var lastQuietReminder = 0L
-        while (keepRunning()) {
-            val opened = try {
-                openChannel(::onControl, ::onRfcomm).also { channel = it }
-            } catch (e: IOException) {
-                // The one live test of whether this unit is really on this route. Detection says the
-                // Bluetooth is an external module; it cannot say the module is reachable this way,
-                // and one whole vendor family in that class is not.
-                if (loudAboutNoDaemon) {
-                    loudAboutNoDaemon = false
-                    lastQuietReminder = now()
-                    AppLog.w(
-                        "NativeAA: [ZBT] nothing is listening on ${ZbtByteChannel.HOST}:${ZbtByteChannel.PORT}. " +
-                            "This unit carries the external-Bluetooth markers but has no vendor daemon to " +
-                            "carry Android Auto, so the module transport can do nothing here. " +
-                            "Wireless will not connect over Bluetooth on this unit; use USB, or a WiFi mode " +
-                            "that needs no Bluetooth handshake. (${e.message})"
-                    )
-                } else if (now() - lastQuietReminder >= QUIET_REMINDER_MS) {
-                    lastQuietReminder = now()
-                    AppLog.i("NativeAA: [ZBT] still nothing listening on port ${ZbtByteChannel.PORT}.")
-                } else {
-                    AppLog.d("NativeAA: [ZBT] daemon still refusing: ${e.message}")
+        // Claimed across the reopen loop, not just an open channel: a probe that took the daemon's
+        // one client slot first must give way to a real connection rather than outlast it.
+        ZbtDaemonReachability.setCarrierWantsClient(true)
+        try {
+            while (keepRunning()) {
+                val opened = try {
+                    openChannel(::onControl, ::onRfcomm).also { channel = it }
+                } catch (e: IOException) {
+                    // The one live test of whether this unit is really on this route. Detection says the
+                    // Bluetooth is an external module; it cannot say the module is reachable this way,
+                    // and one whole vendor family in that class is not.
+                    if (loudAboutNoDaemon) {
+                        loudAboutNoDaemon = false
+                        lastQuietReminder = now()
+                        AppLog.w(
+                            "NativeAA: [ZBT] nothing is listening on ${ZbtByteChannel.HOST}:${ZbtByteChannel.PORT}. " +
+                                "This unit carries the external-Bluetooth markers but has no vendor daemon to " +
+                                "carry Android Auto, so the module transport can do nothing here. " +
+                                "Wireless will not connect over Bluetooth on this unit; use USB, or a WiFi mode " +
+                                "that needs no Bluetooth handshake. (${e.message})"
+                        )
+                    } else if (now() - lastQuietReminder >= QUIET_REMINDER_MS) {
+                        lastQuietReminder = now()
+                        AppLog.i("NativeAA: [ZBT] still nothing listening on port ${ZbtByteChannel.PORT}.")
+                    } else {
+                        AppLog.d("NativeAA: [ZBT] daemon still refusing: ${e.message}")
+                    }
+                    delay(REOPEN_DELAY_MS)
+                    continue
                 }
-                delay(REOPEN_DELAY_MS)
-                continue
-            }
 
-            loudAboutNoDaemon = true
-            // The dial that chose this route was a prediction; opening for real work is the fact.
-            ZbtDaemonReachability.record(true)
-            AppLog.i(
-                "NativeAA: [ZBT] channel open to the Bluetooth module daemon on " +
-                    "${ZbtByteChannel.HOST}:${ZbtByteChannel.PORT} — asking it to carry Android Auto"
-            )
-            try {
-                watchAndServe(opened)
-            } finally {
-                val reason = opened.closeReason
-                opened.close()
-                channel = null
-                AppLog.i("NativeAA: [ZBT] channel ended: ${reason ?: "closed"}")
+                loudAboutNoDaemon = true
+                // The daemon serves one client, and from here that client is us. Held from the socket,
+                // because holding the socket is what holds the slot.
+                ZbtDaemonReachability.setCarrierLive(true)
+                AppLog.i(
+                    "NativeAA: [ZBT] channel open to the Bluetooth module daemon on " +
+                        "${ZbtByteChannel.HOST}:${ZbtByteChannel.PORT} — asking it to carry Android Auto"
+                )
+                try {
+                    watchAndServe(opened)
+                } finally {
+                    val reason = opened.closeReason
+                    ZbtDaemonReachability.setCarrierLive(false)
+                    opened.close()
+                    channel = null
+                    AppLog.i("NativeAA: [ZBT] channel ended: ${reason ?: "closed"}")
+                }
             }
+        } finally {
+            ZbtDaemonReachability.setCarrierWantsClient(false)
         }
         AppLog.i(
             "NativeAA: [ZBT] carrier stopped after $attempts handshake attempt(s), " +
@@ -172,7 +183,15 @@ class ZbtAaCarrier(
             val pumped = open.pumpOnce(wake) { keepRunning() }
             if (pumped == ZbtByteChannel.Pump.ENDED) return
 
-            moduleMac = open.moduleMac ?: moduleMac
+            // A connect proves something listens; only a frame proves it will carry Android Auto,
+            // and a daemon busy with another client accepts the socket and answers nothing.
+            if (pumped == ZbtByteChannel.Pump.FRAME) ZbtDaemonReachability.record(true)
+
+            val namedNow = open.moduleMac
+            if (namedNow != null && namedNow != moduleMac) {
+                moduleMac = namedNow
+                onModuleAddress(namedNow)
+            }
 
             if (shouldAttemptNow(openedAt)) {
                 serveOnce(open, openForMs = now() - openedAt)
