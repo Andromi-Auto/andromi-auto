@@ -228,7 +228,7 @@ class MainActivity : BaseActivity() {
             val elapsedSinceStart = SystemClock.elapsedRealtime() - App.appStartTime
             val targetTotalDuration = 1200L
             val actualDelay = (targetTotalDuration - elapsedSinceStart).coerceAtLeast(0L)
-
+            findViewById<View>(R.id.splash_overlay)?.bringToFront()
             showSplashWithDelay(actualDelay)
         } else {
             findViewById<View>(R.id.splash_overlay)?.visibility = View.GONE
@@ -485,10 +485,11 @@ class MainActivity : BaseActivity() {
         applyNetworkText(ConnectionStageTracker.network.value, animate = false)
         pill.visibility = View.VISIBLE
         pill.bringToFront()
-        // Only for a real attempt. The pill is up whenever the stack is armed, which is from app
-        // start, and cutting the branding splash short on every launch is not this feature's call.
-        if (autoConnectInProgress) {
-            findViewById<View>(R.id.splash_overlay)?.visibility = View.GONE
+        // If the splash overlay is still showing, keep it on top of the pill until the splash finishes
+        findViewById<View>(R.id.splash_overlay)?.let { splash ->
+            if (splash.visibility == View.VISIBLE) {
+                splash.bringToFront()
+            }
         }
     }
 
