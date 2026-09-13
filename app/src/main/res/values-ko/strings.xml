@@ -508,7 +508,8 @@
     <!-- Vehicle Info Settings -->
     <string name="vehicle_info_settings">차량 정보</string>
     <string name="vehicle_info_settings_description">휴대폰에 표시될 차량 정보를 설정합니다</string>
-    <string name="ui_scale">UI 배율</string>
+    <string name="ui_scale">글꼴 및 디스플레이 크기</string>
+    <string name="ui_scale_description">앱 전체의 텍스트, 메뉴 및 레이아웃 요소의 크기를 조정합니다. 글자가 작은 고해상도 디스플레이에 권장됩니다.</string>
     <string name="ui_scale_home">홈 화면</string>
     <string name="ui_scale_settings">설정 화면</string>
     <string name="category_vehicle">차량</string>

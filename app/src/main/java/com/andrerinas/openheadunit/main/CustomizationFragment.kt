@@ -1,8 +1,13 @@
 package com.andrerinas.openheadunit.main
 
 import android.content.Context
+import android.content.Intent
 import android.content.res.ColorStateList
 import android.content.res.Configuration
+import android.widget.FrameLayout
+import android.widget.LinearLayout
+import android.widget.ScrollView
+import android.widget.SeekBar
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
@@ -90,6 +95,10 @@ class CustomizationFragment : Fragment() {
     private var sliderButtonScale: com.google.android.material.slider.Slider? = null
     private var txtButtonScaleValue: TextView? = null
     private var btnResetScale: MaterialButton? = null
+
+    // Display & Text Size (UI Scale)
+    private var cardUiScale: View? = null
+    private var txtUiScaleValue: TextView? = null
 
     // Samsung-style Fullscreen Live Preview Overlay
     private var customizationMainContent: View? = null
@@ -191,6 +200,14 @@ class CustomizationFragment : Fragment() {
         sliderButtonScale = view.findViewById(R.id.slider_button_scale)
         txtButtonScaleValue = view.findViewById(R.id.txt_button_scale_value)
         btnResetScale = view.findViewById(R.id.btn_reset_scale)
+
+        // Display & Text Size (UI Scale)
+        cardUiScale = view.findViewById(R.id.card_ui_scale)
+        txtUiScaleValue = view.findViewById(R.id.txt_ui_scale_value)
+        updateUiScaleValue()
+        cardUiScale?.setOnClickListener {
+            showUiScaleDialog()
+        }
 
         // Samsung-style Overlay views
         overlayHomePreview = view.findViewById(R.id.overlay_home_preview)
@@ -760,6 +777,97 @@ class CustomizationFragment : Fragment() {
 
     private fun notifyMainActivityBackgroundChanged() {
         (activity as? BaseActivity)?.applyWindowBackground()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        updateUiScaleValue()
+    }
+
+    private fun updateUiScaleValue() {
+        txtUiScaleValue?.text = "${getString(R.string.ui_scale_home)}: ${settings.uiScaleHomePercent}% · ${getString(R.string.ui_scale_settings)}: ${settings.uiScaleSettingsPercent}%"
+    }
+
+    private fun showUiScaleDialog() {
+        val ctx = context ?: return
+        val density = resources.displayMetrics.density
+
+        val container = LinearLayout(ctx).apply {
+            orientation = LinearLayout.VERTICAL
+            val pad = (16 * density).toInt()
+            setPadding(pad, pad, pad, pad)
+        }
+
+        fun makeRow(labelText: String, initialPercent: Int): Triple<TextView, SeekBar, TextView> {
+            val label = TextView(ctx).apply {
+                text = labelText
+                setPadding(0, (8 * density).toInt(), 0, (4 * density).toInt())
+            }
+            val seek = SeekBar(ctx).apply {
+                max = 5
+                progress = ((initialPercent - 100) / 10).coerceIn(0, 5)
+            }
+            val value = TextView(ctx).apply {
+                text = "$initialPercent%"
+                setPadding(0, (4 * density).toInt(), 0, (12 * density).toInt())
+            }
+            seek.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+                override fun onProgressChanged(sb: SeekBar?, progress: Int, fromUser: Boolean) {
+                    val pct = 100 + progress * 10
+                    value.text = "$pct%"
+                }
+                override fun onStartTrackingTouch(sb: SeekBar?) {}
+                override fun onStopTrackingTouch(sb: SeekBar?) {}
+            })
+            return Triple(label, seek, value)
+        }
+
+        val homeInitial = settings.uiScaleHomePercent
+        val settingsInitial = settings.uiScaleSettingsPercent
+
+        val (homeLabel, homeSeek, homeValue) = makeRow(getString(R.string.ui_scale_home), homeInitial)
+        val (settingsLabel, settingsSeek, settingsValue) = makeRow(getString(R.string.ui_scale_settings), settingsInitial)
+
+        container.addView(homeLabel, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT))
+        container.addView(homeSeek, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT))
+        container.addView(homeValue, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT))
+        container.addView(settingsLabel, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT))
+        container.addView(settingsSeek, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT))
+        container.addView(settingsValue, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT))
+
+        val scroll = ScrollView(ctx).apply {
+            isFillViewport = true
+            addView(container, FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.WRAP_CONTENT))
+        }
+
+        MaterialAlertDialogBuilder(ctx, R.style.DarkAlertDialog)
+            .setTitle(R.string.ui_scale)
+            .setView(scroll)
+            .setPositiveButton(android.R.string.ok) { dialog, _ ->
+                val newHome = 100 + (homeSeek.progress * 10)
+                val newSettings = 100 + (settingsSeek.progress * 10)
+                val oldSettings = settings.uiScaleSettingsPercent
+                val oldHome = settings.uiScaleHomePercent
+
+                settings.uiScaleHomePercent = newHome
+                settings.uiScaleSettingsPercent = newSettings
+                settings.commit()
+
+                updateUiScaleValue()
+                dialog.dismiss()
+
+                if (newSettings != oldSettings) {
+                    requireActivity().recreate()
+                }
+                if (newHome != oldHome) {
+                    val intent = Intent(MainActivity.ACTION_RECREATE_MAIN).apply {
+                        setPackage(requireContext().packageName)
+                    }
+                    requireContext().sendBroadcast(intent)
+                }
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
     }
 
     override fun onDestroyView() {

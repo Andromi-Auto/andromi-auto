@@ -443,7 +443,8 @@
     <!-- Vehicle Info Settings -->
     <string name="vehicle_info_settings">Járműinformáció</string>
     <string name="vehicle_info_settings_description">Testreszabhatja, hogyan jelenik meg járműve a telefonján</string>
-    <string name="ui_scale">UI méretezés</string>
+    <string name="ui_scale">Szöveg- és kijelzőméret</string>
+    <string name="ui_scale_description">Méretezi a szövegeket, menüket és elrendezési elemeket az egész alkalmazásban. Kis szövegű, nagy felbontású kijelzőkhöz ajánlott.</string>
     <string name="ui_scale_home">Kezdőképernyő</string>
     <string name="ui_scale_settings">Beállítások képernyő</string>
     <string name="category_vehicle">Jármű</string>

@@ -442,7 +442,8 @@
     <!-- Vehicle Info Settings -->
     <string name="vehicle_info_settings">Informații vehicul</string>
     <string name="vehicle_info_settings_description">Personalizați cum apare vehiculul dvs. pe telefon</string>
-    <string name="ui_scale">Scală UI</string>
+    <string name="ui_scale">Mărimea textului și a afișajului</string>
+    <string name="ui_scale_description">Scalează textul, meniurile și elementele de aspect din întreaga aplicație. Recomandat pentru ecrane de înaltă rezoluție cu text mic.</string>
     <string name="ui_scale_home">Ecran principal</string>
     <string name="ui_scale_settings">Ecranul de setări</string>
     <string name="category_vehicle">Vehicul</string>

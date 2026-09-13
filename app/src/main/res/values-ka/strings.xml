@@ -487,7 +487,8 @@
 
     <string name="vehicle_info_settings">ავტომობილის ინფორმაცია</string>
     <string name="vehicle_info_settings_description">მოახდინეთ თქვენი ავტომობილის იდენტიფიკაციის მორგება ტელეფონისთვის</string>
-    <string name="ui_scale">ინტერფეისის მასშტაბი</string>
+    <string name="ui_scale">ტექსტისა და ეკრანის ზომა</string>
+    <string name="ui_scale_description">ცვლის ტექსტის, მენიუებისა და ინტერფეისის ელემენტების მასშტაბს მთელ აპლიკაციაში. რეკომენდებულია მაღალი გარჩევადობის ეკრანებისთვის პატარა ტექსტით.</string>
     <string name="ui_scale_home">მთავარი ეკრანი</string>
     <string name="ui_scale_settings">პარამეტრების ეკრანი</string>
     <string name="category_vehicle">ავტომობილი</string>

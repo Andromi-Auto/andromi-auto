@@ -444,7 +444,8 @@
     <!-- Vehicle Info Settings -->
     <string name="vehicle_info_settings">Informace o vozidle</string>
     <string name="vehicle_info_settings_description">Přizpůsobte, jak se vaše vozidlo zobrazuje na telefonu</string>
-    <string name="ui_scale">Měřítko rozhraní</string>
+    <string name="ui_scale">Velikost textu a zobrazení</string>
+    <string name="ui_scale_description">Změní velikost textu, nabídek a prvků rozhraní v celé aplikaci. Doporučeno pro displeje s vysokým rozlišením a malým textem.</string>
     <string name="ui_scale_home">Hlavní obrazovka</string>
     <string name="ui_scale_settings">Obrazovka nastavení</string>
     <string name="category_vehicle">Vozidlo</string>

@@ -442,7 +442,8 @@
 
     <string name="vehicle_info_settings">Araç bilgileri</string>
     <string name="vehicle_info_settings_description">Aracınızın telefonunuzda nasıl görüneceğini özelleştirin</string>
-    <string name="ui_scale">UI Ölçeği</string>
+    <string name="ui_scale">Metin ve ekran boyutu</string>
+    <string name="ui_scale_description">Uygulama genelinde metinleri, menüleri ve düzen öğelerini ölçeklendirir. Küçük metinli yüksek çözünürlüklü ekranlar için önerilir.</string>
     <string name="ui_scale_home">Ana ekran</string>
     <string name="ui_scale_settings">Ayarlar ekranı</string>
     <string name="category_vehicle">Araç</string>

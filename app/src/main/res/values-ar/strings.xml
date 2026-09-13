@@ -444,7 +444,8 @@
     <!-- Vehicle Info Settings -->
     <string name="vehicle_info_settings">معلومات المركبة</string>
     <string name="vehicle_info_settings_description">خصص كيف تظهر مركبتك على هاتفك</string>
-    <string name="ui_scale">مقياس واجهة المستخدم</string>
+    <string name="ui_scale">حجم النص والشاشة</string>
+    <string name="ui_scale_description">يغير حجم النصوص والقوائم وعناصر الواجهة في التطبيق بالكامل. يُوصى به للشاشات عالية الدقة ذات النصوص الصغيرة.</string>
     <string name="ui_scale_home">الشاشة الرئيسية</string>
     <string name="ui_scale_settings">شاشة الإعدادات</string>
     <string name="category_vehicle">المركبة</string>

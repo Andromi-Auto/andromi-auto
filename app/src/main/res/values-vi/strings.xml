@@ -461,7 +461,8 @@
     <!-- Vehicle Info Settings -->
     <string name="vehicle_info_settings">Thông tin xe</string>
     <string name="vehicle_info_settings_description">Tuỳ chỉnh cách xe hiển thị trên điện thoại</string>
-    <string name="ui_scale">Tỉ lệ giao diện</string>
+    <string name="ui_scale">Kích thước văn bản &amp; màn hình</string>
+    <string name="ui_scale_description">Điều chỉnh tỷ lệ văn bản, menu và bố cục trên toàn bộ ứng dụng. Khuyên dùng cho màn hình độ phân giải cao có chữ nhỏ.</string>
     <string name="ui_scale_home">Màn hình chính</string>
     <string name="ui_scale_settings">Màn hình cài đặt</string>
     <string name="category_vehicle">Xe</string>

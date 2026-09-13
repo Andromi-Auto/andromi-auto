@@ -449,7 +449,8 @@
     <!-- Vehicle Info Settings -->
     <string name="vehicle_info_settings">Informazioni veicolo</string>
     <string name="vehicle_info_settings_description">Personalizza come il tuo veicolo appare sul telefono</string>
-    <string name="ui_scale">Scala UI</string>
+    <string name="ui_scale">Dimensioni testo e display</string>
+    <string name="ui_scale_description">Ridimensiona testi, menu ed elementi di layout nell\'intera applicazione. Consigliato per display ad alta risoluzione con testo piccolo.</string>
     <string name="ui_scale_home">Schermata Home</string>
     <string name="ui_scale_settings">Schermata Impostazioni</string>
     <string name="category_vehicle">Veicolo</string>

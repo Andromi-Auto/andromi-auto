@@ -441,7 +441,8 @@
     <!-- Vehicle Info Settings -->
     <string name="vehicle_info_settings">Voertuiginformatie</string>
     <string name="vehicle_info_settings_description">Pas aan hoe uw voertuig op uw telefoon wordt weergegeven</string>
-    <string name="ui_scale">UI-schaal</string>
+    <string name="ui_scale">Tekst- en weergavegrootte</string>
+    <string name="ui_scale_description">Schaalt tekst, menu\'s en lay-outelementen in de hele app. Aanbevolen voor schermen met een hoge resolutie en kleine tekst.</string>
     <string name="ui_scale_home">Startscherm</string>
     <string name="ui_scale_settings">Instellingen scherm</string>
     <string name="category_vehicle">Voertuig</string>

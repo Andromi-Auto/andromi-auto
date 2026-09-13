@@ -500,7 +500,8 @@
     <!-- Vehicle Info Settings -->
     <string name="vehicle_info_settings">Fahrzeuginformationen</string>
     <string name="vehicle_info_settings_description">Passen Sie an, wie Ihr Fahrzeug auf Ihrem Telefon angezeigt wird</string>
-    <string name="ui_scale">UI-Skalierung</string>
+    <string name="ui_scale">Text- und Anzeigegröße</string>
+    <string name="ui_scale_description">Skaliert Schriften, Menüs und Abstände der gesamten App. Empfohlen für hochauflösende Displays mit kleiner Schrift.</string>
     <string name="ui_scale_home">Startbildschirm</string>
     <string name="ui_scale_settings">Einstellungsbildschirm</string>
     <string name="category_vehicle">Fahrzeug</string>

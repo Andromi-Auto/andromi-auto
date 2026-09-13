@@ -442,7 +442,8 @@
     <!-- Vehicle Info Settings -->
     <string name="vehicle_info_settings">Informacje o pojeździe</string>
     <string name="vehicle_info_settings_description">Dostosuj, jak pojazd jest wyświetlany na telefonie</string>
-    <string name="ui_scale">Skalowanie interfejsu</string>
+    <string name="ui_scale">Rozmiar tekstu i interfejsu</string>
+    <string name="ui_scale_description">Skaluje tekst, menu i elementy interfejsu w całej aplikacji. Zalecane dla ekranów o wysokiej rozdzielczości z małym tekstem.</string>
     <string name="ui_scale_home">Ekran główny</string>
     <string name="ui_scale_settings">Ekran ustawień</string>
     <string name="category_vehicle">Pojazd</string>

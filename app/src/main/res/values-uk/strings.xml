@@ -442,7 +442,8 @@
     <!-- Vehicle Info Settings -->
     <string name="vehicle_info_settings">Інформація про транспортний засіб</string>
     <string name="vehicle_info_settings_description">Налаштуйте, як ваш автомобіль відображається на телефоні</string>
-    <string name="ui_scale">Масштаб інтерфейсу</string>
+    <string name="ui_scale">Розмір тексту та інтерфейсу</string>
+    <string name="ui_scale_description">Масштабує текст, меню та елементи інтерфейсу в усьому додатку. Рекомендовано для екранів високої роздільної здатності з дрібним шрифтом.</string>
     <string name="ui_scale_home">Головний екран</string>
     <string name="ui_scale_settings">Екран налаштувань</string>
     <string name="category_vehicle">Транспортний засіб</string>

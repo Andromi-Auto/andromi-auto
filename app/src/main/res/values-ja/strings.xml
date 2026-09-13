@@ -450,7 +450,8 @@
     <!-- Vehicle Info Settings -->
     <string name="vehicle_info_settings">車両情報</string>
     <string name="vehicle_info_settings_description">お使いのスマートフォン上で、車両情報の表示方法をカスタマイズできます。</string>
-    <string name="ui_scale">UI スケール</string>
+    <string name="ui_scale">テキストと表示サイズ</string>
+    <string name="ui_scale_description">アプリ全体のテキスト、メニュー、レイアウト要素を拡大縮小します。文字が小さく見える高解像度ディスプレイに推奨されます。</string>
     <string name="ui_scale_home">ホーム画面</string>
     <string name="ui_scale_settings">設定画面</string>
     <string name="category_vehicle">車両</string>
