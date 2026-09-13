@@ -14,12 +14,14 @@ import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.ExternalBtTran
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.NativeAaHandshakeManager
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.SoftApCredentialsProvider
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.NativeStrategy
+import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.zbt.ZbtDaemonReachability
 import com.andrerinas.openheadunit.connection.wifi.WifiLauncher
 import com.andrerinas.openheadunit.connection.wifi.WifiLauncherManager
 import com.andrerinas.openheadunit.connection.wifi.WifiLauncherMode
 import com.andrerinas.openheadunit.connection.wifi.WifiLauncherStopSequence
 import com.andrerinas.openheadunit.main.SettingsActivity
 import com.andrerinas.openheadunit.utils.AppLog
+import com.andrerinas.openheadunit.utils.BluetoothHelper
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 
@@ -72,14 +74,16 @@ class WifiLauncherNative : WifiLauncher {
         // started, and on a unit whose access point is already up that is tens of milliseconds.
         setupSoftAp()
 
-        // Skip the whole route, not just the handshake, when the Bluetooth this unit's
-        // phone is bonded to isn't reachable from here: with no Bluetooth channel there is
-        // nobody to hand the credentials to, so hosting a P2P group or holding the hotspot
-        // open would only churn the WiFi stack for nothing.
-        // The module route needs the WiFi half exactly as any other unit does; only the Bluetooth
-        // half changes, and the handshake manager decides that for itself.
-        val blockedByExternalBt = NativeAaHandshakeManager.transportRoute(service) ==
-            ExternalBtTransportPolicy.Route.BLOCKED
+        // Skip the route when this unit's Bluetooth cannot carry the handshake: with no channel
+        // there is nobody to hand credentials to. A *measured* refusal only, never one merely not
+        // measured yet - the dial that measures it is in handshakeManager.start(), which this
+        // return skips, so the answer used to be gated behind itself.
+        val blockedByExternalBt = ExternalBtTransportPolicy.refusesBringUp(
+            BluetoothHelper.externalBtEvidence,
+            settings.externalBtZbtTransport,
+            settings.nativeAaIgnoreExternalBt,
+            ZbtDaemonReachability.cached(),
+        )
         if (blockedByExternalBt) NativeAaHandshakeManager.externalBtDiagnostic()?.let { AppLog.e(it) }
 
         if (!blockedByExternalBt) {

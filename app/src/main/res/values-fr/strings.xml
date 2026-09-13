@@ -786,11 +786,11 @@
     <string name="external_bt_module_nativeaa">Sans fil natif via le module ZJ/ZLink</string>
     <string name="external_bt_module_nativeaa_desc">Votre téléphone s\'appaire avec le module Bluetooth propre à cet autoradio (%1$s), pas avec celui qu\'Android expose aux applications, donc la poignée de main sera envoyée via le service ZJ/ZLink du module.\n\nExpérimental, et ce service est la seule voie d\'accès. Si le téléphone ne démarre jamais Android Auto, utilisez l\'USB ou un mode Wi-Fi.</string>
     <string name="external_bt_transport">Se connecter via le module Bluetooth de l\'autoradio</string>
-    <string name="external_bt_transport_description">Expérimental, et réservé aux appareils dotés d\'un service Bluetooth ZJ/ZLink. Envoie la poignée de main d\'Android Auto sans fil par la puce Bluetooth de cet appareil, celle avec laquelle votre téléphone est réellement appairé, plutôt que par le Bluetooth qu\'Android expose aux applications.\n\nLancez d\'abord « Tester le module Bluetooth de l\'autoradio ». Si le test ne trouve pas ce service, ce réglage ne peut rien faire sur votre appareil et le sans-fil natif n\'y fonctionnera pas. S\'il le trouve, activez ceci et choisissez Natif. Merci d\'exporter le journal dans les deux cas.</string>
+    <string name="external_bt_transport_description">Expérimental, et réservé aux appareils dotés d\'un service Bluetooth ZJ/ZLink. Envoie la négociation Android Auto sans fil via la puce Bluetooth propre à cet appareil, celle avec laquelle votre téléphone est réellement appairé, plutôt que via le Bluetooth qu\'Android expose aux applications.\n\nLancez d\'abord \"Tester le module Bluetooth de l\'autoradio\", ce réglage étant désactivé. Si le test ne trouve rien à l\'écoute sur le port, ce réglage ne peut rien faire sur votre appareil et le sans-fil natif ne fonctionnera pas ici quoi que vous choisissiez. S\'il répond, activez ceci et choisissez Natif. Un test lancé alors que ce réglage est déjà actif et connecté le signale, ce qui n\'est pas un échec. Exportez le journal dans les deux cas.</string>
     <string name="zbt_probe_title">Tester le module Bluetooth de l\'autoradio</string>
     <string name="zbt_probe_idle">Appuyer pour lancer</string>
     <string name="zbt_probe_running">En cours…</string>
-    <string name="zbt_probe_message">Demande à la puce Bluetooth distincte de cet appareil si elle peut porter une connexion Android Auto, puis observe pendant environ une minute et demie. La ligne sous ce réglage indique ce qui se passe, et rien d\'autre n\'est touché sur l\'appareil.\n\n« Réveiller et observer » demande en plus à la puce de se reconnecter à votre téléphone pour Android Auto. C\'est la seule partie qui change quelque chose, et redémarrer l\'appareil l\'annule. Merci d\'exporter le journal ensuite et de le joindre.</string>
+    <string name="zbt_probe_message">Demande à la puce Bluetooth séparée de cet appareil si elle peut porter une connexion Android Auto. Le test vérifie en huit secondes environ que la puce répond, et seulement si c\'est le cas, il observe pendant une minute et demie environ. La ligne sous ce réglage montre ce qui se passe, et rien d\'autre n\'est modifié sur l\'appareil.\n\nLa puce ne parle qu\'à un programme à la fois. Si une connexion passe déjà par elle, le test le signale au lieu de tester. Désactivez d\'abord le réglage ci-dessus pour le tester seul.\n\nRéveiller et observer demande en plus à la puce de se reconnecter à votre téléphone pour Android Auto. C\'est la seule partie qui change quelque chose, et un redémarrage de l\'appareil l\'annule. Exportez ensuite le journal et joignez-le.</string>
     <string name="zbt_probe_watch_only">Observer seulement</string>
     <string name="zbt_probe_wake_and_watch">Réveiller et observer</string>
 
@@ -1203,4 +1203,25 @@
     <string name="connecting_driver_disconnected">%s est déconnecté, réveil en cours...</string>
     <string name="driver_device_disconnected">Déconnecté, sera réveillé</string>
     <string name="no_usb_host_support">Cet autoradio ne prend pas en charge le mode hôte USB ; Android Auto filaire n\'est donc pas disponible. Veuillez utiliser une connexion sans fil.</string>
+    <string name="stage_armed">En attente de votre téléphone</string>
+    <string name="stage_usb_attached">Périphérique USB connecté</string>
+    <string name="stage_preparing_network">Préparation du réseau</string>
+    <string name="stage_searching">Recherche de votre téléphone</string>
+    <string name="stage_usb_switching">Basculement de votre téléphone vers Android Auto</string>
+    <string name="stage_creating_network">Création du réseau WiFi</string>
+    <string name="stage_waiting_for_phone">En attente de la connexion de votre téléphone</string>
+    <string name="stage_waking_phone">Réveil de votre téléphone</string>
+    <string name="stage_phone_answered">Votre téléphone a répondu</string>
+    <string name="stage_sending_credentials">Envoi des informations réseau à votre téléphone</string>
+    <string name="stage_phone_joining">Votre téléphone rejoint le réseau</string>
+    <string name="stage_connecting">Connexion en cours</string>
+    <string name="stage_securing">Sécurisation de la connexion</string>
+    <string name="stage_starting_projection">Démarrage d\'Android Auto</string>
+    <string name="network_detail_5ghz">WiFi Direct en 5 GHz (%1$d MHz)</string>
+    <string name="network_detail_24ghz">WiFi Direct en 2,4 GHz, canal %1$d</string>
+    <string name="network_detail_unknown">Le réseau WiFi Direct est actif</string>
+    <string name="network_detail_retrying_5ghz">WiFi Direct est monté en 2,4 GHz, nouvel essai en 5 GHz</string>
+    <string name="network_detail_unfriendly_channel">WiFi Direct est sur le canal %1$d, que la plupart des téléphones ne peuvent pas rejoindre. Redémarrez le WiFi.</string>
+    <string name="native_aa_requires_wifi">Android Auto natif a besoin du WiFi de cet appareil. Veuillez l\'activer.</string>
+    <string name="connection_issue_banner_wifi_radio_off">Le WiFi de cet appareil est désactivé, et cette version d\'Android ne laisse pas l\'application l\'activer. Le réseau WiFi Direct que votre téléphone devait rejoindre n\'a donc jamais pu être créé. Activez le WiFi sur cet appareil. S\'il ne reste pas activé parce que cet appareil héberge son propre point d\'accès, appuyez ici pour choisir ce point d\'accès comme méthode réseau.</string>
 </resources>

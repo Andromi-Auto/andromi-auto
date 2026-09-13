@@ -61,6 +61,24 @@ object ExternalBtTransportPolicy {
     }
 
     /**
+     * Whether this unit refuses to bring Native AA up at all over its external Bluetooth.
+     *
+     * The exact complement of [needsDaemonMeasurement] on the BLOCKED arm: a daemon that has not
+     * been asked yet is not a refusal, and treating it as one skipped the very code that asks.
+     */
+    fun refusesBringUp(
+        externalBtEvidence: String?,
+        zbtTransportEnabled: Boolean,
+        ignoreExternalBt: Boolean,
+        cachedDaemonReachable: Boolean?
+    ): Boolean =
+        route(externalBtEvidence, zbtTransportEnabled, ignoreExternalBt, cachedDaemonReachable) ==
+            Route.BLOCKED &&
+            !needsDaemonMeasurement(
+                externalBtEvidence, zbtTransportEnabled, ignoreExternalBt, cachedDaemonReachable
+            )
+
+    /**
      * Whether dialling the daemon would change this unit's answer.
      *
      * The fence that keeps the dial off ordinary hardware as much as an optimisation: false

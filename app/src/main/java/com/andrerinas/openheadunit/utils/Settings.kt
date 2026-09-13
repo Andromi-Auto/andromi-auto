@@ -2061,6 +2061,11 @@ class Settings(private val context: Context) {
         get() = prefs.getLong("connection-issue-p2p-cycled", 0L)
         set(value) = prefs.edit().putLong("connection-issue-p2p-cycled", value).apply()
 
+    /** This unit's WiFi was off and this Android would not let the app switch it on. */
+    var connectionIssueWifiRadioOffAtEpochMs: Long
+        get() = prefs.getLong("connection-issue-wifi-radio-off", 0L)
+        set(value) = prefs.edit().putLong("connection-issue-wifi-radio-off", value).apply()
+
     /** Sessions kept starting and ending without a single video frame, so the link cannot carry it. */
     var connectionIssueVideoLinkTooSlowAtEpochMs: Long
         get() = prefs.getLong("connection-issue-video-starved", 0L)

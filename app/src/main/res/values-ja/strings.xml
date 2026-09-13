@@ -242,6 +242,7 @@
         <item>マニュアル (リスト)</item>
         <item>自動検索 (Headunit Server)</item>
         <item>Wireless Helper (Waiting for Phone)</item>
+        <item>ネイティブ Android Auto (公式ハンドシェイク)</item>
     </string-array>
     <string name="auto_connect_last_session">前回のセッションに自動接続</string>
     <string name="auto_connect_last_session_description">アプリ起動時に最後に使用したデバイスに自動的に再接続する。</string>
@@ -909,11 +910,11 @@
     <string name="external_bt_module_nativeaa">ZJ/ZLink モジュール経由のネイティブワイヤレス</string>
     <string name="external_bt_module_nativeaa_desc">スマートフォンは、Android がアプリに提供する Bluetooth ではなく、このヘッドユニット独自の Bluetooth モジュール (%1$s) とペアリングするため、ハンドシェイクはそのモジュールの ZJ/ZLink サービスを通じて送信されます。\n\n実験的な機能で、その一つのサービスだけが唯一の入り口です。スマートフォンが Android Auto を開始しない場合は、USB か WiFi モードをご利用ください。</string>
     <string name="external_bt_transport">ヘッドユニットの Bluetooth モジュール経由で接続</string>
-    <string name="external_bt_transport_description">実験的な機能で、ZJ/ZLink Bluetooth サービスを備えた機種専用です。ワイヤレス Android Auto のハンドシェイクを、Android がアプリに提供する Bluetooth ではなく、スマートフォンが実際にペアリングしているこの機種自身の Bluetooth チップ経由で送信します。\n\nまず「ヘッドユニットの Bluetooth モジュールをテスト」を実行してください。テストでそのサービスが見つからない場合、この設定はお使いの機種では何もできず、ネイティブワイヤレスはここでは動作しません。見つかった場合はこれをオンにし、ネイティブを選択してください。いずれの場合もログのエクスポートをお願いします。</string>
+    <string name="external_bt_transport_description">実験的機能で、ZJ/ZLinkのBluetoothサービスを持つ機器専用です。ワイヤレスAndroid Autoのハンドシェイクを、Androidがアプリに提供するBluetoothではなく、スマートフォンが実際にペアリングしているこの機器自身のBluetoothチップ経由で送信します。\n\nまずこの設定をオフにしたまま「ヘッドユニットのBluetoothモジュールをテスト」を実行してください。ポートで待ち受けているものが見つからない場合、この設定はこの機器では何もできず、何を設定してもネイティブワイヤレスは動作しません。応答があればこれをオンにして「ネイティブ」を選んでください。この設定がすでにオンで接続中のときにテストを実行すると、その旨が表示されますが、これは失敗ではありません。いずれの場合もログを書き出してください。</string>
     <string name="zbt_probe_title">ヘッドユニットの Bluetooth モジュールをテスト</string>
     <string name="zbt_probe_idle">タップして実行</string>
     <string name="zbt_probe_running">実行中…</string>
-    <string name="zbt_probe_message">この機種の独立した Bluetooth チップに Android Auto 接続を運べるかどうかを問い合わせ、約 1 分半のあいだ監視します。この設定の下の行に状況が表示され、機種のほかの部分には一切触れません。\n\n「起こして監視」は、さらにチップに対して Android Auto のためにスマートフォンへ再接続するよう依頼します。何かを変更するのはこの部分だけで、機種を再起動すれば元に戻ります。終了後にログをエクスポートして添付してください。</string>
+    <string name="zbt_probe_message">この機器の独立したBluetoothチップに、Android Autoの接続を運べるかどうかを尋ねます。まず約8秒でチップが応答するかを確認し、応答した場合にのみ約1分半のあいだ観察します。この設定の下の行に状況が表示され、機器の他の部分には一切触れません。\n\nチップは一度に1つのプログラムとしか通信しません。すでに接続が通っている場合、テストは検査の代わりにその旨を表示します。単独で試すには、先に上の設定をオフにしてください。\n\n「起こして観察」は、さらにチップにAndroid Autoのためスマートフォンへ再接続するよう要求します。何かを変更するのはこの部分だけで、機器を再起動すれば元に戻ります。終わったらログを書き出して添付してください。</string>
     <string name="zbt_probe_watch_only">監視のみ</string>
     <string name="zbt_probe_wake_and_watch">起こして監視</string>
     <string name="native_ap_transport">Network transport</string>
@@ -1167,4 +1168,25 @@
     <string name="oem_app_action_failed">実行に失敗しました: %s</string>
     <string name="copy_to_clipboard">コピー</string>
     <string name="copied_to_clipboard">クリップボードにコピーしました</string>
+    <string name="stage_armed">スマートフォンを待っています</string>
+    <string name="stage_usb_attached">USB機器を接続しました</string>
+    <string name="stage_preparing_network">ネットワークを準備しています</string>
+    <string name="stage_searching">スマートフォンを探しています</string>
+    <string name="stage_usb_switching">スマートフォンをAndroid Autoに切り替えています</string>
+    <string name="stage_creating_network">WiFiネットワークを作成しています</string>
+    <string name="stage_waiting_for_phone">スマートフォンの接続を待っています</string>
+    <string name="stage_waking_phone">スマートフォンを起こしています</string>
+    <string name="stage_phone_answered">スマートフォンが応答しました</string>
+    <string name="stage_sending_credentials">ネットワーク情報をスマートフォンに送信しています</string>
+    <string name="stage_phone_joining">スマートフォンがネットワークに参加しています</string>
+    <string name="stage_connecting">接続しています</string>
+    <string name="stage_securing">接続を保護しています</string>
+    <string name="stage_starting_projection">Android Autoを起動しています</string>
+    <string name="network_detail_5ghz">WiFi Directは5 GHz（%1$d MHz）です</string>
+    <string name="network_detail_24ghz">WiFi Directは2.4 GHz、チャンネル%1$dです</string>
+    <string name="network_detail_unknown">WiFi Directネットワークが起動しています</string>
+    <string name="network_detail_retrying_5ghz">WiFi Directが2.4 GHzで起動したため、5 GHzを再試行しています</string>
+    <string name="network_detail_unfriendly_channel">WiFi Directはチャンネル%1$dにあり、ほとんどのスマートフォンは参加できません。WiFiを再起動してください。</string>
+    <string name="native_aa_requires_wifi">ネイティブAndroid Autoにはこの機器のWiFiが必要です。オンにしてください。</string>
+    <string name="connection_issue_banner_wifi_radio_off">この機器のWiFiがオフで、このバージョンのAndroidではアプリがオンにできません。そのため、スマートフォンが参加するはずのWiFi Directネットワークを作成できませんでした。この機器のWiFiをオンにしてください。この機器が自身のテザリングを使っているためオンのままにならない場合は、ここをタップしてネットワーク方式をそのテザリングに変更してください。</string>
 </resources>

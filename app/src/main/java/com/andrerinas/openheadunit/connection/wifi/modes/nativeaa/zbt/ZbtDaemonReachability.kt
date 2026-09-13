@@ -30,6 +30,40 @@ object ZbtDaemonReachability {
     @Volatile
     private var answeredAt = 0L
 
+    @Volatile
+    private var carrierHoldsClient = false
+
+    @Volatile
+    private var carrierWantsSlot = false
+
+    /**
+     * Whether this app's own carrier currently holds the daemon's one client slot.
+     *
+     * The daemon serves one program at a time, so a second connection is accepted and then never
+     * answered. Anything that would dial asks this first, or it measures its own session as a dead
+     * daemon.
+     */
+    fun carrierLive(): Boolean = carrierHoldsClient
+
+    /** Called by [ZbtAaCarrier] as it takes and releases the daemon's client slot. */
+    fun setCarrierLive(live: Boolean) {
+        carrierHoldsClient = live
+    }
+
+    /**
+     * Whether the real connection needs the daemon's one client slot, open or reopening.
+     *
+     * [carrierLive] only covers a channel the carrier already holds. A probe that took the slot
+     * first keeps it until its own run ends, which cost a connection 90 seconds on #978's GT6-CAR,
+     * so the probe polls this as well and gives way: a session outranks a test.
+     */
+    fun carrierWantsClient(): Boolean = carrierWantsSlot
+
+    /** Called by [ZbtAaCarrier] around its whole run, reopen attempts included. */
+    fun setCarrierWantsClient(wants: Boolean) {
+        carrierWantsSlot = wants
+    }
+
     /** The last answer, or null if there is none or it has gone stale. Never dials. */
     fun cached(nowMs: Long = SystemClock.elapsedRealtime()): Boolean? =
         answer?.takeIf { nowMs - answeredAt < RECHECK_AFTER_MS }
@@ -54,8 +88,11 @@ object ZbtDaemonReachability {
     @Synchronized
     fun resolve(
         nowMs: () -> Long = { SystemClock.elapsedRealtime() },
-        dial: () -> Boolean = ::dialOnce
+        dial: () -> Boolean = ::dialOnce,
+        carrierLive: () -> Boolean = ::carrierLive
     ): Boolean {
+        // A live carrier is the answer, and dialling past it would cache its own silence as a no.
+        if (carrierLive()) return true
         cached(nowMs())?.let { return it }
         val reachable = dial()
         record(reachable, nowMs())

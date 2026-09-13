@@ -28,6 +28,13 @@ class ExternalBtTransportPolicyTest {
         cached: Boolean? = null
     ) = ExternalBtTransportPolicy.needsDaemonMeasurement(externalBtEvidence, zbt, ignore, cached)
 
+    private fun refuses(
+        externalBtEvidence: String? = null,
+        zbt: Boolean = false,
+        ignore: Boolean = false,
+        cached: Boolean? = null
+    ) = ExternalBtTransportPolicy.refusesBringUp(externalBtEvidence, zbt, ignore, cached)
+
     @Test
     fun `a unit with no external-BT markers is normal, whatever the settings say`() {
         // Both settings are only ever offered on detected units, but nothing stops one surviving in
@@ -131,5 +138,43 @@ class ExternalBtTransportPolicyTest {
     @Test
     fun `a flagged unit with nothing decided is the one case that dials`() {
         assertTrue(needsMeasurement(evidence))
+    }
+
+    @Test
+    fun `a daemon nobody has asked yet is not a refusal`() {
+        // The measurement lives behind the bring-up this answer gates, so answering "refused" here
+        // meant the dial never ran and the route could never open. Measured on two units in #978.
+        assertEquals(Route.BLOCKED, route(evidence))
+        assertFalse(refuses(evidence))
+    }
+
+    @Test
+    fun `a daemon that was asked and said no is a refusal`() {
+        assertTrue(refuses(evidence, cached = false))
+    }
+
+    @Test
+    fun `a route that is not blocked never refuses`() {
+        assertFalse(refuses(null))
+        assertFalse(refuses(evidence, zbt = true))
+        assertFalse(refuses(evidence, ignore = true))
+        assertFalse(refuses(evidence, cached = true))
+    }
+
+    @Test
+    fun `refusing and still-worth-asking are exact complements of a blocked route`() {
+        // Neither may be relaxed on its own: together they must cover BLOCKED exactly once.
+        val cases = listOf<Boolean?>(null, true, false)
+        for (evidenceValue in listOf(null, evidence))
+            for (zbt in listOf(false, true))
+                for (ignore in listOf(false, true))
+                    for (cached in cases) {
+                        val blocked = ExternalBtTransportPolicy
+                            .route(evidenceValue, zbt, ignore, cached) == Route.BLOCKED
+                        val refused = refuses(evidenceValue, zbt, ignore, cached)
+                        val asking = needsMeasurement(evidenceValue, zbt, ignore, cached)
+                        assertEquals(blocked, refused || asking)
+                        assertFalse(refused && asking)
+                    }
     }
 }
