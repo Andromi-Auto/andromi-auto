@@ -3,6 +3,7 @@ package com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.zbt
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.WppFraming
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.WppMessageType
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -152,5 +153,22 @@ class ZbtProbeTest {
             "(reads as WPP type ${WppMessageType.PING_REQUEST}, 0 byte payload)",
             ZbtProbe.describeWpp(frame)
         )
+    }
+
+    @Test
+    fun `a busy module is reported as working, not as silence`() {
+        val said = ZbtProbe.busyCarrierVerdict()
+        assertTrue(said, said.contains("one program at a time"))
+        assertTrue(said, said.contains("the route works"))
+        assertFalse(said, said.contains("never answered"))
+    }
+
+    @Test
+    fun `a test that gave the module back says so, and does not report a fault`() {
+        val said = ZbtProbe.carrierTookOverVerdict()
+        assertTrue(said, said.contains("one program at a time"))
+        assertTrue(said, said.contains("gave the module back"))
+        assertFalse(said, said.contains("never answered"))
+        assertFalse(said, said.contains("Nothing is listening"))
     }
 }

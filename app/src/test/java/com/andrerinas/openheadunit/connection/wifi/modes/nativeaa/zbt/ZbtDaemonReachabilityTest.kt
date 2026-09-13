@@ -15,11 +15,17 @@ class ZbtDaemonReachabilityTest {
     @Before
     fun clear() {
         ZbtDaemonReachability.forget()
+        ZbtDaemonReachability.setCarrierLive(false)
+        ZbtDaemonReachability.setCarrierWantsClient(false)
         dials = 0
     }
 
     @After
-    fun leaveNothingBehind() = ZbtDaemonReachability.forget()
+    fun leaveNothingBehind() {
+        ZbtDaemonReachability.forget()
+        ZbtDaemonReachability.setCarrierLive(false)
+        ZbtDaemonReachability.setCarrierWantsClient(false)
+    }
 
     private fun dial(answer: Boolean): () -> Boolean = { dials++; answer }
 
@@ -69,5 +75,41 @@ class ZbtDaemonReachabilityTest {
         assertNull(ZbtDaemonReachability.cached(nowMs = 1_000L))
         ZbtDaemonReachability.resolve({ 1_000L }, dial(true))
         assertEquals(2, dials)
+    }
+
+    @Test
+    fun `a live carrier answers without dialling`() {
+        // The daemon serves one client, so a dial beside our own session would measure silence and
+        // cache it as a refusal for ten minutes.
+        assertTrue(ZbtDaemonReachability.resolve({ 1_000L }, dial(false), carrierLive = { true }))
+        assertEquals(0, dials)
+    }
+
+    @Test
+    fun `a live carrier does not overwrite what was measured`() {
+        assertFalse(ZbtDaemonReachability.resolve({ 1_000L }, dial(false)))
+        assertTrue(ZbtDaemonReachability.resolve({ 1_000L }, dial(false), carrierLive = { true }))
+        assertFalse(ZbtDaemonReachability.cached(nowMs = 1_000L) == true)
+    }
+
+    @Test
+    fun `the carrier flag tracks what it is set to`() {
+        assertFalse(ZbtDaemonReachability.carrierLive())
+        ZbtDaemonReachability.setCarrierLive(true)
+        assertTrue(ZbtDaemonReachability.carrierLive())
+        ZbtDaemonReachability.setCarrierLive(false)
+        assertFalse(ZbtDaemonReachability.carrierLive())
+    }
+
+    @Test
+    fun `wanting the slot is tracked apart from holding it`() {
+        // A carrier between reopen attempts holds nothing and still needs the slot back, which is
+        // the whole window a probe used to be able to sit in.
+        assertFalse(ZbtDaemonReachability.carrierWantsClient())
+        ZbtDaemonReachability.setCarrierWantsClient(true)
+        assertTrue(ZbtDaemonReachability.carrierWantsClient())
+        assertFalse(ZbtDaemonReachability.carrierLive())
+        ZbtDaemonReachability.setCarrierWantsClient(false)
+        assertFalse(ZbtDaemonReachability.carrierWantsClient())
     }
 }

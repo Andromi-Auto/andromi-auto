@@ -262,6 +262,20 @@ class ConnectionIssueBannerPolicyTest {
     }
 
     @Test
+    fun `a radio that is off blocks WiFi Direct only`() {
+        // The hotspot route never asks for a group, so a radio that cannot host one is not the
+        // reason a hotspot connection failed.
+        assertTrue(
+            ConnectionIssue.WIFI_RADIO_OFF in
+                ConnectionIssueBannerPolicy.relevantNow(3, NativeTransport.WIFI_DIRECT)
+        )
+        assertFalse(
+            ConnectionIssue.WIFI_RADIO_OFF in
+                ConnectionIssueBannerPolicy.relevantNow(3, NativeTransport.HOTSPOT)
+        )
+    }
+
+    @Test
     fun `every issue is relevant on some route`() {
         // The same guard as `every issue can be shown`: a condition no route claims would be
         // recorded on the connection path and then never shown to anybody.

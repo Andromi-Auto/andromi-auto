@@ -615,6 +615,7 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
     private fun noteGroupFormed() {
         ConnectionIssues.clear(context, ConnectionIssue.WIFI_DIRECT_GROUP_REFUSED)
         ConnectionIssues.clear(context, ConnectionIssue.WIFI_DIRECT_STACK_CYCLED)
+        ConnectionIssues.clear(context, ConnectionIssue.WIFI_RADIO_OFF)
     }
 
     /**
@@ -1732,7 +1733,8 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
             if (Build.VERSION.SDK_INT >= 29) {
                 if (attempt == 1) {
                     AppLog.i("WifiDirectManager: WiFi is off and this Android does not let an app switch it on.")
-                    showToast("Native AA requires Wi-Fi. Please turn it on.")
+                    showToast(context.getString(R.string.native_aa_requires_wifi))
+                    ConnectionIssues.raise(context, ConnectionIssue.WIFI_RADIO_OFF)
                 }
                 isGroupCreatingOrCreated = false
                 releaseNativeCreateWindow("WiFi is off and only the user can turn it on")
@@ -1744,7 +1746,8 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
                         "WifiDirectManager: WiFi is still off after $MAX_WIFI_ENABLE_ATTEMPTS attempts to " +
                             "switch it on, so the group cannot be created. Switch WiFi on for this unit."
                     )
-                    showToast("Native AA requires Wi-Fi. Please turn it on.")
+                    showToast(context.getString(R.string.native_aa_requires_wifi))
+                    ConnectionIssues.raise(context, ConnectionIssue.WIFI_RADIO_OFF)
                 }
                 isGroupCreatingOrCreated = false
                 releaseNativeCreateWindow("WiFi is off and would not come on")
@@ -1767,6 +1770,8 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
             return
         }
         wifiEnableAttempts = 0
+        // The radio being on disproves the record outright, well before a group forms.
+        ConnectionIssues.clear(context, ConnectionIssue.WIFI_RADIO_OFF)
 
         claimNativeCreateWindow("bringing the Native AA group up")
         AppLog.i("WifiDirectManager: startNativeAaQuietHost() requested. Removing old group if any...")

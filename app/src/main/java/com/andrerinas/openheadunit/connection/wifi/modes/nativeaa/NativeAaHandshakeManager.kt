@@ -14,6 +14,7 @@ import com.andrerinas.openheadunit.connection.wifi.direct.GroupIdentityStability
 import com.andrerinas.openheadunit.connection.wifi.direct.GroupIdentityStabilityPolicy
 import com.andrerinas.openheadunit.aap.AapService
 
+import com.andrerinas.openheadunit.utils.BluetoothAddressSeedPolicy
 import com.andrerinas.openheadunit.utils.BluetoothHelper
 import com.andrerinas.openheadunit.aap.protocol.proto.Wireless
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.zbt.ZbtAaCarrier
@@ -1918,6 +1919,21 @@ class NativeAaHandshakeManager(
      * bonded to a chip `android.bluetooth` does not expose, so a listener on the Android radio
      * would never be reached, which is the defect this route exists to route around.
      */
+    /**
+     * Fills the Bluetooth address in from the module when the user has not set one.
+     *
+     * Same rule as the boot-time seed: what the user typed is never overwritten, because a
+     * hand-entered address is usually there because the detected one was wrong.
+     */
+    private fun seedBluetoothAddressFromModule(address: String) {
+        val canonical = BluetoothHelper.normalizeMacAddress(address) ?: return
+        val seeded = BluetoothAddressSeedPolicy.seed(settings.bluetoothAddress, canonical)
+        if (seeded.isEmpty() || seeded == settings.bluetoothAddress) return
+        settings.bluetoothAddress = seeded
+        AppLog.i("NativeAA: [ZBT] the module named this unit's Bluetooth address ($seeded), so the " +
+            "Bluetooth service can be announced; phone calls need it")
+    }
+
     private fun startOverExternalModule() {
         isRunning = true
         notStartedReason = null
@@ -1941,6 +1957,10 @@ class NativeAaHandshakeManager(
             isHandshakeInFlight = { isHandshakeInFlight() },
             mayServeHandshake = { NativeHandoffPolicy.shouldServeHandshake(consecutiveHandshakeFailures) },
             onPhoneEvidence = { resetHandshakeBackoff() },
+            // The module names its own address, and on these units nothing else could: the
+            // adapter is masked and the vendor property is not always there. Without it no
+            // Bluetooth service is announced and Android Auto keeps calls on the phone.
+            onModuleAddress = { address -> seedBluetoothAddressFromModule(address) },
             retryDelayMs = {
                 JoinRefusalPolicy.retryDelayMs(
                     consecutiveJoinRefusals,
