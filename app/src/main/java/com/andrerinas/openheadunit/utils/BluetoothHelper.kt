@@ -390,10 +390,10 @@ object BluetoothHelper {
 
         // 4. Vendor properties, for head units that publish it.
         for (key in ADDRESS_PROPERTY_KEYS) {
-            val valStr = SystemProperties.get(key, "").trim()
-            if (valStr.isNotEmpty() && isValidMacAddress(valStr)) {
-                AppLog.i("BluetoothHelper: Resolved hardware BT MAC $valStr from property $key")
-                return valStr.uppercase()
+            val normalized = normalizeMacAddress(SystemProperties.get(key, ""))
+            if (normalized != null) {
+                AppLog.i("BluetoothHelper: Resolved hardware BT MAC $normalized from property $key")
+                return normalized
             }
         }
 
@@ -495,11 +495,30 @@ object BluetoothHelper {
         )
     }
 
-    private fun isValidMacAddress(mac: String): Boolean {
-        if (mac == "02:00:00:00:00:00" || mac == "00:00:00:00:00:00") return false
-        val regex = Regex("^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$")
-        return regex.matches(mac)
+    private val SEPARATED_MAC = Regex("^([0-9A-F]{2}[:-]){5}[0-9A-F]{2}$")
+    private val BARE_MAC = Regex("^[0-9A-F]{12}$")
+
+    /**
+     * The address as canonical `AA:BB:CC:DD:EE:FF`, or null when it is not an address at all.
+     *
+     * Vendor properties publish it unseparated - `persist.zj.BTmac` reads `008761BF6706` on the ZJ
+     * units - and a separator-only check threw that away, so those units announced no Bluetooth
+     * service and Android Auto kept calls on the phone.
+     */
+    fun normalizeMacAddress(raw: String?): String? {
+        val trimmed = raw?.trim()?.uppercase() ?: return null
+        val hex = when {
+            SEPARATED_MAC.matches(trimmed) -> trimmed.replace("-", "").replace(":", "")
+            BARE_MAC.matches(trimmed) -> trimmed
+            else -> return null
+        }
+        val canonical = hex.chunked(2).joinToString(":")
+        // The placeholder every non-privileged app gets since API 23, and the all-zero one.
+        if (canonical == "02:00:00:00:00:00" || canonical == "00:00:00:00:00:00") return null
+        return canonical
     }
+
+    private fun isValidMacAddress(mac: String): Boolean = normalizeMacAddress(mac) != null
 
     fun listBluetoothServices(): List<String> {
         val bluetoothServices = mutableListOf<String>()
