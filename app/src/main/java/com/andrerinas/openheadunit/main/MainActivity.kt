@@ -1091,10 +1091,12 @@ class MainActivity : BaseActivity() {
     }
 
     private fun requestPermissions() {
+        if (hasRequestedPermissionsThisSession) return
         // Single source of truth: the same registry the wizard/Settings permissions screen use.
         val permissionsToRequest = AppPermissions.missingNormalPermissions(this)
 
         if (permissionsToRequest.isNotEmpty()) {
+            hasRequestedPermissionsThisSession = true
             AppLog.i("Requesting missing permissions: $permissionsToRequest")
             ActivityCompat.requestPermissions(
                 this,
@@ -1103,6 +1105,18 @@ class MainActivity : BaseActivity() {
             )
         } else {
             AppLog.d("All required permissions already granted.")
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == permissionRequestCode) {
+            hasRequestedPermissionsThisSession = true
+            AppLog.i("MainActivity: Permissions request completed.")
         }
     }
 
@@ -1343,6 +1357,7 @@ class MainActivity : BaseActivity() {
         if (isFinishing) {
             AppLog.i("MainActivity finishing, resetting auto-start flag.")
             HomeFragment.resetAutoStart()
+            hasRequestedPermissionsThisSession = false
         }
     }
 
@@ -1357,6 +1372,7 @@ class MainActivity : BaseActivity() {
 
     companion object {
         private const val permissionRequestCode = 97
+        @Volatile var hasRequestedPermissionsThisSession: Boolean = false
         const val EXTRA_LAUNCH_SOURCE = "launch_source"
         const val LAUNCH_SOURCE_BLUETOOTH = "Bluetooth auto-start"
         const val EXTRA_SHOW_DRIVER_SELECTOR = "show_driver_selector"
