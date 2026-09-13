@@ -1,5 +1,8 @@
 package com.andrerinas.openheadunit.connection.wifi
 
+import android.content.Context
+import android.net.wifi.WifiManager
+import android.os.Build
 import android.os.SystemClock
 import com.andrerinas.openheadunit.App
 import com.andrerinas.openheadunit.aap.AapService
@@ -8,6 +11,7 @@ import com.andrerinas.openheadunit.connection.ConnectionStage
 import com.andrerinas.openheadunit.connection.ConnectionStageTracker
 import com.andrerinas.openheadunit.connection.UnresponsivePeerPolicy
 import com.andrerinas.openheadunit.connection.wifi.direct.WifiDirectManager
+import com.andrerinas.openheadunit.connection.wifi.direct.WifiRadioSwitchPolicy
 import com.andrerinas.openheadunit.connection.wifi.server.WirelessServer
 import com.andrerinas.openheadunit.connection.wifi.server.WirelessServerHistory
 import com.andrerinas.openheadunit.connection.wifi.server.WirelessServerRestartPolicy
@@ -62,9 +66,23 @@ class WifiLauncherSharedServices(val service: AapService) {
 
         // This chipset potentially can't run SoftAP and WiFi Direct concurrently — make sure hotspot
         // is off before P2P starts. On IO because the wait for it to actually go is a blocking one.
-        hotspotTeardown = service.serviceScope.launch(Dispatchers.IO) {
-            AppLog.i("AapService: Mode requires WiFi Direct — ensuring hotspot is disabled first...")
-            HotspotManager.disableAndAwaitDown(service)
+        // Skipped when no group can ever form: freeing the radio for one buys nothing, and on a
+        // single-radio unit it takes down the only network that was working.
+        val wifiManager =
+            service.applicationContext.getSystemService(Context.WIFI_SERVICE) as? WifiManager
+        val radioBlockedOff = wifiManager != null &&
+            WifiRadioSwitchPolicy.isBlockedOff(wifiManager.isWifiEnabled, Build.VERSION.SDK_INT)
+        if (radioBlockedOff) {
+            AppLog.i(
+                "AapService: WiFi is off and this Android does not let an app switch it on, so no " +
+                    "WiFi Direct group can be created — leaving this unit's hotspot alone."
+            )
+            hotspotTeardown = null
+        } else {
+            hotspotTeardown = service.serviceScope.launch(Dispatchers.IO) {
+                AppLog.i("AapService: Mode requires WiFi Direct — ensuring hotspot is disabled first...")
+                HotspotManager.disableAndAwaitDown(service)
+            }
         }
 
         wifiDirectManager?.setCredentialsListener { _, _, _, _, _ ->

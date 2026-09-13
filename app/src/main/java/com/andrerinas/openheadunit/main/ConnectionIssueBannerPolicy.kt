@@ -37,6 +37,8 @@ object ConnectionIssueBannerPolicy {
      *   group there is not the reason a connection failed.
      * - `WIFI_DIRECT_STACK_CYCLED` is raised in the same manager's state receiver and is the cause
      *   the refusal above is usually the symptom of, so it is keyed the same way.
+     * - `WIFI_RADIO_OFF` is raised on the branch above both of those, where the radio is off and the
+     *   platform refuses to switch it on, so no group is ever asked for. Same transport, same key.
      *
      * A record is not deleted when it stops applying. It describes what the hardware did, and the
      * user may well be back on that route tomorrow; it is only hidden while it cannot be the
@@ -50,6 +52,7 @@ object ConnectionIssueBannerPolicy {
                 ConnectionIssue.BSSID_UNAVAILABLE,
                 ConnectionIssue.WIFI_DIRECT_GROUP_REFUSED,
                 ConnectionIssue.WIFI_DIRECT_STACK_CYCLED,
+                ConnectionIssue.WIFI_RADIO_OFF,
                 ConnectionIssue.FIVE_GHZ_CHANNEL_REFUSED,
                 ConnectionIssue.VIDEO_LINK_TOO_SLOW
             )

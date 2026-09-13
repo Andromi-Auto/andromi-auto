@@ -53,6 +53,15 @@ enum class ConnectionIssue {
     WIFI_DIRECT_STACK_CYCLED,
 
     /**
+     * This unit's WiFi is off, and this Android will not let an app switch it on.
+     *
+     * Separate from [WIFI_DIRECT_GROUP_REFUSED], which is a radio that was asked and said no: here
+     * nothing is ever asked, so there is no associated station to go looking for. The user's levers
+     * are switching WiFi on, or the head unit's own access point as the Native transport.
+     */
+    WIFI_RADIO_OFF,
+
+    /**
      * Sessions keep starting and then ending without a single video frame ever arriving.
      *
      * The one verdict about a link that works. The phone joins, the AAP session and SSL complete,
@@ -170,6 +179,7 @@ object ConnectionIssues {
                 ConnectionIssue.HOTSPOT_NOT_RUNNING -> settings.connectionIssueHotspotOffAtEpochMs
                 ConnectionIssue.WIFI_DIRECT_GROUP_REFUSED -> settings.connectionIssueWifiDirectRefusedAtEpochMs
                 ConnectionIssue.WIFI_DIRECT_STACK_CYCLED -> settings.connectionIssueWifiDirectCycledAtEpochMs
+                ConnectionIssue.WIFI_RADIO_OFF -> settings.connectionIssueWifiRadioOffAtEpochMs
                 ConnectionIssue.VIDEO_LINK_TOO_SLOW -> settings.connectionIssueVideoLinkTooSlowAtEpochMs
                 ConnectionIssue.FIVE_GHZ_CHANNEL_REFUSED -> settings.connectionIssueFiveGhzChannelRefusedAtEpochMs
             }
@@ -186,6 +196,7 @@ object ConnectionIssues {
                     ConnectionIssue.HOTSPOT_NOT_RUNNING -> settings.connectionIssueHotspotOffAtEpochMs = atEpochMs
                     ConnectionIssue.WIFI_DIRECT_GROUP_REFUSED -> settings.connectionIssueWifiDirectRefusedAtEpochMs = atEpochMs
                     ConnectionIssue.WIFI_DIRECT_STACK_CYCLED -> settings.connectionIssueWifiDirectCycledAtEpochMs = atEpochMs
+                    ConnectionIssue.WIFI_RADIO_OFF -> settings.connectionIssueWifiRadioOffAtEpochMs = atEpochMs
                     ConnectionIssue.VIDEO_LINK_TOO_SLOW -> settings.connectionIssueVideoLinkTooSlowAtEpochMs = atEpochMs
                     ConnectionIssue.FIVE_GHZ_CHANNEL_REFUSED -> settings.connectionIssueFiveGhzChannelRefusedAtEpochMs = atEpochMs
                 }
