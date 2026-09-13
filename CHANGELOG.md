@@ -10,6 +10,8 @@
 - Added floating Exit Button, thanks to @Sesan17
 - Added Log to clipboard, thanks to @peter9811
 - Native for External BT's + Connection Status pill + AAC improvements to @o-jardenass
+- Moved Ui-Scale to theming
+- Native AA: say when the unit's WiFi radio is off instead of retrying in silence
 
 ### v.3.3.1
 - Added: Option to auto-resume media playback on quick reconnect if music was playing before disconnect
