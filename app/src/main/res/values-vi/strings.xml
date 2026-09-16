@@ -1187,4 +1187,9 @@
     <string name="network_detail_unfriendly_channel">WiFi Direct đang ở kênh %1$d, phần lớn điện thoại không thể tham gia. Hãy khởi động lại WiFi.</string>
     <string name="native_aa_requires_wifi">Android Auto gốc cần WiFi của thiết bị này. Vui lòng bật lên.</string>
     <string name="connection_issue_banner_wifi_radio_off">WiFi của thiết bị này đang tắt, và phiên bản Android này không cho ứng dụng bật nó, nên mạng WiFi Direct mà điện thoại của bạn định tham gia không bao giờ được tạo ra. Hãy bật WiFi trên thiết bị này. Nếu nó không giữ được trạng thái bật vì thiết bị đang phát điểm truy cập riêng, hãy chạm vào đây để đổi phương thức mạng sang điểm truy cập đó.</string>
+    <string name="pref_enable_car_launcher_title">Sử dụng làm trình khởi chạy trên xe</string>
+    <string name="pref_enable_car_launcher_summary">Đăng ký Open Headunit làm ứng dụng màn hình chính khi nhấn nút Home của xe</string>
+    <string name="pref_set_default_launcher_title">Ứng dụng màn hình chính mặc định</string>
+    <string name="pref_default_launcher_status_active">Đang hoạt động (Chạm để quản lý)</string>
+    <string name="pref_default_launcher_status_inactive">Chưa đặt (Chạm để đặt làm mặc định)</string>
 </resources>

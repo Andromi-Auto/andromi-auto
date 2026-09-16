@@ -1193,4 +1193,9 @@
     <string name="network_detail_unfriendly_channel">WiFi Direct está en el canal %1$d, al que la mayoría de los teléfonos no pueden unirse. Reinicia el WiFi.</string>
     <string name="native_aa_requires_wifi">Android Auto nativo necesita el WiFi de esta unidad. Actívalo, por favor.</string>
     <string name="connection_issue_banner_wifi_radio_off">El WiFi de esta unidad está apagado y esta versión de Android no deja que la aplicación lo encienda, así que la red WiFi Direct a la que tu teléfono iba a unirse nunca pudo crearse. Enciende el WiFi en esta unidad. Si no se mantiene encendido porque la unidad usa su propio punto de acceso, toca aquí para cambiar el método de red a ese punto de acceso.</string>
+    <string name="pref_enable_car_launcher_title">Usar como lanzador del coche</string>
+    <string name="pref_enable_car_launcher_summary">Registra Open Headunit como aplicación de inicio al pulsar el botón de inicio del coche</string>
+    <string name="pref_set_default_launcher_title">Aplicación de inicio predeterminada</string>
+    <string name="pref_default_launcher_status_active">Activo (Tocar para gestionar)</string>
+    <string name="pref_default_launcher_status_inactive">No establecido (Tocar para configurar)</string>
 </resources>

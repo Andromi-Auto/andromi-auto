@@ -1184,4 +1184,9 @@
     <string name="network_detail_unfriendly_channel">WiFi Direct je na kanálu %1$d, ke kterému se většina telefonů nepřipojí. Restartuj WiFi.</string>
     <string name="native_aa_requires_wifi">Nativní Android Auto potřebuje WiFi této jednotky. Zapni ji prosím.</string>
     <string name="connection_issue_banner_wifi_radio_off">WiFi této jednotky je vypnuté a tato verze Androidu nedovolí aplikaci ho zapnout, takže síť WiFi Direct, ke které se měl telefon připojit, nikdy nemohla vzniknout. Zapni WiFi na této jednotce. Pokud nezůstane zapnuté, protože jednotka provozuje vlastní hotspot, klepni sem a přepni metodu sítě na tento hotspot.</string>
+    <string name="pref_enable_car_launcher_title">Použít jako spouštěč v autě</string>
+    <string name="pref_enable_car_launcher_summary">Zaregistruje Open Headunit jako domovskou aplikaci při stisknutí tlačítka Domů v autě</string>
+    <string name="pref_set_default_launcher_title">Výchozí domovská aplikace</string>
+    <string name="pref_default_launcher_status_active">Aktivní (Klepnutím spravovat)</string>
+    <string name="pref_default_launcher_status_inactive">Nenastaveno (Klepnutím nastavit)</string>
 </resources>

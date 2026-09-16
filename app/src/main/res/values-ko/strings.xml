@@ -1181,4 +1181,9 @@
     <string name="network_detail_unfriendly_channel">WiFi Direct가 채널 %1$d에 있으며 대부분의 휴대폰은 접속할 수 없습니다. WiFi를 다시 시작하세요.</string>
     <string name="native_aa_requires_wifi">네이티브 Android Auto에는 이 기기의 WiFi가 필요합니다. 켜 주세요.</string>
     <string name="connection_issue_banner_wifi_radio_off">이 기기의 WiFi가 꺼져 있고 이 버전의 Android에서는 앱이 켤 수 없어서, 휴대폰이 접속할 WiFi Direct 네트워크를 만들 수 없었습니다. 이 기기에서 WiFi를 켜 주세요. 이 기기가 자체 핫스팟을 사용해서 WiFi가 켜진 상태로 유지되지 않는다면, 여기를 눌러 네트워크 방식을 그 핫스팟으로 바꾸세요.</string>
+    <string name="pref_enable_car_launcher_title">차량용 런처로 사용</string>
+    <string name="pref_enable_car_launcher_summary">차량의 홈 버튼을 눌렀을 때 Open Headunit을 홈 화면 앱으로 등록합니다</string>
+    <string name="pref_set_default_launcher_title">기본 홈 앱</string>
+    <string name="pref_default_launcher_status_active">활성 (관리하려면 탭)</string>
+    <string name="pref_default_launcher_status_inactive">설정 안 됨 (기본값으로 설정하려면 탭)</string>
 </resources>

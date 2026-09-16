@@ -1180,4 +1180,9 @@
     <string name="network_detail_unfriendly_channel">A WiFi Direct a(z) %1$d. csatornán van, amelyhez a legtöbb telefon nem tud csatlakozni. Indítsd újra a WiFit.</string>
     <string name="native_aa_requires_wifi">A natív Android Autónak szüksége van az egység WiFijére. Kérlek, kapcsold be.</string>
     <string name="connection_issue_banner_wifi_radio_off">Ennek az egységnek a WiFije ki van kapcsolva, és ez az Android-verzió nem engedi, hogy az alkalmazás bekapcsolja, így a WiFi Direct hálózat, amelyhez a telefonod csatlakozott volna, soha nem jöhetett létre. Kapcsold be a WiFit ezen az egységen. Ha nem marad bekapcsolva, mert az egység a saját hotspotját üzemelteti, koppints ide, és állítsd át a hálózati módot arra a hotspotra.</string>
+    <string name="pref_enable_car_launcher_title">Használat autós indítóként</string>
+    <string name="pref_enable_car_launcher_summary">Regisztrálja az Open Headunitot kezdőképernyőként a jármű Home gombjának megnyomásakor</string>
+    <string name="pref_set_default_launcher_title">Alapértelmezett kezdőképernyő</string>
+    <string name="pref_default_launcher_status_active">Aktív (Koppintson a kezeléshez)</string>
+    <string name="pref_default_launcher_status_inactive">Nincs beállítva (Koppintson a beállításhoz)</string>
 </resources>

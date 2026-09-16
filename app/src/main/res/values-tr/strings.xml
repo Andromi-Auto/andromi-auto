@@ -1179,4 +1179,9 @@
     <string name="network_detail_unfriendly_channel">WiFi Direct %1$d numaralı kanalda; çoğu telefon bu kanala katılamaz. WiFi\'yi yeniden başlat.</string>
     <string name="native_aa_requires_wifi">Yerel Android Auto bu cihazın WiFi\'sine ihtiyaç duyar. Lütfen aç.</string>
     <string name="connection_issue_banner_wifi_radio_off">Bu cihazın WiFi\'si kapalı ve bu Android sürümü uygulamanın onu açmasına izin vermiyor, bu yüzden telefonunun katılacağı WiFi Direct ağı hiç oluşturulamadı. Bu cihazda WiFi\'yi aç. Cihaz kendi hotspot\'unu yayınladığı için açık kalmıyorsa, ağ yöntemini o hotspot olarak değiştirmek için buraya dokun.</string>
+    <string name="pref_enable_car_launcher_title">Araç Başlatıcısı Olarak Kullan</string>
+    <string name="pref_enable_car_launcher_summary">Araç veya ana ünite Home düğmesine basıldığında Open Headunit\'ı ana ekran olarak kaydeder</string>
+    <string name="pref_set_default_launcher_title">Varsayılan Ana Ekran Uygulaması</string>
+    <string name="pref_default_launcher_status_active">Etkin (Yönetmek için dokunun)</string>
+    <string name="pref_default_launcher_status_inactive">Ayarlanmadı (Varsayılan yapmak için dokunun)</string>
 </resources>

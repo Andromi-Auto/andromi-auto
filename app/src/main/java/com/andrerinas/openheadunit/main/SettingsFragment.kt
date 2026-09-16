@@ -21,6 +21,7 @@ import android.widget.Toast
 import android.content.ClipData
 import android.content.ClipboardManager
 import com.andrerinas.openheadunit.utils.OemAppManager
+import com.andrerinas.openheadunit.utils.CarLauncherManager
 import androidx.activity.OnBackPressedCallback
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
@@ -128,7 +129,7 @@ class SettingsFragment : Fragment() {
         // Dark mode
         "darkModeSettings",
         // Automation
-        "autoStartSettings", "autoConnectSettings",
+        "autoStartSettings", "autoConnectSettings", "enableCarLauncher",
         // Navigation
         "gpsNavigation",
         // Graphic
@@ -213,6 +214,7 @@ class SettingsFragment : Fragment() {
     private var pendingHotspotPassword: String? = null
     private var pendingHotspotInterface: String? = null
 
+    private var pendingEnableCarLauncher: Boolean? = null
     private var pendingEnableFloatingButton: Boolean? = null
     private var pendingFloatingButtonSizeDp: Int? = null
     private var pendingFloatingButtonOpacityPercent: Int? = null
@@ -350,6 +352,7 @@ class SettingsFragment : Fragment() {
         pendingScreenOrientation = settings.screenOrientation
         pendingAppLanguage = settings.appLanguage
 
+        pendingEnableCarLauncher = settings.enableCarLauncher
         pendingEnableFloatingButton = settings.enableFloatingButton
         pendingFloatingButtonSizeDp = settings.floatingButtonSizeDp
         pendingFloatingButtonOpacityPercent = settings.floatingButtonOpacityPercent
@@ -483,6 +486,8 @@ class SettingsFragment : Fragment() {
         pendingShowToastMessages = settings.showToastMessages
         pendingScreenOrientation = settings.screenOrientation
         pendingAppLanguage = settings.appLanguage
+        pendingEnableCarLauncher = settings.enableCarLauncher
+        CarLauncherManager.syncWithSettings(requireContext(), settings.enableCarLauncher)
         pendingEnableFloatingButton = settings.enableFloatingButton
         pendingFloatingButtonSizeDp = settings.floatingButtonSizeDp
         pendingFloatingButtonOpacityPercent = settings.floatingButtonOpacityPercent
@@ -711,7 +716,10 @@ class SettingsFragment : Fragment() {
 
         val hudMirroringChanged = pendingHudMirroring != null && pendingHudMirroring != settings.hudMirroring
 
-        // Save the stretch to fill preference
+        pendingEnableCarLauncher?.let {
+            settings.enableCarLauncher = it
+            CarLauncherManager.setLauncherEnabled(requireContext(), it)
+        }
         pendingEnableFloatingButton?.let { settings.enableFloatingButton = it }
         pendingFloatingButtonSizeDp?.let { settings.floatingButtonSizeDp = it }
         pendingFloatingButtonOpacityPercent?.let { settings.floatingButtonOpacityPercent = it }
@@ -843,6 +851,7 @@ class SettingsFragment : Fragment() {
                         pendingShowToastMessages != settings.showToastMessages ||
                         pendingScreenOrientation != settings.screenOrientation ||
                         pendingAppLanguage != settings.appLanguage ||
+                        pendingEnableCarLauncher != settings.enableCarLauncher ||
                         pendingEnableFloatingButton != settings.enableFloatingButton ||
                         pendingFloatingButtonSizeDp != settings.floatingButtonSizeDp ||
                         pendingFloatingButtonOpacityPercent != settings.floatingButtonOpacityPercent ||
@@ -1689,6 +1698,33 @@ class SettingsFragment : Fragment() {
 
         // --- More Features Settings ---
         items.add(SettingItem.CategoryHeader("moreFeatures", R.string.category_more_features))
+
+        val isCarLauncherEnabled = pendingEnableCarLauncher ?: settings.enableCarLauncher
+
+        items.add(SettingItem.ToggleSettingEntry(
+            stableId = "enableCarLauncher",
+            nameResId = R.string.pref_enable_car_launcher_title,
+            descriptionResId = R.string.pref_enable_car_launcher_summary,
+            isChecked = isCarLauncherEnabled,
+            onCheckedChanged = { isChecked ->
+                pendingEnableCarLauncher = isChecked
+                CarLauncherManager.setLauncherEnabled(requireContext(), isChecked)
+                checkChanges()
+                updateSettingsList()
+            }
+        ))
+
+        if (isCarLauncherEnabled) {
+            val isDefault = CarLauncherManager.isDefaultLauncher(requireContext())
+            items.add(SettingItem.SettingEntry(
+                stableId = "setDefaultLauncher",
+                nameResId = R.string.pref_set_default_launcher_title,
+                value = getString(if (isDefault) R.string.pref_default_launcher_status_active else R.string.pref_default_launcher_status_inactive),
+                onClick = {
+                    CarLauncherManager.promptSetDefaultLauncher(requireContext())
+                }
+            ))
+        }
 
         val isFloatingButtonEnabled = pendingEnableFloatingButton ?: settings.enableFloatingButton
 

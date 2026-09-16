@@ -1185,4 +1185,9 @@
     <string name="network_detail_unfriendly_channel">WiFi Direct на каналі %1$d, до якого більшість телефонів не може приєднатися. Перезапустіть WiFi.</string>
     <string name="native_aa_requires_wifi">Нативному Android Auto потрібен WiFi цього пристрою. Увімкніть його.</string>
     <string name="connection_issue_banner_wifi_radio_off">WiFi цього пристрою вимкнено, і ця версія Android не дозволяє додатку його ввімкнути, тож мережа WiFi Direct, до якої мав приєднатися телефон, так і не з\'явилася. Увімкніть WiFi на цьому пристрої. Якщо він не лишається увімкненим, бо пристрій роздає власну точку доступу, торкніться тут, щоб обрати її як спосіб підключення.</string>
+    <string name="pref_enable_car_launcher_title">Використовувати як лаунчер авто</string>
+    <string name="pref_enable_car_launcher_summary">Реєструє Open Headunit як головний екран при натисканні кнопки Home в авто</string>
+    <string name="pref_set_default_launcher_title">Головна програма за замовчуванням</string>
+    <string name="pref_default_launcher_status_active">Активно (Натисніть для керування)</string>
+    <string name="pref_default_launcher_status_inactive">Не вибрано (Натисніть для налаштування)</string>
 </resources>

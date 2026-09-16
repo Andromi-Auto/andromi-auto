@@ -108,6 +108,11 @@ class Settings(private val context: Context) {
         }
     }
 
+    // Car Launcher / Home App mode
+    var enableCarLauncher: Boolean
+        get() = prefs.getBoolean("enable-car-launcher", false)
+        set(value) { prefs.edit().putBoolean("enable-car-launcher", value).apply() }
+
     // Floating Launcher Overlay Button Settings
     // Off by default: on it, MainActivity.checkOverlayPermission() sends a fresh install to the
     // system overlay screen on first resume, for a feature the user has not asked for yet.

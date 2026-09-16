@@ -1184,4 +1184,9 @@
     <string name="network_detail_unfriendly_channel">WiFi Direct staat op kanaal %1$d, waar de meeste telefoons niet op kunnen. Start WiFi opnieuw.</string>
     <string name="native_aa_requires_wifi">Native Android Auto heeft de WiFi van dit apparaat nodig. Zet die aan.</string>
     <string name="connection_issue_banner_wifi_radio_off">De WiFi van dit apparaat staat uit, en deze Android-versie laat de app hem niet aanzetten, dus het WiFi Direct-netwerk waar je telefoon bij zou komen kon nooit worden aangemaakt. Zet WiFi aan op dit apparaat. Blijft hij uit omdat dit apparaat zijn eigen hotspot draait, tik dan hier om de netwerkmethode op die hotspot te zetten.</string>
+    <string name="pref_enable_car_launcher_title">Als auto-launcher gebruiken</string>
+    <string name="pref_enable_car_launcher_summary">Registreert Open Headunit als startscherm-app wanneer op de Home-knop van de auto wordt gedrukt</string>
+    <string name="pref_set_default_launcher_title">Standaard start-app</string>
+    <string name="pref_default_launcher_status_active">Actief (Tik om te beheren)</string>
+    <string name="pref_default_launcher_status_inactive">Niet ingesteld (Tik om in te stellen)</string>
 </resources>

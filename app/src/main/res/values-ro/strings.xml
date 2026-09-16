@@ -1181,4 +1181,9 @@
     <string name="network_detail_unfriendly_channel">WiFi Direct este pe canalul %1$d, la care majoritatea telefoanelor nu se pot conecta. Repornește WiFi-ul.</string>
     <string name="native_aa_requires_wifi">Android Auto nativ are nevoie de WiFi-ul acestei unități. Te rog activează-l.</string>
     <string name="connection_issue_banner_wifi_radio_off">WiFi-ul acestei unități este oprit, iar această versiune de Android nu permite aplicației să îl pornească, așa că rețeaua WiFi Direct la care urma să se conecteze telefonul nu a putut fi creată niciodată. Pornește WiFi-ul pe această unitate. Dacă nu rămâne pornit pentru că unitatea își găzduiește propriul hotspot, atinge aici pentru a schimba metoda de rețea pe acel hotspot.</string>
+    <string name="pref_enable_car_launcher_title">Utilizare ca lansator auto</string>
+    <string name="pref_enable_car_launcher_summary">Înregistrează Open Headunit ca aplicație pentru ecranul principal la apăsarea butonului Home</string>
+    <string name="pref_set_default_launcher_title">Aplicație principală implicită</string>
+    <string name="pref_default_launcher_status_active">Activ (Atingeți pentru gestionare)</string>
+    <string name="pref_default_launcher_status_inactive">Nesetat (Atingeți pentru configurare)</string>
 </resources>

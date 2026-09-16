@@ -1189,4 +1189,9 @@
     <string name="network_detail_unfriendly_channel">WiFi Directはチャンネル%1$dにあり、ほとんどのスマートフォンは参加できません。WiFiを再起動してください。</string>
     <string name="native_aa_requires_wifi">ネイティブAndroid Autoにはこの機器のWiFiが必要です。オンにしてください。</string>
     <string name="connection_issue_banner_wifi_radio_off">この機器のWiFiがオフで、このバージョンのAndroidではアプリがオンにできません。そのため、スマートフォンが参加するはずのWiFi Directネットワークを作成できませんでした。この機器のWiFiをオンにしてください。この機器が自身のテザリングを使っているためオンのままにならない場合は、ここをタップしてネットワーク方式をそのテザリングに変更してください。</string>
+    <string name="pref_enable_car_launcher_title">カーランチャーとして使用</string>
+    <string name="pref_enable_car_launcher_summary">車載機のホームボタンが押されたときにOpen Headunitをホーム画面アプリとして登録します</string>
+    <string name="pref_set_default_launcher_title">デフォルトのホームアプリ</string>
+    <string name="pref_default_launcher_status_active">有効（タップして管理）</string>
+    <string name="pref_default_launcher_status_inactive">未設定（タップして設定）</string>
 </resources>

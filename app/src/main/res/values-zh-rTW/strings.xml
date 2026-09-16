@@ -1183,4 +1183,9 @@
     <string name="network_detail_unfriendly_channel">WiFi Direct 位於頻道 %1$d，大多數手機無法加入。請重新啟動 WiFi。</string>
     <string name="native_aa_requires_wifi">原生 Android Auto 需要本機的 WiFi，請開啟。</string>
     <string name="connection_issue_banner_wifi_radio_off">本機的 WiFi 已關閉，而這個 Android 版本不允許應用程式將其開啟，因此你的手機原本要加入的 WiFi Direct 網路始終無法建立。請在本機開啟 WiFi。如果因為本機正在提供自己的無線基地台而無法保持開啟，請點這裡把網路方式改成該基地台。</string>
+    <string name="pref_enable_car_launcher_title">用作車載啟動器</string>
+    <string name="pref_enable_car_launcher_summary">按下車機首頁鍵時，將 Open Headunit 註冊為主畫面應用程式</string>
+    <string name="pref_set_default_launcher_title">預設主畫面應用程式</string>
+    <string name="pref_default_launcher_status_active">已啟用（輕觸以管理）</string>
+    <string name="pref_default_launcher_status_inactive">未設定（輕觸以設定為預設）</string>
 </resources>
