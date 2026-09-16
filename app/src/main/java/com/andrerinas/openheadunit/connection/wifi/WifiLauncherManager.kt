@@ -79,7 +79,12 @@ open class WifiLauncherManager(val service: AapService) {
 
         AppLog.i("WifiLauncher: Initializing WiFi Mode: ${newLauncher.mode}")
         // The stack is coming up, so the status pill appears here and is cleared in stop().
-        ConnectionStageTracker.beginAttempt(ConnectionStage.ARMED)
+        // Manual mode has no background discovery or server waiting for connections, so it must not arm the pill.
+        if (newLauncher.mode == WifiLauncherMode.MANUAL) {
+            ConnectionStageTracker.clear()
+        } else {
+            ConnectionStageTracker.beginAttempt(ConnectionStage.ARMED)
+        }
 
         // stop old launcher
         active?.stop(WifiLauncherStopSequence.ANY)
