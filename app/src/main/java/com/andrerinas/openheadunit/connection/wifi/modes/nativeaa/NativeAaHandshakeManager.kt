@@ -14,6 +14,7 @@ import com.andrerinas.openheadunit.connection.wifi.direct.GroupIdentityStability
 import com.andrerinas.openheadunit.connection.wifi.direct.GroupIdentityStabilityPolicy
 import com.andrerinas.openheadunit.aap.AapService
 
+import com.andrerinas.openheadunit.connection.wifi.direct.WifiBandCapability
 import com.andrerinas.openheadunit.utils.BluetoothAddressSeedPolicy
 import com.andrerinas.openheadunit.utils.BluetoothHelper
 import com.andrerinas.openheadunit.aap.protocol.proto.Wireless
@@ -3061,7 +3062,8 @@ class NativeAaHandshakeManager(
                     AppLog.i("NativeAA: advertising WPP over TCP at ${it.ip}:${it.port}")
                 }
         }
-        val request = WppMessages.versionRequest(carInfo(), endpoint)
+        val channelType = WppChannelTypePolicy.forHeadUnit(WifiBandCapability.supports5Ghz(context))
+        val request = WppMessages.versionRequest(carInfo(), endpoint, channelType)
         sendProtobuf(output, request.toByteArray(), WppMessageType.VERSION_REQUEST)
     }
 

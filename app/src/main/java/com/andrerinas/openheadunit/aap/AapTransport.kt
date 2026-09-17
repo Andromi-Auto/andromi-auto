@@ -138,6 +138,10 @@ class AapTransport(
     var isAssistantActive = false
     var onAudioFocusStateChanged: ((Boolean) -> Unit)? = null
     var onUpdateUiConfigReplyReceived: (() -> Unit)? = null
+
+    /** What the phone selected in the version handshake, or null before it has answered. */
+    var negotiatedVersion: AapVersionNegotiation.Result? = null
+        private set
     private var pollHandler: Handler? = null
     private val pollHandlerCallback = Handler.Callback {
         val readInstance = aapRead
@@ -948,7 +952,22 @@ class AapTransport(
                         && buffer[0] == 0.toByte()
                         && buffer[4] == 0.toByte()
                         && buffer[5] == 2.toByte()) {
-                        AppLog.i("Handshake: Version response received (ret=$ret, attempt=$attempt).")
+                        val negotiated = AapVersionNegotiation.parse(buffer, ret)
+                        if (negotiated != null) {
+                            negotiatedVersion = negotiated
+                            AppLog.i("Handshake: Version response received: the phone selected " +
+                                    "${negotiated.major}.${negotiated.minor} " +
+                                    "(we asked for ${AapVersionNegotiation.ANNOUNCED_MAJOR}." +
+                                    "${AapVersionNegotiation.ANNOUNCED_MINOR}), " +
+                                    "status ${negotiated.statusName}")
+                            negotiated.requestedConfig?.let {
+                                AppLog.i("Handshake: the phone asks for ping timeout " +
+                                        "${it.pingConfiguration.timeoutMs}ms, read timeout " +
+                                        "${it.wirelessTcpConfiguration.socketReadTimeoutMs}ms")
+                            }
+                        } else {
+                            AppLog.i("Handshake: Version response received (ret=$ret, attempt=$attempt).")
+                        }
                         received = true
                         break
                     }

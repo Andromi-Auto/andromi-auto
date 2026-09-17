@@ -128,14 +128,14 @@ message SensorBatch
     }
     message SpeedData
     {
-        required int32 speed_e6 =1;
-        optional bool cruise_engaged=2;
-        optional bool cruise_set_speed=3;
+        required int32 speed_e3 = 1;
+        optional bool cruise_engaged = 2;
+        optional int32 cruise_set_speed = 4;
     }
     message OdometerData
     {
-        optional int32 kms_el = 1;
-        optional int32 trip_kms_el = 2;
+        required int32 kms_e1 = 1;
+        optional int32 trip_kms_e1 = 2;
     }
     message DiagnosticsData
     {
@@ -172,23 +172,26 @@ message SensorBatch
     }
     message LightData
     {
-        enum HeadlightState
+        enum HeadLightState
         {
-            HEADLIGHT_0 = 0;
-            HEADLIGHT_1 = 1;
-            HEADLIGHT_2 = 2;
-            HEADLIGHT_3 = 3;
+            HEAD_LIGHT_STATE_OFF = 1;
+            HEAD_LIGHT_STATE_ON = 2;
+            HEAD_LIGHT_STATE_HIGH = 3;
         }
         enum TurnIndicatorState
         {
-            INDICATOR_0 = 0;
-            INDICATOR_1 = 1;
-            INDICATOR_2 = 2;
-            INDICATOR_3 = 3;
+            TURN_INDICATOR_NONE = 1;
+            TURN_INDICATOR_LEFT = 2;
+            TURN_INDICATOR_RIGHT = 3;
         }
-        optional HeadlightState headlight = 1;
+        optional HeadLightState headlight = 1;
         optional TurnIndicatorState turn_indicator = 2;
         optional bool hazard_light_on = 3;
+    }
+
+    message TirePressureData
+    {
+        repeated int32 tire_pressures_e2 = 1;
     }
 
     message PassengerData
@@ -213,7 +216,7 @@ message SensorBatch
     repeated PassengerData passenger_data = 15; //Sensor not yet supported
     repeated DoorData door_data= 16; //Sensor not yet supported
     repeated LightData light_data= 17;  //Sensor not yet supported
-    //repeated TirePressureData Tire = 18;
+    repeated TirePressureData tire_pressure_data = 18;
     repeated AccelerometerData accel_data = 19; //Sensor not yet supported
     repeated GyroscopeData gyro_data = 20; //Sensor not yet supported
     repeated GpsSatelliteData gps_satellite_data = 21;

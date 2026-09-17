@@ -15,6 +15,15 @@ enum AccessPointType {
     DYNAMIC = 1;
 }
 
+// What the head unit's access point can offer. Android Auto answers
+// STATUS_NO_SUPPORTED_WIFI_CHANNELS (-8) when it cannot match our bands.
+enum WifiChannelType {
+    CHANNELS_5GHZ_ONLY = 0;
+    CHANNELS_24GHZ_ONLY = 1;
+    CHANNELS_DUAL_BAND = 2;
+    NO_CHANNELS_SUPPORTED = 3;
+}
+
 enum SecurityMode {
     UNKNOWN_SECURITY_MODE = 0;
     OPEN = 1;
@@ -26,6 +35,8 @@ enum SecurityMode {
     WPA_ENTERPRISE = 20;
     WPA2_ENTERPRISE = 24;
     WPA_WPA2_ENTERPRISE = 28;
+    WPA3_PERSONAL = 32;
+    WPA2_WPA3_PERSONAL = 40;
 }
 
 // Type 1, head unit -> phone. Where to open the projection session once associated.
@@ -96,11 +107,14 @@ message WppCarInfo {
 // carries the two things the phone needs to reach us over TCP later: where to dial, and who we
 // are. Below protocol 4.1 the phone skips wpp_info entirely, which is why the version matters.
 //
-// Fields 3 and 4 exist in the phone's schema (an enum and a packed int32 list) and are left
-// undefined here: we never send them and an absent field costs nothing.
+// Field 3 says which bands our access point can offer; the phone's own parser reads it, and -8
+// STATUS_NO_SUPPORTED_WIFI_CHANNELS is what it answers when it cannot match them. Field 4 is the
+// frequency list, modelled so a capture reads but never sent: nothing here can enumerate it.
 message WifiVersionRequest {
     optional int32 major = 1;
     optional int32 minor = 2;
+    optional WifiChannelType supported_wifi_channel_type = 3;
+    repeated int32 supported_wifi_channels = 4 [packed = true];
     optional WppCarInfo car_info = 5;
     optional WifiProjectionProtocolInfo wpp_info = 6;
 }
@@ -114,6 +128,9 @@ message WifiVersionResponse {
     optional int32 status = 4;
     optional int32 selected_wifi_channel_type = 5;
     optional WppWifiDeviceInfo device_info = 6;
+    // Present in Android Auto 17.5 and 17.8, absent from every schema we had. Contents unknown;
+    // modelled so a session can log it.
+    optional bytes unknown_blob_7 = 7;
 }
 
 // Field 6 of WifiVersionResponse. Named from the schema's own descriptor rather than guessed at.

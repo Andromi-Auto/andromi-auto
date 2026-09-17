@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.SystemClock
 import com.andrerinas.openheadunit.connection.wifi.direct.GroupIdentityStability
 import com.andrerinas.openheadunit.aap.protocol.proto.Wireless
+import com.andrerinas.openheadunit.connection.wifi.direct.WifiBandCapability
 import com.andrerinas.openheadunit.ssl.SslContextFactory
 import com.andrerinas.openheadunit.utils.AppLog
 import kotlinx.coroutines.CoroutineName
@@ -260,7 +261,8 @@ class WppTcpServer(
                             WppMessages.endpoint(callbacks.credentials()?.ip.orEmpty(), decision.port)
                     }
                     AppLog.i("WppTcpServer: [TX] WifiVersionRequest (Type 4) v${WppHandshakeSession.WPP_VERSION_MAJOR}.${WppHandshakeSession.WPP_VERSION_MINOR}")
-                    send(output, WppMessages.versionRequest(callbacks.carInfo(), endpoint).toByteArray(), WppMessageType.VERSION_REQUEST)
+                    val channelType = WppChannelTypePolicy.forHeadUnit(WifiBandCapability.supports5Ghz(context))
+                    send(output, WppMessages.versionRequest(callbacks.carInfo(), endpoint, channelType).toByteArray(), WppMessageType.VERSION_REQUEST)
                 }
                 WppAction.SendStartRequest -> {
                     val endpoint = callbacks.projectionEndpoint()

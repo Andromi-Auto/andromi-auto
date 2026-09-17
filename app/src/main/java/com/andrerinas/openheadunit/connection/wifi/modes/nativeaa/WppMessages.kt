@@ -43,16 +43,20 @@ object WppMessages {
      * The phone stores that endpoint against our Bluetooth address and dials it instead of running
      * the RFCOMM handshake again, so a null [endpoint] is the difference between a reconnect that
      * needs nothing on the phone and one that cannot happen at all. WppEndpointPolicy decides.
+     *
+     * [channelType] is the bands our access point can offer; null when the radio could not be read.
      */
     fun versionRequest(
         carInfo: Wireless.WppCarInfo,
-        endpoint: WppEndpoint?
+        endpoint: WppEndpoint?,
+        channelType: Wireless.WifiChannelType? = null
     ): Wireless.WifiVersionRequest =
         Wireless.WifiVersionRequest.newBuilder()
             .setMajor(WppHandshakeSession.WPP_VERSION_MAJOR)
             .setMinor(WppHandshakeSession.WPP_VERSION_MINOR)
             .setCarInfo(carInfo)
             .also { builder ->
+                if (channelType != null) builder.supportedWifiChannelType = channelType
                 if (endpoint != null) {
                     builder.setWppInfo(
                         Wireless.WifiProjectionProtocolInfo.newBuilder()

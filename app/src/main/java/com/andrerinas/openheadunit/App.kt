@@ -169,6 +169,7 @@ class App : Application(), Application.ActivityLifecycleCallbacks {
     override fun onActivityStarted(activity: Activity) {
         startedActivityCount++
         if (startedActivityCount == 1) {
+            hasStartedActivity = true
             FloatingButtonManager.onAppForegroundChanged(this, isForeground = true)
         }
     }
@@ -178,6 +179,7 @@ class App : Application(), Application.ActivityLifecycleCallbacks {
         startedActivityCount--
         if (startedActivityCount <= 0) {
             startedActivityCount = 0
+            hasStartedActivity = false
             FloatingButtonManager.onAppForegroundChanged(this, isForeground = false)
         }
     }
@@ -194,6 +196,14 @@ class App : Application(), Application.ActivityLifecycleCallbacks {
         val appStartTime = SystemClock.elapsedRealtime()
         var appThemeManager: AppThemeManager? = null
         var isPiPActive = false
+
+        /**
+         * Whether any activity of ours is started, which is the one case where the background
+         * activity-launch restriction does not apply. Read from the service, hence @Volatile.
+         */
+        @Volatile
+        var hasStartedActivity = false
+            private set
 
         @Volatile
         var instance: App? = null

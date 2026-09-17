@@ -465,6 +465,10 @@ class CommManager(
                 } else {
                     val silent = transport?.lastHandshakeFailure == AapTransport.HandshakeFailure.PEER_SILENT
                     noteHandshakeOutcome(silent)
+                    // Here, not from a ConnectionState.Error collector: disconnect() follows with no
+                    // suspension point, so the conflated flow never delivers Error and the pill kept
+                    // the step it had. Measured stuck on "Securing the connection" for 3m39s.
+                    ConnectionStageTracker.endAttempt()
                     onSessionFailure?.invoke(if (silent) "peer_silent" else "handshake_failed")
                     _connectionState.emit(
                         ConnectionState.Error(if (silent) ERROR_HANDSHAKE_PEER_SILENT else "Handshake failed")
@@ -504,6 +508,12 @@ class CommManager(
         // Mode — is something the user can restart. The phone dialling our own server on 5288 and
         // the Nearby helper can both reach this branch, and sending their users off to force stop
         // Android Auto after a switch they never turned on would be worse than saying nothing.
+        if (endpoint?.endsWith(":5277") == true) {
+            // On the first one, not on the third the log explanation waits for: the record is
+            // cleared the moment a handshake succeeds, so a premature banner self-heals, while a
+            // missing one leaves the user a failed connection and no remedy.
+            ConnectionIssues.raise(context, ConnectionIssue.HEADUNIT_SERVER_NOT_ANSWERING)
+        }
         if (UnresponsivePeerPolicy.shouldExplain(silentPeerFailures) && endpoint?.endsWith(":5277") == true) {
             AppLog.e(
                 "CommManager: $endpoint has accepted $silentPeerFailures connections in a row " +
@@ -513,7 +523,6 @@ class CommManager(
                     "it does not recover on its own. Stop and start the head unit server on the " +
                     "phone; this will reconnect by itself."
             )
-            ConnectionIssues.raise(context, ConnectionIssue.HEADUNIT_SERVER_NOT_ANSWERING)
         }
     }
 

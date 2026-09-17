@@ -256,11 +256,23 @@ class AapService : Service() {
     private var isDestroying = false
     private var hasEverConnected = false
 
+    // Completed when the disconnect teardown has finished giving the network back. The exit path
+    // creates it before it disconnects, so a teardown that has not started yet is still waited for.
+    @Volatile private var exitTeardownDone: CompletableDeferred<Unit>? = null
+
     /**
      * Set by a `no_ui` automation command, which asks for the session without the screen.
      * Consumed by the next raise only, so an ordinary reconnect still comes to the front.
      */
     @Volatile private var suppressNextProjectionRaise = false
+
+    /**
+     * Watches for a handshake that never becomes a picture. The read loop only starts once the
+     * projection activity has a surface, so a raise that goes nowhere holds a live socket with the
+     * phone waiting on it. See [ProjectionRaiseDeadlinePolicy].
+     */
+    private var projectionRaiseJob: Job? = null
+    private var projectionRaisesThisSession = 0
 
     /** When the live session started projecting, for [SessionStateIntent.EXTRA_UPTIME_MS]. */
     @Volatile private var projectingSinceMs = 0L
@@ -1095,9 +1107,11 @@ class AapService : Service() {
                         onConnected()
                     }
                     is CommManager.ConnectionState.HandshakeComplete -> {
-                        launchAapProjectionActivity()
+                        projectionRaisesThisSession = 0
+                        armProjectionRaiseDeadline(launchAapProjectionActivity())
                     }
                     is CommManager.ConnectionState.TransportStarted -> {
+                        cancelProjectionRaiseDeadline()
                         hasEverConnected = true
                         projectingSinceMs = SystemClock.elapsedRealtime()
                         usbLauncherManager.projectionHandshakeFailures = 0
@@ -1357,23 +1371,23 @@ class AapService : Service() {
      *   there is no overlay permission. False on the call path, where it would compete with the
      *   call screen's own full-screen intent.
      */
-    private fun launchAapProjectionActivity(allowNotificationFallback: Boolean = true) {
+    private fun launchAapProjectionActivity(allowNotificationFallback: Boolean = true): Boolean {
         if (App.isPiPActive) {
             AppLog.i("AapService: Skipping projection launch because PiP is active")
-            return
+            return false
         }
 
         if (suppressNextProjectionRaise) {
             suppressNextProjectionRaise = false
             AppLog.i("AapService: Not raising the projection, a no_ui command asked for the session only")
-            return
+            return false
         }
 
         // The user is configuring the app. SettingsActivity raises the projection itself when it
         // goes, and MainActivity.onResume does the same on the way back to the home screen.
         if (SettingsActivity.isForeground) {
             AppLog.i("AapService: Not raising the projection, the settings screen is open")
-            return
+            return false
         }
 
         val intent = AapProjectionActivity.intent(this).apply {
@@ -1382,7 +1396,14 @@ class AapService : Service() {
         }
 
         val canOverlay = AppPermissions.isOverlayGranted(this)
-        when (ActivityLaunchPolicy.chooseLaunchStrategy(Build.VERSION.SDK_INT, canOverlay)) {
+        val strategy = ActivityLaunchPolicy.chooseLaunchStrategy(
+            Build.VERSION.SDK_INT, canOverlay, App.hasStartedActivity
+        )
+        // Which route was taken is the difference between a session that projects and one that
+        // waits on a notification tap, and nothing used to record it.
+        AppLog.i("AapService: raising the projection by $strategy (overlay=$canOverlay, " +
+            "foreground=${App.hasStartedActivity})")
+        when (strategy) {
             ActivityLaunchPolicy.LaunchStrategy.DIRECT -> {
                 try { startActivity(intent) }
                 catch (e: Exception) { AppLog.e("Projection launch failed: ${e.message}") }
@@ -1395,9 +1416,46 @@ class AapService : Service() {
                 }
             }
             ActivityLaunchPolicy.LaunchStrategy.NOTIFICATION ->
-                if (allowNotificationFallback) launchProjectionViaNotification(intent)
-                else AppLog.w("AapService: No overlay permission, not raising the projection")
+                if (allowNotificationFallback) {
+                    AppLog.w("AapService: no permission to draw over other apps, so the projection " +
+                        "is a notification the user has to tap. Turn that permission on to have it " +
+                        "come up by itself.")
+                    launchProjectionViaNotification(intent)
+                } else AppLog.w("AapService: No overlay permission, not raising the projection")
         }
+        return true
+    }
+
+    /**
+     * A handshake that never becomes a picture used to sit on a live socket indefinitely. One
+     * retry, then the session ends so the phone can start a fresh one instead of waiting.
+     */
+    private fun armProjectionRaiseDeadline(raiseAttempted: Boolean) {
+        projectionRaiseJob?.cancel()
+        if (!ProjectionRaiseDeadlinePolicy.arms(raiseAttempted)) return
+        projectionRaisesThisSession++
+        projectionRaiseJob = serviceScope.launch {
+            delay(ProjectionRaiseDeadlinePolicy.DEADLINE_MS)
+            if (commManager.connectionState.value is CommManager.ConnectionState.TransportStarted) return@launch
+            when (ProjectionRaiseDeadlinePolicy.actionFor(projectionRaisesThisSession)) {
+                ProjectionRaiseDeadlinePolicy.Action.RETRY_RAISE -> {
+                    AppLog.w("AapService: the handshake finished ${ProjectionRaiseDeadlinePolicy.DEADLINE_MS}ms " +
+                        "ago and the projection screen has not come up, so nothing is reading the " +
+                        "session. Raising it again.")
+                    armProjectionRaiseDeadline(launchAapProjectionActivity())
+                }
+                ProjectionRaiseDeadlinePolicy.Action.END_SESSION -> {
+                    AppLog.e("AapService: the projection screen never came up, so this session can " +
+                        "carry nothing. Ending it so the phone can start a new one.")
+                    commManager.disconnect()
+                }
+            }
+        }
+    }
+
+    private fun cancelProjectionRaiseDeadline() {
+        projectionRaiseJob?.cancel()
+        projectionRaiseJob = null
     }
 
     private fun launchProjectionViaNotification(launchIntent: Intent) {
@@ -1501,6 +1559,12 @@ class AapService : Service() {
      * 4. Scheduling a reconnect attempt if applicable (see [scheduleReconnectIfNeeded])
      */
     private fun onDisconnected(state: CommManager.ConnectionState.Disconnected) {
+        cancelProjectionRaiseDeadline()
+        // A bye-bye is a deliberate disconnection, not a wireless failure: the listeners reopen
+        // behind it and the stage they report would otherwise read as a reconnect nobody asked for.
+        if (!state.isUserExit && state.isClean) {
+            ConnectionStageTracker.notePhoneLeft(SystemClock.elapsedRealtime())
+        }
         cancelAllBtAutoDisconnects()
         usbLauncherManager.setSwitchingToProjection(false)
         releaseWifiLock()
@@ -1682,6 +1746,9 @@ class AapService : Service() {
                 App.provide(this@AapService).audioDecoder.stop()
                 App.provide(this@AapService).videoDecoder.stop("AapService::onDisconnect")
             }
+            // The network is back with whoever owns it now, so an exit waiting on this can stop
+            // the service. Last, because everything above it is what it is waiting for.
+            exitTeardownDone?.complete(Unit)
         }
 
         // [FIX] Set cooldown flag for ALL user exits (not just USB).
@@ -2555,10 +2622,39 @@ class AapService : Service() {
                 setPackage(packageName)
             })
             isDestroying = true
+            // Asked before the disconnect, and the latch made before it too. The teardown that
+            // gives the network back runs on serviceScope and suspends on the disconnect, and
+            // onDestroy cancels that scope: a stopSelf() taken here killed it at the await and left
+            // the group up for the next bring-up to meet as a busy create.
+            val teardownDone = if (
+                ServiceStopWaitPolicy.waitsForWirelessTeardown(
+                    sessionConnected = commManager.isConnected,
+                    wirelessLauncherActive = wifiLauncherManager.isActive,
+                )
+            ) CompletableDeferred<Unit>() else null
+            exitTeardownDone = teardownDone
             if (commManager.isConnected) commManager.disconnect(sendByeBye = true)
             selfLauncherManager.stop(wasConnected = false)
             stopForeground(true)
-            stopSelf()
+            if (teardownDone == null) {
+                stopSelf()
+            } else {
+                serviceScope.launch {
+                    val gaveItBack = withTimeoutOrNull(ServiceStopWaitPolicy.TEARDOWN_TIMEOUT_MS) {
+                        teardownDone.await()
+                    } != null
+                    if (!gaveItBack) {
+                        AppLog.w(
+                            "AapService: the wireless teardown did not finish in " +
+                                "${ServiceStopWaitPolicy.TEARDOWN_TIMEOUT_MS}ms, so the service stops " +
+                                "anyway. A network left up here is what the next bring-up meets as a " +
+                                "busy create."
+                        )
+                    }
+                    exitTeardownDone = null
+                    stopSelf()
+                }
+            }
             return START_NOT_STICKY
         }
 

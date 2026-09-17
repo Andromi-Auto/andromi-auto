@@ -3,6 +3,7 @@ package com.andrerinas.openheadunit.aap.protocol.messages
 import android.content.Context
 import com.andrerinas.openheadunit.App
 import com.andrerinas.openheadunit.aap.AapMessage
+import com.andrerinas.openheadunit.aap.ConnectionConfigPolicy
 import com.andrerinas.openheadunit.aap.NarrowBandProfilePolicy
 import com.andrerinas.openheadunit.aap.VehicleIdentityPolicy
 import com.andrerinas.openheadunit.aap.VehicleTypePolicy
@@ -246,9 +247,12 @@ class ServiceDiscoveryResponse(private val context: Context)
                     service.id = Channel.ID_BTH
                     service.bluetoothService = Control.Service.BluetoothService.newBuilder().also {
                         it.carAddress = settings.bluetoothAddress
+                        // Pairing methods, not profiles: the old A2DP/HFP names on these two
+                        // values said otherwise. The values are unchanged, and numeric
+                        // comparison plus PIN is what Android's own stack offers a phone.
                         it.addAllSupportedPairingMethods(
-                                listOf(Control.BluetoothPairingMethod.A2DP,
-                                        Control.BluetoothPairingMethod.HFP)
+                                listOf(Control.BluetoothPairingMethod.BLUETOOTH_PAIRING_NUMERIC_COMPARISON,
+                                        Control.BluetoothPairingMethod.BLUETOOTH_PAIRING_PIN)
                         )
                     }.build()
                 }.build()
@@ -321,6 +325,12 @@ class ServiceDiscoveryResponse(private val context: Context)
                     // user's choice here.
                     setVehicleType(vehicleType)
                 }.build())
+
+                ConnectionConfigPolicy.announce(settings.announceConnectionConfiguration)?.let {
+                    setConnectionConfiguration(it)
+                    AppLog.i("[ServiceDiscovery] Asking for ping timeout ${it.pingConfiguration.timeoutMs}ms " +
+                            "and ${it.wirelessTcpConfiguration.socketReceiveBufferSize}B socket buffers")
+                }
 
                 addAllServices(services)
             }.build()

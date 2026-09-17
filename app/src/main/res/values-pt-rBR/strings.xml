@@ -1007,6 +1007,8 @@
     <string name="native_wifi_version_exchange_description">Permite que o telefone se reconecte por WiFi em vez de Bluetooth, usando o ponto de acesso desta unidade. Ajuda em unidades cujo Bluetooth não consegue transportar o handshake, e em versões mais novas do Android Auto. Desativado por padrão, e a primeira conexão ainda passa pelo Bluetooth.</string>
     <string name="native_aa_complete_hfp_slc">Concluir a conexão Bluetooth</string>
     <string name="native_aa_complete_hfp_slc_description">Alguns telefones só iniciam o Android Auto sem fio quando o Bluetooth desta unidade conta como conectado, não apenas pareado. Ativado por padrão; desative se as chamadas neste dispositivo pararem de funcionar.</string>
+    <string name="announce_connection_configuration">Pedir um tempo limite de conexão maior</string>
+    <string name="announce_connection_configuration_description">Diz ao Android Auto para esperar 15 segundos em vez de 3 antes de considerar a conexão morta, e para usar buffers de socket maiores. Isso é voltado para um rádio que sai do canal por alguns segundos no meio da sessão e leva a conexão junto. Não foi medido se o seu telefone respeita algo disso.</string>
     <string name="native_aa_ignore_external_bt">Ignorar a verificação de compatibilidade Bluetooth</string>
     <string name="native_aa_ignore_external_bt_description">Esta unidade parece manter o Bluetooth em um módulo separado que o Android não alcança, por isso o Android Auto sem fio é desativado automaticamente. Desativado por padrão. Ative apenas se achar que isso está errado: quando a detecção está certa, a conexão falha silenciosamente e o registro parece normal.</string>
     <string name="native_aa_setup_qr_title">Configurar por código QR</string>

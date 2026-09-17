@@ -987,6 +987,8 @@
     <string name="native_wifi_version_exchange_description">საშუალებას აძლევს ტელეფონს ხელახლა დაუკავშირდეს WiFi-ით Bluetooth-ის ნაცვლად, ამ მოწყობილობის Hotspot-ის გამოყენებით. ეხმარება მოწყობილობებს, რომელთა Bluetooth ვერ ატარებს handshake-ს, და Android Auto-ს უფრო ახალ ვერსიებს. ნაგულისხმევად გამორთულია და პირველი კავშირი კვლავ Bluetooth-ით ხდება.</string>
     <string name="native_aa_complete_hfp_slc">Bluetooth-კავშირის დასრულება</string>
     <string name="native_aa_complete_hfp_slc_description">ზოგიერთი ტელეფონი უსადენო Android Auto-ს არ იწყებს, სანამ ამ მოწყობილობის Bluetooth დაკავშირებულად არ ჩაითვლება და არა მხოლოდ დაწყვილებულად. ნაგულისხმევად ჩართულია; გამორთეთ, თუ ამ მოწყობილობაზე ზარები აღარ მუშაობს.</string>
+    <string name="announce_connection_configuration">უფრო გრძელი კავშირის ტაიმაუთის მოთხოვნა</string>
+    <string name="announce_connection_configuration_description">სთხოვს Android Auto-ს, დაელოდოს 15 წამი 3-ის ნაცვლად, სანამ კავშირს მკვდრად ჩათვლის, და გამოიყენოს უფრო დიდი სოკეტის ბუფერები. ეს მიმართულია რადიოსკენ, რომელიც სესიის შუაში რამდენიმე წამით ტოვებს არხს და კავშირს თან ითრევს. არ არის გაზომილი, ითვალისწინებს თუ არა ამას თქვენი ტელეფონი.</string>
     <string name="native_aa_ignore_external_bt">Bluetooth-თავსებადობის შემოწმების იგნორირება</string>
     <string name="native_aa_ignore_external_bt_description">როგორც ჩანს, ეს მოწყობილობა Bluetooth-ს ცალკე მოდულზე ინახავს, რომელსაც Android ვერ წვდება, ამიტომ უსადენო Android Auto ავტომატურად ითიშება. ნაგულისხმევად გამორთულია. ჩართეთ მხოლოდ მაშინ, თუ ფიქრობთ, რომ ეს არასწორია: თუ ამოცნობა სწორია, კავშირი უხმაუროდ ჩაიშლება და ჟურნალი გამართული გამოჩნდება.</string>
     <string name="native_aa_setup_qr_title">დაყენება QR კოდით</string>

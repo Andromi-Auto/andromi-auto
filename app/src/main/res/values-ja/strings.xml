@@ -1011,6 +1011,8 @@
     <string name="native_wifi_version_exchange_description">この機器のホットスポットを使い、Bluetoothの代わりにWiFiで再接続できるようにします。Bluetoothがハンドシェイクを運べない機器や、新しいバージョンのAndroid Autoで役立ちます。既定でオフで、最初の接続は引き続きBluetooth経由です。</string>
     <string name="native_aa_complete_hfp_slc">Bluetooth接続を完了する</string>
     <string name="native_aa_complete_hfp_slc_description">一部のスマートフォンは、この機器のBluetoothがペアリング済みではなく接続済みとみなされるまで、ワイヤレスAndroid Autoを開始しません。既定でオン。この端末での通話が使えなくなった場合はオフにしてください。</string>
+    <string name="announce_connection_configuration">より長いリンクタイムアウトを要求</string>
+    <string name="announce_connection_configuration_description">Android Autoに対し、リンクが切断されたと判断するまでの待機時間を3秒ではなく15秒にし、より大きなソケットバッファーを使うよう指示します。これは、セッションの途中で数秒間チャンネルを離れ、接続を道連れにしてしまう無線機を対象としています。お使いのスマートフォンがこれに従うかどうかは測定されていません。</string>
     <string name="native_aa_ignore_external_bt">Bluetooth互換性チェックを無視する</string>
     <string name="native_aa_ignore_external_bt_description">この機器はAndroidから到達できない別モジュールでBluetoothを扱っているようなので、ワイヤレスAndroid Autoは自動的に無効化されます。既定でオフ。判定が誤っていると思う場合のみオンにしてください。判定が正しい場合、接続は何も告げずに失敗し、ログは正常に見えます。</string>
     <string name="native_aa_setup_qr_title">QRコードで設定</string>

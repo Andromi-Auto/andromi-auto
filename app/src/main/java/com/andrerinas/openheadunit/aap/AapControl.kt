@@ -107,7 +107,7 @@ internal class AapControlMedia(
 
         val maxUnacked = maxUnackedFor(channel)
         val configResponse = Media.Config.newBuilder().apply {
-            status = Media.Config.ConfigStatus.HEADUNIT
+            status = Media.Config.ConfigStatus.STATUS_READY
             this.maxUnacked = maxUnacked
 
             addConfigurationIndices(0)
@@ -383,7 +383,7 @@ internal class AapControlService(
         AppLog.i("Navigation Focus Request: %s", request.focusType)
 
         val response = Control.NavFocusNotification.newBuilder()
-                .setFocusType(Control.NavFocusType.NAV_FOCUS_2)
+                .setFocusType(Control.NavFocusType.NAV_FOCUS_PROJECTED)
                 .build()
 
         val msg = AapMessage(channel, Control.ControlMsgType.MESSAGE_NAV_FOCUS_NOTIFICATION_VALUE, response)

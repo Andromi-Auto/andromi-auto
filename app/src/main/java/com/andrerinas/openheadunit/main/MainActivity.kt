@@ -41,6 +41,7 @@ import com.andrerinas.openheadunit.connection.ConnectionNetworkDetail
 import com.andrerinas.openheadunit.connection.ConnectionNetworkDetailPolicy
 import com.andrerinas.openheadunit.connection.ConnectionStage
 import com.andrerinas.openheadunit.connection.ConnectionStageTracker
+import com.andrerinas.openheadunit.connection.PhoneExitQuietPolicy
 import com.andrerinas.openheadunit.utils.AppLog
 import com.andrerinas.openheadunit.utils.AppPermissions
 import com.andrerinas.openheadunit.utils.ConnectionIssue
@@ -75,6 +76,9 @@ class MainActivity : BaseActivity() {
     private var autoConnectWatchdog: Job? = null
     private var renderedStage: ConnectionStage? = null
     private var loggedStage: ConnectionStage? = null
+
+    /** Ends the hold after a clean phone-side exit; the flow itself emits nothing at that moment. */
+    private var phoneExitQuietJob: Job? = null
     private var renderedNetwork: ConnectionNetworkDetail? = null
     private var autoConnectKenBurnsAnim: ObjectAnimator? = null
 
@@ -573,9 +577,12 @@ class MainActivity : BaseActivity() {
      * attempt ends, because the flow conflates a repeat of the value it already holds.
      */
     private fun renderStagePill(stage: ConnectionStage?) {
+        val now = SystemClock.elapsedRealtime()
+        val phoneLeftQuiet =
+            PhoneExitQuietPolicy.suppressesPill(ConnectionStageTracker.phoneLeftAtMs, now)
         // PILL_THEN_OVERLAY hands the screen to the overlay part-way through an attempt.
         // Re-raising the pill under it would undo that promotion.
-        val shown = if (stage == null || overlayOwnsScreen()) null else stage
+        val shown = if (stage == null || overlayOwnsScreen() || phoneLeftQuiet) null else stage
         // What the user is actually being told, which no other line records. A reporter's
         // screenshot and their log can then be read against each other. A step the overlay hides
         // is still named: without that, a session where an auto-connect happened to be in flight
@@ -585,10 +592,21 @@ class MainActivity : BaseActivity() {
             renderedStage = shown
             val step = when {
                 shown != null -> shown.name
+                stage != null && phoneLeftQuiet -> "${stage.name} (not shown, the phone ended the session)"
                 stage != null -> "${stage.name} (not shown, the overlay owns the screen)"
                 else -> "hidden"
             }
             AppLog.i("MainActivity: status pill step: $step")
+        }
+        // Nothing emits at the end of the hold, so the step that was withheld needs asking for
+        // again; without this the pill stays down until the stack's next step.
+        phoneExitQuietJob?.cancel()
+        if (phoneLeftQuiet) {
+            val waitMs = PhoneExitQuietPolicy.remainingMs(ConnectionStageTracker.phoneLeftAtMs, now)
+            phoneExitQuietJob = lifecycleScope.launch {
+                delay(waitMs)
+                renderStagePill(ConnectionStageTracker.stage.value)
+            }
         }
         if (shown == null) {
             hideAutoConnectPill()

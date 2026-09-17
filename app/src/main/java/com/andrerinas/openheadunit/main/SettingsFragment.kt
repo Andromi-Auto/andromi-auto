@@ -194,6 +194,7 @@ class SettingsFragment : Fragment() {
     private var pendingExternalBtZbtTransport: Boolean? = null
     private var pendingNativeWifiVersionExchange: Boolean? = null
     private var pendingNativeAaCompleteHfpSlc: Boolean? = null
+    private var pendingAnnounceConnectionConfiguration: Boolean? = null
 
     // The probe's verdict is not a pending setting: it changes nothing and there is nothing to
     // save. It lives in the companion object with the job that produces it. This one is
@@ -382,6 +383,7 @@ class SettingsFragment : Fragment() {
         pendingExternalBtZbtTransport = settings.externalBtZbtTransport
         pendingNativeWifiVersionExchange = settings.nativeWifiVersionExchange
         pendingNativeAaCompleteHfpSlc = settings.nativeAaCompleteHfpSlc
+        pendingAnnounceConnectionConfiguration = settings.announceConnectionConfiguration
         pendingNativeApTransport = settings.nativeApStrategy
         pendingNativeDriverSelectionMode = settings.nativeDriverSelectionMode
         pendingNativeDriverSelectionTimeout = settings.nativeDriverSelectionTimeoutSec
@@ -514,6 +516,7 @@ class SettingsFragment : Fragment() {
         pendingExternalBtZbtTransport = settings.externalBtZbtTransport
         pendingNativeWifiVersionExchange = settings.nativeWifiVersionExchange
         pendingNativeAaCompleteHfpSlc = settings.nativeAaCompleteHfpSlc
+        pendingAnnounceConnectionConfiguration = settings.announceConnectionConfiguration
         pendingNativeApTransport = settings.nativeApStrategy
         pendingNativeDriverSelectionMode = NativeDriverSelectionPolicy.Mode.AUTO
         pendingNativeDriverSelectionTimeout = NativeDriverSelectionPolicy.DEFAULT_TIMEOUT_SEC
@@ -755,6 +758,7 @@ class SettingsFragment : Fragment() {
         pendingExternalBtZbtTransport?.let { settings.externalBtZbtTransport = it }
         pendingNativeWifiVersionExchange?.let { settings.nativeWifiVersionExchange = it }
         pendingNativeAaCompleteHfpSlc?.let { settings.nativeAaCompleteHfpSlc = it }
+        pendingAnnounceConnectionConfiguration?.let { settings.announceConnectionConfiguration = it }
         pendingNativeApTransport?.let { settings.nativeApStrategy = it }
         pendingNativeDriverSelectionMode?.let { settings.nativeDriverSelectionMode = it }
         pendingNativeDriverSelectionTimeout?.let { settings.nativeDriverSelectionTimeoutSec = it }
@@ -885,6 +889,7 @@ class SettingsFragment : Fragment() {
                         pendingExternalBtZbtTransport != settings.externalBtZbtTransport ||
                         pendingNativeWifiVersionExchange != settings.nativeWifiVersionExchange ||
                         pendingNativeAaCompleteHfpSlc != settings.nativeAaCompleteHfpSlc ||
+                        pendingAnnounceConnectionConfiguration != settings.announceConnectionConfiguration ||
                         pendingNativeApTransport != settings.nativeApStrategy ||
                         pendingNativeDriverSelectionMode != settings.nativeDriverSelectionMode ||
                         pendingNativeDriverSelectionTimeout != settings.nativeDriverSelectionTimeoutSec ||
@@ -1619,6 +1624,21 @@ class SettingsFragment : Fragment() {
                         updateSettingsList()
                     }
                 )
+            }
+        ))
+
+        // Ungated like the address above: ServiceDiscoveryResponse carries these parameters on
+        // every transport, so a mode gate would hide the row from the connection it was asked for.
+        items.add(SettingItem.ToggleSettingEntry(
+            stableId = "announceConnectionConfiguration",
+            nameResId = R.string.announce_connection_configuration,
+            descriptionResId = R.string.announce_connection_configuration_description,
+            isChecked = pendingAnnounceConnectionConfiguration ?: settings.announceConnectionConfiguration,
+            searchKeywords = "ping timeout socket buffer link drop session stall scan connection",
+            onCheckedChanged = { isChecked ->
+                pendingAnnounceConnectionConfiguration = isChecked
+                checkChanges()
+                updateSettingsList()
             }
         ))
 

@@ -1001,6 +1001,8 @@
     <string name="native_wifi_version_exchange_description">Telefonun Bluetooth yerine WiFi üzerinden, bu cihazın erişim noktasını kullanarak yeniden bağlanmasını sağlar. Bluetooth\'u el sıkışmasını taşıyamayan cihazlarda ve daha yeni Android Auto sürümlerinde yardımcı olur. Varsayılan olarak kapalı ve ilk bağlantı yine Bluetooth üzerinden gerçekleşir.</string>
     <string name="native_aa_complete_hfp_slc">Bluetooth bağlantısını tamamla</string>
     <string name="native_aa_complete_hfp_slc_description">Bazı telefonlar, bu cihazın Bluetooth\'u yalnızca eşleştirilmiş değil bağlı sayılana kadar kablosuz Android Auto\'yu başlatmaz. Varsayılan olarak açık; bu cihazdaki aramalar çalışmayı bırakırsa kapatın.</string>
+    <string name="announce_connection_configuration">Daha uzun bağlantı zaman aşımı iste</string>
+    <string name="announce_connection_configuration_description">Android Auto\'ya bağlantıyı ölü saymadan önce 3 yerine 15 saniye beklemesini ve daha büyük soket arabellekleri kullanmasını söyler. Bu, oturum ortasında birkaç saniyeliğine kanaldan çıkan ve bağlantıyı da beraberinde götüren bir radyo için tasarlanmıştır. Telefonunuzun bunlardan herhangi birine uyup uymadığı ölçülmedi.</string>
     <string name="native_aa_ignore_external_bt">Bluetooth uyumluluk denetimini yoksay</string>
     <string name="native_aa_ignore_external_bt_description">Bu cihaz, Bluetooth\'u Android\'in erişemediği ayrı bir modülde tutuyor gibi görünüyor, bu nedenle kablosuz Android Auto otomatik olarak kapatılır. Varsayılan olarak kapalı. Yalnızca bunun yanlış olduğunu düşünüyorsanız açın: tespit doğruysa bağlantı sessizce başarısız olur ve günlük sorunsuz görünür.</string>
     <string name="native_aa_setup_qr_title">QR kod ile kurulum</string>

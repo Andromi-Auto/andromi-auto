@@ -1006,6 +1006,8 @@
     <string name="native_wifi_version_exchange_description">Umožní telefonu znovu se připojit přes WiFi místo Bluetooth, pomocí hotspotu této jednotky. Pomáhá u jednotek, jejichž Bluetooth nedokáže handshake přenést, a u novějších verzí Android Auto. Ve výchozím nastavení vypnuto a první připojení stále probíhá přes Bluetooth.</string>
     <string name="native_aa_complete_hfp_slc">Dokončit připojení Bluetooth</string>
     <string name="native_aa_complete_hfp_slc_description">Některé telefony nespustí bezdrátové Android Auto, dokud se Bluetooth této jednotky nepovažuje za připojené, nejen spárované. Ve výchozím nastavení zapnuto; vypněte, pokud přestanou fungovat hovory na tomto zařízení.</string>
+    <string name="announce_connection_configuration">Požádat o delší časový limit spojení</string>
+    <string name="announce_connection_configuration_description">Řekne Android Auto, aby před označením spojení za mrtvé počkal 15 sekund místo 3, a aby použil větší vyrovnávací paměti soketu. Je to určeno pro rádio, které se uprostřed relace na pár sekund odpojí od kanálu a vezme si spojení s sebou. Zda to váš telefon nějak respektuje, nebylo změřeno.</string>
     <string name="native_aa_ignore_external_bt">Ignorovat kontrolu kompatibility Bluetooth</string>
     <string name="native_aa_ignore_external_bt_description">Tato jednotka podle všeho používá Bluetooth na samostatném modulu, ke kterému se Android nedostane, proto se bezdrátové Android Auto automaticky vypíná. Ve výchozím nastavení vypnuto. Zapněte jen tehdy, pokud si myslíte, že je to špatně: pokud je detekce správná, připojení tiše selže a protokol vypadá v pořádku.</string>
     <string name="native_aa_setup_qr_title">Nastavení pomocí QR kódu</string>

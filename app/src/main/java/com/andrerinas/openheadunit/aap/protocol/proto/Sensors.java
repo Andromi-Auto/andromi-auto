@@ -1140,8 +1140,32 @@ public final class Sensors {
         int index);
 
     /**
+     * <code>repeated .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.TirePressureData tire_pressure_data = 18;</code>
+     */
+    java.util.List<com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData> 
+        getTirePressureDataList();
+    /**
+     * <code>repeated .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.TirePressureData tire_pressure_data = 18;</code>
+     */
+    com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData getTirePressureData(int index);
+    /**
+     * <code>repeated .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.TirePressureData tire_pressure_data = 18;</code>
+     */
+    int getTirePressureDataCount();
+    /**
+     * <code>repeated .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.TirePressureData tire_pressure_data = 18;</code>
+     */
+    java.util.List<? extends com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureDataOrBuilder> 
+        getTirePressureDataOrBuilderList();
+    /**
+     * <code>repeated .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.TirePressureData tire_pressure_data = 18;</code>
+     */
+    com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureDataOrBuilder getTirePressureDataOrBuilder(
+        int index);
+
+    /**
      * <pre>
-     *repeated TirePressureData Tire = 18;
+     *Sensor not yet supported
      * </pre>
      *
      * <code>repeated .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.AccelerometerData accel_data = 19;</code>
@@ -1150,7 +1174,7 @@ public final class Sensors {
         getAccelDataList();
     /**
      * <pre>
-     *repeated TirePressureData Tire = 18;
+     *Sensor not yet supported
      * </pre>
      *
      * <code>repeated .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.AccelerometerData accel_data = 19;</code>
@@ -1158,7 +1182,7 @@ public final class Sensors {
     com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.AccelerometerData getAccelData(int index);
     /**
      * <pre>
-     *repeated TirePressureData Tire = 18;
+     *Sensor not yet supported
      * </pre>
      *
      * <code>repeated .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.AccelerometerData accel_data = 19;</code>
@@ -1166,7 +1190,7 @@ public final class Sensors {
     int getAccelDataCount();
     /**
      * <pre>
-     *repeated TirePressureData Tire = 18;
+     *Sensor not yet supported
      * </pre>
      *
      * <code>repeated .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.AccelerometerData accel_data = 19;</code>
@@ -1175,7 +1199,7 @@ public final class Sensors {
         getAccelDataOrBuilderList();
     /**
      * <pre>
-     *repeated TirePressureData Tire = 18;
+     *Sensor not yet supported
      * </pre>
      *
      * <code>repeated .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.AccelerometerData accel_data = 19;</code>
@@ -1281,6 +1305,7 @@ public final class Sensors {
       passengerData_ = java.util.Collections.emptyList();
       doorData_ = java.util.Collections.emptyList();
       lightData_ = java.util.Collections.emptyList();
+      tirePressureData_ = java.util.Collections.emptyList();
       accelData_ = java.util.Collections.emptyList();
       gyroData_ = java.util.Collections.emptyList();
       gpsSatelliteData_ = java.util.Collections.emptyList();
@@ -9456,15 +9481,15 @@ public final class Sensors {
         com.google.protobuf.MessageOrBuilder {
 
       /**
-       * <code>required int32 speed_e6 = 1;</code>
-       * @return Whether the speedE6 field is set.
+       * <code>required int32 speed_e3 = 1;</code>
+       * @return Whether the speedE3 field is set.
        */
-      boolean hasSpeedE6();
+      boolean hasSpeedE3();
       /**
-       * <code>required int32 speed_e6 = 1;</code>
-       * @return The speedE6.
+       * <code>required int32 speed_e3 = 1;</code>
+       * @return The speedE3.
        */
-      int getSpeedE6();
+      int getSpeedE3();
 
       /**
        * <code>optional bool cruise_engaged = 2;</code>
@@ -9478,15 +9503,15 @@ public final class Sensors {
       boolean getCruiseEngaged();
 
       /**
-       * <code>optional bool cruise_set_speed = 3;</code>
+       * <code>optional int32 cruise_set_speed = 4;</code>
        * @return Whether the cruiseSetSpeed field is set.
        */
       boolean hasCruiseSetSpeed();
       /**
-       * <code>optional bool cruise_set_speed = 3;</code>
+       * <code>optional int32 cruise_set_speed = 4;</code>
        * @return The cruiseSetSpeed.
        */
-      boolean getCruiseSetSpeed();
+      int getCruiseSetSpeed();
     }
     /**
      * Protobuf type {@code com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.SpeedData}
@@ -9524,23 +9549,23 @@ public final class Sensors {
       }
 
       private int bitField0_;
-      public static final int SPEED_E6_FIELD_NUMBER = 1;
-      private int speedE6_ = 0;
+      public static final int SPEED_E3_FIELD_NUMBER = 1;
+      private int speedE3_ = 0;
       /**
-       * <code>required int32 speed_e6 = 1;</code>
-       * @return Whether the speedE6 field is set.
+       * <code>required int32 speed_e3 = 1;</code>
+       * @return Whether the speedE3 field is set.
        */
       @java.lang.Override
-      public boolean hasSpeedE6() {
+      public boolean hasSpeedE3() {
         return ((bitField0_ & 0x00000001) != 0);
       }
       /**
-       * <code>required int32 speed_e6 = 1;</code>
-       * @return The speedE6.
+       * <code>required int32 speed_e3 = 1;</code>
+       * @return The speedE3.
        */
       @java.lang.Override
-      public int getSpeedE6() {
-        return speedE6_;
+      public int getSpeedE3() {
+        return speedE3_;
       }
 
       public static final int CRUISE_ENGAGED_FIELD_NUMBER = 2;
@@ -9562,10 +9587,10 @@ public final class Sensors {
         return cruiseEngaged_;
       }
 
-      public static final int CRUISE_SET_SPEED_FIELD_NUMBER = 3;
-      private boolean cruiseSetSpeed_ = false;
+      public static final int CRUISE_SET_SPEED_FIELD_NUMBER = 4;
+      private int cruiseSetSpeed_ = 0;
       /**
-       * <code>optional bool cruise_set_speed = 3;</code>
+       * <code>optional int32 cruise_set_speed = 4;</code>
        * @return Whether the cruiseSetSpeed field is set.
        */
       @java.lang.Override
@@ -9573,11 +9598,11 @@ public final class Sensors {
         return ((bitField0_ & 0x00000004) != 0);
       }
       /**
-       * <code>optional bool cruise_set_speed = 3;</code>
+       * <code>optional int32 cruise_set_speed = 4;</code>
        * @return The cruiseSetSpeed.
        */
       @java.lang.Override
-      public boolean getCruiseSetSpeed() {
+      public int getCruiseSetSpeed() {
         return cruiseSetSpeed_;
       }
 
@@ -9588,7 +9613,7 @@ public final class Sensors {
         if (isInitialized == 1) return true;
         if (isInitialized == 0) return false;
 
-        if (!hasSpeedE6()) {
+        if (!hasSpeedE3()) {
           memoizedIsInitialized = 0;
           return false;
         }
@@ -9600,13 +9625,13 @@ public final class Sensors {
       public void writeTo(com.google.protobuf.CodedOutputStream output)
                           throws java.io.IOException {
         if (((bitField0_ & 0x00000001) != 0)) {
-          output.writeInt32(1, speedE6_);
+          output.writeInt32(1, speedE3_);
         }
         if (((bitField0_ & 0x00000002) != 0)) {
           output.writeBool(2, cruiseEngaged_);
         }
         if (((bitField0_ & 0x00000004) != 0)) {
-          output.writeBool(3, cruiseSetSpeed_);
+          output.writeInt32(4, cruiseSetSpeed_);
         }
         getUnknownFields().writeTo(output);
       }
@@ -9619,7 +9644,7 @@ public final class Sensors {
         size = 0;
         if (((bitField0_ & 0x00000001) != 0)) {
           size += com.google.protobuf.CodedOutputStream
-            .computeInt32Size(1, speedE6_);
+            .computeInt32Size(1, speedE3_);
         }
         if (((bitField0_ & 0x00000002) != 0)) {
           size += com.google.protobuf.CodedOutputStream
@@ -9627,7 +9652,7 @@ public final class Sensors {
         }
         if (((bitField0_ & 0x00000004) != 0)) {
           size += com.google.protobuf.CodedOutputStream
-            .computeBoolSize(3, cruiseSetSpeed_);
+            .computeInt32Size(4, cruiseSetSpeed_);
         }
         size += getUnknownFields().getSerializedSize();
         memoizedSize = size;
@@ -9644,10 +9669,10 @@ public final class Sensors {
         }
         com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.SpeedData other = (com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.SpeedData) obj;
 
-        if (hasSpeedE6() != other.hasSpeedE6()) return false;
-        if (hasSpeedE6()) {
-          if (getSpeedE6()
-              != other.getSpeedE6()) return false;
+        if (hasSpeedE3() != other.hasSpeedE3()) return false;
+        if (hasSpeedE3()) {
+          if (getSpeedE3()
+              != other.getSpeedE3()) return false;
         }
         if (hasCruiseEngaged() != other.hasCruiseEngaged()) return false;
         if (hasCruiseEngaged()) {
@@ -9670,9 +9695,9 @@ public final class Sensors {
         }
         int hash = 41;
         hash = (19 * hash) + getDescriptor().hashCode();
-        if (hasSpeedE6()) {
-          hash = (37 * hash) + SPEED_E6_FIELD_NUMBER;
-          hash = (53 * hash) + getSpeedE6();
+        if (hasSpeedE3()) {
+          hash = (37 * hash) + SPEED_E3_FIELD_NUMBER;
+          hash = (53 * hash) + getSpeedE3();
         }
         if (hasCruiseEngaged()) {
           hash = (37 * hash) + CRUISE_ENGAGED_FIELD_NUMBER;
@@ -9681,8 +9706,7 @@ public final class Sensors {
         }
         if (hasCruiseSetSpeed()) {
           hash = (37 * hash) + CRUISE_SET_SPEED_FIELD_NUMBER;
-          hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
-              getCruiseSetSpeed());
+          hash = (53 * hash) + getCruiseSetSpeed();
         }
         hash = (29 * hash) + getUnknownFields().hashCode();
         memoizedHashCode = hash;
@@ -9815,9 +9839,9 @@ public final class Sensors {
         public Builder clear() {
           super.clear();
           bitField0_ = 0;
-          speedE6_ = 0;
+          speedE3_ = 0;
           cruiseEngaged_ = false;
-          cruiseSetSpeed_ = false;
+          cruiseSetSpeed_ = 0;
           return this;
         }
 
@@ -9853,7 +9877,7 @@ public final class Sensors {
           int from_bitField0_ = bitField0_;
           int to_bitField0_ = 0;
           if (((from_bitField0_ & 0x00000001) != 0)) {
-            result.speedE6_ = speedE6_;
+            result.speedE3_ = speedE3_;
             to_bitField0_ |= 0x00000001;
           }
           if (((from_bitField0_ & 0x00000002) != 0)) {
@@ -9911,8 +9935,8 @@ public final class Sensors {
 
         public Builder mergeFrom(com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.SpeedData other) {
           if (other == com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.SpeedData.getDefaultInstance()) return this;
-          if (other.hasSpeedE6()) {
-            setSpeedE6(other.getSpeedE6());
+          if (other.hasSpeedE3()) {
+            setSpeedE3(other.getSpeedE3());
           }
           if (other.hasCruiseEngaged()) {
             setCruiseEngaged(other.getCruiseEngaged());
@@ -9927,7 +9951,7 @@ public final class Sensors {
 
         @java.lang.Override
         public final boolean isInitialized() {
-          if (!hasSpeedE6()) {
+          if (!hasSpeedE3()) {
             return false;
           }
           return true;
@@ -9950,7 +9974,7 @@ public final class Sensors {
                   done = true;
                   break;
                 case 8: {
-                  speedE6_ = input.readInt32();
+                  speedE3_ = input.readInt32();
                   bitField0_ |= 0x00000001;
                   break;
                 } // case 8
@@ -9959,11 +9983,11 @@ public final class Sensors {
                   bitField0_ |= 0x00000002;
                   break;
                 } // case 16
-                case 24: {
-                  cruiseSetSpeed_ = input.readBool();
+                case 32: {
+                  cruiseSetSpeed_ = input.readInt32();
                   bitField0_ |= 0x00000004;
                   break;
-                } // case 24
+                } // case 32
                 default: {
                   if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                     done = true; // was an endgroup tag
@@ -9981,42 +10005,42 @@ public final class Sensors {
         }
         private int bitField0_;
 
-        private int speedE6_ ;
+        private int speedE3_ ;
         /**
-         * <code>required int32 speed_e6 = 1;</code>
-         * @return Whether the speedE6 field is set.
+         * <code>required int32 speed_e3 = 1;</code>
+         * @return Whether the speedE3 field is set.
          */
         @java.lang.Override
-        public boolean hasSpeedE6() {
+        public boolean hasSpeedE3() {
           return ((bitField0_ & 0x00000001) != 0);
         }
         /**
-         * <code>required int32 speed_e6 = 1;</code>
-         * @return The speedE6.
+         * <code>required int32 speed_e3 = 1;</code>
+         * @return The speedE3.
          */
         @java.lang.Override
-        public int getSpeedE6() {
-          return speedE6_;
+        public int getSpeedE3() {
+          return speedE3_;
         }
         /**
-         * <code>required int32 speed_e6 = 1;</code>
-         * @param value The speedE6 to set.
+         * <code>required int32 speed_e3 = 1;</code>
+         * @param value The speedE3 to set.
          * @return This builder for chaining.
          */
-        public Builder setSpeedE6(int value) {
+        public Builder setSpeedE3(int value) {
 
-          speedE6_ = value;
+          speedE3_ = value;
           bitField0_ |= 0x00000001;
           onChanged();
           return this;
         }
         /**
-         * <code>required int32 speed_e6 = 1;</code>
+         * <code>required int32 speed_e3 = 1;</code>
          * @return This builder for chaining.
          */
-        public Builder clearSpeedE6() {
+        public Builder clearSpeedE3() {
           bitField0_ = (bitField0_ & ~0x00000001);
-          speedE6_ = 0;
+          speedE3_ = 0;
           onChanged();
           return this;
         }
@@ -10061,9 +10085,9 @@ public final class Sensors {
           return this;
         }
 
-        private boolean cruiseSetSpeed_ ;
+        private int cruiseSetSpeed_ ;
         /**
-         * <code>optional bool cruise_set_speed = 3;</code>
+         * <code>optional int32 cruise_set_speed = 4;</code>
          * @return Whether the cruiseSetSpeed field is set.
          */
         @java.lang.Override
@@ -10071,19 +10095,19 @@ public final class Sensors {
           return ((bitField0_ & 0x00000004) != 0);
         }
         /**
-         * <code>optional bool cruise_set_speed = 3;</code>
+         * <code>optional int32 cruise_set_speed = 4;</code>
          * @return The cruiseSetSpeed.
          */
         @java.lang.Override
-        public boolean getCruiseSetSpeed() {
+        public int getCruiseSetSpeed() {
           return cruiseSetSpeed_;
         }
         /**
-         * <code>optional bool cruise_set_speed = 3;</code>
+         * <code>optional int32 cruise_set_speed = 4;</code>
          * @param value The cruiseSetSpeed to set.
          * @return This builder for chaining.
          */
-        public Builder setCruiseSetSpeed(boolean value) {
+        public Builder setCruiseSetSpeed(int value) {
 
           cruiseSetSpeed_ = value;
           bitField0_ |= 0x00000004;
@@ -10091,12 +10115,12 @@ public final class Sensors {
           return this;
         }
         /**
-         * <code>optional bool cruise_set_speed = 3;</code>
+         * <code>optional int32 cruise_set_speed = 4;</code>
          * @return This builder for chaining.
          */
         public Builder clearCruiseSetSpeed() {
           bitField0_ = (bitField0_ & ~0x00000004);
-          cruiseSetSpeed_ = false;
+          cruiseSetSpeed_ = 0;
           onChanged();
           return this;
         }
@@ -10169,26 +10193,26 @@ public final class Sensors {
         com.google.protobuf.MessageOrBuilder {
 
       /**
-       * <code>optional int32 kms_el = 1;</code>
-       * @return Whether the kmsEl field is set.
+       * <code>required int32 kms_e1 = 1;</code>
+       * @return Whether the kmsE1 field is set.
        */
-      boolean hasKmsEl();
+      boolean hasKmsE1();
       /**
-       * <code>optional int32 kms_el = 1;</code>
-       * @return The kmsEl.
+       * <code>required int32 kms_e1 = 1;</code>
+       * @return The kmsE1.
        */
-      int getKmsEl();
+      int getKmsE1();
 
       /**
-       * <code>optional int32 trip_kms_el = 2;</code>
-       * @return Whether the tripKmsEl field is set.
+       * <code>optional int32 trip_kms_e1 = 2;</code>
+       * @return Whether the tripKmsE1 field is set.
        */
-      boolean hasTripKmsEl();
+      boolean hasTripKmsE1();
       /**
-       * <code>optional int32 trip_kms_el = 2;</code>
-       * @return The tripKmsEl.
+       * <code>optional int32 trip_kms_e1 = 2;</code>
+       * @return The tripKmsE1.
        */
-      int getTripKmsEl();
+      int getTripKmsE1();
     }
     /**
      * Protobuf type {@code com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.OdometerData}
@@ -10226,42 +10250,42 @@ public final class Sensors {
       }
 
       private int bitField0_;
-      public static final int KMS_EL_FIELD_NUMBER = 1;
-      private int kmsEl_ = 0;
+      public static final int KMS_E1_FIELD_NUMBER = 1;
+      private int kmsE1_ = 0;
       /**
-       * <code>optional int32 kms_el = 1;</code>
-       * @return Whether the kmsEl field is set.
+       * <code>required int32 kms_e1 = 1;</code>
+       * @return Whether the kmsE1 field is set.
        */
       @java.lang.Override
-      public boolean hasKmsEl() {
+      public boolean hasKmsE1() {
         return ((bitField0_ & 0x00000001) != 0);
       }
       /**
-       * <code>optional int32 kms_el = 1;</code>
-       * @return The kmsEl.
+       * <code>required int32 kms_e1 = 1;</code>
+       * @return The kmsE1.
        */
       @java.lang.Override
-      public int getKmsEl() {
-        return kmsEl_;
+      public int getKmsE1() {
+        return kmsE1_;
       }
 
-      public static final int TRIP_KMS_EL_FIELD_NUMBER = 2;
-      private int tripKmsEl_ = 0;
+      public static final int TRIP_KMS_E1_FIELD_NUMBER = 2;
+      private int tripKmsE1_ = 0;
       /**
-       * <code>optional int32 trip_kms_el = 2;</code>
-       * @return Whether the tripKmsEl field is set.
+       * <code>optional int32 trip_kms_e1 = 2;</code>
+       * @return Whether the tripKmsE1 field is set.
        */
       @java.lang.Override
-      public boolean hasTripKmsEl() {
+      public boolean hasTripKmsE1() {
         return ((bitField0_ & 0x00000002) != 0);
       }
       /**
-       * <code>optional int32 trip_kms_el = 2;</code>
-       * @return The tripKmsEl.
+       * <code>optional int32 trip_kms_e1 = 2;</code>
+       * @return The tripKmsE1.
        */
       @java.lang.Override
-      public int getTripKmsEl() {
-        return tripKmsEl_;
+      public int getTripKmsE1() {
+        return tripKmsE1_;
       }
 
       private byte memoizedIsInitialized = -1;
@@ -10271,6 +10295,10 @@ public final class Sensors {
         if (isInitialized == 1) return true;
         if (isInitialized == 0) return false;
 
+        if (!hasKmsE1()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
         memoizedIsInitialized = 1;
         return true;
       }
@@ -10279,10 +10307,10 @@ public final class Sensors {
       public void writeTo(com.google.protobuf.CodedOutputStream output)
                           throws java.io.IOException {
         if (((bitField0_ & 0x00000001) != 0)) {
-          output.writeInt32(1, kmsEl_);
+          output.writeInt32(1, kmsE1_);
         }
         if (((bitField0_ & 0x00000002) != 0)) {
-          output.writeInt32(2, tripKmsEl_);
+          output.writeInt32(2, tripKmsE1_);
         }
         getUnknownFields().writeTo(output);
       }
@@ -10295,11 +10323,11 @@ public final class Sensors {
         size = 0;
         if (((bitField0_ & 0x00000001) != 0)) {
           size += com.google.protobuf.CodedOutputStream
-            .computeInt32Size(1, kmsEl_);
+            .computeInt32Size(1, kmsE1_);
         }
         if (((bitField0_ & 0x00000002) != 0)) {
           size += com.google.protobuf.CodedOutputStream
-            .computeInt32Size(2, tripKmsEl_);
+            .computeInt32Size(2, tripKmsE1_);
         }
         size += getUnknownFields().getSerializedSize();
         memoizedSize = size;
@@ -10316,15 +10344,15 @@ public final class Sensors {
         }
         com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.OdometerData other = (com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.OdometerData) obj;
 
-        if (hasKmsEl() != other.hasKmsEl()) return false;
-        if (hasKmsEl()) {
-          if (getKmsEl()
-              != other.getKmsEl()) return false;
+        if (hasKmsE1() != other.hasKmsE1()) return false;
+        if (hasKmsE1()) {
+          if (getKmsE1()
+              != other.getKmsE1()) return false;
         }
-        if (hasTripKmsEl() != other.hasTripKmsEl()) return false;
-        if (hasTripKmsEl()) {
-          if (getTripKmsEl()
-              != other.getTripKmsEl()) return false;
+        if (hasTripKmsE1() != other.hasTripKmsE1()) return false;
+        if (hasTripKmsE1()) {
+          if (getTripKmsE1()
+              != other.getTripKmsE1()) return false;
         }
         if (!getUnknownFields().equals(other.getUnknownFields())) return false;
         return true;
@@ -10337,13 +10365,13 @@ public final class Sensors {
         }
         int hash = 41;
         hash = (19 * hash) + getDescriptor().hashCode();
-        if (hasKmsEl()) {
-          hash = (37 * hash) + KMS_EL_FIELD_NUMBER;
-          hash = (53 * hash) + getKmsEl();
+        if (hasKmsE1()) {
+          hash = (37 * hash) + KMS_E1_FIELD_NUMBER;
+          hash = (53 * hash) + getKmsE1();
         }
-        if (hasTripKmsEl()) {
-          hash = (37 * hash) + TRIP_KMS_EL_FIELD_NUMBER;
-          hash = (53 * hash) + getTripKmsEl();
+        if (hasTripKmsE1()) {
+          hash = (37 * hash) + TRIP_KMS_E1_FIELD_NUMBER;
+          hash = (53 * hash) + getTripKmsE1();
         }
         hash = (29 * hash) + getUnknownFields().hashCode();
         memoizedHashCode = hash;
@@ -10476,8 +10504,8 @@ public final class Sensors {
         public Builder clear() {
           super.clear();
           bitField0_ = 0;
-          kmsEl_ = 0;
-          tripKmsEl_ = 0;
+          kmsE1_ = 0;
+          tripKmsE1_ = 0;
           return this;
         }
 
@@ -10513,11 +10541,11 @@ public final class Sensors {
           int from_bitField0_ = bitField0_;
           int to_bitField0_ = 0;
           if (((from_bitField0_ & 0x00000001) != 0)) {
-            result.kmsEl_ = kmsEl_;
+            result.kmsE1_ = kmsE1_;
             to_bitField0_ |= 0x00000001;
           }
           if (((from_bitField0_ & 0x00000002) != 0)) {
-            result.tripKmsEl_ = tripKmsEl_;
+            result.tripKmsE1_ = tripKmsE1_;
             to_bitField0_ |= 0x00000002;
           }
           result.bitField0_ |= to_bitField0_;
@@ -10567,11 +10595,11 @@ public final class Sensors {
 
         public Builder mergeFrom(com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.OdometerData other) {
           if (other == com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.OdometerData.getDefaultInstance()) return this;
-          if (other.hasKmsEl()) {
-            setKmsEl(other.getKmsEl());
+          if (other.hasKmsE1()) {
+            setKmsE1(other.getKmsE1());
           }
-          if (other.hasTripKmsEl()) {
-            setTripKmsEl(other.getTripKmsEl());
+          if (other.hasTripKmsE1()) {
+            setTripKmsE1(other.getTripKmsE1());
           }
           this.mergeUnknownFields(other.getUnknownFields());
           onChanged();
@@ -10580,6 +10608,9 @@ public final class Sensors {
 
         @java.lang.Override
         public final boolean isInitialized() {
+          if (!hasKmsE1()) {
+            return false;
+          }
           return true;
         }
 
@@ -10600,12 +10631,12 @@ public final class Sensors {
                   done = true;
                   break;
                 case 8: {
-                  kmsEl_ = input.readInt32();
+                  kmsE1_ = input.readInt32();
                   bitField0_ |= 0x00000001;
                   break;
                 } // case 8
                 case 16: {
-                  tripKmsEl_ = input.readInt32();
+                  tripKmsE1_ = input.readInt32();
                   bitField0_ |= 0x00000002;
                   break;
                 } // case 16
@@ -10626,82 +10657,82 @@ public final class Sensors {
         }
         private int bitField0_;
 
-        private int kmsEl_ ;
+        private int kmsE1_ ;
         /**
-         * <code>optional int32 kms_el = 1;</code>
-         * @return Whether the kmsEl field is set.
+         * <code>required int32 kms_e1 = 1;</code>
+         * @return Whether the kmsE1 field is set.
          */
         @java.lang.Override
-        public boolean hasKmsEl() {
+        public boolean hasKmsE1() {
           return ((bitField0_ & 0x00000001) != 0);
         }
         /**
-         * <code>optional int32 kms_el = 1;</code>
-         * @return The kmsEl.
+         * <code>required int32 kms_e1 = 1;</code>
+         * @return The kmsE1.
          */
         @java.lang.Override
-        public int getKmsEl() {
-          return kmsEl_;
+        public int getKmsE1() {
+          return kmsE1_;
         }
         /**
-         * <code>optional int32 kms_el = 1;</code>
-         * @param value The kmsEl to set.
+         * <code>required int32 kms_e1 = 1;</code>
+         * @param value The kmsE1 to set.
          * @return This builder for chaining.
          */
-        public Builder setKmsEl(int value) {
+        public Builder setKmsE1(int value) {
 
-          kmsEl_ = value;
+          kmsE1_ = value;
           bitField0_ |= 0x00000001;
           onChanged();
           return this;
         }
         /**
-         * <code>optional int32 kms_el = 1;</code>
+         * <code>required int32 kms_e1 = 1;</code>
          * @return This builder for chaining.
          */
-        public Builder clearKmsEl() {
+        public Builder clearKmsE1() {
           bitField0_ = (bitField0_ & ~0x00000001);
-          kmsEl_ = 0;
+          kmsE1_ = 0;
           onChanged();
           return this;
         }
 
-        private int tripKmsEl_ ;
+        private int tripKmsE1_ ;
         /**
-         * <code>optional int32 trip_kms_el = 2;</code>
-         * @return Whether the tripKmsEl field is set.
+         * <code>optional int32 trip_kms_e1 = 2;</code>
+         * @return Whether the tripKmsE1 field is set.
          */
         @java.lang.Override
-        public boolean hasTripKmsEl() {
+        public boolean hasTripKmsE1() {
           return ((bitField0_ & 0x00000002) != 0);
         }
         /**
-         * <code>optional int32 trip_kms_el = 2;</code>
-         * @return The tripKmsEl.
+         * <code>optional int32 trip_kms_e1 = 2;</code>
+         * @return The tripKmsE1.
          */
         @java.lang.Override
-        public int getTripKmsEl() {
-          return tripKmsEl_;
+        public int getTripKmsE1() {
+          return tripKmsE1_;
         }
         /**
-         * <code>optional int32 trip_kms_el = 2;</code>
-         * @param value The tripKmsEl to set.
+         * <code>optional int32 trip_kms_e1 = 2;</code>
+         * @param value The tripKmsE1 to set.
          * @return This builder for chaining.
          */
-        public Builder setTripKmsEl(int value) {
+        public Builder setTripKmsE1(int value) {
 
-          tripKmsEl_ = value;
+          tripKmsE1_ = value;
           bitField0_ |= 0x00000002;
           onChanged();
           return this;
         }
         /**
-         * <code>optional int32 trip_kms_el = 2;</code>
+         * <code>optional int32 trip_kms_e1 = 2;</code>
          * @return This builder for chaining.
          */
-        public Builder clearTripKmsEl() {
+        public Builder clearTripKmsE1() {
           bitField0_ = (bitField0_ & ~0x00000002);
-          tripKmsEl_ = 0;
+          tripKmsE1_ = 0;
           onChanged();
           return this;
         }
@@ -14811,15 +14842,15 @@ public final class Sensors {
         com.google.protobuf.MessageOrBuilder {
 
       /**
-       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.LightData.HeadlightState headlight = 1;</code>
+       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.LightData.HeadLightState headlight = 1;</code>
        * @return Whether the headlight field is set.
        */
       boolean hasHeadlight();
       /**
-       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.LightData.HeadlightState headlight = 1;</code>
+       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.LightData.HeadLightState headlight = 1;</code>
        * @return The headlight.
        */
-      com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.LightData.HeadlightState getHeadlight();
+      com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.LightData.HeadLightState getHeadlight();
 
       /**
        * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.LightData.TurnIndicatorState turn_indicator = 2;</code>
@@ -14856,8 +14887,8 @@ public final class Sensors {
         super(builder);
       }
       private LightData() {
-        headlight_ = 0;
-        turnIndicator_ = 0;
+        headlight_ = 1;
+        turnIndicator_ = 1;
       }
 
       @java.lang.Override
@@ -14881,44 +14912,36 @@ public final class Sensors {
       }
 
       /**
-       * Protobuf enum {@code com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.LightData.HeadlightState}
+       * Protobuf enum {@code com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.LightData.HeadLightState}
        */
-      public enum HeadlightState
+      public enum HeadLightState
           implements com.google.protobuf.ProtocolMessageEnum {
         /**
-         * <code>HEADLIGHT_0 = 0;</code>
+         * <code>HEAD_LIGHT_STATE_OFF = 1;</code>
          */
-        HEADLIGHT_0(0),
+        HEAD_LIGHT_STATE_OFF(1),
         /**
-         * <code>HEADLIGHT_1 = 1;</code>
+         * <code>HEAD_LIGHT_STATE_ON = 2;</code>
          */
-        HEADLIGHT_1(1),
+        HEAD_LIGHT_STATE_ON(2),
         /**
-         * <code>HEADLIGHT_2 = 2;</code>
+         * <code>HEAD_LIGHT_STATE_HIGH = 3;</code>
          */
-        HEADLIGHT_2(2),
-        /**
-         * <code>HEADLIGHT_3 = 3;</code>
-         */
-        HEADLIGHT_3(3),
+        HEAD_LIGHT_STATE_HIGH(3),
         ;
 
         /**
-         * <code>HEADLIGHT_0 = 0;</code>
+         * <code>HEAD_LIGHT_STATE_OFF = 1;</code>
          */
-        public static final int HEADLIGHT_0_VALUE = 0;
+        public static final int HEAD_LIGHT_STATE_OFF_VALUE = 1;
         /**
-         * <code>HEADLIGHT_1 = 1;</code>
+         * <code>HEAD_LIGHT_STATE_ON = 2;</code>
          */
-        public static final int HEADLIGHT_1_VALUE = 1;
+        public static final int HEAD_LIGHT_STATE_ON_VALUE = 2;
         /**
-         * <code>HEADLIGHT_2 = 2;</code>
+         * <code>HEAD_LIGHT_STATE_HIGH = 3;</code>
          */
-        public static final int HEADLIGHT_2_VALUE = 2;
-        /**
-         * <code>HEADLIGHT_3 = 3;</code>
-         */
-        public static final int HEADLIGHT_3_VALUE = 3;
+        public static final int HEAD_LIGHT_STATE_HIGH_VALUE = 3;
 
 
         public final int getNumber() {
@@ -14931,7 +14954,7 @@ public final class Sensors {
          * @deprecated Use {@link #forNumber(int)} instead.
          */
         @java.lang.Deprecated
-        public static HeadlightState valueOf(int value) {
+        public static HeadLightState valueOf(int value) {
           return forNumber(value);
         }
 
@@ -14939,25 +14962,24 @@ public final class Sensors {
          * @param value The numeric wire value of the corresponding enum entry.
          * @return The enum associated with the given numeric wire value.
          */
-        public static HeadlightState forNumber(int value) {
+        public static HeadLightState forNumber(int value) {
           switch (value) {
-            case 0: return HEADLIGHT_0;
-            case 1: return HEADLIGHT_1;
-            case 2: return HEADLIGHT_2;
-            case 3: return HEADLIGHT_3;
+            case 1: return HEAD_LIGHT_STATE_OFF;
+            case 2: return HEAD_LIGHT_STATE_ON;
+            case 3: return HEAD_LIGHT_STATE_HIGH;
             default: return null;
           }
         }
 
-        public static com.google.protobuf.Internal.EnumLiteMap<HeadlightState>
+        public static com.google.protobuf.Internal.EnumLiteMap<HeadLightState>
             internalGetValueMap() {
           return internalValueMap;
         }
         private static final com.google.protobuf.Internal.EnumLiteMap<
-            HeadlightState> internalValueMap =
-              new com.google.protobuf.Internal.EnumLiteMap<HeadlightState>() {
-                public HeadlightState findValueByNumber(int number) {
-                  return HeadlightState.forNumber(number);
+            HeadLightState> internalValueMap =
+              new com.google.protobuf.Internal.EnumLiteMap<HeadLightState>() {
+                public HeadLightState findValueByNumber(int number) {
+                  return HeadLightState.forNumber(number);
                 }
               };
 
@@ -14974,9 +14996,9 @@ public final class Sensors {
           return com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.LightData.getDescriptor().getEnumTypes().get(0);
         }
 
-        private static final HeadlightState[] VALUES = values();
+        private static final HeadLightState[] VALUES = values();
 
-        public static HeadlightState valueOf(
+        public static HeadLightState valueOf(
             com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
           if (desc.getType() != getDescriptor()) {
             throw new java.lang.IllegalArgumentException(
@@ -14987,11 +15009,11 @@ public final class Sensors {
 
         private final int value;
 
-        private HeadlightState(int value) {
+        private HeadLightState(int value) {
           this.value = value;
         }
 
-        // @@protoc_insertion_point(enum_scope:com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.LightData.HeadlightState)
+        // @@protoc_insertion_point(enum_scope:com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.LightData.HeadLightState)
       }
 
       /**
@@ -15000,39 +15022,31 @@ public final class Sensors {
       public enum TurnIndicatorState
           implements com.google.protobuf.ProtocolMessageEnum {
         /**
-         * <code>INDICATOR_0 = 0;</code>
+         * <code>TURN_INDICATOR_NONE = 1;</code>
          */
-        INDICATOR_0(0),
+        TURN_INDICATOR_NONE(1),
         /**
-         * <code>INDICATOR_1 = 1;</code>
+         * <code>TURN_INDICATOR_LEFT = 2;</code>
          */
-        INDICATOR_1(1),
+        TURN_INDICATOR_LEFT(2),
         /**
-         * <code>INDICATOR_2 = 2;</code>
+         * <code>TURN_INDICATOR_RIGHT = 3;</code>
          */
-        INDICATOR_2(2),
-        /**
-         * <code>INDICATOR_3 = 3;</code>
-         */
-        INDICATOR_3(3),
+        TURN_INDICATOR_RIGHT(3),
         ;
 
         /**
-         * <code>INDICATOR_0 = 0;</code>
+         * <code>TURN_INDICATOR_NONE = 1;</code>
          */
-        public static final int INDICATOR_0_VALUE = 0;
+        public static final int TURN_INDICATOR_NONE_VALUE = 1;
         /**
-         * <code>INDICATOR_1 = 1;</code>
+         * <code>TURN_INDICATOR_LEFT = 2;</code>
          */
-        public static final int INDICATOR_1_VALUE = 1;
+        public static final int TURN_INDICATOR_LEFT_VALUE = 2;
         /**
-         * <code>INDICATOR_2 = 2;</code>
+         * <code>TURN_INDICATOR_RIGHT = 3;</code>
          */
-        public static final int INDICATOR_2_VALUE = 2;
-        /**
-         * <code>INDICATOR_3 = 3;</code>
-         */
-        public static final int INDICATOR_3_VALUE = 3;
+        public static final int TURN_INDICATOR_RIGHT_VALUE = 3;
 
 
         public final int getNumber() {
@@ -15055,10 +15069,9 @@ public final class Sensors {
          */
         public static TurnIndicatorState forNumber(int value) {
           switch (value) {
-            case 0: return INDICATOR_0;
-            case 1: return INDICATOR_1;
-            case 2: return INDICATOR_2;
-            case 3: return INDICATOR_3;
+            case 1: return TURN_INDICATOR_NONE;
+            case 2: return TURN_INDICATOR_LEFT;
+            case 3: return TURN_INDICATOR_RIGHT;
             default: return null;
           }
         }
@@ -15110,25 +15123,25 @@ public final class Sensors {
 
       private int bitField0_;
       public static final int HEADLIGHT_FIELD_NUMBER = 1;
-      private int headlight_ = 0;
+      private int headlight_ = 1;
       /**
-       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.LightData.HeadlightState headlight = 1;</code>
+       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.LightData.HeadLightState headlight = 1;</code>
        * @return Whether the headlight field is set.
        */
       @java.lang.Override public boolean hasHeadlight() {
         return ((bitField0_ & 0x00000001) != 0);
       }
       /**
-       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.LightData.HeadlightState headlight = 1;</code>
+       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.LightData.HeadLightState headlight = 1;</code>
        * @return The headlight.
        */
-      @java.lang.Override public com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.LightData.HeadlightState getHeadlight() {
-        com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.LightData.HeadlightState result = com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.LightData.HeadlightState.forNumber(headlight_);
-        return result == null ? com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.LightData.HeadlightState.HEADLIGHT_0 : result;
+      @java.lang.Override public com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.LightData.HeadLightState getHeadlight() {
+        com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.LightData.HeadLightState result = com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.LightData.HeadLightState.forNumber(headlight_);
+        return result == null ? com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.LightData.HeadLightState.HEAD_LIGHT_STATE_OFF : result;
       }
 
       public static final int TURN_INDICATOR_FIELD_NUMBER = 2;
-      private int turnIndicator_ = 0;
+      private int turnIndicator_ = 1;
       /**
        * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.LightData.TurnIndicatorState turn_indicator = 2;</code>
        * @return Whether the turnIndicator field is set.
@@ -15142,7 +15155,7 @@ public final class Sensors {
        */
       @java.lang.Override public com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.LightData.TurnIndicatorState getTurnIndicator() {
         com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.LightData.TurnIndicatorState result = com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.LightData.TurnIndicatorState.forNumber(turnIndicator_);
-        return result == null ? com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.LightData.TurnIndicatorState.INDICATOR_0 : result;
+        return result == null ? com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.LightData.TurnIndicatorState.TURN_INDICATOR_NONE : result;
       }
 
       public static final int HAZARD_LIGHT_ON_FIELD_NUMBER = 3;
@@ -15391,8 +15404,8 @@ public final class Sensors {
         public Builder clear() {
           super.clear();
           bitField0_ = 0;
-          headlight_ = 0;
-          turnIndicator_ = 0;
+          headlight_ = 1;
+          turnIndicator_ = 1;
           hazardLightOn_ = false;
           return this;
         }
@@ -15524,8 +15537,8 @@ public final class Sensors {
                   break;
                 case 8: {
                   int tmpRaw = input.readEnum();
-                  com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.LightData.HeadlightState tmpValue =
-                      com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.LightData.HeadlightState.forNumber(tmpRaw);
+                  com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.LightData.HeadLightState tmpValue =
+                      com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.LightData.HeadLightState.forNumber(tmpRaw);
                   if (tmpValue == null) {
                     mergeUnknownVarintField(1, tmpRaw);
                   } else {
@@ -15568,29 +15581,29 @@ public final class Sensors {
         }
         private int bitField0_;
 
-        private int headlight_ = 0;
+        private int headlight_ = 1;
         /**
-         * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.LightData.HeadlightState headlight = 1;</code>
+         * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.LightData.HeadLightState headlight = 1;</code>
          * @return Whether the headlight field is set.
          */
         @java.lang.Override public boolean hasHeadlight() {
           return ((bitField0_ & 0x00000001) != 0);
         }
         /**
-         * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.LightData.HeadlightState headlight = 1;</code>
+         * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.LightData.HeadLightState headlight = 1;</code>
          * @return The headlight.
          */
         @java.lang.Override
-        public com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.LightData.HeadlightState getHeadlight() {
-          com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.LightData.HeadlightState result = com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.LightData.HeadlightState.forNumber(headlight_);
-          return result == null ? com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.LightData.HeadlightState.HEADLIGHT_0 : result;
+        public com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.LightData.HeadLightState getHeadlight() {
+          com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.LightData.HeadLightState result = com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.LightData.HeadLightState.forNumber(headlight_);
+          return result == null ? com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.LightData.HeadLightState.HEAD_LIGHT_STATE_OFF : result;
         }
         /**
-         * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.LightData.HeadlightState headlight = 1;</code>
+         * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.LightData.HeadLightState headlight = 1;</code>
          * @param value The headlight to set.
          * @return This builder for chaining.
          */
-        public Builder setHeadlight(com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.LightData.HeadlightState value) {
+        public Builder setHeadlight(com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.LightData.HeadLightState value) {
           if (value == null) {
             throw new NullPointerException();
           }
@@ -15600,17 +15613,17 @@ public final class Sensors {
           return this;
         }
         /**
-         * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.LightData.HeadlightState headlight = 1;</code>
+         * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.LightData.HeadLightState headlight = 1;</code>
          * @return This builder for chaining.
          */
         public Builder clearHeadlight() {
           bitField0_ = (bitField0_ & ~0x00000001);
-          headlight_ = 0;
+          headlight_ = 1;
           onChanged();
           return this;
         }
 
-        private int turnIndicator_ = 0;
+        private int turnIndicator_ = 1;
         /**
          * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.LightData.TurnIndicatorState turn_indicator = 2;</code>
          * @return Whether the turnIndicator field is set.
@@ -15625,7 +15638,7 @@ public final class Sensors {
         @java.lang.Override
         public com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.LightData.TurnIndicatorState getTurnIndicator() {
           com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.LightData.TurnIndicatorState result = com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.LightData.TurnIndicatorState.forNumber(turnIndicator_);
-          return result == null ? com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.LightData.TurnIndicatorState.INDICATOR_0 : result;
+          return result == null ? com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.LightData.TurnIndicatorState.TURN_INDICATOR_NONE : result;
         }
         /**
          * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.LightData.TurnIndicatorState turn_indicator = 2;</code>
@@ -15647,7 +15660,7 @@ public final class Sensors {
          */
         public Builder clearTurnIndicator() {
           bitField0_ = (bitField0_ & ~0x00000002);
-          turnIndicator_ = 0;
+          turnIndicator_ = 1;
           onChanged();
           return this;
         }
@@ -15750,6 +15763,591 @@ public final class Sensors {
 
       @java.lang.Override
       public com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.LightData getDefaultInstanceForType() {
+        return DEFAULT_INSTANCE;
+      }
+
+    }
+
+    public interface TirePressureDataOrBuilder extends
+        // @@protoc_insertion_point(interface_extends:com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.TirePressureData)
+        com.google.protobuf.MessageOrBuilder {
+
+      /**
+       * <code>repeated int32 tire_pressures_e2 = 1;</code>
+       * @return A list containing the tirePressuresE2.
+       */
+      java.util.List<java.lang.Integer> getTirePressuresE2List();
+      /**
+       * <code>repeated int32 tire_pressures_e2 = 1;</code>
+       * @return The count of tirePressuresE2.
+       */
+      int getTirePressuresE2Count();
+      /**
+       * <code>repeated int32 tire_pressures_e2 = 1;</code>
+       * @param index The index of the element to return.
+       * @return The tirePressuresE2 at the given index.
+       */
+      int getTirePressuresE2(int index);
+    }
+    /**
+     * Protobuf type {@code com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.TirePressureData}
+     */
+    public static final class TirePressureData extends
+        com.google.protobuf.GeneratedMessageV3 implements
+        // @@protoc_insertion_point(message_implements:com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.TirePressureData)
+        TirePressureDataOrBuilder {
+    private static final long serialVersionUID = 0L;
+      // Use TirePressureData.newBuilder() to construct.
+      private TirePressureData(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+        super(builder);
+      }
+      private TirePressureData() {
+        tirePressuresE2_ = emptyIntList();
+      }
+
+      @java.lang.Override
+      @SuppressWarnings({"unused"})
+      protected java.lang.Object newInstance(
+          UnusedPrivateParameter unused) {
+        return new TirePressureData();
+      }
+
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.andrerinas.openheadunit.aap.protocol.proto.Sensors.internal_static_com_andrerinas_openheadunit_aap_protocol_proto_SensorBatch_TirePressureData_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.andrerinas.openheadunit.aap.protocol.proto.Sensors.internal_static_com_andrerinas_openheadunit_aap_protocol_proto_SensorBatch_TirePressureData_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData.class, com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData.Builder.class);
+      }
+
+      public static final int TIRE_PRESSURES_E2_FIELD_NUMBER = 1;
+      @SuppressWarnings("serial")
+      private com.google.protobuf.Internal.IntList tirePressuresE2_ =
+          emptyIntList();
+      /**
+       * <code>repeated int32 tire_pressures_e2 = 1;</code>
+       * @return A list containing the tirePressuresE2.
+       */
+      @java.lang.Override
+      public java.util.List<java.lang.Integer>
+          getTirePressuresE2List() {
+        return tirePressuresE2_;
+      }
+      /**
+       * <code>repeated int32 tire_pressures_e2 = 1;</code>
+       * @return The count of tirePressuresE2.
+       */
+      public int getTirePressuresE2Count() {
+        return tirePressuresE2_.size();
+      }
+      /**
+       * <code>repeated int32 tire_pressures_e2 = 1;</code>
+       * @param index The index of the element to return.
+       * @return The tirePressuresE2 at the given index.
+       */
+      public int getTirePressuresE2(int index) {
+        return tirePressuresE2_.getInt(index);
+      }
+
+      private byte memoizedIsInitialized = -1;
+      @java.lang.Override
+      public final boolean isInitialized() {
+        byte isInitialized = memoizedIsInitialized;
+        if (isInitialized == 1) return true;
+        if (isInitialized == 0) return false;
+
+        memoizedIsInitialized = 1;
+        return true;
+      }
+
+      @java.lang.Override
+      public void writeTo(com.google.protobuf.CodedOutputStream output)
+                          throws java.io.IOException {
+        for (int i = 0; i < tirePressuresE2_.size(); i++) {
+          output.writeInt32(1, tirePressuresE2_.getInt(i));
+        }
+        getUnknownFields().writeTo(output);
+      }
+
+      @java.lang.Override
+      public int getSerializedSize() {
+        int size = memoizedSize;
+        if (size != -1) return size;
+
+        size = 0;
+        {
+          int dataSize = 0;
+          for (int i = 0; i < tirePressuresE2_.size(); i++) {
+            dataSize += com.google.protobuf.CodedOutputStream
+              .computeInt32SizeNoTag(tirePressuresE2_.getInt(i));
+          }
+          size += dataSize;
+          size += 1 * getTirePressuresE2List().size();
+        }
+        size += getUnknownFields().getSerializedSize();
+        memoizedSize = size;
+        return size;
+      }
+
+      @java.lang.Override
+      public boolean equals(final java.lang.Object obj) {
+        if (obj == this) {
+         return true;
+        }
+        if (!(obj instanceof com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData)) {
+          return super.equals(obj);
+        }
+        com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData other = (com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData) obj;
+
+        if (!getTirePressuresE2List()
+            .equals(other.getTirePressuresE2List())) return false;
+        if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+        return true;
+      }
+
+      @java.lang.Override
+      public int hashCode() {
+        if (memoizedHashCode != 0) {
+          return memoizedHashCode;
+        }
+        int hash = 41;
+        hash = (19 * hash) + getDescriptor().hashCode();
+        if (getTirePressuresE2Count() > 0) {
+          hash = (37 * hash) + TIRE_PRESSURES_E2_FIELD_NUMBER;
+          hash = (53 * hash) + getTirePressuresE2List().hashCode();
+        }
+        hash = (29 * hash) + getUnknownFields().hashCode();
+        memoizedHashCode = hash;
+        return hash;
+      }
+
+      public static com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData parseFrom(
+          java.nio.ByteBuffer data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData parseFrom(
+          java.nio.ByteBuffer data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData parseFrom(
+          com.google.protobuf.ByteString data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData parseFrom(
+          com.google.protobuf.ByteString data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData parseFrom(byte[] data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData parseFrom(
+          byte[] data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData parseFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input);
+      }
+      public static com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData parseFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input, extensionRegistry);
+      }
+
+      public static com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData parseDelimitedFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseDelimitedWithIOException(PARSER, input);
+      }
+
+      public static com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData parseDelimitedFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+      }
+      public static com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData parseFrom(
+          com.google.protobuf.CodedInputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input);
+      }
+      public static com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData parseFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input, extensionRegistry);
+      }
+
+      @java.lang.Override
+      public Builder newBuilderForType() { return newBuilder(); }
+      public static Builder newBuilder() {
+        return DEFAULT_INSTANCE.toBuilder();
+      }
+      public static Builder newBuilder(com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData prototype) {
+        return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+      }
+      @java.lang.Override
+      public Builder toBuilder() {
+        return this == DEFAULT_INSTANCE
+            ? new Builder() : new Builder().mergeFrom(this);
+      }
+
+      @java.lang.Override
+      protected Builder newBuilderForType(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        Builder builder = new Builder(parent);
+        return builder;
+      }
+      /**
+       * Protobuf type {@code com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.TirePressureData}
+       */
+      public static final class Builder extends
+          com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+          // @@protoc_insertion_point(builder_implements:com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.TirePressureData)
+          com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureDataOrBuilder {
+        public static final com.google.protobuf.Descriptors.Descriptor
+            getDescriptor() {
+          return com.andrerinas.openheadunit.aap.protocol.proto.Sensors.internal_static_com_andrerinas_openheadunit_aap_protocol_proto_SensorBatch_TirePressureData_descriptor;
+        }
+
+        @java.lang.Override
+        protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+            internalGetFieldAccessorTable() {
+          return com.andrerinas.openheadunit.aap.protocol.proto.Sensors.internal_static_com_andrerinas_openheadunit_aap_protocol_proto_SensorBatch_TirePressureData_fieldAccessorTable
+              .ensureFieldAccessorsInitialized(
+                  com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData.class, com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData.Builder.class);
+        }
+
+        // Construct using com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData.newBuilder()
+        private Builder() {
+
+        }
+
+        private Builder(
+            com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+          super(parent);
+
+        }
+        @java.lang.Override
+        public Builder clear() {
+          super.clear();
+          bitField0_ = 0;
+          tirePressuresE2_ = emptyIntList();
+          return this;
+        }
+
+        @java.lang.Override
+        public com.google.protobuf.Descriptors.Descriptor
+            getDescriptorForType() {
+          return com.andrerinas.openheadunit.aap.protocol.proto.Sensors.internal_static_com_andrerinas_openheadunit_aap_protocol_proto_SensorBatch_TirePressureData_descriptor;
+        }
+
+        @java.lang.Override
+        public com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData getDefaultInstanceForType() {
+          return com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData.getDefaultInstance();
+        }
+
+        @java.lang.Override
+        public com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData build() {
+          com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData result = buildPartial();
+          if (!result.isInitialized()) {
+            throw newUninitializedMessageException(result);
+          }
+          return result;
+        }
+
+        @java.lang.Override
+        public com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData buildPartial() {
+          com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData result = new com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData(this);
+          if (bitField0_ != 0) { buildPartial0(result); }
+          onBuilt();
+          return result;
+        }
+
+        private void buildPartial0(com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData result) {
+          int from_bitField0_ = bitField0_;
+          if (((from_bitField0_ & 0x00000001) != 0)) {
+            tirePressuresE2_.makeImmutable();
+            result.tirePressuresE2_ = tirePressuresE2_;
+          }
+        }
+
+        @java.lang.Override
+        public Builder clone() {
+          return super.clone();
+        }
+        @java.lang.Override
+        public Builder setField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            java.lang.Object value) {
+          return super.setField(field, value);
+        }
+        @java.lang.Override
+        public Builder clearField(
+            com.google.protobuf.Descriptors.FieldDescriptor field) {
+          return super.clearField(field);
+        }
+        @java.lang.Override
+        public Builder clearOneof(
+            com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+          return super.clearOneof(oneof);
+        }
+        @java.lang.Override
+        public Builder setRepeatedField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            int index, java.lang.Object value) {
+          return super.setRepeatedField(field, index, value);
+        }
+        @java.lang.Override
+        public Builder addRepeatedField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            java.lang.Object value) {
+          return super.addRepeatedField(field, value);
+        }
+        @java.lang.Override
+        public Builder mergeFrom(com.google.protobuf.Message other) {
+          if (other instanceof com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData) {
+            return mergeFrom((com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData)other);
+          } else {
+            super.mergeFrom(other);
+            return this;
+          }
+        }
+
+        public Builder mergeFrom(com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData other) {
+          if (other == com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData.getDefaultInstance()) return this;
+          if (!other.tirePressuresE2_.isEmpty()) {
+            if (tirePressuresE2_.isEmpty()) {
+              tirePressuresE2_ = other.tirePressuresE2_;
+              tirePressuresE2_.makeImmutable();
+              bitField0_ |= 0x00000001;
+            } else {
+              ensureTirePressuresE2IsMutable();
+              tirePressuresE2_.addAll(other.tirePressuresE2_);
+            }
+            onChanged();
+          }
+          this.mergeUnknownFields(other.getUnknownFields());
+          onChanged();
+          return this;
+        }
+
+        @java.lang.Override
+        public final boolean isInitialized() {
+          return true;
+        }
+
+        @java.lang.Override
+        public Builder mergeFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws java.io.IOException {
+          if (extensionRegistry == null) {
+            throw new java.lang.NullPointerException();
+          }
+          try {
+            boolean done = false;
+            while (!done) {
+              int tag = input.readTag();
+              switch (tag) {
+                case 0:
+                  done = true;
+                  break;
+                case 8: {
+                  int v = input.readInt32();
+                  ensureTirePressuresE2IsMutable();
+                  tirePressuresE2_.addInt(v);
+                  break;
+                } // case 8
+                case 10: {
+                  int length = input.readRawVarint32();
+                  int limit = input.pushLimit(length);
+                  ensureTirePressuresE2IsMutable();
+                  while (input.getBytesUntilLimit() > 0) {
+                    tirePressuresE2_.addInt(input.readInt32());
+                  }
+                  input.popLimit(limit);
+                  break;
+                } // case 10
+                default: {
+                  if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                    done = true; // was an endgroup tag
+                  }
+                  break;
+                } // default:
+              } // switch (tag)
+            } // while (!done)
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            throw e.unwrapIOException();
+          } finally {
+            onChanged();
+          } // finally
+          return this;
+        }
+        private int bitField0_;
+
+        private com.google.protobuf.Internal.IntList tirePressuresE2_ = emptyIntList();
+        private void ensureTirePressuresE2IsMutable() {
+          if (!tirePressuresE2_.isModifiable()) {
+            tirePressuresE2_ = makeMutableCopy(tirePressuresE2_);
+          }
+          bitField0_ |= 0x00000001;
+        }
+        /**
+         * <code>repeated int32 tire_pressures_e2 = 1;</code>
+         * @return A list containing the tirePressuresE2.
+         */
+        public java.util.List<java.lang.Integer>
+            getTirePressuresE2List() {
+          tirePressuresE2_.makeImmutable();
+          return tirePressuresE2_;
+        }
+        /**
+         * <code>repeated int32 tire_pressures_e2 = 1;</code>
+         * @return The count of tirePressuresE2.
+         */
+        public int getTirePressuresE2Count() {
+          return tirePressuresE2_.size();
+        }
+        /**
+         * <code>repeated int32 tire_pressures_e2 = 1;</code>
+         * @param index The index of the element to return.
+         * @return The tirePressuresE2 at the given index.
+         */
+        public int getTirePressuresE2(int index) {
+          return tirePressuresE2_.getInt(index);
+        }
+        /**
+         * <code>repeated int32 tire_pressures_e2 = 1;</code>
+         * @param index The index to set the value at.
+         * @param value The tirePressuresE2 to set.
+         * @return This builder for chaining.
+         */
+        public Builder setTirePressuresE2(
+            int index, int value) {
+
+          ensureTirePressuresE2IsMutable();
+          tirePressuresE2_.setInt(index, value);
+          bitField0_ |= 0x00000001;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>repeated int32 tire_pressures_e2 = 1;</code>
+         * @param value The tirePressuresE2 to add.
+         * @return This builder for chaining.
+         */
+        public Builder addTirePressuresE2(int value) {
+
+          ensureTirePressuresE2IsMutable();
+          tirePressuresE2_.addInt(value);
+          bitField0_ |= 0x00000001;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>repeated int32 tire_pressures_e2 = 1;</code>
+         * @param values The tirePressuresE2 to add.
+         * @return This builder for chaining.
+         */
+        public Builder addAllTirePressuresE2(
+            java.lang.Iterable<? extends java.lang.Integer> values) {
+          ensureTirePressuresE2IsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, tirePressuresE2_);
+          bitField0_ |= 0x00000001;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>repeated int32 tire_pressures_e2 = 1;</code>
+         * @return This builder for chaining.
+         */
+        public Builder clearTirePressuresE2() {
+          tirePressuresE2_ = emptyIntList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+          onChanged();
+          return this;
+        }
+        @java.lang.Override
+        public final Builder setUnknownFields(
+            final com.google.protobuf.UnknownFieldSet unknownFields) {
+          return super.setUnknownFields(unknownFields);
+        }
+
+        @java.lang.Override
+        public final Builder mergeUnknownFields(
+            final com.google.protobuf.UnknownFieldSet unknownFields) {
+          return super.mergeUnknownFields(unknownFields);
+        }
+
+
+        // @@protoc_insertion_point(builder_scope:com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.TirePressureData)
+      }
+
+      // @@protoc_insertion_point(class_scope:com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.TirePressureData)
+      private static final com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData DEFAULT_INSTANCE;
+      static {
+        DEFAULT_INSTANCE = new com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData();
+      }
+
+      public static com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData getDefaultInstance() {
+        return DEFAULT_INSTANCE;
+      }
+
+      @java.lang.Deprecated public static final com.google.protobuf.Parser<TirePressureData>
+          PARSER = new com.google.protobuf.AbstractParser<TirePressureData>() {
+        @java.lang.Override
+        public TirePressureData parsePartialFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+          Builder builder = newBuilder();
+          try {
+            builder.mergeFrom(input, extensionRegistry);
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            throw e.setUnfinishedMessage(builder.buildPartial());
+          } catch (com.google.protobuf.UninitializedMessageException e) {
+            throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+          } catch (java.io.IOException e) {
+            throw new com.google.protobuf.InvalidProtocolBufferException(e)
+                .setUnfinishedMessage(builder.buildPartial());
+          }
+          return builder.buildPartial();
+        }
+      };
+
+      public static com.google.protobuf.Parser<TirePressureData> parser() {
+        return PARSER;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Parser<TirePressureData> getParserForType() {
+        return PARSER;
+      }
+
+      @java.lang.Override
+      public com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData getDefaultInstanceForType() {
         return DEFAULT_INSTANCE;
       }
 
@@ -17299,12 +17897,53 @@ public final class Sensors {
       return lightData_.get(index);
     }
 
+    public static final int TIRE_PRESSURE_DATA_FIELD_NUMBER = 18;
+    @SuppressWarnings("serial")
+    private java.util.List<com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData> tirePressureData_;
+    /**
+     * <code>repeated .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.TirePressureData tire_pressure_data = 18;</code>
+     */
+    @java.lang.Override
+    public java.util.List<com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData> getTirePressureDataList() {
+      return tirePressureData_;
+    }
+    /**
+     * <code>repeated .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.TirePressureData tire_pressure_data = 18;</code>
+     */
+    @java.lang.Override
+    public java.util.List<? extends com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureDataOrBuilder> 
+        getTirePressureDataOrBuilderList() {
+      return tirePressureData_;
+    }
+    /**
+     * <code>repeated .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.TirePressureData tire_pressure_data = 18;</code>
+     */
+    @java.lang.Override
+    public int getTirePressureDataCount() {
+      return tirePressureData_.size();
+    }
+    /**
+     * <code>repeated .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.TirePressureData tire_pressure_data = 18;</code>
+     */
+    @java.lang.Override
+    public com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData getTirePressureData(int index) {
+      return tirePressureData_.get(index);
+    }
+    /**
+     * <code>repeated .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.TirePressureData tire_pressure_data = 18;</code>
+     */
+    @java.lang.Override
+    public com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureDataOrBuilder getTirePressureDataOrBuilder(
+        int index) {
+      return tirePressureData_.get(index);
+    }
+
     public static final int ACCEL_DATA_FIELD_NUMBER = 19;
     @SuppressWarnings("serial")
     private java.util.List<com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.AccelerometerData> accelData_;
     /**
      * <pre>
-     *repeated TirePressureData Tire = 18;
+     *Sensor not yet supported
      * </pre>
      *
      * <code>repeated .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.AccelerometerData accel_data = 19;</code>
@@ -17315,7 +17954,7 @@ public final class Sensors {
     }
     /**
      * <pre>
-     *repeated TirePressureData Tire = 18;
+     *Sensor not yet supported
      * </pre>
      *
      * <code>repeated .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.AccelerometerData accel_data = 19;</code>
@@ -17327,7 +17966,7 @@ public final class Sensors {
     }
     /**
      * <pre>
-     *repeated TirePressureData Tire = 18;
+     *Sensor not yet supported
      * </pre>
      *
      * <code>repeated .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.AccelerometerData accel_data = 19;</code>
@@ -17338,7 +17977,7 @@ public final class Sensors {
     }
     /**
      * <pre>
-     *repeated TirePressureData Tire = 18;
+     *Sensor not yet supported
      * </pre>
      *
      * <code>repeated .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.AccelerometerData accel_data = 19;</code>
@@ -17349,7 +17988,7 @@ public final class Sensors {
     }
     /**
      * <pre>
-     *repeated TirePressureData Tire = 18;
+     *Sensor not yet supported
      * </pre>
      *
      * <code>repeated .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.AccelerometerData accel_data = 19;</code>
@@ -17493,6 +18132,12 @@ public final class Sensors {
           return false;
         }
       }
+      for (int i = 0; i < getOdometerDataCount(); i++) {
+        if (!getOdometerData(i).isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
       for (int i = 0; i < getFuelDataCount(); i++) {
         if (!getFuelData(i).isInitialized()) {
           memoizedIsInitialized = 0;
@@ -17593,6 +18238,9 @@ public final class Sensors {
       for (int i = 0; i < lightData_.size(); i++) {
         output.writeMessage(17, lightData_.get(i));
       }
+      for (int i = 0; i < tirePressureData_.size(); i++) {
+        output.writeMessage(18, tirePressureData_.get(i));
+      }
       for (int i = 0; i < accelData_.size(); i++) {
         output.writeMessage(19, accelData_.get(i));
       }
@@ -17679,6 +18327,10 @@ public final class Sensors {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(17, lightData_.get(i));
       }
+      for (int i = 0; i < tirePressureData_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(18, tirePressureData_.get(i));
+      }
       for (int i = 0; i < accelData_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(19, accelData_.get(i));
@@ -17740,6 +18392,8 @@ public final class Sensors {
           .equals(other.getDoorDataList())) return false;
       if (!getLightDataList()
           .equals(other.getLightDataList())) return false;
+      if (!getTirePressureDataList()
+          .equals(other.getTirePressureDataList())) return false;
       if (!getAccelDataList()
           .equals(other.getAccelDataList())) return false;
       if (!getGyroDataList()
@@ -17824,6 +18478,10 @@ public final class Sensors {
       if (getLightDataCount() > 0) {
         hash = (37 * hash) + LIGHT_DATA_FIELD_NUMBER;
         hash = (53 * hash) + getLightDataList().hashCode();
+      }
+      if (getTirePressureDataCount() > 0) {
+        hash = (37 * hash) + TIRE_PRESSURE_DATA_FIELD_NUMBER;
+        hash = (53 * hash) + getTirePressureDataList().hashCode();
       }
       if (getAccelDataCount() > 0) {
         hash = (37 * hash) + ACCEL_DATA_FIELD_NUMBER;
@@ -18087,27 +18745,34 @@ public final class Sensors {
           lightDataBuilder_.clear();
         }
         bitField0_ = (bitField0_ & ~0x00010000);
+        if (tirePressureDataBuilder_ == null) {
+          tirePressureData_ = java.util.Collections.emptyList();
+        } else {
+          tirePressureData_ = null;
+          tirePressureDataBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00020000);
         if (accelDataBuilder_ == null) {
           accelData_ = java.util.Collections.emptyList();
         } else {
           accelData_ = null;
           accelDataBuilder_.clear();
         }
-        bitField0_ = (bitField0_ & ~0x00020000);
+        bitField0_ = (bitField0_ & ~0x00040000);
         if (gyroDataBuilder_ == null) {
           gyroData_ = java.util.Collections.emptyList();
         } else {
           gyroData_ = null;
           gyroDataBuilder_.clear();
         }
-        bitField0_ = (bitField0_ & ~0x00040000);
+        bitField0_ = (bitField0_ & ~0x00080000);
         if (gpsSatelliteDataBuilder_ == null) {
           gpsSatelliteData_ = java.util.Collections.emptyList();
         } else {
           gpsSatelliteData_ = null;
           gpsSatelliteDataBuilder_.clear();
         }
-        bitField0_ = (bitField0_ & ~0x00080000);
+        bitField0_ = (bitField0_ & ~0x00100000);
         return this;
       }
 
@@ -18294,28 +18959,37 @@ public final class Sensors {
         } else {
           result.lightData_ = lightDataBuilder_.build();
         }
-        if (accelDataBuilder_ == null) {
+        if (tirePressureDataBuilder_ == null) {
           if (((bitField0_ & 0x00020000) != 0)) {
-            accelData_ = java.util.Collections.unmodifiableList(accelData_);
+            tirePressureData_ = java.util.Collections.unmodifiableList(tirePressureData_);
             bitField0_ = (bitField0_ & ~0x00020000);
+          }
+          result.tirePressureData_ = tirePressureData_;
+        } else {
+          result.tirePressureData_ = tirePressureDataBuilder_.build();
+        }
+        if (accelDataBuilder_ == null) {
+          if (((bitField0_ & 0x00040000) != 0)) {
+            accelData_ = java.util.Collections.unmodifiableList(accelData_);
+            bitField0_ = (bitField0_ & ~0x00040000);
           }
           result.accelData_ = accelData_;
         } else {
           result.accelData_ = accelDataBuilder_.build();
         }
         if (gyroDataBuilder_ == null) {
-          if (((bitField0_ & 0x00040000) != 0)) {
+          if (((bitField0_ & 0x00080000) != 0)) {
             gyroData_ = java.util.Collections.unmodifiableList(gyroData_);
-            bitField0_ = (bitField0_ & ~0x00040000);
+            bitField0_ = (bitField0_ & ~0x00080000);
           }
           result.gyroData_ = gyroData_;
         } else {
           result.gyroData_ = gyroDataBuilder_.build();
         }
         if (gpsSatelliteDataBuilder_ == null) {
-          if (((bitField0_ & 0x00080000) != 0)) {
+          if (((bitField0_ & 0x00100000) != 0)) {
             gpsSatelliteData_ = java.util.Collections.unmodifiableList(gpsSatelliteData_);
-            bitField0_ = (bitField0_ & ~0x00080000);
+            bitField0_ = (bitField0_ & ~0x00100000);
           }
           result.gpsSatelliteData_ = gpsSatelliteData_;
         } else {
@@ -18813,11 +19487,37 @@ public final class Sensors {
             }
           }
         }
+        if (tirePressureDataBuilder_ == null) {
+          if (!other.tirePressureData_.isEmpty()) {
+            if (tirePressureData_.isEmpty()) {
+              tirePressureData_ = other.tirePressureData_;
+              bitField0_ = (bitField0_ & ~0x00020000);
+            } else {
+              ensureTirePressureDataIsMutable();
+              tirePressureData_.addAll(other.tirePressureData_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.tirePressureData_.isEmpty()) {
+            if (tirePressureDataBuilder_.isEmpty()) {
+              tirePressureDataBuilder_.dispose();
+              tirePressureDataBuilder_ = null;
+              tirePressureData_ = other.tirePressureData_;
+              bitField0_ = (bitField0_ & ~0x00020000);
+              tirePressureDataBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getTirePressureDataFieldBuilder() : null;
+            } else {
+              tirePressureDataBuilder_.addAllMessages(other.tirePressureData_);
+            }
+          }
+        }
         if (accelDataBuilder_ == null) {
           if (!other.accelData_.isEmpty()) {
             if (accelData_.isEmpty()) {
               accelData_ = other.accelData_;
-              bitField0_ = (bitField0_ & ~0x00020000);
+              bitField0_ = (bitField0_ & ~0x00040000);
             } else {
               ensureAccelDataIsMutable();
               accelData_.addAll(other.accelData_);
@@ -18830,7 +19530,7 @@ public final class Sensors {
               accelDataBuilder_.dispose();
               accelDataBuilder_ = null;
               accelData_ = other.accelData_;
-              bitField0_ = (bitField0_ & ~0x00020000);
+              bitField0_ = (bitField0_ & ~0x00040000);
               accelDataBuilder_ = 
                 com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getAccelDataFieldBuilder() : null;
@@ -18843,7 +19543,7 @@ public final class Sensors {
           if (!other.gyroData_.isEmpty()) {
             if (gyroData_.isEmpty()) {
               gyroData_ = other.gyroData_;
-              bitField0_ = (bitField0_ & ~0x00040000);
+              bitField0_ = (bitField0_ & ~0x00080000);
             } else {
               ensureGyroDataIsMutable();
               gyroData_.addAll(other.gyroData_);
@@ -18856,7 +19556,7 @@ public final class Sensors {
               gyroDataBuilder_.dispose();
               gyroDataBuilder_ = null;
               gyroData_ = other.gyroData_;
-              bitField0_ = (bitField0_ & ~0x00040000);
+              bitField0_ = (bitField0_ & ~0x00080000);
               gyroDataBuilder_ = 
                 com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getGyroDataFieldBuilder() : null;
@@ -18869,7 +19569,7 @@ public final class Sensors {
           if (!other.gpsSatelliteData_.isEmpty()) {
             if (gpsSatelliteData_.isEmpty()) {
               gpsSatelliteData_ = other.gpsSatelliteData_;
-              bitField0_ = (bitField0_ & ~0x00080000);
+              bitField0_ = (bitField0_ & ~0x00100000);
             } else {
               ensureGpsSatelliteDataIsMutable();
               gpsSatelliteData_.addAll(other.gpsSatelliteData_);
@@ -18882,7 +19582,7 @@ public final class Sensors {
               gpsSatelliteDataBuilder_.dispose();
               gpsSatelliteDataBuilder_ = null;
               gpsSatelliteData_ = other.gpsSatelliteData_;
-              bitField0_ = (bitField0_ & ~0x00080000);
+              bitField0_ = (bitField0_ & ~0x00100000);
               gpsSatelliteDataBuilder_ = 
                 com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getGpsSatelliteDataFieldBuilder() : null;
@@ -18915,6 +19615,11 @@ public final class Sensors {
         }
         for (int i = 0; i < getRpmCount(); i++) {
           if (!getRpm(i).isInitialized()) {
+            return false;
+          }
+        }
+        for (int i = 0; i < getOdometerDataCount(); i++) {
+          if (!getOdometerData(i).isInitialized()) {
             return false;
           }
         }
@@ -19193,6 +19898,19 @@ public final class Sensors {
                 }
                 break;
               } // case 138
+              case 146: {
+                com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData m =
+                    input.readMessage(
+                        com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData.PARSER,
+                        extensionRegistry);
+                if (tirePressureDataBuilder_ == null) {
+                  ensureTirePressureDataIsMutable();
+                  tirePressureData_.add(m);
+                } else {
+                  tirePressureDataBuilder_.addMessage(m);
+                }
+                break;
+              } // case 146
               case 154: {
                 com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.AccelerometerData m =
                     input.readMessage(
@@ -24553,12 +25271,252 @@ public final class Sensors {
         return lightDataBuilder_;
       }
 
+      private java.util.List<com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData> tirePressureData_ =
+        java.util.Collections.emptyList();
+      private void ensureTirePressureDataIsMutable() {
+        if (!((bitField0_ & 0x00020000) != 0)) {
+          tirePressureData_ = new java.util.ArrayList<com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData>(tirePressureData_);
+          bitField0_ |= 0x00020000;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData, com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData.Builder, com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureDataOrBuilder> tirePressureDataBuilder_;
+
+      /**
+       * <code>repeated .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.TirePressureData tire_pressure_data = 18;</code>
+       */
+      public java.util.List<com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData> getTirePressureDataList() {
+        if (tirePressureDataBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(tirePressureData_);
+        } else {
+          return tirePressureDataBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.TirePressureData tire_pressure_data = 18;</code>
+       */
+      public int getTirePressureDataCount() {
+        if (tirePressureDataBuilder_ == null) {
+          return tirePressureData_.size();
+        } else {
+          return tirePressureDataBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.TirePressureData tire_pressure_data = 18;</code>
+       */
+      public com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData getTirePressureData(int index) {
+        if (tirePressureDataBuilder_ == null) {
+          return tirePressureData_.get(index);
+        } else {
+          return tirePressureDataBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.TirePressureData tire_pressure_data = 18;</code>
+       */
+      public Builder setTirePressureData(
+          int index, com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData value) {
+        if (tirePressureDataBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureTirePressureDataIsMutable();
+          tirePressureData_.set(index, value);
+          onChanged();
+        } else {
+          tirePressureDataBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.TirePressureData tire_pressure_data = 18;</code>
+       */
+      public Builder setTirePressureData(
+          int index, com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData.Builder builderForValue) {
+        if (tirePressureDataBuilder_ == null) {
+          ensureTirePressureDataIsMutable();
+          tirePressureData_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          tirePressureDataBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.TirePressureData tire_pressure_data = 18;</code>
+       */
+      public Builder addTirePressureData(com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData value) {
+        if (tirePressureDataBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureTirePressureDataIsMutable();
+          tirePressureData_.add(value);
+          onChanged();
+        } else {
+          tirePressureDataBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.TirePressureData tire_pressure_data = 18;</code>
+       */
+      public Builder addTirePressureData(
+          int index, com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData value) {
+        if (tirePressureDataBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureTirePressureDataIsMutable();
+          tirePressureData_.add(index, value);
+          onChanged();
+        } else {
+          tirePressureDataBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.TirePressureData tire_pressure_data = 18;</code>
+       */
+      public Builder addTirePressureData(
+          com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData.Builder builderForValue) {
+        if (tirePressureDataBuilder_ == null) {
+          ensureTirePressureDataIsMutable();
+          tirePressureData_.add(builderForValue.build());
+          onChanged();
+        } else {
+          tirePressureDataBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.TirePressureData tire_pressure_data = 18;</code>
+       */
+      public Builder addTirePressureData(
+          int index, com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData.Builder builderForValue) {
+        if (tirePressureDataBuilder_ == null) {
+          ensureTirePressureDataIsMutable();
+          tirePressureData_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          tirePressureDataBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.TirePressureData tire_pressure_data = 18;</code>
+       */
+      public Builder addAllTirePressureData(
+          java.lang.Iterable<? extends com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData> values) {
+        if (tirePressureDataBuilder_ == null) {
+          ensureTirePressureDataIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, tirePressureData_);
+          onChanged();
+        } else {
+          tirePressureDataBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.TirePressureData tire_pressure_data = 18;</code>
+       */
+      public Builder clearTirePressureData() {
+        if (tirePressureDataBuilder_ == null) {
+          tirePressureData_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00020000);
+          onChanged();
+        } else {
+          tirePressureDataBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.TirePressureData tire_pressure_data = 18;</code>
+       */
+      public Builder removeTirePressureData(int index) {
+        if (tirePressureDataBuilder_ == null) {
+          ensureTirePressureDataIsMutable();
+          tirePressureData_.remove(index);
+          onChanged();
+        } else {
+          tirePressureDataBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.TirePressureData tire_pressure_data = 18;</code>
+       */
+      public com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData.Builder getTirePressureDataBuilder(
+          int index) {
+        return getTirePressureDataFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.TirePressureData tire_pressure_data = 18;</code>
+       */
+      public com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureDataOrBuilder getTirePressureDataOrBuilder(
+          int index) {
+        if (tirePressureDataBuilder_ == null) {
+          return tirePressureData_.get(index);  } else {
+          return tirePressureDataBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.TirePressureData tire_pressure_data = 18;</code>
+       */
+      public java.util.List<? extends com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureDataOrBuilder> 
+           getTirePressureDataOrBuilderList() {
+        if (tirePressureDataBuilder_ != null) {
+          return tirePressureDataBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(tirePressureData_);
+        }
+      }
+      /**
+       * <code>repeated .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.TirePressureData tire_pressure_data = 18;</code>
+       */
+      public com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData.Builder addTirePressureDataBuilder() {
+        return getTirePressureDataFieldBuilder().addBuilder(
+            com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.TirePressureData tire_pressure_data = 18;</code>
+       */
+      public com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData.Builder addTirePressureDataBuilder(
+          int index) {
+        return getTirePressureDataFieldBuilder().addBuilder(
+            index, com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.TirePressureData tire_pressure_data = 18;</code>
+       */
+      public java.util.List<com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData.Builder> 
+           getTirePressureDataBuilderList() {
+        return getTirePressureDataFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData, com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData.Builder, com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureDataOrBuilder> 
+          getTirePressureDataFieldBuilder() {
+        if (tirePressureDataBuilder_ == null) {
+          tirePressureDataBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData, com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureData.Builder, com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.TirePressureDataOrBuilder>(
+                  tirePressureData_,
+                  ((bitField0_ & 0x00020000) != 0),
+                  getParentForChildren(),
+                  isClean());
+          tirePressureData_ = null;
+        }
+        return tirePressureDataBuilder_;
+      }
+
       private java.util.List<com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.AccelerometerData> accelData_ =
         java.util.Collections.emptyList();
       private void ensureAccelDataIsMutable() {
-        if (!((bitField0_ & 0x00020000) != 0)) {
+        if (!((bitField0_ & 0x00040000) != 0)) {
           accelData_ = new java.util.ArrayList<com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.AccelerometerData>(accelData_);
-          bitField0_ |= 0x00020000;
+          bitField0_ |= 0x00040000;
          }
       }
 
@@ -24567,7 +25525,7 @@ public final class Sensors {
 
       /**
        * <pre>
-       *repeated TirePressureData Tire = 18;
+       *Sensor not yet supported
        * </pre>
        *
        * <code>repeated .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.AccelerometerData accel_data = 19;</code>
@@ -24581,7 +25539,7 @@ public final class Sensors {
       }
       /**
        * <pre>
-       *repeated TirePressureData Tire = 18;
+       *Sensor not yet supported
        * </pre>
        *
        * <code>repeated .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.AccelerometerData accel_data = 19;</code>
@@ -24595,7 +25553,7 @@ public final class Sensors {
       }
       /**
        * <pre>
-       *repeated TirePressureData Tire = 18;
+       *Sensor not yet supported
        * </pre>
        *
        * <code>repeated .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.AccelerometerData accel_data = 19;</code>
@@ -24609,7 +25567,7 @@ public final class Sensors {
       }
       /**
        * <pre>
-       *repeated TirePressureData Tire = 18;
+       *Sensor not yet supported
        * </pre>
        *
        * <code>repeated .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.AccelerometerData accel_data = 19;</code>
@@ -24630,7 +25588,7 @@ public final class Sensors {
       }
       /**
        * <pre>
-       *repeated TirePressureData Tire = 18;
+       *Sensor not yet supported
        * </pre>
        *
        * <code>repeated .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.AccelerometerData accel_data = 19;</code>
@@ -24648,7 +25606,7 @@ public final class Sensors {
       }
       /**
        * <pre>
-       *repeated TirePressureData Tire = 18;
+       *Sensor not yet supported
        * </pre>
        *
        * <code>repeated .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.AccelerometerData accel_data = 19;</code>
@@ -24668,7 +25626,7 @@ public final class Sensors {
       }
       /**
        * <pre>
-       *repeated TirePressureData Tire = 18;
+       *Sensor not yet supported
        * </pre>
        *
        * <code>repeated .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.AccelerometerData accel_data = 19;</code>
@@ -24689,7 +25647,7 @@ public final class Sensors {
       }
       /**
        * <pre>
-       *repeated TirePressureData Tire = 18;
+       *Sensor not yet supported
        * </pre>
        *
        * <code>repeated .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.AccelerometerData accel_data = 19;</code>
@@ -24707,7 +25665,7 @@ public final class Sensors {
       }
       /**
        * <pre>
-       *repeated TirePressureData Tire = 18;
+       *Sensor not yet supported
        * </pre>
        *
        * <code>repeated .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.AccelerometerData accel_data = 19;</code>
@@ -24725,7 +25683,7 @@ public final class Sensors {
       }
       /**
        * <pre>
-       *repeated TirePressureData Tire = 18;
+       *Sensor not yet supported
        * </pre>
        *
        * <code>repeated .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.AccelerometerData accel_data = 19;</code>
@@ -24744,7 +25702,7 @@ public final class Sensors {
       }
       /**
        * <pre>
-       *repeated TirePressureData Tire = 18;
+       *Sensor not yet supported
        * </pre>
        *
        * <code>repeated .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.AccelerometerData accel_data = 19;</code>
@@ -24752,7 +25710,7 @@ public final class Sensors {
       public Builder clearAccelData() {
         if (accelDataBuilder_ == null) {
           accelData_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00020000);
+          bitField0_ = (bitField0_ & ~0x00040000);
           onChanged();
         } else {
           accelDataBuilder_.clear();
@@ -24761,7 +25719,7 @@ public final class Sensors {
       }
       /**
        * <pre>
-       *repeated TirePressureData Tire = 18;
+       *Sensor not yet supported
        * </pre>
        *
        * <code>repeated .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.AccelerometerData accel_data = 19;</code>
@@ -24778,7 +25736,7 @@ public final class Sensors {
       }
       /**
        * <pre>
-       *repeated TirePressureData Tire = 18;
+       *Sensor not yet supported
        * </pre>
        *
        * <code>repeated .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.AccelerometerData accel_data = 19;</code>
@@ -24789,7 +25747,7 @@ public final class Sensors {
       }
       /**
        * <pre>
-       *repeated TirePressureData Tire = 18;
+       *Sensor not yet supported
        * </pre>
        *
        * <code>repeated .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.AccelerometerData accel_data = 19;</code>
@@ -24803,7 +25761,7 @@ public final class Sensors {
       }
       /**
        * <pre>
-       *repeated TirePressureData Tire = 18;
+       *Sensor not yet supported
        * </pre>
        *
        * <code>repeated .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.AccelerometerData accel_data = 19;</code>
@@ -24818,7 +25776,7 @@ public final class Sensors {
       }
       /**
        * <pre>
-       *repeated TirePressureData Tire = 18;
+       *Sensor not yet supported
        * </pre>
        *
        * <code>repeated .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.AccelerometerData accel_data = 19;</code>
@@ -24829,7 +25787,7 @@ public final class Sensors {
       }
       /**
        * <pre>
-       *repeated TirePressureData Tire = 18;
+       *Sensor not yet supported
        * </pre>
        *
        * <code>repeated .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.AccelerometerData accel_data = 19;</code>
@@ -24841,7 +25799,7 @@ public final class Sensors {
       }
       /**
        * <pre>
-       *repeated TirePressureData Tire = 18;
+       *Sensor not yet supported
        * </pre>
        *
        * <code>repeated .com.andrerinas.openheadunit.aap.protocol.proto.SensorBatch.AccelerometerData accel_data = 19;</code>
@@ -24857,7 +25815,7 @@ public final class Sensors {
           accelDataBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
               com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.AccelerometerData, com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.AccelerometerData.Builder, com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.AccelerometerDataOrBuilder>(
                   accelData_,
-                  ((bitField0_ & 0x00020000) != 0),
+                  ((bitField0_ & 0x00040000) != 0),
                   getParentForChildren(),
                   isClean());
           accelData_ = null;
@@ -24868,9 +25826,9 @@ public final class Sensors {
       private java.util.List<com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.GyroscopeData> gyroData_ =
         java.util.Collections.emptyList();
       private void ensureGyroDataIsMutable() {
-        if (!((bitField0_ & 0x00040000) != 0)) {
+        if (!((bitField0_ & 0x00080000) != 0)) {
           gyroData_ = new java.util.ArrayList<com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.GyroscopeData>(gyroData_);
-          bitField0_ |= 0x00040000;
+          bitField0_ |= 0x00080000;
          }
       }
 
@@ -25064,7 +26022,7 @@ public final class Sensors {
       public Builder clearGyroData() {
         if (gyroDataBuilder_ == null) {
           gyroData_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00040000);
+          bitField0_ = (bitField0_ & ~0x00080000);
           onChanged();
         } else {
           gyroDataBuilder_.clear();
@@ -25169,7 +26127,7 @@ public final class Sensors {
           gyroDataBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
               com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.GyroscopeData, com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.GyroscopeData.Builder, com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.GyroscopeDataOrBuilder>(
                   gyroData_,
-                  ((bitField0_ & 0x00040000) != 0),
+                  ((bitField0_ & 0x00080000) != 0),
                   getParentForChildren(),
                   isClean());
           gyroData_ = null;
@@ -25180,9 +26138,9 @@ public final class Sensors {
       private java.util.List<com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.GpsSatelliteData> gpsSatelliteData_ =
         java.util.Collections.emptyList();
       private void ensureGpsSatelliteDataIsMutable() {
-        if (!((bitField0_ & 0x00080000) != 0)) {
+        if (!((bitField0_ & 0x00100000) != 0)) {
           gpsSatelliteData_ = new java.util.ArrayList<com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.GpsSatelliteData>(gpsSatelliteData_);
-          bitField0_ |= 0x00080000;
+          bitField0_ |= 0x00100000;
          }
       }
 
@@ -25332,7 +26290,7 @@ public final class Sensors {
       public Builder clearGpsSatelliteData() {
         if (gpsSatelliteDataBuilder_ == null) {
           gpsSatelliteData_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00080000);
+          bitField0_ = (bitField0_ & ~0x00100000);
           onChanged();
         } else {
           gpsSatelliteDataBuilder_.clear();
@@ -25409,7 +26367,7 @@ public final class Sensors {
           gpsSatelliteDataBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
               com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.GpsSatelliteData, com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.GpsSatelliteData.Builder, com.andrerinas.openheadunit.aap.protocol.proto.Sensors.SensorBatch.GpsSatelliteDataOrBuilder>(
                   gpsSatelliteData_,
-                  ((bitField0_ & 0x00080000) != 0),
+                  ((bitField0_ & 0x00100000) != 0),
                   getParentForChildren(),
                   isClean());
           gpsSatelliteData_ = null;
@@ -26735,6 +27693,11 @@ public final class Sensors {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_com_andrerinas_openheadunit_aap_protocol_proto_SensorBatch_LightData_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_com_andrerinas_openheadunit_aap_protocol_proto_SensorBatch_TirePressureData_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_com_andrerinas_openheadunit_aap_protocol_proto_SensorBatch_TirePressureData_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_SensorBatch_PassengerData_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -26758,129 +27721,133 @@ public final class Sensors {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\012\015sensors.proto\022.com.andrerinas.openhead" +
-      "unit.aap.protocol.proto\032\014common.proto\"\344 " +
-      "\012\013SensorBatch\022_\012\015location_data\030\001 \003(\0132H.c" +
+      "\n\rsensors.proto\022.com.andrerinas.openhead" +
+      "unit.aap.protocol.proto\032\014common.proto\"\217\"" +
+      "\n\013SensorBatch\022_\n\rlocation_data\030\001 \003(\0132H.c" +
       "om.andrerinas.openheadunit.aap.protocol." +
-      "proto.SensorBatch.LocationData\022]\012\014compas" +
+      "proto.SensorBatch.LocationData\022]\n\014compas" +
       "s_data\030\002 \003(\0132G.com.andrerinas.openheadun" +
       "it.aap.protocol.proto.SensorBatch.Compas" +
-      "sData\022Y\012\012speed_data\030\003 \003(\0132E.com.andrerin" +
+      "sData\022Y\n\nspeed_data\030\003 \003(\0132E.com.andrerin" +
       "as.openheadunit.aap.protocol.proto.Senso" +
-      "rBatch.SpeedData\022P\012\003rpm\030\004 \003(\0132C.com.andr" +
+      "rBatch.SpeedData\022P\n\003rpm\030\004 \003(\0132C.com.andr" +
       "erinas.openheadunit.aap.protocol.proto.S" +
-      "ensorBatch.RpmData\022_\012\015odometer_data\030\005 \003(" +
+      "ensorBatch.RpmData\022_\n\rodometer_data\030\005 \003(" +
       "\0132H.com.andrerinas.openheadunit.aap.prot" +
-      "ocol.proto.SensorBatch.OdometerData\022W\012\011f" +
+      "ocol.proto.SensorBatch.OdometerData\022W\n\tf" +
       "uel_data\030\006 \003(\0132D.com.andrerinas.openhead" +
       "unit.aap.protocol.proto.SensorBatch.Fuel" +
-      "Data\022g\012\021parkingbrake_data\030\007 \003(\0132L.com.an" +
+      "Data\022g\n\021parkingbrake_data\030\007 \003(\0132L.com.an" +
       "drerinas.openheadunit.aap.protocol.proto" +
-      ".SensorBatch.ParkingBrakeData\022W\012\011gear_da" +
+      ".SensorBatch.ParkingBrakeData\022W\n\tgear_da" +
       "ta\030\010 \003(\0132D.com.andrerinas.openheadunit.a" +
       "ap.protocol.proto.SensorBatch.GearData\022e" +
-      "\012\020diagnostics_data\030\011 \003(\0132K.com.andrerina" +
+      "\n\020diagnostics_data\030\t \003(\0132K.com.andrerina" +
       "s.openheadunit.aap.protocol.proto.Sensor" +
-      "Batch.DiagnosticsData\022Y\012\012night_mode\030\012 \003(" +
+      "Batch.DiagnosticsData\022Y\n\nnight_mode\030\n \003(" +
       "\0132E.com.andrerinas.openheadunit.aap.prot" +
-      "ocol.proto.SensorBatch.NightData\022d\012\017envi" +
+      "ocol.proto.SensorBatch.NightData\022d\n\017envi" +
       "orment_data\030\013 \003(\0132K.com.andrerinas.openh" +
       "eadunit.aap.protocol.proto.SensorBatch.E" +
-      "nvironmentData\022W\012\011hvac_data\030\014 \003(\0132D.com." +
+      "nvironmentData\022W\n\thvac_data\030\014 \003(\0132D.com." +
       "andrerinas.openheadunit.aap.protocol.pro" +
-      "to.SensorBatch.HvacData\022e\012\016driving_statu" +
-      "s\030\015 \003(\0132M.com.andrerinas.openheadunit.aa" +
+      "to.SensorBatch.HvacData\022e\n\016driving_statu" +
+      "s\030\r \003(\0132M.com.andrerinas.openheadunit.aa" +
       "p.protocol.proto.SensorBatch.DrivingStat" +
-      "usData\022e\012\016dead_reckoning\030\016 \003(\0132M.com.and" +
+      "usData\022e\n\016dead_reckoning\030\016 \003(\0132M.com.and" +
       "rerinas.openheadunit.aap.protocol.proto." +
-      "SensorBatch.DeadReckoningData\022a\012\016passeng" +
+      "SensorBatch.DeadReckoningData\022a\n\016passeng" +
       "er_data\030\017 \003(\0132I.com.andrerinas.openheadu" +
       "nit.aap.protocol.proto.SensorBatch.Passe" +
-      "ngerData\022W\012\011door_data\030\020 \003(\0132D.com.andrer" +
+      "ngerData\022W\n\tdoor_data\030\020 \003(\0132D.com.andrer" +
       "inas.openheadunit.aap.protocol.proto.Sen" +
-      "sorBatch.DoorData\022Y\012\012light_data\030\021 \003(\0132E." +
+      "sorBatch.DoorData\022Y\n\nlight_data\030\021 \003(\0132E." +
       "com.andrerinas.openheadunit.aap.protocol" +
-      ".proto.SensorBatch.LightData\022a\012\012accel_da" +
-      "ta\030\023 \003(\0132M.com.andrerinas.openheadunit.a" +
-      "ap.protocol.proto.SensorBatch.Accelerome" +
-      "terData\022\\\012\011gyro_data\030\024 \003(\0132I.com.andreri" +
-      "nas.openheadunit.aap.protocol.proto.Sens" +
-      "orBatch.GyroscopeData\022h\012\022gps_satellite_d" +
-      "ata\030\025 \003(\0132L.com.andrerinas.openheadunit." +
-      "aap.protocol.proto.SensorBatch.GpsSatell" +
-      "iteData\032\212\001\012\014LocationData\022\021\012\011timestamp\030\001 " +
-      "\002(\004\022\020\012\010latitude\030\002 \002(\005\022\021\012\011longitude\030\003 \002(\005" +
-      "\022\020\012\010accuracy\030\004 \002(\015\022\020\012\010altitude\030\005 \001(\005\022\015\012\005" +
-      "speed\030\006 \001(\005\022\017\012\007bearing\030\007 \001(\005\032\026\012\007RpmData\022" +
-      "\013\012\003rpm\030\001 \002(\005\032=\012\010FuelData\022\021\012\011fuellevel\030\001 " +
-      "\002(\005\022\015\012\005range\030\002 \001(\005\022\017\012\007lowfuel\030\003 \001(\010\032@\012\021D" +
-      "eadReckoningData\022\026\012\016steering_angel\030\001 \001(\005" +
-      "\022\023\012\013wheel_speed\030\002 \001(\005\032\"\012\011NightData\022\025\012\015is" +
-      "_night_mode\030\001 \002(\010\032&\012\020ParkingBrakeData\022\022\012" +
-      "\012is_engaged\030\001 \002(\010\032\265\001\012\021DrivingStatusData\022" +
-      "\016\012\006status\030\001 \002(\005\"\217\001\012\006Status\022\020\012\014UNRESTRICT" +
-      "ED\020\000\022\014\012\010NO_VIDEO\020\001\022\025\012\021NO_KEYBOARD_INPUT\020" +
-      "\002\022\022\012\016NO_VOICE_INPUT\020\004\022\015\012\011NO_CONFIG\020\010\022\025\012\021" +
-      "LIMIT_MESSAGE_LEN\020\020\022\024\012\020FULLY_RESTRICTED\020" +
-      "\037\032\234\002\012\020GpsSatelliteData\022\025\012\015number_in_use\030" +
-      "\001 \001(\005\022\026\012\016number_in_view\030\002 \001(\005\022m\012\012satelli" +
-      "tes\030\003 \003(\0132Y.com.andrerinas.openheadunit." +
-      "aap.protocol.proto.SensorBatch.GpsSatell" +
-      "iteData.GpsSatellite\032j\012\014GpsSatellite\022\013\012\003" +
-      "prn\030\001 \001(\005\022\016\012\006snr_e3\030\002 \001(\005\022\023\012\013used_in_fix" +
-      "\030\003 \001(\010\022\022\012\012azimuth_e3\030\004 \001(\005\022\024\012\014elevation_" +
-      "e3\030\005 \001(\005\032\216\002\012\010GearData\022W\012\004gear\030\001 \002(\0162I.co" +
+      ".proto.SensorBatch.LightData\022h\n\022tire_pre" +
+      "ssure_data\030\022 \003(\0132L.com.andrerinas.openhe" +
+      "adunit.aap.protocol.proto.SensorBatch.Ti" +
+      "rePressureData\022a\n\naccel_data\030\023 \003(\0132M.com" +
+      ".andrerinas.openheadunit.aap.protocol.pr" +
+      "oto.SensorBatch.AccelerometerData\022\\\n\tgyr" +
+      "o_data\030\024 \003(\0132I.com.andrerinas.openheadun" +
+      "it.aap.protocol.proto.SensorBatch.Gyrosc" +
+      "opeData\022h\n\022gps_satellite_data\030\025 \003(\0132L.co" +
       "m.andrerinas.openheadunit.aap.protocol.p" +
-      "roto.SensorBatch.GearData.GEAR\"\250\001\012\004GEAR\022" +
-      "\011\012\005DRIVE\020d\022\012\012\006EIGHTH\020\010\022\011\012\005FIFTH\020\005\022\011\012\005FIR" +
-      "ST\020\001\022\012\012\006FOURTH\020\004\022\013\012\007NEUTRAL\020\000\022\011\012\005NINTH\020\011" +
-      "\022\010\012\004PARK\020e\022\013\012\007REVERSE\020f\022\012\012\006SECOND\020\002\022\013\012\007S" +
-      "EVENTH\020\007\022\011\012\005SIXTH\020\006\022\011\012\005TENTH\020\012\022\011\012\005THIRD\020" +
-      "\003\032D\012\013CompassData\022\022\012\012bearing_e6\030\001 \002(\005\022\020\012\010" +
-      "pitch_e6\030\002 \002(\005\022\017\012\007roll_e6\030\003 \002(\005\032O\012\011Speed" +
-      "Data\022\020\012\010speed_e6\030\001 \002(\005\022\026\012\016cruise_engaged" +
-      "\030\002 \001(\010\022\030\012\020cruise_set_speed\030\003 \001(\010\0323\012\014Odom" +
-      "eterData\022\016\012\006kms_el\030\001 \001(\005\022\023\012\013trip_kms_el\030" +
-      "\002 \001(\005\032+\012\017DiagnosticsData\022\030\012\020diagnostics_" +
-      "byte\030\001 \002(\014\032L\012\017EnvironmentData\022\026\012\016tempera" +
-      "ture_e3\030\001 \001(\005\022\023\012\013pressure_e3\030\002 \001(\005\022\014\012\004ra" +
-      "in\030\003 \001(\005\032I\012\010HvacData\022\035\012\025target_temperatu" +
-      "re_e3\030\001 \001(\005\022\036\012\026current_temperature_e3\030\002 " +
-      "\001(\005\032d\012\021AccelerometerData\022\031\012\021acceleration" +
-      "_x_e3\030\001 \001(\005\022\031\012\021acceleration_y_e3\030\002 \001(\005\022\031" +
-      "\012\021acceleration_z_e3\030\003 \001(\005\032f\012\015GyroscopeDa" +
-      "ta\022\033\012\023rotation_speed_x_e3\030\001 \001(\005\022\033\012\023rotat" +
-      "ion_speed_y_e3\030\002 \001(\005\022\033\012\023rotation_speed_z" +
-      "_e3\030\003 \001(\005\032C\012\010DoorData\022\021\012\011hood_open\030\001 \002(\010" +
-      "\022\021\012\011boot_open\030\002 \002(\010\022\021\012\011door_open\030\003 \003(\010\032\257" +
-      "\003\012\011LightData\022g\012\011headlight\030\001 \001(\0162T.com.an" +
-      "drerinas.openheadunit.aap.protocol.proto" +
-      ".SensorBatch.LightData.HeadlightState\022p\012" +
-      "\016turn_indicator\030\002 \001(\0162X.com.andrerinas.o" +
+      "roto.SensorBatch.GpsSatelliteData\032\212\001\n\014Lo" +
+      "cationData\022\021\n\ttimestamp\030\001 \002(\004\022\020\n\010latitud" +
+      "e\030\002 \002(\005\022\021\n\tlongitude\030\003 \002(\005\022\020\n\010accuracy\030\004" +
+      " \002(\r\022\020\n\010altitude\030\005 \001(\005\022\r\n\005speed\030\006 \001(\005\022\017\n" +
+      "\007bearing\030\007 \001(\005\032\026\n\007RpmData\022\013\n\003rpm\030\001 \002(\005\032=" +
+      "\n\010FuelData\022\021\n\tfuellevel\030\001 \002(\005\022\r\n\005range\030\002" +
+      " \001(\005\022\017\n\007lowfuel\030\003 \001(\010\032@\n\021DeadReckoningDa" +
+      "ta\022\026\n\016steering_angel\030\001 \001(\005\022\023\n\013wheel_spee" +
+      "d\030\002 \001(\005\032\"\n\tNightData\022\025\n\ris_night_mode\030\001 " +
+      "\002(\010\032&\n\020ParkingBrakeData\022\022\n\nis_engaged\030\001 " +
+      "\002(\010\032\265\001\n\021DrivingStatusData\022\016\n\006status\030\001 \002(" +
+      "\005\"\217\001\n\006Status\022\020\n\014UNRESTRICTED\020\000\022\014\n\010NO_VID" +
+      "EO\020\001\022\025\n\021NO_KEYBOARD_INPUT\020\002\022\022\n\016NO_VOICE_" +
+      "INPUT\020\004\022\r\n\tNO_CONFIG\020\010\022\025\n\021LIMIT_MESSAGE_" +
+      "LEN\020\020\022\024\n\020FULLY_RESTRICTED\020\037\032\234\002\n\020GpsSatel" +
+      "liteData\022\025\n\rnumber_in_use\030\001 \001(\005\022\026\n\016numbe" +
+      "r_in_view\030\002 \001(\005\022m\n\nsatellites\030\003 \003(\0132Y.co" +
+      "m.andrerinas.openheadunit.aap.protocol.p" +
+      "roto.SensorBatch.GpsSatelliteData.GpsSat" +
+      "ellite\032j\n\014GpsSatellite\022\013\n\003prn\030\001 \001(\005\022\016\n\006s" +
+      "nr_e3\030\002 \001(\005\022\023\n\013used_in_fix\030\003 \001(\010\022\022\n\nazim" +
+      "uth_e3\030\004 \001(\005\022\024\n\014elevation_e3\030\005 \001(\005\032\216\002\n\010G" +
+      "earData\022W\n\004gear\030\001 \002(\0162I.com.andrerinas.o" +
       "penheadunit.aap.protocol.proto.SensorBat" +
-      "ch.LightData.TurnIndicatorState\022\027\012\017hazar" +
-      "d_light_on\030\003 \001(\010\"T\012\016HeadlightState\022\017\012\013HE" +
-      "ADLIGHT_0\020\000\022\017\012\013HEADLIGHT_1\020\001\022\017\012\013HEADLIGH" +
-      "T_2\020\002\022\017\012\013HEADLIGHT_3\020\003\"X\012\022TurnIndicatorS" +
-      "tate\022\017\012\013INDICATOR_0\020\000\022\017\012\013INDICATOR_1\020\001\022\017" +
-      "\012\013INDICATOR_2\020\002\022\017\012\013INDICATOR_3\020\003\032*\012\015Pass" +
-      "engerData\022\031\012\021passenger_present\030\001 \001(\010\"t\012\015" +
-      "SensorRequest\022H\012\004type\030\001 \002(\0162:.com.andrer" +
-      "inas.openheadunit.aap.protocol.proto.Sen" +
-      "sorType\022\031\012\021min_update_period\030\002 \002(\003\"_\012\016Se" +
-      "nsorResponse\022M\012\006status\030\001 \002(\0162=.com.andre" +
-      "rinas.openheadunit.aap.protocol.proto.Me" +
-      "ssageStatus*[\012\016SensorsMsgType\022\031\012\023SENSOR_" +
-      "STARTREQUEST\020\201\200\002\022\032\012\024SENSOR_STARTRESPONSE" +
-      "\020\202\200\002\022\022\012\014SENSOR_EVENT\020\203\200\002*\244\002\012\012SensorType\022" +
-      "\014\012\010LOCATION\020\001\022\013\012\007COMPASS\020\002\022\015\012\011CAR_SPEED\020" +
-      "\003\022\007\012\003RPM\020\004\022\014\012\010ODOMETER\020\005\022\016\012\012FUEL_LEVEL\020\006" +
-      "\022\021\012\015PARKING_BRAKE\020\007\022\010\012\004GEAR\020\010\022\017\012\013DIAGNOS" +
-      "TICS\020\011\022\011\012\005NIGHT\020\012\022\017\012\013ENVIRONMENT\020\013\022\010\012\004HV" +
-      "AC\020\014\022\022\012\016DRIVING_STATUS\020\015\022\021\012\015DEAD_RECONIN" +
-      "G\020\016\022\015\012\011PASSENGER\020\017\022\010\012\004DOOR\020\020\022\011\012\005LIGHT\020\021\022" +
-      "\010\012\004TIRE\020\022\022\011\012\005ACCEL\020\023\022\010\012\004GYRO\020\024\022\007\012\003GPS\020\025B" +
-      "\011B\007Sensors"
+      "ch.GearData.GEAR\"\250\001\n\004GEAR\022\t\n\005DRIVE\020d\022\n\n\006" +
+      "EIGHTH\020\010\022\t\n\005FIFTH\020\005\022\t\n\005FIRST\020\001\022\n\n\006FOURTH" +
+      "\020\004\022\013\n\007NEUTRAL\020\000\022\t\n\005NINTH\020\t\022\010\n\004PARK\020e\022\013\n\007" +
+      "REVERSE\020f\022\n\n\006SECOND\020\002\022\013\n\007SEVENTH\020\007\022\t\n\005SI" +
+      "XTH\020\006\022\t\n\005TENTH\020\n\022\t\n\005THIRD\020\003\032D\n\013CompassDa" +
+      "ta\022\022\n\nbearing_e6\030\001 \002(\005\022\020\n\010pitch_e6\030\002 \002(\005" +
+      "\022\017\n\007roll_e6\030\003 \002(\005\032O\n\tSpeedData\022\020\n\010speed_" +
+      "e3\030\001 \002(\005\022\026\n\016cruise_engaged\030\002 \001(\010\022\030\n\020crui" +
+      "se_set_speed\030\004 \001(\005\0323\n\014OdometerData\022\016\n\006km" +
+      "s_e1\030\001 \002(\005\022\023\n\013trip_kms_e1\030\002 \001(\005\032+\n\017Diagn" +
+      "osticsData\022\030\n\020diagnostics_byte\030\001 \002(\014\032L\n\017" +
+      "EnvironmentData\022\026\n\016temperature_e3\030\001 \001(\005\022" +
+      "\023\n\013pressure_e3\030\002 \001(\005\022\014\n\004rain\030\003 \001(\005\032I\n\010Hv" +
+      "acData\022\035\n\025target_temperature_e3\030\001 \001(\005\022\036\n" +
+      "\026current_temperature_e3\030\002 \001(\005\032d\n\021Acceler" +
+      "ometerData\022\031\n\021acceleration_x_e3\030\001 \001(\005\022\031\n" +
+      "\021acceleration_y_e3\030\002 \001(\005\022\031\n\021acceleration" +
+      "_z_e3\030\003 \001(\005\032f\n\rGyroscopeData\022\033\n\023rotation" +
+      "_speed_x_e3\030\001 \001(\005\022\033\n\023rotation_speed_y_e3" +
+      "\030\002 \001(\005\022\033\n\023rotation_speed_z_e3\030\003 \001(\005\032C\n\010D" +
+      "oorData\022\021\n\thood_open\030\001 \002(\010\022\021\n\tboot_open\030" +
+      "\002 \002(\010\022\021\n\tdoor_open\030\003 \003(\010\032\301\003\n\tLightData\022g" +
+      "\n\theadlight\030\001 \001(\0162T.com.andrerinas.openh" +
+      "eadunit.aap.protocol.proto.SensorBatch.L" +
+      "ightData.HeadLightState\022p\n\016turn_indicato" +
+      "r\030\002 \001(\0162X.com.andrerinas.openheadunit.aa" +
+      "p.protocol.proto.SensorBatch.LightData.T" +
+      "urnIndicatorState\022\027\n\017hazard_light_on\030\003 \001" +
+      "(\010\"^\n\016HeadLightState\022\030\n\024HEAD_LIGHT_STATE" +
+      "_OFF\020\001\022\027\n\023HEAD_LIGHT_STATE_ON\020\002\022\031\n\025HEAD_" +
+      "LIGHT_STATE_HIGH\020\003\"`\n\022TurnIndicatorState" +
+      "\022\027\n\023TURN_INDICATOR_NONE\020\001\022\027\n\023TURN_INDICA" +
+      "TOR_LEFT\020\002\022\030\n\024TURN_INDICATOR_RIGHT\020\003\032-\n\020" +
+      "TirePressureData\022\031\n\021tire_pressures_e2\030\001 " +
+      "\003(\005\032*\n\rPassengerData\022\031\n\021passenger_presen" +
+      "t\030\001 \001(\010\"t\n\rSensorRequest\022H\n\004type\030\001 \002(\0162:" +
+      ".com.andrerinas.openheadunit.aap.protoco" +
+      "l.proto.SensorType\022\031\n\021min_update_period\030" +
+      "\002 \002(\003\"_\n\016SensorResponse\022M\n\006status\030\001 \002(\0162" +
+      "=.com.andrerinas.openheadunit.aap.protoc" +
+      "ol.proto.MessageStatus*[\n\016SensorsMsgType" +
+      "\022\031\n\023SENSOR_STARTREQUEST\020\201\200\002\022\032\n\024SENSOR_ST" +
+      "ARTRESPONSE\020\202\200\002\022\022\n\014SENSOR_EVENT\020\203\200\002*\244\002\n\n" +
+      "SensorType\022\014\n\010LOCATION\020\001\022\013\n\007COMPASS\020\002\022\r\n" +
+      "\tCAR_SPEED\020\003\022\007\n\003RPM\020\004\022\014\n\010ODOMETER\020\005\022\016\n\nF" +
+      "UEL_LEVEL\020\006\022\021\n\rPARKING_BRAKE\020\007\022\010\n\004GEAR\020\010" +
+      "\022\017\n\013DIAGNOSTICS\020\t\022\t\n\005NIGHT\020\n\022\017\n\013ENVIRONM" +
+      "ENT\020\013\022\010\n\004HVAC\020\014\022\022\n\016DRIVING_STATUS\020\r\022\021\n\rD" +
+      "EAD_RECONING\020\016\022\r\n\tPASSENGER\020\017\022\010\n\004DOOR\020\020\022" +
+      "\t\n\005LIGHT\020\021\022\010\n\004TIRE\020\022\022\t\n\005ACCEL\020\023\022\010\n\004GYRO\020" +
+      "\024\022\007\n\003GPS\020\025B\tB\007Sensors"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -26892,7 +27859,7 @@ public final class Sensors {
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_SensorBatch_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_com_andrerinas_openheadunit_aap_protocol_proto_SensorBatch_descriptor,
-        new java.lang.String[] { "LocationData", "CompassData", "SpeedData", "Rpm", "OdometerData", "FuelData", "ParkingbrakeData", "GearData", "DiagnosticsData", "NightMode", "EnviormentData", "HvacData", "DrivingStatus", "DeadReckoning", "PassengerData", "DoorData", "LightData", "AccelData", "GyroData", "GpsSatelliteData", });
+        new java.lang.String[] { "LocationData", "CompassData", "SpeedData", "Rpm", "OdometerData", "FuelData", "ParkingbrakeData", "GearData", "DiagnosticsData", "NightMode", "EnviormentData", "HvacData", "DrivingStatus", "DeadReckoning", "PassengerData", "DoorData", "LightData", "TirePressureData", "AccelData", "GyroData", "GpsSatelliteData", });
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_SensorBatch_LocationData_descriptor =
       internal_static_com_andrerinas_openheadunit_aap_protocol_proto_SensorBatch_descriptor.getNestedTypes().get(0);
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_SensorBatch_LocationData_fieldAccessorTable = new
@@ -26964,13 +27931,13 @@ public final class Sensors {
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_SensorBatch_SpeedData_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_com_andrerinas_openheadunit_aap_protocol_proto_SensorBatch_SpeedData_descriptor,
-        new java.lang.String[] { "SpeedE6", "CruiseEngaged", "CruiseSetSpeed", });
+        new java.lang.String[] { "SpeedE3", "CruiseEngaged", "CruiseSetSpeed", });
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_SensorBatch_OdometerData_descriptor =
       internal_static_com_andrerinas_openheadunit_aap_protocol_proto_SensorBatch_descriptor.getNestedTypes().get(11);
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_SensorBatch_OdometerData_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_com_andrerinas_openheadunit_aap_protocol_proto_SensorBatch_OdometerData_descriptor,
-        new java.lang.String[] { "KmsEl", "TripKmsEl", });
+        new java.lang.String[] { "KmsE1", "TripKmsE1", });
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_SensorBatch_DiagnosticsData_descriptor =
       internal_static_com_andrerinas_openheadunit_aap_protocol_proto_SensorBatch_descriptor.getNestedTypes().get(12);
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_SensorBatch_DiagnosticsData_fieldAccessorTable = new
@@ -27013,8 +27980,14 @@ public final class Sensors {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_com_andrerinas_openheadunit_aap_protocol_proto_SensorBatch_LightData_descriptor,
         new java.lang.String[] { "Headlight", "TurnIndicator", "HazardLightOn", });
-    internal_static_com_andrerinas_openheadunit_aap_protocol_proto_SensorBatch_PassengerData_descriptor =
+    internal_static_com_andrerinas_openheadunit_aap_protocol_proto_SensorBatch_TirePressureData_descriptor =
       internal_static_com_andrerinas_openheadunit_aap_protocol_proto_SensorBatch_descriptor.getNestedTypes().get(19);
+    internal_static_com_andrerinas_openheadunit_aap_protocol_proto_SensorBatch_TirePressureData_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_com_andrerinas_openheadunit_aap_protocol_proto_SensorBatch_TirePressureData_descriptor,
+        new java.lang.String[] { "TirePressuresE2", });
+    internal_static_com_andrerinas_openheadunit_aap_protocol_proto_SensorBatch_PassengerData_descriptor =
+      internal_static_com_andrerinas_openheadunit_aap_protocol_proto_SensorBatch_descriptor.getNestedTypes().get(20);
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_SensorBatch_PassengerData_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_com_andrerinas_openheadunit_aap_protocol_proto_SensorBatch_PassengerData_descriptor,

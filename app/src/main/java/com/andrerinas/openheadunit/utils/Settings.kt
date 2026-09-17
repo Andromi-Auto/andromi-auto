@@ -2041,11 +2041,21 @@ class Settings(private val context: Context) {
     // setup puts on the wire, so it stays opt-in. What it buys is the WPP-over-TCP endpoint, which
     // from Android Auto 17.4 is how a reconnect happens with nothing running on the phone. That
     // endpoint goes out on the hotspot transport, and on WiFi Direct once this unit's group has been
-    // seen to keep its name and address across bring-ups (see WppEndpointPolicy). Fields 3 and 4 of
-    // the request are still undecoded and are the shape a channel hint would take.
+    // seen to keep its name and address across bring-ups (see WppEndpointPolicy). Field 3 carries
+    // the bands we can offer (WppChannelTypePolicy); field 4, the frequency list, we cannot read.
     var nativeWifiVersionExchange: Boolean
         get() = prefs.getBoolean("native-wifi-version-exchange", false)
         set(value) = prefs.edit().putBoolean("native-wifi-version-exchange", value).apply()
+
+    // Whether ServiceDiscoveryResponse carries a ConnectionConfiguration: the ping and TCP
+    // parameters Android Auto lets a head unit ask for.
+    //
+    // Off by default. It is aimed at the link outages that kill a session mid-drive, where the
+    // protocol's own 3 s ping timeout fires long before the link is actually gone, but whether the
+    // phone honours any of it is unmeasured. See ConnectionConfigPolicy for the values.
+    var announceConnectionConfiguration: Boolean
+        get() = prefs.getBoolean("announce-connection-configuration", false)
+        set(value) = prefs.edit().putBoolean("announce-connection-configuration", value).apply()
 
     var nativeDriverSelectionMode: NativeDriverSelectionPolicy.Mode
         get() = NativeDriverSelectionPolicy.Mode.fromId(

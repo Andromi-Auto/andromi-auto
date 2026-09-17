@@ -1003,6 +1003,8 @@
     <string name="native_wifi_version_exchange_description">이 기기의 핫스팟을 사용해 휴대전화가 Bluetooth 대신 WiFi로 다시 연결하도록 합니다. Bluetooth가 핸드셰이크를 전달하지 못하는 기기와 최신 Android Auto 버전에서 도움이 됩니다. 기본값은 꺼짐이며, 첫 연결은 여전히 Bluetooth로 이루어집니다.</string>
     <string name="native_aa_complete_hfp_slc">Bluetooth 연결 완료하기</string>
     <string name="native_aa_complete_hfp_slc_description">일부 휴대전화는 이 기기의 Bluetooth가 페어링만이 아니라 연결됨으로 인식될 때까지 무선 Android Auto를 시작하지 않습니다. 기본값은 켜짐이며, 이 기기에서 통화가 되지 않으면 끄세요.</string>
+    <string name="announce_connection_configuration">더 긴 연결 시간 제한 요청</string>
+    <string name="announce_connection_configuration_description">Android Auto에게 연결을 끊긴 것으로 판단하기 전에 3초 대신 15초를 기다리고, 더 큰 소켓 버퍼를 사용하도록 지시합니다. 이는 세션 도중 몇 초간 채널을 벗어나면서 연결을 함께 끊어버리는 무선 장치를 위한 것입니다. 휴대전화가 이를 실제로 따르는지는 측정되지 않았습니다.</string>
     <string name="native_aa_ignore_external_bt">Bluetooth 호환성 검사 무시</string>
     <string name="native_aa_ignore_external_bt_description">이 기기는 Android가 접근할 수 없는 별도 모듈에 Bluetooth를 두고 있는 것으로 보여 무선 Android Auto가 자동으로 꺼집니다. 기본값은 꺼짐입니다. 그 판단이 틀렸다고 생각할 때만 켜세요. 판단이 맞다면 연결은 아무 표시 없이 실패하고 로그는 정상으로 보입니다.</string>
     <string name="native_aa_setup_qr_title">QR 코드로 설정</string>
