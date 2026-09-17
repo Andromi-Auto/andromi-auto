@@ -189,6 +189,7 @@
     <string name="usb_auto_connect">USB ავტო-კავშირი</string>
     <string name="usb_auto_connect_description">ცნობილ USB მოწყობილობასთან ავტომატური დაკავშირება აპლიკაციის გახსნისას.</string>
     <string name="auto_start_bt_label">ავტო-გაშვება Bluetooth-ით</string>
+    <string name="auto_start_overlay_missing_hint">სხვა აპების ზემოდან ჩვენება ნებადართული არაა, ამიტომ ავტოგაშვება ეკრანის გახსნის ნაცვლად შეტყობინებას აჩვენებს. შეეხეთ ნებართვისთვის.</string>
     <string name="auto_start_bt_description">Open Headunit-ის ავტომატური გახსნა კონკრეტული Bluetooth მოწყობილობის დაკავშირებისას.</string>
     <string name="auto_start_offer_title">ავტომატურად გაეშვას?</string>
     <string name="auto_start_offer_message">გსურს აპლიკაციის ავტომატური გაშვება ამ მოწყობილობასთან, %1$s?</string>
@@ -462,14 +463,14 @@
     <string name="nav_action_ferry">ბორანი</string>
     <string name="nav_action_ferry_train">ბორანი / მატარებელი</string>
     <string name="nav_action_destination">დანიშნულების ადგილი</string>
-    <string name="show_fps_counter">FPS მრიცხველის ჩვენება</string>
-    <string name="show_fps_counter_description">პროექციის დროს ზედა მარცხენა კუთხეში რეალური FPS-ის ჩვენება.</string>
+    <string name="show_performance_overlay">წარმადობის ინდიკატორის ჩვენება</string>
+    <string name="overlay_position">წარმადობის ინდიკატორის მდებარეობა</string>
+    <string name="show_performance_overlay_description">აჩვენებს FPS-ს, CPU-ს დატვირთვას, ტემპერატურას და კადრის ასაკს პროექციაზე.</string>
 
     <string name="reopen_on_reconnection_label">ხელახალი კავშირისას გახსნა</string>
     <string name="reopen_on_reconnection_description">\"გასვლა\" ღილაკზე დაჭერისას აპლიკაცია აგრძელებს მუშაობას ფონურ რეჟიმში და აკონტროლებს USB კავშირებს. მოწყობილობის ხელახალი შეერთებისას აპი ავტომატურად გაიხსნება.</string>
     <string name="overlay_permission_required">ავტო-გაშვებისთვის საჭიროა \'სხვა აპებზე ჩვენების\' ნებართვა</string>
     <string name="usb_permission_denied">USB ნებართვა უარყოფილია. გთხოვთ, დაუშვათ USB წვდომა ავტომატური კავშირისთვის.</string>
-    <string name="overlay_permission_denied_auto_start_disabled">ფონური ჩვენების ნებართვა არ არის გაცემული. ავტო-გაშვება გამორთულია.</string>
 
     <string name="kill_on_disconnect">აპის დახურვა გათიშვისას</string>
     <string name="kill_on_disconnect_description">Android Auto-ს გათიშვისას აპლიკაციის ავტომატური დახურვა</string>
@@ -967,6 +968,7 @@
     <string name="narrow_band_profile_cap_description">როცა ეს სესია მუშაობს 2.4 გჰც-ზე, იმის მიუხედავად, ამ მოწყობილობის WiFi-ს არ აქვს 5 გჰც დიაპაზონი თუ ქსელი იქ ჩაირთო, ზემოთ მითითებული პარამეტრების ნაცვლად ტელეფონს მოთხოვეთ მაქსიმუმ 720p და წამში 30 კადრი, ასევე AAC აუდიო. ასეთ კავშირზე გაზომვამ აჩვენა, რომ სრული სიჩქარის ნაკადი საერთოდ არ გადმოსცემდა სურათს, დაბალი კი ინარჩუნებდა. გამორთეთ, რომ ზუსტად ის მიიღოთ, რაც მიუთითეთ.</string>
     <string name="connection_issue_banner_video_link_too_slow">თქვენმა ტელეფონმა ზედიზედ რამდენჯერმე შეწყვიტა ვიდეო ერთი კადრის მოსვლამდეც კი. WiFi კავშირი ძალიან ნელია სურათის გადასაცემად. შეეხეთ FPS-ის ზღვრის 30-მდე დასაწევად; ასევე დაეხმარება დაბალი გარჩევადობა და AAC აუდიო.</string>
     <string name="connection_issue_banner_five_ghz_channel_refused">ამ მოწყობილობამ უარი თქვა WiFi Direct ქსელის თქვენ მიერ არჩეულ რომელიმე 5 გჰც არხზე განთავსებაზე და ის საკუთარი Wi-Fi დრაივერის არჩეულ არხზე აამუშავა. ეს არხი ხშირად ისეთია, რომელსაც მკაცრი რეგულაციის ქვეყნებში ტელეფონები ვერც კი ხედავენ. შეეხეთ WiFi Direct დიაპაზონის 2.4 გჰც-ზე დასაყენებლად, რომელიც ყველა ქვეყანაშია ნებადართული; მოელოდეთ 720p-ს 1080p-ის ნაცვლად.</string>
+    <string name="connection_issue_banner_headunit_server_deaf">თქვენს ტელეფონზე Android Auto-ს head unit სერვერი იღებს კავშირებს და არცერთს არ პასუხობს. თავისით არ აღდგება: ტელეფონზე გააჩერეთ head unit სერვერი Android Auto-ს დეველოპერულ პარამეტრებში და ხელახლა გაუშვით. ეს მოწყობილობა თავისით დაუკავშირდება.</string>
     <string name="connection_issue_banner_dismiss">დახურვა</string>
     <string name="connection_issue_remedy_hotspot_query">Hotspot-ის სახელი და პაროლი</string>
     <string name="preflight_title">დაკავშირებამდე</string>

@@ -53,4 +53,14 @@ class DiscoveryModePolicyTest {
             )
         }
     }
+
+    @Test
+    fun `only the Wireless Helper modes probe port 5289`() {
+        // Every other mode pays 300ms per address, plus a 500ms hold on the one that answers,
+        // in front of the port-5277 dial the sweep exists for.
+        assertFalse(DiscoveryModePolicy.probesWirelessHelper(0))
+        assertFalse(DiscoveryModePolicy.probesWirelessHelper(1))
+        assertTrue(DiscoveryModePolicy.probesWirelessHelper(2))
+        assertFalse(DiscoveryModePolicy.probesWirelessHelper(3))
+    }
 }

@@ -163,6 +163,7 @@
     <string name="usb_auto_connect">Conexión automática USB</string>
     <string name="usb_auto_connect_description">Se conecta automáticamente a un dispositivo USB conocido tan pronto como se abre la aplicación.</string>
     <string name="auto_start_bt_label">Autoinicio por Bluetooth</string>
+    <string name="auto_start_overlay_missing_hint">No se ha concedido el permiso para mostrar sobre otras aplicaciones, así que el inicio automático mostrará una notificación en lugar de abrir la pantalla. Toca para concederlo.</string>
     <string name="auto_start_bt_description">Abrir Open Headunit automáticamente al conectar un dispositivo Bluetooth.</string>
     <string name="auto_start_offer_title">¿Iniciar automáticamente?</string>
     <string name="auto_start_offer_message">¿Quieres que la aplicación se inicie automáticamente con este dispositivo, %1$s?</string>
@@ -418,11 +419,11 @@
     <string name="monochrome_icons_description">Usar iconos en escala de grises en la pantalla principal en modo Oscuro u Oscuro Extremo</string>
     <string name="use_extreme_dark">Usar oscuro extremo</string>
     <string name="use_extreme_dark_description">Usar fondo negro puro cuando el modo oscuro está activo</string>
-    <string name="show_fps_counter">Mostrar contador de FPS</string>
-    <string name="show_fps_counter_description">Muestra una superposición de FPS en tiempo real en la esquina superior izquierda durante la proyección.</string>
+    <string name="show_performance_overlay">Mostrar panel de rendimiento</string>
+    <string name="overlay_position">Posición del panel de rendimiento</string>
+    <string name="show_performance_overlay_description">Muestra los FPS, la carga de CPU, la temperatura y la antigüedad del fotograma sobre la proyección.</string>
     <string name="overlay_permission_required">El inicio automático requiere el permiso \'Mostrar sobre otras apps\'</string>
     <string name="usb_permission_denied">Permiso USB denegado. Por favor, permite el acceso USB para conectar automáticamente.</string>
-    <string name="overlay_permission_denied_auto_start_disabled">Permiso de superposición no otorgado. El inicio automático ha sido desactivado.</string>
     <string name="use_white_background">Usar fondo de pantalla blanco en inicio</string>
     <string name="reopen_on_reconnection_label">Reabrir al reconectar</string>
     <string name="reopen_on_reconnection_description">Al pulsar el botón Salir, la app sigue ejecutándose en segundo plano y continúa monitorizando las conexiones USB. Si un dispositivo se reconecta, la app se reabre automáticamente.</string>
@@ -996,6 +997,7 @@
     <string name="narrow_band_profile_cap_description">Cuando esta sesión funcione en 2,4 GHz, ya sea porque el WiFi de esta unidad no tiene banda de 5 GHz o porque la red se estableció ahí, pedir al teléfono como máximo 720p y 30 fps en lugar de los ajustes de arriba, y audio AAC. En un enlace así se midió que un flujo a plena velocidad no llevaba imagen alguna, mientras que uno más bajo sí aguantaba. Desactiva esto para recibir exactamente lo que pediste.</string>
     <string name="connection_issue_banner_video_link_too_slow">Tu teléfono abandonó el vídeo antes de que llegara un solo fotograma, varias veces seguidas. El enlace WiFi es demasiado lento para llevar la imagen. Toca para bajar el límite de FPS a 30; una resolución menor y el audio AAC también ayudan.</string>
     <string name="connection_issue_banner_five_ghz_channel_refused">Esta unidad se negó a poner su red WiFi Direct en cualquier canal de 5 GHz que elegiste, así que la creó en el que eligió su propio controlador WiFi. Ese canal a menudo es uno que los teléfonos de países más restrictivos ni siquiera pueden ver. Toca para poner la banda de WiFi Direct en 2,4 GHz, permitida en todos los países; espera 720p en lugar de 1080p.</string>
+    <string name="connection_issue_banner_headunit_server_deaf">El servidor de unidad principal de Android Auto en tu teléfono acepta conexiones y no responde a ninguna. No se recupera solo: en el teléfono, detén el servidor de unidad principal en los ajustes de desarrollador de Android Auto y vuelve a iniciarlo. Esta unidad se reconectará sola.</string>
     <string name="connection_issue_banner_dismiss">Descartar</string>
     <string name="connection_issue_remedy_hotspot_query">Nombre y contraseña del punto de acceso</string>
     <string name="preflight_title">Antes de conectar</string>

@@ -184,6 +184,7 @@
     <string name="usb_auto_connect">USB Otomatik Bağlan</string>
     <string name="usb_auto_connect_description">Uygulama açıldığında bilinen bir USB cihazına otomatik olarak bağlan.</string>
     <string name="auto_start_bt_label">Bluetooth ile otomatik başlat</string>
+    <string name="auto_start_overlay_missing_hint">Diğer uygulamaların üzerinde gösterme izni verilmedi, bu yüzden otomatik başlatma ekranı açmak yerine bir bildirim gösterecek. İzin vermek için dokunun.</string>
     <string name="auto_start_bt_description">Belirli bir Bluetooth cihazı bağlandığında Open Headunit\'ı otomatik olarak aç.</string>
     <string name="auto_start_offer_title">Otomatik başlatılsın mı?</string>
     <string name="auto_start_offer_message">Uygulamanın bu cihazla otomatik başlatılmasını ister misin, %1$s?</string>
@@ -413,14 +414,14 @@
     <string name="nav_action_ferry">Feribot</string>
     <string name="nav_action_ferry_train">Feribot / tren</string>
     <string name="nav_action_destination">Varış</string>
-    <string name="show_fps_counter">FPS Sayacını Göster</string>
-    <string name="show_fps_counter_description">Yansıtma sırasında sol üst köşede gerçek zamanlı bir FPS göstergesi görüntüler.</string>
+    <string name="show_performance_overlay">Performans katmanını göster</string>
+    <string name="overlay_position">Performans katmanının konumu</string>
+    <string name="show_performance_overlay_description">Yansıtmanın üzerinde FPS, CPU yükü, sıcaklık ve kare yaşını gösterir.</string>
 
     <string name="reopen_on_reconnection_label">Yeniden bağlantıda tekrar aç</string>
     <string name="reopen_on_reconnection_description">Çıkış düğmesine bastığınızda, uygulama arka planda çalışmaya devam eder ve USB bağlantılarını izlemeyi sürdürür. Bir cihaz yeniden bağlandığında uygulama otomatik olarak tekrar açılır.</string>
     <string name="overlay_permission_required">Otomatik başlatma için \'Diğer uygulamaların üzerinde görüntüleme\' izni gereklidir</string>
     <string name="usb_permission_denied">USB izni reddedildi. Otomatik bağlanmak için lütfen USB erişimine izin verin.</string>
-    <string name="overlay_permission_denied_auto_start_disabled">Üstte görüntüleme izni verilmedi. Otomatik başlatma devre dışı bırakıldı.</string>
 
     <string name="use_white_background">Beyaz ana ekran duvar kağıdı kullan</string>
     <string name="category_input">Giriş Ayarları</string>
@@ -981,6 +982,7 @@
     <string name="narrow_band_profile_cap_description">Bu oturum 2,4 GHz üzerinde çalışıyorsa, bunun nedeni bu cihazın Wi-Fi\'ında 5 GHz bandı olmaması veya ağın orada kurulmuş olması olsun, yukarıdaki ayarlar yerine telefondan en fazla 720p ve 30 fps ile AAC ses iste. Böyle bir bağlantıda tam hızlı akışın hiç görüntü taşımadığı, daha düşüğünün ise tutunduğu ölçüldü. İstediğiniz ayarların aynen uygulanması için bunu kapatın.</string>
     <string name="connection_issue_banner_video_link_too_slow">Telefonunuz üst üste birkaç kez, tek bir kare bile gelmeden videodan vazgeçti. Wi-Fi bağlantısı görüntüyü taşıyamayacak kadar yavaş. FPS sınırını 30\'a düşürmek için dokunun; daha düşük çözünürlük ve AAC ses de yardımcı olur.</string>
     <string name="connection_issue_banner_five_ghz_channel_refused">Bu ünite WiFi Direct ağını seçtiğin hiçbir 5 GHz kanalına koymayı reddetti ve kendi WiFi sürücüsünün seçtiği kanalda başlattı. Bu kanal çoğu zaman daha katı ülkelerdeki telefonların göremediği bir kanaldır. WiFi Direct bandını her ülkede izin verilen 2,4 GHz olarak ayarlamak için dokun; burada 1080p yerine 720p bekle.</string>
+    <string name="connection_issue_banner_headunit_server_deaf">Telefonunuzdaki Android Auto ana ünite sunucusu bağlantıları kabul ediyor ve hiçbirini yanıtlamıyor. Kendi kendine düzelmez: telefonda Android Auto geliştirici ayarlarından ana ünite sunucusunu durdurup yeniden başlatın. Bu cihaz kendiliğinden yeniden bağlanacak.</string>
     <string name="connection_issue_banner_dismiss">Kapat</string>
     <string name="connection_issue_remedy_hotspot_query">Erişim noktası adı ve şifresi</string>
     <string name="preflight_title">Bağlanmadan önce</string>

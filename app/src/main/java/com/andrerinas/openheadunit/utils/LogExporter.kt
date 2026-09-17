@@ -5,9 +5,11 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.widget.Toast
 import android.util.Log
 import androidx.core.content.FileProvider
 import com.andrerinas.openheadunit.BuildConfig
+import com.andrerinas.openheadunit.R
 import com.andrerinas.openheadunit.connection.wifi.WifiLauncherMode
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.NativeAaHandshakeManager
 import com.andrerinas.openheadunit.decoder.video.VideoFaultInjector
@@ -428,18 +430,36 @@ object LogExporter {
         logFile
     }
 
+    /**
+     * Shares an exported log.
+     *
+     * Every step is guarded, because this runs from a dialog's click handler and a throw there
+     * kills the app: a log outside the provider's declared roots used to do exactly that, so the
+     * one button a reporter needs crashed instead of sending the file.
+     */
     fun shareLogFile(context: Context, file: File) {
-        val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+        try {
+            val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
 
-        val shareIntent = Intent(Intent.ACTION_SEND).apply {
-            type = "text/plain"
-            putExtra(Intent.EXTRA_STREAM, uri)
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                type = "text/plain"
+                putExtra(Intent.EXTRA_STREAM, uri)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+
+            val chooser = Intent.createChooser(shareIntent, "Share Log File")
+            chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            context.startActivity(chooser)
+        } catch (e: Exception) {
+            // The path, because the reporter can still fetch the file by hand from there.
+            AppLog.e("LogExporter: could not share ${file.absolutePath}: ${e.message}", e)
+            ToastUtils.showToast(
+                context,
+                context.getString(R.string.failed_export_logs),
+                Toast.LENGTH_LONG,
+                force = true
+            )
         }
-
-        val chooser = Intent.createChooser(shareIntent, "Share Log File")
-        chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        context.startActivity(chooser)
     }
 
     // Capped at 250 KB to guarantee safe Android Binder IPC transaction limits on older

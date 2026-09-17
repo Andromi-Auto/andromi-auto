@@ -178,6 +178,7 @@
     <string name="usb_auto_connect">Tự kết nối USB</string>
     <string name="usb_auto_connect_description">Tự động kết nối thiết bị USB đã biết khi mở ứng dụng.</string>
     <string name="auto_start_bt_label">Tự khởi động khi có Bluetooth</string>
+    <string name="auto_start_overlay_missing_hint">Chưa cấp quyền hiển thị trên ứng dụng khác, nên tự động khởi động sẽ hiện thông báo thay vì mở màn hình. Nhấn để cấp quyền.</string>
     <string name="auto_start_bt_description">Tự động mở Open Headunit khi một thiết bị Bluetooth nhất định kết nối.</string>
     <string name="auto_start_offer_title">Tự động khởi động?</string>
     <string name="auto_start_offer_message">Bạn có muốn tự động khởi động ứng dụng với thiết bị này, %1$s không?</string>
@@ -428,15 +429,15 @@
     <string name="nav_action_ferry">Phà</string>
     <string name="nav_action_ferry_train">Phà / tàu</string>
     <string name="nav_action_destination">Đến nơi</string>
-    <string name="show_fps_counter">Hiển thị bộ đếm FPS</string>
-    <string name="show_fps_counter_description">Hiển thị FPS thời gian thực ở góc trên bên trái khi đang chiếu.</string>
+    <string name="show_performance_overlay">Hiển thị lớp phủ hiệu suất</string>
+    <string name="overlay_position">Vị trí lớp phủ hiệu suất</string>
+    <string name="show_performance_overlay_description">Hiển thị FPS, tải CPU, nhiệt độ và tuổi khung hình trên hình chiếu.</string>
 
     <!-- Auto-start permission strings -->
     <string name="reopen_on_reconnection_label">Mở lại khi kết nối lại</string>
     <string name="reopen_on_reconnection_description">Khi bạn nhấn nút Thoát, ứng dụng vẫn chạy ngầm và tiếp tục theo dõi kết nối USB. Nếu thiết bị kết nối lại, ứng dụng sẽ tự mở lại.</string>
     <string name="overlay_permission_required">Tự khởi động cần quyền \'Hiển thị trên ứng dụng khác\'</string>
     <string name="usb_permission_denied">Đã từ chối quyền USB. Vui lòng cho phép truy cập USB để tự kết nối.</string>
-    <string name="overlay_permission_denied_auto_start_disabled">Không có quyền overlay. Tự khởi động đã bị tắt.</string>
 
     <!-- Theme -->
     <string name="use_white_background">Dùng hình nền màn hình chính trắng</string>
@@ -989,6 +990,7 @@
     <string name="narrow_band_profile_cap_description">Khi phiên này chạy trên 2,4 GHz, cho dù vì Wi-Fi của thiết bị này không có băng tần 5 GHz hay vì mạng được thiết lập trên đó, yêu cầu điện thoại tối đa 720p và 30 fps thay cho các cài đặt ở trên, và âm thanh AAC. Trên đường truyền như vậy, đo được luồng ở tốc độ đầy đủ không mang được hình ảnh nào, còn luồng thấp hơn thì trụ được. Tắt tùy chọn này để nhận đúng những gì bạn đã đặt.</string>
     <string name="connection_issue_banner_video_link_too_slow">Điện thoại đã bỏ dở video trước khi có dù chỉ một khung hình, nhiều lần liên tiếp. Đường truyền Wi-Fi quá chậm để tải hình ảnh. Nhấn để hạ giới hạn FPS xuống 30; giảm độ phân giải và dùng âm thanh AAC cũng có ích.</string>
     <string name="connection_issue_banner_five_ghz_channel_refused">Thiết bị này đã từ chối đặt mạng WiFi Direct trên bất kỳ kênh 5 GHz nào bạn chọn, nên nó khởi tạo trên kênh do trình điều khiển WiFi của chính nó chọn. Kênh đó thường là kênh mà điện thoại ở các nước có quy định nghiêm ngặt hơn thậm chí không thấy được. Chạm để đặt băng tần WiFi Direct thành 2,4 GHz, được phép ở mọi quốc gia; hãy chờ đợi 720p thay vì 1080p.</string>
+    <string name="connection_issue_banner_headunit_server_deaf">Máy chủ head unit của Android Auto trên điện thoại của bạn chấp nhận kết nối nhưng không trả lời kết nối nào. Nó không tự khôi phục: trên điện thoại, hãy dừng máy chủ head unit trong cài đặt nhà phát triển của Android Auto rồi khởi động lại. Thiết bị này sẽ tự kết nối lại.</string>
     <string name="connection_issue_banner_dismiss">Bỏ qua</string>
     <string name="connection_issue_remedy_hotspot_query">Tên và mật khẩu điểm phát sóng</string>
     <string name="preflight_title">Trước khi kết nối</string>

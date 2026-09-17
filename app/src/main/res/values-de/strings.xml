@@ -217,6 +217,7 @@
     <string name="usb_auto_connect">USB Auto-Verbindung</string>
     <string name="usb_auto_connect_description">Verbindet sich automatisch mit einem bekannten USB-Gerät, sobald die App geöffnet wird.</string>
     <string name="auto_start_bt_label">Auto-Start bei Bluetooth</string>
+    <string name="auto_start_overlay_missing_hint">Über anderen Apps anzeigen ist nicht erlaubt, daher zeigt der Autostart eine Benachrichtigung, statt den Bildschirm zu öffnen. Zum Erteilen tippen.</string>
     <string name="auto_start_bt_description">Startet Open Headunit automatisch, wenn sich ein bestimmtes Bluetooth-Gerät verbindet.</string>
     <string name="auto_start_offer_title">Automatisch starten?</string>
     <string name="auto_start_offer_message">Soll die App mit diesem Gerät automatisch gestartet werden, %1$s?</string>
@@ -470,14 +471,14 @@
     <string name="nav_action_ferry">Fähre</string>
     <string name="nav_action_ferry_train">Fähre / Zug</string>
     <string name="nav_action_destination">Ankunft</string>
-    <string name="show_fps_counter">FPS-Zähler anzeigen</string>
-    <string name="show_fps_counter_description">Echtzeit-FPS oben links während der Projektion einblenden.</string>
+    <string name="show_performance_overlay">Leistungsanzeige einblenden</string>
+    <string name="overlay_position">Position der Leistungsanzeige</string>
+    <string name="show_performance_overlay_description">Zeigt Bildrate, CPU-Last, Temperatur und Bildalter über der Projektion an.</string>
 
     <string name="reopen_on_reconnection_label">Bei Neuverbindung erneut öffnen</string>
     <string name="reopen_on_reconnection_description">Wenn Sie die Beenden-Taste drücken, läuft die App im Hintergrund weiter und überwacht USB-Verbindungen. Wenn ein Gerät erneut verbunden wird, öffnet sich die App automatisch.</string>
     <string name="overlay_permission_required">Autostart erfordert die Berechtigung \'Über anderen Apps einblenden\'</string>
     <string name="usb_permission_denied">USB-Berechtigung verweigert. Bitte erlauben Sie den USB-Zugriff für automatische Verbindung.</string>
-    <string name="overlay_permission_denied_auto_start_disabled">Overlay-Berechtigung nicht erteilt. Autostart wurde deaktiviert.</string>
 
     <string name="use_white_background">Weißes Startbildschirm-Hintergrundbild verwenden</string>
     <string name="category_input">Eingabeeinstellungen</string>
@@ -992,6 +993,7 @@
     <string name="narrow_band_profile_cap_description">Wenn diese Sitzung auf 2,4 GHz läuft, egal ob weil das WLAN dieses Geräts kein 5-GHz-Band hat oder weil das Netzwerk dort entstanden ist, statt der Einstellungen oben höchstens 720p und 30 fps sowie AAC-Audio vom Telefon anfordern. Auf einer solchen Verbindung wurde gemessen, dass ein Stream mit voller Rate gar kein Bild überträgt, ein niedrigerer dagegen schon. Schalte dies aus, um genau das zu bekommen, was du eingestellt hast.</string>
     <string name="connection_issue_banner_video_link_too_slow">Dein Telefon hat das Video mehrmals hintereinander abgebrochen, bevor auch nur ein Bild ankam. Die WLAN-Verbindung ist zu langsam für das Bild. Tippe hier, um die FPS-Grenze auf 30 zu senken; eine niedrigere Auflösung und AAC-Audio helfen ebenfalls.</string>
     <string name="connection_issue_banner_five_ghz_channel_refused">Dieses Gerät hat sich geweigert, sein WiFi-Direct-Netzwerk auf einen von dir gewählten 5-GHz-Kanal zu legen, und hat es auf dem Kanal seines eigenen WLAN-Treibers gestartet. Diesen Kanal können Telefone in Ländern mit strengeren Regeln oft gar nicht sehen. Tippe hier, um das WiFi-Direct-Band auf 2,4 GHz zu setzen, das überall erlaubt ist; erwarte dort 720p statt 1080p.</string>
+    <string name="connection_issue_banner_headunit_server_deaf">Der Head-Unit-Server von Android Auto auf deinem Telefon nimmt Verbindungen an und beantwortet keine davon. Er erholt sich nicht von selbst: Stoppe den Head-Unit-Server auf dem Telefon in den Entwicklereinstellungen von Android Auto und starte ihn erneut. Dieses Gerät verbindet sich dann von allein.</string>
     <string name="connection_issue_banner_dismiss">Schließen</string>
     <string name="connection_issue_remedy_hotspot_query">Hotspot-Name und Passwort</string>
     <string name="preflight_title">Vor dem Verbinden</string>

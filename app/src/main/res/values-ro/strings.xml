@@ -183,6 +183,7 @@
     <string name="usb_auto_connect">Conectare automată USB</string>
     <string name="usb_auto_connect_description">Conectează automat un dispozitiv USB cunoscut când deschizi aplicația.</string>
     <string name="auto_start_bt_label">Pornire automată pe Bluetooth</string>
+    <string name="auto_start_overlay_missing_hint">Afișarea peste alte aplicații nu este permisă, așa că pornirea automată va afișa o notificare în loc să deschidă ecranul. Atinge pentru a permite.</string>
     <string name="auto_start_bt_description">Deschide automat Open Headunit când se conectează un anumit dispozitiv Bluetooth.</string>
     <string name="auto_start_offer_title">Pornire automată?</string>
     <string name="auto_start_offer_message">Vrei să pornești automat aplicația cu acest dispozitiv, %1$s?</string>
@@ -415,14 +416,14 @@
     <string name="monochrome_icons_description">Utilizați pictograme în tonuri de gri pe ecranul principal în modul Întunecat sau Negru extrem</string>
     <string name="use_extreme_dark">Folosiți negru extrem</string>
     <string name="use_extreme_dark_description">Utilizați fundal negru pur când modul întunecat este activ</string>
-    <string name="show_fps_counter">Afișează contor FPS</string>
+    <string name="show_performance_overlay">Afișează suprapunerea de performanță</string>
+    <string name="overlay_position">Poziția suprapunerii de performanță</string>
     <string name="overlay_permission_required">Pornirea automată necesită permisiunea \'Afișare peste alte aplicații\'</string>
     <string name="usb_permission_denied">Permisiunea USB a fost refuzată. Vă rugăm să permiteți accesul USB pentru conectare automată.</string>
-    <string name="overlay_permission_denied_auto_start_disabled">Permisiunea de suprapunere nu a fost acordată. Pornirea automată a fost dezactivată.</string>
     <string name="use_white_background">Folosește fundal alb pe ecranul principal</string>
     <string name="reopen_on_reconnection_label">Redeschide la reconectare</string>
     <string name="reopen_on_reconnection_description">Când apăsați butonul Ieșire, aplicația continuă să ruleze în fundal și monitorizează conexiunile USB. Dacă un dispozitiv se reconectează, aplicația se redeschide automat.</string>
-    <string name="show_fps_counter_description">Afișează un overlay cu FPS în timp real în colțul din stânga sus în timpul proiecției.</string>
+    <string name="show_performance_overlay_description">Afișează FPS, încărcarea procesorului, temperatura și vechimea cadrului peste proiecție.</string>
 
     <string name="category_input">Setări intrare</string>
     <string name="enable_rotary">Activează controlerul rotativ (Rotary)</string>
@@ -983,6 +984,7 @@
     <string name="narrow_band_profile_cap_description">Când această sesiune rulează pe 2,4 GHz, fie pentru că Wi-Fi-ul acestei unități nu are banda de 5 GHz, fie pentru că rețeaua s-a format acolo, cere telefonului cel mult 720p și 30 fps în locul setărilor de mai sus, și audio AAC. Pe o astfel de legătură s-a măsurat că fluxul la rată completă nu transporta deloc imagine, în timp ce unul mai mic rezista. Dezactivați pentru a primi exact ce ați cerut.</string>
     <string name="connection_issue_banner_video_link_too_slow">Telefonul a renunțat la video de mai multe ori la rând, înainte să ajungă vreun cadru. Legătura Wi-Fi este prea lentă pentru imagine. Atingeți pentru a coborî limita de FPS la 30; ajută și o rezoluție mai mică, precum și sunetul AAC.</string>
     <string name="connection_issue_banner_five_ghz_channel_refused">Această unitate a refuzat să pună rețeaua WiFi Direct pe oricare canal de 5 GHz ales de tine, așa că a pornit-o pe cel ales de propriul driver WiFi. Acel canal este adesea unul pe care telefoanele din țările mai stricte nici măcar nu îl văd. Atinge pentru a seta banda WiFi Direct la 2,4 GHz, permisă în toate țările; așteaptă-te la 720p în loc de 1080p.</string>
+    <string name="connection_issue_banner_headunit_server_deaf">Serverul unității centrale Android Auto de pe telefon acceptă conexiuni și nu răspunde la niciuna. Nu își revine singur: pe telefon, oprește serverul unității centrale din setările pentru dezvoltatori Android Auto și pornește-l din nou. Această unitate se va reconecta singură.</string>
     <string name="connection_issue_banner_dismiss">Închide</string>
     <string name="connection_issue_remedy_hotspot_query">Nume și parolă hotspot</string>
     <string name="preflight_title">Înainte de conectare</string>

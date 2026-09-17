@@ -187,6 +187,7 @@
     <string name="usb_auto_connect">USB自動接続</string>
     <string name="usb_auto_connect_description">アプリケーションが開始された時に既知のUSBデバイスに接続されると自動的に接続します。</string>
     <string name="auto_start_bt_label">Bluetooth自動開始</string>
+    <string name="auto_start_overlay_missing_hint">他のアプリの上に重ねて表示が許可されていないため、自動起動は画面を開かずに通知を表示します。タップして許可してください。</string>
     <string name="auto_start_bt_description">特定のBluetoothデバイスが接続されたときに、Open Headunitを自動的に起動します。</string>
     <string name="auto_start_offer_title">自動的に起動しますか?</string>
     <string name="auto_start_offer_message">このデバイス (%1$s) でアプリを自動的に起動しますか?</string>
@@ -418,15 +419,15 @@
     <string name="nav_action_ferry">フェリー</string>
     <string name="nav_action_ferry_train">フェリー / 列車</string>
     <string name="nav_action_destination">到着</string>
-    <string name="show_fps_counter">FPSカウンターを表示する</string>
-    <string name="show_fps_counter_description">投影中に、画面左上にリアルタイムのFPSオーバーレイを表示します。</string>
+    <string name="show_performance_overlay">パフォーマンス表示を表示</string>
+    <string name="overlay_position">パフォーマンス表示の位置</string>
+    <string name="show_performance_overlay_description">FPS、CPU 負荷、温度、フレーム経過時間を投影画面に重ねて表示します。</string>
 
     <!-- Auto-start permission strings -->
     <string name="reopen_on_reconnection_label">再接続時に再開</string>
     <string name="reopen_on_reconnection_description">終了ボタンを押しても、アプリはバックグラウンドで実行され続け、USB接続の監視を継続します。デバイスが再接続されると、アプリは自動的に再起動します。</string>
     <string name="overlay_permission_required">自動起動には「他のアプリの上に表示する」権限が必要です</string>
     <string name="usb_permission_denied">USB接続の許可が拒否されました。自動接続するには、USBアクセスを許可してください。</string>
-    <string name="overlay_permission_denied_auto_start_disabled">「他のアプリの上に表示する」の権限が付与されていません。自動起動は無効になっています。</string>
 
     <!-- Theme -->
     <string name="use_white_background">白いホーム画面の壁紙を使用する</string>
@@ -991,6 +992,7 @@
     <string name="narrow_band_profile_cap_description">このセッションが2.4 GHzで動作している場合、このユニットのWiFiに5 GHz帯がないためであれ、ネットワークがそちらで確立されたためであれ、上記の設定ではなく最大720p、30 fps、およびAAC音声をスマートフォンに要求します。この種の回線では、フルレートの映像がまったく届かない一方、低いレートでは維持されることが確認されています。設定どおりの値を使いたい場合はオフにしてください。</string>
     <string name="connection_issue_banner_video_link_too_slow">スマートフォンが1フレームも届かないうちに映像を断念する状態が数回続きました。WiFi回線が映像を運ぶには遅すぎます。タップするとFPS上限を30に下げます。解像度を下げることやAAC音声も有効です。</string>
     <string name="connection_issue_banner_five_ghz_channel_refused">この機器は選択したどの5 GHzチャンネルでもWiFi Directネットワークを作成せず、自身のWi-Fiドライバーが選んだチャンネルで開始しました。そのチャンネルは、規制の厳しい国のスマートフォンからは見えないことがよくあります。タップしてWiFi Directの帯域を2.4 GHzに設定してください。すべての国で許可されていますが、1080pではなく720pになります。</string>
+    <string name="connection_issue_banner_headunit_server_deaf">スマートフォンの Android Auto ヘッドユニットサーバーが接続を受け付けながら、どれにも応答していません。自動では復帰しません。スマートフォンの Android Auto 開発者設定でヘッドユニットサーバーを停止し、もう一度開始してください。この機器は自動的に再接続します。</string>
     <string name="connection_issue_banner_dismiss">閉じる</string>
     <string name="connection_issue_remedy_hotspot_query">ホットスポット名とパスワード</string>
     <string name="preflight_title">接続前の確認</string>

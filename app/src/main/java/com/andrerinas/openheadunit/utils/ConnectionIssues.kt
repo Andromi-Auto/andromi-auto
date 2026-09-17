@@ -81,7 +81,16 @@ enum class ConnectionIssue {
      * merely refuse it, it never scans it and so never lists the network at all. The user's lever
      * is the band, not the channel.
      */
-    FIVE_GHZ_CHANNEL_REFUSED
+    FIVE_GHZ_CHANNEL_REFUSED,
+
+    /**
+     * Android Auto's own head unit server is accepting connections and answering none of them.
+     *
+     * It hands every accepted socket to its car service and waits there with no timeout, so one
+     * peer that went away without closing leaves it deaf to everyone after. Nothing on this side
+     * recovers it; stopping and starting the server on the phone does.
+     */
+    HEADUNIT_SERVER_NOT_ANSWERING
 }
 
 /** An issue that is currently true, and when it was last raised. */
@@ -182,6 +191,7 @@ object ConnectionIssues {
                 ConnectionIssue.WIFI_RADIO_OFF -> settings.connectionIssueWifiRadioOffAtEpochMs
                 ConnectionIssue.VIDEO_LINK_TOO_SLOW -> settings.connectionIssueVideoLinkTooSlowAtEpochMs
                 ConnectionIssue.FIVE_GHZ_CHANNEL_REFUSED -> settings.connectionIssueFiveGhzChannelRefusedAtEpochMs
+                ConnectionIssue.HEADUNIT_SERVER_NOT_ANSWERING -> settings.connectionIssueHeadUnitServerDeafAtEpochMs
             }
         } catch (e: Exception) {
             0L
@@ -199,6 +209,7 @@ object ConnectionIssues {
                     ConnectionIssue.WIFI_RADIO_OFF -> settings.connectionIssueWifiRadioOffAtEpochMs = atEpochMs
                     ConnectionIssue.VIDEO_LINK_TOO_SLOW -> settings.connectionIssueVideoLinkTooSlowAtEpochMs = atEpochMs
                     ConnectionIssue.FIVE_GHZ_CHANNEL_REFUSED -> settings.connectionIssueFiveGhzChannelRefusedAtEpochMs = atEpochMs
+                    ConnectionIssue.HEADUNIT_SERVER_NOT_ANSWERING -> settings.connectionIssueHeadUnitServerDeafAtEpochMs = atEpochMs
                 }
             } catch (e: Exception) {
                 AppLog.d("ConnectionIssues: could not record $issue: ${e.message}")

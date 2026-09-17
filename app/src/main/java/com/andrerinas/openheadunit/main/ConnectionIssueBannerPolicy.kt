@@ -45,8 +45,12 @@ object ConnectionIssueBannerPolicy {
      * reason the last attempt failed.
      */
     fun relevantNow(mode: Int, transport: NativeTransport): Set<ConnectionIssue> {
-        if (mode != NATIVE_AA_MODE) return emptySet()
-        return when (transport) {
+        // Keyed on its endpoint rather than on a mode: it is raised only when the peer we dialled
+        // was Android Auto's own head unit server, so its presence already proves the route that
+        // produces it ran. Self Mode reaches it on any stored mode.
+        val anyMode = setOf(ConnectionIssue.HEADUNIT_SERVER_NOT_ANSWERING)
+        if (mode != NATIVE_AA_MODE) return anyMode
+        return anyMode + when (transport) {
             NativeTransport.WIFI_DIRECT -> setOf(
                 ConnectionIssue.BLUETOOTH_SENT_NO_DATA,
                 ConnectionIssue.BSSID_UNAVAILABLE,
@@ -89,7 +93,8 @@ object ConnectionIssueBannerPolicy {
      * one is retired by a narrower event than the rest - a group formed *on the channel that was
      * asked for*, since one on the driver's own pick is the failure it describes. Lowering the
      * frame rate is deliberately not a remedy here: it is a guess at the ceiling, and only a
-     * session that renders proves it was enough.
+     * session that renders proves it was enough. `HEADUNIT_SERVER_NOT_ANSWERING` has no entry
+     * either: its remedy is on the phone, and a handshake that completes disproves it.
      *
      * @param hotspotSsid [com.andrerinas.openheadunit.utils.Settings.hotspotSsid]
      * @param hotspotPassword [com.andrerinas.openheadunit.utils.Settings.hotspotPassword] — needed

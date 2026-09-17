@@ -16,6 +16,7 @@ import android.content.SharedPreferences
 import android.net.wifi.WifiManager
 import android.net.ConnectivityManager
 import android.net.Network
+import android.net.NetworkInfo
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import android.os.Build
@@ -90,6 +91,7 @@ import com.andrerinas.openheadunit.utils.HotspotManager
 import com.andrerinas.openheadunit.connection.wifi.WifiLauncherManager
 import com.andrerinas.openheadunit.connection.wifi.WifiLauncherMode
 import com.andrerinas.openheadunit.connection.wifi.WifiLauncherStopSequence
+import com.andrerinas.openheadunit.connection.wifi.WifiJoinKickPolicy
 import com.andrerinas.openheadunit.connection.wifi.direct.P2pIdentityRotationPolicy
 import com.andrerinas.openheadunit.connection.wifi.direct.StationScanMonitor
 import com.andrerinas.openheadunit.connection.wifi.direct.StationStandDown
@@ -551,6 +553,21 @@ class AapService : Service() {
      * screen timeout from a hibernate wake (car ACC off → on).
      */
     private var screenOffTimestamp = 0L
+    private var powerDisconnectedTimestamp = 0L
+
+    /**
+     * Below Lollipop there is no `NetworkCallback`, so this is the only way to hear that the unit
+     * has joined a network. Registered as the exact complement of [registerNetworkMonitor]'s guard,
+     * so there is always precisely one event source feeding [onWifiJoinDetected].
+     */
+    private val legacyWifiJoinReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            if (intent.action != WifiManager.NETWORK_STATE_CHANGED_ACTION) return
+            @Suppress("DEPRECATION")
+            val networkInfo = intent.getParcelableExtra<NetworkInfo>(WifiManager.EXTRA_NETWORK_INFO)
+            onWifiJoinDetected("NETWORK_STATE_CHANGED", isConnected = networkInfo?.isConnected == true)
+        }
+    }
 
     /**
      * Debounce: last time [onHibernateWake] actually ran.
@@ -587,6 +604,7 @@ class AapService : Service() {
                 Intent.ACTION_SCREEN_OFF -> {
                     screenOffTimestamp = SystemClock.elapsedRealtime()
                     AppLog.i("WakeDetect: SCREEN_OFF")
+                    maybeInferredAccPowerLoss { goAsync() }
                 }
                 Intent.ACTION_SCREEN_ON -> {
                     val now = SystemClock.elapsedRealtime()
@@ -615,6 +633,7 @@ class AapService : Service() {
                 }
                 Intent.ACTION_POWER_CONNECTED -> {
                     AppLog.i("WakeDetect: POWER_CONNECTED")
+                    powerDisconnectedTimestamp = 0L
                     // On some head units, power connected = ACC on = car started.
                     // Only check USB (don't launch UI) since this could also be a
                     // charger being plugged in on a phone/tablet.
@@ -622,10 +641,20 @@ class AapService : Service() {
                 }
                 Intent.ACTION_POWER_DISCONNECTED -> {
                     AppLog.i("WakeDetect: POWER_DISCONNECTED")
+                    powerDisconnectedTimestamp = SystemClock.elapsedRealtime()
+                    maybeInferredAccPowerLoss { goAsync() }
                 }
                 Intent.ACTION_SHUTDOWN -> {
                     AppLog.i("WakeDetect: SHUTDOWN (system shutting down, not hibernating)")
                     maybeTearDownBeforeLinkGoes(LinkLossTrigger.DEVICE_SHUTDOWN) { goAsync() }
+                }
+                in ACC_OFF_ACTIONS -> {
+                    // Matched here rather than left to the else branch, which treats anything it
+                    // does not know as a wake and would auto-start us as the car is switched off.
+                    AppLog.i("WakeDetect: ACC off ($action)")
+                    maybeTearDownBeforeLinkGoes(
+                        LinkLossTrigger.ACC_POWER_LOST, accSignalIsExplicit = true
+                    ) { goAsync() }
                 }
                 WifiManager.WIFI_STATE_CHANGED_ACTION -> {
                     val state = intent.getIntExtra(
@@ -701,6 +730,19 @@ class AapService : Service() {
     }
 
     /**
+     * Power reported lost and the screen going dark within moments of each other is a car being
+     * switched off on a unit that names no ACC intent of its own. Either order arrives here.
+     */
+    private fun maybeInferredAccPowerLoss(pendingResult: () -> BroadcastReceiver.PendingResult) {
+        val screenOff = screenOffTimestamp
+        val powerOff = powerDisconnectedTimestamp
+        if (screenOff <= 0L || powerOff <= 0L) return
+        if (kotlin.math.abs(screenOff - powerOff) > ACC_POWER_LOSS_CORROBORATION_WINDOW_MS) return
+        AppLog.i("WakeDetect: power lost beside a screen-off; treating it as the car being switched off")
+        maybeTearDownBeforeLinkGoes(LinkLossTrigger.ACC_POWER_LOST, accSignalIsExplicit = false, pendingResult)
+    }
+
+    /**
      * Closes an active session while the link it rides still works.
      *
      * Android Auto's head unit server is wedged permanently by a peer that vanishes without
@@ -713,6 +755,7 @@ class AapService : Service() {
      */
     private fun maybeTearDownBeforeLinkGoes(
         trigger: LinkLossTrigger,
+        accSignalIsExplicit: Boolean = false,
         pendingResult: () -> BroadcastReceiver.PendingResult
     ) {
         if (!commManager.isConnected) return
@@ -729,7 +772,11 @@ class AapService : Service() {
                 // says nothing about what is running: a USB drive with a WiFi mode selected was
                 // being disconnected by the user switching WiFi off, which the session never
                 // rode in the first place.
-                sessionIsWireless = commManager.isWirelessSession
+                sessionIsWireless = commManager.isWirelessSession,
+                // The one route where a missed close outlives this drive, so the one where a
+                // signal we only inferred is still worth acting on.
+                peerIsHeadUnitServer = commManager.lastAttemptedEndpoint?.endsWith(":5277") == true,
+                accSignalIsExplicit = accSignalIsExplicit
             )
         ) {
             AppLog.i("AapService: $trigger, but this session does not ride that link; leaving it alone")
@@ -1758,6 +1805,17 @@ class AapService : Service() {
         )
         AppLog.i("Registered dynamic WiFi Auto-start receiver")
 
+        // Below Lollipop registerNetworkMonitor() returns without registering anything, so without
+        // this a unit that rejoins the phone's hotspot waits out the discovery timer instead.
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            ContextCompat.registerReceiver(
+                this, legacyWifiJoinReceiver,
+                IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION),
+                ContextCompat.RECEIVER_EXPORTED
+            )
+            AppLog.i("Registered pre-Lollipop WiFi join receiver")
+        }
+
         // Wake detection receiver: catches SCREEN_ON, SCREEN_OFF, POWER_CONNECTED,
         // and all known OEM boot/ACC intents. Enables hibernate wake detection on
         // Quick Boot head units where BOOT_COMPLETED never fires.
@@ -1790,6 +1848,10 @@ class AapService : Service() {
             // Microntek / MTCD / PX3 head units (ACC wake)
             addAction("com.cayboy.action.ACC_ON")
             addAction("com.carboy.action.ACC_ON")
+            // The counterparts: the car being switched off. On FYT units Android then deep-sleeps,
+            // which is exactly when a session would otherwise vanish without closing. See
+            // LinkLossTeardownPolicy.
+            ACC_OFF_ACTIONS.forEach { addAction(it) }
         }
         ContextCompat.registerReceiver(
             this, wakeDetectReceiver,
@@ -1885,49 +1947,53 @@ class AapService : Service() {
         btAutoDisconnectJobs.clear()
     }
 
+    /**
+     * A network arrived, from whichever of the two event sources this API level has. Kicks the
+     * discovery sweep rather than letting it wait out its 10s-5min timer, which is the difference
+     * between a phone found as the drive starts and one found a minute into it.
+     */
+    private fun onWifiJoinDetected(source: String, isConnected: Boolean) {
+        // Whatever else this network is, it ends the wait a WiFi teardown started. The
+        // forceStartDiscoveryScan() below is what actually revives the loop.
+        if (isConnected && discoveryDormantAfterWifiLoss) {
+            discoveryDormantAfterWifiLoss = false
+            AppLog.i("NetworkMonitor: network is back after a link-loss teardown; discovery resumes")
+        }
+        val now = SystemClock.elapsedRealtime()
+        if (!WifiJoinKickPolicy.shouldKick(isConnected, now, lastNetworkAvailableKickMs, NETWORK_AVAILABLE_DEBOUNCE_MS)) {
+            AppLog.d("NetworkMonitor: $source event ignored (connected=$isConnected, inside debounce)")
+            return
+        }
+        lastNetworkAvailableKickMs = now
+        // [BUG_FIX] force start scan, now that we are connected — but do not stop the scan already
+        // running to do it. stop() is cooperative, so the pair started a second sweep beside the
+        // first, and two sweeps probing the head unit server's port at once is how it ends up bound
+        // to a connection nobody owns. startScan() is a no-op while a healthy scan is in flight.
+        serviceScope.launch {
+            delay(500)
+
+            when (wifiLauncherManager.forceStartDiscoveryScan()) {
+                false -> {
+                    // Folded into a sweep that was already running — which was started for
+                    // the network we have just left. Do not cancel it; just do not make the
+                    // next one wait ten seconds either.
+                    rescanWithoutWaiting = true
+                    AppLog.i("NetworkMonitor: a scan was already in flight; the next one will not wait")
+                }
+                // No discovery loop on this route at all, so there is nothing to hurry.
+                null -> AppLog.d("NetworkMonitor: no discovery loop to kick")
+                true -> {}
+            }
+        }
+    }
+
     private fun registerNetworkMonitor() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) return
         val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val callback = object : ConnectivityManager.NetworkCallback() {
             override fun onAvailable(network: Network) {
                 AppLog.i("NetworkMonitor: Network available: $network")
-
-                // [BUG_FIX] force start scan, now that we are connected — but do not stop the
-                // scan already running to do it. stop() is cooperative, so the pair started a
-                // second sweep beside the first, and two sweeps probing the head unit server's
-                // port at once is how it ends up bound to a connection nobody owns.
-                // startScan() is a no-op while a healthy scan is in flight, which is what this
-                // wants: a scan is running, so the network is already being looked at.
-                // onAvailable also fires repeatedly (per network, and again on re-validation),
-                // hence the debounce.
-                // Whatever else this network is, it ends the wait a WiFi teardown started. The
-                // startScan() below is what actually revives the loop.
-                if (discoveryDormantAfterWifiLoss) {
-                    discoveryDormantAfterWifiLoss = false
-                    AppLog.i("NetworkMonitor: network is back after a link-loss teardown; discovery resumes")
-                }
-                val now = SystemClock.elapsedRealtime()
-                if (now - lastNetworkAvailableKickMs < NETWORK_AVAILABLE_DEBOUNCE_MS) {
-                    AppLog.d("NetworkMonitor: Ignoring repeat onAvailable within debounce window")
-                    return
-                }
-                lastNetworkAvailableKickMs = now
-                serviceScope.launch {
-                    delay(500)
-
-                    when (wifiLauncherManager.forceStartDiscoveryScan()) {
-                        false -> {
-                            // Folded into a sweep that was already running — which was started for
-                            // the network we have just left. Do not cancel it; just do not make the
-                            // next one wait ten seconds either.
-                            rescanWithoutWaiting = true
-                            AppLog.i("NetworkMonitor: a scan was already in flight; the next one will not wait")
-                        }
-                        // No discovery loop on this route at all, so there is nothing to hurry.
-                        null -> AppLog.d("NetworkMonitor: no discovery loop to kick")
-                        true -> {}
-                    }
-                }
+                onWifiJoinDetected("NetworkCallback", isConnected = true)
             }
             override fun onLost(network: Network) {
                 AppLog.w("NetworkMonitor: Network lost: $network")
@@ -2343,6 +2409,9 @@ class AapService : Service() {
         usbLauncherManager.unregister()
         try { unregisterReceiver(mediaButtonReceiver) } catch (_: Exception) {}
         try { unregisterReceiver(wakeDetectReceiver) } catch (_: Exception) {}
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            try { unregisterReceiver(legacyWifiJoinReceiver) } catch (_: Exception) {}
+        }
         try { unregisterReceiver(btAutoDisconnectReceiver) } catch (_: Exception) {}
         cancelAllBtAutoDisconnects()
         btAutoDisconnectStandDown = false
@@ -3033,6 +3102,18 @@ class AapService : Service() {
          * single join can produce several. One discovery kick per join is what is wanted.
          */
         private const val NETWORK_AVAILABLE_DEBOUNCE_MS = 1000L
+
+        /** How close a power loss and a screen-off must be to read as one car being switched off. */
+        private const val ACC_POWER_LOSS_CORROBORATION_WINDOW_MS = 5_000L
+
+        /** The ACC-off counterparts of the ACC-on intents this service already listens for. */
+        private val ACC_OFF_ACTIONS = setOf(
+            "com.fyt.boot.ACCOFF",
+            "com.glsx.boot.ACCOFF",
+            "com.cayboy.action.ACC_OFF",
+            "com.carboy.action.ACC_OFF",
+            "android.intent.action.ACTION_MT_COMMAND_SLEEP_IN"
+        )
 
 
         /**

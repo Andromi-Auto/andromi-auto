@@ -190,6 +190,7 @@
     <string name="usb_auto_connect">USB 자동 연결</string>
     <string name="usb_auto_connect_description">앱 실행 시 알려진 USB 기기에 자동으로 연결합니다.</string>
     <string name="auto_start_bt_label">블루투스 연결 시 자동 시작</string>
+    <string name="auto_start_overlay_missing_hint">다른 앱 위에 표시 권한이 없어 자동 시작이 화면을 열지 않고 알림을 표시합니다. 탭하여 허용하세요.</string>
     <string name="auto_start_bt_description">특정 블루투스 기기가 연결되면 Open Headunit를 자동으로 실행합니다.</string>
     <string name="auto_start_offer_title">자동으로 시작할까요?</string>
     <string name="auto_start_offer_message">이 기기(%1$s)에서 앱을 자동으로 시작할까요?</string>
@@ -475,15 +476,15 @@
     <string name="nav_action_ferry">페리</string>
     <string name="nav_action_ferry_train">페리/열차</string>
     <string name="nav_action_destination">도착</string>
-    <string name="show_fps_counter">FPS 카운터 표시</string>
-    <string name="show_fps_counter_description">Android Auto 화면 출력 중 왼쪽 상단에 실시간 FPS 오버레이를 표시합니다.</string>
+    <string name="show_performance_overlay">성능 오버레이 표시</string>
+    <string name="overlay_position">성능 오버레이 위치</string>
+    <string name="show_performance_overlay_description">투영 화면 위에 FPS, CPU 부하, 온도, 프레임 경과 시간을 표시합니다.</string>
 
     <!-- Auto-start permission strings -->
     <string name="reopen_on_reconnection_label">재연결 시 앱 다시 열기</string>
     <string name="reopen_on_reconnection_description">종료 버튼을 누르면 앱이 백그라운드에서 계속 실행되며 USB 연결을 계속 확인합니다. 기기가 다시 연결되면 앱이 자동으로 다시 열립니다.</string>
     <string name="overlay_permission_required">자동 시작을 사용하려면 \'다른 앱 위에 표시\' 권한이 필요합니다.</string>
     <string name="usb_permission_denied">USB 권한이 거부되었습니다. 자동으로 연결하려면 USB 접근 권한을 허용하세요.</string>
-    <string name="overlay_permission_denied_auto_start_disabled">\'다른 앱 위에 표시\' 권한이 허용되지 않아 자동 시작이 비활성화되었습니다.</string>
 
     <!-- Theme -->
     <string name="use_white_background">흰색 홈 화면 배경 사용</string>
@@ -983,6 +984,7 @@
     <string name="narrow_band_profile_cap_description">이 세션이 2.4GHz에서 실행 중이면, 이 기기의 WiFi에 5GHz 대역이 없어서든 네트워크가 그쪽에서 형성되어서든, 위 설정 대신 최대 720p, 30fps, 그리고 AAC 오디오를 휴대전화에 요청합니다. 이런 연결에서는 최대 속도 스트림이 화면을 전혀 전달하지 못하고 낮춘 스트림은 유지되는 것으로 측정되었습니다. 설정한 값 그대로 받으려면 끄세요.</string>
     <string name="connection_issue_banner_video_link_too_slow">휴대전화가 프레임이 하나도 도착하기 전에 영상을 포기하는 일이 연달아 여러 번 있었습니다. WiFi 연결이 화면을 전달하기에 너무 느립니다. 탭하면 FPS 제한을 30으로 낮춥니다. 해상도를 낮추거나 AAC 오디오를 쓰는 것도 도움이 됩니다.</string>
     <string name="connection_issue_banner_five_ghz_channel_refused">이 기기는 선택한 어떤 5GHz 채널에도 WiFi Direct 네트워크를 올리지 않고, 자체 Wi-Fi 드라이버가 고른 채널에서 시작했습니다. 그 채널은 규제가 엄격한 국가의 휴대폰에서는 아예 보이지 않는 경우가 많습니다. 탭하여 WiFi Direct 대역을 모든 국가에서 허용되는 2.4GHz로 설정하세요. 이 대역에서는 1080p가 아닌 720p로 예상됩니다.</string>
+    <string name="connection_issue_banner_headunit_server_deaf">휴대전화의 Android Auto 헤드유닛 서버가 연결을 수락하고도 아무것도 응답하지 않습니다. 저절로 복구되지 않습니다. 휴대전화의 Android Auto 개발자 설정에서 헤드유닛 서버를 중지했다가 다시 시작하세요. 이 기기는 스스로 다시 연결됩니다.</string>
     <string name="connection_issue_banner_dismiss">닫기</string>
     <string name="connection_issue_remedy_hotspot_query">핫스팟 이름 및 비밀번호</string>
     <string name="preflight_title">연결 전 확인</string>

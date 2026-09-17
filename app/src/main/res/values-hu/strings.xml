@@ -161,6 +161,7 @@
     <string name="usb_auto_connect">Automatikus USB-csatlakozás</string>
     <string name="usb_auto_connect_description">Az alkalmazás megnyitásakor automatikus csatlakozás egy ismert USB-eszközhöz.</string>
     <string name="auto_start_bt_label">Bluetooth automatikus indítás</string>
+    <string name="auto_start_overlay_missing_hint">A más alkalmazások felett való megjelenítés nincs engedélyezve, ezért az automatikus indítás értesítést jelenít meg a képernyő megnyitása helyett. Koppintson az engedélyezéshez.</string>
     <string name="auto_start_bt_description">A Open Headunit automatikus megnyitása, amikor egy adott Bluetooth-eszköz csatlakozik.</string>
     <string name="auto_start_offer_title">Automatikus indítás?</string>
     <string name="auto_start_offer_message">Szeretnéd, hogy az alkalmazás automatikusan elinduljon ezzel az eszközzel, %1$s?</string>
@@ -416,14 +417,14 @@
     <string name="monochrome_icons_description">Szürkeárnyalatos ikonok használata a kezdőképernyőn Sötét vagy Extrém sötét módban</string>
     <string name="use_extreme_dark">Extrém sötét használata</string>
     <string name="use_extreme_dark_description">Tiszta fekete háttér használata sötét módban</string>
-    <string name="show_fps_counter">FPS számláló megjelenítése</string>
+    <string name="show_performance_overlay">Teljesítményjelző megjelenítése</string>
+    <string name="overlay_position">Teljesítményjelző helye</string>
     <string name="overlay_permission_required">Az automatikus indításhoz szükséges a \'Megjelenítés más alkalmazások felett\' engedély</string>
     <string name="usb_permission_denied">USB-engedély megtagadva. Kérjük, engedélyezze az USB-hozzáférést az automatikus csatlakozáshoz.</string>
-    <string name="overlay_permission_denied_auto_start_disabled">Az átfedési engedély nem lett megadva. Az automatikus indítás letiltásra került.</string>
     <string name="use_white_background">Fehér főképernyő háttérkép használata</string>
     <string name="reopen_on_reconnection_label">Újranyitás újracsatlakozáskor</string>
     <string name="reopen_on_reconnection_description">A Kilépés gomb megnyomásakor az alkalmazás a háttérben fut tovább, és folyamatosan figyeli az USB-kapcsolatokat. Ha egy eszköz újracsatlakozik, az alkalmazás automatikusan megnyílik.</string>
-    <string name="show_fps_counter_description">Valós idejű FPS overlay megjelenítése a bal felső sarokban a vetítés alatt.</string>
+    <string name="show_performance_overlay_description">Megjeleníti az FPS-t, a CPU-terhelést, a hőmérsékletet és a képkocka korát a vetítés felett.</string>
 
     <string name="category_input">Beviteli beállítások</string>
     <string name="enable_rotary">Forgókapcsoló (Rotary) engedélyezése</string>
@@ -982,6 +983,7 @@
     <string name="narrow_band_profile_cap_description">Ha ez a munkamenet 2,4 GHz-en fut, akár azért, mert az egység Wi-Fi-je nem tud 5 GHz-et, akár azért, mert a hálózat azon jött létre, a fenti beállítások helyett legfeljebb 720p és 30 fps kérése a telefontól, valamint AAC hangot is. Ilyen kapcsolaton a mérések szerint a teljes sebességű adatfolyam egyáltalán nem vitt képet, az alacsonyabb viszont igen. Kapcsolja ki, ha pontosan a beállított értékeket szeretné.</string>
     <string name="connection_issue_banner_video_link_too_slow">A telefon egymás után többször feladta a videót, mielőtt egyetlen képkocka megérkezett volna. A Wi-Fi kapcsolat túl lassú a képhez. Érintse meg az FPS-korlát 30-ra csökkentéséhez; az alacsonyabb felbontás és az AAC hang is segít.</string>
     <string name="connection_issue_banner_five_ghz_channel_refused">Ez az egység nem volt hajlandó a WiFi Direct hálózatát egyetlen általad választott 5 GHz-es csatornára sem tenni, ezért azon indult el, amelyet a saját WiFi-illesztőprogramja választott. Ezt a csatornát a szigorúbb országokban lévő telefonok gyakran nem is látják. Koppints ide, hogy a WiFi Direct sávját 2,4 GHz-re állítsd, amelyet minden ország engedélyez; ezen 1080p helyett 720p várható.</string>
+    <string name="connection_issue_banner_headunit_server_deaf">Az Android Auto fejegység-kiszolgálója a telefonján fogadja a kapcsolatokat, de egyikre sem válaszol. Magától nem áll helyre: a telefonon állítsa le a fejegység-kiszolgálót az Android Auto fejlesztői beállításaiban, majd indítsa el újra. Ez az egység magától újracsatlakozik.</string>
     <string name="connection_issue_banner_dismiss">Elvetés</string>
     <string name="connection_issue_remedy_hotspot_query">Hotspot neve és jelszava</string>
     <string name="preflight_title">Csatlakozás előtt</string>

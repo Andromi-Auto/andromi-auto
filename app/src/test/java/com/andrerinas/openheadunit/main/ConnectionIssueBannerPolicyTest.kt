@@ -142,11 +142,27 @@ class ConnectionIssueBannerPolicyTest {
     // Which conditions the selected route can be blocked by.
 
     @Test
-    fun `no condition is relevant outside Native AA`() {
+    fun `outside Native AA only the head unit server condition is relevant`() {
+        // Every other condition is raised on a Native AA branch. This one is keyed on the endpoint
+        // dialled rather than the mode, and every mode can dial Android Auto's own server.
+        for (mode in listOf(0, 1, 2)) {
+            for (transport in NativeTransport.values()) {
+                assertEquals(
+                    "mode=$mode transport=$transport",
+                    setOf(ConnectionIssue.HEADUNIT_SERVER_NOT_ANSWERING),
+                    ConnectionIssueBannerPolicy.relevantNow(mode = mode, transport = transport)
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `the head unit server condition stays relevant inside Native AA too`() {
         for (transport in NativeTransport.values()) {
             assertTrue(
                 transport.name,
-                ConnectionIssueBannerPolicy.relevantNow(mode = 2, transport = transport).isEmpty()
+                ConnectionIssue.HEADUNIT_SERVER_NOT_ANSWERING in
+                    ConnectionIssueBannerPolicy.relevantNow(3, transport)
             )
         }
     }

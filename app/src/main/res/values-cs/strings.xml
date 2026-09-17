@@ -162,6 +162,7 @@
     <string name="usb_auto_connect">Auto-connect USB</string>
     <string name="usb_auto_connect_description">Automatically connect to a known USB device when the application is opened.</string>
     <string name="auto_start_bt_label">Automaticky spustit při Bluetooth</string>
+    <string name="auto_start_overlay_missing_hint">Zobrazení přes jiné aplikace není povoleno, takže automatické spuštění zobrazí oznámení místo otevření obrazovky. Klepnutím udělíte oprávnění.</string>
     <string name="auto_start_bt_description">Automaticky otevřít Open Headunit při připojení konkrétního Bluetooth zařízení.</string>
     <string name="auto_start_offer_title">Spustit automaticky?</string>
     <string name="auto_start_offer_message">Chcete aplikaci automaticky spouštět s tímto zařízením, %1$s?</string>
@@ -417,11 +418,11 @@
     <string name="monochrome_icons_description">Použít šedé ikony na domovské obrazovce v tmavém nebo extrémně tmavém režimu</string>
     <string name="use_extreme_dark">Použít extrémně tmavý režim</string>
     <string name="use_extreme_dark_description">Použít čistě černé pozadí při aktivním tmavém režimu</string>
-    <string name="show_fps_counter">Zobrazit počítadlo FPS</string>
-    <string name="show_fps_counter_description">Během projekce zobrazí v levém horním rohu aktuální FPS.</string>
+    <string name="show_performance_overlay">Zobrazit výkonnostní překryv</string>
+    <string name="overlay_position">Umístění výkonnostního překryvu</string>
+    <string name="show_performance_overlay_description">Zobrazí snímkovou frekvenci, zatížení procesoru, teplotu a stáří snímku přes projekci.</string>
     <string name="overlay_permission_required">Automatické spuštění vyžaduje oprávnění \'Zobrazit přes jiné aplikace\'</string>
     <string name="usb_permission_denied">Oprávnění USB bylo zamítnuto. Povolte prosím přístup k USB pro automatické připojení.</string>
-    <string name="overlay_permission_denied_auto_start_disabled">Oprávnění pro překrytí nebylo uděleno. Automatické spuštění bylo zakázáno.</string>
     <string name="use_white_background">Použít bílou tapetu hlavní obrazovky</string>
     <string name="reopen_on_reconnection_label">Znovu otevřít při opětovném připojení</string>
     <string name="reopen_on_reconnection_description">Po stisknutí tlačítka Ukončit aplikace zůstane běžet na pozadí a nadále sleduje USB připojení. Pokud se zařízení znovu připojí, aplikace se automaticky otevře.</string>
@@ -986,6 +987,7 @@
     <string name="narrow_band_profile_cap_description">Když toto sezení běží na 2,4 GHz, ať už proto, že Wi-Fi této jednotky nemá pásmo 5 GHz, nebo proto, že síť na něm vznikla, žádat telefon nejvýše o 720p a 30 fps místo nastavení výše, a o zvuk AAC. Na takovém spoji bylo naměřeno, že plný datový tok nepřenesl vůbec žádný obraz, zatímco nižší vydržel. Vypněte to, pokud chcete dostat přesně to, co jste nastavili.</string>
     <string name="connection_issue_banner_video_link_too_slow">Telefon několikrát po sobě vzdal video dřív, než dorazil jediný snímek. Spoj Wi-Fi je pro přenos obrazu příliš pomalý. Klepnutím snížíte limit FPS na 30; pomůže i nižší rozlišení a zvuk AAC.</string>
     <string name="connection_issue_banner_five_ghz_channel_refused">Tato jednotka odmítla umístit síť WiFi Direct na jakýkoli kanál 5 GHz, který jsi zvolil, a spustila ji na kanálu vybraném jejím vlastním ovladačem Wi-Fi. Tento kanál telefony v zemích s přísnějšími pravidly často vůbec nevidí. Klepnutím nastavíš pásmo WiFi Direct na 2,4 GHz, které je povoleno všude; počítej na něm s 720p místo 1080p.</string>
+    <string name="connection_issue_banner_headunit_server_deaf">Server head unit služby Android Auto ve vašem telefonu přijímá připojení, ale na žádné neodpovídá. Sám se neobnoví: v telefdonu zastavte server head unit ve vývojářském nastavení Android Auto a znovu jej spusťte. Tato jednotka se připojí sama.</string>
     <string name="connection_issue_banner_dismiss">Zavřít</string>
     <string name="connection_issue_remedy_hotspot_query">Název a heslo hotspotu</string>
     <string name="preflight_title">Před připojením</string>

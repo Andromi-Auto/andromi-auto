@@ -458,6 +458,8 @@ class CommManager(
                     sessionReachedHandshake = true
                     videoDecoder.framesRenderedThisSession = 0L
                     silentPeerFailures = 0
+                    // The peer answered, which is what the deaf-server record claims it cannot.
+                    ConnectionIssues.clear(context, ConnectionIssue.HEADUNIT_SERVER_NOT_ANSWERING)
                     _connectionState.emit(ConnectionState.HandshakeComplete)
                 } else {
                     val silent = transport?.lastHandshakeFailure == AapTransport.HandshakeFailure.PEER_SILENT
@@ -507,10 +509,10 @@ class CommManager(
                     "without answering any of them. Slowing discovery to one attempt every " +
                     "${UnresponsivePeerPolicy.BACKOFF_RESCAN_MS / 1000}s. Android Auto hands each " +
                     "accepted connection to its own car service and waits there with no timeout, so " +
-                    "it does not recover on its own and restarting the server does not clear it. " +
-                    "Force stop Android Auto on the phone, and reboot it if that does not help; this " +
-                    "will reconnect by itself."
+                    "it does not recover on its own. Stop and start the head unit server on the " +
+                    "phone; this will reconnect by itself."
             )
+            ConnectionIssues.raise(context, ConnectionIssue.HEADUNIT_SERVER_NOT_ANSWERING)
         }
     }
 
@@ -948,23 +950,25 @@ class CommManager(
         // here, so the second pass sees a session that never reached the handshake and counts
         // nothing.
         noteSessionEnded(renderedAnyFrame = videoDecoder.framesRenderedThisSession > 0L)
-        try {
-            // Only send ByeByeRequest when we are initiating the disconnect (e.g. user pressed
-            // disconnect). When the transport self-quit (read error, soTimeout), the connection
-            // is already dead — skip the send and the 150 ms sleep inside stop().
-            if (sendByeBye) transport?.stop(byeByeReason) else transport?.quit()
+        // The close is in its own phase because it is the one that must happen: a throw from the
+        // ByeBye send or either decoder stop used to skip it, leaving the phone's head unit server
+        // holding a peer that never came back. See TeardownGuard.
+        TeardownGuard.runThenClose(
+            teardown = {
+                // Only send ByeByeRequest when we are initiating the disconnect (e.g. user pressed
+                // disconnect). When the transport self-quit (read error, soTimeout), the connection
+                // is already dead — skip the send and the 150 ms sleep inside stop().
+                if (sendByeBye) transport?.stop(byeByeReason) else transport?.quit()
 
-            // Explicitly stop and release decoders to prevent MediaCodec finalize() timeouts
-            videoDecoder.stop("CommManager: doDisconnect")
-            audioDecoder.stop()
-
-            connection?.disconnect()
-        } catch (e: Exception) {
-            AppLog.e("doDisconnect error: ${e.message}")
-        } finally {
-            if (_connectionState.value !is ConnectionState.Disconnected) {
-                _connectionState.value = ConnectionState.Disconnected()
-            }
+                // Explicitly stop and release decoders to prevent MediaCodec finalize() timeouts
+                videoDecoder.stop("CommManager: doDisconnect")
+                audioDecoder.stop()
+            },
+            close = { connection?.disconnect() },
+            onError = { phase, e -> AppLog.e("CommManager: doDisconnect $phase failed: ${e.message}") }
+        )
+        if (_connectionState.value !is ConnectionState.Disconnected) {
+            _connectionState.value = ConnectionState.Disconnected()
         }
     }
 

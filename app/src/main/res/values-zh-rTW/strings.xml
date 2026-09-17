@@ -161,6 +161,7 @@
     <string name="usb_auto_connect">USB 自動連接</string>
     <string name="usb_auto_connect_description">應用程式開啟時自動連接到已知的 USB 裝置。</string>
     <string name="auto_start_bt_label">藍牙自動啟動</string>
+    <string name="auto_start_overlay_missing_hint">未授予顯示在其他應用程式上層的權限，因此自動啟動會顯示通知而不是開啟畫面。點選以授予。</string>
     <string name="auto_start_bt_description">當特定藍牙裝置連接時，自動開啟 Open Headunit。</string>
     <string name="auto_start_offer_title">自動啟動？</string>
     <string name="auto_start_offer_message">要在此裝置（%1$s）上自動啟動應用程式嗎？</string>
@@ -414,14 +415,14 @@
     <string name="monochrome_icons_description">在深色或極致黑暗模式中使用灰階圖示</string>
     <string name="use_extreme_dark">使用極致黑暗</string>
     <string name="use_extreme_dark_description">在深色模式啟用時使用純黑背景</string>
-    <string name="show_fps_counter">顯示 FPS 計數器</string>
+    <string name="show_performance_overlay">顯示效能疊加層</string>
+    <string name="overlay_position">效能疊加層位置</string>
     <string name="overlay_permission_required">自動啟動需要「顯示在其他應用程式上層」權限</string>
     <string name="usb_permission_denied">USB 權限被拒絕。請允許 USB 存取以自動連線。</string>
-    <string name="overlay_permission_denied_auto_start_disabled">未授予覆蓋權限。自動啟動已被停用。</string>
     <string name="use_white_background">使用白色主畫面桌布</string>
     <string name="reopen_on_reconnection_label">重新連線時重新開啟</string>
     <string name="reopen_on_reconnection_description">當您按下退出按鈕時，應用程式會在背景繼續運行並持續監控 USB 連線。如果裝置重新連線，應用程式會自動開啟。</string>
-    <string name="show_fps_counter_description">在投影期間於左上角顯示即時 FPS 疊加層。</string>
+    <string name="show_performance_overlay_description">在投影畫面上顯示 FPS、CPU 負載、溫度與影格時間。</string>
 
     <string name="category_input">輸入設定</string>
     <string name="enable_rotary">啟用旋鈕控制器 (Rotary)</string>
@@ -985,6 +986,7 @@
     <string name="narrow_band_profile_cap_description">當此工作階段在 2.4 GHz 上執行時，無論是因為此主機的 WiFi 沒有 5 GHz 頻段，還是因為網路在該頻段上建立，都會改為向手機要求最高 720p 與 30 fps，以及 AAC 音訊，而非上方的設定。實測顯示在這種連線上，全速串流完全傳不出畫面，較低的設定則能維持。若要完全依照您的設定，請關閉此選項。</string>
     <string name="connection_issue_banner_video_link_too_slow">手機連續多次在第一個影格送達前就放棄影像。WiFi 連線太慢，無法承載畫面。輕觸以將 FPS 上限降為 30；降低解析度與改用 AAC 音訊也有幫助。</string>
     <string name="connection_issue_banner_five_ghz_channel_refused">這台主機拒絕將 WiFi Direct 網路建立在你所選的任何 5 GHz 頻道上，因此改用它自己的 WiFi 驅動程式挑選的頻道。該頻道往往是法規較嚴格國家的手機根本看不到的頻道。點選以將 WiFi Direct 頻段設為 2.4 GHz，這是所有國家都允許的頻段；在該頻段上預期為 720p 而非 1080p。</string>
+    <string name="connection_issue_banner_headunit_server_deaf">你手機上的 Android Auto 主機伺服器會接受連線，卻不回應任何一個。它不會自行恢復：請在手機的 Android Auto 開發人員設定中停止主機伺服器，然後再次啟動。本機將自行重新連線。</string>
     <string name="connection_issue_banner_dismiss">關閉</string>
     <string name="connection_issue_remedy_hotspot_query">熱點名稱與密碼</string>
     <string name="preflight_title">連線前檢查</string>

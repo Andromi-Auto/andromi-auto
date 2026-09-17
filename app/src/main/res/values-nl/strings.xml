@@ -161,6 +161,7 @@
     <string name="usb_auto_connect">Automatisch verbinden met USB</string>
     <string name="usb_auto_connect_description">Automatisch verbinden met een bekend USB-apparaat wanneer de applicatie wordt geopend.</string>
     <string name="auto_start_bt_label">Automatisch starten bij Bluetooth</string>
+    <string name="auto_start_overlay_missing_hint">Over andere apps weergeven is niet toegestaan, dus automatisch starten toont een melding in plaats van het scherm te openen. Tik om toe te staan.</string>
     <string name="auto_start_bt_description">Start Open Headunit automatisch wanneer een specifiek Bluetooth-apparaat verbinding maakt.</string>
     <string name="auto_start_offer_title">Automatisch starten?</string>
     <string name="auto_start_offer_message">Wil je de app automatisch starten met dit apparaat, %1$s?</string>
@@ -414,14 +415,14 @@
     <string name="monochrome_icons_description">Grijstinten pictogrammen op het startscherm gebruiken in Donker of Extra donker modus</string>
     <string name="use_extreme_dark">Extra donker gebruiken</string>
     <string name="use_extreme_dark_description">Puur zwarte achtergrond gebruiken wanneer donkere modus actief is</string>
-    <string name="show_fps_counter">FPS-teller weergeven</string>
+    <string name="show_performance_overlay">Prestatie-overlay tonen</string>
+    <string name="overlay_position">Positie van prestatie-overlay</string>
     <string name="overlay_permission_required">Automatisch starten vereist de machtiging \'Weergeven over andere apps\'</string>
     <string name="usb_permission_denied">USB-machtiging geweigerd. Sta USB-toegang toe om automatisch te verbinden.</string>
-    <string name="overlay_permission_denied_auto_start_disabled">Overlay-machtiging niet verleend. Automatisch starten is uitgeschakeld.</string>
     <string name="use_white_background">Wit startscherm achtergrond gebruiken</string>
     <string name="reopen_on_reconnection_label">Heropenen bij herverbinding</string>
     <string name="reopen_on_reconnection_description">Wanneer u op de knop Afsluiten drukt, blijft de app op de achtergrond draaien en blijft USB-verbindingen monitoren. Als een apparaat opnieuw verbinding maakt, opent de app automatisch.</string>
-    <string name="show_fps_counter_description">Toon een real-time FPS-overlay in de linkerbovenhoek tijdens de projectie.</string>
+    <string name="show_performance_overlay_description">Toont FPS, CPU-belasting, temperatuur en frameleeftijd over de projectie.</string>
 
     <string name="category_input">Invoerinstellingen</string>
     <string name="enable_rotary">Draaiknop (Rotary) inschakelen</string>
@@ -986,6 +987,7 @@
     <string name="narrow_band_profile_cap_description">Als deze sessie op 2,4 GHz draait, of dat nu is omdat de wifi van dit apparaat geen 5GHz-band heeft of omdat het netwerk daar is opgekomen, vraag de telefoon dan om maximaal 720p en 30 fps in plaats van de instellingen hierboven, en om AAC-audio. Op zo\'n verbinding bleek uit metingen dat een stream op volle snelheid helemaal geen beeld doorgaf, terwijl een lagere het wel volhield. Zet dit uit om precies te krijgen wat je hebt ingesteld.</string>
     <string name="connection_issue_banner_video_link_too_slow">Je telefoon heeft de video meerdere keren achter elkaar opgegeven voordat er ook maar één beeld binnenkwam. De wifi-verbinding is te traag voor het beeld. Tik om de FPS-limiet naar 30 te verlagen; een lagere resolutie en AAC-audio helpen ook.</string>
     <string name="connection_issue_banner_five_ghz_channel_refused">Deze unit weigerde het WiFi Direct-netwerk op een door jou gekozen 5 GHz-kanaal te zetten en startte het op het kanaal dat de eigen wifi-driver koos. Dat kanaal is vaak een kanaal dat telefoons in strengere landen niet eens kunnen zien. Tik hier om de WiFi Direct-band op 2,4 GHz te zetten, wat overal is toegestaan; verwacht daar 720p in plaats van 1080p.</string>
+    <string name="connection_issue_banner_headunit_server_deaf">De head-unitserver van Android Auto op je telefoon accepteert verbindingen en beantwoordt er geen enkele. Hij herstelt niet vanzelf: stop op de telefoon de head-unitserver in de ontwikkelaarsinstellingen van Android Auto en start hem opnieuw. Dit apparaat verbindt daarna vanzelf.</string>
     <string name="connection_issue_banner_dismiss">Sluiten</string>
     <string name="connection_issue_remedy_hotspot_query">Hotspot-naam en wachtwoord</string>
     <string name="preflight_title">Voordat je verbindt</string>

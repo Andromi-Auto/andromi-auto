@@ -1231,6 +1231,8 @@ class MainActivity : BaseActivity() {
                     R.string.connection_issue_banner_video_link_too_slow
                 ConnectionIssue.FIVE_GHZ_CHANNEL_REFUSED ->
                     R.string.connection_issue_banner_five_ghz_channel_refused
+                ConnectionIssue.HEADUNIT_SERVER_NOT_ANSWERING ->
+                    R.string.connection_issue_banner_headunit_server_deaf
             }
         )
         banner.setOnClickListener { openRemedyFor(issue) }
@@ -1265,6 +1267,8 @@ class MainActivity : BaseActivity() {
      */
     private fun openRemedyFor(issue: ConnectionIssue) {
         val query = when (issue) {
+            // The remedy is on the phone, so there is no row here to send anyone to.
+            ConnectionIssue.HEADUNIT_SERVER_NOT_ANSWERING -> return
             ConnectionIssue.BLUETOOTH_SENT_NO_DATA -> getString(R.string.wireless_mode)
             ConnectionIssue.BSSID_UNAVAILABLE -> getString(R.string.static_bssid_title)
             ConnectionIssue.HOTSPOT_CONFIG_UNREADABLE ->

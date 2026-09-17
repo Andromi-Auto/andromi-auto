@@ -162,6 +162,7 @@
     <string name="usb_auto_connect">Автопідключення USB</string>
     <string name="usb_auto_connect_description">Автоматично підключатися до відомого USB-пристрою при запуску програми.</string>
     <string name="auto_start_bt_label">Автозапуск при Bluetooth</string>
+    <string name="auto_start_overlay_missing_hint">Дозвіл на показ поверх інших застосунків не надано, тому автозапуск покаже сповіщення замість відкриття екрана. Торкніться, щоб надати.</string>
     <string name="auto_start_bt_description">Автоматично відкривати Open Headunit при підключенні певного пристрою Bluetooth.</string>
     <string name="auto_start_offer_title">Запускати автоматично?</string>
     <string name="auto_start_offer_message">Запускати застосунок автоматично з цим пристроєм, %1$s?</string>
@@ -415,11 +416,11 @@
     <string name="monochrome_icons_description">Використовувати сірі значки на головному екрані в темному або надтемному режимі</string>
     <string name="use_extreme_dark">Використовувати надтемний режим</string>
     <string name="use_extreme_dark_description">Використовувати повністю чорний фон при активному темному режимі</string>
-    <string name="show_fps_counter">Показувати лічильник FPS</string>
-    <string name="show_fps_counter_description">Відображати частоту кадрів у реальному часі у верхньому лівому куті під час проекції.</string>
+    <string name="show_performance_overlay">Показувати панель продуктивності</string>
+    <string name="overlay_position">Положення панелі продуктивності</string>
+    <string name="show_performance_overlay_description">Показує FPS, завантаження процесора, температуру та вік кадру поверх проєкції.</string>
     <string name="overlay_permission_required">Автозапуск потребує дозволу \'Відображення поверх інших додатків\'</string>
     <string name="usb_permission_denied">Дозвіл USB відхилено. Будь ласка, дозвольте доступ до USB для автоматичного підключення.</string>
-    <string name="overlay_permission_denied_auto_start_disabled">Дозвіл на накладення не надано. Автозапуск було вимкнено.</string>
     <string name="use_white_background">Використовувати білі шпалери головного екрана</string>
     <string name="reopen_on_reconnection_label">Відкривати при повторному підключенні</string>
     <string name="reopen_on_reconnection_description">Коли ви натискаєте кнопку «Вихід», додаток продовжує працювати у фоновому режимі та відстежує USB-підключення. Якщо пристрій підключається повторно, додаток відкривається автоматично.</string>
@@ -987,6 +988,7 @@
     <string name="narrow_band_profile_cap_description">Коли цей сеанс працює на 2,4 ГГц, чи то тому, що Wi-Fi цього пристрою не має діапазону 5 ГГц, чи то тому, що мережа піднялася на ньому, запитувати в телефона щонайбільше 720p і 30 кадр/с замість налаштувань вище, а також звук AAC. На такому з\'єднанні виміряно, що потік на повній швидкості не передавав зображення взагалі, а нижчий працював. Вимкніть, щоб отримувати саме те, що ви задали.</string>
     <string name="connection_issue_banner_video_link_too_slow">Ваш телефон кілька разів поспіль припиняв відео ще до першого кадру. З\'єднання Wi-Fi надто повільне для зображення. Натисніть, щоб знизити обмеження FPS до 30; також допоможуть менша роздільність і звук AAC.</string>
     <string name="connection_issue_banner_five_ghz_channel_refused">Цей пристрій відмовився розмістити мережу WiFi Direct на будь-якому обраному тобою каналі 5 ГГц і запустив її на каналі, який обрав його власний драйвер Wi-Fi. Цей канал часто не видно телефонам у країнах зі суворішими правилами. Торкніться, щоб встановити діапазон WiFi Direct на 2,4 ГГц, дозволений у всіх країнах; очікуйте 720p замість 1080p.</string>
+    <string name="connection_issue_banner_headunit_server_deaf">Сервер головного пристрою Android Auto на вашому телефоні приймає підключення й на жодне не відповідає. Сам він не відновиться: на телефоні зупиніть сервер головного пристрою в налаштуваннях розробника Android Auto і запустіть його знову. Цей пристрій підключиться сам.</string>
     <string name="connection_issue_banner_dismiss">Закрити</string>
     <string name="connection_issue_remedy_hotspot_query">Назва та пароль точки доступу</string>
     <string name="preflight_title">Перед підключенням</string>

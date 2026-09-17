@@ -680,10 +680,7 @@ class HomeFragment : Fragment() {
             requestDriverSelection = false
             showNativeAaDeviceSelector(autoCountdown = false)
         } else if (appSettings.wifiConnectionMode == WifiLauncherMode.NATIVE && !commManager.isConnected) {
-            // The driver check runs once. Nothing it puts on screen blocks the clean-up below any
-            // more, which only rewrites a setting and never waits for a free screen.
             if (!hasCheckedNativeDriverSelection) checkNativeDriverSelectionOnStartup()
-            checkAutoStartOffer(AutoStartOfferPolicy.Trigger.HOME_SCREEN)
         }
 
         activity?.let { act ->
@@ -766,37 +763,6 @@ class HomeFragment : Fragment() {
             return true
         }
         return false
-    }
-
-    /**
-     * The home screen's half of the auto-start offer, which is the two-phone clean-up only.
-     *
-     * The question itself is asked at the first frame of a session, by AapProjectionActivity: a
-     * phone can wake this unit on its own, and nobody is here to be asked. [AutoStartOfferPolicy].
-     */
-    private fun checkAutoStartOffer(trigger: AutoStartOfferPolicy.Trigger) {
-        if (!isAdded) return
-        val appSettings = App.provide(requireContext()).settings
-        val adapter = BluetoothHelper.getBluetoothAdapter(requireContext())
-        if (adapter == null || !adapter.isEnabled) return
-
-        val connectedMac = appSettings.lastConnectedNativeMac
-        val cands = BluetoothHelper.driverCandidates(
-            requireContext(), appSettings.nativePreferredDeviceMac, connectedMac
-        )
-        val action = AutoStartOfferPolicy.decide(
-            phonesPaired = cands.offered.size,
-            connectedMac = connectedMac,
-            answeredMacs = appSettings.autoStartOfferAnsweredMacs,
-            autoStartConfigured = appSettings.autoStartBluetoothDeviceMacs.isNotEmpty(),
-        )
-        if (!AutoStartOfferPolicy.actsNow(action, trigger)) return
-        if (action == AutoStartOfferPolicy.Action.RESET) {
-            AppLog.i("HomeFragment: more than one phone is paired, so the Bluetooth auto-start device is cleared.")
-            appSettings.autoStartBluetoothDeviceMacs = emptySet()
-            appSettings.autoStartBluetoothDeviceName = ""
-            Settings.syncAutoStartBtMacsToDeviceStorage(requireContext(), emptySet())
-        }
     }
 
     private fun showNativeAaDeviceSelector(autoCountdown: Boolean = false) {
