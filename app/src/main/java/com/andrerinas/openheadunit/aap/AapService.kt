@@ -37,6 +37,7 @@ import com.andrerinas.openheadunit.app.ForegroundServiceTypePolicy
 import com.andrerinas.openheadunit.app.WifiAutoStartReceiver
 import com.andrerinas.openheadunit.connection.wifi.HotspotExitAction
 import com.andrerinas.openheadunit.connection.wifi.UsbSessionQuiescePolicy
+import com.andrerinas.openheadunit.connection.wifi.SettingsScreenPausePolicy
 import com.andrerinas.openheadunit.connection.wifi.WirelessBringUpDeferralPolicy
 import com.andrerinas.openheadunit.connection.wifi.UserExitHotspotPolicy
 import com.andrerinas.openheadunit.decoder.audio.PlaybackFocusPolicy
@@ -52,6 +53,7 @@ import com.andrerinas.openheadunit.aap.protocol.messages.NightModeEvent
 import com.andrerinas.openheadunit.aap.protocol.proto.MediaPlayback
 import com.andrerinas.openheadunit.decoder.audio.MicRecorder
 import com.andrerinas.openheadunit.connection.CommManager
+import com.andrerinas.openheadunit.connection.ConnectionStageTracker
 import com.andrerinas.openheadunit.connection.carkey.CarKeysManager
 import com.andrerinas.openheadunit.connection.wifi.NetworkDiscovery
 import android.support.v4.media.session.MediaSessionCompat
@@ -100,6 +102,7 @@ import com.andrerinas.openheadunit.connection.wifi.modes.WifiLauncherManual
 import com.andrerinas.openheadunit.connection.wifi.modes.WifiLauncherNative
 import com.andrerinas.openheadunit.connection.wifi.server.WirelessServer
 import com.andrerinas.openheadunit.main.BackgroundNotification
+import com.andrerinas.openheadunit.main.SettingsActivity
 import com.andrerinas.openheadunit.main.FloatingButtonManager
 import com.andrerinas.openheadunit.utils.Settings
 import com.andrerinas.openheadunit.utils.VpnControl
@@ -1366,6 +1369,13 @@ class AapService : Service() {
             return
         }
 
+        // The user is configuring the app. SettingsActivity raises the projection itself when it
+        // goes, and MainActivity.onResume does the same on the way back to the home screen.
+        if (SettingsActivity.isForeground) {
+            AppLog.i("AapService: Not raising the projection, the settings screen is open")
+            return
+        }
+
         val intent = AapProjectionActivity.intent(this).apply {
             putExtra(AapProjectionActivity.EXTRA_FOCUS, true)
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
@@ -1496,6 +1506,12 @@ class AapService : Service() {
         releaseWifiLock()
         stopDummyVpn(DummyVpnPolicy.Reason.SESSION_ENDED)
 
+        // Here rather than in the teardown coroutine below, which runs ~300ms later: the pill is
+        // re-rendered inside that window and would show the ended session's last step. Only stop()
+        // used to take it down, so every session end that keeps the launcher left it frozen at
+        // STARTING_PROJECTION, which outranks and so silently drops every later report.
+        if (!commManager.isConnected) ConnectionStageTracker.endAttempt()
+
         // Stop GpsLocationService and NightModeManager sensor tracking
         AppLog.i("AapService: Stopping GpsLocationService and NightModeManager since connection is disconnected")
         stopService(GpsLocationService.intent(this))
@@ -1561,7 +1577,9 @@ class AapService : Service() {
                     commManager.awaitDisconnectComplete()
                     val launcher = wifiLauncherManager.active as? WifiLauncherNative
                     AppLog.i("AapService: Native AA session ended; keeping the ${launcher?.strategy ?: "wireless"} network up for the phone's return.")
-                    launcher?.rearmAfterSessionEnd()
+                    launcher?.rearmAfterSessionEnd(
+                        wakePhone = SessionEndGroupPolicy.wakesPhoneAfterSessionEnd(state.isClean),
+                    )
                 }
                 SessionEndGroupPolicy.Action.NONE -> {}
             }
@@ -2220,6 +2238,80 @@ class AapService : Service() {
         return true
     }
 
+    /**
+     * Whether the settings screen has the wireless stack down. Read by `WifiLauncherManager.setActive`,
+     * which refuses to arm while it is true, so the ACTION_START_WIRELESS a Save fires cannot walk
+     * the stack back up under the user.
+     */
+    @Volatile var wirelessPausedForSettings = false
+        private set
+
+    /** Whether the status pill's X is holding the stack down, so no pill is raised over nothing. */
+    fun wirelessCancelledByUser(): Boolean = wifiLauncherManager.cancelledByUser
+
+    /** True while the setup QR dialog needs the running launcher to read a network off. */
+    @Volatile private var settingsQrHold = false
+
+    /** A wireless setting was saved while the screen had the stack down; the close re-arms it. */
+    @Volatile private var wirelessRearmPendingForSettings = false
+
+    private var settingsRearmJob: Job? = null
+
+    /** The settings screen opened or closed, or its QR dialog took or released its hold. */
+    fun onSettingsScreenChanged(inForeground: Boolean? = null, qrHold: Boolean? = null) {
+        if (qrHold != null) settingsQrHold = qrHold
+        // Showing the setup QR is an explicit wireless action: the close after its dismiss must
+        // still re-arm, or the phone that scanned it finds nothing listening.
+        if (qrHold == true) wirelessRearmPendingForSettings = true
+        val foreground = inForeground ?: SettingsActivity.isForeground
+
+        // Connecting counts as live: a phone already on its way in is not torn down for this, and
+        // the raise suppression is what keeps it off the screen when it lands.
+        val sessionLive = commManager.isConnected ||
+            commManager.connectionState.value is CommManager.ConnectionState.Connecting
+        val pause = SettingsScreenPausePolicy.pauses(
+            settingsForeground = foreground,
+            sessionLive = sessionLive,
+            qrHold = settingsQrHold,
+        )
+        if (pause == wirelessPausedForSettings) return
+
+        if (pause) {
+            wirelessPausedForSettings = true
+            // A recreate or a permission prompt can have scheduled one; it must not fire now.
+            settingsRearmJob?.cancel()
+            AppLog.i(
+                "AapService: the settings screen is open, so the wireless stack stops until it " +
+                    "closes. A wake poke that works would raise the projection over it."
+            )
+            wifiLauncherManager.stop()
+            return
+        }
+
+        wirelessPausedForSettings = false
+        val mode = App.provide(this).settings.wifiConnectionMode
+        if (mode == WifiLauncherMode.MANUAL) return
+
+        if (!SettingsScreenPausePolicy.rearmsOnRelease(settingsQrHold, wirelessRearmPendingForSettings)) {
+            AppLog.i(
+                "AapService: the settings screen closed with nothing wireless changed, so the " +
+                    "wireless stack stays down. The WiFi button re-arms it."
+            )
+            return
+        }
+
+        val why = if (settingsQrHold) "the setup QR needs the running launcher"
+            else "the settings screen closed with a wireless setting saved behind it"
+        AppLog.i("AapService: $why, re-arming wireless mode $mode")
+        settingsRearmJob = serviceScope.launch {
+            delay(1500) // Same settle the Native AA reconnect path allows the P2P hardware.
+            // Reopened inside the settle: leave the Save pending so the real close still applies it.
+            if (wirelessPausedForSettings) return@launch
+            if (!settingsQrHold) wirelessRearmPendingForSettings = false
+            wifiLauncherManager.setActiveFromSettings(force = true)
+        }
+    }
+
     private fun acquireWifiLock() {
         if (wifiLock == null) {
             val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
@@ -2499,7 +2591,15 @@ class AapService : Service() {
                 // Asked for from the UI, so the user is present: release the boot-loop pause
                 // rather than silently ignoring them.
                 Settings.clearBootLoopState(this)
-                wifiLauncherManager.setActiveFromSettings()
+                wifiLauncherManager.liftUserCancel("a wireless setting was saved")
+                // Save does not close the screen, so arming now would put the stack up under it.
+                if (wirelessPausedForSettings) {
+                    wirelessRearmPendingForSettings = true
+                    AppLog.i("AapService: a wireless setting was saved while the settings screen " +
+                        "is open; re-arming when it closes.")
+                } else {
+                    wifiLauncherManager.setActiveFromSettings()
+                }
             }
             ACTION_START_WIRELESS_SCAN   -> {
                 val settings = App.provide(this).settings
@@ -2511,12 +2611,33 @@ class AapService : Service() {
                 userExitedAA = false
                 userExitCooldownUntil = 0L
                 Settings.clearBootLoopState(this)
-                wifiLauncherManager.setActiveFromSettings(force = true, noInfoToasts = false)
+                wifiLauncherManager.setActiveFromSettings(
+                    force = true, noInfoToasts = false, userRequested = true
+                )
 
                 if (mode == WifiLauncherMode.AUTO)
                     wifiLauncherManager.startDiscovery(oneShot = true)
             }
-            ACTION_STOP_WIRELESS         -> wifiLauncherManager.stop()
+            ACTION_STOP_WIRELESS         -> {
+                wirelessRearmPendingForSettings = false
+                wifiLauncherManager.stop()
+            }
+            ACTION_CANCEL_WIRELESS       -> {
+                AppLog.i("AapService: the status pill's X stopped the wireless bring-up. It stays " +
+                    "down until the WiFi button or a wireless setting asks for it.")
+                wirelessRearmPendingForSettings = false
+                if (commManager.connectionState.value is CommManager.ConnectionState.Connecting) {
+                    // The pill's CONNECTING step: the socket goes before the interface, as on a
+                    // user exit, or the teardown races a session still coming up.
+                    commManager.disconnect()
+                    serviceScope.launch {
+                        commManager.awaitDisconnectComplete()
+                        wifiLauncherManager.stopForUser()
+                    }
+                } else {
+                    wifiLauncherManager.stopForUser()
+                }
+            }
             ACTION_ROTATE_WIFI_DIRECT_IDENTITY -> rotateWifiDirectIdentity()
             ACTION_NATIVE_AA_POKE        -> {
                 val mac = intent?.getStringExtra(EXTRA_MAC)
@@ -2538,9 +2659,9 @@ class AapService : Service() {
                     } else {
                         if (wifiLauncherManager.activeMode != WifiLauncherMode.NATIVE) {
                             AppLog.i("AapService: Initializing Native AA mode before poke...")
-                            wifiLauncherManager.setActiveFromSettings(force = true)
+                            wifiLauncherManager.setActiveFromSettings(force = true, userRequested = true)
                         } else if (activeLauncher is WifiLauncherNative && activeLauncher.handshakeManager?.isStarted() != true) {
-                            // Never started, or stopped. rearmAfterSessionEnd() cannot help here:
+                            // Never started, or stopped. reopenListeners() cannot help here:
                             // it returns on the same flag, so the button used to promise a repair
                             // it never made and the phone had nothing to connect back to.
                             val why = activeLauncher.handshakeManager?.notStartedReason()
@@ -2560,7 +2681,7 @@ class AapService : Service() {
                             // nothing was listening. The listeners are reopened directly rather than by
                             // rebuilding the mode and its network under the phone.
                             AppLog.i("AapService: Native AA listeners are closed, reopening them before the poke.")
-                            activeLauncher.rearmAfterSessionEnd()
+                            activeLauncher.reopenListeners()
                         } else {
                             AppLog.d("AapService: Already in Native AA mode, skipping re-init.")
                         }
@@ -2716,7 +2837,7 @@ class AapService : Service() {
                     } else {
                         AppLog.i("AapService: Nearby is not the running transport — arming it before connecting.")
                         val launcher = WifiLauncherHelper(wifiLauncherManager, HelperStrategy.NEARBY_DEVICES)
-                        wifiLauncherManager.setActive(launcher, force = true)
+                        wifiLauncherManager.setActive(launcher, force = true, userRequested = true)
                         launcher.nearbyManager?.connectToEndpoint(endpointId)
                     }
                 }
@@ -3068,6 +3189,7 @@ class AapService : Service() {
         const val ACTION_BT_AUTO_START              = "com.andrerinas.openheadunit.ACTION_BT_AUTO_START"
         const val ACTION_START_WIRELESS_SCAN       = "com.andrerinas.openheadunit.ACTION_START_WIRELESS_SCAN"
         const val ACTION_STOP_WIRELESS             = "com.andrerinas.openheadunit.ACTION_STOP_WIRELESS"
+        const val ACTION_CANCEL_WIRELESS           = "com.andrerinas.openheadunit.ACTION_CANCEL_WIRELESS"
         const val ACTION_ROTATE_WIFI_DIRECT_IDENTITY = "com.andrerinas.openheadunit.ACTION_ROTATE_WIFI_DIRECT_IDENTITY"
         const val ACTION_NATIVE_AA_POKE            = "com.andrerinas.openheadunit.ACTION_NATIVE_AA_POKE"
         const val ACTION_NATIVE_AA_SWITCH_DEVICE   = "com.andrerinas.openheadunit.ACTION_NATIVE_AA_SWITCH_DEVICE"

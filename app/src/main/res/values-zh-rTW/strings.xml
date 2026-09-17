@@ -984,10 +984,12 @@
     <string name="connection_issue_banner_hotspot_config">無法取得熱點名稱與密碼。輕觸以手動輸入。</string>
     <string name="narrow_band_profile_cap">在 2.4 GHz 連線時降低影像</string>
     <string name="narrow_band_profile_cap_description">當此工作階段在 2.4 GHz 上執行時，無論是因為此主機的 WiFi 沒有 5 GHz 頻段，還是因為網路在該頻段上建立，都會改為向手機要求最高 720p 與 30 fps，以及 AAC 音訊，而非上方的設定。實測顯示在這種連線上，全速串流完全傳不出畫面，較低的設定則能維持。若要完全依照您的設定，請關閉此選項。</string>
-    <string name="connection_issue_banner_video_link_too_slow">手機連續多次在第一個影格送達前就放棄影像。WiFi 連線太慢，無法承載畫面。輕觸以將 FPS 上限降為 30；降低解析度與改用 AAC 音訊也有幫助。</string>
+    <string name="connection_issue_banner_video_link_too_slow">手機連續多次在第一個影格送達前就放棄影像。WiFi 連線太慢，無法承載畫面，因此目前改以 720p、30 FPS 與 AAC 音訊要求。輕觸可自行設定解析度或 FPS 上限，這同時也會解除此限制；另一個解法是改用 5 GHz 網路。</string>
     <string name="connection_issue_banner_five_ghz_channel_refused">這台主機拒絕將 WiFi Direct 網路建立在你所選的任何 5 GHz 頻道上，因此改用它自己的 WiFi 驅動程式挑選的頻道。該頻道往往是法規較嚴格國家的手機根本看不到的頻道。點選以將 WiFi Direct 頻段設為 2.4 GHz，這是所有國家都允許的頻段；在該頻段上預期為 720p 而非 1080p。</string>
     <string name="connection_issue_banner_headunit_server_deaf">你手機上的 Android Auto 主機伺服器會接受連線，卻不回應任何一個。它不會自行恢復：請在手機的 Android Auto 開發人員設定中停止主機伺服器，然後再次啟動。本機將自行重新連線。</string>
+    <string name="connection_issue_banner_hands_free_held">另一部裝置已在使用本機的免持連接，因此本機正在喚醒的手機無法取得該連接。除非主機的藍牙已透過設定檔連接，否則 Android Auto 不會開始無線連接，而一次只能提供一個免持連接的裝置，已經沒有可用的連接了。請中斷另一部裝置的連接，或關閉其藍牙，本機將自行重試。</string>
     <string name="connection_issue_banner_dismiss">關閉</string>
+    <string name="auto_connect_pill_cancel">停止連線</string>
     <string name="connection_issue_remedy_hotspot_query">熱點名稱與密碼</string>
     <string name="preflight_title">連線前檢查</string>
     <string name="preflight_intro">此裝置無法提供 Android Auto 所需的所有資訊：</string>
@@ -1114,7 +1116,7 @@
     <string name="wifi_direct_new_identity_confirm">為群組選擇新的名稱和密碼，並於下次連線時生效。手機將透過藍牙重新設定，猶如連至全新車機。</string>
     <string name="wifi_direct_new_identity_done">下次連線時將使用新的網路識別碼。</string>
     <string name="wifi_direct_new_identity_applied">正在設定新的網路識別碼。下次連線時將要求您的手機加入該網路。</string>
-    <string name="wifi_direct_stable_identity_description_legacy">在此 Android 版本中，網路名稱由系統決定，並會盡可能維持不變。請保持開啟，讓手機重新連接已知的網路；若手機持續拒絕已儲存的網路，請在下方改用新的識別碼。關閉後，系統會在每次連線前忘記該網路。</string>
+    <string name="wifi_direct_stable_identity_description_legacy">在此 Android 版本中，網路名稱由系統決定，部分裝置每次連線都會換一個新名稱，應用程式無法在此指定名稱。系統若會保留名稱，請保持開啟，讓手機重新連接已知的網路；若手機持續拒絕已儲存的網路，請在下方改用新的識別碼。關閉後，系統會在每次連線前忘記該網路。</string>
     <string name="debug_video_low_latency">請求解碼器低延遲模式</string>
     <string name="debug_video_low_latency_description">在設定視訊解碼器時設定廠商低延遲 MediaFormat 金鑰。</string>
     <string name="debug_video_feed_hold">模擬慢速解碼器</string>

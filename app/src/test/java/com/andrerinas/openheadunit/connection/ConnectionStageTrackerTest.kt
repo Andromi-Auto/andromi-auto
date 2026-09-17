@@ -74,6 +74,25 @@ class ConnectionStageTrackerTest {
         assertEquals(ConnectionStage.WAKING_PHONE, ConnectionStageTracker.stage.value)
     }
 
+    /** The regression: a session that ended at the top rank locked every later report out. */
+    @Test
+    fun `a session that ends takes the pill down and unlocks the next attempt`() {
+        ConnectionStageTracker.report(ConnectionStage.STARTING_PROJECTION)
+        ConnectionStageTracker.endAttempt()
+        assertNull(ConnectionStageTracker.stage.value)
+
+        ConnectionStageTracker.report(ConnectionStage.WAITING_FOR_PHONE)
+        assertEquals(ConnectionStage.WAITING_FOR_PHONE, ConnectionStageTracker.stage.value)
+    }
+
+    @Test
+    fun `a session that ends without removing the group keeps its network line`() {
+        ConnectionStageTracker.report(ConnectionStage.STARTING_PROJECTION)
+        ConnectionStageTracker.reportNetwork(ConnectionNetworkDetail(5805))
+        ConnectionStageTracker.endAttempt()
+        assertEquals(ConnectionNetworkDetail(5805), ConnectionStageTracker.network.value)
+    }
+
     @Test
     fun `a failed attempt leaves the group's line up`() {
         ConnectionStageTracker.report(ConnectionStage.WAKING_PHONE)

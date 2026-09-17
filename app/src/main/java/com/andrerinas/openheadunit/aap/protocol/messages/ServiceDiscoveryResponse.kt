@@ -380,6 +380,8 @@ class ServiceDiscoveryResponse(private val context: Context)
                 wirelessSession = App.provide(context).commManager.isWirelessSession,
                 capEnabled = settings.narrowBandProfileCap,
                 sessionFrequencyMhz = WifiBandCapability.sessionFrequencyMhz(),
+                bandUnreadable = WifiBandCapability.bandUnreadable(),
+                linkProvedTooSlow = settings.videoProfileStarvationCap,
             )
         } catch (e: Exception) {
             AppLog.d("[ServiceDiscovery] could not evaluate the band cap: ${e.message}")
@@ -401,6 +403,8 @@ class ServiceDiscoveryResponse(private val context: Context)
                 wirelessSession = App.provide(context).commManager.isWirelessSession,
                 capEnabled = settings.narrowBandProfileCap,
                 sessionFrequencyMhz = WifiBandCapability.sessionFrequencyMhz(),
+                bandUnreadable = WifiBandCapability.bandUnreadable(),
+                linkProvedTooSlow = settings.videoProfileStarvationCap,
             )
             if (aac && !settings.useAacAudio) {
                 AppLog.i("[ServiceDiscovery] AAC audio announced by the 2.4 GHz cap (Use AAC Audio is off)")
@@ -426,6 +430,8 @@ class ServiceDiscoveryResponse(private val context: Context)
                     wirelessSession = App.provide(context).commManager.isWirelessSession,
                     capEnabled = settings.narrowBandProfileCap,
                     sessionFrequencyMhz = WifiBandCapability.sessionFrequencyMhz(),
+                    bandUnreadable = WifiBandCapability.bandUnreadable(),
+                    linkProvedTooSlow = settings.videoProfileStarvationCap,
                 )
             } catch (e: Exception) {
                 // Service discovery must not fail over a diagnostic. A missing line is a missing

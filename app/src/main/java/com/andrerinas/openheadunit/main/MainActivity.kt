@@ -247,10 +247,10 @@ class MainActivity : BaseActivity() {
         )
         isFinishReceiverRegistered = true
 
-        // Wire cancel affordances. Pill click and overlay cancel button both
-        // route through the same cancellation path.
-        findViewById<View>(R.id.auto_connect_pill)?.setOnClickListener {
-            cancelAutoConnect()
+        // Wire cancel affordances. The pill's X stops the whole bring-up; the overlay's button
+        // ends only the attempt it belongs to.
+        findViewById<View>(R.id.auto_connect_pill_cancel)?.setOnClickListener {
+            cancelBringUp()
         }
         findViewById<View>(R.id.auto_connect_loading_cancel)?.setOnClickListener {
             cancelAutoConnect()
@@ -351,6 +351,19 @@ class MainActivity : BaseActivity() {
         // immediately rather than waiting for the round-trip.
         App.provide(this).commManager.disconnect()
         endAutoConnect(success = false)
+    }
+
+    /**
+     * The pill's X: ends the attempt this activity may be tracking, then has the service stop the
+     * stack and hold it down. [cancelAutoConnect] alone cannot reach the pre-handshake stages,
+     * which are the ones the pill spends most of its life showing.
+     */
+    private fun cancelBringUp() {
+        AppLog.i("MainActivity: status pill X pressed, stopping the wireless bring-up")
+        cancelAutoConnect()
+        ContextCompat.startForegroundService(this, Intent(this, AapService::class.java).apply {
+            action = AapService.ACTION_CANCEL_WIRELESS
+        })
     }
 
     /**
@@ -1039,7 +1052,9 @@ class MainActivity : BaseActivity() {
             // HomeFragment owns the VPN consent and the projection needs a foreground window.
             val commManager = App.provide(this).commManager
             val settings = App.provide(this).settings
-            if (!commManager.isConnected) {
+            // The service refuses this arrival while the pill's X holds, and a pill with nothing
+            // behind it would otherwise sit there for the watchdog's full deadline.
+            if (!commManager.isConnected && AapService.instance?.wirelessCancelledByUser() != true) {
                 beginAutoConnect(LAUNCH_SOURCE_BLUETOOTH, ConnectionUiMode.PILL)
             }
             val launchesSelfMode = BtAutoStartRearmPolicy.launchesSelfMode(
@@ -1196,7 +1211,8 @@ class MainActivity : BaseActivity() {
                     settings.onboardingVersion >= OnboardingActivity.CURRENT_ONBOARDING_VERSION,
                 relevant = ConnectionIssueBannerPolicy.relevantNow(
                     mode = settings.wifiConnectionMode.id,
-                    transport = settings.nativeApStrategy
+                    transport = settings.nativeApStrategy,
+                    wirelessSelected = settings.showsWifi()
                 ),
                 remedyApplied = ConnectionIssueBannerPolicy.remedyApplied(
                     hotspotSsid = settings.hotspotSsid,
@@ -1233,6 +1249,8 @@ class MainActivity : BaseActivity() {
                     R.string.connection_issue_banner_five_ghz_channel_refused
                 ConnectionIssue.HEADUNIT_SERVER_NOT_ANSWERING ->
                     R.string.connection_issue_banner_headunit_server_deaf
+                ConnectionIssue.HANDS_FREE_HELD_ELSEWHERE ->
+                    R.string.connection_issue_banner_hands_free_held
             }
         )
         banner.setOnClickListener { openRemedyFor(issue) }
@@ -1269,6 +1287,8 @@ class MainActivity : BaseActivity() {
         val query = when (issue) {
             // The remedy is on the phone, so there is no row here to send anyone to.
             ConnectionIssue.HEADUNIT_SERVER_NOT_ANSWERING -> return
+            // The remedy is the other device's Bluetooth connection, which no setting here reaches.
+            ConnectionIssue.HANDS_FREE_HELD_ELSEWHERE -> return
             ConnectionIssue.BLUETOOTH_SENT_NO_DATA -> getString(R.string.wireless_mode)
             ConnectionIssue.BSSID_UNAVAILABLE -> getString(R.string.static_bssid_title)
             ConnectionIssue.HOTSPOT_CONFIG_UNREADABLE ->

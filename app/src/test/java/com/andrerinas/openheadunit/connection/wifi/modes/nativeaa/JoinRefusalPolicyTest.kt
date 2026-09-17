@@ -77,4 +77,52 @@ class JoinRefusalPolicyTest {
         assertFalse(JoinRefusalPolicy.isFirstWidening(JoinRefusalPolicy.REFUSALS_AT_NORMAL_CADENCE + 2))
         assertFalse(JoinRefusalPolicy.isFirstWidening(20))
     }
+
+    private fun remaining(refusals: Int, refusedAt: Long, now: Long) =
+        JoinRefusalPolicy.remainingDelayMs(refusals, normal, refusedAt, now)
+
+    @Test
+    fun `a wake round with no refusal behind it waits for nothing`() {
+        for (refusals in 0..12) {
+            assertEquals("waited at $refusals", 0L, remaining(refusals, 0L, 900_000L))
+            assertEquals("waited at $refusals", 0L, remaining(refusals, -1L, 900_000L))
+        }
+    }
+
+    @Test
+    fun `a round starting inside the gap waits out what is left of it`() {
+        assertEquals(
+            JoinRefusalPolicy.WIDENED_DELAY_MS - 4_000L,
+            remaining(2, 10_000L, 14_000L)
+        )
+        assertEquals(
+            JoinRefusalPolicy.CEILING_DELAY_MS - 4_000L,
+            remaining(JoinRefusalPolicy.REFUSALS_BEFORE_CEILING, 10_000L, 14_000L)
+        )
+    }
+
+    @Test
+    fun `a gap already served waits for nothing rather than going negative`() {
+        assertEquals(0L, remaining(2, 10_000L, 10_000L + JoinRefusalPolicy.WIDENED_DELAY_MS))
+        assertEquals(0L, remaining(9, 10_000L, 900_000L))
+    }
+
+    @Test
+    fun `a stamp the clock has moved behind is capped at the gap itself`() {
+        // elapsedRealtime is read from several coroutines and survives a re-arm, so a reading that
+        // lands before the stamp must not turn into an unbounded wait.
+        assertEquals(JoinRefusalPolicy.WIDENED_DELAY_MS, remaining(2, 900_000L, 0L))
+    }
+
+    @Test
+    fun `what is left is never more than the gap the same count asks for`() {
+        for (refusals in 0..12) {
+            val gap = delay(refusals)
+            for (age in listOf(0L, 1L, 7_000L, 29_999L, 200_000L)) {
+                val left = remaining(refusals, 10_000L, 10_000L + age)
+                assertTrue("over the gap at $refusals/$age", left <= gap)
+                assertTrue("under zero at $refusals/$age", left >= 0L)
+            }
+        }
+    }
 }

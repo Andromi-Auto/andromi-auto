@@ -16,6 +16,13 @@ import com.andrerinas.openheadunit.utils.Settings
  * lower profile held on the same access point in both cases, so the cap is now applied and
  * [Settings.narrowBandProfileCap] is how a user who disagrees turns it off.
  *
+ * **A third reason was added for platforms that cannot be asked**, below API 21, where
+ * `is5GHzBandSupported` does not exist and no transport reports a frequency: both inputs read
+ * absent, so the cap could never fire on the oldest hardware, which is the hardware least able to
+ * carry a full-rate stream. That arm rests on **one** measured unit, an Android 4.4.2 tablet that
+ * died repeatedly at 1080p and held 720p indefinitely, not on the two the arms above have. The
+ * same opt-out covers it and [advice] says exactly what was done.
+ *
  * Pure, so the wording and every gate are a unit test rather than a device.
  */
 object NarrowBandProfilePolicy {
@@ -40,9 +47,18 @@ object NarrowBandProfilePolicy {
      * is grounds for lowering somebody's picture. The second is the network actually in use, which
      * a unit with a 5 GHz radio reaches by choosing 2.4 GHz or by a 5 GHz request falling back. The
      * link is equally narrow either way, and the app already tells that user to expect 720p.
+     *
+     * [bandUnreadable] is the third, and it is deliberately not a null [supports5Ghz]: a null also
+     * means a WiFi service that refused on a unit that can be asked, and that unit must keep its
+     * picture. This one means the platform has no such call, so a `true` here cannot have come
+     * from a reading and does not save a unit from the cap.
      */
-    fun runsNarrow(supports5Ghz: Boolean?, sessionFrequencyMhz: Int): Boolean =
-        supports5Ghz == false || sessionFrequencyMhz in 1..MAX_24GHZ_FREQUENCY_MHZ
+    fun runsNarrow(
+        supports5Ghz: Boolean?,
+        sessionFrequencyMhz: Int,
+        bandUnreadable: Boolean = false,
+    ): Boolean =
+        supports5Ghz == false || bandUnreadable || sessionFrequencyMhz in 1..MAX_24GHZ_FREQUENCY_MHZ
 
     /**
      * Whether this session should be asked for less than the user's settings say.
@@ -50,13 +66,22 @@ object NarrowBandProfilePolicy {
      * A wired session does not care what the radio is doing, and the user can say no; what is left
      * is [runsNarrow]. The frequency defaults to zero so a caller that cannot read one is answered
      * on the radio alone, which is every unit below API 29.
+     *
+     * [linkProvedTooSlow] is the second road to the same profile and is deliberately **not** behind
+     * [capEnabled]: the band switch is a guess about a link, while this is that link having already
+     * refused to carry the picture three sessions running
+     * ([com.andrerinas.openheadunit.connection.VideoStarvationPolicy]). 720p with a picture beats
+     * 1080p without one, and the user's way back is the resolution and frame rate themselves.
      */
     fun caps(
         supports5Ghz: Boolean?,
         wirelessSession: Boolean,
         capEnabled: Boolean,
-        sessionFrequencyMhz: Int = 0
-    ): Boolean = wirelessSession && capEnabled && runsNarrow(supports5Ghz, sessionFrequencyMhz)
+        sessionFrequencyMhz: Int = 0,
+        bandUnreadable: Boolean = false,
+        linkProvedTooSlow: Boolean = false
+    ): Boolean = wirelessSession &&
+        (linkProvedTooSlow || (capEnabled && runsNarrow(supports5Ghz, sessionFrequencyMhz, bandUnreadable)))
 
     /**
      * The frame rate to announce. Only ever lowers: a user already on 30 is left there, and this
@@ -67,9 +92,12 @@ object NarrowBandProfilePolicy {
         supports5Ghz: Boolean?,
         wirelessSession: Boolean,
         capEnabled: Boolean,
-        sessionFrequencyMhz: Int = 0
+        sessionFrequencyMhz: Int = 0,
+        bandUnreadable: Boolean = false,
+        linkProvedTooSlow: Boolean = false
     ): Int =
-        if (caps(supports5Ghz, wirelessSession, capEnabled, sessionFrequencyMhz)) minOf(fpsLimit, CAPPED_FRAME_RATE)
+        if (caps(supports5Ghz, wirelessSession, capEnabled, sessionFrequencyMhz, bandUnreadable, linkProvedTooSlow))
+            minOf(fpsLimit, CAPPED_FRAME_RATE)
         else fpsLimit
 
     /**
@@ -81,8 +109,11 @@ object NarrowBandProfilePolicy {
         supports5Ghz: Boolean?,
         wirelessSession: Boolean,
         capEnabled: Boolean,
-        sessionFrequencyMhz: Int = 0
-    ): Boolean = userChoice || caps(supports5Ghz, wirelessSession, capEnabled, sessionFrequencyMhz)
+        sessionFrequencyMhz: Int = 0,
+        bandUnreadable: Boolean = false,
+        linkProvedTooSlow: Boolean = false
+    ): Boolean = userChoice ||
+        caps(supports5Ghz, wirelessSession, capEnabled, sessionFrequencyMhz, bandUnreadable, linkProvedTooSlow)
 
     /**
      * The ceiling this link puts on the resolution, or null when it puts none.
@@ -94,9 +125,13 @@ object NarrowBandProfilePolicy {
         supports5Ghz: Boolean?,
         wirelessSession: Boolean,
         capEnabled: Boolean,
-        sessionFrequencyMhz: Int = 0
+        sessionFrequencyMhz: Int = 0,
+        bandUnreadable: Boolean = false,
+        linkProvedTooSlow: Boolean = false
     ): Settings.Resolution? =
-        if (caps(supports5Ghz, wirelessSession, capEnabled, sessionFrequencyMhz)) CAPPED_RESOLUTION else null
+        if (caps(supports5Ghz, wirelessSession, capEnabled, sessionFrequencyMhz, bandUnreadable, linkProvedTooSlow))
+            CAPPED_RESOLUTION
+        else null
 
     /**
      * One line for the log, or null when there is nothing worth saying.
@@ -109,26 +144,48 @@ object NarrowBandProfilePolicy {
         fpsLimit: Int,
         wirelessSession: Boolean,
         capEnabled: Boolean = true,
-        sessionFrequencyMhz: Int = 0
+        sessionFrequencyMhz: Int = 0,
+        bandUnreadable: Boolean = false,
+        linkProvedTooSlow: Boolean = false
     ): String? {
         if (!wirelessSession) return null
-        if (!runsNarrow(supports5Ghz, sessionFrequencyMhz)) return null
-        // Which of the two reasons this link is narrow, because the remedies differ: one is the
-        // hardware and the other is a band this user chose and can choose again.
-        val why = if (supports5Ghz == false) "This unit has no 5 GHz band, so this session runs over 2.4 GHz"
-                  else "This session's network is on 2.4 GHz"
+        // The earned cap answers first: it is the one reason that is a measurement of this link
+        // rather than an inference about it, and it applies whatever the band switch says.
+        if (linkProvedTooSlow) {
+            return "Connections here have repeatedly set up every channel and then ended without " +
+                "a single video frame arriving, which is a link that cannot carry the picture " +
+                "this unit is asking for. The phone is being asked for at most " +
+                "${CAPPED_RESOLUTION.resName} and $CAPPED_FRAME_RATE fps, and the music is sent " +
+                "as AAC rather than uncompressed PCM. Change the resolution or the frame rate in " +
+                "Video settings to take this back off."
+        }
+        if (!runsNarrow(supports5Ghz, sessionFrequencyMhz, bandUnreadable)) return null
+        // Which of the three reasons this link is narrow, because the remedies differ: the first is
+        // the hardware, the second a band this user chose and can choose again, and the third is
+        // nothing the user can act on at all. A real reading is preferred to "cannot ask".
+        val why = when {
+            supports5Ghz == false -> "This unit has no 5 GHz band, so this session runs over 2.4 GHz"
+            sessionFrequencyMhz in 1..MAX_24GHZ_FREQUENCY_MHZ -> "This session's network is on 2.4 GHz"
+            else -> "This unit's Android is too old to report which band it is on"
+        }
+        // The 2.4 GHz measurement belongs to the two arms it was taken on. The third arm has its
+        // own unit and says so rather than borrowing theirs.
+        val evidence = if (supports5Ghz == false || sessionFrequencyMhz in 1..MAX_24GHZ_FREQUENCY_MHZ)
+            "on a 2.4 GHz access point, a full-rate stream died having sent no frame at all where " +
+                "a lower one held indefinitely"
+        else
+            "on an Android 4.4 tablet, a full-rate stream died seconds into every session having " +
+                "sent no frame at all where a 720p one held indefinitely"
         if (!capEnabled) {
             if (fpsLimit != FULL_FRAME_RATE) return null
             return "$why, and it is " +
                 "being offered $FULL_FRAME_RATE fps because lowering the profile on a narrow band " +
-                "is switched off in Video settings. Measured on a 2.4 GHz access point, a " +
-                "full-rate stream died having sent no frame at all where a lower one held " +
-                "indefinitely. Nothing here has been changed for you."
+                "is switched off in Video settings. Measured $evidence. Nothing here has been " +
+                "changed for you."
         }
         return "$why. The phone is being " +
             "asked for at most ${CAPPED_RESOLUTION.resName} and $CAPPED_FRAME_RATE fps rather than " +
-            "what Video settings say: measured on a 2.4 GHz access point, a full-rate stream died " +
-            "having sent no frame at all where a lower one held indefinitely. The music is sent as " +
+            "what Video settings say: measured $evidence. The music is sent as " +
             "AAC rather than uncompressed PCM, a fraction of the bytes. Turn off \"Lower video on " +
             "a 2.4 GHz link\" in Video settings to be given what you asked for instead."
     }

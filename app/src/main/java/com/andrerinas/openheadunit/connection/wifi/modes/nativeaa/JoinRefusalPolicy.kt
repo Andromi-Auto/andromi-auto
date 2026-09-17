@@ -41,4 +41,22 @@ object JoinRefusalPolicy {
      */
     fun isFirstWidening(consecutiveRefusals: Int): Boolean =
         consecutiveRefusals == REFUSALS_AT_NORMAL_CADENCE + 1
+
+    /**
+     * How much of the gap after a refusal at [lastRefusalAtMs] is still to run at [now].
+     *
+     * Read wherever a wake round starts as well as where one ends: the phone that refuses takes
+     * the credentials over Bluetooth first, and that handshake cancels the retry loop, so a gap
+     * waited only at the loop's foot never runs at all.
+     */
+    fun remainingDelayMs(
+        consecutiveRefusals: Int,
+        normalDelayMs: Long,
+        lastRefusalAtMs: Long,
+        now: Long,
+    ): Long {
+        if (lastRefusalAtMs <= 0L) return 0L
+        val gap = retryDelayMs(consecutiveRefusals, normalDelayMs)
+        return (lastRefusalAtMs + gap - now).coerceIn(0L, gap)
+    }
 }

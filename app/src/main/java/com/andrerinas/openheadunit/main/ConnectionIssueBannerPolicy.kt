@@ -39,16 +39,25 @@ object ConnectionIssueBannerPolicy {
      *   the refusal above is usually the symptom of, so it is keyed the same way.
      * - `WIFI_RADIO_OFF` is raised on the branch above both of those, where the radio is off and the
      *   platform refuses to switch it on, so no group is ever asked for. Same transport, same key.
+     * - `HANDS_FREE_HELD_ELSEWHERE` is raised by the wake poke in `NativeAaHandshakeManager`, which
+     *   only runs in Native AA but runs on both of its transports, so it is keyed to both.
      *
      * A record is not deleted when it stops applying. It describes what the hardware did, and the
      * user may well be back on that route tomorrow; it is only hidden while it cannot be the
      * reason the last attempt failed.
      */
-    fun relevantNow(mode: Int, transport: NativeTransport): Set<ConnectionIssue> {
-        // Keyed on its endpoint rather than on a mode: it is raised only when the peer we dialled
-        // was Android Auto's own head unit server, so its presence already proves the route that
-        // produces it ran. Self Mode reaches it on any stored mode.
+    fun relevantNow(
+        mode: Int,
+        transport: NativeTransport,
+        wirelessSelected: Boolean,
+    ): Set<ConnectionIssue> {
+        // Keyed on its endpoint rather than on a mode or on wireless being chosen: it is raised
+        // only when the peer we dialled was Android Auto's own head unit server, so its presence
+        // already proves the route that produces it ran. Self Mode reaches it either way.
         val anyMode = setOf(ConnectionIssue.HEADUNIT_SERVER_NOT_ANSWERING)
+        // A cable-only unit never brings the wireless stack up, so none of the rest can be the
+        // reason its last attempt failed, however recently the record was written.
+        if (!wirelessSelected) return anyMode
         if (mode != NATIVE_AA_MODE) return anyMode
         return anyMode + when (transport) {
             NativeTransport.WIFI_DIRECT -> setOf(
@@ -58,13 +67,15 @@ object ConnectionIssueBannerPolicy {
                 ConnectionIssue.WIFI_DIRECT_STACK_CYCLED,
                 ConnectionIssue.WIFI_RADIO_OFF,
                 ConnectionIssue.FIVE_GHZ_CHANNEL_REFUSED,
-                ConnectionIssue.VIDEO_LINK_TOO_SLOW
+                ConnectionIssue.VIDEO_LINK_TOO_SLOW,
+                ConnectionIssue.HANDS_FREE_HELD_ELSEWHERE
             )
             NativeTransport.HOTSPOT -> setOf(
                 ConnectionIssue.BLUETOOTH_SENT_NO_DATA,
                 ConnectionIssue.HOTSPOT_CONFIG_UNREADABLE,
                 ConnectionIssue.HOTSPOT_NOT_RUNNING,
-                ConnectionIssue.VIDEO_LINK_TOO_SLOW
+                ConnectionIssue.VIDEO_LINK_TOO_SLOW,
+                ConnectionIssue.HANDS_FREE_HELD_ELSEWHERE
             )
         }
     }
@@ -95,6 +106,8 @@ object ConnectionIssueBannerPolicy {
      * frame rate is deliberately not a remedy here: it is a guess at the ceiling, and only a
      * session that renders proves it was enough. `HEADUNIT_SERVER_NOT_ANSWERING` has no entry
      * either: its remedy is on the phone, and a handshake that completes disproves it.
+     * `HANDS_FREE_HELD_ELSEWHERE` has none for the same shape of reason: the lever is the other
+     * device, and the next wake pass that reads the link free retires it.
      *
      * @param hotspotSsid [com.andrerinas.openheadunit.utils.Settings.hotspotSsid]
      * @param hotspotPassword [com.andrerinas.openheadunit.utils.Settings.hotspotPassword] — needed

@@ -282,6 +282,7 @@
                 <action android:name="com.andrerinas.openheadunit.ACTION_SET_NIGHT_MODE" />
                 <action android:name="com.andrerinas.openheadunit.ACTION_START_WIRELESS" />
                 <action android:name="com.andrerinas.openheadunit.ACTION_STOP_WIRELESS" />
+                <action android:name="com.andrerinas.openheadunit.ACTION_CANCEL_WIRELESS" />
                 <action android:name="com.andrerinas.openheadunit.ACTION_START_WIRELESS_SCAN" />
                 <action android:name="com.andrerinas.openheadunit.ACTION_NATIVE_AA_POKE" />
                 <action android:name="com.andrerinas.openheadunit.ACTION_NATIVE_AA_CANCEL_POKE" />

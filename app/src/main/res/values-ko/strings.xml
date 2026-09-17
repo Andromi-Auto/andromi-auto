@@ -982,10 +982,12 @@
     <string name="connection_issue_banner_hotspot_config">핫스팟 이름과 비밀번호를 읽을 수 없습니다. 직접 입력하려면 탭하세요.</string>
     <string name="narrow_band_profile_cap">2.4GHz 연결에서 영상 낮추기</string>
     <string name="narrow_band_profile_cap_description">이 세션이 2.4GHz에서 실행 중이면, 이 기기의 WiFi에 5GHz 대역이 없어서든 네트워크가 그쪽에서 형성되어서든, 위 설정 대신 최대 720p, 30fps, 그리고 AAC 오디오를 휴대전화에 요청합니다. 이런 연결에서는 최대 속도 스트림이 화면을 전혀 전달하지 못하고 낮춘 스트림은 유지되는 것으로 측정되었습니다. 설정한 값 그대로 받으려면 끄세요.</string>
-    <string name="connection_issue_banner_video_link_too_slow">휴대전화가 프레임이 하나도 도착하기 전에 영상을 포기하는 일이 연달아 여러 번 있었습니다. WiFi 연결이 화면을 전달하기에 너무 느립니다. 탭하면 FPS 제한을 30으로 낮춥니다. 해상도를 낮추거나 AAC 오디오를 쓰는 것도 도움이 됩니다.</string>
+    <string name="connection_issue_banner_video_link_too_slow">휴대전화가 프레임이 하나도 도착하기 전에 영상을 포기하는 일이 연달아 여러 번 있었습니다. WiFi 연결이 화면을 전달하기에 너무 느려서 지금은 AAC 오디오와 함께 720p, 30 FPS로 요청하고 있습니다. 탭해서 해상도나 FPS 제한을 직접 설정하면 이 제한도 해제됩니다. 다른 해결책은 5GHz 네트워크입니다.</string>
     <string name="connection_issue_banner_five_ghz_channel_refused">이 기기는 선택한 어떤 5GHz 채널에도 WiFi Direct 네트워크를 올리지 않고, 자체 Wi-Fi 드라이버가 고른 채널에서 시작했습니다. 그 채널은 규제가 엄격한 국가의 휴대폰에서는 아예 보이지 않는 경우가 많습니다. 탭하여 WiFi Direct 대역을 모든 국가에서 허용되는 2.4GHz로 설정하세요. 이 대역에서는 1080p가 아닌 720p로 예상됩니다.</string>
     <string name="connection_issue_banner_headunit_server_deaf">휴대전화의 Android Auto 헤드유닛 서버가 연결을 수락하고도 아무것도 응답하지 않습니다. 저절로 복구되지 않습니다. 휴대전화의 Android Auto 개발자 설정에서 헤드유닛 서버를 중지했다가 다시 시작하세요. 이 기기는 스스로 다시 연결됩니다.</string>
+    <string name="connection_issue_banner_hands_free_held">다른 기기가 이미 이 기기의 핸즈프리 연결을 사용하고 있어, 이 기기가 깨우는 휴대전화는 그것을 사용할 수 없습니다. Android Auto는 헤드유닛의 Bluetooth가 프로필로 연결되어 있지 않으면 무선 연결을 시작하지 않으며, 한 번에 하나의 핸즈프리 연결만 제공하는 기기는 더 이상 내줄 것이 없습니다. 다른 기기의 연결을 끊거나 해당 기기의 Bluetooth를 끄면, 이 기기는 스스로 다시 시도합니다.</string>
     <string name="connection_issue_banner_dismiss">닫기</string>
+    <string name="auto_connect_pill_cancel">연결 중지</string>
     <string name="connection_issue_remedy_hotspot_query">핫스팟 이름 및 비밀번호</string>
     <string name="preflight_title">연결 전 확인</string>
     <string name="preflight_intro">이 기기는 Android Auto에 필요한 일부 정보를 제공할 수 없습니다:</string>
@@ -1112,7 +1114,7 @@
     <string name="wifi_direct_new_identity_confirm">다음 연결부터 적용될 새 그룹 이름과 비밀번호를 선택합니다. 새 헤드유닛처럼 블루투스를 통해 설정됩니다.</string>
     <string name="wifi_direct_new_identity_done">다음 연결부터 새 네트워크 식별자가 사용됩니다.</string>
     <string name="wifi_direct_new_identity_applied">새 네트워크 식별자를 설정하는 중입니다. 다음 연결 때 휴대폰에 전달됩니다.</string>
-    <string name="wifi_direct_stable_identity_description_legacy">이 Android 버전에서는 네트워크 이름을 시스템이 정하며 가능한 한 같은 이름을 유지합니다. 휴대폰이 이미 아는 네트워크에 다시 연결되도록 켜 두고, 저장된 네트워크를 계속 거부하면 아래에서 새 식별자를 사용하세요. 끄면 연결할 때마다 시스템이 네트워크를 잊습니다.</string>
+    <string name="wifi_direct_stable_identity_description_legacy">이 Android 버전에서는 네트워크 이름을 시스템이 정하며, 연결할 때마다 새 이름을 고르는 기기도 있습니다. 앱이 여기에서 특정 이름을 요청할 수는 없습니다. 시스템이 이름을 유지하는 경우 휴대폰이 이미 아는 네트워크에 다시 연결되도록 켜 두고, 저장된 네트워크를 계속 거부하면 아래에서 새 식별자를 사용하세요. 끄면 연결할 때마다 시스템이 네트워크를 잊습니다.</string>
     <string name="debug_video_low_latency">디코더 저지연 모드 요청</string>
     <string name="debug_video_low_latency_description">비디오 디코더 설정 시 벤더 저지연 MediaFormat 키를 적용합니다.</string>
     <string name="debug_video_feed_hold">느린 디코더 시뮬레이션</string>

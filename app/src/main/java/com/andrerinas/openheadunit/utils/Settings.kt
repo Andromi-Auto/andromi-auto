@@ -661,6 +661,31 @@ class Settings(private val context: Context) {
         }
 
     /**
+     * Consecutive group creates whose name did not match the last one's.
+     *
+     * Kept per unit because a create is once per bring-up: in memory it would take a whole session
+     * to learn what one line of history already knows.
+     * [com.andrerinas.openheadunit.connection.wifi.direct.GroupIdentityStabilityPolicy] owns the
+     * rule; this only stores the count it hands back.
+     */
+    var wifiDirectGroupNameChanges: Int
+        get() = prefs.getInt("wifi-direct-group-name-changes", 0)
+        set(value) { prefs.edit().putInt("wifi-direct-group-name-changes", value).apply() }
+
+    /**
+     * Set once three wireless sessions in a row set up every channel and rendered nothing.
+     *
+     * The conclusion rather than the counter, the way `playback-focus-self-defeating` is: the
+     * streak itself is [com.andrerinas.openheadunit.connection.VideoStarvationPolicy]'s and lives
+     * in memory. Cleared only by the user changing the resolution or the frame rate, because the
+     * cap is what makes the session render and clearing it on a rendering session would earn it
+     * again every time.
+     */
+    var videoProfileStarvationCap: Boolean
+        get() = prefs.getBoolean("video-profile-starvation-cap", false)
+        set(value) { prefs.edit().putBoolean("video-profile-starvation-cap", value).apply() }
+
+    /**
      * Asks the decoder for low-latency mode, through whichever key its vendor understands.
      *
      * Off by default, and it stays off until a log from a real device shows the key changing the
@@ -2104,6 +2129,11 @@ class Settings(private val context: Context) {
         get() = prefs.getLong("connection-issue-headunit-server-deaf", 0L)
         set(value) = prefs.edit().putLong("connection-issue-headunit-server-deaf", value).apply()
 
+    /** Another device held this unit's hands-free link, so the woken phone could not have it. */
+    var connectionIssueHandsFreeHeldAtEpochMs: Long
+        get() = prefs.getLong("connection-issue-hands-free-held", 0L)
+        set(value) = prefs.edit().putLong("connection-issue-hands-free-held", value).apply()
+
     /**
      * When the user last dismissed the failure banner.
      *
@@ -2194,6 +2224,14 @@ class Settings(private val context: Context) {
     var nativeAaCompleteHfpSlc: Boolean
         get() = prefs.getBoolean("native-aa-complete-hfp-slc", true)
         set(value) = prefs.edit().putBoolean("native-aa-complete-hfp-slc", value).apply()
+
+    // What an escalated wake did to this unit's own hands-free link, as NativeAaWakeDamagePolicy.
+    // Measured rather than chosen: the poke displaces the phone's single slot by design and no API
+    // puts it back, but whether the link returns is a property of this unit's stack. The first
+    // escalated wake is the probe; a unit that stayed down never escalates again.
+    var nativeAaWakeDamageVerdict: Int
+        get() = prefs.getInt("native-aa-wake-damage-verdict", 0)
+        set(value) = prefs.edit().putInt("native-aa-wake-damage-verdict", value).apply()
 
     // Run the Native AA Bluetooth route on a unit ExternalBtPolicy has flagged, instead of refusing
     // to start it. The detection marks a class of hardware rather than measuring the unit in front

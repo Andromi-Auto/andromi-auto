@@ -5,6 +5,7 @@ import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import com.andrerinas.openheadunit.aap.AapSslContext
 import com.andrerinas.openheadunit.aap.AapTransport
+import com.andrerinas.openheadunit.aap.NarrowBandProfilePolicy
 import com.andrerinas.openheadunit.input.MediaKeyRoutingPolicy
 import com.andrerinas.openheadunit.decoder.audio.PlaybackFocusPolicy
 import com.andrerinas.openheadunit.utils.AppLog
@@ -974,13 +975,16 @@ class CommManager(
 
     /**
      * Counts a finished session against [VideoStarvationPolicy] and, on a long enough run of
-     * sessions that carried no video at all, says what that means and what to do about it.
+     * sessions that carried no video at all, lowers the profile the next one is offered and says so.
      *
      * The phone gives no reason we can see — it closes the socket and our read reports a plain EOF
      * — so without this the log shows nothing but a healthy connection repeating forever.
      *
      * The record is retired by a session that renders, which is the hardware answering the
-     * question. No setting disproves it, so it has no `remedyApplied` entry.
+     * question. No setting disproves it, so it has no `remedyApplied` entry. **The cap is not
+     * retired there**: capping is what made that session render, so releasing it on the same event
+     * would uncap, starve three more times and earn it again forever. Only the user changing the
+     * resolution or the frame rate takes it off (`SettingsFragment`).
      */
     private fun noteSessionEnded(renderedAnyFrame: Boolean) {
         val reachedHandshake = sessionReachedHandshake
@@ -991,13 +995,18 @@ class CommManager(
         if (reachedHandshake && renderedAnyFrame) {
             ConnectionIssues.clear(context, ConnectionIssue.VIDEO_LINK_TOO_SLOW)
         }
+        if (VideoStarvationPolicy.shouldCap(starvedSessionStreak)) {
+            settings.videoProfileStarvationCap = true
+        }
         if (VideoStarvationPolicy.shouldAdvise(starvedSessionStreak)) {
             AppLog.w(
                 "CommManager: $starvedSessionStreak sessions in a row ended without a single video " +
                     "frame arriving. The phone is connecting and then giving up on the video stream, " +
-                    "which is what a WiFi link too slow to carry it looks like. Measured on a 2.4 GHz " +
-                    "access point at 1080p/60, where the same link held 800x480/30 indefinitely: move " +
-                    "the access point to 5 GHz, or lower the resolution and frame rate in Video settings."
+                    "which is what a WiFi link too slow to carry it looks like. The next connection " +
+                    "is offered at most ${NarrowBandProfilePolicy.CAPPED_RESOLUTION.resName} and " +
+                    "${NarrowBandProfilePolicy.CAPPED_FRAME_RATE} fps with AAC audio instead of what " +
+                    "Video settings say. Changing the resolution or the frame rate yourself takes " +
+                    "that back off; moving the access point to 5 GHz is the other fix."
             )
             ConnectionIssues.raise(context, ConnectionIssue.VIDEO_LINK_TOO_SLOW)
         }

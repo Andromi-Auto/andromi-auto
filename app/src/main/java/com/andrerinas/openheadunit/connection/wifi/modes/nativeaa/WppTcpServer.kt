@@ -146,6 +146,16 @@ class WppTcpServer(
                         break
                     }
                     AppLog.i("WppTcpServer: connection from ${socket.inetAddress?.hostAddress}")
+                    // A phone dialling an endpoint from an earlier session, on a unit we have since
+                    // judged unsafe to be remembered by. Serving it hands out a name the next create
+                    // replaces, which it then retries instead of falling back to Bluetooth - fifteen
+                    // minutes of it, measured. See [WppTcpServePolicy].
+                    val decision = WppEndpointPolicy.decide(callbacks.strategy(), listeningPort, callbacks.identity())
+                    if (!WppTcpServePolicy.servesDial(decision)) {
+                        AppLog.w("WppTcpServer: not serving this dial: ${WppTcpServePolicy.refusalReason(decision)}")
+                        try { socket.close() } catch (_: Exception) {}
+                        continue
+                    }
                     scope.launch(Dispatchers.IO + CoroutineName("WppTcp-Session")) {
                         handleConnection(socket, factory)
                     }

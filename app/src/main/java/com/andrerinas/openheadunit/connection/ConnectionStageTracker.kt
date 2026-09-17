@@ -32,6 +32,12 @@ object ConnectionStageTracker {
         _stage.value = opening
     }
 
+    /** The session or attempt is over. The network line is left to whoever owns the group, which a
+     *  session that ends without removing it still has. */
+    fun endAttempt() {
+        _stage.value = null
+    }
+
     /** A step that ended with nothing to show: [from] gives way to [to], and any other stage stays. */
     fun retreat(from: ConnectionStage, to: ConnectionStage) {
         if (ConnectionStagePolicy.shouldRetreat(_stage.value, from)) _stage.value = to

@@ -90,7 +90,17 @@ enum class ConnectionIssue {
      * peer that went away without closing leaves it deaf to everyone after. Nothing on this side
      * recovers it; stopping and starting the server on the phone does.
      */
-    HEADUNIT_SERVER_NOT_ANSWERING
+    HEADUNIT_SERVER_NOT_ANSWERING,
+
+    /**
+     * Another device holds this unit's hands-free link, so the phone being woken cannot have it.
+     *
+     * The wake still goes out, because the link is not that phone's and nothing of its is taken.
+     * But Android Auto will not start wireless setup against a head unit whose Bluetooth is not
+     * connected with a profile, and a unit serving one hands-free link at a time has none left to
+     * give. No setting reaches it: the lever is the other device.
+     */
+    HANDS_FREE_HELD_ELSEWHERE
 }
 
 /** An issue that is currently true, and when it was last raised. */
@@ -135,6 +145,10 @@ object ConnectionIssues {
         storeFor(context)?.let { raise(it, issue, System.currentTimeMillis()) }
     }
 
+    fun raiseOnce(context: Context, issue: ConnectionIssue) {
+        storeFor(context)?.let { raiseOnce(it, issue, System.currentTimeMillis()) }
+    }
+
     fun clear(context: Context, issue: ConnectionIssue) {
         storeFor(context)?.let { clear(it, issue) }
     }
@@ -151,6 +165,16 @@ object ConnectionIssues {
      */
     fun raise(store: ConnectionIssueStore, issue: ConnectionIssue, nowMs: Long) {
         store.write(issue, nowMs)
+    }
+
+    /**
+     * Record [issue] as true without moving a stamp that is already standing.
+     *
+     * For a condition re-detected on a loop rather than at an event. [raise] would push the stamp
+     * past the user's dismissal on every pass, so the banner could never be dismissed at all.
+     */
+    fun raiseOnce(store: ConnectionIssueStore, issue: ConnectionIssue, nowMs: Long) {
+        if (store.read(issue) == 0L) store.write(issue, nowMs)
     }
 
     /** Safe to call when the issue was never raised. */
@@ -192,6 +216,7 @@ object ConnectionIssues {
                 ConnectionIssue.VIDEO_LINK_TOO_SLOW -> settings.connectionIssueVideoLinkTooSlowAtEpochMs
                 ConnectionIssue.FIVE_GHZ_CHANNEL_REFUSED -> settings.connectionIssueFiveGhzChannelRefusedAtEpochMs
                 ConnectionIssue.HEADUNIT_SERVER_NOT_ANSWERING -> settings.connectionIssueHeadUnitServerDeafAtEpochMs
+                ConnectionIssue.HANDS_FREE_HELD_ELSEWHERE -> settings.connectionIssueHandsFreeHeldAtEpochMs
             }
         } catch (e: Exception) {
             0L
@@ -210,6 +235,7 @@ object ConnectionIssues {
                     ConnectionIssue.VIDEO_LINK_TOO_SLOW -> settings.connectionIssueVideoLinkTooSlowAtEpochMs = atEpochMs
                     ConnectionIssue.FIVE_GHZ_CHANNEL_REFUSED -> settings.connectionIssueFiveGhzChannelRefusedAtEpochMs = atEpochMs
                     ConnectionIssue.HEADUNIT_SERVER_NOT_ANSWERING -> settings.connectionIssueHeadUnitServerDeafAtEpochMs = atEpochMs
+                    ConnectionIssue.HANDS_FREE_HELD_ELSEWHERE -> settings.connectionIssueHandsFreeHeldAtEpochMs = atEpochMs
                 }
             } catch (e: Exception) {
                 AppLog.d("ConnectionIssues: could not record $issue: ${e.message}")

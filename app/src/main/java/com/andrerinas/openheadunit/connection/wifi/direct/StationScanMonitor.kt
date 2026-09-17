@@ -68,7 +68,7 @@ class StationScanMonitor {
         val elapsed = nowMs - windowStartMs
         if (elapsed < StationScanCadencePolicy.WINDOW_MS) return
 
-        StationScanCadencePolicy.summarise(scanTimes.toList(), elapsed)
+        StationScanCadencePolicy.summarise(scanTimes.toList(), elapsed, StationStandDown.lastOutcome)
             ?.let { AppLog.i("StationScanMonitor: $it") }
         scanTimes.clear()
         windowStartMs = nowMs

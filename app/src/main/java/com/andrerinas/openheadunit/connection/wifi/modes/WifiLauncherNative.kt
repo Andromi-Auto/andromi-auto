@@ -161,11 +161,18 @@ class WifiLauncherNative : WifiLauncher {
             return
         }
         AppLog.i("WifiLauncherNative: waiting for this unit's hotspot to go down before creating the group.")
+        // Claimed before the wait, exactly as the stand-down branch does: tearing the hotspot down
+        // cycles the P2P interface, and the ENABLED that follows lands in this gap and starts a
+        // second bring-up whose BUSY removes the group this one is about to make.
+        wifiDirect.claimNativeCreateWindow("waiting for this unit's hotspot to go down")
         service.serviceScope.launch {
             val freed = withTimeoutOrNull(HOTSPOT_TEARDOWN_CEILING_MS) { teardown.join() } != null
             if (manager.active !== this@WifiLauncherNative ||
                 manager.sharedServices.wifiDirectManager !== wifiDirect
-            ) return@launch
+            ) {
+                wifiDirect.releaseNativeCreateWindow("the launcher was replaced while its hotspot went down")
+                return@launch
+            }
             if (!freed) {
                 AppLog.w(
                     "WifiLauncherNative: this unit's hotspot had not gone down after " +
@@ -225,6 +232,17 @@ class WifiLauncherNative : WifiLauncher {
             handshakeManager?.isHandoffSettling() == true
         }
         wifiDirectManager.setNativeSessionConnectedProvider { commManager.isConnected }
+        // The join watchdog recreates a group a phone could not join. A phone that has not opened the
+        // Bluetooth channel since we armed was never handed these credentials, so there is nothing to
+        // repair — including on a reconnect, where the last session's dial says nothing about this one.
+        wifiDirectManager.setPhoneEverOpenedAaChannelProvider {
+            handshakeManager?.hasPhoneOpenedAaChannelThisArming() == true
+        }
+        // A group that carried a session is normally never recreated. This is how the watchdog
+        // learns the phone has stopped coming back to it. See ProvenGroupStalePolicy.
+        wifiDirectManager.setUnansweredPokeCountProvider {
+            handshakeManager?.unansweredPokeCount() ?: 0
+        }
         wifiDirectManager.setNativeGroupInvalidatedListener { handshakeManager?.invalidateCredentials() }
     }
 
@@ -259,13 +277,24 @@ class WifiLauncherNative : WifiLauncher {
     /**
      * Puts the mode back where it was before the session, without taking the network down.
      *
+     * [wakePhone] is false when the phone ended the session itself, which is the one case where
+     * waking it pulls it back against its own choice.
+     */
+    fun rearmAfterSessionEnd(wakePhone: Boolean) {
+        handshakeManager?.noteSessionEnded(wakePhone)
+        reopenListeners()
+    }
+
+    /**
+     * Reopens the Bluetooth and TCP sides without treating this as a session ending.
+     *
      * The network is what the phone saved and rejoins, so it stays; only the Bluetooth side needs
      * re-arming, because a completed handoff closed its Android Auto listeners. The credentials
-     * are then read again, which restarts the wake poke and confirms the network is still up.
-     * The TCP port is checked first: it is what the phone dials, and nothing else looks at it
-     * between sessions.
+     * are then read again, which confirms the network is still up and restarts the wake poke. The
+     * TCP port is checked first: it is what the phone dials, and nothing else looks at it between
+     * sessions.
      */
-    fun rearmAfterSessionEnd() {
+    fun reopenListeners() {
         manager.sharedServices.startWirelessServer(this)
         handshakeManager?.rearmForNextSession()
         triggerWifiDirectRefresh()
@@ -311,6 +340,10 @@ class WifiLauncherNative : WifiLauncher {
         if (commManager.isConnected ||
             commManager.connectionState.value is CommManager.ConnectionState.Connecting) {
             AppLog.i("AapService: USB/other session already active. Skipping auto-poke to avoid pulling phone into wireless flow.")
+        } else if (handshakeManager?.wakesPhone() == false) {
+            // The pill is reported here as well as poked, so both stand down together or it claims
+            // a wake that will not run.
+            AppLog.i("AapService: the phone ended the last session itself. Skipping auto-poke until it comes back.")
         } else if (!service.userExitedAA) {
             ConnectionStageTracker.report(ConnectionStage.WAKING_PHONE)
             handshakeManager?.triggerPoke()
