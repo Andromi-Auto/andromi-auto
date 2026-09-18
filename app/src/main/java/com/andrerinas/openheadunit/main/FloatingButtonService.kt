@@ -1,7 +1,6 @@
 package com.andrerinas.openheadunit.main
 
 import android.annotation.SuppressLint
-import android.app.Notification
 import android.app.Service
 import android.content.Context
 import android.content.Intent
@@ -16,8 +15,6 @@ import android.view.View
 import android.view.ViewOutlineProvider
 import android.view.WindowManager
 import android.widget.ImageView
-import androidx.core.app.NotificationCompat
-import androidx.core.content.ContextCompat
 import com.andrerinas.openheadunit.App
 import com.andrerinas.openheadunit.R
 import com.andrerinas.openheadunit.utils.AppLog
@@ -31,17 +28,6 @@ class FloatingButtonService : Service() {
     private val mainHandler = Handler(Looper.getMainLooper())
 
     override fun onBind(intent: Intent?): IBinder? = null
-
-    override fun onCreate() {
-        super.onCreate()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            try {
-                startForeground(NOTIFICATION_ID, createNotification())
-            } catch (e: Exception) {
-                AppLog.e("FloatingButtonService: startForeground failed: ${e.message}", e)
-            }
-        }
-    }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent?.action == ACTION_STOP) {
@@ -190,20 +176,8 @@ class FloatingButtonService : Service() {
         removeOverlay()
     }
 
-    private fun createNotification(): Notification {
-        return NotificationCompat.Builder(this, App.bootStartChannel)
-            .setSmallIcon(R.drawable.ic_stat_aa)
-            .setContentTitle(getString(R.string.title))
-            .setContentText("Floating Button Active")
-            .setPriority(NotificationCompat.PRIORITY_MIN)
-            .setCategory(NotificationCompat.CATEGORY_SERVICE)
-            .setOngoing(true)
-            .build()
-    }
-
     companion object {
         const val ACTION_STOP = "com.andrerinas.openheadunit.ACTION_STOP_FLOATING_BUTTON"
-        private const val NOTIFICATION_ID = 1002
 
         @Volatile
         @SuppressLint("StaticFieldLeak")
@@ -225,11 +199,7 @@ class FloatingButtonService : Service() {
         fun start(context: Context) {
             val intent = Intent(context, FloatingButtonService::class.java)
             try {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    ContextCompat.startForegroundService(context, intent)
-                } else {
-                    context.startService(intent)
-                }
+                context.startService(intent)
             } catch (e: Exception) {
                 AppLog.e("FloatingButtonService: Failed to start service: ${e.message}")
             }
