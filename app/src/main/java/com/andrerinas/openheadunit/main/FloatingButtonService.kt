@@ -25,7 +25,9 @@ import kotlin.math.roundToInt
 
 class FloatingButtonService : Service() {
 
-    private var overlayView: View? = null
+    private var overlayView: View?
+        get() = activeOverlayView
+        set(value) { activeOverlayView = value }
     private val mainHandler = Handler(Looper.getMainLooper())
 
     override fun onBind(intent: Intent?): IBinder? = null
@@ -59,6 +61,7 @@ class FloatingButtonService : Service() {
             return START_NOT_STICKY
         }
 
+        mainHandler.removeCallbacksAndMessages(null)
         mainHandler.post { showOrUpdateOverlay() }
         return START_STICKY
     }
@@ -66,8 +69,18 @@ class FloatingButtonService : Service() {
     @SuppressLint("MissingPermission")
     private fun showOrUpdateOverlay() {
         val appContext = applicationContext
-        val windowManager = (appContext.getSystemService(WINDOW_SERVICE) as? WindowManager) ?: return
         val settings = App.provide(appContext).settings
+        val enabled = settings.enableFloatingButton
+        val permissionGranted = FloatingButtonManager.hasOverlayPermission(appContext)
+        val shouldShow = enabled && permissionGranted && !FloatingButtonManager.isAppForeground
+
+        if (!shouldShow) {
+            removeOverlay()
+            stopSelf()
+            return
+        }
+
+        val windowManager = (appContext.getSystemService(WINDOW_SERVICE) as? WindowManager) ?: return
 
         val displayMetrics = DisplayMetrics()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
@@ -158,6 +171,7 @@ class FloatingButtonService : Service() {
     }
 
     private fun removeOverlay() {
+        mainHandler.removeCallbacksAndMessages(null)
         val view = overlayView ?: return
         try {
             val windowManager = applicationContext.getSystemService(WINDOW_SERVICE) as? WindowManager
@@ -172,6 +186,7 @@ class FloatingButtonService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
+        mainHandler.removeCallbacksAndMessages(null)
         removeOverlay()
     }
 
@@ -189,6 +204,23 @@ class FloatingButtonService : Service() {
     companion object {
         const val ACTION_STOP = "com.andrerinas.openheadunit.ACTION_STOP_FLOATING_BUTTON"
         private const val NOTIFICATION_ID = 1002
+
+        @Volatile
+        @SuppressLint("StaticFieldLeak")
+        private var activeOverlayView: View? = null
+
+        fun removeOverlayDirect(context: Context) {
+            val view = activeOverlayView ?: return
+            try {
+                val windowManager = context.applicationContext.getSystemService(WINDOW_SERVICE) as? WindowManager
+                windowManager?.removeView(view)
+                AppLog.i("FloatingButtonService: Removed floating button overlay directly")
+            } catch (e: Exception) {
+                AppLog.w("FloatingButtonService: Failed to directly remove overlay view (${e.message})")
+            } finally {
+                activeOverlayView = null
+            }
+        }
 
         fun start(context: Context) {
             val intent = Intent(context, FloatingButtonService::class.java)

@@ -1,5 +1,5 @@
 # Changelog
-### v.3.4.0-beta2
+### v.3.4.0
 - USB: connect non-Pixel phones without fighting a fast-reverting dongle
 - Feat/automation command surface
 - Video-Fit and ultrawide touch enhancements with dynamic scaling and rework all the options, thanks to @o-jardenass and @Sesam17
@@ -13,6 +13,9 @@
 - Moved Ui-Scale to theming
 - Native AA: say when the unit's WiFi radio is off instead of retrying in silence
 - Fix: Endless Loop in Permission Requests.
+- Give Video its own transport thread
+- Stop old Android promising what it cannot do
+- Measure and size the audio sink
 
 ### v.3.3.1
 - Added: Option to auto-resume media playback on quick reconnect if music was playing before disconnect
