@@ -2,8 +2,11 @@ package com.andrerinas.openheadunit.connection.wifi
 
 import android.content.Context
 import android.net.ConnectivityManager
+import android.net.wifi.WifiManager
 import android.os.Build
+import com.andrerinas.openheadunit.App
 import com.andrerinas.openheadunit.utils.AppLog
+import com.andrerinas.openheadunit.utils.NetworkAddresses
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
@@ -22,6 +25,7 @@ import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.net.NetworkInterface
 import java.net.Socket
+import java.nio.ByteOrder
 import java.util.Collections
 
 class NetworkDiscovery(private val context: Context, private val listener: Listener) {
@@ -112,6 +116,8 @@ class NetworkDiscovery(private val context: Context, private val listener: Liste
 
     private val reportedIps = Collections.synchronizedSet(mutableSetOf<String>())
 
+    @Volatile private var probeHelperPort: Boolean = true
+
     /**
      * [oneShot] belongs to the scan being started, not to the instance, because callers that want
      * a single sweep and callers that want the 10 s re-arm now share one instance.
@@ -187,6 +193,7 @@ class NetworkDiscovery(private val context: Context, private val listener: Liste
             // Cleared here rather than at the call, so the set belongs to this generation and
             // the outgoing scan keeps its own dedupe while it winds down.
             reportedIps.clear()
+            probeHelperPort = readProbeHelperPort()
             try {
                 // 1. Quick Scan: Check likely Gateways first
                 AppLog.i("NetworkDiscovery: Step 1 - Quick Gateway Scan")
@@ -209,6 +216,30 @@ class NetworkDiscovery(private val context: Context, private val listener: Liste
             }
         }
 
+    /**
+     * Whether this sweep probes port 5289 as well, read once per scan.
+     *
+     * Settings throws before the device is unlocked and a sweep can start from a boot receiver, so
+     * an unreadable mode keeps the old behaviour rather than silently dropping the helper probe.
+     */
+    private fun readProbeHelperPort(): Boolean = try {
+        DiscoveryModePolicy.probesWirelessHelper(App.provide(context).settings.wifiConnectionMode.id)
+    } catch (e: Exception) {
+        AppLog.d("NetworkDiscovery: could not read the wireless mode, probing 5289 anyway")
+        true
+    }
+
+    /** The DHCP server we were given an address by, which on a phone hotspot is the phone. */
+    private fun dhcpGatewaySuspect(): String? = try {
+        val wifiManager = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as? WifiManager
+        val raw = wifiManager?.dhcpInfo?.gateway
+        if (raw == null) null
+        else DhcpGatewayFormat.toDottedQuad(raw, swapBytes = ByteOrder.nativeOrder() == ByteOrder.BIG_ENDIAN)
+    } catch (e: Exception) {
+        AppLog.e("NetworkDiscovery: Could not read the DHCP gateway", e)
+        null
+    }
+
     private suspend fun scanGateways(): Boolean {
         var foundAny = false
         var probed = 0
@@ -216,6 +247,11 @@ class NetworkDiscovery(private val context: Context, private val listener: Liste
         beginProbeTally()
         try {
             val suspects = mutableSetOf<String>()
+
+            // First, and on every API level. The route lookup below needs API 23, and on a phone
+            // hotspot this is the phone itself. mutableSetOf keeps insertion order, so it is
+            // probed first and the 254-address sweep is reached less often.
+            dhcpGatewaySuspect()?.let { suspects.add(it) }
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -262,14 +298,15 @@ class NetworkDiscovery(private val context: Context, private val listener: Liste
     }
 
     private suspend fun scanSubnet(): Unit = coroutineScope {
-        val subnet = getSubnet()
+        val stationIp = NetworkAddresses.stationIpv4(context)
+        val myIp = DiscoverySubnetPolicy.address(stationIp, firstInterfaceIpv4())
+        val subnet = DiscoverySubnetPolicy.subnetOf(myIp)
         if (subnet == null) {
             AppLog.e("NetworkDiscovery: Could not determine subnet for deep scan")
             return@coroutineScope
         }
 
-        val myIp = getLocalIpAddress()
-        AppLog.i("NetworkDiscovery: Scanning subnet: $subnet.*")
+        AppLog.i("NetworkDiscovery: Scanning subnet: $subnet.* (from ${DiscoverySubnetPolicy.source(stationIp)})")
 
         beginProbeTally()
 
@@ -292,7 +329,11 @@ class NetworkDiscovery(private val context: Context, private val listener: Liste
         reportProbeTally("Swept $subnet.*", tasks.size, found)
     }
 
-    private fun getLocalIpAddress(): String? {
+    /**
+     * The first IPv4 the kernel lists, which on a head unit is usually an `seth_lte*` stub. Only a
+     * fallback now: [DiscoverySubnetPolicy] prefers the network actually carrying traffic.
+     */
+    private fun firstInterfaceIpv4(): String? {
         try {
             val interfaces = Collections.list(NetworkInterface.getNetworkInterfaces())
             for (intf in interfaces) {
@@ -321,8 +362,10 @@ class NetworkDiscovery(private val context: Context, private val listener: Liste
         // and connecting is work.
         coroutineContext.ensureActive()
 
-        // Check Port 5289 (Wifi Launcher) - prioritizing this
-        val launcherSocket = checkPort(ip, 5289, timeout = 300)
+        // Check Port 5289 (Wifi Launcher) - prioritizing this. Skipped where no helper can be
+        // listening: the probe is held open 500 ms per address, and that is dead time in front of
+        // the 5277 dial the sweep is actually for.
+        val launcherSocket = if (probeHelperPort) checkPort(ip, 5289, timeout = 300) else null
         if (launcherSocket != null) {
             // The phone-side Wireless Helper watches for this inbound probe to auto-launch
             // itself. Hold the socket open briefly before closing so it has time to react;
@@ -429,29 +472,6 @@ class NetworkDiscovery(private val context: Context, private val listener: Liste
         } catch (e: Exception) {
             AppLog.e("NetworkDiscovery: Interface collection failed", e)
         }
-    }
-
-    private fun getSubnet(): String? {
-        // Reuse similar logic to collectInterfaceSuspects but return subnet string
-        try {
-             val interfaces = Collections.list(NetworkInterface.getNetworkInterfaces())
-             for (networkInterface in interfaces) {
-                 if (!networkInterface.isUp || networkInterface.isLoopback) continue
-
-                 for (addr in Collections.list(networkInterface.inetAddresses)) {
-                     if (addr is Inet4Address) {
-                         val host = addr.hostAddress
-                         val lastDot = host.lastIndexOf('.')
-                         if (lastDot > 0) {
-                             return host.substring(0, lastDot)
-                         }
-                     }
-                 }
-             }
-        } catch (e: Exception) {
-            AppLog.e("NetworkDiscovery: Failed to get subnet", e)
-        }
-        return null
     }
 
     fun stop() {

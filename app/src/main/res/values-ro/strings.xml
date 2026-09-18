@@ -183,6 +183,7 @@
     <string name="usb_auto_connect">Conectare automată USB</string>
     <string name="usb_auto_connect_description">Conectează automat un dispozitiv USB cunoscut când deschizi aplicația.</string>
     <string name="auto_start_bt_label">Pornire automată pe Bluetooth</string>
+    <string name="auto_start_overlay_missing_hint">Afișarea peste alte aplicații nu este permisă, așa că pornirea automată va afișa o notificare în loc să deschidă ecranul. Atinge pentru a permite.</string>
     <string name="auto_start_bt_description">Deschide automat Open Headunit când se conectează un anumit dispozitiv Bluetooth.</string>
     <string name="auto_start_offer_title">Pornire automată?</string>
     <string name="auto_start_offer_message">Vrei să pornești automat aplicația cu acest dispozitiv, %1$s?</string>
@@ -415,14 +416,14 @@
     <string name="monochrome_icons_description">Utilizați pictograme în tonuri de gri pe ecranul principal în modul Întunecat sau Negru extrem</string>
     <string name="use_extreme_dark">Folosiți negru extrem</string>
     <string name="use_extreme_dark_description">Utilizați fundal negru pur când modul întunecat este activ</string>
-    <string name="show_fps_counter">Afișează contor FPS</string>
+    <string name="show_performance_overlay">Afișează suprapunerea de performanță</string>
+    <string name="overlay_position">Poziția suprapunerii de performanță</string>
     <string name="overlay_permission_required">Pornirea automată necesită permisiunea \'Afișare peste alte aplicații\'</string>
     <string name="usb_permission_denied">Permisiunea USB a fost refuzată. Vă rugăm să permiteți accesul USB pentru conectare automată.</string>
-    <string name="overlay_permission_denied_auto_start_disabled">Permisiunea de suprapunere nu a fost acordată. Pornirea automată a fost dezactivată.</string>
     <string name="use_white_background">Folosește fundal alb pe ecranul principal</string>
     <string name="reopen_on_reconnection_label">Redeschide la reconectare</string>
     <string name="reopen_on_reconnection_description">Când apăsați butonul Ieșire, aplicația continuă să ruleze în fundal și monitorizează conexiunile USB. Dacă un dispozitiv se reconectează, aplicația se redeschide automat.</string>
-    <string name="show_fps_counter_description">Afișează un overlay cu FPS în timp real în colțul din stânga sus în timpul proiecției.</string>
+    <string name="show_performance_overlay_description">Afișează FPS, încărcarea procesorului, temperatura și vechimea cadrului peste proiecție.</string>
 
     <string name="category_input">Setări intrare</string>
     <string name="enable_rotary">Activează controlerul rotativ (Rotary)</string>
@@ -981,9 +982,12 @@
     <string name="connection_issue_banner_hotspot_config">Unitatea nu a furnizat numele și parola hotspotului. Atingeți pentru a le introduce manual.</string>
     <string name="narrow_band_profile_cap">Video redus pe o legătură de 2,4 GHz</string>
     <string name="narrow_band_profile_cap_description">Când această sesiune rulează pe 2,4 GHz, fie pentru că Wi-Fi-ul acestei unități nu are banda de 5 GHz, fie pentru că rețeaua s-a format acolo, cere telefonului cel mult 720p și 30 fps în locul setărilor de mai sus, și audio AAC. Pe o astfel de legătură s-a măsurat că fluxul la rată completă nu transporta deloc imagine, în timp ce unul mai mic rezista. Dezactivați pentru a primi exact ce ați cerut.</string>
-    <string name="connection_issue_banner_video_link_too_slow">Telefonul a renunțat la video de mai multe ori la rând, înainte să ajungă vreun cadru. Legătura Wi-Fi este prea lentă pentru imagine. Atingeți pentru a coborî limita de FPS la 30; ajută și o rezoluție mai mică, precum și sunetul AAC.</string>
+    <string name="connection_issue_banner_video_link_too_slow">Telefonul a renunțat la video de mai multe ori la rând, înainte să ajungă vreun cadru. Legătura Wi-Fi este prea lentă pentru imagine, așa că acum se cere 720p la 30 FPS cu sunet AAC. Atingeți pentru a stabili chiar dumneavoastră rezoluția sau limita de FPS, ceea ce anulează și această setare; o rețea de 5 GHz este cealaltă soluție.</string>
     <string name="connection_issue_banner_five_ghz_channel_refused">Această unitate a refuzat să pună rețeaua WiFi Direct pe oricare canal de 5 GHz ales de tine, așa că a pornit-o pe cel ales de propriul driver WiFi. Acel canal este adesea unul pe care telefoanele din țările mai stricte nici măcar nu îl văd. Atinge pentru a seta banda WiFi Direct la 2,4 GHz, permisă în toate țările; așteaptă-te la 720p în loc de 1080p.</string>
+    <string name="connection_issue_banner_headunit_server_deaf">Serverul unității centrale Android Auto de pe telefon acceptă conexiuni și nu răspunde la niciuna. Nu își revine singur: pe telefon, oprește serverul unității centrale din setările pentru dezvoltatori Android Auto și pornește-l din nou. Această unitate se va reconecta singură.</string>
+    <string name="connection_issue_banner_hands_free_held">Un alt dispozitiv folosește deja conexiunea hands-free a acestei unități, așa că telefonul pe care această unitate îl trezește nu o poate avea. Android Auto nu va porni o conexiune wireless decât dacă Bluetooth-ul unității centrale este conectat cu un profil, iar o unitate care deservește o singură conexiune hands-free la un moment dat nu mai are niciuna de oferit. Deconectează celălalt dispozitiv sau oprește-i Bluetooth-ul, iar această unitate va încerca din nou singură.</string>
     <string name="connection_issue_banner_dismiss">Închide</string>
+    <string name="auto_connect_pill_cancel">Oprește conectarea</string>
     <string name="connection_issue_remedy_hotspot_query">Nume și parolă hotspot</string>
     <string name="preflight_title">Înainte de conectare</string>
     <string name="preflight_intro">Acest dispozitiv nu poate furniza toate datele necesare pentru Android Auto:</string>
@@ -999,6 +1003,8 @@
     <string name="native_wifi_version_exchange_description">Permite telefonului să se reconecteze prin WiFi în loc de Bluetooth, folosind hotspotul acestei unități. Ajută la unitățile al căror Bluetooth nu poate transporta handshake-ul și la versiunile mai noi de Android Auto. Dezactivat implicit, iar prima conexiune trece în continuare prin Bluetooth.</string>
     <string name="native_aa_complete_hfp_slc">Finalizează conexiunea Bluetooth</string>
     <string name="native_aa_complete_hfp_slc_description">Unele telefoane nu pornesc Android Auto wireless până când Bluetooth-ul acestei unități nu este considerat conectat, nu doar asociat. Activat implicit; dezactivați-l dacă apelurile pe acest dispozitiv nu mai funcționează.</string>
+    <string name="announce_connection_configuration">Solicită un timp de așteptare mai lung pentru legătură</string>
+    <string name="announce_connection_configuration_description">Îi spune aplicației Android Auto să aștepte 15 secunde în loc de 3 înainte de a considera legătura moartă și să folosească memorii tampon de socket mai mari. Este menit pentru o radio care părăsește canalul pentru câteva secunde în mijlocul sesiunii și ia legătura cu ea. Nu s-a măsurat dacă telefonul dvs. respectă ceva din toate acestea.</string>
     <string name="native_aa_ignore_external_bt">Ignoră verificarea de compatibilitate Bluetooth</string>
     <string name="native_aa_ignore_external_bt_description">Această unitate pare să țină Bluetooth-ul pe un modul separat la care Android nu ajunge, așa că Android Auto wireless este dezactivat automat. Dezactivat implicit. Activați-l doar dacă credeți că este greșit: când detectarea este corectă, conexiunea eșuează fără niciun semn, iar jurnalul pare în regulă.</string>
     <string name="native_aa_setup_qr_title">Configurare prin cod QR</string>
@@ -1110,7 +1116,7 @@
     <string name="wifi_direct_new_identity_confirm">Alege un nume și o parolă noi pentru grup începând cu următoarea conexiune.</string>
     <string name="wifi_direct_new_identity_done">O nouă identitate de rețea va fi utilizată de la următoarea conexiune.</string>
     <string name="wifi_direct_new_identity_applied">O nouă identitate de rețea se configurează acum. Telefonului i se va cere să se conecteze la ea la următoarea conexiune.</string>
-    <string name="wifi_direct_stable_identity_description_legacy">Pe această versiune de Android numele rețelei este stabilit de sistem, care îl păstrează cât timp poate. Lasă opțiunea activată pentru ca telefonul să se reconecteze la o rețea cunoscută și încearcă o identitate nouă mai jos dacă refuză în continuare rețeaua salvată. Dezactiveaz-o pentru ca sistemul să uite rețeaua înainte de fiecare conexiune.</string>
+    <string name="wifi_direct_stable_identity_description_legacy">Pe această versiune de Android numele rețelei este stabilit de sistem, iar unele aparate aleg unul nou la fiecare conexiune. Aplicația nu poate cere aici un anumit nume. Lasă opțiunea activată pentru ca telefonul să se reconecteze la o rețea cunoscută atunci când sistemul păstrează una și încearcă o identitate nouă mai jos dacă refuză în continuare rețeaua salvată. Dezactiveaz-o pentru ca sistemul să uite rețeaua înainte de fiecare conexiune.</string>
     <string name="debug_video_low_latency">Solicită mod de latență redusă a decodorului</string>
     <string name="debug_video_low_latency_description">Setează cheia MediaFormat proprietară de latență redusă la configurarea decodorului video.</string>
     <string name="debug_video_feed_hold">Simulează un decodor lent</string>

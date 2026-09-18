@@ -23,8 +23,15 @@ object StationScanCadencePolicy {
      *
      * @param scanTimesMs when each scan result landed, oldest first
      * @param windowMs how long the window actually was, which is not exactly [WINDOW_MS]
+     * @param station what the bring-up did to this unit's own association. A disconnected station
+     *   is the state that scans, so a cadence read without it attributes nothing; the deciding
+     *   lines rotate out of a head unit's buffer long before a stutter is noticed.
      */
-    fun summarise(scanTimesMs: List<Long>, windowMs: Long): String? {
+    fun summarise(
+        scanTimesMs: List<Long>,
+        windowMs: Long,
+        station: StationStandDownOutcome = StationStandDownOutcome.UNKNOWN
+    ): String? {
         if (scanTimesMs.isEmpty()) return null
 
         val gaps = scanTimesMs.zipWithNext { a, b -> b - a }
@@ -37,8 +44,9 @@ object StationScanCadencePolicy {
                     "longest ${format(sorted.last())}s)"
             }
         }
+        val whose = station.scanClause?.let { " $it" } ?: ""
         return "station scans: ${scanTimesMs.size} in ${windowMs}ms, $cadence. Each one takes the " +
-            "radio off the group's channel."
+            "radio off the group's channel.$whose"
     }
 
     private fun format(ms: Long): String = String.format(java.util.Locale.US, "%.1f", ms / 1000.0)

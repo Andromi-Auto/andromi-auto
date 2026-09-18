@@ -398,6 +398,7 @@
     <string name="usb_auto_connect">Auto-connect USB</string>
     <string name="usb_auto_connect_description">Automatically connect to a known USB device when the application is opened.</string>
     <string name="auto_start_bt_label">Auto-start on Bluetooth</string>
+    <string name="auto_start_overlay_missing_hint">Display over other apps is not granted, so auto-start will show a notification instead of opening the screen. Tap to grant.</string>
     <string name="auto_start_bt_description">Automatically open Open Headunit when a specific Bluetooth device connects.</string>
     <!-- Asked once, after the first connection, when this unit is paired to exactly one phone. -->
     <string name="auto_start_offer_title">Start automatically?</string>
@@ -841,7 +842,8 @@
     <string name="nav_action_ferry">Ferry</string>
     <string name="nav_action_ferry_train">Ferry / train</string>
     <string name="nav_action_destination">Arrival</string>
-    <string name="show_fps_counter">Show FPS Counter</string>
+    <string name="show_performance_overlay">Show Performance Overlay</string>
+    <string name="overlay_position">Performance overlay position</string>
     <!-- Debug-only: deliberately corrupts the projected video stream so the reassembler's
          failure paths can be exercised on a unit that is working correctly. Not translated on
          purpose - it is a developer tool and the terms are protocol terms. -->
@@ -860,18 +862,17 @@
     <string name="wifi_direct_new_identity_confirm">Picks a new name and password for the group, used from the next connection on. Your phone will be set up for it over Bluetooth as if this were a new head unit. Do this if the phone keeps trying a network it can no longer join.</string>
     <string name="wifi_direct_new_identity_done">A new network identity will be used from the next connection.</string>
     <string name="wifi_direct_new_identity_applied">A new network identity is being set up now. Your phone will be asked to join it on the next connection.</string>
-    <string name="wifi_direct_stable_identity_description_legacy">On this Android version the network name comes from the system, which keeps the same one for as long as it can. Leave this on so your phone rejoins a network it already knows, and use a new identity below if it keeps refusing the saved one. Turn it off to make the system forget the network before every connection.</string>
+    <string name="wifi_direct_stable_identity_description_legacy">On this Android version the network name comes from the system, and some units pick a new one on every connection. The app cannot ask for a particular name here. Leave this on so your phone rejoins a network it already knows wherever the system keeps one, and use a new identity below if it keeps refusing the saved one. Turn it off to make the system forget the network before every connection.</string>
     <string name="debug_video_low_latency">Request decoder low-latency mode</string>
     <string name="debug_video_low_latency_description">Sets the vendor low-latency MediaFormat key when configuring the video decoder. Falls back automatically if the decoder rejects it.</string>
     <string name="debug_video_feed_hold">Simulate a slow decoder</string>
-    <string name="show_fps_counter_description">Display a real-time FPS overlay in the top-left corner during projection.</string>
+    <string name="show_performance_overlay_description">Display FPS, CPU load, temperature and frame age over the projection.</string>
 
     <!-- Auto-start permission strings -->
     <string name="reopen_on_reconnection_label">Reopen on reconnection</string>
     <string name="reopen_on_reconnection_description">When you press the Exit button, the app stays running in the background and continues monitoring USB connections. If a device reconnects, the app reopens automatically.</string>
     <string name="overlay_permission_required">Auto-start requires \'Display over other apps\' permission</string>
     <string name="usb_permission_denied">USB permission denied. Please allow USB access to connect automatically.</string>
-    <string name="overlay_permission_denied_auto_start_disabled">Overlay permission not granted. Auto-start has been disabled.</string>
 
     <!-- Theme -->
     <string name="use_white_background">Use white home screen wallpaper</string>
@@ -1057,9 +1058,12 @@
     <string name="native_aa_requires_wifi">Native Android Auto needs this unit\'s WiFi. Please turn it on.</string>
     <string name="narrow_band_profile_cap">Lower video on a 2.4 GHz link</string>
     <string name="narrow_band_profile_cap_description">When this session runs on 2.4 GHz, whether because this unit\'s WiFi has no 5 GHz band or because the network came up there, ask the phone for at most 720p and 30 fps instead of the settings above, and for AAC audio. On such a link a full-rate stream was measured to carry no picture at all, while a lower one held. Turn this off to be given what you asked for.</string>
-    <string name="connection_issue_banner_video_link_too_slow">Your phone gave up on the video before a single frame arrived, several times in a row. The WiFi link is too slow to carry the picture. Tap to lower the FPS limit to 30; a lower resolution and AAC audio also help.</string>
+    <string name="connection_issue_banner_video_link_too_slow">Your phone gave up on the video before a single frame arrived, several times in a row. The WiFi link is too slow to carry the picture, so it is now being asked for 720p at 30 FPS with AAC audio. Tap to set the resolution or the FPS limit yourself, which also takes this back off; a 5 GHz network is the other fix.</string>
     <string name="connection_issue_banner_five_ghz_channel_refused">This unit refused to put its WiFi Direct network on any 5 GHz channel you chose, so it went up on the one its own WiFi driver picked. That channel is often one phones in stricter countries cannot even see. Tap to set the WiFi Direct band to 2.4 GHz, which every country allows; expect 720p rather than 1080p on it.</string>
+    <string name="connection_issue_banner_headunit_server_deaf">Android Auto\'s head unit server on your phone is accepting connections and answering none of them. It does not recover on its own: on the phone, stop the head unit server in Android Auto\'s developer settings and start it again. This unit will reconnect by itself.</string>
+    <string name="connection_issue_banner_hands_free_held">Another device is already using this unit\'s hands-free connection, so the phone this unit is waking cannot have it. Android Auto will not start a wireless connection unless the head unit\'s Bluetooth is connected with a profile, and a unit that serves one hands-free link at a time has none left to give. Disconnect the other device, or switch its Bluetooth off, and this unit will try again by itself.</string>
     <string name="connection_issue_banner_dismiss">Dismiss</string>
+    <string name="auto_connect_pill_cancel">Stop connecting</string>
     <!-- What the hotspot banner types into the settings search. Both override rows carry it
          as a search keyword, so this one string is what makes the tap reach the pair. -->
     <string name="connection_issue_remedy_hotspot_query">Hotspot name and password</string>
@@ -1078,6 +1082,8 @@
     <string name="native_wifi_version_exchange_description">Lets the phone reconnect over WiFi instead of Bluetooth, using this head unit\'s hotspot. Helps on units whose Bluetooth cannot carry the handshake, and on newer Android Auto versions. Off by default, and the first connection still goes over Bluetooth.</string>
     <string name="native_aa_complete_hfp_slc">Complete the Bluetooth connection</string>
     <string name="native_aa_complete_hfp_slc_description">Some phones will not start wireless Android Auto until this unit\'s Bluetooth counts as connected, not just paired. On by default; turn it off if calls on this device stop working.</string>
+    <string name="announce_connection_configuration">Ask for a longer link timeout</string>
+    <string name="announce_connection_configuration_description">Tells Android Auto to wait 15 seconds before treating the link as dead instead of 3, and to use larger socket buffers. It is aimed at a radio that goes off channel for a few seconds mid session and takes the connection with it. Whether your phone honours any of it has not been measured.</string>
     <string name="native_aa_ignore_external_bt">Ignore the Bluetooth compatibility check</string>
     <string name="native_aa_ignore_external_bt_description">This unit looks like it keeps Bluetooth on a separate module that Android cannot reach, so wireless Android Auto is switched off automatically. Off by default. Turn it on only if you think that is wrong: where it is right, the connection fails silently and the log looks healthy.</string>
 

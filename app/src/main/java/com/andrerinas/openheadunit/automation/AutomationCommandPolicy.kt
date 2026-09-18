@@ -77,8 +77,8 @@ object AutomationCommandPolicy {
         HeadUnitCommand.ACTION_DISCONNECT to AapService.ACTION_DISCONNECT,
         HeadUnitCommand.ACTION_STOP_SERVICE to AapService.ACTION_STOP_SERVICE,
         HeadUnitCommand.ACTION_EXIT to AapService.ACTION_STOP_SERVICE,
-        HeadUnitCommand.ACTION_START_WIRELESS to AapService.ACTION_START_WIRELESS,
         HeadUnitCommand.ACTION_STOP_WIRELESS to AapService.ACTION_STOP_WIRELESS,
+        HeadUnitCommand.ACTION_CANCEL_WIRELESS to AapService.ACTION_CANCEL_WIRELESS,
         HeadUnitCommand.ACTION_START_WIRELESS_SCAN to AapService.ACTION_START_WIRELESS_SCAN,
         HeadUnitCommand.ACTION_CHECK_USB to AapService.ACTION_CHECK_USB,
         HeadUnitCommand.ACTION_REFRESH_SENSORS to AapService.ACTION_REFRESH_SENSORS,
@@ -107,6 +107,14 @@ object AutomationCommandPolicy {
 
         return when (action) {
             HeadUnitCommand.ACTION_CONNECT -> connect(extras)
+            // Not a plain relay: the service honours no_ui on this action, and relaying it without
+            // the extra silently dropped the one thing the caller asked for.
+            HeadUnitCommand.ACTION_START_WIRELESS -> listOf(
+                Effect.StartService(
+                    AapService.ACTION_START_WIRELESS,
+                    flagExtras = mapOf(AapService.EXTRA_NO_UI to extras.flag(HeadUnitCommand.EXTRA_NO_UI))
+                )
+            )
             HeadUnitCommand.ACTION_START_SELF_MODE -> listOf(
                 Effect.StartService(
                     AapService.ACTION_START_SELF_MODE,

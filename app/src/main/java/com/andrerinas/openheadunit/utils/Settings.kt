@@ -661,6 +661,31 @@ class Settings(private val context: Context) {
         }
 
     /**
+     * Consecutive group creates whose name did not match the last one's.
+     *
+     * Kept per unit because a create is once per bring-up: in memory it would take a whole session
+     * to learn what one line of history already knows.
+     * [com.andrerinas.openheadunit.connection.wifi.direct.GroupIdentityStabilityPolicy] owns the
+     * rule; this only stores the count it hands back.
+     */
+    var wifiDirectGroupNameChanges: Int
+        get() = prefs.getInt("wifi-direct-group-name-changes", 0)
+        set(value) { prefs.edit().putInt("wifi-direct-group-name-changes", value).apply() }
+
+    /**
+     * Set once three wireless sessions in a row set up every channel and rendered nothing.
+     *
+     * The conclusion rather than the counter, the way `playback-focus-self-defeating` is: the
+     * streak itself is [com.andrerinas.openheadunit.connection.VideoStarvationPolicy]'s and lives
+     * in memory. Cleared only by the user changing the resolution or the frame rate, because the
+     * cap is what makes the session render and clearing it on a rendering session would earn it
+     * again every time.
+     */
+    var videoProfileStarvationCap: Boolean
+        get() = prefs.getBoolean("video-profile-starvation-cap", false)
+        set(value) { prefs.edit().putBoolean("video-profile-starvation-cap", value).apply() }
+
+    /**
      * Asks the decoder for low-latency mode, through whichever key its vendor understands.
      *
      * Off by default, and it stays off until a log from a real device shows the key changing the
@@ -985,8 +1010,11 @@ class Settings(private val context: Context) {
         get() = prefs.getInt("mic-input-source", 0) // Default: DEFAULT
         set(value) { prefs.edit().putInt("mic-input-source", value).apply() }
 
+    // 16 banks 400ms, which is AudioJitterBufferPolicy's ceiling and the only setting measured to
+    // produce no audible stutter on the rig's phone-to-phone pairing. Nothing else writes this key,
+    // so a user who saved 8 keeps 8 and one who never opened the picker moves.
     var audioLatencyMultiplier: Int
-        get() = prefs.getInt("audio-latency-multiplier", 8)
+        get() = prefs.getInt("audio-latency-multiplier", 16)
         set(value) { prefs.edit().putInt("audio-latency-multiplier", value).apply() }
 
     // Chunks the audio thread may hold before it starts dropping, or 0 for no limit. Bounded by
@@ -1463,10 +1491,21 @@ class Settings(private val context: Context) {
     var appThemeManualEnd: Int
         get() = prefs.getInt("app-theme-manual-end", 420)
         set(value) { prefs.edit().putInt("app-theme-manual-end", value).apply() }
-    var showFpsCounter: Boolean
+    // The stored key keeps the old spelling: renaming it would reset the setting on every unit.
+    var showPerformanceOverlay: Boolean
         get() = prefs.getBoolean("show-fps-counter", false)
         set(value) {
             prefs.edit().putBoolean("show-fps-counter", value).apply()
+        }
+
+    // Which top corner the performance overlay sits in, for a panel whose OEM bar covers the other.
+    var overlayPosition: OverlayPosition
+        get() {
+            val value = prefs.getInt("overlay-position", 0)
+            return OverlayPosition.fromInt(value) ?: OverlayPosition.LEFT
+        }
+        set(value) {
+            prefs.edit().putInt("overlay-position", value.value).apply()
         }
 
     companion object {
@@ -1846,6 +1885,16 @@ class Settings(private val context: Context) {
         }
     }
 
+    enum class OverlayPosition(val value: Int) {
+        LEFT(0),
+        RIGHT(1);
+
+        companion object {
+            private val map = values().associateBy(OverlayPosition::value)
+            fun fromInt(value: Int) = map[value]
+        }
+    }
+
     enum class ScreenOrientation(val value: Int, val androidOrientation: Int) {
         SYSTEM(0, android.content.pm.ActivityInfo.SCREEN_ORIENTATION_USER),
         AUTO(1, android.content.pm.ActivityInfo.SCREEN_ORIENTATION_SENSOR),
@@ -1992,11 +2041,21 @@ class Settings(private val context: Context) {
     // setup puts on the wire, so it stays opt-in. What it buys is the WPP-over-TCP endpoint, which
     // from Android Auto 17.4 is how a reconnect happens with nothing running on the phone. That
     // endpoint goes out on the hotspot transport, and on WiFi Direct once this unit's group has been
-    // seen to keep its name and address across bring-ups (see WppEndpointPolicy). Fields 3 and 4 of
-    // the request are still undecoded and are the shape a channel hint would take.
+    // seen to keep its name and address across bring-ups (see WppEndpointPolicy). Field 3 carries
+    // the bands we can offer (WppChannelTypePolicy); field 4, the frequency list, we cannot read.
     var nativeWifiVersionExchange: Boolean
         get() = prefs.getBoolean("native-wifi-version-exchange", false)
         set(value) = prefs.edit().putBoolean("native-wifi-version-exchange", value).apply()
+
+    // Whether ServiceDiscoveryResponse carries a ConnectionConfiguration: the ping and TCP
+    // parameters Android Auto lets a head unit ask for.
+    //
+    // Off by default. It is aimed at the link outages that kill a session mid-drive, where the
+    // protocol's own 3 s ping timeout fires long before the link is actually gone, but whether the
+    // phone honours any of it is unmeasured. See ConnectionConfigPolicy for the values.
+    var announceConnectionConfiguration: Boolean
+        get() = prefs.getBoolean("announce-connection-configuration", false)
+        set(value) = prefs.edit().putBoolean("announce-connection-configuration", value).apply()
 
     var nativeDriverSelectionMode: NativeDriverSelectionPolicy.Mode
         get() = NativeDriverSelectionPolicy.Mode.fromId(
@@ -2075,6 +2134,15 @@ class Settings(private val context: Context) {
     var connectionIssueFiveGhzChannelRefusedAtEpochMs: Long
         get() = prefs.getLong("connection-issue-5ghz-channel-refused", 0L)
         set(value) = prefs.edit().putLong("connection-issue-5ghz-channel-refused", value).apply()
+
+    var connectionIssueHeadUnitServerDeafAtEpochMs: Long
+        get() = prefs.getLong("connection-issue-headunit-server-deaf", 0L)
+        set(value) = prefs.edit().putLong("connection-issue-headunit-server-deaf", value).apply()
+
+    /** Another device held this unit's hands-free link, so the woken phone could not have it. */
+    var connectionIssueHandsFreeHeldAtEpochMs: Long
+        get() = prefs.getLong("connection-issue-hands-free-held", 0L)
+        set(value) = prefs.edit().putLong("connection-issue-hands-free-held", value).apply()
 
     /**
      * When the user last dismissed the failure banner.
@@ -2166,6 +2234,14 @@ class Settings(private val context: Context) {
     var nativeAaCompleteHfpSlc: Boolean
         get() = prefs.getBoolean("native-aa-complete-hfp-slc", true)
         set(value) = prefs.edit().putBoolean("native-aa-complete-hfp-slc", value).apply()
+
+    // What an escalated wake did to this unit's own hands-free link, as NativeAaWakeDamagePolicy.
+    // Measured rather than chosen: the poke displaces the phone's single slot by design and no API
+    // puts it back, but whether the link returns is a property of this unit's stack. The first
+    // escalated wake is the probe; a unit that stayed down never escalates again.
+    var nativeAaWakeDamageVerdict: Int
+        get() = prefs.getInt("native-aa-wake-damage-verdict", 0)
+        set(value) = prefs.edit().putInt("native-aa-wake-damage-verdict", value).apply()
 
     // Run the Native AA Bluetooth route on a unit ExternalBtPolicy has flagged, instead of refusing
     // to start it. The detection marks a class of hardware rather than measuring the unit in front

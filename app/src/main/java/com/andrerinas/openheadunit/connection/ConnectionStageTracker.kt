@@ -29,7 +29,16 @@ object ConnectionStageTracker {
     /** A genuine restart: the floor drops so [opening] shows even though it ranks lower. The
      *  network line is the group owner's to clear, because a failed attempt leaves the group up. */
     fun beginAttempt(opening: ConnectionStage) {
+        // A fresh arming is somebody asking for a connection, so the hold from the phone's own
+        // exit is no longer about anything.
+        phoneLeftAtMs = 0L
         _stage.value = opening
+    }
+
+    /** The session or attempt is over. The network line is left to whoever owns the group, which a
+     *  session that ends without removing it still has. */
+    fun endAttempt() {
+        _stage.value = null
     }
 
     /** A step that ended with nothing to show: [from] gives way to [to], and any other stage stays. */
@@ -42,8 +51,22 @@ object ConnectionStageTracker {
         _network.value = detail
     }
 
+    /**
+     * The phone ended the session itself, so the pill holds off for a moment: the listeners reopen
+     * immediately behind a bye-bye and the stage they report reads as a reconnect nobody asked for.
+     * `elapsedRealtime`, so a sleeping unit does not age the window.
+     */
+    @Volatile
+    var phoneLeftAtMs = 0L
+        private set
+
+    fun notePhoneLeft(nowMs: Long) {
+        phoneLeftAtMs = nowMs
+    }
+
     /** The stack is down. */
     fun clear() {
+        phoneLeftAtMs = 0L
         _stage.value = null
         _network.value = null
     }

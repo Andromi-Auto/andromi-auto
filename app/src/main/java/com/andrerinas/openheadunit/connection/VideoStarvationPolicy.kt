@@ -21,6 +21,10 @@ package com.andrerinas.openheadunit.connection
  * Deliberately a streak rather than a single occurrence. One starved session is ordinary — a phone
  * being unplugged mid-bring-up looks exactly like this once — and advice given on the strength of
  * one is advice that will sometimes be wrong.
+ *
+ * **This used to only advise**, and telling the user to lower the resolution by hand is what an
+ * Android 4.4 tablet needed three failed bring-ups to be told. [shouldCap] is the same streak
+ * acting on itself: the profile comes down and the picture arrives.
  */
 object VideoStarvationPolicy {
 
@@ -37,6 +41,22 @@ object VideoStarvationPolicy {
      */
     fun shouldAdvise(consecutiveStarvedSessions: Int): Boolean =
         consecutiveStarvedSessions == ADVISE_AFTER_STARVED_SESSIONS
+
+    /**
+     * Whether the next session should be offered a lower profile than the user asked for.
+     *
+     * The complement of [shouldAdvise]'s "say it once": this is a standing condition rather than an
+     * edge, so it holds for as long as the streak does, and the same streak that produced the
+     * advice produces the cap.
+     *
+     * **What retires it is not this function.** The cap is what makes the next session render, and
+     * a rendering session is what clears the streak, so a cap released on a cleared streak would
+     * uncap, starve three more times and be earned again forever. The conclusion is kept instead
+     * (`Settings.videoProfileStarvationCap`) and only the user changing the resolution or the frame
+     * rate takes it back off, which is the same shape as the playback-focus latch.
+     */
+    fun shouldCap(consecutiveStarvedSessions: Int): Boolean =
+        consecutiveStarvedSessions >= ADVISE_AFTER_STARVED_SESSIONS
 
     /**
      * The streak after a session that [reachedHandshake] and rendered frames or not.

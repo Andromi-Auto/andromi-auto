@@ -169,12 +169,12 @@ class QuickSettingsFragment : DialogFragment() {
         ))
 
         items.add(SettingItem.ToggleSettingEntry(
-            stableId = "showFpsCounter",
-            nameResId = R.string.show_fps_counter,
-            descriptionResId = R.string.show_fps_counter_description,
-            isChecked = settings.showFpsCounter,
+            stableId = "showPerformanceOverlay",
+            nameResId = R.string.show_performance_overlay,
+            descriptionResId = R.string.show_performance_overlay_description,
+            isChecked = settings.showPerformanceOverlay,
             onCheckedChanged = { isChecked ->
-                settings.showFpsCounter = isChecked
+                settings.showPerformanceOverlay = isChecked
                 settings.commit()
                 notifyChange()
                 updateSettingsList()
@@ -339,8 +339,11 @@ class QuickSettingsFragment : DialogFragment() {
     }
 
     private fun showAudioLatencyDialog() {
-        val options = arrayOf("1x (Lowest Latency)", "2x (Low Latency)", "4x (High Latency)", "8x (Very High Latency)")
-        val values = intArrayOf(1, 2, 4, 8)
+        val options = arrayOf(
+            "1x (shallowest cushion)", "2x (shallow)", "4x (medium)",
+            "8x (deep)", "16x (deepest, default)"
+        )
+        val values = intArrayOf(1, 2, 4, 8, 16)
         val currentIndex = values.indexOf(settings.audioLatencyMultiplier).coerceAtLeast(0)
         MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
             .setTitle(R.string.audio_latency_multiplier)

@@ -184,6 +184,7 @@
     <string name="usb_auto_connect">USB Otomatik Bağlan</string>
     <string name="usb_auto_connect_description">Uygulama açıldığında bilinen bir USB cihazına otomatik olarak bağlan.</string>
     <string name="auto_start_bt_label">Bluetooth ile otomatik başlat</string>
+    <string name="auto_start_overlay_missing_hint">Diğer uygulamaların üzerinde gösterme izni verilmedi, bu yüzden otomatik başlatma ekranı açmak yerine bir bildirim gösterecek. İzin vermek için dokunun.</string>
     <string name="auto_start_bt_description">Belirli bir Bluetooth cihazı bağlandığında Open Headunit\'ı otomatik olarak aç.</string>
     <string name="auto_start_offer_title">Otomatik başlatılsın mı?</string>
     <string name="auto_start_offer_message">Uygulamanın bu cihazla otomatik başlatılmasını ister misin, %1$s?</string>
@@ -413,14 +414,14 @@
     <string name="nav_action_ferry">Feribot</string>
     <string name="nav_action_ferry_train">Feribot / tren</string>
     <string name="nav_action_destination">Varış</string>
-    <string name="show_fps_counter">FPS Sayacını Göster</string>
-    <string name="show_fps_counter_description">Yansıtma sırasında sol üst köşede gerçek zamanlı bir FPS göstergesi görüntüler.</string>
+    <string name="show_performance_overlay">Performans katmanını göster</string>
+    <string name="overlay_position">Performans katmanının konumu</string>
+    <string name="show_performance_overlay_description">Yansıtmanın üzerinde FPS, CPU yükü, sıcaklık ve kare yaşını gösterir.</string>
 
     <string name="reopen_on_reconnection_label">Yeniden bağlantıda tekrar aç</string>
     <string name="reopen_on_reconnection_description">Çıkış düğmesine bastığınızda, uygulama arka planda çalışmaya devam eder ve USB bağlantılarını izlemeyi sürdürür. Bir cihaz yeniden bağlandığında uygulama otomatik olarak tekrar açılır.</string>
     <string name="overlay_permission_required">Otomatik başlatma için \'Diğer uygulamaların üzerinde görüntüleme\' izni gereklidir</string>
     <string name="usb_permission_denied">USB izni reddedildi. Otomatik bağlanmak için lütfen USB erişimine izin verin.</string>
-    <string name="overlay_permission_denied_auto_start_disabled">Üstte görüntüleme izni verilmedi. Otomatik başlatma devre dışı bırakıldı.</string>
 
     <string name="use_white_background">Beyaz ana ekran duvar kağıdı kullan</string>
     <string name="category_input">Giriş Ayarları</string>
@@ -979,9 +980,12 @@
     <string name="connection_issue_banner_hotspot_config">Erişim noktası adı ve şifresi alınamadı. Manuel girmek için dokunun.</string>
     <string name="narrow_band_profile_cap">2,4 GHz bağlantıda videoyu düşür</string>
     <string name="narrow_band_profile_cap_description">Bu oturum 2,4 GHz üzerinde çalışıyorsa, bunun nedeni bu cihazın Wi-Fi\'ında 5 GHz bandı olmaması veya ağın orada kurulmuş olması olsun, yukarıdaki ayarlar yerine telefondan en fazla 720p ve 30 fps ile AAC ses iste. Böyle bir bağlantıda tam hızlı akışın hiç görüntü taşımadığı, daha düşüğünün ise tutunduğu ölçüldü. İstediğiniz ayarların aynen uygulanması için bunu kapatın.</string>
-    <string name="connection_issue_banner_video_link_too_slow">Telefonunuz üst üste birkaç kez, tek bir kare bile gelmeden videodan vazgeçti. Wi-Fi bağlantısı görüntüyü taşıyamayacak kadar yavaş. FPS sınırını 30\'a düşürmek için dokunun; daha düşük çözünürlük ve AAC ses de yardımcı olur.</string>
+    <string name="connection_issue_banner_video_link_too_slow">Telefonunuz üst üste birkaç kez, tek bir kare bile gelmeden videodan vazgeçti. Wi-Fi bağlantısı görüntüyü taşıyamayacak kadar yavaş, bu yüzden artık AAC sesle 720p ve 30 FPS isteniyor. Çözünürlüğü veya FPS sınırını kendiniz ayarlamak için dokunun; bu aynı zamanda ayarı geri alır. Diğer çözüm 5 GHz\'lik bir ağ.</string>
     <string name="connection_issue_banner_five_ghz_channel_refused">Bu ünite WiFi Direct ağını seçtiğin hiçbir 5 GHz kanalına koymayı reddetti ve kendi WiFi sürücüsünün seçtiği kanalda başlattı. Bu kanal çoğu zaman daha katı ülkelerdeki telefonların göremediği bir kanaldır. WiFi Direct bandını her ülkede izin verilen 2,4 GHz olarak ayarlamak için dokun; burada 1080p yerine 720p bekle.</string>
+    <string name="connection_issue_banner_headunit_server_deaf">Telefonunuzdaki Android Auto ana ünite sunucusu bağlantıları kabul ediyor ve hiçbirini yanıtlamıyor. Kendi kendine düzelmez: telefonda Android Auto geliştirici ayarlarından ana ünite sunucusunu durdurup yeniden başlatın. Bu cihaz kendiliğinden yeniden bağlanacak.</string>
+    <string name="connection_issue_banner_hands_free_held">Başka bir cihaz zaten bu cihazın eller serbest bağlantısını kullanıyor, bu yüzden bu cihazın uyandırdığı telefon bu bağlantıyı kullanamaz. Android Auto, ana ünitenin Bluetooth\'u bir profille bağlanmadıkça kablosuz bağlantı başlatmaz ve aynı anda yalnızca bir eller serbest bağlantısına hizmet veren bir cihazın verecek başka bağlantısı kalmaz. Diğer cihazın bağlantısını kesin veya Bluetooth\'unu kapatın; bu cihaz kendiliğinden yeniden deneyecek.</string>
     <string name="connection_issue_banner_dismiss">Kapat</string>
+    <string name="auto_connect_pill_cancel">Bağlanmayı durdur</string>
     <string name="connection_issue_remedy_hotspot_query">Erişim noktası adı ve şifresi</string>
     <string name="preflight_title">Bağlanmadan önce</string>
     <string name="preflight_intro">Bu cihaz Android Auto için gereken tüm bilgileri sağlayamıyor:</string>
@@ -997,6 +1001,8 @@
     <string name="native_wifi_version_exchange_description">Telefonun Bluetooth yerine WiFi üzerinden, bu cihazın erişim noktasını kullanarak yeniden bağlanmasını sağlar. Bluetooth\'u el sıkışmasını taşıyamayan cihazlarda ve daha yeni Android Auto sürümlerinde yardımcı olur. Varsayılan olarak kapalı ve ilk bağlantı yine Bluetooth üzerinden gerçekleşir.</string>
     <string name="native_aa_complete_hfp_slc">Bluetooth bağlantısını tamamla</string>
     <string name="native_aa_complete_hfp_slc_description">Bazı telefonlar, bu cihazın Bluetooth\'u yalnızca eşleştirilmiş değil bağlı sayılana kadar kablosuz Android Auto\'yu başlatmaz. Varsayılan olarak açık; bu cihazdaki aramalar çalışmayı bırakırsa kapatın.</string>
+    <string name="announce_connection_configuration">Daha uzun bağlantı zaman aşımı iste</string>
+    <string name="announce_connection_configuration_description">Android Auto\'ya bağlantıyı ölü saymadan önce 3 yerine 15 saniye beklemesini ve daha büyük soket arabellekleri kullanmasını söyler. Bu, oturum ortasında birkaç saniyeliğine kanaldan çıkan ve bağlantıyı da beraberinde götüren bir radyo için tasarlanmıştır. Telefonunuzun bunlardan herhangi birine uyup uymadığı ölçülmedi.</string>
     <string name="native_aa_ignore_external_bt">Bluetooth uyumluluk denetimini yoksay</string>
     <string name="native_aa_ignore_external_bt_description">Bu cihaz, Bluetooth\'u Android\'in erişemediği ayrı bir modülde tutuyor gibi görünüyor, bu nedenle kablosuz Android Auto otomatik olarak kapatılır. Varsayılan olarak kapalı. Yalnızca bunun yanlış olduğunu düşünüyorsanız açın: tespit doğruysa bağlantı sessizce başarısız olur ve günlük sorunsuz görünür.</string>
     <string name="native_aa_setup_qr_title">QR kod ile kurulum</string>
@@ -1108,7 +1114,7 @@
     <string name="wifi_direct_new_identity_confirm">Sonraki bağlantıdan itibaren grup için yeni bir ad ve şifre belirler. Telefonunuz yeni bir ana üniteymiş gibi Bluetooth üzerinden ayarlanacaktır.</string>
     <string name="wifi_direct_new_identity_done">Bir sonraki bağlantıdan itibaren yeni ağ kimliği kullanılacaktır.</string>
     <string name="wifi_direct_new_identity_applied">Yeni bir ağ kimliği şimdi hazırlanıyor. Telefonunuzdan bir sonraki bağlantıda bu ağa katılması istenecek.</string>
-    <string name="wifi_direct_stable_identity_description_legacy">Bu Android sürümünde ağ adını sistem belirler ve mümkün olduğu sürece aynı adı korur. Telefonunuzun bildiği bir ağa yeniden bağlanması için bunu açık bırakın; kaydedilmiş ağı reddetmeye devam ederse aşağıdan yeni bir kimlik deneyin. Kapatırsanız sistem her bağlantıdan önce ağı unutur.</string>
+    <string name="wifi_direct_stable_identity_description_legacy">Bu Android sürümünde ağ adını sistem belirler ve bazı cihazlar her bağlantıda yenisini seçer. Uygulama burada belirli bir ad isteyemez. Sistemin bir ad koruduğu yerlerde telefonunuzun bildiği bir ağa yeniden bağlanması için bunu açık bırakın; kaydedilmiş ağı reddetmeye devam ederse aşağıdan yeni bir kimlik deneyin. Kapatırsanız sistem her bağlantıdan önce ağı unutur.</string>
     <string name="debug_video_low_latency">Kod çözücü düşük gecikme modunu iste</string>
     <string name="debug_video_low_latency_description">Video kod çözücüyü yapılandırırken üreticinin düşük gecikmeli MediaFormat anahtarını ayarlar.</string>
     <string name="debug_video_feed_hold">Yavaş kod çözücüyü simüle et</string>

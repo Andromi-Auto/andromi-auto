@@ -33,6 +33,19 @@ object StationStandDown {
     const val VERIFY_DELAY_MS = 1_500L
 
     /**
+     * What the last bring-up did to the station, for readers that run after the deciding lines have
+     * rotated out of the buffer. Process-lifetime, so a fresh process reads [StationStandDownOutcome.UNKNOWN] rather than
+     * guessing.
+     */
+    @Volatile
+    var lastOutcome: StationStandDownOutcome = StationStandDownOutcome.UNKNOWN
+        private set
+
+    private fun record(outcome: StationStandDownOutcome) {
+        lastOutcome = outcome
+    }
+
+    /**
      * Whether this unit is still joined to its own network, or null when that cannot be read.
      *
      * Null is not "still there": an unreadable station must never hold the group up, which is what
@@ -95,26 +108,39 @@ object StationStandDown {
             ) {
                 val why = StationStandDownPolicy.describeUnavailable(Build.VERSION.SDK_INT, overlay)
                 when {
-                    why != null -> AppLog.i("StationStandDown: $why")
-                    !associated -> AppLog.i(
-                        "StationStandDown: this unit is not joined to another WiFi network, so " +
-                            "there is nothing to stand down before creating the group."
-                    )
-                    networkId < 0 -> AppLog.w(
-                        "StationStandDown: this unit is joined to a network the app is not allowed " +
-                            "to name, so it will not be disabled. Turning Location on usually makes " +
-                            "it readable."
-                    )
-                    else -> AppLog.i(
-                        "StationStandDown: " + StationStandDownPolicy.describeSkipped(
-                            mode, supports5Ghz, stationFrequency, groupBand
+                    why != null -> {
+                        record(StationStandDownOutcome.UNAVAILABLE)
+                        AppLog.i("StationStandDown: $why")
+                    }
+                    !associated -> {
+                        record(StationStandDownOutcome.NOT_JOINED)
+                        AppLog.i(
+                            "StationStandDown: this unit is not joined to another WiFi network, so " +
+                                "there is nothing to stand down before creating the group."
                         )
-                    )
+                    }
+                    networkId < 0 -> {
+                        record(StationStandDownOutcome.JOINED)
+                        AppLog.w(
+                            "StationStandDown: this unit is joined to a network the app is not allowed " +
+                                "to name, so it will not be disabled. Turning Location on usually makes " +
+                                "it readable."
+                        )
+                    }
+                    else -> {
+                        record(StationStandDownOutcome.JOINED)
+                        AppLog.i(
+                            "StationStandDown: " + StationStandDownPolicy.describeSkipped(
+                                mode, supports5Ghz, stationFrequency, groupBand
+                            )
+                        )
+                    }
                 }
                 return false
             }
 
             ConnectionStageTracker.report(ConnectionStage.PREPARING_NETWORK)
+            record(StationStandDownOutcome.STOOD_DOWN)
             settings.stationStandDownNetworkId = networkId
             @Suppress("DEPRECATION")
             val disabled = wm.disableNetwork(networkId)
@@ -129,6 +155,7 @@ object StationStandDown {
 
             Handler(Looper.getMainLooper()).postDelayed({
                 if (isStillAssociated(context) == true) {
+                    record(StationStandDownOutcome.STILL_JOINED)
                     AppLog.w(
                         "StationStandDown: this unit is still joined to its WiFi network " +
                             "${VERIFY_DELAY_MS}ms later, so the group will have to share that " +
@@ -140,6 +167,7 @@ object StationStandDown {
             }, VERIFY_DELAY_MS)
             return true
         } catch (e: Exception) {
+            record(StationStandDownOutcome.FAILED)
             AppLog.w("StationStandDown: could not stand the station down: ${e.message}")
             return false
         }

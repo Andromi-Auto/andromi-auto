@@ -61,7 +61,10 @@ class AutomationCommandPolicyTest {
             single(HeadUnitCommand.ACTION_DISCONNECT)
         )
         assertEquals(
-            AutomationCommandPolicy.Effect.StartService(AapService.ACTION_START_WIRELESS),
+            AutomationCommandPolicy.Effect.StartService(
+                AapService.ACTION_START_WIRELESS,
+                flagExtras = mapOf(AapService.EXTRA_NO_UI to false)
+            ),
             single(HeadUnitCommand.ACTION_START_WIRELESS)
         )
     }
@@ -96,8 +99,8 @@ class AutomationCommandPolicyTest {
     fun `every relayed verb maps onto a real service action`() {
         val expected = mapOf(
             HeadUnitCommand.ACTION_DISCONNECT to AapService.ACTION_DISCONNECT,
-            HeadUnitCommand.ACTION_START_WIRELESS to AapService.ACTION_START_WIRELESS,
             HeadUnitCommand.ACTION_STOP_WIRELESS to AapService.ACTION_STOP_WIRELESS,
+            HeadUnitCommand.ACTION_CANCEL_WIRELESS to AapService.ACTION_CANCEL_WIRELESS,
             HeadUnitCommand.ACTION_START_WIRELESS_SCAN to AapService.ACTION_START_WIRELESS_SCAN,
             HeadUnitCommand.ACTION_CHECK_USB to AapService.ACTION_CHECK_USB,
             HeadUnitCommand.ACTION_REFRESH_SENSORS to AapService.ACTION_REFRESH_SENSORS,
@@ -153,6 +156,21 @@ class AutomationCommandPolicyTest {
             mapOf(HeadUnitCommand.EXTRA_NO_UI to "true")
         ) as AutomationCommandPolicy.Effect.StartService
         assertEquals(true, selfMode.flagExtras[AapService.EXTRA_NO_UI])
+
+        // It was a plain relay, so the flag was dropped before the service ever saw it.
+        val wireless = single(
+            HeadUnitCommand.ACTION_START_WIRELESS,
+            mapOf(HeadUnitCommand.EXTRA_NO_UI to "true")
+        ) as AutomationCommandPolicy.Effect.StartService
+        assertEquals(AapService.ACTION_START_WIRELESS, wireless.action)
+        assertEquals(true, wireless.flagExtras[AapService.EXTRA_NO_UI])
+    }
+
+    @Test
+    fun `starting wireless defaults to raising the screen`() {
+        val wireless = single(HeadUnitCommand.ACTION_START_WIRELESS)
+            as AutomationCommandPolicy.Effect.StartService
+        assertEquals(false, wireless.flagExtras[AapService.EXTRA_NO_UI])
     }
 
     @Test
@@ -321,6 +339,7 @@ class AutomationCommandPolicyTest {
         HeadUnitCommand.ACTION_START_SELF_MODE, HeadUnitCommand.ACTION_STOP_SERVICE,
         HeadUnitCommand.ACTION_EXIT, HeadUnitCommand.ACTION_SET_NIGHT_MODE,
         HeadUnitCommand.ACTION_START_WIRELESS, HeadUnitCommand.ACTION_STOP_WIRELESS,
+        HeadUnitCommand.ACTION_CANCEL_WIRELESS,
         HeadUnitCommand.ACTION_START_WIRELESS_SCAN, HeadUnitCommand.ACTION_NATIVE_AA_POKE,
         HeadUnitCommand.ACTION_NATIVE_AA_CANCEL_POKE,
         HeadUnitCommand.ACTION_NEARBY_CONNECT, HeadUnitCommand.ACTION_CHECK_USB,

@@ -189,6 +189,7 @@
     <string name="usb_auto_connect">USB ავტო-კავშირი</string>
     <string name="usb_auto_connect_description">ცნობილ USB მოწყობილობასთან ავტომატური დაკავშირება აპლიკაციის გახსნისას.</string>
     <string name="auto_start_bt_label">ავტო-გაშვება Bluetooth-ით</string>
+    <string name="auto_start_overlay_missing_hint">სხვა აპების ზემოდან ჩვენება ნებადართული არაა, ამიტომ ავტოგაშვება ეკრანის გახსნის ნაცვლად შეტყობინებას აჩვენებს. შეეხეთ ნებართვისთვის.</string>
     <string name="auto_start_bt_description">Open Headunit-ის ავტომატური გახსნა კონკრეტული Bluetooth მოწყობილობის დაკავშირებისას.</string>
     <string name="auto_start_offer_title">ავტომატურად გაეშვას?</string>
     <string name="auto_start_offer_message">გსურს აპლიკაციის ავტომატური გაშვება ამ მოწყობილობასთან, %1$s?</string>
@@ -462,14 +463,14 @@
     <string name="nav_action_ferry">ბორანი</string>
     <string name="nav_action_ferry_train">ბორანი / მატარებელი</string>
     <string name="nav_action_destination">დანიშნულების ადგილი</string>
-    <string name="show_fps_counter">FPS მრიცხველის ჩვენება</string>
-    <string name="show_fps_counter_description">პროექციის დროს ზედა მარცხენა კუთხეში რეალური FPS-ის ჩვენება.</string>
+    <string name="show_performance_overlay">წარმადობის ინდიკატორის ჩვენება</string>
+    <string name="overlay_position">წარმადობის ინდიკატორის მდებარეობა</string>
+    <string name="show_performance_overlay_description">აჩვენებს FPS-ს, CPU-ს დატვირთვას, ტემპერატურას და კადრის ასაკს პროექციაზე.</string>
 
     <string name="reopen_on_reconnection_label">ხელახალი კავშირისას გახსნა</string>
     <string name="reopen_on_reconnection_description">\"გასვლა\" ღილაკზე დაჭერისას აპლიკაცია აგრძელებს მუშაობას ფონურ რეჟიმში და აკონტროლებს USB კავშირებს. მოწყობილობის ხელახალი შეერთებისას აპი ავტომატურად გაიხსნება.</string>
     <string name="overlay_permission_required">ავტო-გაშვებისთვის საჭიროა \'სხვა აპებზე ჩვენების\' ნებართვა</string>
     <string name="usb_permission_denied">USB ნებართვა უარყოფილია. გთხოვთ, დაუშვათ USB წვდომა ავტომატური კავშირისთვის.</string>
-    <string name="overlay_permission_denied_auto_start_disabled">ფონური ჩვენების ნებართვა არ არის გაცემული. ავტო-გაშვება გამორთულია.</string>
 
     <string name="kill_on_disconnect">აპის დახურვა გათიშვისას</string>
     <string name="kill_on_disconnect_description">Android Auto-ს გათიშვისას აპლიკაციის ავტომატური დახურვა</string>
@@ -965,9 +966,12 @@
     <string name="connection_issue_banner_hotspot_config">Hotspot-ის სახელი და პაროლი ვერ მოიძებნა. შეიყვანეთ ხელით.</string>
     <string name="narrow_band_profile_cap">ვიდეოს დაწევა 2.4 გჰც კავშირზე</string>
     <string name="narrow_band_profile_cap_description">როცა ეს სესია მუშაობს 2.4 გჰც-ზე, იმის მიუხედავად, ამ მოწყობილობის WiFi-ს არ აქვს 5 გჰც დიაპაზონი თუ ქსელი იქ ჩაირთო, ზემოთ მითითებული პარამეტრების ნაცვლად ტელეფონს მოთხოვეთ მაქსიმუმ 720p და წამში 30 კადრი, ასევე AAC აუდიო. ასეთ კავშირზე გაზომვამ აჩვენა, რომ სრული სიჩქარის ნაკადი საერთოდ არ გადმოსცემდა სურათს, დაბალი კი ინარჩუნებდა. გამორთეთ, რომ ზუსტად ის მიიღოთ, რაც მიუთითეთ.</string>
-    <string name="connection_issue_banner_video_link_too_slow">თქვენმა ტელეფონმა ზედიზედ რამდენჯერმე შეწყვიტა ვიდეო ერთი კადრის მოსვლამდეც კი. WiFi კავშირი ძალიან ნელია სურათის გადასაცემად. შეეხეთ FPS-ის ზღვრის 30-მდე დასაწევად; ასევე დაეხმარება დაბალი გარჩევადობა და AAC აუდიო.</string>
+    <string name="connection_issue_banner_video_link_too_slow">თქვენმა ტელეფონმა ზედიზედ რამდენჯერმე შეწყვიტა ვიდეო ერთი კადრის მოსვლამდეც კი. WiFi კავშირი ძალიან ნელია სურათის გადასაცემად, ამიტომ ახლა ითხოვება 720p 30 FPS-ზე AAC აუდიოთი. შეეხეთ, რომ გარჩევადობა ან FPS-ის ზღვარი თავად დააყენოთ, რაც ამ შეზღუდვასაც მოხსნის; მეორე გამოსავალი 5 გჰც ქსელია.</string>
     <string name="connection_issue_banner_five_ghz_channel_refused">ამ მოწყობილობამ უარი თქვა WiFi Direct ქსელის თქვენ მიერ არჩეულ რომელიმე 5 გჰც არხზე განთავსებაზე და ის საკუთარი Wi-Fi დრაივერის არჩეულ არხზე აამუშავა. ეს არხი ხშირად ისეთია, რომელსაც მკაცრი რეგულაციის ქვეყნებში ტელეფონები ვერც კი ხედავენ. შეეხეთ WiFi Direct დიაპაზონის 2.4 გჰც-ზე დასაყენებლად, რომელიც ყველა ქვეყანაშია ნებადართული; მოელოდეთ 720p-ს 1080p-ის ნაცვლად.</string>
+    <string name="connection_issue_banner_headunit_server_deaf">თქვენს ტელეფონზე Android Auto-ს head unit სერვერი იღებს კავშირებს და არცერთს არ პასუხობს. თავისით არ აღდგება: ტელეფონზე გააჩერეთ head unit სერვერი Android Auto-ს დეველოპერულ პარამეტრებში და ხელახლა გაუშვით. ეს მოწყობილობა თავისით დაუკავშირდება.</string>
+    <string name="connection_issue_banner_hands_free_held">სხვა მოწყობილობა უკვე იყენებს ამ მოწყობილობის ჰენდსფრის კავშირს, ამიტომ ტელეფონი, რომელსაც ეს მოწყობილობა აღვიძებს, მას ვერ მიიღებს. Android Auto უსადენო კავშირს არ დაიწყებს, სანამ head unit-ის Bluetooth პროფილთან დაკავშირებული არ არის, ხოლო მოწყობილობას, რომელიც ერთდროულად მხოლოდ ერთ ჰენდსფრის კავშირს ემსახურება, აღარაფერი აქვს მისაცემი. გათიშეთ მეორე მოწყობილობა ან გამორთეთ მისი Bluetooth და ეს მოწყობილობა თავისით ისევ სცდის.</string>
     <string name="connection_issue_banner_dismiss">დახურვა</string>
+    <string name="auto_connect_pill_cancel">კავშირის შეწყვეტა</string>
     <string name="connection_issue_remedy_hotspot_query">Hotspot-ის სახელი და პაროლი</string>
     <string name="preflight_title">დაკავშირებამდე</string>
     <string name="preflight_intro">ამ მოწყობილობას არ შეუძლია Android Auto-სთვის საჭირო ყველა მონაცემის მიწოდება:</string>
@@ -983,6 +987,8 @@
     <string name="native_wifi_version_exchange_description">საშუალებას აძლევს ტელეფონს ხელახლა დაუკავშირდეს WiFi-ით Bluetooth-ის ნაცვლად, ამ მოწყობილობის Hotspot-ის გამოყენებით. ეხმარება მოწყობილობებს, რომელთა Bluetooth ვერ ატარებს handshake-ს, და Android Auto-ს უფრო ახალ ვერსიებს. ნაგულისხმევად გამორთულია და პირველი კავშირი კვლავ Bluetooth-ით ხდება.</string>
     <string name="native_aa_complete_hfp_slc">Bluetooth-კავშირის დასრულება</string>
     <string name="native_aa_complete_hfp_slc_description">ზოგიერთი ტელეფონი უსადენო Android Auto-ს არ იწყებს, სანამ ამ მოწყობილობის Bluetooth დაკავშირებულად არ ჩაითვლება და არა მხოლოდ დაწყვილებულად. ნაგულისხმევად ჩართულია; გამორთეთ, თუ ამ მოწყობილობაზე ზარები აღარ მუშაობს.</string>
+    <string name="announce_connection_configuration">უფრო გრძელი კავშირის ტაიმაუთის მოთხოვნა</string>
+    <string name="announce_connection_configuration_description">სთხოვს Android Auto-ს, დაელოდოს 15 წამი 3-ის ნაცვლად, სანამ კავშირს მკვდრად ჩათვლის, და გამოიყენოს უფრო დიდი სოკეტის ბუფერები. ეს მიმართულია რადიოსკენ, რომელიც სესიის შუაში რამდენიმე წამით ტოვებს არხს და კავშირს თან ითრევს. არ არის გაზომილი, ითვალისწინებს თუ არა ამას თქვენი ტელეფონი.</string>
     <string name="native_aa_ignore_external_bt">Bluetooth-თავსებადობის შემოწმების იგნორირება</string>
     <string name="native_aa_ignore_external_bt_description">როგორც ჩანს, ეს მოწყობილობა Bluetooth-ს ცალკე მოდულზე ინახავს, რომელსაც Android ვერ წვდება, ამიტომ უსადენო Android Auto ავტომატურად ითიშება. ნაგულისხმევად გამორთულია. ჩართეთ მხოლოდ მაშინ, თუ ფიქრობთ, რომ ეს არასწორია: თუ ამოცნობა სწორია, კავშირი უხმაუროდ ჩაიშლება და ჟურნალი გამართული გამოჩნდება.</string>
     <string name="native_aa_setup_qr_title">დაყენება QR კოდით</string>
@@ -1094,7 +1100,7 @@
     <string name="wifi_direct_new_identity_confirm">ირჩევს ახალ სახელსა და პაროლს შემდეგი დაკავშირებისთვის.</string>
     <string name="wifi_direct_new_identity_done">ახალი ქსელის იდენტიფიკატორი გამოყენებული იქნება შემდეგი დაკავშირებისას.</string>
     <string name="wifi_direct_new_identity_applied">ახალი ქსელის იდენტიფიკატორი ახლა კონფიგურირდება. ტელეფონი მას შემდეგი დაკავშირებისას მიიღებს.</string>
-    <string name="wifi_direct_stable_identity_description_legacy">Android-ის ამ ვერსიაში ქსელის სახელს სისტემა ირჩევს და ინახავს მას რამდენადაც შესაძლებელია. დატოვეთ ჩართული, რომ ტელეფონი ნაცნობ ქსელს დაუკავშირდეს, და სცადეთ ახალი იდენტიფიკატორი ქვემოთ, თუ ის შენახულ ქსელს კვლავ უარყოფს. გამორთვისას სისტემა ქსელს ყოველ დაკავშირებამდე დაივიწყებს.</string>
+    <string name="wifi_direct_stable_identity_description_legacy">Android-ის ამ ვერსიაში ქსელის სახელს სისტემა ირჩევს და ზოგიერთ მოწყობილობაზე ის ყოველ დაკავშირებაზე იცვლება. აპლიკაციას აქ კონკრეტული სახელის მოთხოვნა არ შეუძლია. დატოვეთ ჩართული, რომ ტელეფონი ნაცნობ ქსელს დაუკავშირდეს იქ, სადაც სისტემა მას ინახავს, და სცადეთ ახალი იდენტიფიკატორი ქვემოთ, თუ ის შენახულ ქსელს კვლავ უარყოფს. გამორთვისას სისტემა ქსელს ყოველ დაკავშირებამდე დაივიწყებს.</string>
     <string name="debug_video_low_latency">დეკოდერის დაბალი დაყოვნების რეჟიმის მოთხოვნა</string>
     <string name="debug_video_low_latency_description">აყენებს მწარმოებლის დაბალი დაყოვნების MediaFormat გასაღებს ვიდეო დეკოდერის კონფიგურაციისას.</string>
     <string name="debug_video_feed_hold">ნელი დეკოდერის სიმულაცია</string>

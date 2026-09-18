@@ -222,4 +222,182 @@ class NarrowBandProfilePolicyTest {
         )
         assertTrue(advice!!.startsWith("This unit has no 5 GHz band"))
     }
+
+    // --- a platform that cannot be asked about the band at all ---------------------------------
+
+    @Test
+    fun `a platform with no way to read the band is narrow`() {
+        // Below API 21 the radio has no is5GHzBandSupported and nothing reports a frequency, so
+        // both of the other inputs read absent and the cap could never fire without this.
+        assertTrue(
+            NarrowBandProfilePolicy.runsNarrow(
+                supports5Ghz = null, sessionFrequencyMhz = 0, bandUnreadable = true
+            )
+        )
+    }
+
+    @Test
+    fun `an unknown band on a platform that can be asked still caps nobody`() {
+        // The regression this guards: a modern unit whose WiFi service threw answers null too, and
+        // must keep the picture it asked for.
+        assertFalse(
+            NarrowBandProfilePolicy.runsNarrow(
+                supports5Ghz = null, sessionFrequencyMhz = 0, bandUnreadable = false
+            )
+        )
+        assertFalse(
+            NarrowBandProfilePolicy.caps(
+                supports5Ghz = null, wirelessSession = true, capEnabled = true,
+                sessionFrequencyMhz = 0, bandUnreadable = false
+            )
+        )
+    }
+
+    @Test
+    fun `a yes does not save a unit whose platform cannot have answered it`() {
+        // Nothing below API 21 can return true from a call that does not exist, so a true here came
+        // from somewhere else and is not a reading.
+        assertTrue(
+            NarrowBandProfilePolicy.runsNarrow(
+                supports5Ghz = true, sessionFrequencyMhz = 0, bandUnreadable = true
+            )
+        )
+    }
+
+    @Test
+    fun `the unreadable band lowers the whole profile, and the user can still say no`() {
+        assertEquals(
+            NarrowBandProfilePolicy.CAPPED_FRAME_RATE,
+            NarrowBandProfilePolicy.cappedFrameRate(
+                fpsLimit = 60, supports5Ghz = null, wirelessSession = true, capEnabled = true,
+                sessionFrequencyMhz = 0, bandUnreadable = true
+            )
+        )
+        assertEquals(
+            NarrowBandProfilePolicy.CAPPED_RESOLUTION,
+            NarrowBandProfilePolicy.linkCeiling(
+                supports5Ghz = null, wirelessSession = true, capEnabled = true,
+                sessionFrequencyMhz = 0, bandUnreadable = true
+            )
+        )
+        assertTrue(
+            NarrowBandProfilePolicy.useAac(
+                userChoice = false, supports5Ghz = null, wirelessSession = true, capEnabled = true,
+                sessionFrequencyMhz = 0, bandUnreadable = true
+            )
+        )
+        assertFalse(
+            NarrowBandProfilePolicy.caps(
+                supports5Ghz = null, wirelessSession = true, capEnabled = false,
+                sessionFrequencyMhz = 0, bandUnreadable = true
+            )
+        )
+    }
+
+    @Test
+    fun `the advice claims no band it could not read, and no measurement it does not have`() {
+        val advice = NarrowBandProfilePolicy.advice(
+            supports5Ghz = null, fpsLimit = 60, wirelessSession = true, capEnabled = true,
+            sessionFrequencyMhz = 0, bandUnreadable = true
+        )
+        assertNotNull(advice)
+        assertTrue(advice!!.startsWith("This unit's Android is too old to report which band it is on"))
+        assertFalse("the 2.4 GHz measurement belongs to the other two arms", advice.contains("2.4 GHz access point"))
+        assertTrue(advice.contains("Android 4.4 tablet"))
+    }
+
+    @Test
+    fun `a real reading is preferred to cannot ask when both are present`() {
+        val absent = NarrowBandProfilePolicy.advice(
+            supports5Ghz = false, fpsLimit = 60, wirelessSession = true, capEnabled = true,
+            sessionFrequencyMhz = 0, bandUnreadable = true
+        )
+        assertTrue(absent!!.startsWith("This unit has no 5 GHz band"))
+        val onNetwork = NarrowBandProfilePolicy.advice(
+            supports5Ghz = null, fpsLimit = 60, wirelessSession = true, capEnabled = true,
+            sessionFrequencyMhz = 2437, bandUnreadable = true
+        )
+        assertTrue(onNetwork!!.startsWith("This session's network is on 2.4 GHz"))
+    }
+
+    // --- a link that has already refused to carry the picture ------------------------------------
+
+    @Test
+    fun `a link measured too slow caps a 5 GHz session the band would have left alone`() {
+        assertTrue(
+            NarrowBandProfilePolicy.caps(
+                supports5Ghz = true, wirelessSession = true, capEnabled = true,
+                sessionFrequencyMhz = 5180, linkProvedTooSlow = true
+            )
+        )
+        assertEquals(
+            NarrowBandProfilePolicy.CAPPED_RESOLUTION,
+            NarrowBandProfilePolicy.linkCeiling(
+                supports5Ghz = true, wirelessSession = true, capEnabled = true,
+                sessionFrequencyMhz = 5180, linkProvedTooSlow = true
+            )
+        )
+        assertEquals(
+            NarrowBandProfilePolicy.CAPPED_FRAME_RATE,
+            NarrowBandProfilePolicy.cappedFrameRate(
+                fpsLimit = 60, supports5Ghz = true, wirelessSession = true, capEnabled = true,
+                sessionFrequencyMhz = 5180, linkProvedTooSlow = true
+            )
+        )
+        assertTrue(
+            NarrowBandProfilePolicy.useAac(
+                userChoice = false, supports5Ghz = true, wirelessSession = true, capEnabled = true,
+                sessionFrequencyMhz = 5180, linkProvedTooSlow = true
+            )
+        )
+    }
+
+    @Test
+    fun `the band switch does not govern a cap the link itself earned`() {
+        // "Lower video on a 2.4 GHz link" is a guess about a link; this is that link having already
+        // refused the picture three sessions running, and turning the guess off does not undo it.
+        assertTrue(
+            NarrowBandProfilePolicy.caps(
+                supports5Ghz = true, wirelessSession = true, capEnabled = false,
+                linkProvedTooSlow = true
+            )
+        )
+        // The band arm is still the user's to switch off.
+        assertFalse(
+            NarrowBandProfilePolicy.caps(
+                supports5Ghz = false, wirelessSession = true, capEnabled = false,
+                linkProvedTooSlow = false
+            )
+        )
+    }
+
+    @Test
+    fun `a wired session is not capped by a link it is not running on`() {
+        assertFalse(
+            NarrowBandProfilePolicy.caps(
+                supports5Ghz = true, wirelessSession = false, capEnabled = true,
+                linkProvedTooSlow = true
+            )
+        )
+    }
+
+    @Test
+    fun `the earned cap answers first, and names what it measured rather than the band`() {
+        val advice = NarrowBandProfilePolicy.advice(
+            supports5Ghz = true, fpsLimit = 60, wirelessSession = true, capEnabled = false,
+            sessionFrequencyMhz = 5180, linkProvedTooSlow = true
+        )
+        assertNotNull(advice)
+        assertTrue(advice!!.contains("without a single video frame"))
+        assertTrue(advice.contains("Change the resolution or the frame rate"))
+        assertFalse("nothing was left unchanged here", advice.contains("Nothing here has been changed"))
+    }
+
+    @Test
+    fun `every existing caller is unchanged, because the new input defaults to false`() {
+        assertFalse(NarrowBandProfilePolicy.runsNarrow(supports5Ghz = null, sessionFrequencyMhz = 0))
+        assertFalse(NarrowBandProfilePolicy.runsNarrow(supports5Ghz = true, sessionFrequencyMhz = 0))
+        assertTrue(NarrowBandProfilePolicy.runsNarrow(supports5Ghz = false, sessionFrequencyMhz = 0))
+        assertTrue(NarrowBandProfilePolicy.runsNarrow(supports5Ghz = true, sessionFrequencyMhz = 2437))
+    }
 }

@@ -41,6 +41,7 @@ import com.andrerinas.openheadunit.connection.ConnectionNetworkDetail
 import com.andrerinas.openheadunit.connection.ConnectionNetworkDetailPolicy
 import com.andrerinas.openheadunit.connection.ConnectionStage
 import com.andrerinas.openheadunit.connection.ConnectionStageTracker
+import com.andrerinas.openheadunit.connection.PhoneExitQuietPolicy
 import com.andrerinas.openheadunit.utils.AppLog
 import com.andrerinas.openheadunit.utils.AppPermissions
 import com.andrerinas.openheadunit.utils.ConnectionIssue
@@ -75,6 +76,9 @@ class MainActivity : BaseActivity() {
     private var autoConnectWatchdog: Job? = null
     private var renderedStage: ConnectionStage? = null
     private var loggedStage: ConnectionStage? = null
+
+    /** Ends the hold after a clean phone-side exit; the flow itself emits nothing at that moment. */
+    private var phoneExitQuietJob: Job? = null
     private var renderedNetwork: ConnectionNetworkDetail? = null
     private var autoConnectKenBurnsAnim: ObjectAnimator? = null
 
@@ -247,10 +251,10 @@ class MainActivity : BaseActivity() {
         )
         isFinishReceiverRegistered = true
 
-        // Wire cancel affordances. Pill click and overlay cancel button both
-        // route through the same cancellation path.
-        findViewById<View>(R.id.auto_connect_pill)?.setOnClickListener {
-            cancelAutoConnect()
+        // Wire cancel affordances. The pill's X stops the whole bring-up; the overlay's button
+        // ends only the attempt it belongs to.
+        findViewById<View>(R.id.auto_connect_pill_cancel)?.setOnClickListener {
+            cancelBringUp()
         }
         findViewById<View>(R.id.auto_connect_loading_cancel)?.setOnClickListener {
             cancelAutoConnect()
@@ -351,6 +355,19 @@ class MainActivity : BaseActivity() {
         // immediately rather than waiting for the round-trip.
         App.provide(this).commManager.disconnect()
         endAutoConnect(success = false)
+    }
+
+    /**
+     * The pill's X: ends the attempt this activity may be tracking, then has the service stop the
+     * stack and hold it down. [cancelAutoConnect] alone cannot reach the pre-handshake stages,
+     * which are the ones the pill spends most of its life showing.
+     */
+    private fun cancelBringUp() {
+        AppLog.i("MainActivity: status pill X pressed, stopping the wireless bring-up")
+        cancelAutoConnect()
+        ContextCompat.startForegroundService(this, Intent(this, AapService::class.java).apply {
+            action = AapService.ACTION_CANCEL_WIRELESS
+        })
     }
 
     /**
@@ -560,9 +577,12 @@ class MainActivity : BaseActivity() {
      * attempt ends, because the flow conflates a repeat of the value it already holds.
      */
     private fun renderStagePill(stage: ConnectionStage?) {
+        val now = SystemClock.elapsedRealtime()
+        val phoneLeftQuiet =
+            PhoneExitQuietPolicy.suppressesPill(ConnectionStageTracker.phoneLeftAtMs, now)
         // PILL_THEN_OVERLAY hands the screen to the overlay part-way through an attempt.
         // Re-raising the pill under it would undo that promotion.
-        val shown = if (stage == null || overlayOwnsScreen()) null else stage
+        val shown = if (stage == null || overlayOwnsScreen() || phoneLeftQuiet) null else stage
         // What the user is actually being told, which no other line records. A reporter's
         // screenshot and their log can then be read against each other. A step the overlay hides
         // is still named: without that, a session where an auto-connect happened to be in flight
@@ -572,10 +592,21 @@ class MainActivity : BaseActivity() {
             renderedStage = shown
             val step = when {
                 shown != null -> shown.name
+                stage != null && phoneLeftQuiet -> "${stage.name} (not shown, the phone ended the session)"
                 stage != null -> "${stage.name} (not shown, the overlay owns the screen)"
                 else -> "hidden"
             }
             AppLog.i("MainActivity: status pill step: $step")
+        }
+        // Nothing emits at the end of the hold, so the step that was withheld needs asking for
+        // again; without this the pill stays down until the stack's next step.
+        phoneExitQuietJob?.cancel()
+        if (phoneLeftQuiet) {
+            val waitMs = PhoneExitQuietPolicy.remainingMs(ConnectionStageTracker.phoneLeftAtMs, now)
+            phoneExitQuietJob = lifecycleScope.launch {
+                delay(waitMs)
+                renderStagePill(ConnectionStageTracker.stage.value)
+            }
         }
         if (shown == null) {
             hideAutoConnectPill()
@@ -1039,7 +1070,9 @@ class MainActivity : BaseActivity() {
             // HomeFragment owns the VPN consent and the projection needs a foreground window.
             val commManager = App.provide(this).commManager
             val settings = App.provide(this).settings
-            if (!commManager.isConnected) {
+            // The service refuses this arrival while the pill's X holds, and a pill with nothing
+            // behind it would otherwise sit there for the watchdog's full deadline.
+            if (!commManager.isConnected && AapService.instance?.wirelessCancelledByUser() != true) {
                 beginAutoConnect(LAUNCH_SOURCE_BLUETOOTH, ConnectionUiMode.PILL)
             }
             val launchesSelfMode = BtAutoStartRearmPolicy.launchesSelfMode(
@@ -1196,7 +1229,8 @@ class MainActivity : BaseActivity() {
                     settings.onboardingVersion >= OnboardingActivity.CURRENT_ONBOARDING_VERSION,
                 relevant = ConnectionIssueBannerPolicy.relevantNow(
                     mode = settings.wifiConnectionMode.id,
-                    transport = settings.nativeApStrategy
+                    transport = settings.nativeApStrategy,
+                    wirelessSelected = settings.showsWifi()
                 ),
                 remedyApplied = ConnectionIssueBannerPolicy.remedyApplied(
                     hotspotSsid = settings.hotspotSsid,
@@ -1231,6 +1265,10 @@ class MainActivity : BaseActivity() {
                     R.string.connection_issue_banner_video_link_too_slow
                 ConnectionIssue.FIVE_GHZ_CHANNEL_REFUSED ->
                     R.string.connection_issue_banner_five_ghz_channel_refused
+                ConnectionIssue.HEADUNIT_SERVER_NOT_ANSWERING ->
+                    R.string.connection_issue_banner_headunit_server_deaf
+                ConnectionIssue.HANDS_FREE_HELD_ELSEWHERE ->
+                    R.string.connection_issue_banner_hands_free_held
             }
         )
         banner.setOnClickListener { openRemedyFor(issue) }
@@ -1265,6 +1303,10 @@ class MainActivity : BaseActivity() {
      */
     private fun openRemedyFor(issue: ConnectionIssue) {
         val query = when (issue) {
+            // The remedy is on the phone, so there is no row here to send anyone to.
+            ConnectionIssue.HEADUNIT_SERVER_NOT_ANSWERING -> return
+            // The remedy is the other device's Bluetooth connection, which no setting here reaches.
+            ConnectionIssue.HANDS_FREE_HELD_ELSEWHERE -> return
             ConnectionIssue.BLUETOOTH_SENT_NO_DATA -> getString(R.string.wireless_mode)
             ConnectionIssue.BSSID_UNAVAILABLE -> getString(R.string.static_bssid_title)
             ConnectionIssue.HOTSPOT_CONFIG_UNREADABLE ->

@@ -72,4 +72,52 @@ class SessionEndGroupPolicyTest {
         assertFalse(SessionEndGroupPolicy.shouldReopenAaListeners(handshakeRunning = false, listenersClosedForSession = true))
         assertFalse(SessionEndGroupPolicy.shouldReopenAaListeners(handshakeRunning = false, listenersClosedForSession = false))
     }
+
+    @Test
+    fun `a phone that said goodbye is not woken again`() {
+        assertFalse(SessionEndGroupPolicy.wakesPhoneAfterSessionEnd(phoneSaidGoodbye = true))
+    }
+
+    @Test
+    fun `a link that died is woken, because nothing chose to end it`() {
+        assertTrue(SessionEndGroupPolicy.wakesPhoneAfterSessionEnd(phoneSaidGoodbye = false))
+    }
+
+    @Test
+    fun `a poke with no session behind it waits for nothing`() {
+        assertEquals(0L, SessionEndGroupPolicy.wakeSettleRemainingMs(sessionEndedAt = 0L, now = 10_000L))
+    }
+
+    @Test
+    fun `the settle is what is left of the window`() {
+        assertEquals(
+            SessionEndGroupPolicy.WAKE_SETTLE_MS - 1_000L,
+            SessionEndGroupPolicy.wakeSettleRemainingMs(sessionEndedAt = 10_000L, now = 11_000L)
+        )
+        assertEquals(
+            SessionEndGroupPolicy.WAKE_SETTLE_MS,
+            SessionEndGroupPolicy.wakeSettleRemainingMs(sessionEndedAt = 10_000L, now = 10_000L)
+        )
+    }
+
+    @Test
+    fun `a session that ended long ago costs nothing`() {
+        assertEquals(
+            0L,
+            SessionEndGroupPolicy.wakeSettleRemainingMs(
+                sessionEndedAt = 10_000L,
+                now = 10_000L + SessionEndGroupPolicy.WAKE_SETTLE_MS
+            )
+        )
+        assertEquals(0L, SessionEndGroupPolicy.wakeSettleRemainingMs(sessionEndedAt = 10_000L, now = 90_000L))
+    }
+
+    /** elapsedRealtime does not go backwards, but a stamp read across a restart can look like it. */
+    @Test
+    fun `a clock that reads backwards never waits longer than the window`() {
+        assertEquals(
+            SessionEndGroupPolicy.WAKE_SETTLE_MS,
+            SessionEndGroupPolicy.wakeSettleRemainingMs(sessionEndedAt = 10_000L, now = 0L)
+        )
+    }
 }

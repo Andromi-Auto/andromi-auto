@@ -5,6 +5,7 @@ import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import com.andrerinas.openheadunit.aap.AapSslContext
 import com.andrerinas.openheadunit.aap.AapTransport
+import com.andrerinas.openheadunit.aap.NarrowBandProfilePolicy
 import com.andrerinas.openheadunit.input.MediaKeyRoutingPolicy
 import com.andrerinas.openheadunit.decoder.audio.PlaybackFocusPolicy
 import com.andrerinas.openheadunit.utils.AppLog
@@ -458,10 +459,16 @@ class CommManager(
                     sessionReachedHandshake = true
                     videoDecoder.framesRenderedThisSession = 0L
                     silentPeerFailures = 0
+                    // The peer answered, which is what the deaf-server record claims it cannot.
+                    ConnectionIssues.clear(context, ConnectionIssue.HEADUNIT_SERVER_NOT_ANSWERING)
                     _connectionState.emit(ConnectionState.HandshakeComplete)
                 } else {
                     val silent = transport?.lastHandshakeFailure == AapTransport.HandshakeFailure.PEER_SILENT
                     noteHandshakeOutcome(silent)
+                    // Here, not from a ConnectionState.Error collector: disconnect() follows with no
+                    // suspension point, so the conflated flow never delivers Error and the pill kept
+                    // the step it had. Measured stuck on "Securing the connection" for 3m39s.
+                    ConnectionStageTracker.endAttempt()
                     onSessionFailure?.invoke(if (silent) "peer_silent" else "handshake_failed")
                     _connectionState.emit(
                         ConnectionState.Error(if (silent) ERROR_HANDSHAKE_PEER_SILENT else "Handshake failed")
@@ -501,15 +508,20 @@ class CommManager(
         // Mode — is something the user can restart. The phone dialling our own server on 5288 and
         // the Nearby helper can both reach this branch, and sending their users off to force stop
         // Android Auto after a switch they never turned on would be worse than saying nothing.
+        if (endpoint?.endsWith(":5277") == true) {
+            // On the first one, not on the third the log explanation waits for: the record is
+            // cleared the moment a handshake succeeds, so a premature banner self-heals, while a
+            // missing one leaves the user a failed connection and no remedy.
+            ConnectionIssues.raise(context, ConnectionIssue.HEADUNIT_SERVER_NOT_ANSWERING)
+        }
         if (UnresponsivePeerPolicy.shouldExplain(silentPeerFailures) && endpoint?.endsWith(":5277") == true) {
             AppLog.e(
                 "CommManager: $endpoint has accepted $silentPeerFailures connections in a row " +
                     "without answering any of them. Slowing discovery to one attempt every " +
                     "${UnresponsivePeerPolicy.BACKOFF_RESCAN_MS / 1000}s. Android Auto hands each " +
                     "accepted connection to its own car service and waits there with no timeout, so " +
-                    "it does not recover on its own and restarting the server does not clear it. " +
-                    "Force stop Android Auto on the phone, and reboot it if that does not help; this " +
-                    "will reconnect by itself."
+                    "it does not recover on its own. Stop and start the head unit server on the " +
+                    "phone; this will reconnect by itself."
             )
         }
     }
@@ -948,35 +960,40 @@ class CommManager(
         // here, so the second pass sees a session that never reached the handshake and counts
         // nothing.
         noteSessionEnded(renderedAnyFrame = videoDecoder.framesRenderedThisSession > 0L)
-        try {
-            // Only send ByeByeRequest when we are initiating the disconnect (e.g. user pressed
-            // disconnect). When the transport self-quit (read error, soTimeout), the connection
-            // is already dead — skip the send and the 150 ms sleep inside stop().
-            if (sendByeBye) transport?.stop(byeByeReason) else transport?.quit()
+        // The close is in its own phase because it is the one that must happen: a throw from the
+        // ByeBye send or either decoder stop used to skip it, leaving the phone's head unit server
+        // holding a peer that never came back. See TeardownGuard.
+        TeardownGuard.runThenClose(
+            teardown = {
+                // Only send ByeByeRequest when we are initiating the disconnect (e.g. user pressed
+                // disconnect). When the transport self-quit (read error, soTimeout), the connection
+                // is already dead — skip the send and the 150 ms sleep inside stop().
+                if (sendByeBye) transport?.stop(byeByeReason) else transport?.quit()
 
-            // Explicitly stop and release decoders to prevent MediaCodec finalize() timeouts
-            videoDecoder.stop("CommManager: doDisconnect")
-            audioDecoder.stop()
-
-            connection?.disconnect()
-        } catch (e: Exception) {
-            AppLog.e("doDisconnect error: ${e.message}")
-        } finally {
-            if (_connectionState.value !is ConnectionState.Disconnected) {
-                _connectionState.value = ConnectionState.Disconnected()
-            }
+                // Explicitly stop and release decoders to prevent MediaCodec finalize() timeouts
+                videoDecoder.stop("CommManager: doDisconnect")
+                audioDecoder.stop()
+            },
+            close = { connection?.disconnect() },
+            onError = { phase, e -> AppLog.e("CommManager: doDisconnect $phase failed: ${e.message}") }
+        )
+        if (_connectionState.value !is ConnectionState.Disconnected) {
+            _connectionState.value = ConnectionState.Disconnected()
         }
     }
 
     /**
      * Counts a finished session against [VideoStarvationPolicy] and, on a long enough run of
-     * sessions that carried no video at all, says what that means and what to do about it.
+     * sessions that carried no video at all, lowers the profile the next one is offered and says so.
      *
      * The phone gives no reason we can see — it closes the socket and our read reports a plain EOF
      * — so without this the log shows nothing but a healthy connection repeating forever.
      *
      * The record is retired by a session that renders, which is the hardware answering the
-     * question. No setting disproves it, so it has no `remedyApplied` entry.
+     * question. No setting disproves it, so it has no `remedyApplied` entry. **The cap is not
+     * retired there**: capping is what made that session render, so releasing it on the same event
+     * would uncap, starve three more times and earn it again forever. Only the user changing the
+     * resolution or the frame rate takes it off (`SettingsFragment`).
      */
     private fun noteSessionEnded(renderedAnyFrame: Boolean) {
         val reachedHandshake = sessionReachedHandshake
@@ -987,13 +1004,18 @@ class CommManager(
         if (reachedHandshake && renderedAnyFrame) {
             ConnectionIssues.clear(context, ConnectionIssue.VIDEO_LINK_TOO_SLOW)
         }
+        if (VideoStarvationPolicy.shouldCap(starvedSessionStreak)) {
+            settings.videoProfileStarvationCap = true
+        }
         if (VideoStarvationPolicy.shouldAdvise(starvedSessionStreak)) {
             AppLog.w(
                 "CommManager: $starvedSessionStreak sessions in a row ended without a single video " +
                     "frame arriving. The phone is connecting and then giving up on the video stream, " +
-                    "which is what a WiFi link too slow to carry it looks like. Measured on a 2.4 GHz " +
-                    "access point at 1080p/60, where the same link held 800x480/30 indefinitely: move " +
-                    "the access point to 5 GHz, or lower the resolution and frame rate in Video settings."
+                    "which is what a WiFi link too slow to carry it looks like. The next connection " +
+                    "is offered at most ${NarrowBandProfilePolicy.CAPPED_RESOLUTION.resName} and " +
+                    "${NarrowBandProfilePolicy.CAPPED_FRAME_RATE} fps with AAC audio instead of what " +
+                    "Video settings say. Changing the resolution or the frame rate yourself takes " +
+                    "that back off; moving the access point to 5 GHz is the other fix."
             )
             ConnectionIssues.raise(context, ConnectionIssue.VIDEO_LINK_TOO_SLOW)
         }

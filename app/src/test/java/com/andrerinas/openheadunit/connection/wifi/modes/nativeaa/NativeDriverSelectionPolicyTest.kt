@@ -435,6 +435,52 @@ class NativeDriverSelectionPolicyTest {
     }
 
     @Test
+    fun `a stood-down wake opened nothing, so it spends no round`() {
+        assertFalse(NativeDriverSelectionPolicy.wakeRoundSpent(BluetoothWakePolicy.WakeOutcome.STOOD_DOWN))
+        assertTrue(NativeDriverSelectionPolicy.wakeRoundSpent(BluetoothWakePolicy.WakeOutcome.ANSWERED))
+        assertTrue(NativeDriverSelectionPolicy.wakeRoundSpent(BluetoothWakePolicy.WakeOutcome.DIALLED))
+    }
+
+    @Test
+    fun `refusals keep the loop alive long enough for the escalation to mature`() {
+        // The whole point: three refusals are over in about 30 s, and the escalation needs 90 s.
+        var elapsed = 0L
+        var passes = 0
+        while (NativeDriverSelectionPolicy.chosenWakeContinues(
+                BluetoothWakePolicy.WakeOutcome.STOOD_DOWN, 0, elapsed)) {
+            passes++
+            elapsed += 15_000L
+        }
+        assertTrue("refusals must outlast ${HandsFreeWakeEscalationPolicy.ESCALATE_AFTER_MS}ms",
+            elapsed > HandsFreeWakeEscalationPolicy.ESCALATE_AFTER_MS)
+        assertTrue(passes > NativeDriverSelectionPolicy.CHOSEN_WAKE_ROUNDS)
+    }
+
+    @Test
+    fun `dialled rounds still spend the budget, and the ceiling still ends an endless refusal`() {
+        assertFalse(
+            NativeDriverSelectionPolicy.chosenWakeContinues(
+                BluetoothWakePolicy.WakeOutcome.DIALLED, NativeDriverSelectionPolicy.CHOSEN_WAKE_ROUNDS, 0L
+            )
+        )
+        assertFalse(
+            NativeDriverSelectionPolicy.chosenWakeContinues(
+                BluetoothWakePolicy.WakeOutcome.STOOD_DOWN, 0,
+                NativeDriverSelectionPolicy.CHOSEN_EXCLUSIVE_MAX_MS
+            )
+        )
+    }
+
+    @Test
+    fun `an unpaired phone ends the loop rather than being waited out`() {
+        assertFalse(
+            NativeDriverSelectionPolicy.chosenWakeContinues(
+                BluetoothWakePolicy.WakeOutcome.NOT_PAIRED, 0, 0L
+            )
+        )
+    }
+
+    @Test
     fun `a target with a live bluetooth link may take the full screen`() {
         assertTrue(
             NativeDriverSelectionPolicy.connectUiIsImmediate("AA:BB", listOf("CC:DD", "AA:BB"))

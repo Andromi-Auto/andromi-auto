@@ -11,7 +11,10 @@ enum class LinkLossTrigger {
     DEVICE_SHUTDOWN,
 
     /** WiFi station mode is being switched off. Only sessions riding it are affected. */
-    WIFI_STATION_DISABLING
+    WIFI_STATION_DISABLING,
+
+    /** The car is being switched off: an OEM ACC-off intent, or power lost as the screen goes. */
+    ACC_POWER_LOST
 }
 
 /**
@@ -33,11 +36,16 @@ object LinkLossTeardownPolicy {
      * @param launcher the wireless route that is armed, or null when none is. Null is a real state
      *   rather than a missing argument: a wired session quiesces the wireless stack, and a shutdown
      *   arriving in that window still has a session to close.
+     * @param peerIsHeadUnitServer the session's peer is Android Auto's own head unit server, the
+     *   one route where a missing close costs the user their next drive.
+     * @param accSignalIsExplicit the unit named the ACC-off itself, rather than us inferring it.
      */
     fun shouldTearDown(
         trigger: LinkLossTrigger,
         launcher: WifiLauncher?,
-        sessionIsWireless: Boolean = true
+        sessionIsWireless: Boolean = true,
+        peerIsHeadUnitServer: Boolean = false,
+        accSignalIsExplicit: Boolean = false
     ): Boolean = when (trigger) {
         // The whole device is going, so every route's link is going with it — USB included.
         LinkLossTrigger.DEVICE_SHUTDOWN -> true
@@ -50,6 +58,11 @@ object LinkLossTeardownPolicy {
             sessionIsWireless &&
                 launcher?.hasWifiDirect() != true &&
                 !ridesOwnAccessPoint(launcher)
+
+        // A named ACC-off is the whole board going, so it counts for every route. An inferred one
+        // is only worth acting on where a missed close lasts beyond this drive, and where coming
+        // back costs a gateway dial rather than a group and a handshake.
+        LinkLossTrigger.ACC_POWER_LOST -> accSignalIsExplicit || peerIsHeadUnitServer
     }
 
     /** The two routes where the phone sits on an access point this device is hosting. */

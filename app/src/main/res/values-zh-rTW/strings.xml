@@ -161,6 +161,7 @@
     <string name="usb_auto_connect">USB 自動連接</string>
     <string name="usb_auto_connect_description">應用程式開啟時自動連接到已知的 USB 裝置。</string>
     <string name="auto_start_bt_label">藍牙自動啟動</string>
+    <string name="auto_start_overlay_missing_hint">未授予顯示在其他應用程式上層的權限，因此自動啟動會顯示通知而不是開啟畫面。點選以授予。</string>
     <string name="auto_start_bt_description">當特定藍牙裝置連接時，自動開啟 Open Headunit。</string>
     <string name="auto_start_offer_title">自動啟動？</string>
     <string name="auto_start_offer_message">要在此裝置（%1$s）上自動啟動應用程式嗎？</string>
@@ -414,14 +415,14 @@
     <string name="monochrome_icons_description">在深色或極致黑暗模式中使用灰階圖示</string>
     <string name="use_extreme_dark">使用極致黑暗</string>
     <string name="use_extreme_dark_description">在深色模式啟用時使用純黑背景</string>
-    <string name="show_fps_counter">顯示 FPS 計數器</string>
+    <string name="show_performance_overlay">顯示效能疊加層</string>
+    <string name="overlay_position">效能疊加層位置</string>
     <string name="overlay_permission_required">自動啟動需要「顯示在其他應用程式上層」權限</string>
     <string name="usb_permission_denied">USB 權限被拒絕。請允許 USB 存取以自動連線。</string>
-    <string name="overlay_permission_denied_auto_start_disabled">未授予覆蓋權限。自動啟動已被停用。</string>
     <string name="use_white_background">使用白色主畫面桌布</string>
     <string name="reopen_on_reconnection_label">重新連線時重新開啟</string>
     <string name="reopen_on_reconnection_description">當您按下退出按鈕時，應用程式會在背景繼續運行並持續監控 USB 連線。如果裝置重新連線，應用程式會自動開啟。</string>
-    <string name="show_fps_counter_description">在投影期間於左上角顯示即時 FPS 疊加層。</string>
+    <string name="show_performance_overlay_description">在投影畫面上顯示 FPS、CPU 負載、溫度與影格時間。</string>
 
     <string name="category_input">輸入設定</string>
     <string name="enable_rotary">啟用旋鈕控制器 (Rotary)</string>
@@ -983,9 +984,12 @@
     <string name="connection_issue_banner_hotspot_config">無法取得熱點名稱與密碼。輕觸以手動輸入。</string>
     <string name="narrow_band_profile_cap">在 2.4 GHz 連線時降低影像</string>
     <string name="narrow_band_profile_cap_description">當此工作階段在 2.4 GHz 上執行時，無論是因為此主機的 WiFi 沒有 5 GHz 頻段，還是因為網路在該頻段上建立，都會改為向手機要求最高 720p 與 30 fps，以及 AAC 音訊，而非上方的設定。實測顯示在這種連線上，全速串流完全傳不出畫面，較低的設定則能維持。若要完全依照您的設定，請關閉此選項。</string>
-    <string name="connection_issue_banner_video_link_too_slow">手機連續多次在第一個影格送達前就放棄影像。WiFi 連線太慢，無法承載畫面。輕觸以將 FPS 上限降為 30；降低解析度與改用 AAC 音訊也有幫助。</string>
+    <string name="connection_issue_banner_video_link_too_slow">手機連續多次在第一個影格送達前就放棄影像。WiFi 連線太慢，無法承載畫面，因此目前改以 720p、30 FPS 與 AAC 音訊要求。輕觸可自行設定解析度或 FPS 上限，這同時也會解除此限制；另一個解法是改用 5 GHz 網路。</string>
     <string name="connection_issue_banner_five_ghz_channel_refused">這台主機拒絕將 WiFi Direct 網路建立在你所選的任何 5 GHz 頻道上，因此改用它自己的 WiFi 驅動程式挑選的頻道。該頻道往往是法規較嚴格國家的手機根本看不到的頻道。點選以將 WiFi Direct 頻段設為 2.4 GHz，這是所有國家都允許的頻段；在該頻段上預期為 720p 而非 1080p。</string>
+    <string name="connection_issue_banner_headunit_server_deaf">你手機上的 Android Auto 主機伺服器會接受連線，卻不回應任何一個。它不會自行恢復：請在手機的 Android Auto 開發人員設定中停止主機伺服器，然後再次啟動。本機將自行重新連線。</string>
+    <string name="connection_issue_banner_hands_free_held">另一部裝置已在使用本機的免持連接，因此本機正在喚醒的手機無法取得該連接。除非主機的藍牙已透過設定檔連接，否則 Android Auto 不會開始無線連接，而一次只能提供一個免持連接的裝置，已經沒有可用的連接了。請中斷另一部裝置的連接，或關閉其藍牙，本機將自行重試。</string>
     <string name="connection_issue_banner_dismiss">關閉</string>
+    <string name="auto_connect_pill_cancel">停止連線</string>
     <string name="connection_issue_remedy_hotspot_query">熱點名稱與密碼</string>
     <string name="preflight_title">連線前檢查</string>
     <string name="preflight_intro">此裝置無法提供 Android Auto 所需的所有資訊：</string>
@@ -1001,6 +1005,8 @@
     <string name="native_wifi_version_exchange_description">讓手機改用 WiFi 而非藍牙重新連線，透過此裝置的熱點。對藍牙無法傳送交握的裝置，以及較新版本的 Android Auto 有幫助。預設關閉，且第一次連線仍會透過藍牙。</string>
     <string name="native_aa_complete_hfp_slc">完成藍牙連線</string>
     <string name="native_aa_complete_hfp_slc_description">部分手機必須等到此裝置的藍牙被視為已連線（而非僅已配對）才會啟動無線 Android Auto。預設開啟；若此裝置上的通話停止運作，請關閉。</string>
+    <string name="announce_connection_configuration">要求更長的連線逾時</string>
+    <string name="announce_connection_configuration_description">告訴 Android Auto 在判定連線中斷前等待 15 秒，而不是 3 秒，並使用較大的通訊端緩衝區。這是針對在工作階段中途離開頻道幾秒鐘、並將連線一併中斷的無線電。尚未測得你的手機是否會遵循其中任何一項。</string>
     <string name="native_aa_ignore_external_bt">忽略藍牙相容性檢查</string>
     <string name="native_aa_ignore_external_bt_description">此裝置似乎將藍牙置於 Android 無法存取的獨立模組上，因此無線 Android Auto 會自動關閉。預設關閉。只有在你認為判斷有誤時才開啟：若判斷正確，連線會無聲失敗，而記錄看起來一切正常。</string>
     <string name="native_aa_setup_qr_title">以 QR 碼設定</string>
@@ -1112,7 +1118,7 @@
     <string name="wifi_direct_new_identity_confirm">為群組選擇新的名稱和密碼，並於下次連線時生效。手機將透過藍牙重新設定，猶如連至全新車機。</string>
     <string name="wifi_direct_new_identity_done">下次連線時將使用新的網路識別碼。</string>
     <string name="wifi_direct_new_identity_applied">正在設定新的網路識別碼。下次連線時將要求您的手機加入該網路。</string>
-    <string name="wifi_direct_stable_identity_description_legacy">在此 Android 版本中，網路名稱由系統決定，並會盡可能維持不變。請保持開啟，讓手機重新連接已知的網路；若手機持續拒絕已儲存的網路，請在下方改用新的識別碼。關閉後，系統會在每次連線前忘記該網路。</string>
+    <string name="wifi_direct_stable_identity_description_legacy">在此 Android 版本中，網路名稱由系統決定，部分裝置每次連線都會換一個新名稱，應用程式無法在此指定名稱。系統若會保留名稱，請保持開啟，讓手機重新連接已知的網路；若手機持續拒絕已儲存的網路，請在下方改用新的識別碼。關閉後，系統會在每次連線前忘記該網路。</string>
     <string name="debug_video_low_latency">請求解碼器低延遲模式</string>
     <string name="debug_video_low_latency_description">在設定視訊解碼器時設定廠商低延遲 MediaFormat 金鑰。</string>
     <string name="debug_video_feed_hold">模擬慢速解碼器</string>

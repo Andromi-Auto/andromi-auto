@@ -41,4 +41,26 @@ object SessionEndGroupPolicy {
      */
     fun shouldReopenAaListeners(handshakeRunning: Boolean, listenersClosedForSession: Boolean): Boolean =
         handshakeRunning && listenersClosedForSession
+
+    /**
+     * Whether the re-arm wakes the phone.
+     *
+     * A phone that sent a ByeByeRequest chose to end the session, whatever its reason, so a poke
+     * pulls it straight back against that choice. A link that simply died chose nothing.
+     */
+    fun wakesPhoneAfterSessionEnd(phoneSaidGoodbye: Boolean): Boolean = !phoneSaidGoodbye
+
+    /** How long a poke waits after a session ends, so the phone can see the group again. */
+    const val WAKE_SETTLE_MS = 5_000L
+
+    /**
+     * What is left of [WAKE_SETTLE_MS] since the session ended, 0 if none or if none ended.
+     *
+     * Measured: a poke 0.5s after a session end had the phone answer WIFI_NETWORK_UNAVAILABLE with
+     * no_bss_found against a group that never moved. The 5s itself is a guess awaiting a round.
+     */
+    fun wakeSettleRemainingMs(sessionEndedAt: Long, now: Long): Long {
+        if (sessionEndedAt <= 0L) return 0L
+        return (sessionEndedAt + WAKE_SETTLE_MS - now).coerceIn(0L, WAKE_SETTLE_MS)
+    }
 }

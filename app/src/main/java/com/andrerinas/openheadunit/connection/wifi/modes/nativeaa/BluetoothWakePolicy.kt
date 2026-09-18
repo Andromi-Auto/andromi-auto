@@ -14,6 +14,14 @@ import java.util.UUID
  */
 object BluetoothWakePolicy {
 
+    /**
+     * What one wake attempt did, rather than only whether the phone answered.
+     *
+     * [STOOD_DOWN] opened nothing, so it cost the phone nothing and is not an attempt spent; the
+     * budgets that count attempts need the difference ([NativeDriverSelectionPolicy.wakeRoundSpent]).
+     */
+    enum class WakeOutcome { ANSWERED, DIALLED, STOOD_DOWN, NOT_PAIRED }
+
     /** Handsfree Profile — Audio Gateway. The phone's hands-free side; a call rides on this. */
     val HFP_AG_UUID: UUID = UUID.fromString("0000111f-0000-1000-8000-00805f9b34fb")
 
@@ -111,6 +119,23 @@ object BluetoothWakePolicy {
     }
 
     data class WakeDecision(val poke: Boolean, val reason: WakeReason)
+
+    /** What a wake reason says about another device holding this unit's hands-free link. */
+    enum class ForeignLink { RAISE, CLEAR, UNCHANGED }
+
+    /**
+     * Whether the record that another device holds this unit's hands-free link stands.
+     *
+     * The poke still goes out on [ForeignLink.RAISE]: the link is not the target's, so nothing of
+     * the target's is taken. What it costs is that a unit serving one link at a time has none left
+     * to give the phone it just woke, which is the connected profile Android Auto asks for.
+     * An unreadable target answers nothing either way.
+     */
+    fun foreignHandsFreeLink(reason: WakeReason): ForeignLink = when (reason) {
+        WakeReason.TARGET_ABSENT, WakeReason.SWITCH_TARGET -> ForeignLink.RAISE
+        WakeReason.NO_LINK, WakeReason.GATEWAY_ONLY, WakeReason.TARGET_CONNECTED -> ForeignLink.CLEAR
+        WakeReason.TARGET_UNREADABLE -> ForeignLink.UNCHANGED
+    }
 
     /**
      * Whether the wake poke may run. A poke that connects takes the phone's single hands-free slot

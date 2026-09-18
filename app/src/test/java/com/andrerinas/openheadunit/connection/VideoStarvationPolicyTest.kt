@@ -49,6 +49,39 @@ class VideoStarvationPolicyTest {
         assertEquals(1, advised)
     }
 
+    // --- acting on the streak, not only reporting it ---------------------------------------------
+
+    @Test
+    fun `the cap holds for as long as the streak does, unlike the advice`() {
+        assertFalse(VideoStarvationPolicy.shouldCap(2))
+        assertTrue(VideoStarvationPolicy.shouldCap(3))
+        // The advice is an edge and says itself once; the cap is a standing condition.
+        for (streak in 4..32) {
+            assertFalse("advice at $streak", VideoStarvationPolicy.shouldAdvise(streak))
+            assertTrue("cap at $streak", VideoStarvationPolicy.shouldCap(streak))
+        }
+    }
+
+    @Test
+    fun `the cap and the advice agree on when the run is long enough`() {
+        assertEquals(
+            VideoStarvationPolicy.shouldAdvise(VideoStarvationPolicy.ADVISE_AFTER_STARVED_SESSIONS),
+            VideoStarvationPolicy.shouldCap(VideoStarvationPolicy.ADVISE_AFTER_STARVED_SESSIONS)
+        )
+    }
+
+    @Test
+    fun `a capped session that renders clears the streak, which is why the cap is kept elsewhere`() {
+        // The oscillation this guards: capping is what makes the session render, so a cap released
+        // on a cleared streak would be earned again three sessions later, forever. shouldCap goes
+        // false here on purpose and Settings.videoProfileStarvationCap is what does not.
+        var streak = streakAfter(starved, starved, starved)
+        assertTrue(VideoStarvationPolicy.shouldCap(streak))
+        streak = VideoStarvationPolicy.nextStreak(streak, reachedHandshake = true, renderedAnyFrame = true)
+        assertEquals(0, streak)
+        assertFalse(VideoStarvationPolicy.shouldCap(streak))
+    }
+
     @Test
     fun `a cleared streak can advise again on the next run`() {
         var streak = streakAfter(starved, starved, starved)

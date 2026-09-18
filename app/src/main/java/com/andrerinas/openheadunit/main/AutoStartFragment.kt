@@ -186,9 +186,9 @@ class AutoStartFragment : Fragment() {
             settings.autoStartOnUsb = it
             Settings.syncAutoStartOnUsbToDeviceStorage(requireContext(), it)
         }
-        settings.autoStartBluetoothDeviceMacs = pendingAutoStartBtMacs
-        Settings.syncAutoStartBtMacsToDeviceStorage(requireContext(), pendingAutoStartBtMacs)
-        settings.nativePokeBtMacs = pendingNativePokeBtMacs
+        settings.autoStartBluetoothDeviceMacs = pendingAutoStartBtMacs.toSet()
+        Settings.syncAutoStartBtMacsToDeviceStorage(requireContext(), pendingAutoStartBtMacs.toSet())
+        settings.nativePokeBtMacs = pendingNativePokeBtMacs.toSet()
         pendingNativePokeAllPaired?.let { settings.nativePokeAllPairedDevices = it }
         if (pendingAutoStartBtMacs.isNotEmpty()) {
             val firstMac = pendingAutoStartBtMacs.first()
@@ -228,9 +228,7 @@ class AutoStartFragment : Fragment() {
 
         // Check for Overlay permission if any auto-start is configured. Auto-disconnect launches
         // nothing, so it is not part of this.
-        if ((pendingAutoStartBtMacs.isNotEmpty() || pendingAutoStartOnUsb == true ||
-            pendingAutoStartOnBoot == true || pendingAutoStartOnScreenOn == true ||
-            pendingAutoStartOnWifi == true)) {
+        if (launchesOnItsOwn()) {
             if (!AppPermissions.isOverlayGranted(requireContext())) {
                 MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
                     .setTitle(R.string.overlay_permission_title)
@@ -265,6 +263,9 @@ class AutoStartFragment : Fragment() {
             ContextCompat.startForegroundService(requireContext(),
                 Intent(requireContext(), AapService::class.java))
         }
+
+        AppLog.i("AutoStartFragment: saved auto-start ${pendingAutoStartBtMacs.size} device(s), " +
+            "auto-disconnect ${pendingAutoDisconnectBtMacs.size}, wake ${pendingNativePokeBtMacs.size}")
 
         hasChanges = false
         updateSaveButtonState()
@@ -370,6 +371,19 @@ class AutoStartFragment : Fragment() {
             }
         ))
 
+        if (AutoStartOverlayPolicy.showsNotice(
+                overlayGranted = AppPermissions.isOverlayGranted(requireContext()),
+                launches = launchesOnItsOwn(),
+            )
+        ) {
+            items.add(SettingItem.SettingEntry(
+                stableId = "autoStartOverlayMissing",
+                nameResId = R.string.overlay_permission_title,
+                value = getString(R.string.auto_start_overlay_missing_hint),
+                onClick = { requestOverlayPermission() }
+            ))
+        }
+
         if (settings.wifiConnectionMode == WifiLauncherMode.NATIVE) {
             items.add(SettingItem.SettingEntry(
                 stableId = "nativePokeBt",
@@ -458,7 +472,12 @@ class AutoStartFragment : Fragment() {
         // when a wireless or Self Mode session starts and stops; USB has its own attach and
         // detach, so a USB-only unit does not see them.
         val usbIds = setOf("listenForUsbDevices", "autoStartUsb", "reopenOnReconnection")
-        val wifiIds = setOf("autoStartWifiWarning", "autoStartWifi", "autoStartWifiSsid")
+        // The wake rows filter by isLikelyPhone, so on a Self-only unit they offer a picker that
+        // hides the car radio the other two rows are for.
+        val wifiIds = setOf(
+            "autoStartWifiWarning", "autoStartWifi", "autoStartWifiSsid",
+            "nativePokeBt", "nativePokeAllPaired",
+        )
         val btIds = setOf("autoStartBt", "autoDisconnectBt", "autoDisconnectBtDelay", "autoDisconnectBtKillHint")
         val filtered = items.filterNot { item ->
             (item.stableId in usbIds && !settings.showsUsb()) ||
@@ -473,50 +492,37 @@ class AutoStartFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        // Re-check overlay permission. If the user returned from system settings
-        // without granting it, disable auto-start settings that require it.
-        if (!AppPermissions.isOverlayGranted(requireContext())) {
-            var disabled = false
-            if (settings.autoStartOnBoot) {
-                settings.autoStartOnBoot = false
-                Settings.syncAutoStartOnBootToDeviceStorage(requireContext(), false)
-                pendingAutoStartOnBoot = false
-                disabled = true
-            }
-            if (settings.autoStartOnScreenOn) {
-                settings.autoStartOnScreenOn = false
-                Settings.syncAutoStartOnScreenOnToDeviceStorage(requireContext(), false)
-                pendingAutoStartOnScreenOn = false
-                disabled = true
-            }
-            if (settings.autoStartOnUsb) {
-                settings.autoStartOnUsb = false
-                Settings.syncAutoStartOnUsbToDeviceStorage(requireContext(), false)
-                pendingAutoStartOnUsb = false
-                disabled = true
-            }
-            if (settings.autoStartBluetoothDeviceMacs.isNotEmpty()) {
-                settings.autoStartBluetoothDeviceMacs = emptySet()
-                settings.autoStartBluetoothDeviceName = ""
-                Settings.syncAutoStartBtMacsToDeviceStorage(requireContext(), emptySet())
-                pendingAutoStartBtMacs.clear()
-                disabled = true
-            }
-            // The auto-disconnect list stays: it launches nothing, so it needs no overlay.
-            if (settings.autoStartOnWifi) {
-                settings.autoStartOnWifi = false
-                settings.autoStartWifiSsid = ""
-                Settings.syncAutoStartOnWifiToDeviceStorage(requireContext(), false)
-                Settings.syncAutoStartWifiSsidToDeviceStorage(requireContext(), "")
-                pendingAutoStartOnWifi = false
-                pendingAutoStartWifiSsid = ""
-                disabled = true
-            }
-            if (disabled) {
-                AppLog.w("Overlay permission not granted, disabling auto-start settings")
-                ToastUtils.showToast(requireContext(), getString(R.string.overlay_permission_denied_auto_start_disabled), Toast.LENGTH_LONG, force = true)
-                checkChanges()
-                updateSettingsList()
+        // [FIX] The overlay only decides how the screen is raised - ActivityLaunchPolicy falls back
+        // to a notification without it - so nothing is cleared here any more. A chosen device that
+        // vanished on the next visit read as a setting that would not save. The notice row says
+        // what is missing instead.
+        updateSettingsList()
+    }
+
+    /** Whether anything configured here raises the screen, so the overlay permission is its own. */
+    private fun launchesOnItsOwn(): Boolean = AutoStartOverlayPolicy.launches(
+        onBoot = pendingAutoStartOnBoot == true,
+        onScreenOn = pendingAutoStartOnScreenOn == true,
+        onUsb = pendingAutoStartOnUsb == true,
+        onWifi = pendingAutoStartOnWifi == true,
+        btTriggerCount = pendingAutoStartBtMacs.size,
+    )
+
+    private fun requestOverlayPermission() {
+        try {
+            startActivity(Intent(
+                android.provider.Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                android.net.Uri.parse("package:${requireContext().packageName}")
+            ))
+        } catch (e: Exception) {
+            try {
+                startActivity(Intent(android.provider.Settings.ACTION_MANAGE_OVERLAY_PERMISSION))
+            } catch (e2: Exception) {
+                try {
+                    startActivity(Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                        data = android.net.Uri.parse("package:${requireContext().packageName}")
+                    })
+                } catch (_: Exception) {}
             }
         }
     }

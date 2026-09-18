@@ -23,8 +23,8 @@ object UsbDeviceDiagnostics {
     /** Last dump per caller, so a repeated scan of an unchanged bus does not repeat itself. */
     private val lastSignatures = ConcurrentHashMap<String, String>()
 
-    /** (seen at, VID:PID) for every device any scan has met, trimmed to the hint window. */
-    private val seenIdentities = Collections.synchronizedList(mutableListOf<Pair<Long, String>>())
+    /** (scanned at, the whole bus) for every scan, trimmed to the hint window. */
+    private val seenScans = Collections.synchronizedList(mutableListOf<Pair<Long, Set<String>>>())
 
     /** The host-support verdict is a fact about the unit, so it is worth saying exactly once. */
     private val hostSupportReported = AtomicBoolean(false)
@@ -45,10 +45,10 @@ object UsbDeviceDiagnostics {
         val accepted = devices.count { UsbDeviceCompat.isConnectable(context, it) }
         val reportAtInfo = accepted == 0
         val lines = devices.map { "UsbDiagnostics:   ${describe(context, it, usbManager)}" }
-        val recentIdentities = recordIdentities(devices)
+        val (recentIdentities, compositionChanges) = recordScan(devices)
 
         val hint = UsbBusHintPolicy.hint(
-            devices.size, accepted, recentIdentities.size, hasUsbHostFeature(context)
+            devices.size, accepted, compositionChanges, hasUsbHostFeature(context)
         )
 
         // Above the dedup, because this verdict never changes: an unchanged empty bus returns early
@@ -87,8 +87,8 @@ object UsbDeviceDiagnostics {
                     "before it presents itself."
             )
             UsbBusHintPolicy.Hint.CYCLING_ADAPTER -> AppLog.i(
-                "UsbDiagnostics: the bus identity has changed ${recentIdentities.size} times in " +
-                    "the last minute (${recentIdentities.joinToString(", ")}) and none of them " +
+                "UsbDiagnostics: the bus changed $compositionChanges times in the last minute " +
+                    "(${recentIdentities.joinToString(", ")}) and none of what came and went " +
                     "offers Android Auto. A wireless adapter that keeps re-enumerating has not " +
                     "found its phone: pair the adapter with the phone, not with this head unit."
             )
@@ -100,13 +100,22 @@ object UsbDeviceDiagnostics {
         }
     }
 
-    /** Adds this scan's identities to the window and returns the distinct ones still inside it. */
-    private fun recordIdentities(devices: List<UsbDevice>): List<String> {
+    /**
+     * Adds this scan's whole bus to the window, and returns what is still inside it: the distinct
+     * identities to name, and how many times the composition moved.
+     *
+     * The composition is recorded as one entry rather than one per device, because two devices that
+     * merely sit there side by side are not a device that keeps changing its identity.
+     */
+    private fun recordScan(devices: List<UsbDevice>): Pair<List<String>, Int> {
         val now = System.currentTimeMillis()
-        synchronized(seenIdentities) {
-            devices.forEach { seenIdentities.add(now to vidPid(it)) }
-            seenIdentities.removeAll { now - it.first >= UsbBusHintPolicy.IDENTITY_WINDOW_MS }
-            return UsbBusHintPolicy.identitiesInWindow(seenIdentities.toList(), now)
+        synchronized(seenScans) {
+            seenScans.add(now to devices.map { vidPid(it) }.toSet())
+            seenScans.removeAll { now - it.first >= UsbBusHintPolicy.IDENTITY_WINDOW_MS }
+            val scans = seenScans.toList()
+            val identities = scans.flatMap { scan -> scan.second.map { scan.first to it } }
+            return UsbBusHintPolicy.identitiesInWindow(identities, now) to
+                UsbBusHintPolicy.compositionChanges(scans, now)
         }
     }
 

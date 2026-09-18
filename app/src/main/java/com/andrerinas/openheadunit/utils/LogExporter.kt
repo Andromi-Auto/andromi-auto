@@ -5,10 +5,15 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.widget.Toast
 import android.util.Log
 import androidx.core.content.FileProvider
 import com.andrerinas.openheadunit.BuildConfig
+import com.andrerinas.openheadunit.R
 import com.andrerinas.openheadunit.connection.wifi.WifiLauncherMode
+import com.andrerinas.openheadunit.connection.wifi.direct.StationStandDown
+import com.andrerinas.openheadunit.connection.wifi.direct.StationStandDownMode
+import com.andrerinas.openheadunit.connection.wifi.direct.WifiBandCapability
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.NativeAaHandshakeManager
 import com.andrerinas.openheadunit.decoder.video.VideoFaultInjector
 import kotlinx.coroutines.Dispatchers
@@ -146,13 +151,36 @@ object LogExporter {
             "video=codec:${settings.videoCodec} fps:${settings.fpsLimit} resId:${settings.resolutionId} " +
             "view:${settings.viewMode.name} forceSw:${settings.forceSoftwareDecoding} " +
             "swDecoder:${settings.softwareVideoDecoder.name} | " +
-            "wifi=mode:${settings.wifiConnectionMode} strategy:${wifiTransport(settings)} | " +
+            "wifi=mode:${settings.wifiConnectionMode} strategy:${wifiTransport(settings)} " +
+            // The band and the stand-down arm decide how a stuttering capture reads, and both are
+            // otherwise only in lines that rotate out of a head unit's buffer within a minute.
+            "band:${band(context)} standDown:${standDown(settings)} | " +
             // Which Bluetooth this unit will use. A capture that shows the handshake doing nothing
             // reads completely differently once the header says the route was blocked.
             "bt=${bluetoothRoute(context)} | " +
             "logLevel=${settings.exporterLogLevel.name} | " +
             "debug=${debugLevers(settings)}"
     }
+
+    /**
+     * Which bands this unit's radio has, or why nobody knows.
+     *
+     * `unasked` and `unknown` are kept apart on purpose: the first is a platform too old to have
+     * the call, the second is a WiFi service that refused on a unit that does have it.
+     */
+    private fun band(context: Context): String = when {
+        WifiBandCapability.bandUnreadable() -> "unasked"
+        else -> when (WifiBandCapability.supports5Ghz(context)) {
+            true -> "5ghz"
+            false -> "2.4only"
+            null -> "unknown"
+        }
+    }
+
+    /** The stand-down setting, and what the last bring-up in this process actually did with it. */
+    private fun standDown(settings: Settings): String =
+        "${StationStandDownMode.fromSetting(settings.stationStandDownMode)}/" +
+            StationStandDown.lastOutcome.token
 
     /** Internal radio, or the external module and the route chosen for it. Both reads are cheap. */
     private fun bluetoothRoute(context: Context): String =
@@ -428,18 +456,36 @@ object LogExporter {
         logFile
     }
 
+    /**
+     * Shares an exported log.
+     *
+     * Every step is guarded, because this runs from a dialog's click handler and a throw there
+     * kills the app: a log outside the provider's declared roots used to do exactly that, so the
+     * one button a reporter needs crashed instead of sending the file.
+     */
     fun shareLogFile(context: Context, file: File) {
-        val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+        try {
+            val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
 
-        val shareIntent = Intent(Intent.ACTION_SEND).apply {
-            type = "text/plain"
-            putExtra(Intent.EXTRA_STREAM, uri)
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                type = "text/plain"
+                putExtra(Intent.EXTRA_STREAM, uri)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+
+            val chooser = Intent.createChooser(shareIntent, "Share Log File")
+            chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            context.startActivity(chooser)
+        } catch (e: Exception) {
+            // The path, because the reporter can still fetch the file by hand from there.
+            AppLog.e("LogExporter: could not share ${file.absolutePath}: ${e.message}", e)
+            ToastUtils.showToast(
+                context,
+                context.getString(R.string.failed_export_logs),
+                Toast.LENGTH_LONG,
+                force = true
+            )
         }
-
-        val chooser = Intent.createChooser(shareIntent, "Share Log File")
-        chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        context.startActivity(chooser)
     }
 
     // Capped at 250 KB to guarantee safe Android Binder IPC transaction limits on older

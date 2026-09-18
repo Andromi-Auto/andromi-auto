@@ -231,4 +231,61 @@ class BluetoothWakePolicyTest {
             )
         )
     }
+
+    @Test
+    fun `a link that is not the target's is recorded against this unit`() {
+        // Both mean a link is up and it belongs to somebody else. The poke still goes out; what is
+        // recorded is that this unit has no hands-free left to give the phone it is waking.
+        for (reason in listOf(
+            BluetoothWakePolicy.WakeReason.TARGET_ABSENT,
+            BluetoothWakePolicy.WakeReason.SWITCH_TARGET,
+        )) {
+            assertEquals(
+                reason.name,
+                BluetoothWakePolicy.ForeignLink.RAISE,
+                BluetoothWakePolicy.foreignHandsFreeLink(reason)
+            )
+        }
+    }
+
+    @Test
+    fun `a target whose Bluetooth is off still records it`() {
+        // The case the record is written before the socket for: a bonded phone with its radio off
+        // reads as absent, reaches TARGET_ABSENT, and only then does connect() fail.
+        assertEquals(
+            BluetoothWakePolicy.ForeignLink.RAISE,
+            BluetoothWakePolicy.foreignHandsFreeLink(
+                BluetoothWakePolicy.wakeDecision(
+                    clientRoleLink = BluetoothWakePolicy.HandsFreeLink.CONNECTED,
+                    gatewayRoleLink = BluetoothWakePolicy.HandsFreeLink.ABSENT,
+                    targetLink = BluetoothWakePolicy.TargetLink.ABSENT
+                ).reason
+            )
+        )
+    }
+
+    @Test
+    fun `every positive reading about the link retires the record`() {
+        for (reason in listOf(
+            BluetoothWakePolicy.WakeReason.NO_LINK,
+            BluetoothWakePolicy.WakeReason.GATEWAY_ONLY,
+            BluetoothWakePolicy.WakeReason.TARGET_CONNECTED,
+        )) {
+            assertEquals(
+                reason.name,
+                BluetoothWakePolicy.ForeignLink.CLEAR,
+                BluetoothWakePolicy.foreignHandsFreeLink(reason)
+            )
+        }
+    }
+
+    @Test
+    fun `an unreadable target neither raises nor retires`() {
+        // A question that could not be asked is not a question answered, the same rule the poke
+        // guard itself uses: an unreadable target stands the poke down rather than claiming absence.
+        assertEquals(
+            BluetoothWakePolicy.ForeignLink.UNCHANGED,
+            BluetoothWakePolicy.foreignHandsFreeLink(BluetoothWakePolicy.WakeReason.TARGET_UNREADABLE)
+        )
+    }
 }
