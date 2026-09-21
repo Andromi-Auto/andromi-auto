@@ -488,6 +488,15 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
     @Volatile private var nativeGroupWasRead = false
 
     /**
+     * Whether the adopt-or-recreate decision below is still outstanding.
+     *
+     * A callback that lands inside that window carries [nativeGroupWasRead] false for a group that
+     * is about to be adopted, and the assessment is made once per group, so it would compare a
+     * surviving group to itself and grade a unit that re-addresses every create stable for good.
+     */
+    @Volatile private var nativeAdoptDecisionPending = false
+
+    /**
      * Bumped by [stop]. Every P2P callback that continues into another framework call captures this
      * first and gives up if it has moved, because [stop] can cancel posted runnables but nothing can
      * cancel an `ActionListener` the framework is already holding - and those continuations create
@@ -552,6 +561,9 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
      */
     private fun forgetPerGroupKeys() {
         nativeGroupWasRead = false
+        // Its window is a bring-up's, so a teardown or the next bring-up ends it whatever the
+        // framework did with the request it was taken for.
+        nativeAdoptDecisionPending = false
         nativeGroupHostedSession = false
         lastBssidDumpSsid = null
         lastIdentityReportSsid = null
@@ -1213,9 +1225,12 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
                 nativeCreateRequestedAtMs = 0L
                 // Said once per group, and once more if the address only became readable later.
                 // The comparison is made once per group, on the first callback with an address:
-                // made again on the next callback it would compare the group to itself.
+                // made again on the next callback it would compare the group to itself. Held off
+                // entirely while this bring-up is still deciding whether to adopt the group it
+                // found, because that answer is what says whether anything was created to compare.
                 val bssidUsable = SoftApBssidPolicy.isUsable(bssid)
-                if (ssid != nativeIdentityAssessedSsid && (bssidUsable || ssid != lastIdentityReportSsid)) {
+                if (!nativeAdoptDecisionPending &&
+                    ssid != nativeIdentityAssessedSsid && (bssidUsable || ssid != lastIdentityReportSsid)) {
                     val appNamesGroup = Build.VERSION.SDK_INT >= P2pIdentityRotationPolicy.NAMED_CREATE_SDK
                     val verdict = GroupIdentityStabilityPolicy.assess(
                         keepIdentity = appSettings.wifiDirectStableIdentity,
@@ -1918,8 +1933,17 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
         val appSettings = App.provide(context).settings
         if (appSettings.wifiDirectStableIdentity) {
             val kept = chooseNativeGroupIdentity()
+            val gen = generation
             markP2pRequest()
+            // Taken before the request, not inside its callback: a group-info callback from the
+            // receiver can reach the assessment first and grade the surviving group against itself.
+            nativeAdoptDecisionPending = true
             mgr.requestGroupInfo(ch) { group ->
+                // An exit delivered to a stopped app starts the service, whose onCreate arms this,
+                // so the stop lands mid-flight and this callback adopted a group on a manager that
+                // had already stopped. The pending flag is left alone: stop() cleared it, and a
+                // bring-up that has since re-armed owns it now.
+                if (supersededByStop(gen, "the adopt-or-create decision")) return@requestGroupInfo
                 if (group != null && P2pIdentityRotationPolicy.readsExistingGroup(
                         Build.VERSION.SDK_INT, group.isGroupOwner, group.networkName, kept.networkName
                     )
@@ -1929,10 +1953,12 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
                             "before this bring-up; reading it instead of tearing it down."
                     )
                     nativeGroupWasRead = true
+                    nativeAdoptDecisionPending = false
                     isGroupOwner = true
                     mgr.requestConnectionInfo(ch, this)
                     mgr.requestGroupInfo(ch, this)
                 } else {
+                    nativeAdoptDecisionPending = false
                     recreateNativeGroup(forceStandard = false)
                 }
             }

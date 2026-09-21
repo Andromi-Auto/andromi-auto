@@ -421,4 +421,83 @@ class GroupIdentityStabilityPolicyTest {
         )
         assertEquals(GroupIdentityStability.CHANGED, verdict.stability)
     }
+
+    @Test
+    fun `below the naming API a measured rename is not retired by the same group seen again`() {
+        // Measured on an API 19 tablet: the bring-up adopts the group the last run left up, so the
+        // name and the address both repeat without a create. Graded stable, that unit is handed the
+        // TCP endpoint and STATIC credentials for a network its next create renames.
+        val v = assess(
+            requested = null, bssid = a, previous = ObservedP2pGroup(name, a),
+            appNamesGroup = false,
+            nameChangesSoFar = GroupIdentityStabilityPolicy.NAME_CHANGES_BEFORE_MEASURED,
+        )
+        assertEquals(GroupIdentityStability.RENAMED, v.stability)
+        assertEquals(GroupIdentityStabilityPolicy.NAME_CHANGES_BEFORE_MEASURED, v.nameChanges)
+        assertTrue(v.reason.contains("that group seen again"))
+    }
+
+    @Test
+    fun `below the naming API a repeat before the rename is measured is still stable`() {
+        // A pre-Q unit whose platform does keep the profile never reaches the cap, so the endpoint
+        // it earns is untouched by the rule above.
+        val v = assess(
+            requested = null, bssid = a, previous = ObservedP2pGroup(name, a),
+            appNamesGroup = false,
+            nameChangesSoFar = GroupIdentityStabilityPolicy.NAME_CHANGES_BEFORE_MEASURED - 1,
+        )
+        assertEquals(GroupIdentityStability.STABLE, v.stability)
+    }
+
+    @Test
+    fun `where the app names the group a repeat is the lever working, whatever the count`() {
+        val v = assess(
+            bssid = a, previous = ObservedP2pGroup(name, a), appNamesGroup = true,
+            nameChangesSoFar = GroupIdentityStabilityPolicy.NAME_CHANGES_BEFORE_MEASURED + 2,
+        )
+        assertEquals(GroupIdentityStability.STABLE, v.stability)
+        assertEquals(0, v.nameChanges)
+    }
+    @Test
+    fun `a read does not hand back a stable stored before the rename was measured`() {
+        // The stored verdict outlives the build that wrote it, and a group that survives every
+        // relaunch is never created again to correct it, so the read branch has to ask too.
+        val group = ObservedP2pGroup(name, a)
+        val v = GroupIdentityStabilityPolicy.assess(
+            keepIdentity = true,
+            requestedName = null,
+            ssid = group.ssid,
+            bssid = group.bssid,
+            bssidUsable = true,
+            staticOverride = false,
+            previous = group,
+            appNamesGroup = false,
+            nameChangesSoFar = GroupIdentityStabilityPolicy.NAME_CHANGES_BEFORE_MEASURED,
+            readNotCreated = true,
+            previousStability = GroupIdentityStability.STABLE,
+        )
+        assertEquals(GroupIdentityStability.RENAMED, v.stability)
+        assertNull("a read still teaches nothing, whatever it answers", v.remember)
+    }
+
+    @Test
+    fun `a read below the rename threshold still hands the stored verdict back`() {
+        // The boundary: a pre-Q unit whose platform keeps the profile never reaches the cap, and
+        // what its creates earned is not taken away from it by a bring-up that only looked.
+        val group = ObservedP2pGroup(name, a)
+        val v = GroupIdentityStabilityPolicy.assess(
+            keepIdentity = true,
+            requestedName = null,
+            ssid = group.ssid,
+            bssid = group.bssid,
+            bssidUsable = true,
+            staticOverride = false,
+            previous = group,
+            appNamesGroup = false,
+            nameChangesSoFar = GroupIdentityStabilityPolicy.NAME_CHANGES_BEFORE_MEASURED - 1,
+            readNotCreated = true,
+            previousStability = GroupIdentityStability.STABLE,
+        )
+        assertEquals(GroupIdentityStability.STABLE, v.stability)
+    }
 }
