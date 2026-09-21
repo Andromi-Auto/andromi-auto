@@ -157,4 +157,44 @@ class P2pIdentityRotationPolicyTest {
             P2pIdentityRotationPolicy.purgeBeforeCreate(36, keepIdentity = false, rotationPending = false)
         )
     }
+
+    @Test
+    fun `below Q any group this unit owns is read rather than recreated`() {
+        // There is no name to compare: the platform named it, and a recreate would mint another.
+        assertTrue(
+            P2pIdentityRotationPolicy.readsExistingGroup(
+                sdkInt = 17, isGroupOwner = true,
+                liveName = "DIRECT-l9-Tablet", requestedName = "DIRECT-PB-HeadUnit",
+            )
+        )
+    }
+
+    @Test
+    fun `a group this unit does not own is never read`() {
+        for (sdk in listOf(17, P2pIdentityRotationPolicy.NAMED_CREATE_SDK)) {
+            assertFalse(
+                "sdk $sdk",
+                P2pIdentityRotationPolicy.readsExistingGroup(
+                    sdkInt = sdk, isGroupOwner = false,
+                    liveName = "DIRECT-PB-HeadUnit", requestedName = "DIRECT-PB-HeadUnit",
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `from Q the name is still the test`() {
+        assertTrue(
+            P2pIdentityRotationPolicy.readsExistingGroup(
+                sdkInt = P2pIdentityRotationPolicy.NAMED_CREATE_SDK, isGroupOwner = true,
+                liveName = "DIRECT-PB-HeadUnit", requestedName = "DIRECT-PB-HeadUnit",
+            )
+        )
+        assertFalse(
+            P2pIdentityRotationPolicy.readsExistingGroup(
+                sdkInt = P2pIdentityRotationPolicy.NAMED_CREATE_SDK, isGroupOwner = true,
+                liveName = "DIRECT-XX-Other", requestedName = "DIRECT-PB-HeadUnit",
+            )
+        )
+    }
 }

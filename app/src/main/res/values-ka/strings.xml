@@ -983,8 +983,6 @@
     <string name="preflight_open_location">მდებარეობა</string>
     <string name="preflight_later">მოგვიანებით</string>
     <string name="preflight_invalid_bssid">არასწორი WiFi მისამართი (მაგ: 02:1A:11:FF:3C:4D).</string>
-    <string name="native_wifi_version_exchange">ქსელით დაკავშირება (ახალი AA handshake)</string>
-    <string name="native_wifi_version_exchange_description">საშუალებას აძლევს ტელეფონს ხელახლა დაუკავშირდეს WiFi-ით Bluetooth-ის ნაცვლად, ამ მოწყობილობის Hotspot-ის გამოყენებით. ეხმარება მოწყობილობებს, რომელთა Bluetooth ვერ ატარებს handshake-ს, და Android Auto-ს უფრო ახალ ვერსიებს. ნაგულისხმევად გამორთულია და პირველი კავშირი კვლავ Bluetooth-ით ხდება.</string>
     <string name="native_aa_complete_hfp_slc">Bluetooth-კავშირის დასრულება</string>
     <string name="native_aa_complete_hfp_slc_description">ზოგიერთი ტელეფონი უსადენო Android Auto-ს არ იწყებს, სანამ ამ მოწყობილობის Bluetooth დაკავშირებულად არ ჩაითვლება და არა მხოლოდ დაწყვილებულად. ნაგულისხმევად ჩართულია; გამორთეთ, თუ ამ მოწყობილობაზე ზარები აღარ მუშაობს.</string>
     <string name="announce_connection_configuration">უფრო გრძელი კავშირის ტაიმაუთის მოთხოვნა</string>
@@ -1094,13 +1092,13 @@
     <string name="five_ghz_channel_option">არხი %1$d (%2$d მგჰც)</string>
     <string name="five_ghz_channel_hint">არხი მოთხოვნაა და არა გარანტია. ბევრი მოწყობილობა ქსელს მხოლოდ იმ არხზე ქმნის, რომელსაც მისი საკუთარი Wi-Fi დრაივერი ირჩევს, და აპლიკაციას ამის თქმა მხოლოდ ცდის შემდეგ შეუძლია. თუ არცერთი 5 გჰც არხი არ მუშაობს და თქვენი ტელეფონი ქსელს კვლავ ვერ ხედავს, ზემოთ მოცემული დიაპაზონია ის პარამეტრი, რომელიც უშველის.</string>
     <string name="wifi_direct_stable_identity">იგივე Wi-Fi Direct ქსელის შენარჩუნება</string>
-    <string name="wifi_direct_stable_identity_description">ყოველ ჯერზე იყენებს ჯგუფის იგივე სახელსა და პაროლს, რათა ტელეფონი ნაცნობ ქსელს დაუკავშირდეს.</string>
+    <string name="wifi_direct_stable_identity_description">ყოველთვის იყენებს ერთსა და იმავე ქსელის სახელსა და პაროლს, რათა თქვენი ტელეფონი დაუკავშირდეს უკვე ნაცნობ ქსელს. მათ განსაახლებლად გამოიყენეთ ქვემოთ მოცემული სტრიქონი.</string>
     <string name="wifi_direct_new_identity">ახალი Wi-Fi Direct ქსელის იდენტიფიკატორი</string>
     <string name="wifi_direct_new_identity_none">შეირჩევა შემდეგი დაკავშირებისას</string>
     <string name="wifi_direct_new_identity_confirm">ირჩევს ახალ სახელსა და პაროლს შემდეგი დაკავშირებისთვის.</string>
     <string name="wifi_direct_new_identity_done">ახალი ქსელის იდენტიფიკატორი გამოყენებული იქნება შემდეგი დაკავშირებისას.</string>
     <string name="wifi_direct_new_identity_applied">ახალი ქსელის იდენტიფიკატორი ახლა კონფიგურირდება. ტელეფონი მას შემდეგი დაკავშირებისას მიიღებს.</string>
-    <string name="wifi_direct_stable_identity_description_legacy">Android-ის ამ ვერსიაში ქსელის სახელს სისტემა ირჩევს და ზოგიერთ მოწყობილობაზე ის ყოველ დაკავშირებაზე იცვლება. აპლიკაციას აქ კონკრეტული სახელის მოთხოვნა არ შეუძლია. დატოვეთ ჩართული, რომ ტელეფონი ნაცნობ ქსელს დაუკავშირდეს იქ, სადაც სისტემა მას ინახავს, და სცადეთ ახალი იდენტიფიკატორი ქვემოთ, თუ ის შენახულ ქსელს კვლავ უარყოფს. გამორთვისას სისტემა ქსელს ყოველ დაკავშირებამდე დაივიწყებს.</string>
+    <string name="wifi_direct_stable_identity_description_legacy">Android-ის ამ ვერსიაში სახელს სისტემა ირჩევს და აპლიკაციას არ შეუძლია კონკრეტული სახელის მოთხოვნა. დატოვეთ ჩართული, რომ თქვენი ტელეფონი დაუკავშირდეს უკვე ნაცნობ ქსელს იქ, სადაც სისტემა მას ინახავს, და მისი განსაახლებლად გამოიყენეთ ქვემოთ მოცემული სტრიქონი.</string>
     <string name="debug_video_low_latency">დეკოდერის დაბალი დაყოვნების რეჟიმის მოთხოვნა</string>
     <string name="debug_video_low_latency_description">აყენებს მწარმოებლის დაბალი დაყოვნების MediaFormat გასაღებს ვიდეო დეკოდერის კონფიგურაციისას.</string>
     <string name="debug_video_feed_hold">ნელი დეკოდერის სიმულაცია</string>

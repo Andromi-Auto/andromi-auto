@@ -1,5 +1,8 @@
 package com.andrerinas.openheadunit.connection.wifi.direct
 
+import com.andrerinas.openheadunit.connection.wifi.MacAddressOrigin
+import com.andrerinas.openheadunit.connection.wifi.MacAddressPolicy
+
 /** Whether the network the phone is handed will be the same network next time. */
 enum class GroupIdentityStability {
     /** Same name and same BSSID as the last group this unit hosted, or an address the user fixed. */
@@ -10,7 +13,7 @@ enum class GroupIdentityStability {
     CHANGED,
     /** The platform names the group itself and hands out a different name every create. */
     RENAMED,
-    /** Not this transport's question: an access point's identity is its own. */
+    /** Not asked on this delivery. The Native transports both measure; nothing else needs to. */
     NOT_MEASURED,
 }
 
@@ -55,6 +58,11 @@ object GroupIdentityStabilityPolicy {
      *   `WifiP2pConfig.Builder` does not exist, so the create reinvokes whatever profile the
      *   platform kept and a changed name is the platform's doing rather than a rotation of ours.
      * @param nameChangesSoFar the previous verdict's [Verdict.nameChanges].
+     * @param bssidIsGroupsOwn whether the address read belongs to this group's own interface. A
+     *   stand-in from another one is a well-formed address that answers a different question, and
+     *   comparing it reads as a move and is then remembered as what the next group is judged on.
+     * @param readNotCreated whether this group was found already up and adopted rather than created.
+     * @param previousStability what the creates before it earned, which a read hands straight back.
      */
     fun assess(
         keepIdentity: Boolean,
@@ -66,6 +74,9 @@ object GroupIdentityStabilityPolicy {
         previous: ObservedP2pGroup?,
         appNamesGroup: Boolean = true,
         nameChangesSoFar: Int = 0,
+        bssidIsGroupsOwn: Boolean = true,
+        readNotCreated: Boolean = false,
+        previousStability: GroupIdentityStability = GroupIdentityStability.UNPROVEN,
     ): Verdict {
         // The count survives every branch below that observed nothing about the name, or a run with
         // one unreadable BSSID in it erases a measurement built from the bring-ups either side. A
@@ -89,7 +100,25 @@ object GroupIdentityStabilityPolicy {
                 nameChanges = nameChangesSoFar,
             )
         }
+        if (!bssidIsGroupsOwn) {
+            return Verdict(
+                GroupIdentityStability.UNPROVEN, null,
+                "the address announced ($bssid) belongs to another interface, so it says nothing about this group",
+                nameChanges = nameChangesSoFar,
+            )
+        }
         val observed = ObservedP2pGroup(ssid, bssid)
+        // A group found already up is the same group instance, so its address repeating says
+        // nothing about what a create would do. Promoting on it graded a unit that re-addresses
+        // every create as stable, and the endpoint that went out on the strength of it is the one
+        // the phone then pins and cannot find.
+        if (readNotCreated) {
+            return Verdict(
+                previousStability, null,
+                "this group was already up and was read rather than created, so nothing new was measured",
+                nameChanges = nameChangesSoFar,
+            )
+        }
         if (staticOverride) {
             return Verdict(
                 GroupIdentityStability.STABLE, observed,
@@ -98,6 +127,13 @@ object GroupIdentityStabilityPolicy {
             )
         }
         return when {
+            // A generated address is the platform's per-create one, so it already answers what a
+            // second bring-up would. Saying "the next one decides" of it promises nothing.
+            previous == null && MacAddressPolicy.origin(bssid) == MacAddressOrigin.GENERATED -> Verdict(
+                GroupIdentityStability.CHANGED, observed,
+                "first group under this name, and $bssid is generated rather than this interface's own, so the next create moves it",
+                nameChanges = nameChangesSoFar,
+            )
             previous == null -> Verdict(
                 GroupIdentityStability.UNPROVEN, observed,
                 "first group under this name; the next one decides",

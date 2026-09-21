@@ -1011,8 +1011,6 @@
     <string name="preflight_open_location">Ubicación</string>
     <string name="preflight_later">Más tarde</string>
     <string name="preflight_invalid_bssid">Dirección WiFi no válida. Introduzca seis pares de dígitos hexadecimales (ej. 02:1A:11:FF:3C:4D).</string>
-    <string name="native_wifi_version_exchange">Conectar por red (nuevo handshake AA)</string>
-    <string name="native_wifi_version_exchange_description">Permite que el teléfono se vuelva a conectar por WiFi en lugar de Bluetooth, usando el punto de acceso de esta unidad. Ayuda en unidades cuyo Bluetooth no puede transportar el handshake, y en versiones nuevas de Android Auto. Desactivado de forma predeterminada, y la primera conexión sigue pasando por Bluetooth.</string>
     <string name="native_aa_complete_hfp_slc">Completar la conexión Bluetooth</string>
     <string name="native_aa_complete_hfp_slc_description">Algunos teléfonos no inician Android Auto inalámbrico hasta que el Bluetooth de esta unidad cuenta como conectado, no solo emparejado. Activado de forma predeterminada; desactívelo si las llamadas en este dispositivo dejan de funcionar.</string>
     <string name="announce_connection_configuration">Pedir un tiempo de espera de conexión más largo</string>
@@ -1122,13 +1120,13 @@
     <string name="five_ghz_channel_option">Canal %1$d (%2$d MHz)</string>
     <string name="five_ghz_channel_hint">Un canal es una petición, no una garantía. Muchas unidades solo crean la red en el canal que elige su propio controlador WiFi, y la aplicación solo puede decírtelo después de intentarlo. Si ningún canal de 5 GHz funciona y tu teléfono sigue sin ver la red, la banda de arriba es el ajuste que sí lo hará.</string>
     <string name="wifi_direct_stable_identity">Mantener la misma red Wi-Fi Direct</string>
-    <string name="wifi_direct_stable_identity_description">Solicita el grupo con el mismo nombre y contraseña cada vez, para que el teléfono vuelva a conectarse a una red conocida en lugar de configurarse de nuevo en cada viaje. Desactívalo para obtener una red nueva en cada conexión si el teléfono rechaza la guardada. Probar una nueva identidad abajo es la solución más sencilla.</string>
+    <string name="wifi_direct_stable_identity_description">Usa el mismo nombre y la misma contraseña de red cada vez, para que el teléfono vuelva a conectarse a una red que ya conoce. Usa la fila de abajo para renovarlos.</string>
     <string name="wifi_direct_new_identity">Nueva identidad de red Wi-Fi Direct</string>
     <string name="wifi_direct_new_identity_none">Se elegirá en la próxima conexión</string>
     <string name="wifi_direct_new_identity_confirm">Elige un nuevo nombre y contraseña para el grupo a partir de la próxima conexión. El teléfono se configurará por Bluetooth como si fuera una nueva unidad principal. Usa esto si el teléfono sigue intentando unirse a una red inaccesible.</string>
     <string name="wifi_direct_new_identity_done">Se utilizará una nueva identidad de red a partir de la próxima conexión.</string>
     <string name="wifi_direct_new_identity_applied">Se está configurando una nueva identidad de red. Se pedirá al teléfono que se una a ella en la próxima conexión.</string>
-    <string name="wifi_direct_stable_identity_description_legacy">En esta versión de Android el nombre de la red lo decide el sistema, y algunos equipos eligen uno nuevo en cada conexión. La aplicación no puede pedir aquí un nombre concreto. Déjalo activado para que el teléfono vuelva a conectarse a una red conocida cuando el sistema la mantenga, y usa una nueva identidad abajo si sigue rechazando la guardada. Desactívalo para que el sistema olvide la red antes de cada conexión.</string>
+    <string name="wifi_direct_stable_identity_description_legacy">En esta versión de Android, el sistema elige el nombre y la aplicación no puede pedir uno. Déjalo activado para que el teléfono vuelva a conectarse a una red que ya conoce dondequiera que el sistema mantenga una, y usa la fila de abajo para renovarla.</string>
     <string name="debug_video_low_latency">Solicitar modo de baja latencia del decodificador</string>
     <string name="debug_video_low_latency_description">Establece la clave MediaFormat de baja latencia del fabricante al configurar el decodificador de vídeo. Vuelve atrás automáticamente si el decodificador la rechaza.</string>
     <string name="debug_video_feed_hold">Simular decodificador lento</string>

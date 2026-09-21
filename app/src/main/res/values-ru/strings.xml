@@ -1001,8 +1001,6 @@
     <string name="preflight_open_location">Геолокация</string>
     <string name="preflight_later">Позже</string>
     <string name="preflight_invalid_bssid">Неверный адрес WiFi. Введите 6 пар шестнадцатеричных цифр (например, 02:1A:11:FF:3C:4D).</string>
-    <string name="native_wifi_version_exchange">Подключение по сети (новое рукопожатие AA)</string>
-    <string name="native_wifi_version_exchange_description">Позволяет телефону переподключаться по WiFi вместо Bluetooth, через точку доступа этого устройства. Помогает на устройствах, Bluetooth которых не может передать рукопожатие, и в новых версиях Android Auto. По умолчанию выключено, и первое подключение по-прежнему идёт через Bluetooth.</string>
     <string name="native_aa_complete_hfp_slc">Завершать подключение Bluetooth</string>
     <string name="native_aa_complete_hfp_slc_description">Некоторые телефоны не запускают беспроводной Android Auto, пока Bluetooth этого устройства не будет считаться подключённым, а не просто сопряжённым. По умолчанию включено; отключите, если звонки на этом устройстве перестанут работать.</string>
     <string name="announce_connection_configuration">Запросить более длинный тайм-аут соединения</string>
@@ -1112,13 +1110,13 @@
     <string name="five_ghz_channel_option">Канал %1$d (%2$d МГц)</string>
     <string name="five_ghz_channel_hint">Канал является запросом, а не гарантией. Многие устройства создают сеть только на том канале, который выбирает их собственный драйвер Wi-Fi, и приложение может сообщить об этом лишь после попытки. Если ни один канал 5 ГГц не работает и телефон по-прежнему не видит сеть, поможет настройка диапазона выше.</string>
     <string name="wifi_direct_stable_identity">Сохранять ту же сеть Wi-Fi Direct</string>
-    <string name="wifi_direct_stable_identity_description">Создает группу с одним и тем же именем и паролем, чтобы телефон подключался к уже известной сети без повторной настройки при каждой поездке.</string>
+    <string name="wifi_direct_stable_identity_description">Каждый раз использует одно и то же имя сети и пароль, чтобы телефон снова подключался к уже известной сети. Используйте строку ниже, чтобы обновить их.</string>
     <string name="wifi_direct_new_identity">Новые параметры сети Wi-Fi Direct</string>
     <string name="wifi_direct_new_identity_none">Будет выбрано при следующем подключении</string>
     <string name="wifi_direct_new_identity_confirm">Выбирает новое имя и пароль для группы начиная со следующего подключения. Телефон настроится по Bluetooth как для новой магнитолы.</string>
     <string name="wifi_direct_new_identity_done">Новые параметры сети будут применены со следующего подключения.</string>
     <string name="wifi_direct_new_identity_applied">Новые параметры сети настраиваются сейчас. Телефону будет предложено подключиться к этой сети при следующем подключении.</string>
-    <string name="wifi_direct_stable_identity_description_legacy">В этой версии Android имя сети выбирает система, и на некоторых устройствах оно меняется при каждом подключении. Приложение не может запросить здесь конкретное имя. Оставьте параметр включённым, чтобы телефон подключался к уже известной сети там, где система её сохраняет, и попробуйте новые параметры ниже, если он продолжает отклонять сохранённую. Выключите, чтобы система забывала сеть перед каждым подключением.</string>
+    <string name="wifi_direct_stable_identity_description_legacy">В этой версии Android имя выбирает система, и приложение не может запросить конкретное. Оставьте параметр включённым, чтобы телефон снова подключался к уже известной сети везде, где система её сохраняет, и используйте строку ниже, чтобы обновить её.</string>
     <string name="debug_video_low_latency">Запросить режим низкой задержки декодера</string>
     <string name="debug_video_low_latency_description">Устанавливает ключ MediaFormat низкой задержки производителя при настройке видеодекодера.</string>
     <string name="debug_video_feed_hold">Имитировать медленный декодер</string>

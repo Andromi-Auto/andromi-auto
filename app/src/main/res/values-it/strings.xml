@@ -1005,8 +1005,6 @@
     <string name="preflight_open_location">Posizione</string>
     <string name="preflight_later">Più tardi</string>
     <string name="preflight_invalid_bssid">Indirizzo WiFi non valido. Inserisci 6 coppie di cifre esadecimali (es. 02:1A:11:FF:3C:4D).</string>
-    <string name="native_wifi_version_exchange">Connetti tramite rete (nuovo handshake AA)</string>
-    <string name="native_wifi_version_exchange_description">Consente al telefono di riconnettersi via WiFi anziché via Bluetooth, usando l\'hotspot di questa unità. Utile sulle unità il cui Bluetooth non riesce a trasportare l\'handshake e con le versioni più recenti di Android Auto. Disattivo per impostazione predefinita, e la prima connessione passa ancora dal Bluetooth.</string>
     <string name="native_aa_complete_hfp_slc">Completa la connessione Bluetooth</string>
     <string name="native_aa_complete_hfp_slc_description">Alcuni telefoni non avviano Android Auto wireless finché il Bluetooth di questa unità non risulta connesso, non solo associato. Attivo per impostazione predefinita; disattivalo se le chiamate su questo dispositivo smettono di funzionare.</string>
     <string name="announce_connection_configuration">Richiedi un timeout di collegamento più lungo</string>
@@ -1116,13 +1114,13 @@
     <string name="five_ghz_channel_option">Canale %1$d (%2$d MHz)</string>
     <string name="five_ghz_channel_hint">Un canale è una richiesta, non una garanzia. Molte unità creano la rete solo sul canale scelto dal proprio driver WiFi, e l\'app può dirtelo solo dopo aver provato. Se nessun canale a 5 GHz funziona e il telefono continua a non vedere la rete, la banda qui sopra è l\'impostazione che risolverà.</string>
     <string name="wifi_direct_stable_identity">Mantieni la stessa rete Wi-Fi Direct</string>
-    <string name="wifi_direct_stable_identity_description">Richiede il gruppo con lo stesso nome e password ogni volta, in modo che il telefono si riconnetta a una rete nota anziché configurarsi a ogni viaggio. Disattivalo per ottenere una nuova rete a ogni connessione se il telefono rifiuta quella salvata.</string>
+    <string name="wifi_direct_stable_identity_description">Usa lo stesso nome e la stessa password di rete ogni volta, in modo che il telefono si riconnetta a una rete che già conosce. Usa la riga qui sotto per rinnovarli.</string>
     <string name="wifi_direct_new_identity">Nuova identità di rete Wi-Fi Direct</string>
     <string name="wifi_direct_new_identity_none">Scelta alla prossima connessione</string>
     <string name="wifi_direct_new_identity_confirm">Sceglie un nuovo nome e password per il gruppo, applicati dalla prossima connessione. Il telefono verrà configurato via Bluetooth come se fosse una nuova unità.</string>
     <string name="wifi_direct_new_identity_done">Una nuova identità di rete verrà utilizzata dalla prossima connessione.</string>
     <string name="wifi_direct_new_identity_applied">È in corso la configurazione di una nuova identità di rete. Al telefono verrà chiesto di collegarsi alla prossima connessione.</string>
-    <string name="wifi_direct_stable_identity_description_legacy">In questa versione di Android il nome della rete lo sceglie il sistema, e alcuni apparecchi ne scelgono uno nuovo a ogni connessione. L\'app non può chiedere qui un nome preciso. Lascia attiva questa opzione perché il telefono si ricolleghi a una rete già nota quando il sistema la mantiene, e prova una nuova identità qui sotto se continua a rifiutare quella salvata. Disattivala per far dimenticare la rete al sistema prima di ogni connessione.</string>
+    <string name="wifi_direct_stable_identity_description_legacy">In questa versione di Android il nome lo sceglie il sistema, e l\'app non può richiederne uno specifico. Lascia attiva questa opzione perché il telefono si riconnetta a una rete che già conosce ovunque il sistema ne mantenga una, e usa la riga qui sotto per rinnovarla.</string>
     <string name="debug_video_low_latency">Richiedi modalità a bassa latenza del decoder</string>
     <string name="debug_video_low_latency_description">Imposta la chiave proprietaria MediaFormat a bassa latenza durante la configurazione del decoder video.</string>
     <string name="debug_video_feed_hold">Simula un decoder lento</string>

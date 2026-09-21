@@ -1002,8 +1002,6 @@
     <string name="preflight_open_location">Poloha</string>
     <string name="preflight_later">Později</string>
     <string name="preflight_invalid_bssid">Neplatná adresa WiFi. Zadejte šest dvojic hexadecimálních číslic (např. 02:1A:11:FF:3C:4D).</string>
-    <string name="native_wifi_version_exchange">Připojit přes síť (nový handshake AA)</string>
-    <string name="native_wifi_version_exchange_description">Umožní telefonu znovu se připojit přes WiFi místo Bluetooth, pomocí hotspotu této jednotky. Pomáhá u jednotek, jejichž Bluetooth nedokáže handshake přenést, a u novějších verzí Android Auto. Ve výchozím nastavení vypnuto a první připojení stále probíhá přes Bluetooth.</string>
     <string name="native_aa_complete_hfp_slc">Dokončit připojení Bluetooth</string>
     <string name="native_aa_complete_hfp_slc_description">Některé telefony nespustí bezdrátové Android Auto, dokud se Bluetooth této jednotky nepovažuje za připojené, nejen spárované. Ve výchozím nastavení zapnuto; vypněte, pokud přestanou fungovat hovory na tomto zařízení.</string>
     <string name="announce_connection_configuration">Požádat o delší časový limit spojení</string>
@@ -1113,13 +1111,13 @@
     <string name="five_ghz_channel_option">Kanál %1$d (%2$d MHz)</string>
     <string name="five_ghz_channel_hint">Kanál je požadavek, nikoli záruka. Mnoho jednotek vytvoří síť jen na kanálu, který si zvolí jejich vlastní ovladač Wi-Fi, a aplikace ti to může říct až po pokusu. Pokud nefunguje žádný kanál v pásmu 5 GHz a telefon síť stále nevidí, pomůže nastavení pásma výše.</string>
     <string name="wifi_direct_stable_identity">Ponechat stejnou síť Wi-Fi Direct</string>
-    <string name="wifi_direct_stable_identity_description">Vytváří skupinu pokaždé se stejným názvem a heslem, aby se telefon připojil ke známé síti bez nového nastavování při každé jízdě.</string>
+    <string name="wifi_direct_stable_identity_description">Používá stejný název sítě a heslo pokaždé, takže se telefon znovu připojí ke známé síti. Použijte řádek níže k jejich obnovení.</string>
     <string name="wifi_direct_new_identity">Nová identita sítě Wi-Fi Direct</string>
     <string name="wifi_direct_new_identity_none">Bude vybráno při příštím připojení</string>
     <string name="wifi_direct_new_identity_confirm">Zvolí nový název a heslo pro skupinu od příštího připojení. Telefon se nastaví přes Bluetooth jako pro novou hlavní jednotku.</string>
     <string name="wifi_direct_new_identity_done">Od příštího připojení bude použita nová identita sítě.</string>
     <string name="wifi_direct_new_identity_applied">Nová identita sítě se právě nastavuje. Telefon bude vyzván, aby se k ní připojil při příštím připojení.</string>
-    <string name="wifi_direct_stable_identity_description_legacy">V této verzi Androidu určuje název sítě systém a některá zařízení volí nový při každém připojení. Aplikace zde nemůže o konkrétní název požádat. Nechte zapnuté, aby se telefon připojoval ke známé síti tam, kde ji systém zachovává, a použijte novou identitu níže, pokud uloženou síť stále odmítá. Vypnutím systém zapomene síť před každým připojením.</string>
+    <string name="wifi_direct_stable_identity_description_legacy">V této verzi Androidu název vybírá systém a aplikace o něj nemůže požádat. Nechte to zapnuté, aby se telefon znovu připojil ke známé síti všude tam, kde ji systém uchovává, a použijte řádek níže k jejímu obnovení.</string>
     <string name="debug_video_low_latency">Požádat o režim nízké latence dekodéru</string>
     <string name="debug_video_low_latency_description">Nastaví klíč MediaFormat nízké latence výrobce při konfiguraci videodekodéru.</string>
     <string name="debug_video_feed_hold">Simulovat pomalý dekodér</string>

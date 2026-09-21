@@ -1,5 +1,7 @@
 package com.andrerinas.openheadunit.connection.wifi.direct
 
+import com.andrerinas.openheadunit.connection.wifi.MacAddressOrigin
+import com.andrerinas.openheadunit.connection.wifi.MacAddressPolicy
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -12,6 +14,12 @@ class GroupIdentityStabilityPolicyTest {
     private val a = "DE:B3:88:55:B3:92"
     private val b = "DE:B3:88:55:B3:93"
 
+    /** The head unit's own station address, which is what the sysfs last resort answered with. */
+    private val station = "06:54:F8:6E:60:B2"
+
+    /** Globally unique, so an interface's own rather than one the platform generated per create. */
+    private val factory = "00:27:15:43:06:6A"
+
     private fun assess(
         keep: Boolean = true,
         requested: String? = name,
@@ -22,15 +30,36 @@ class GroupIdentityStabilityPolicyTest {
         previous: ObservedP2pGroup? = null,
         appNamesGroup: Boolean = true,
         nameChangesSoFar: Int = 0,
+        groupsOwn: Boolean = true,
     ) = GroupIdentityStabilityPolicy.assess(
-        keep, requested, ssid, bssid, usable, override, previous, appNamesGroup, nameChangesSoFar
+        keep, requested, ssid, bssid, usable, override, previous, appNamesGroup, nameChangesSoFar,
+        groupsOwn
     )
 
     @Test
-    fun `the first group under a name is unproven and is remembered`() {
+    fun `a first group at a generated address is called changed, and is remembered`() {
+        // The address already says the platform made it for this create, so there is nothing for a
+        // second bring-up to add. Still remembered, so a kept group can prove itself stable below.
         val v = assess()
-        assertEquals(GroupIdentityStability.UNPROVEN, v.stability)
+        assertEquals(GroupIdentityStability.CHANGED, v.stability)
         assertEquals(ObservedP2pGroup(name, a), v.remember)
+        assertTrue(v.reason.contains("generated"))
+    }
+
+    @Test
+    fun `a first group at the interface's own address is unproven, and waits`() {
+        val v = assess(bssid = factory)
+        assertEquals(GroupIdentityStability.UNPROVEN, v.stability)
+        assertEquals(ObservedP2pGroup(name, factory), v.remember)
+    }
+
+    @Test
+    fun `a generated address that comes back is stable, because the group was kept`() {
+        // The point of holding the group: the first verdict predicts a move, and not creating one
+        // is what stops it. A generated address must not veto stability on the next read.
+        val first = assess()
+        val second = assess(previous = first.remember)
+        assertEquals(GroupIdentityStability.STABLE, second.stability)
     }
 
     @Test
@@ -57,11 +86,7 @@ class GroupIdentityStabilityPolicyTest {
             seen += v.stability
             previous = v.remember
         }
-        assertEquals(
-            listOf(GroupIdentityStability.UNPROVEN, GroupIdentityStability.CHANGED,
-                GroupIdentityStability.CHANGED, GroupIdentityStability.CHANGED),
-            seen,
-        )
+        assertEquals(List(4) { GroupIdentityStability.CHANGED }, seen)
     }
 
     @Test
@@ -235,7 +260,8 @@ class GroupIdentityStabilityPolicyTest {
 
     @Test
     fun `the existing verdicts are untouched by the new inputs defaulting`() {
-        assertEquals(GroupIdentityStability.UNPROVEN, assess().stability)
+        assertEquals(GroupIdentityStability.CHANGED, assess().stability)
+        assertEquals(GroupIdentityStability.UNPROVEN, assess(bssid = factory).stability)
         assertEquals(GroupIdentityStability.STABLE, assess(previous = ObservedP2pGroup(name, a)).stability)
         assertEquals(
             GroupIdentityStability.CHANGED,
@@ -254,5 +280,145 @@ class GroupIdentityStabilityPolicyTest {
         for (s in GroupIdentityStability.values()) {
             assertTrue(GroupIdentityStabilityPolicy.label(s).isNotBlank())
         }
+    }
+
+    @Test
+    fun `an address from another interface is not compared and is not remembered`() {
+        val v = assess(bssid = station, previous = ObservedP2pGroup(name, a), groupsOwn = false)
+        assertEquals(GroupIdentityStability.UNPROVEN, v.stability)
+        assertNull(v.remember)
+        assertTrue(v.reason.contains("another interface"))
+    }
+
+    @Test
+    fun `a stand-in does not grade a group that never moved as changed`() {
+        // The round-3 shape: the group kept its address, the chain answered with the station's, and
+        // the verdict read "the BSSID moved" against an address no group ever had.
+        assertEquals(
+            GroupIdentityStability.CHANGED,
+            assess(bssid = station, previous = ObservedP2pGroup(name, a)).stability
+        )
+        assertEquals(
+            GroupIdentityStability.UNPROVEN,
+            assess(bssid = station, previous = ObservedP2pGroup(name, a), groupsOwn = false).stability
+        )
+    }
+
+    @Test
+    fun `an unreadable address is still answered before the interface question`() {
+        val v = assess(usable = false, groupsOwn = false)
+        assertEquals(GroupIdentityStability.UNPROVEN, v.stability)
+        assertTrue(v.reason.contains("no BSSID could be read"))
+    }
+
+    @Test
+    fun `the name change count survives an address from another interface`() {
+        assertEquals(2, assess(groupsOwn = false, nameChangesSoFar = 2).nameChanges)
+    }
+
+    @Test
+    fun `a group read as it was found is not evidence its address repeats`() {
+        // The MT50 re-addresses every create. Force-stop, relaunch, and the surviving group is
+        // compared with the record it wrote itself, which matches because it is the same group.
+        val group = ObservedP2pGroup("DIRECT-hu", "26:E2:6D:4E:57:18")
+        val verdict = GroupIdentityStabilityPolicy.assess(
+            keepIdentity = true,
+            requestedName = null,
+            ssid = group.ssid,
+            bssid = group.bssid,
+            bssidUsable = true,
+            staticOverride = false,
+            previous = group,
+            readNotCreated = true,
+            previousStability = GroupIdentityStability.CHANGED,
+        )
+        assertEquals(GroupIdentityStability.CHANGED, verdict.stability)
+        assertNull("a read teaches nothing, so it must not become the yardstick", verdict.remember)
+    }
+
+    @Test
+    fun `a read does not cost a unit the stability its creates earned`() {
+        val group = ObservedP2pGroup("DIRECT-hu", "00:27:15:43:06:6A")
+        val verdict = GroupIdentityStabilityPolicy.assess(
+            keepIdentity = true,
+            requestedName = null,
+            ssid = group.ssid,
+            bssid = group.bssid,
+            bssidUsable = true,
+            staticOverride = false,
+            previous = group,
+            readNotCreated = true,
+            previousStability = GroupIdentityStability.STABLE,
+        )
+        assertEquals(GroupIdentityStability.STABLE, verdict.stability)
+        assertNull(verdict.remember)
+    }
+
+    @Test
+    fun `a first read on a unit with no record promises nothing`() {
+        val verdict = GroupIdentityStabilityPolicy.assess(
+            keepIdentity = true,
+            requestedName = null,
+            ssid = "DIRECT-hu",
+            bssid = "26:E2:6D:4E:57:18",
+            bssidUsable = true,
+            staticOverride = false,
+            previous = null,
+            readNotCreated = true,
+            previousStability = GroupIdentityStability.UNPROVEN,
+        )
+        assertEquals(GroupIdentityStability.UNPROVEN, verdict.stability)
+        assertNull(verdict.remember)
+    }
+
+    @Test
+    fun `the same sighting created rather than read still grades stable`() {
+        // The complement, so the arm cannot be read as disabling the measurement altogether.
+        val group = ObservedP2pGroup("DIRECT-hu", "00:27:15:43:06:6A")
+        val verdict = GroupIdentityStabilityPolicy.assess(
+            keepIdentity = true,
+            requestedName = null,
+            ssid = group.ssid,
+            bssid = group.bssid,
+            bssidUsable = true,
+            staticOverride = false,
+            previous = group,
+            readNotCreated = false,
+        )
+        assertEquals(GroupIdentityStability.STABLE, verdict.stability)
+        assertEquals(group, verdict.remember)
+    }
+
+    @Test
+    fun `an address the platform generated still earns stable by coming back`() {
+        // The access point is graded through this too. Soft AP randomisation is persistent per
+        // configuration since Android 11, so generated says the platform made it up, not that it
+        // moves, and grading on the bit alone denied every such unit the endpoint for good.
+        val seen = ObservedP2pGroup("headunit-ap", "26:E2:6D:4E:57:18")
+        assertEquals(MacAddressOrigin.GENERATED, MacAddressPolicy.origin(seen.bssid))
+        val verdict = GroupIdentityStabilityPolicy.assess(
+            keepIdentity = true,
+            requestedName = null,
+            ssid = seen.ssid,
+            bssid = seen.bssid,
+            bssidUsable = true,
+            staticOverride = false,
+            previous = seen,
+        )
+        assertEquals(GroupIdentityStability.STABLE, verdict.stability)
+    }
+
+    @Test
+    fun `an address that moved between bring-ups is changed however it was made`() {
+        val verdict = GroupIdentityStabilityPolicy.assess(
+            keepIdentity = true,
+            requestedName = null,
+            ssid = "headunit-ap",
+            bssid = "26:E2:6D:4E:57:18",
+            bssidUsable = true,
+            staticOverride = false,
+            previous = ObservedP2pGroup("headunit-ap", "E6:50:68:13:92:11"),
+        )
+        assertEquals(GroupIdentityStability.CHANGED, verdict.stability)
     }
 }

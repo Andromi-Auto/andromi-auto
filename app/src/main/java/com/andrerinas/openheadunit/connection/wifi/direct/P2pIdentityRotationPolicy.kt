@@ -49,6 +49,21 @@ object P2pIdentityRotationPolicy {
     }
 
     /**
+     * Whether a group already up is read rather than torn down and asked for again.
+     *
+     * Above [NAMED_CREATE_SDK] the app names the group, so the name is the test. Below it the
+     * platform names it and there is no name to compare, which made this never match on the one
+     * kind of unit that cannot afford a recreate: there, every create costs a new name the phone
+     * has to be told about over Bluetooth again.
+     */
+    fun readsExistingGroup(
+        sdkInt: Int,
+        isGroupOwner: Boolean,
+        liveName: String?,
+        requestedName: String,
+    ): Boolean = isGroupOwner && (sdkInt < NAMED_CREATE_SDK || liveName == requestedName)
+
+    /**
      * Whether the platform's stored profile must be deleted before the create.
      *
      * Below 29 it is the only rename lever there is, and it is also how "a new network on every

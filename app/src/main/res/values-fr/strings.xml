@@ -1049,8 +1049,6 @@
     <string name="preflight_open_location">Localisation</string>
     <string name="preflight_later">Plus tard</string>
     <string name="preflight_invalid_bssid">Adresse Wi-Fi non valide. Entrez 6 paires de caractères hexadécimaux (ex. 02:1A:11:FF:3C:4D).</string>
-    <string name="native_wifi_version_exchange">Se connecter via le réseau (nouveau handshake AA)</string>
-    <string name="native_wifi_version_exchange_description">Permet au téléphone de se reconnecter en Wi-Fi plutôt qu\'en Bluetooth, via le point d\'accès de cet appareil. Utile sur les appareils dont le Bluetooth ne peut pas transporter le handshake, et avec les versions récentes d\'Android Auto. Désactivé par défaut, et la première connexion passe toujours par le Bluetooth.</string>
     <string name="native_aa_complete_hfp_slc">Terminer la connexion Bluetooth</string>
     <string name="native_aa_complete_hfp_slc_description">Certains téléphones ne démarrent Android Auto sans fil que lorsque le Bluetooth de cet appareil est considéré comme connecté, et pas seulement appairé. Activé par défaut ; désactivez-le si les appels sur cet appareil cessent de fonctionner.</string>
     <string name="announce_connection_configuration">Demander un délai de liaison plus long</string>
@@ -1156,13 +1154,13 @@
     <string name="five_ghz_channel_option">Canal %1$d (%2$d MHz)</string>
     <string name="five_ghz_channel_hint">Un canal est une demande, pas une garantie. Beaucoup d\'unités ne créent le réseau que sur le canal choisi par leur propre pilote WiFi, et l\'application ne peut te le dire qu\'après avoir essayé. Si aucun canal 5 GHz ne fonctionne et que ton téléphone ne voit toujours pas le réseau, c\'est la bande ci-dessus qui réglera le problème.</string>
     <string name="wifi_direct_stable_identity">Conserver le même réseau Wi-Fi Direct</string>
-    <string name="wifi_direct_stable_identity_description">Demande le groupe avec le même nom et mot de passe à chaque fois, afin que votre téléphone rejoigne un réseau connu au lieu d\'en configurer un nouveau à chaque trajet. Désactivez cette option pour obtenir un nouveau réseau à chaque connexion (comme dans les versions 3.2 et 3.3) si le téléphone refuse le réseau enregistré. Essayer une nouvelle identité ci-dessous est la solution la plus simple.</string>
+    <string name="wifi_direct_stable_identity_description">Utilise le même nom de réseau et le même mot de passe à chaque fois, afin que votre téléphone rejoigne un réseau qu\'il connaît déjà. Utilisez la ligne ci-dessous pour les renouveler.</string>
     <string name="wifi_direct_new_identity">Nouvelle identité réseau Wi-Fi Direct</string>
     <string name="wifi_direct_new_identity_none">Choisie lors de la prochaine connexion</string>
     <string name="wifi_direct_new_identity_confirm">Choisit un nouveau nom et mot de passe pour le groupe, appliqués dès la prochaine connexion. Votre téléphone sera configuré via Bluetooth comme s\'il s\'agissait d\'un nouvel autoradio. Utilisez cette option si le téléphone persiste à essayer un réseau inaccessible.</string>
     <string name="wifi_direct_new_identity_done">Une nouvelle identité réseau sera utilisée dès la prochaine connexion.</string>
     <string name="wifi_direct_new_identity_applied">Une nouvelle identité réseau est en cours de configuration. Votre téléphone sera invité à la rejoindre lors de la prochaine connexion.</string>
-    <string name="wifi_direct_stable_identity_description_legacy">Sur cette version d\'Android, le nom du réseau vient du système, et certains appareils en choisissent un nouveau à chaque connexion. L\'application ne peut pas demander un nom précis ici. Laissez cette option activée pour que votre téléphone rejoigne un réseau connu lorsque le système en conserve un, et essayez une nouvelle identité ci-dessous s\'il refuse toujours le réseau enregistré. Désactivez-la pour que le système oublie le réseau avant chaque connexion.</string>
+    <string name="wifi_direct_stable_identity_description_legacy">Sur cette version d\'Android, le système choisit le nom, et l\'application ne peut pas en demander un. Laissez cette option activée pour que votre téléphone rejoigne un réseau qu\'il connaît déjà partout où le système en conserve un, et utilisez la ligne ci-dessous pour le renouveler.</string>
     <string name="debug_video_feed_hold">Simuler un décodeur lent</string>
     <string name="oem_app_management">Gestion des conflits d\'apps OEM (ADB)</string>
     <string name="oem_app_management_desc">Détecter et désactiver les apps conflictuelles (Zlink, AutoKit, etc.)</string>

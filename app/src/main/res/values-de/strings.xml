@@ -1008,8 +1008,6 @@
     <string name="preflight_open_location">Standort</string>
     <string name="preflight_later">Später</string>
     <string name="preflight_invalid_bssid">Ungültige WLAN-Adresse. Gib sechs hexadezimale Zahlenpaare ein, z. B. 02:1A:11:FF:3C:4D.</string>
-    <string name="native_wifi_version_exchange">Über Netzwerk verbinden (neuer AA-Handshake)</string>
-    <string name="native_wifi_version_exchange_description">Lässt das Telefon über WLAN statt über Bluetooth neu verbinden, über den Hotspot dieses Geräts. Hilft bei Geräten, deren Bluetooth den Handshake nicht übertragen kann, und bei neueren Android-Auto-Versionen. Standardmäßig aus, und die erste Verbindung läuft weiterhin über Bluetooth.</string>
     <string name="native_aa_complete_hfp_slc">Bluetooth-Verbindung vollständig herstellen</string>
     <string name="native_aa_complete_hfp_slc_description">Manche Telefone starten kabelloses Android Auto erst, wenn das Bluetooth dieses Geräts als verbunden gilt und nicht nur als gekoppelt. Standardmäßig an; schalte es aus, wenn Anrufe auf diesem Gerät nicht mehr funktionieren.</string>
     <string name="announce_connection_configuration">Um einen längeren Verbindungs-Timeout bitten</string>
@@ -1114,13 +1112,13 @@
     <string name="five_ghz_channel_option">Kanal %1$d (%2$d MHz)</string>
     <string name="five_ghz_channel_hint">Ein Kanal ist eine Anfrage, keine Garantie. Viele Geräte erstellen das Netzwerk nur auf dem Kanal, den ihr eigener WLAN-Treiber wählt, und die App kann dir das erst nach dem Versuch sagen. Wenn kein 5-GHz-Kanal funktioniert und dein Telefon das Netzwerk weiterhin nicht sieht, ist das Band oben die Einstellung, die hilft.</string>
     <string name="wifi_direct_stable_identity">Dasselbe Wi-Fi Direct-Netzwerk beibehalten</string>
-    <string name="wifi_direct_stable_identity_description">Erstellt die Gruppe jedes Mal mit demselben Namen und Passwort, sodass sich dein Smartphone wieder mit einem bekannten Netzwerk verbindet, anstatt bei jeder Fahrt neu eingerichtet zu werden. Deaktiviere dies, um bei jeder Verbindung ein neues Netzwerk zu erstellen (wie in Version 3.2 und 3.3), falls ein Smartphone das gespeicherte Netzwerk verweigert. Eine neue Identität unten auszuwählen ist die einfachere Lösung.</string>
+    <string name="wifi_direct_stable_identity_description">Verwendet jedes Mal denselben Netzwerknamen und dasselbe Passwort, sodass sich dein Smartphone wieder mit einem bekannten Netzwerk verbindet. Nutze die Zeile unten, um beide zu erneuern.</string>
     <string name="wifi_direct_new_identity">Neue Wi-Fi Direct-Netzwerkidentität</string>
     <string name="wifi_direct_new_identity_none">Wird bei der nächsten Verbindung festgelegt</string>
     <string name="wifi_direct_new_identity_confirm">Wählt einen neuen Namen und ein neues Passwort für die Gruppe, gültig ab der nächsten Verbindung. Dein Smartphone wird dafür über Bluetooth eingerichtet, als wäre dies ein neues Headunit. Nutze dies, wenn das Smartphone versucht, sich mit einem nicht mehr erreichbaren Netzwerk zu verbinden.</string>
     <string name="wifi_direct_new_identity_done">Ab der nächsten Verbindung wird eine neue Netzwerkidentität verwendet.</string>
     <string name="wifi_direct_new_identity_applied">Eine neue Netzwerkidentität wird jetzt eingerichtet. Dein Smartphone wird bei der nächsten Verbindung aufgefordert, ihr beizutreten.</string>
-    <string name="wifi_direct_stable_identity_description_legacy">In dieser Android-Version stammt der Netzwerkname vom System, und manche Geräte vergeben bei jeder Verbindung einen neuen. Die App kann hier keinen bestimmten Namen anfordern. Lass die Option aktiviert, damit sich dein Smartphone wieder mit einem bekannten Netzwerk verbindet, sofern das System eines beibehält, und wähle unten eine neue Identität, falls es das gespeicherte Netzwerk weiterhin ablehnt. Deaktiviere sie, damit das System das Netzwerk vor jeder Verbindung vergisst.</string>
+    <string name="wifi_direct_stable_identity_description_legacy">In dieser Android-Version wählt das System den Namen, und die App kann keinen bestimmten anfordern. Lass diese Option aktiviert, damit sich dein Smartphone wieder mit einem bekannten Netzwerk verbindet, wo immer das System eines beibehält, und nutze die Zeile unten, um ihn zu erneuern.</string>
     <string name="debug_video_low_latency">Low-Latency-Modus für Decoder anfordern</string>
     <string name="debug_video_low_latency_description">Setzt beim Konfigurieren des Videodecoders den herstellerspezifischen Low-Latency-MediaFormat-Schlüssel. Fällt automatisch zurück, wenn der Decoder ihn ablehnt.</string>
     <string name="debug_video_feed_hold">Langsamen Decoder simulieren</string>

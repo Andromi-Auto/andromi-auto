@@ -997,8 +997,6 @@
     <string name="preflight_open_location">Konum</string>
     <string name="preflight_later">Daha sonra</string>
     <string name="preflight_invalid_bssid">Geçersiz WiFi adresi. 6 çift onaltılık basamak girin (örn. 02:1A:11:FF:3C:4D).</string>
-    <string name="native_wifi_version_exchange">Ağ üzerinden bağlan (yeni AA el sıkışması)</string>
-    <string name="native_wifi_version_exchange_description">Telefonun Bluetooth yerine WiFi üzerinden, bu cihazın erişim noktasını kullanarak yeniden bağlanmasını sağlar. Bluetooth\'u el sıkışmasını taşıyamayan cihazlarda ve daha yeni Android Auto sürümlerinde yardımcı olur. Varsayılan olarak kapalı ve ilk bağlantı yine Bluetooth üzerinden gerçekleşir.</string>
     <string name="native_aa_complete_hfp_slc">Bluetooth bağlantısını tamamla</string>
     <string name="native_aa_complete_hfp_slc_description">Bazı telefonlar, bu cihazın Bluetooth\'u yalnızca eşleştirilmiş değil bağlı sayılana kadar kablosuz Android Auto\'yu başlatmaz. Varsayılan olarak açık; bu cihazdaki aramalar çalışmayı bırakırsa kapatın.</string>
     <string name="announce_connection_configuration">Daha uzun bağlantı zaman aşımı iste</string>
@@ -1108,13 +1106,13 @@
     <string name="five_ghz_channel_option">Kanal %1$d (%2$d MHz)</string>
     <string name="five_ghz_channel_hint">Kanal bir istektir, garanti değildir. Birçok ünite ağı yalnızca kendi WiFi sürücüsünün seçtiği kanalda oluşturur ve uygulama bunu ancak denedikten sonra söyleyebilir. Hiçbir 5 GHz kanalı işe yaramıyorsa ve telefonun ağı hâlâ göremiyorsa, çözecek olan ayar yukarıdaki banttır.</string>
     <string name="wifi_direct_stable_identity">Aynı Wi-Fi Direct ağını koru</string>
-    <string name="wifi_direct_stable_identity_description">Her sürüşte yeni bir kurulum yerine, telefonunuzun bildiği bir ağa yeniden bağlanması için grubu her seferinde aynı ad ve şifreyle ister.</string>
+    <string name="wifi_direct_stable_identity_description">Telefonunuzun zaten bildiği bir ağa yeniden bağlanması için her seferinde aynı ağ adını ve şifreyi kullanır. Bunları yenilemek için aşağıdaki satırı kullanın.</string>
     <string name="wifi_direct_new_identity">Yeni Wi-Fi Direct ağ kimliği</string>
     <string name="wifi_direct_new_identity_none">Sonraki bağlantıda belirlenecek</string>
     <string name="wifi_direct_new_identity_confirm">Sonraki bağlantıdan itibaren grup için yeni bir ad ve şifre belirler. Telefonunuz yeni bir ana üniteymiş gibi Bluetooth üzerinden ayarlanacaktır.</string>
     <string name="wifi_direct_new_identity_done">Bir sonraki bağlantıdan itibaren yeni ağ kimliği kullanılacaktır.</string>
     <string name="wifi_direct_new_identity_applied">Yeni bir ağ kimliği şimdi hazırlanıyor. Telefonunuzdan bir sonraki bağlantıda bu ağa katılması istenecek.</string>
-    <string name="wifi_direct_stable_identity_description_legacy">Bu Android sürümünde ağ adını sistem belirler ve bazı cihazlar her bağlantıda yenisini seçer. Uygulama burada belirli bir ad isteyemez. Sistemin bir ad koruduğu yerlerde telefonunuzun bildiği bir ağa yeniden bağlanması için bunu açık bırakın; kaydedilmiş ağı reddetmeye devam ederse aşağıdan yeni bir kimlik deneyin. Kapatırsanız sistem her bağlantıdan önce ağı unutur.</string>
+    <string name="wifi_direct_stable_identity_description_legacy">Bu Android sürümünde adı sistem belirler ve uygulama belirli bir ad isteyemez. Sistemin bir ad koruduğu her yerde telefonunuzun bildiği bir ağa yeniden bağlanması için bunu açık bırakın ve yenilemek için aşağıdaki satırı kullanın.</string>
     <string name="debug_video_low_latency">Kod çözücü düşük gecikme modunu iste</string>
     <string name="debug_video_low_latency_description">Video kod çözücüyü yapılandırırken üreticinin düşük gecikmeli MediaFormat anahtarını ayarlar.</string>
     <string name="debug_video_feed_hold">Yavaş kod çözücüyü simüle et</string>

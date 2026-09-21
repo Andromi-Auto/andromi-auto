@@ -2320,6 +2320,23 @@ class NativeAaHandshakeManager(
         lastJoinRefusalAtMs = 0L
     }
 
+    /** Set by [WppTcpServer] on a dial it turned away, read by the landing that follows. */
+    @Volatile
+    private var dialRefusedSinceLastLanding = false
+
+    /**
+     * Retires the stale-endpoint record where this landing disproves it.
+     *
+     * Only a served dial used to, and a rejection that works means no dial ever arrives again, so
+     * the banner stood forever on exactly the units the fix had repaired.
+     */
+    private fun retireStaleEndpointRecord() {
+        val refused = dialRefusedSinceLastLanding
+        dialRefusedSinceLastLanding = false
+        if (!StaleEndpointRecordPolicy.retiredByHandshake(refused)) return
+        ConnectionIssues.clear(context, ConnectionIssue.PHONE_HOLDS_STALE_ENDPOINT)
+    }
+
     /**
      * Records a phone that answered everything and then said it could not join.
      *
@@ -2410,7 +2427,7 @@ class NativeAaHandshakeManager(
         // actually hosting, and a saved transport does not reach the running launcher until it is
         // re-armed.
         val transport = launcher.strategy
-        val session = WppHandshakeSession(settings.nativeWifiVersionExchange)
+        val session = WppHandshakeSession()
         // Everything the phone sends, in order. Replaces the single bounded read this used to do:
         // types 6 and 7 arrive *after* the credentials go out, so a one-shot read could never see
         // them, and the phone is free to interject a ping at any point in between.
@@ -2547,7 +2564,10 @@ class NativeAaHandshakeManager(
                             launcher.triggerWifiDirectRefresh()
                             return
                         }
-                        sendWifiSecurityResponse(output, credSsid, credPsk, credBssid, transport)
+                        sendWifiSecurityResponse(
+                            output, credSsid, credPsk, credBssid,
+                            credentials?.identity ?: GroupIdentityStability.UNPROVEN
+                        )
                         // Set after the write returns, not before the delay above: this marks that
                         // we put bytes on the channel, and a phone that opened the exchange itself
                         // can reach this having had nothing from us before it.
@@ -2585,6 +2605,7 @@ class NativeAaHandshakeManager(
                     WppAction.CompleteSuccess -> {
                         AppLog.i("NativeAA: WiFi session landed. Handshake session ending, releasing Bluetooth connection.")
                         ifOwner(link) {
+                            retireStaleEndpointRecord()
                             resetJoinRefusals()
                             handoffSettlingSince = 0L
                             // Stop accepting new AA_UUID connections too, not just this socket —
@@ -2791,6 +2812,27 @@ class NativeAaHandshakeManager(
             credPsk = snapshot.psk
             credBssid = snapshot.bssid.uppercase()
             capturedCreds = NativeNetworkCredentials(credSsid, credPsk, credIp, credBssid)
+
+            // Before the BSSID, because this one is certain rather than merely likely: an open
+            // network is refused by every client, and sending it spends a wake poke, which takes
+            // the phone's hands-free link and nothing gives it back.
+            if (!NativeCredentialsPolicy.isUsablePassphrase(credPsk) &&
+                NativeCredentialsPolicy.onEmptyPassphrase(transport) == UnusablePassphraseAction.ABORT
+            ) {
+                AppLog.e(
+                    "NativeAA: these credentials for '$credSsid' carry no passphrase, and the phone " +
+                        "refuses an open network. Not sending them. " +
+                        if (transport == NativeTransport.HOTSPOT)
+                            "Set 'Hotspot password (manual)' as well as the name under Wireless connection."
+                        else
+                            "The group came up without one, which is a fault in this unit's WiFi Direct stack."
+                )
+                if (transport == NativeTransport.HOTSPOT) {
+                    ConnectionIssues.raise(context, ConnectionIssue.HOTSPOT_CONFIG_UNREADABLE)
+                }
+                abortedLocally = true
+                return@withContext
+            }
 
             // [FIX] Ensure BSSID is uppercase and not zeroed if possible
             if (!NativeCredentialsPolicy.isUsableBssid(credBssid)) {
@@ -3004,7 +3046,14 @@ class NativeAaHandshakeManager(
                 WppMessageType.VERSION_RESPONSE -> {
                     val v = Wireless.WifiVersionResponse.parseFrom(msg.payload)
                     val device = if (v.hasDeviceInfo()) {
-                        " device=${v.deviceInfo.deviceId} lifetime=${v.deviceInfo.connectivityLifetimeId}"
+                        // Fields 3 and 4 are two strings the phone declares and nothing here knows
+                        // the meaning of. Printed only when present, so a capture can name them.
+                        val extra = listOfNotNull(
+                            v.deviceInfo.unknownString3.takeIf { v.deviceInfo.hasUnknownString3() && it.isNotEmpty() },
+                            v.deviceInfo.unknownString4.takeIf { v.deviceInfo.hasUnknownString4() && it.isNotEmpty() },
+                        ).joinToString(" ") { "unknown=$it" }
+                        " device=${v.deviceInfo.deviceId} lifetime=${v.deviceInfo.connectivityLifetimeId}" +
+                            if (extra.isNotEmpty()) " $extra" else ""
                     } else ""
                     // The phone's own answer to which band it wants (2.4-only / 5-only / dual). The
                     // one place it says so, and the only check on a channel we cannot read back.
@@ -3019,6 +3068,10 @@ class NativeAaHandshakeManager(
                     AppLog.i("NativeAA: [RX] WifiConnectStatus status=${WppStatus.describe(if (s.hasStatus()) s.status else null)}$hint (SUCCESS = the phone got onto our network)")
                     ConnectionStageTracker.report(ConnectionStage.PHONE_JOINING)
                 }
+                // Ours to send and never to receive: the phone's own dispatcher answers one of
+                // these with an exception rather than a reply. Named so a capture says so.
+                WppMessageType.CONNECTION_REJECTION ->
+                    AppLog.w("NativeAA: [RX] WifiConnectionRejection, which the phone should never send")
                 WppMessageType.START_RESPONSE -> {
                     val r = Wireless.WifiStartResponse.parseFrom(msg.payload)
                     val port = if (r.hasPort()) ":${r.port}" else ""
@@ -3038,8 +3091,7 @@ class NativeAaHandshakeManager(
 
     /**
      * Declares our protocol version and who we are, and where the phone can reach us over TCP when
-     * that is safe to say. Real head units send this first, as does the OEM ZLink app; aa-proxy-rs's
-     * dongle does not, which is why it sits behind [Settings.nativeWifiVersionExchange].
+     * that is safe to say. Real head units open with this, and it is what carries the endpoint.
      *
      * [WppEndpointPolicy] holds the endpoint back on a network the phone would later fail to find,
      * which is worse than staying quiet: it stores what we advertise and dials it in preference to
@@ -3088,10 +3140,16 @@ class NativeAaHandshakeManager(
 
             override fun carInfo(): Wireless.WppCarInfo = this@NativeAaHandshakeManager.carInfo()
 
+            // isActive(), not isStarted(): the question is whether a phone sent back to Bluetooth
+            // right now would find the listeners open, not whether they were ever brought up.
+            override fun canRunRfcomm(): Boolean = isActive()
+
             override fun projectionSessionUp(): Boolean = commManager.isConnected
 
             override fun projectionEndpoint(): Pair<String, Int>? =
                 this@NativeAaHandshakeManager.credentials?.ip?.takeIf { it.isNotBlank() }?.let { it to 5288 }
+
+            override fun noteDialRefused() { dialRefusedSinceLastLanding = true }
         })
         wppTcpServer = server
         server.start()
@@ -3116,17 +3174,17 @@ class NativeAaHandshakeManager(
      * than dropping the field. Omitting it risks a strict parser rejecting the whole message, which
      * would surface as silence rather than as the specific refusal an empty one produces.
      *
-     * [strategy] picks the access-point type: DYNAMIC for a hotspot, matching both reference
-     * implementations, and STATIC for a WiFi Direct group as before.
+     * [identity] decides the access-point type: a network the phone should not keep is announced
+     * DYNAMIC so it never stores one whose address has moved.
      */
     private fun sendWifiSecurityResponse(
         output: OutputStream,
         ssid: String,
         key: String,
         bssid: String?,
-        strategy: NativeStrategy
+        identity: GroupIdentityStability
     ) {
-        val response = WppMessages.infoResponse(ssid, key, bssid, strategy)
+        val response = WppMessages.infoResponse(ssid, key, bssid, identity)
         sendProtobuf(output, response.toByteArray(), WppMessageType.INFO_RESPONSE)
     }
 

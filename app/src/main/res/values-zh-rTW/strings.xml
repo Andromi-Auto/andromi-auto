@@ -1001,8 +1001,6 @@
     <string name="preflight_open_location">定位服務</string>
     <string name="preflight_later">稍後</string>
     <string name="preflight_invalid_bssid">無效的 WiFi 位址。請輸入 6 組十六進位數字（例如 02:1A:11:FF:3C:4D）。</string>
-    <string name="native_wifi_version_exchange">透過網路連線（新版 AA 交握）</string>
-    <string name="native_wifi_version_exchange_description">讓手機改用 WiFi 而非藍牙重新連線，透過此裝置的熱點。對藍牙無法傳送交握的裝置，以及較新版本的 Android Auto 有幫助。預設關閉，且第一次連線仍會透過藍牙。</string>
     <string name="native_aa_complete_hfp_slc">完成藍牙連線</string>
     <string name="native_aa_complete_hfp_slc_description">部分手機必須等到此裝置的藍牙被視為已連線（而非僅已配對）才會啟動無線 Android Auto。預設開啟；若此裝置上的通話停止運作，請關閉。</string>
     <string name="announce_connection_configuration">要求更長的連線逾時</string>
@@ -1112,13 +1110,13 @@
     <string name="five_ghz_channel_option">頻道 %1$d (%2$d MHz)</string>
     <string name="five_ghz_channel_hint">頻道只是請求，並非保證。許多主機只會在自己的 WiFi 驅動程式所選的頻道上建立網路，而應用程式只能在嘗試之後才能告訴你結果。如果沒有任何 5 GHz 頻道可用，而手機仍然看不到網路，上方的頻段才是能解決問題的設定。</string>
     <string name="wifi_direct_stable_identity">保持相同的 Wi-Fi Direct 網路</string>
-    <string name="wifi_direct_stable_identity_description">每次都使用相同的名稱和密碼建立群組，讓您的手機重新連接已知的網路，而無需在每次行程中重新設定。</string>
+    <string name="wifi_direct_stable_identity_description">每次都使用相同的網路名稱和密碼，讓您的手機重新連接已知的網路。請使用下方的項目來更新它們。</string>
     <string name="wifi_direct_new_identity">新的 Wi-Fi Direct 網路識別碼</string>
     <string name="wifi_direct_new_identity_none">將於下次連線時選擇</string>
     <string name="wifi_direct_new_identity_confirm">為群組選擇新的名稱和密碼，並於下次連線時生效。手機將透過藍牙重新設定，猶如連至全新車機。</string>
     <string name="wifi_direct_new_identity_done">下次連線時將使用新的網路識別碼。</string>
     <string name="wifi_direct_new_identity_applied">正在設定新的網路識別碼。下次連線時將要求您的手機加入該網路。</string>
-    <string name="wifi_direct_stable_identity_description_legacy">在此 Android 版本中，網路名稱由系統決定，部分裝置每次連線都會換一個新名稱，應用程式無法在此指定名稱。系統若會保留名稱，請保持開啟，讓手機重新連接已知的網路；若手機持續拒絕已儲存的網路，請在下方改用新的識別碼。關閉後，系統會在每次連線前忘記該網路。</string>
+    <string name="wifi_direct_stable_identity_description_legacy">在此 Android 版本中，系統會決定名稱，應用程式無法指定名稱。請保持開啟，讓您的手機在系統保留名稱的情況下重新連接已知的網路，並使用下方的項目來更新它。</string>
     <string name="debug_video_low_latency">請求解碼器低延遲模式</string>
     <string name="debug_video_low_latency_description">在設定視訊解碼器時設定廠商低延遲 MediaFormat 金鑰。</string>
     <string name="debug_video_feed_hold">模擬慢速解碼器</string>

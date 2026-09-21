@@ -999,8 +999,6 @@
     <string name="preflight_open_location">위치</string>
     <string name="preflight_later">나중에</string>
     <string name="preflight_invalid_bssid">유효하지 않은 WiFi 주소입니다. 6쌍의 16진수(예: 02:1A:11:FF:3C:4D)를 입력하세요.</string>
-    <string name="native_wifi_version_exchange">네트워크로 연결 (새 AA 핸드셰이크)</string>
-    <string name="native_wifi_version_exchange_description">이 기기의 핫스팟을 사용해 휴대전화가 Bluetooth 대신 WiFi로 다시 연결하도록 합니다. Bluetooth가 핸드셰이크를 전달하지 못하는 기기와 최신 Android Auto 버전에서 도움이 됩니다. 기본값은 꺼짐이며, 첫 연결은 여전히 Bluetooth로 이루어집니다.</string>
     <string name="native_aa_complete_hfp_slc">Bluetooth 연결 완료하기</string>
     <string name="native_aa_complete_hfp_slc_description">일부 휴대전화는 이 기기의 Bluetooth가 페어링만이 아니라 연결됨으로 인식될 때까지 무선 Android Auto를 시작하지 않습니다. 기본값은 켜짐이며, 이 기기에서 통화가 되지 않으면 끄세요.</string>
     <string name="announce_connection_configuration">더 긴 연결 시간 제한 요청</string>
@@ -1110,13 +1108,13 @@
     <string name="five_ghz_channel_option">채널 %1$d (%2$d MHz)</string>
     <string name="five_ghz_channel_hint">채널은 요청일 뿐 보장이 아닙니다. 많은 기기는 자체 Wi-Fi 드라이버가 선택한 채널에서만 네트워크를 만들며, 앱은 시도한 뒤에야 이를 알려줄 수 있습니다. 어떤 5GHz 채널도 작동하지 않고 휴대폰이 여전히 네트워크를 찾지 못한다면, 위의 대역 설정이 해결해 줍니다.</string>
     <string name="wifi_direct_stable_identity">동일한 Wi-Fi Direct 네트워크 유지</string>
-    <string name="wifi_direct_stable_identity_description">매번 동일한 이름과 비밀번호로 그룹을 생성하여 주행마다 새로 설정할 필요 없이 기존 네트워크에 다시 연결합니다.</string>
+    <string name="wifi_direct_stable_identity_description">매번 동일한 네트워크 이름과 비밀번호를 사용하여 휴대폰이 이미 아는 네트워크에 다시 연결되도록 합니다. 아래 항목을 사용해 갱신하세요.</string>
     <string name="wifi_direct_new_identity">새 Wi-Fi Direct 네트워크 식별자</string>
     <string name="wifi_direct_new_identity_none">다음 연결 시 선택됨</string>
     <string name="wifi_direct_new_identity_confirm">다음 연결부터 적용될 새 그룹 이름과 비밀번호를 선택합니다. 새 헤드유닛처럼 블루투스를 통해 설정됩니다.</string>
     <string name="wifi_direct_new_identity_done">다음 연결부터 새 네트워크 식별자가 사용됩니다.</string>
     <string name="wifi_direct_new_identity_applied">새 네트워크 식별자를 설정하는 중입니다. 다음 연결 때 휴대폰에 전달됩니다.</string>
-    <string name="wifi_direct_stable_identity_description_legacy">이 Android 버전에서는 네트워크 이름을 시스템이 정하며, 연결할 때마다 새 이름을 고르는 기기도 있습니다. 앱이 여기에서 특정 이름을 요청할 수는 없습니다. 시스템이 이름을 유지하는 경우 휴대폰이 이미 아는 네트워크에 다시 연결되도록 켜 두고, 저장된 네트워크를 계속 거부하면 아래에서 새 식별자를 사용하세요. 끄면 연결할 때마다 시스템이 네트워크를 잊습니다.</string>
+    <string name="wifi_direct_stable_identity_description_legacy">이 Android 버전에서는 시스템이 이름을 정하며 앱에서 특정 이름을 요청할 수 없습니다. 시스템이 이름을 유지하는 경우 휴대폰이 이미 아는 네트워크에 다시 연결되도록 켜 두고, 갱신하려면 아래 항목을 사용하세요.</string>
     <string name="debug_video_low_latency">디코더 저지연 모드 요청</string>
     <string name="debug_video_low_latency_description">비디오 디코더 설정 시 벤더 저지연 MediaFormat 키를 적용합니다.</string>
     <string name="debug_video_feed_hold">느린 디코더 시뮬레이션</string>

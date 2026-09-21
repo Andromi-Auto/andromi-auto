@@ -1005,8 +1005,6 @@
     <string name="preflight_open_location">Vị trí</string>
     <string name="preflight_later">Để sau</string>
     <string name="preflight_invalid_bssid">Địa chỉ WiFi không hợp lệ. Nhập 6 cặp ký tự thập lục phân (vd: 02:1A:11:FF:3C:4D).</string>
-    <string name="native_wifi_version_exchange">Kết nối qua mạng (bắt tay AA mới)</string>
-    <string name="native_wifi_version_exchange_description">Cho phép điện thoại kết nối lại qua WiFi thay vì Bluetooth, sử dụng điểm phát sóng của thiết bị này. Hữu ích với các thiết bị mà Bluetooth không thể truyền bắt tay, và với các phiên bản Android Auto mới hơn. Tắt theo mặc định, và lần kết nối đầu tiên vẫn đi qua Bluetooth.</string>
     <string name="native_aa_complete_hfp_slc">Hoàn tất kết nối Bluetooth</string>
     <string name="native_aa_complete_hfp_slc_description">Một số điện thoại chỉ khởi động Android Auto không dây khi Bluetooth của thiết bị này được tính là đã kết nối, chứ không chỉ đã ghép đôi. Bật theo mặc định; hãy tắt nếu cuộc gọi trên thiết bị này ngừng hoạt động.</string>
     <string name="announce_connection_configuration">Yêu cầu thời gian chờ liên kết dài hơn</string>
@@ -1116,13 +1114,13 @@
     <string name="five_ghz_channel_option">Kênh %1$d (%2$d MHz)</string>
     <string name="five_ghz_channel_hint">Kênh chỉ là một yêu cầu, không phải điều bảo đảm. Nhiều thiết bị chỉ tạo mạng trên kênh do trình điều khiển WiFi của chính nó chọn, và ứng dụng chỉ có thể cho bạn biết điều đó sau khi đã thử. Nếu không kênh 5 GHz nào hoạt động và điện thoại vẫn không thấy mạng, băng tần ở trên là thiết lập sẽ giải quyết được.</string>
     <string name="wifi_direct_stable_identity">Giữ nguyên mạng Wi-Fi Direct</string>
-    <string name="wifi_direct_stable_identity_description">Tạo nhóm với cùng tên và mật khẩu mỗi lần để điện thoại kết nối lại với mạng đã biết mà không cần thiết lập lại ở mỗi chuyến đi.</string>
+    <string name="wifi_direct_stable_identity_description">Sử dụng cùng một tên mạng và mật khẩu mỗi lần, để điện thoại kết nối lại với mạng đã biết. Hãy dùng dòng bên dưới để làm mới chúng.</string>
     <string name="wifi_direct_new_identity">Danh tính mạng Wi-Fi Direct mới</string>
     <string name="wifi_direct_new_identity_none">Được chọn ở lần kết nối tiếp theo</string>
     <string name="wifi_direct_new_identity_confirm">Chọn tên và mật khẩu mới cho nhóm áp dụng từ lần kết nối tiếp theo.</string>
     <string name="wifi_direct_new_identity_done">Danh tính mạng mới sẽ được sử dụng từ lần kết nối tiếp theo.</string>
     <string name="wifi_direct_new_identity_applied">Danh tính mạng mới đang được thiết lập. Điện thoại sẽ được yêu cầu tham gia mạng này ở lần kết nối tiếp theo.</string>
-    <string name="wifi_direct_stable_identity_description_legacy">Trên phiên bản Android này, tên mạng do hệ thống đặt và một số máy chọn tên mới sau mỗi lần kết nối. Ứng dụng không thể yêu cầu một tên cụ thể ở đây. Hãy bật tùy chọn này để điện thoại kết nối lại với mạng đã biết ở những máy mà hệ thống giữ nguyên tên, và thử một danh tính mới bên dưới nếu điện thoại vẫn từ chối mạng đã lưu. Tắt để hệ thống quên mạng trước mỗi lần kết nối.</string>
+    <string name="wifi_direct_stable_identity_description_legacy">Trên phiên bản Android này, hệ thống chọn tên và ứng dụng không thể yêu cầu một tên cụ thể. Hãy bật tùy chọn này để điện thoại kết nối lại với mạng đã biết ở bất kỳ đâu hệ thống giữ nguyên tên, và dùng dòng bên dưới để làm mới nó.</string>
     <string name="debug_video_low_latency">Yêu cầu chế độ độ trễ thấp của bộ giải mã</string>
     <string name="debug_video_low_latency_description">Đặt khóa MediaFormat độ trễ thấp của nhà sản xuất khi định cấu hình bộ giải mã video.</string>
     <string name="debug_video_feed_hold">Mô phỏng bộ giải mã chậm</string>
