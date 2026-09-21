@@ -210,8 +210,8 @@ class MainActivity : BaseActivity() {
                 }
                 if (navController.navigateUp()) {
                     return
-                } else if (CarLauncherManager.isDefaultLauncher(this@MainActivity)) {
-                    // When Open Headunit is the active system Home launcher,
+                } else if (appSettings.enableCarLauncher || CarLauncherManager.isDefaultLauncher(this@MainActivity)) {
+                    // When in Car Launcher mode or active system Home launcher,
                     // back press at the root of the app should not finish the launcher.
                     return
                 } else if (System.currentTimeMillis() - lastBackPressTime < 2000) {

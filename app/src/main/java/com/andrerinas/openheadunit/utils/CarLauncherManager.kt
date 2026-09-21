@@ -115,4 +115,13 @@ object CarLauncherManager {
             }
         }
     }
+
+    /**
+     * Determines whether the main screen Exit button should be shown.
+     * When Car Launcher mode is enabled or Open Headunit is acting as the system Home launcher,
+     * the Exit button is hidden because exiting the Home launcher has no meaningful target.
+     */
+    fun shouldShowExitButton(isCarLauncherEnabled: Boolean, isDefaultLauncher: Boolean): Boolean {
+        return !isCarLauncherEnabled && !isDefaultLauncher
+    }
 }
