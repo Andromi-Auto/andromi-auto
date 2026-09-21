@@ -187,6 +187,7 @@
     <string name="usb_auto_connect">Connessione automatica USB</string>
     <string name="usb_auto_connect_description">Connettiti automaticamente a un dispositivo USB noto all\'apertura dell\'applicazione.</string>
     <string name="auto_start_bt_label">Avvio automatico su Bluetooth</string>
+    <string name="auto_start_overlay_missing_hint">La visualizzazione sopra le altre app non è consentita, quindi l\'avvio automatico mostrerà una notifica invece di aprire la schermata. Tocca per concedere.</string>
     <string name="auto_start_bt_description">Apri automaticamente Open Headunit quando si connette un dispositivo Bluetooth specifico.</string>
     <string name="auto_start_offer_title">Avviare automaticamente?</string>
     <string name="auto_start_offer_message">Vuoi avviare automaticamente l\'app con questo dispositivo, %1$s?</string>
@@ -417,15 +418,15 @@
     <string name="nav_action_ferry">Traghetto</string>
     <string name="nav_action_ferry_train">Traghetto / treno</string>
     <string name="nav_action_destination">Arrivo</string>
-    <string name="show_fps_counter">Mostra contatore FPS</string>
-    <string name="show_fps_counter_description">Mostra un overlay FPS in tempo reale nell\'angolo in alto a sinistra durante la proiezione.</string>
+    <string name="show_performance_overlay">Mostra pannello prestazioni</string>
+    <string name="overlay_position">Posizione del pannello prestazioni</string>
+    <string name="show_performance_overlay_description">Mostra FPS, carico CPU, temperatura ed età del fotogramma sopra la proiezione.</string>
 
     <!-- Auto-start permission strings -->
     <string name="reopen_on_reconnection_label">Riapri alla riconnessione</string>
     <string name="reopen_on_reconnection_description">Quando premi il pulsante Esci, l\'app rimane in esecuzione in background e continua a monitorare le connessioni USB. Se un dispositivo si riconnette, l\'app si riapre automaticamente.</string>
     <string name="overlay_permission_required">L\'avvio automatico richiede il permesso \'Mostra sopra altre app\'</string>
     <string name="usb_permission_denied">Permesso USB negato. Per favore, consenti l\'accesso USB per connetterti automaticamente.</string>
-    <string name="overlay_permission_denied_auto_start_disabled">Permesso overlay non concesso. L\'avvio automatico è stato disabilitato.</string>
 
     <!-- Theme -->
     <string name="use_white_background">Usa sfondo bianco nella home</string>
@@ -987,9 +988,12 @@
     <string name="connection_issue_banner_hotspot_config">Questa unità non ha fornito nome e password dell\'hotspot. Tocca per inserirli a mano.</string>
     <string name="narrow_band_profile_cap">Ridurre il video su un collegamento a 2,4 GHz</string>
     <string name="narrow_band_profile_cap_description">Quando questa sessione funziona a 2,4 GHz, sia perché il WiFi di questa unità non ha la banda 5 GHz sia perché la rete si è stabilita lì, chiedi al telefono al massimo 720p e 30 fps invece delle impostazioni qui sopra, e audio AAC. Su un collegamento simile è stato misurato che un flusso a piena velocità non portava alcuna immagine, mentre uno più basso reggeva. Disattiva questa opzione per ottenere esattamente ciò che hai impostato.</string>
-    <string name="connection_issue_banner_video_link_too_slow">Il telefono ha abbandonato il video prima che arrivasse un solo fotogramma, più volte di seguito. Il collegamento WiFi è troppo lento per trasportare l\'immagine. Tocca per abbassare il limite di FPS a 30; aiutano anche una risoluzione più bassa e l\'audio AAC.</string>
+    <string name="connection_issue_banner_video_link_too_slow">Il telefono ha abbandonato il video prima che arrivasse un solo fotogramma, più volte di seguito. Il collegamento WiFi è troppo lento per trasportare l\'immagine, quindi ora vengono chiesti 720p a 30 FPS con audio AAC. Tocca per impostare tu la risoluzione o il limite di FPS, cosa che toglie anche questo; una rete a 5 GHz è l\'altra soluzione.</string>
     <string name="connection_issue_banner_five_ghz_channel_refused">Questa unità ha rifiutato di mettere la sua rete WiFi Direct su qualsiasi canale a 5 GHz tu abbia scelto, quindi è partita su quello scelto dal suo driver WiFi. Spesso è un canale che i telefoni nei paesi più restrittivi non riescono nemmeno a vedere. Tocca per impostare la banda WiFi Direct su 2,4 GHz, consentita ovunque; aspettati 720p invece di 1080p.</string>
+    <string name="connection_issue_banner_headunit_server_deaf">Il server dell\'unità principale di Android Auto sul telefono accetta le connessioni e non ne serve nessuna. Non si riprende da solo: sul telefono, arresta il server dell\'unità principale nelle impostazioni sviluppatore di Android Auto e riavvialo. Questa unità si riconnetterà da sola.</string>
+    <string name="connection_issue_banner_hands_free_held">Un altro dispositivo sta già usando la connessione vivavoce di questa unità, quindi il telefono che questa unità sta svegliando non può averla. Android Auto non avvierà una connessione wireless a meno che il Bluetooth dell\'unità principale non sia connesso con un profilo, e un\'unità che serve una sola connessione vivavoce alla volta non ne ha più da dare. Disconnetti l\'altro dispositivo, o disattivane il Bluetooth, e questa unità riproverà da sola.</string>
     <string name="connection_issue_banner_dismiss">Ignora</string>
+    <string name="auto_connect_pill_cancel">Interrompi la connessione</string>
     <string name="connection_issue_remedy_hotspot_query">Nome e password dell\'hotspot</string>
     <string name="preflight_title">Prima di connetterti</string>
     <string name="preflight_intro">Questo dispositivo non può fornire tutti i dati necessari per Android Auto:</string>
@@ -1005,6 +1009,8 @@
     <string name="native_wifi_version_exchange_description">Consente al telefono di riconnettersi via WiFi anziché via Bluetooth, usando l\'hotspot di questa unità. Utile sulle unità il cui Bluetooth non riesce a trasportare l\'handshake e con le versioni più recenti di Android Auto. Disattivo per impostazione predefinita, e la prima connessione passa ancora dal Bluetooth.</string>
     <string name="native_aa_complete_hfp_slc">Completa la connessione Bluetooth</string>
     <string name="native_aa_complete_hfp_slc_description">Alcuni telefoni non avviano Android Auto wireless finché il Bluetooth di questa unità non risulta connesso, non solo associato. Attivo per impostazione predefinita; disattivalo se le chiamate su questo dispositivo smettono di funzionare.</string>
+    <string name="announce_connection_configuration">Richiedi un timeout di collegamento più lungo</string>
+    <string name="announce_connection_configuration_description">Dice ad Android Auto di attendere 15 secondi anziché 3 prima di considerare il collegamento interrotto, e di usare buffer socket più grandi. È pensato per una radio che esce dal canale per qualche secondo a metà sessione e si porta via la connessione. Non è stato misurato se il telefono ne tiene conto.</string>
     <string name="native_aa_ignore_external_bt">Ignora il controllo di compatibilità Bluetooth</string>
     <string name="native_aa_ignore_external_bt_description">Questa unità sembra gestire il Bluetooth su un modulo separato che Android non riesce a raggiungere, perciò Android Auto wireless viene disattivato automaticamente. Disattivo per impostazione predefinita. Attivalo solo se ritieni che sia sbagliato: quando il rilevamento è corretto, la connessione fallisce senza segnalare nulla e il log sembra a posto.</string>
     <string name="native_aa_setup_qr_title">Configura con codice QR</string>
@@ -1116,7 +1122,7 @@
     <string name="wifi_direct_new_identity_confirm">Sceglie un nuovo nome e password per il gruppo, applicati dalla prossima connessione. Il telefono verrà configurato via Bluetooth come se fosse una nuova unità.</string>
     <string name="wifi_direct_new_identity_done">Una nuova identità di rete verrà utilizzata dalla prossima connessione.</string>
     <string name="wifi_direct_new_identity_applied">È in corso la configurazione di una nuova identità di rete. Al telefono verrà chiesto di collegarsi alla prossima connessione.</string>
-    <string name="wifi_direct_stable_identity_description_legacy">In questa versione di Android il nome della rete lo sceglie il sistema, che lo mantiene finché può. Lascia attiva questa opzione perché il telefono si ricolleghi a una rete già nota, e prova una nuova identità qui sotto se continua a rifiutare quella salvata. Disattivala per far dimenticare la rete al sistema prima di ogni connessione.</string>
+    <string name="wifi_direct_stable_identity_description_legacy">In questa versione di Android il nome della rete lo sceglie il sistema, e alcuni apparecchi ne scelgono uno nuovo a ogni connessione. L\'app non può chiedere qui un nome preciso. Lascia attiva questa opzione perché il telefono si ricolleghi a una rete già nota quando il sistema la mantiene, e prova una nuova identità qui sotto se continua a rifiutare quella salvata. Disattivala per far dimenticare la rete al sistema prima di ogni connessione.</string>
     <string name="debug_video_low_latency">Richiedi modalità a bassa latenza del decoder</string>
     <string name="debug_video_low_latency_description">Imposta la chiave proprietaria MediaFormat a bassa latenza durante la configurazione del decoder video.</string>
     <string name="debug_video_feed_hold">Simula un decoder lento</string>

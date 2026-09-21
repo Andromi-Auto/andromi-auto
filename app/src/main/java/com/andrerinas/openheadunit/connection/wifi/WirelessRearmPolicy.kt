@@ -22,6 +22,17 @@ object WirelessRearmPolicy {
         val helperConnectionStrategy: HelperStrategy,
         val nativeApStrategy: NativeStrategy,
         val bluetoothManagerServiceName: String,
+        /** Whether WiFi is one of the chosen connection modes; unchecking it stops the stack. */
+        val wirelessSelected: Boolean,
+        /** The band and channel a group is created on, both frozen by createGroup. */
+        val wifiDirectBand: Int,
+        val fiveGhzChannel: Int,
+        /** The two that decide whether the Native servers start at all. */
+        val externalBtZbtTransport: Boolean,
+        val nativeAaIgnoreExternalBt: Boolean,
+        /** Read once by the Helper launcher, and once per listener start. */
+        val autoEnableHotspot: Boolean,
+        val insecureAaRfcommListener: Boolean,
     )
 
     fun requiresRearm(before: Config, after: Config): Boolean = before != after

@@ -112,6 +112,125 @@ public final class Wireless {
   }
 
   /**
+   * <pre>
+   * What the head unit's access point can offer. Android Auto answers
+   * STATUS_NO_SUPPORTED_WIFI_CHANNELS (-8) when it cannot match our bands.
+   * </pre>
+   *
+   * Protobuf enum {@code com.andrerinas.openheadunit.aap.protocol.proto.WifiChannelType}
+   */
+  public enum WifiChannelType
+      implements com.google.protobuf.ProtocolMessageEnum {
+    /**
+     * <code>CHANNELS_5GHZ_ONLY = 0;</code>
+     */
+    CHANNELS_5GHZ_ONLY(0),
+    /**
+     * <code>CHANNELS_24GHZ_ONLY = 1;</code>
+     */
+    CHANNELS_24GHZ_ONLY(1),
+    /**
+     * <code>CHANNELS_DUAL_BAND = 2;</code>
+     */
+    CHANNELS_DUAL_BAND(2),
+    /**
+     * <code>NO_CHANNELS_SUPPORTED = 3;</code>
+     */
+    NO_CHANNELS_SUPPORTED(3),
+    ;
+
+    /**
+     * <code>CHANNELS_5GHZ_ONLY = 0;</code>
+     */
+    public static final int CHANNELS_5GHZ_ONLY_VALUE = 0;
+    /**
+     * <code>CHANNELS_24GHZ_ONLY = 1;</code>
+     */
+    public static final int CHANNELS_24GHZ_ONLY_VALUE = 1;
+    /**
+     * <code>CHANNELS_DUAL_BAND = 2;</code>
+     */
+    public static final int CHANNELS_DUAL_BAND_VALUE = 2;
+    /**
+     * <code>NO_CHANNELS_SUPPORTED = 3;</code>
+     */
+    public static final int NO_CHANNELS_SUPPORTED_VALUE = 3;
+
+
+    public final int getNumber() {
+      return value;
+    }
+
+    /**
+     * @param value The numeric wire value of the corresponding enum entry.
+     * @return The enum associated with the given numeric wire value.
+     * @deprecated Use {@link #forNumber(int)} instead.
+     */
+    @java.lang.Deprecated
+    public static WifiChannelType valueOf(int value) {
+      return forNumber(value);
+    }
+
+    /**
+     * @param value The numeric wire value of the corresponding enum entry.
+     * @return The enum associated with the given numeric wire value.
+     */
+    public static WifiChannelType forNumber(int value) {
+      switch (value) {
+        case 0: return CHANNELS_5GHZ_ONLY;
+        case 1: return CHANNELS_24GHZ_ONLY;
+        case 2: return CHANNELS_DUAL_BAND;
+        case 3: return NO_CHANNELS_SUPPORTED;
+        default: return null;
+      }
+    }
+
+    public static com.google.protobuf.Internal.EnumLiteMap<WifiChannelType>
+        internalGetValueMap() {
+      return internalValueMap;
+    }
+    private static final com.google.protobuf.Internal.EnumLiteMap<
+        WifiChannelType> internalValueMap =
+          new com.google.protobuf.Internal.EnumLiteMap<WifiChannelType>() {
+            public WifiChannelType findValueByNumber(int number) {
+              return WifiChannelType.forNumber(number);
+            }
+          };
+
+    public final com.google.protobuf.Descriptors.EnumValueDescriptor
+        getValueDescriptor() {
+      return getDescriptor().getValues().get(ordinal());
+    }
+    public final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptorForType() {
+      return getDescriptor();
+    }
+    public static final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptor() {
+      return com.andrerinas.openheadunit.aap.protocol.proto.Wireless.getDescriptor().getEnumTypes().get(1);
+    }
+
+    private static final WifiChannelType[] VALUES = values();
+
+    public static WifiChannelType valueOf(
+        com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+      if (desc.getType() != getDescriptor()) {
+        throw new java.lang.IllegalArgumentException(
+          "EnumValueDescriptor is not for this type.");
+      }
+      return VALUES[desc.getIndex()];
+    }
+
+    private final int value;
+
+    private WifiChannelType(int value) {
+      this.value = value;
+    }
+
+    // @@protoc_insertion_point(enum_scope:com.andrerinas.openheadunit.aap.protocol.proto.WifiChannelType)
+  }
+
+  /**
    * Protobuf enum {@code com.andrerinas.openheadunit.aap.protocol.proto.SecurityMode}
    */
   public enum SecurityMode
@@ -156,6 +275,14 @@ public final class Wireless {
      * <code>WPA_WPA2_ENTERPRISE = 28;</code>
      */
     WPA_WPA2_ENTERPRISE(28),
+    /**
+     * <code>WPA3_PERSONAL = 32;</code>
+     */
+    WPA3_PERSONAL(32),
+    /**
+     * <code>WPA2_WPA3_PERSONAL = 40;</code>
+     */
+    WPA2_WPA3_PERSONAL(40),
     ;
 
     /**
@@ -198,6 +325,14 @@ public final class Wireless {
      * <code>WPA_WPA2_ENTERPRISE = 28;</code>
      */
     public static final int WPA_WPA2_ENTERPRISE_VALUE = 28;
+    /**
+     * <code>WPA3_PERSONAL = 32;</code>
+     */
+    public static final int WPA3_PERSONAL_VALUE = 32;
+    /**
+     * <code>WPA2_WPA3_PERSONAL = 40;</code>
+     */
+    public static final int WPA2_WPA3_PERSONAL_VALUE = 40;
 
 
     public final int getNumber() {
@@ -230,6 +365,8 @@ public final class Wireless {
         case 20: return WPA_ENTERPRISE;
         case 24: return WPA2_ENTERPRISE;
         case 28: return WPA_WPA2_ENTERPRISE;
+        case 32: return WPA3_PERSONAL;
+        case 40: return WPA2_WPA3_PERSONAL;
         default: return null;
       }
     }
@@ -256,7 +393,7 @@ public final class Wireless {
     }
     public static final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptor() {
-      return com.andrerinas.openheadunit.aap.protocol.proto.Wireless.getDescriptor().getEnumTypes().get(1);
+      return com.andrerinas.openheadunit.aap.protocol.proto.Wireless.getDescriptor().getEnumTypes().get(2);
     }
 
     private static final SecurityMode[] VALUES = values();
@@ -5402,6 +5539,34 @@ public final class Wireless {
     int getMinor();
 
     /**
+     * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.WifiChannelType supported_wifi_channel_type = 3;</code>
+     * @return Whether the supportedWifiChannelType field is set.
+     */
+    boolean hasSupportedWifiChannelType();
+    /**
+     * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.WifiChannelType supported_wifi_channel_type = 3;</code>
+     * @return The supportedWifiChannelType.
+     */
+    com.andrerinas.openheadunit.aap.protocol.proto.Wireless.WifiChannelType getSupportedWifiChannelType();
+
+    /**
+     * <code>repeated int32 supported_wifi_channels = 4 [packed = true];</code>
+     * @return A list containing the supportedWifiChannels.
+     */
+    java.util.List<java.lang.Integer> getSupportedWifiChannelsList();
+    /**
+     * <code>repeated int32 supported_wifi_channels = 4 [packed = true];</code>
+     * @return The count of supportedWifiChannels.
+     */
+    int getSupportedWifiChannelsCount();
+    /**
+     * <code>repeated int32 supported_wifi_channels = 4 [packed = true];</code>
+     * @param index The index of the element to return.
+     * @return The supportedWifiChannels at the given index.
+     */
+    int getSupportedWifiChannels(int index);
+
+    /**
      * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.WppCarInfo car_info = 5;</code>
      * @return Whether the carInfo field is set.
      */
@@ -5437,8 +5602,9 @@ public final class Wireless {
    * carries the two things the phone needs to reach us over TCP later: where to dial, and who we
    * are. Below protocol 4.1 the phone skips wpp_info entirely, which is why the version matters.
    *
-   * Fields 3 and 4 exist in the phone's schema (an enum and a packed int32 list) and are left
-   * undefined here: we never send them and an absent field costs nothing.
+   * Field 3 says which bands our access point can offer; the phone's own parser reads it, and -8
+   * STATUS_NO_SUPPORTED_WIFI_CHANNELS is what it answers when it cannot match them. Field 4 is the
+   * frequency list, modelled so a capture reads but never sent: nothing here can enumerate it.
    * </pre>
    *
    * Protobuf type {@code com.andrerinas.openheadunit.aap.protocol.proto.WifiVersionRequest}
@@ -5453,6 +5619,8 @@ public final class Wireless {
       super(builder);
     }
     private WifiVersionRequest() {
+      supportedWifiChannelType_ = 0;
+      supportedWifiChannels_ = emptyIntList();
     }
 
     @java.lang.Override
@@ -5514,6 +5682,54 @@ public final class Wireless {
       return minor_;
     }
 
+    public static final int SUPPORTED_WIFI_CHANNEL_TYPE_FIELD_NUMBER = 3;
+    private int supportedWifiChannelType_ = 0;
+    /**
+     * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.WifiChannelType supported_wifi_channel_type = 3;</code>
+     * @return Whether the supportedWifiChannelType field is set.
+     */
+    @java.lang.Override public boolean hasSupportedWifiChannelType() {
+      return ((bitField0_ & 0x00000004) != 0);
+    }
+    /**
+     * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.WifiChannelType supported_wifi_channel_type = 3;</code>
+     * @return The supportedWifiChannelType.
+     */
+    @java.lang.Override public com.andrerinas.openheadunit.aap.protocol.proto.Wireless.WifiChannelType getSupportedWifiChannelType() {
+      com.andrerinas.openheadunit.aap.protocol.proto.Wireless.WifiChannelType result = com.andrerinas.openheadunit.aap.protocol.proto.Wireless.WifiChannelType.forNumber(supportedWifiChannelType_);
+      return result == null ? com.andrerinas.openheadunit.aap.protocol.proto.Wireless.WifiChannelType.CHANNELS_5GHZ_ONLY : result;
+    }
+
+    public static final int SUPPORTED_WIFI_CHANNELS_FIELD_NUMBER = 4;
+    @SuppressWarnings("serial")
+    private com.google.protobuf.Internal.IntList supportedWifiChannels_ =
+        emptyIntList();
+    /**
+     * <code>repeated int32 supported_wifi_channels = 4 [packed = true];</code>
+     * @return A list containing the supportedWifiChannels.
+     */
+    @java.lang.Override
+    public java.util.List<java.lang.Integer>
+        getSupportedWifiChannelsList() {
+      return supportedWifiChannels_;
+    }
+    /**
+     * <code>repeated int32 supported_wifi_channels = 4 [packed = true];</code>
+     * @return The count of supportedWifiChannels.
+     */
+    public int getSupportedWifiChannelsCount() {
+      return supportedWifiChannels_.size();
+    }
+    /**
+     * <code>repeated int32 supported_wifi_channels = 4 [packed = true];</code>
+     * @param index The index of the element to return.
+     * @return The supportedWifiChannels at the given index.
+     */
+    public int getSupportedWifiChannels(int index) {
+      return supportedWifiChannels_.getInt(index);
+    }
+    private int supportedWifiChannelsMemoizedSerializedSize = -1;
+
     public static final int CAR_INFO_FIELD_NUMBER = 5;
     private com.andrerinas.openheadunit.aap.protocol.proto.Wireless.WppCarInfo carInfo_;
     /**
@@ -5522,7 +5738,7 @@ public final class Wireless {
      */
     @java.lang.Override
     public boolean hasCarInfo() {
-      return ((bitField0_ & 0x00000004) != 0);
+      return ((bitField0_ & 0x00000008) != 0);
     }
     /**
      * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.WppCarInfo car_info = 5;</code>
@@ -5548,7 +5764,7 @@ public final class Wireless {
      */
     @java.lang.Override
     public boolean hasWppInfo() {
-      return ((bitField0_ & 0x00000008) != 0);
+      return ((bitField0_ & 0x00000010) != 0);
     }
     /**
      * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.WifiProjectionProtocolInfo wpp_info = 6;</code>
@@ -5580,6 +5796,7 @@ public final class Wireless {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
+      getSerializedSize();
       if (((bitField0_ & 0x00000001) != 0)) {
         output.writeInt32(1, major_);
       }
@@ -5587,9 +5804,19 @@ public final class Wireless {
         output.writeInt32(2, minor_);
       }
       if (((bitField0_ & 0x00000004) != 0)) {
-        output.writeMessage(5, getCarInfo());
+        output.writeEnum(3, supportedWifiChannelType_);
+      }
+      if (getSupportedWifiChannelsList().size() > 0) {
+        output.writeUInt32NoTag(34);
+        output.writeUInt32NoTag(supportedWifiChannelsMemoizedSerializedSize);
+      }
+      for (int i = 0; i < supportedWifiChannels_.size(); i++) {
+        output.writeInt32NoTag(supportedWifiChannels_.getInt(i));
       }
       if (((bitField0_ & 0x00000008) != 0)) {
+        output.writeMessage(5, getCarInfo());
+      }
+      if (((bitField0_ & 0x00000010) != 0)) {
         output.writeMessage(6, getWppInfo());
       }
       getUnknownFields().writeTo(output);
@@ -5611,9 +5838,27 @@ public final class Wireless {
       }
       if (((bitField0_ & 0x00000004) != 0)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(5, getCarInfo());
+          .computeEnumSize(3, supportedWifiChannelType_);
+      }
+      {
+        int dataSize = 0;
+        for (int i = 0; i < supportedWifiChannels_.size(); i++) {
+          dataSize += com.google.protobuf.CodedOutputStream
+            .computeInt32SizeNoTag(supportedWifiChannels_.getInt(i));
+        }
+        size += dataSize;
+        if (!getSupportedWifiChannelsList().isEmpty()) {
+          size += 1;
+          size += com.google.protobuf.CodedOutputStream
+              .computeInt32SizeNoTag(dataSize);
+        }
+        supportedWifiChannelsMemoizedSerializedSize = dataSize;
       }
       if (((bitField0_ & 0x00000008) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(5, getCarInfo());
+      }
+      if (((bitField0_ & 0x00000010) != 0)) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(6, getWppInfo());
       }
@@ -5642,6 +5887,12 @@ public final class Wireless {
         if (getMinor()
             != other.getMinor()) return false;
       }
+      if (hasSupportedWifiChannelType() != other.hasSupportedWifiChannelType()) return false;
+      if (hasSupportedWifiChannelType()) {
+        if (supportedWifiChannelType_ != other.supportedWifiChannelType_) return false;
+      }
+      if (!getSupportedWifiChannelsList()
+          .equals(other.getSupportedWifiChannelsList())) return false;
       if (hasCarInfo() != other.hasCarInfo()) return false;
       if (hasCarInfo()) {
         if (!getCarInfo()
@@ -5670,6 +5921,14 @@ public final class Wireless {
       if (hasMinor()) {
         hash = (37 * hash) + MINOR_FIELD_NUMBER;
         hash = (53 * hash) + getMinor();
+      }
+      if (hasSupportedWifiChannelType()) {
+        hash = (37 * hash) + SUPPORTED_WIFI_CHANNEL_TYPE_FIELD_NUMBER;
+        hash = (53 * hash) + supportedWifiChannelType_;
+      }
+      if (getSupportedWifiChannelsCount() > 0) {
+        hash = (37 * hash) + SUPPORTED_WIFI_CHANNELS_FIELD_NUMBER;
+        hash = (53 * hash) + getSupportedWifiChannelsList().hashCode();
       }
       if (hasCarInfo()) {
         hash = (37 * hash) + CAR_INFO_FIELD_NUMBER;
@@ -5782,8 +6041,9 @@ public final class Wireless {
      * carries the two things the phone needs to reach us over TCP later: where to dial, and who we
      * are. Below protocol 4.1 the phone skips wpp_info entirely, which is why the version matters.
      *
-     * Fields 3 and 4 exist in the phone's schema (an enum and a packed int32 list) and are left
-     * undefined here: we never send them and an absent field costs nothing.
+     * Field 3 says which bands our access point can offer; the phone's own parser reads it, and -8
+     * STATUS_NO_SUPPORTED_WIFI_CHANNELS is what it answers when it cannot match them. Field 4 is the
+     * frequency list, modelled so a capture reads but never sent: nothing here can enumerate it.
      * </pre>
      *
      * Protobuf type {@code com.andrerinas.openheadunit.aap.protocol.proto.WifiVersionRequest}
@@ -5828,6 +6088,8 @@ public final class Wireless {
         bitField0_ = 0;
         major_ = 0;
         minor_ = 0;
+        supportedWifiChannelType_ = 0;
+        supportedWifiChannels_ = emptyIntList();
         carInfo_ = null;
         if (carInfoBuilder_ != null) {
           carInfoBuilder_.dispose();
@@ -5881,16 +6143,24 @@ public final class Wireless {
           to_bitField0_ |= 0x00000002;
         }
         if (((from_bitField0_ & 0x00000004) != 0)) {
-          result.carInfo_ = carInfoBuilder_ == null
-              ? carInfo_
-              : carInfoBuilder_.build();
+          result.supportedWifiChannelType_ = supportedWifiChannelType_;
           to_bitField0_ |= 0x00000004;
         }
         if (((from_bitField0_ & 0x00000008) != 0)) {
+          supportedWifiChannels_.makeImmutable();
+          result.supportedWifiChannels_ = supportedWifiChannels_;
+        }
+        if (((from_bitField0_ & 0x00000010) != 0)) {
+          result.carInfo_ = carInfoBuilder_ == null
+              ? carInfo_
+              : carInfoBuilder_.build();
+          to_bitField0_ |= 0x00000008;
+        }
+        if (((from_bitField0_ & 0x00000020) != 0)) {
           result.wppInfo_ = wppInfoBuilder_ == null
               ? wppInfo_
               : wppInfoBuilder_.build();
-          to_bitField0_ |= 0x00000008;
+          to_bitField0_ |= 0x00000010;
         }
         result.bitField0_ |= to_bitField0_;
       }
@@ -5945,6 +6215,20 @@ public final class Wireless {
         if (other.hasMinor()) {
           setMinor(other.getMinor());
         }
+        if (other.hasSupportedWifiChannelType()) {
+          setSupportedWifiChannelType(other.getSupportedWifiChannelType());
+        }
+        if (!other.supportedWifiChannels_.isEmpty()) {
+          if (supportedWifiChannels_.isEmpty()) {
+            supportedWifiChannels_ = other.supportedWifiChannels_;
+            supportedWifiChannels_.makeImmutable();
+            bitField0_ |= 0x00000008;
+          } else {
+            ensureSupportedWifiChannelsIsMutable();
+            supportedWifiChannels_.addAll(other.supportedWifiChannels_);
+          }
+          onChanged();
+        }
         if (other.hasCarInfo()) {
           mergeCarInfo(other.getCarInfo());
         }
@@ -5987,18 +6271,46 @@ public final class Wireless {
                 bitField0_ |= 0x00000002;
                 break;
               } // case 16
+              case 24: {
+                int tmpRaw = input.readEnum();
+                com.andrerinas.openheadunit.aap.protocol.proto.Wireless.WifiChannelType tmpValue =
+                    com.andrerinas.openheadunit.aap.protocol.proto.Wireless.WifiChannelType.forNumber(tmpRaw);
+                if (tmpValue == null) {
+                  mergeUnknownVarintField(3, tmpRaw);
+                } else {
+                  supportedWifiChannelType_ = tmpRaw;
+                  bitField0_ |= 0x00000004;
+                }
+                break;
+              } // case 24
+              case 32: {
+                int v = input.readInt32();
+                ensureSupportedWifiChannelsIsMutable();
+                supportedWifiChannels_.addInt(v);
+                break;
+              } // case 32
+              case 34: {
+                int length = input.readRawVarint32();
+                int limit = input.pushLimit(length);
+                ensureSupportedWifiChannelsIsMutable();
+                while (input.getBytesUntilLimit() > 0) {
+                  supportedWifiChannels_.addInt(input.readInt32());
+                }
+                input.popLimit(limit);
+                break;
+              } // case 34
               case 42: {
                 input.readMessage(
                     getCarInfoFieldBuilder().getBuilder(),
                     extensionRegistry);
-                bitField0_ |= 0x00000004;
+                bitField0_ |= 0x00000010;
                 break;
               } // case 42
               case 50: {
                 input.readMessage(
                     getWppInfoFieldBuilder().getBuilder(),
                     extensionRegistry);
-                bitField0_ |= 0x00000008;
+                bitField0_ |= 0x00000020;
                 break;
               } // case 50
               default: {
@@ -6098,6 +6410,132 @@ public final class Wireless {
         return this;
       }
 
+      private int supportedWifiChannelType_ = 0;
+      /**
+       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.WifiChannelType supported_wifi_channel_type = 3;</code>
+       * @return Whether the supportedWifiChannelType field is set.
+       */
+      @java.lang.Override public boolean hasSupportedWifiChannelType() {
+        return ((bitField0_ & 0x00000004) != 0);
+      }
+      /**
+       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.WifiChannelType supported_wifi_channel_type = 3;</code>
+       * @return The supportedWifiChannelType.
+       */
+      @java.lang.Override
+      public com.andrerinas.openheadunit.aap.protocol.proto.Wireless.WifiChannelType getSupportedWifiChannelType() {
+        com.andrerinas.openheadunit.aap.protocol.proto.Wireless.WifiChannelType result = com.andrerinas.openheadunit.aap.protocol.proto.Wireless.WifiChannelType.forNumber(supportedWifiChannelType_);
+        return result == null ? com.andrerinas.openheadunit.aap.protocol.proto.Wireless.WifiChannelType.CHANNELS_5GHZ_ONLY : result;
+      }
+      /**
+       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.WifiChannelType supported_wifi_channel_type = 3;</code>
+       * @param value The supportedWifiChannelType to set.
+       * @return This builder for chaining.
+       */
+      public Builder setSupportedWifiChannelType(com.andrerinas.openheadunit.aap.protocol.proto.Wireless.WifiChannelType value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        bitField0_ |= 0x00000004;
+        supportedWifiChannelType_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.WifiChannelType supported_wifi_channel_type = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearSupportedWifiChannelType() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        supportedWifiChannelType_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private com.google.protobuf.Internal.IntList supportedWifiChannels_ = emptyIntList();
+      private void ensureSupportedWifiChannelsIsMutable() {
+        if (!supportedWifiChannels_.isModifiable()) {
+          supportedWifiChannels_ = makeMutableCopy(supportedWifiChannels_);
+        }
+        bitField0_ |= 0x00000008;
+      }
+      /**
+       * <code>repeated int32 supported_wifi_channels = 4 [packed = true];</code>
+       * @return A list containing the supportedWifiChannels.
+       */
+      public java.util.List<java.lang.Integer>
+          getSupportedWifiChannelsList() {
+        supportedWifiChannels_.makeImmutable();
+        return supportedWifiChannels_;
+      }
+      /**
+       * <code>repeated int32 supported_wifi_channels = 4 [packed = true];</code>
+       * @return The count of supportedWifiChannels.
+       */
+      public int getSupportedWifiChannelsCount() {
+        return supportedWifiChannels_.size();
+      }
+      /**
+       * <code>repeated int32 supported_wifi_channels = 4 [packed = true];</code>
+       * @param index The index of the element to return.
+       * @return The supportedWifiChannels at the given index.
+       */
+      public int getSupportedWifiChannels(int index) {
+        return supportedWifiChannels_.getInt(index);
+      }
+      /**
+       * <code>repeated int32 supported_wifi_channels = 4 [packed = true];</code>
+       * @param index The index to set the value at.
+       * @param value The supportedWifiChannels to set.
+       * @return This builder for chaining.
+       */
+      public Builder setSupportedWifiChannels(
+          int index, int value) {
+
+        ensureSupportedWifiChannelsIsMutable();
+        supportedWifiChannels_.setInt(index, value);
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated int32 supported_wifi_channels = 4 [packed = true];</code>
+       * @param value The supportedWifiChannels to add.
+       * @return This builder for chaining.
+       */
+      public Builder addSupportedWifiChannels(int value) {
+
+        ensureSupportedWifiChannelsIsMutable();
+        supportedWifiChannels_.addInt(value);
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated int32 supported_wifi_channels = 4 [packed = true];</code>
+       * @param values The supportedWifiChannels to add.
+       * @return This builder for chaining.
+       */
+      public Builder addAllSupportedWifiChannels(
+          java.lang.Iterable<? extends java.lang.Integer> values) {
+        ensureSupportedWifiChannelsIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, supportedWifiChannels_);
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated int32 supported_wifi_channels = 4 [packed = true];</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearSupportedWifiChannels() {
+        supportedWifiChannels_ = emptyIntList();
+        bitField0_ = (bitField0_ & ~0x00000008);
+        onChanged();
+        return this;
+      }
+
       private com.andrerinas.openheadunit.aap.protocol.proto.Wireless.WppCarInfo carInfo_;
       private com.google.protobuf.SingleFieldBuilderV3<
           com.andrerinas.openheadunit.aap.protocol.proto.Wireless.WppCarInfo, com.andrerinas.openheadunit.aap.protocol.proto.Wireless.WppCarInfo.Builder, com.andrerinas.openheadunit.aap.protocol.proto.Wireless.WppCarInfoOrBuilder> carInfoBuilder_;
@@ -6106,7 +6544,7 @@ public final class Wireless {
        * @return Whether the carInfo field is set.
        */
       public boolean hasCarInfo() {
-        return ((bitField0_ & 0x00000004) != 0);
+        return ((bitField0_ & 0x00000010) != 0);
       }
       /**
        * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.WppCarInfo car_info = 5;</code>
@@ -6131,7 +6569,7 @@ public final class Wireless {
         } else {
           carInfoBuilder_.setMessage(value);
         }
-        bitField0_ |= 0x00000004;
+        bitField0_ |= 0x00000010;
         onChanged();
         return this;
       }
@@ -6145,7 +6583,7 @@ public final class Wireless {
         } else {
           carInfoBuilder_.setMessage(builderForValue.build());
         }
-        bitField0_ |= 0x00000004;
+        bitField0_ |= 0x00000010;
         onChanged();
         return this;
       }
@@ -6154,7 +6592,7 @@ public final class Wireless {
        */
       public Builder mergeCarInfo(com.andrerinas.openheadunit.aap.protocol.proto.Wireless.WppCarInfo value) {
         if (carInfoBuilder_ == null) {
-          if (((bitField0_ & 0x00000004) != 0) &&
+          if (((bitField0_ & 0x00000010) != 0) &&
             carInfo_ != null &&
             carInfo_ != com.andrerinas.openheadunit.aap.protocol.proto.Wireless.WppCarInfo.getDefaultInstance()) {
             getCarInfoBuilder().mergeFrom(value);
@@ -6165,7 +6603,7 @@ public final class Wireless {
           carInfoBuilder_.mergeFrom(value);
         }
         if (carInfo_ != null) {
-          bitField0_ |= 0x00000004;
+          bitField0_ |= 0x00000010;
           onChanged();
         }
         return this;
@@ -6174,7 +6612,7 @@ public final class Wireless {
        * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.WppCarInfo car_info = 5;</code>
        */
       public Builder clearCarInfo() {
-        bitField0_ = (bitField0_ & ~0x00000004);
+        bitField0_ = (bitField0_ & ~0x00000010);
         carInfo_ = null;
         if (carInfoBuilder_ != null) {
           carInfoBuilder_.dispose();
@@ -6187,7 +6625,7 @@ public final class Wireless {
        * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.WppCarInfo car_info = 5;</code>
        */
       public com.andrerinas.openheadunit.aap.protocol.proto.Wireless.WppCarInfo.Builder getCarInfoBuilder() {
-        bitField0_ |= 0x00000004;
+        bitField0_ |= 0x00000010;
         onChanged();
         return getCarInfoFieldBuilder().getBuilder();
       }
@@ -6227,7 +6665,7 @@ public final class Wireless {
        * @return Whether the wppInfo field is set.
        */
       public boolean hasWppInfo() {
-        return ((bitField0_ & 0x00000008) != 0);
+        return ((bitField0_ & 0x00000020) != 0);
       }
       /**
        * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.WifiProjectionProtocolInfo wpp_info = 6;</code>
@@ -6252,7 +6690,7 @@ public final class Wireless {
         } else {
           wppInfoBuilder_.setMessage(value);
         }
-        bitField0_ |= 0x00000008;
+        bitField0_ |= 0x00000020;
         onChanged();
         return this;
       }
@@ -6266,7 +6704,7 @@ public final class Wireless {
         } else {
           wppInfoBuilder_.setMessage(builderForValue.build());
         }
-        bitField0_ |= 0x00000008;
+        bitField0_ |= 0x00000020;
         onChanged();
         return this;
       }
@@ -6275,7 +6713,7 @@ public final class Wireless {
        */
       public Builder mergeWppInfo(com.andrerinas.openheadunit.aap.protocol.proto.Wireless.WifiProjectionProtocolInfo value) {
         if (wppInfoBuilder_ == null) {
-          if (((bitField0_ & 0x00000008) != 0) &&
+          if (((bitField0_ & 0x00000020) != 0) &&
             wppInfo_ != null &&
             wppInfo_ != com.andrerinas.openheadunit.aap.protocol.proto.Wireless.WifiProjectionProtocolInfo.getDefaultInstance()) {
             getWppInfoBuilder().mergeFrom(value);
@@ -6286,7 +6724,7 @@ public final class Wireless {
           wppInfoBuilder_.mergeFrom(value);
         }
         if (wppInfo_ != null) {
-          bitField0_ |= 0x00000008;
+          bitField0_ |= 0x00000020;
           onChanged();
         }
         return this;
@@ -6295,7 +6733,7 @@ public final class Wireless {
        * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.WifiProjectionProtocolInfo wpp_info = 6;</code>
        */
       public Builder clearWppInfo() {
-        bitField0_ = (bitField0_ & ~0x00000008);
+        bitField0_ = (bitField0_ & ~0x00000020);
         wppInfo_ = null;
         if (wppInfoBuilder_ != null) {
           wppInfoBuilder_.dispose();
@@ -6308,7 +6746,7 @@ public final class Wireless {
        * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.WifiProjectionProtocolInfo wpp_info = 6;</code>
        */
       public com.andrerinas.openheadunit.aap.protocol.proto.Wireless.WifiProjectionProtocolInfo.Builder getWppInfoBuilder() {
-        bitField0_ |= 0x00000008;
+        bitField0_ |= 0x00000020;
         onChanged();
         return getWppInfoFieldBuilder().getBuilder();
       }
@@ -6482,6 +6920,27 @@ public final class Wireless {
      * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.WppWifiDeviceInfo device_info = 6;</code>
      */
     com.andrerinas.openheadunit.aap.protocol.proto.Wireless.WppWifiDeviceInfoOrBuilder getDeviceInfoOrBuilder();
+
+    /**
+     * <pre>
+     * Present in Android Auto 17.5 and 17.8, absent from every schema we had. Contents unknown;
+     * modelled so a session can log it.
+     * </pre>
+     *
+     * <code>optional bytes unknown_blob_7 = 7;</code>
+     * @return Whether the unknownBlob7 field is set.
+     */
+    boolean hasUnknownBlob7();
+    /**
+     * <pre>
+     * Present in Android Auto 17.5 and 17.8, absent from every schema we had. Contents unknown;
+     * modelled so a session can log it.
+     * </pre>
+     *
+     * <code>optional bytes unknown_blob_7 = 7;</code>
+     * @return The unknownBlob7.
+     */
+    com.google.protobuf.ByteString getUnknownBlob7();
   }
   /**
    * <pre>
@@ -6502,6 +6961,7 @@ public final class Wireless {
     }
     private WifiVersionResponse() {
       deviceSerial_ = "";
+      unknownBlob7_ = com.google.protobuf.ByteString.EMPTY;
     }
 
     @java.lang.Override
@@ -6676,6 +7136,35 @@ public final class Wireless {
       return deviceInfo_ == null ? com.andrerinas.openheadunit.aap.protocol.proto.Wireless.WppWifiDeviceInfo.getDefaultInstance() : deviceInfo_;
     }
 
+    public static final int UNKNOWN_BLOB_7_FIELD_NUMBER = 7;
+    private com.google.protobuf.ByteString unknownBlob7_ = com.google.protobuf.ByteString.EMPTY;
+    /**
+     * <pre>
+     * Present in Android Auto 17.5 and 17.8, absent from every schema we had. Contents unknown;
+     * modelled so a session can log it.
+     * </pre>
+     *
+     * <code>optional bytes unknown_blob_7 = 7;</code>
+     * @return Whether the unknownBlob7 field is set.
+     */
+    @java.lang.Override
+    public boolean hasUnknownBlob7() {
+      return ((bitField0_ & 0x00000040) != 0);
+    }
+    /**
+     * <pre>
+     * Present in Android Auto 17.5 and 17.8, absent from every schema we had. Contents unknown;
+     * modelled so a session can log it.
+     * </pre>
+     *
+     * <code>optional bytes unknown_blob_7 = 7;</code>
+     * @return The unknownBlob7.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString getUnknownBlob7() {
+      return unknownBlob7_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -6708,6 +7197,9 @@ public final class Wireless {
       if (((bitField0_ & 0x00000020) != 0)) {
         output.writeMessage(6, getDeviceInfo());
       }
+      if (((bitField0_ & 0x00000040) != 0)) {
+        output.writeBytes(7, unknownBlob7_);
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -6739,6 +7231,10 @@ public final class Wireless {
       if (((bitField0_ & 0x00000020) != 0)) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(6, getDeviceInfo());
+      }
+      if (((bitField0_ & 0x00000040) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(7, unknownBlob7_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
@@ -6785,6 +7281,11 @@ public final class Wireless {
         if (!getDeviceInfo()
             .equals(other.getDeviceInfo())) return false;
       }
+      if (hasUnknownBlob7() != other.hasUnknownBlob7()) return false;
+      if (hasUnknownBlob7()) {
+        if (!getUnknownBlob7()
+            .equals(other.getUnknownBlob7())) return false;
+      }
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -6819,6 +7320,10 @@ public final class Wireless {
       if (hasDeviceInfo()) {
         hash = (37 * hash) + DEVICE_INFO_FIELD_NUMBER;
         hash = (53 * hash) + getDeviceInfo().hashCode();
+      }
+      if (hasUnknownBlob7()) {
+        hash = (37 * hash) + UNKNOWN_BLOB_7_FIELD_NUMBER;
+        hash = (53 * hash) + getUnknownBlob7().hashCode();
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
@@ -6972,6 +7477,7 @@ public final class Wireless {
           deviceInfoBuilder_.dispose();
           deviceInfoBuilder_ = null;
         }
+        unknownBlob7_ = com.google.protobuf.ByteString.EMPTY;
         return this;
       }
 
@@ -7031,6 +7537,10 @@ public final class Wireless {
               ? deviceInfo_
               : deviceInfoBuilder_.build();
           to_bitField0_ |= 0x00000020;
+        }
+        if (((from_bitField0_ & 0x00000040) != 0)) {
+          result.unknownBlob7_ = unknownBlob7_;
+          to_bitField0_ |= 0x00000040;
         }
         result.bitField0_ |= to_bitField0_;
       }
@@ -7099,6 +7609,9 @@ public final class Wireless {
         if (other.hasDeviceInfo()) {
           mergeDeviceInfo(other.getDeviceInfo());
         }
+        if (other.hasUnknownBlob7()) {
+          setUnknownBlob7(other.getUnknownBlob7());
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
@@ -7157,6 +7670,11 @@ public final class Wireless {
                 bitField0_ |= 0x00000020;
                 break;
               } // case 50
+              case 58: {
+                unknownBlob7_ = input.readBytes();
+                bitField0_ |= 0x00000040;
+                break;
+              } // case 58
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -7533,6 +8051,66 @@ public final class Wireless {
           deviceInfo_ = null;
         }
         return deviceInfoBuilder_;
+      }
+
+      private com.google.protobuf.ByteString unknownBlob7_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <pre>
+       * Present in Android Auto 17.5 and 17.8, absent from every schema we had. Contents unknown;
+       * modelled so a session can log it.
+       * </pre>
+       *
+       * <code>optional bytes unknown_blob_7 = 7;</code>
+       * @return Whether the unknownBlob7 field is set.
+       */
+      @java.lang.Override
+      public boolean hasUnknownBlob7() {
+        return ((bitField0_ & 0x00000040) != 0);
+      }
+      /**
+       * <pre>
+       * Present in Android Auto 17.5 and 17.8, absent from every schema we had. Contents unknown;
+       * modelled so a session can log it.
+       * </pre>
+       *
+       * <code>optional bytes unknown_blob_7 = 7;</code>
+       * @return The unknownBlob7.
+       */
+      @java.lang.Override
+      public com.google.protobuf.ByteString getUnknownBlob7() {
+        return unknownBlob7_;
+      }
+      /**
+       * <pre>
+       * Present in Android Auto 17.5 and 17.8, absent from every schema we had. Contents unknown;
+       * modelled so a session can log it.
+       * </pre>
+       *
+       * <code>optional bytes unknown_blob_7 = 7;</code>
+       * @param value The unknownBlob7 to set.
+       * @return This builder for chaining.
+       */
+      public Builder setUnknownBlob7(com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        unknownBlob7_ = value;
+        bitField0_ |= 0x00000040;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Present in Android Auto 17.5 and 17.8, absent from every schema we had. Contents unknown;
+       * modelled so a session can log it.
+       * </pre>
+       *
+       * <code>optional bytes unknown_blob_7 = 7;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearUnknownBlob7() {
+        bitField0_ = (bitField0_ & ~0x00000040);
+        unknownBlob7_ = getDefaultInstance().getUnknownBlob7();
+        onChanged();
+        return this;
       }
       @java.lang.Override
       public final Builder setUnknownFields(
@@ -13181,38 +13759,46 @@ public final class Wireless {
       "\005 \001(\t\022\027\n\017head_unit_model\030\006 \001(\t\022 \n\030head_u" +
       "nit_software_build\030\007 \001(\t\022\"\n\032head_unit_so" +
       "ftware_version\030\010 \001(\t\022\021\n\tbody_type\030\t \001(\005\"" +
-      "\336\001\n\022WifiVersionRequest\022\r\n\005major\030\001 \001(\005\022\r\n" +
-      "\005minor\030\002 \001(\005\022L\n\010car_info\030\005 \001(\0132:.com.and" +
-      "rerinas.openheadunit.aap.protocol.proto." +
-      "WppCarInfo\022\\\n\010wpp_info\030\006 \001(\0132J.com.andre" +
-      "rinas.openheadunit.aap.protocol.proto.Wi" +
-      "fiProjectionProtocolInfo\"\326\001\n\023WifiVersion" +
-      "Response\022\r\n\005major\030\001 \001(\005\022\r\n\005minor\030\002 \001(\005\022\025" +
-      "\n\rdevice_serial\030\003 \001(\t\022\016\n\006status\030\004 \001(\005\022\"\n" +
-      "\032selected_wifi_channel_type\030\005 \001(\005\022V\n\013dev" +
-      "ice_info\030\006 \001(\0132A.com.andrerinas.openhead" +
-      "unit.aap.protocol.proto.WppWifiDeviceInf" +
-      "o\"H\n\021WppWifiDeviceInfo\022\021\n\tdevice_id\030\001 \001(" +
-      "\t\022 \n\030connectivity_lifetime_id\030\002 \001(\t\"?\n\021W" +
-      "ifiConnectStatus\022\016\n\006status\030\001 \001(\005\022\032\n\022erro" +
-      "r_message_hint\030\002 \001(\t\"E\n\021WifiStartRespons" +
-      "e\022\022\n\nip_address\030\001 \001(\t\022\014\n\004port\030\002 \001(\005\022\016\n\006s" +
-      "tatus\030\003 \001(\005\"$\n\017WifiPingRequest\022\021\n\ttimest" +
-      "amp\030\001 \001(\003\"%\n\020WifiPingResponse\022\021\n\ttimesta" +
-      "mp\030\001 \001(\003\"-\n\rWifiSetupInfo\022\r\n\005major\030\001 \001(\005" +
-      "\022\r\n\005minor\030\002 \001(\005\"\334\001\n\026ProjectionDeepLinkDa" +
-      "ta\022\014\n\004ssid\030\001 \001(\t\022\r\n\005bssid\030\002 \001(\t\022\017\n\007passk" +
-      "ey\030\003 \001(\t\022\022\n\nwpp_tcp_ip\030\004 \001(\t\022\024\n\014wpp_tcp_" +
-      "port\030\005 \001(\005\022\025\n\rbluetooth_mac\030\006 \001(\t\022S\n\rsec" +
-      "urity_mode\030\007 \001(\0162<.com.andrerinas.openhe" +
-      "adunit.aap.protocol.proto.SecurityMode**" +
-      "\n\017AccessPointType\022\n\n\006STATIC\020\000\022\013\n\007DYNAMIC" +
-      "\020\001*\312\001\n\014SecurityMode\022\031\n\025UNKNOWN_SECURITY_" +
-      "MODE\020\000\022\010\n\004OPEN\020\001\022\n\n\006WEP_64\020\002\022\013\n\007WEP_128\020" +
-      "\003\022\020\n\014WPA_PERSONAL\020\004\022\021\n\rWPA2_PERSONAL\020\010\022\025" +
-      "\n\021WPA_WPA2_PERSONAL\020\014\022\022\n\016WPA_ENTERPRISE\020" +
-      "\024\022\023\n\017WPA2_ENTERPRISE\020\030\022\027\n\023WPA_WPA2_ENTER" +
-      "PRISE\020\034"
+      "\351\002\n\022WifiVersionRequest\022\r\n\005major\030\001 \001(\005\022\r\n" +
+      "\005minor\030\002 \001(\005\022d\n\033supported_wifi_channel_t" +
+      "ype\030\003 \001(\0162?.com.andrerinas.openheadunit." +
+      "aap.protocol.proto.WifiChannelType\022#\n\027su" +
+      "pported_wifi_channels\030\004 \003(\005B\002\020\001\022L\n\010car_i" +
+      "nfo\030\005 \001(\0132:.com.andrerinas.openheadunit." +
+      "aap.protocol.proto.WppCarInfo\022\\\n\010wpp_inf" +
+      "o\030\006 \001(\0132J.com.andrerinas.openheadunit.aa" +
+      "p.protocol.proto.WifiProjectionProtocolI" +
+      "nfo\"\356\001\n\023WifiVersionResponse\022\r\n\005major\030\001 \001" +
+      "(\005\022\r\n\005minor\030\002 \001(\005\022\025\n\rdevice_serial\030\003 \001(\t" +
+      "\022\016\n\006status\030\004 \001(\005\022\"\n\032selected_wifi_channe" +
+      "l_type\030\005 \001(\005\022V\n\013device_info\030\006 \001(\0132A.com." +
+      "andrerinas.openheadunit.aap.protocol.pro" +
+      "to.WppWifiDeviceInfo\022\026\n\016unknown_blob_7\030\007" +
+      " \001(\014\"H\n\021WppWifiDeviceInfo\022\021\n\tdevice_id\030\001" +
+      " \001(\t\022 \n\030connectivity_lifetime_id\030\002 \001(\t\"?" +
+      "\n\021WifiConnectStatus\022\016\n\006status\030\001 \001(\005\022\032\n\022e" +
+      "rror_message_hint\030\002 \001(\t\"E\n\021WifiStartResp" +
+      "onse\022\022\n\nip_address\030\001 \001(\t\022\014\n\004port\030\002 \001(\005\022\016" +
+      "\n\006status\030\003 \001(\005\"$\n\017WifiPingRequest\022\021\n\ttim" +
+      "estamp\030\001 \001(\003\"%\n\020WifiPingResponse\022\021\n\ttime" +
+      "stamp\030\001 \001(\003\"-\n\rWifiSetupInfo\022\r\n\005major\030\001 " +
+      "\001(\005\022\r\n\005minor\030\002 \001(\005\"\334\001\n\026ProjectionDeepLin" +
+      "kData\022\014\n\004ssid\030\001 \001(\t\022\r\n\005bssid\030\002 \001(\t\022\017\n\007pa" +
+      "sskey\030\003 \001(\t\022\022\n\nwpp_tcp_ip\030\004 \001(\t\022\024\n\014wpp_t" +
+      "cp_port\030\005 \001(\005\022\025\n\rbluetooth_mac\030\006 \001(\t\022S\n\r" +
+      "security_mode\030\007 \001(\0162<.com.andrerinas.ope" +
+      "nheadunit.aap.protocol.proto.SecurityMod" +
+      "e**\n\017AccessPointType\022\n\n\006STATIC\020\000\022\013\n\007DYNA" +
+      "MIC\020\001*u\n\017WifiChannelType\022\026\n\022CHANNELS_5GH" +
+      "Z_ONLY\020\000\022\027\n\023CHANNELS_24GHZ_ONLY\020\001\022\026\n\022CHA" +
+      "NNELS_DUAL_BAND\020\002\022\031\n\025NO_CHANNELS_SUPPORT" +
+      "ED\020\003*\365\001\n\014SecurityMode\022\031\n\025UNKNOWN_SECURIT" +
+      "Y_MODE\020\000\022\010\n\004OPEN\020\001\022\n\n\006WEP_64\020\002\022\013\n\007WEP_12" +
+      "8\020\003\022\020\n\014WPA_PERSONAL\020\004\022\021\n\rWPA2_PERSONAL\020\010" +
+      "\022\025\n\021WPA_WPA2_PERSONAL\020\014\022\022\n\016WPA_ENTERPRIS" +
+      "E\020\024\022\023\n\017WPA2_ENTERPRISE\020\030\022\027\n\023WPA_WPA2_ENT" +
+      "ERPRISE\020\034\022\021\n\rWPA3_PERSONAL\020 \022\026\n\022WPA2_WPA" +
+      "3_PERSONAL\020("
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -13253,13 +13839,13 @@ public final class Wireless {
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_WifiVersionRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_com_andrerinas_openheadunit_aap_protocol_proto_WifiVersionRequest_descriptor,
-        new java.lang.String[] { "Major", "Minor", "CarInfo", "WppInfo", });
+        new java.lang.String[] { "Major", "Minor", "SupportedWifiChannelType", "SupportedWifiChannels", "CarInfo", "WppInfo", });
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_WifiVersionResponse_descriptor =
       getDescriptor().getMessageTypes().get(6);
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_WifiVersionResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_com_andrerinas_openheadunit_aap_protocol_proto_WifiVersionResponse_descriptor,
-        new java.lang.String[] { "Major", "Minor", "DeviceSerial", "Status", "SelectedWifiChannelType", "DeviceInfo", });
+        new java.lang.String[] { "Major", "Minor", "DeviceSerial", "Status", "SelectedWifiChannelType", "DeviceInfo", "UnknownBlob7", });
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_WppWifiDeviceInfo_descriptor =
       getDescriptor().getMessageTypes().get(7);
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_WppWifiDeviceInfo_fieldAccessorTable = new

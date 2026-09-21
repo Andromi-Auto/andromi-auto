@@ -186,6 +186,12 @@ object HeadUnitCommand {
     const val ACTION_SET_NIGHT_MODE = "$PREFIX.ACTION_SET_NIGHT_MODE"
     const val ACTION_START_WIRELESS = "$PREFIX.ACTION_START_WIRELESS"
     const val ACTION_STOP_WIRELESS = "$PREFIX.ACTION_STOP_WIRELESS"
+
+    /**
+     * Stops the wireless bring-up and keeps it down, as the status pill's X does. Unlike
+     * [ACTION_STOP_WIRELESS] no automatic trigger undoes it; asking for wireless by hand does.
+     */
+    const val ACTION_CANCEL_WIRELESS = "$PREFIX.ACTION_CANCEL_WIRELESS"
     const val ACTION_START_WIRELESS_SCAN = "$PREFIX.ACTION_START_WIRELESS_SCAN"
     const val ACTION_NATIVE_AA_POKE = "$PREFIX.ACTION_NATIVE_AA_POKE"
 

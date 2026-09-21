@@ -30,7 +30,9 @@ jobs:
           java-version: "21"
 
       - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
+        uses: android-actions/setup-android@v4
+        with:
+          packages: ''
 
       # NDK/CMake versions are pinned in app/build.gradle.kts; install the
       # exact versions rather than relying on whatever the runner ships.
@@ -77,7 +79,9 @@ jobs:
           java-version: "21"
 
       - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
+        uses: android-actions/setup-android@v4
+        with:
+          packages: ''
 
       # See the build job for why NDK/CMake are pinned and the install is retried.
       - name: Install pinned NDK and CMake

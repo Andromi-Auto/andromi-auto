@@ -113,4 +113,33 @@ class ConnectionIssuesTest {
 
         assertTrue(ConnectionIssues.standing(store).isEmpty())
     }
+
+    @Test
+    fun `raising once leaves a standing stamp where it is`() {
+        // The poke loop re-detects its condition every pass. A moving stamp would overtake the
+        // user's dismissal every time and the banner could never be dismissed at all.
+        val store = FakeStore()
+        ConnectionIssues.raiseOnce(store, ConnectionIssue.HANDS_FREE_HELD_ELSEWHERE, 1_000L)
+        ConnectionIssues.raiseOnce(store, ConnectionIssue.HANDS_FREE_HELD_ELSEWHERE, 9_000L)
+        assertEquals(1_000L, store.read(ConnectionIssue.HANDS_FREE_HELD_ELSEWHERE))
+    }
+
+    @Test
+    fun `raising once after a clear stamps the new occurrence`() {
+        val store = FakeStore()
+        ConnectionIssues.raiseOnce(store, ConnectionIssue.HANDS_FREE_HELD_ELSEWHERE, 1_000L)
+        ConnectionIssues.clear(store, ConnectionIssue.HANDS_FREE_HELD_ELSEWHERE)
+        ConnectionIssues.raiseOnce(store, ConnectionIssue.HANDS_FREE_HELD_ELSEWHERE, 9_000L)
+        assertEquals(9_000L, store.read(ConnectionIssue.HANDS_FREE_HELD_ELSEWHERE))
+    }
+
+    @Test
+    fun `an ordinary raise still moves a standing stamp forward`() {
+        // The banner answers "why did the last attempt fail", so an event-detected condition keeps
+        // reporting its latest occurrence. Only the loop-detected one opts out.
+        val store = FakeStore()
+        ConnectionIssues.raise(store, ConnectionIssue.WIFI_RADIO_OFF, 1_000L)
+        ConnectionIssues.raise(store, ConnectionIssue.WIFI_RADIO_OFF, 9_000L)
+        assertEquals(9_000L, store.read(ConnectionIssue.WIFI_RADIO_OFF))
+    }
 }

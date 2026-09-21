@@ -45,6 +45,32 @@ object NativeDriverSelectionPolicy {
     const val CHOSEN_WAKE_ROUNDS = 3
 
     /**
+     * Whether a wake attempt spent one of [CHOSEN_WAKE_ROUNDS].
+     *
+     * A wake the hands-free guard stood down opened nothing and cost the phone nothing, so counting
+     * it burns the budget on the air time it never used.
+     */
+    fun wakeRoundSpent(outcome: BluetoothWakePolicy.WakeOutcome): Boolean =
+        outcome != BluetoothWakePolicy.WakeOutcome.STOOD_DOWN
+
+    /**
+     * Whether a chosen driver's wake loop takes another pass.
+     *
+     * Three stood-down rounds are over in about 30 s, while the escalation that answers exactly that
+     * stand-down needs [HandsFreeWakeEscalationPolicy.ESCALATE_AFTER_MS] to mature, so a budget
+     * counted in refusals put the escalation out of reach on the single-phone default. Refusals are
+     * bounded by [CHOSEN_EXCLUSIVE_MAX_MS] instead, which is the ceiling they already sit under.
+     */
+    fun chosenWakeContinues(
+        outcome: BluetoothWakePolicy.WakeOutcome,
+        roundsDialled: Int,
+        elapsedMs: Long,
+    ): Boolean =
+        outcome != BluetoothWakePolicy.WakeOutcome.NOT_PAIRED &&
+            roundsDialled < CHOSEN_WAKE_ROUNDS &&
+            elapsedMs < CHOSEN_EXCLUSIVE_MAX_MS
+
+    /**
      * The hard ceiling on refusing every other phone while the chosen one is woken.
      *
      * Three 20 s holds and two 15 s gaps is a 90 s wake budget, plus 30 s for the phone to join: a

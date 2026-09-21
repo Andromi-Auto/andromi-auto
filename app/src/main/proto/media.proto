@@ -61,6 +61,14 @@ message Ack
 {
     required int32 session_id = 1;
     required uint32 ack = 2;
+    repeated uint64 receive_timestamp_ns = 3;
+}
+
+// Type 0x800B, head unit -> phone, no reply. One per underflow, only between the first audio
+// packet and Stop. Added in AAP 1.6 and must not be sent to a phone that selected less.
+message AudioUnderflowNotification
+{
+    required int32 session_id = 1;
 }
 
 message MicrophoneRequest
@@ -92,6 +100,8 @@ message VideoFocusRequestNotification
         UNKNOWN = 0;
         PHONE_SCREEN_OFF = 1;
         LAUNCH_NATIVE = 2;
+        VIDEO_FOCUS_REASON_LAST_MODE = 3;
+        VIDEO_FOCUS_REASON_USER_SELECTION = 4;
     }
 
     optional int32 disp_channel_id = 1;
@@ -114,8 +124,8 @@ message Config
 {
     enum ConfigStatus
     {
-        DEVICE = 1;
-        HEADUNIT = 2;
+        STATUS_WAIT = 1;
+        STATUS_READY = 2;
     }
     required ConfigStatus status = 1;
     required uint32 max_unacked = 2;
@@ -145,5 +155,5 @@ message UpdateUiConfigRequest
 
 message UpdateUiConfigReply
 {
-    required uint32 status = 1;
+    optional UiConfig ui_config = 1;
 }

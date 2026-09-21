@@ -42,11 +42,13 @@ object FloatingButtonManager {
             FloatingButtonService.start(context)
         } else {
             FloatingButtonService.stop(context)
+            FloatingButtonService.removeOverlayDirect(context)
         }
     }
 
     fun removeOverlay(context: Context) {
         FloatingButtonService.stop(context)
+        FloatingButtonService.removeOverlayDirect(context)
     }
 
     fun requestOverlayPermission(context: Context) {

@@ -21,12 +21,32 @@ class UnresponsivePeerPolicyTest {
     }
 
     @Test
-    fun `the cadence drops at the threshold and stays down`() {
+    fun `the cadence drops at the threshold and holds until the last tier`() {
+        for (failures in UnresponsivePeerPolicy.SILENT_FAILURES_BEFORE_BACKOFF
+            until UnresponsivePeerPolicy.SILENT_FAILURES_BEFORE_LAST_TIER) {
+            assertEquals(
+                "failures=$failures",
+                UnresponsivePeerPolicy.BACKOFF_RESCAN_MS,
+                UnresponsivePeerPolicy.rescanDelayMs(failures)
+            )
+        }
+    }
+
+    @Test
+    fun `the cadence drops once more when a minute apart has plainly not helped`() {
+        // Every attempt strands another socket on the phone, and the phone never reaps them.
         assertEquals(
-            UnresponsivePeerPolicy.BACKOFF_RESCAN_MS,
-            UnresponsivePeerPolicy.rescanDelayMs(UnresponsivePeerPolicy.SILENT_FAILURES_BEFORE_BACKOFF)
+            UnresponsivePeerPolicy.LAST_TIER_RESCAN_MS,
+            UnresponsivePeerPolicy.rescanDelayMs(UnresponsivePeerPolicy.SILENT_FAILURES_BEFORE_LAST_TIER)
         )
-        assertEquals(UnresponsivePeerPolicy.BACKOFF_RESCAN_MS, UnresponsivePeerPolicy.rescanDelayMs(34))
+        assertEquals(UnresponsivePeerPolicy.LAST_TIER_RESCAN_MS, UnresponsivePeerPolicy.rescanDelayMs(34))
+    }
+
+    @Test
+    fun `each tier is slower than the one before it`() {
+        assertTrue(UnresponsivePeerPolicy.NORMAL_RESCAN_MS < UnresponsivePeerPolicy.BACKOFF_RESCAN_MS)
+        assertTrue(UnresponsivePeerPolicy.BACKOFF_RESCAN_MS < UnresponsivePeerPolicy.LAST_TIER_RESCAN_MS)
+        assertTrue(UnresponsivePeerPolicy.SILENT_FAILURES_BEFORE_BACKOFF < UnresponsivePeerPolicy.SILENT_FAILURES_BEFORE_LAST_TIER)
     }
 
     @Test

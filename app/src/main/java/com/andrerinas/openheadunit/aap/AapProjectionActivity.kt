@@ -4,7 +4,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
-import android.graphics.Typeface
 import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
@@ -44,6 +43,7 @@ import com.andrerinas.openheadunit.decoder.video.VideoDimensionsListener
 import com.andrerinas.openheadunit.utils.AppLog
 import com.andrerinas.openheadunit.utils.BluetoothHelper
 import com.andrerinas.openheadunit.connection.self.SelfModeCallRaisePolicy
+import com.andrerinas.openheadunit.connection.usb.UsbSwitchClaim
 import com.andrerinas.openheadunit.decoder.audio.CallState
 import com.andrerinas.openheadunit.utils.IntentFilters
 import com.andrerinas.openheadunit.view.IProjectionView
@@ -53,6 +53,7 @@ import com.andrerinas.openheadunit.view.TextureProjectionView
 import com.andrerinas.openheadunit.utils.Settings
 import com.andrerinas.openheadunit.utils.ToastUtils
 import com.andrerinas.openheadunit.view.OverlayTouchView
+import com.andrerinas.openheadunit.view.PerformanceOverlay
 import com.andrerinas.openheadunit.utils.HeadUnitScreenConfig
 import com.andrerinas.openheadunit.utils.SystemUI
 import com.andrerinas.openheadunit.aap.AapService
@@ -72,8 +73,6 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.andrerinas.openheadunit.main.AutoStartOfferPolicy
 import com.andrerinas.openheadunit.main.MainActivity
 import java.io.File
-import java.util.concurrent.Executors
-import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.abs
 
 class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, VideoDimensionsListener {
@@ -87,6 +86,12 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
     private var isSurfaceSet = false
     private var overlayState = OverlayState.STARTING
     private val watchdogHandler = android.os.Handler(android.os.Looper.getMainLooper())
+
+    /** When the session dropped, and when the reconnect last showed a sign of life. Realtime, so a
+     * unit that sleeps mid-reconnect does not come back with the whole wait still ahead of it. */
+    private var disconnectedAtMs = 0L
+    private var lastReconnectProgressAtMs = 0L
+    private var reconnectIsUsb = false
 
     /**
      * True when the user themselves left the projection (Home, Recents), which fires
@@ -119,26 +124,9 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
     // Activity-local override for fullscreen mode. If non-null, setFullscreen() will use this
     // instead of persisting to Settings. This keeps toggles local to the Activity lifecycle.
     private var activityFullscreenOverride: Settings.FullscreenMode? = null
-    private var fpsTextView: TextView? = null
     private var touchOverlayView: OverlayTouchView? = null
-    private var currentFps: Int? = null
-
-    // Named rather than inline so onDestroy can tell this instance's listener apart from a
-    // relaunched instance's before clearing it - lambdas have no usable identity across instances.
-    private val fpsListener: (Int) -> Unit = { fps -> currentFps = fps }
-    private val performanceHandler = android.os.Handler(android.os.Looper.getMainLooper())
-    private val performanceSampler = PerformanceSampler()
-    private val performanceExecutor = Executors.newSingleThreadExecutor { runnable ->
-        Thread(runnable, "PerformanceSampler").apply {
-            priority = Thread.MIN_PRIORITY
-        }
-    }
-    private val performanceSampleInFlight = AtomicBoolean(false)
-    private val performanceOverlayRunnable = object : Runnable {
-        override fun run() {
-            requestPerformanceOverlayUpdate()
-            performanceHandler.postDelayed(this, 1000L)
-        }
+    private val performanceOverlay by lazy {
+        PerformanceOverlay(settings) { videoDecoder.lastFrameRenderedMs }
     }
 
     private var isOrientationReceiverRegistered = false
@@ -418,12 +406,44 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         AppLog.w("AapProjectionActivity: connected but no frames - requesting video focus (unsolicited)")
         commManager.send(VideoFocusEvent(gain = true, unsolicited = true))
     }
-    private val exitRunnable = Runnable {
-        if (commManager.connectionState.value is CommManager.ConnectionState.Disconnected) {
-            AppLog.i("AapProjectionActivity: Reconnect timed out (20s). Finishing activity.")
+    /**
+     * Re-asks [ReconnectGracePolicy] rather than firing at a fixed delay, because a reconnect that
+     * is visibly in flight has to outlive the base grace: the AOA switch alone is sized at 10s.
+     */
+    private val exitRunnable = object : Runnable {
+        override fun run() {
+            if (commManager.connectionState.value !is CommManager.ConnectionState.Disconnected) return
+            noteReconnectProgressIfSwitching()
+            val now = SystemClock.elapsedRealtime()
+            val sinceProgress =
+                if (lastReconnectProgressAtMs == 0L) null else now - lastReconnectProgressAtMs
+            val ended = ReconnectGracePolicy.endedBecause(
+                reconnectIsUsb, now - disconnectedAtMs, sinceProgress
+            )
+            if (ended == null) {
+                watchdogHandler.postDelayed(this, ProjectionWatchdogPolicy.WATCHDOG_TICK_MS)
+                return
+            }
+            AppLog.i(
+                "AapProjectionActivity: Reconnect gave up after ${(now - disconnectedAtMs) / 1000}s " +
+                    "($ended). Finishing activity."
+            )
             hideReconnectingOverlay("reconnect timed out")
             finish()
         }
+    }
+
+    /** The AOA switch runs with the session still Disconnected, so the claim is the only sign of it. */
+    private fun noteReconnectProgressIfSwitching() {
+        if (reconnectIsUsb && UsbSwitchClaim.isLive()) noteReconnectProgress("a USB switch is in flight")
+    }
+
+    private fun noteReconnectProgress(what: String) {
+        if (disconnectedAtMs == 0L) return
+        if (lastReconnectProgressAtMs == 0L) {
+            AppLog.i("AapProjectionActivity: reconnect is under way ($what), holding the overlay")
+        }
+        lastReconnectProgressAtMs = SystemClock.elapsedRealtime()
     }
     private val watchdogRunnable = Runnable {
         if (!isSurfaceSet) {
@@ -486,14 +506,14 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
 
             updateDesaturation(com.andrerinas.openheadunit.utils.NightMode(settings, false).current)
 
-            if (settings.showFpsCounter && fpsTextView == null) {
-                setupFpsCounter()
-            } else if (!settings.showFpsCounter && fpsTextView != null) {
-                fpsTextView?.visibility = View.GONE
-                stopPerformanceOverlayUpdates()
-            } else if (settings.showFpsCounter && fpsTextView != null) {
-                fpsTextView?.visibility = View.VISIBLE
-                startPerformanceOverlayUpdates()
+            if (settings.showPerformanceOverlay && !performanceOverlay.isAttached) {
+                attachPerformanceOverlay()
+            } else if (!settings.showPerformanceOverlay && performanceOverlay.isAttached) {
+                performanceOverlay.setVisible(false)
+                performanceOverlay.stop()
+            } else if (settings.showPerformanceOverlay && performanceOverlay.isAttached) {
+                performanceOverlay.setVisible(true)
+                performanceOverlay.start()
             }
         }
     }
@@ -516,7 +536,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
             setupProjectionView()
             val mirror = if (settings.hudMirroring) -1.0f else 1.0f
             findViewById<View>(R.id.loading_overlay)?.scaleX = mirror
-            fpsTextView?.scaleX = mirror
+            performanceOverlay.setMirror(mirror)
         }
     }
 
@@ -767,16 +787,14 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         val cands = BluetoothHelper.driverCandidates(
             this, settings.nativePreferredDeviceMac, connectedMac
         )
-        val action = AutoStartOfferPolicy.decide(
+        // The connected phone is pinned PROVEN here, so the offered tier really is the phones.
+        val offers = AutoStartOfferPolicy.offers(
             phonesPaired = cands.offered.size,
             connectedMac = connectedMac,
             answeredMacs = settings.autoStartOfferAnsweredMacs,
             autoStartConfigured = settings.autoStartBluetoothDeviceMacs.isNotEmpty(),
         )
-        if (!AutoStartOfferPolicy.actsNow(
-                action, AutoStartOfferPolicy.Trigger.PROJECTION_START
-            )
-        ) return
+        if (!offers) return
         showAutoStartOfferBanner(connectedMac, cands.deviceFor(connectedMac)?.name ?: connectedMac)
     }
 
@@ -959,8 +977,8 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
 
         setContentView(R.layout.activity_headunit)
 
-        if (settings.showFpsCounter) {
-            setupFpsCounter()
+        if (settings.showPerformanceOverlay) {
+            attachPerformanceOverlay()
         }
 
         videoDecoder.dimensionsListener = this
@@ -999,10 +1017,14 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
                                 hideReconnectingOverlay("the session ended")
                                 finish()
                             } else {
-                                // For unexpected disconnects (especially Wireless), show the reconnecting overlay immediately
-                                // and wait up to 20 seconds (or 8 seconds for USB) to see if the connection recovers.
-                                val timeoutMs = if (settings.lastConnectionType == Settings.CONNECTION_TYPE_USB) 8000L else 20000L
-                                AppLog.i("AapProjectionActivity: Unexpected disconnect. Showing reconnecting overlay and waiting up to ${timeoutMs / 1000}s for recovery.")
+                                // Show the reconnecting overlay immediately. How long it stays is
+                                // ReconnectGracePolicy's: the base below, extended while a reconnect
+                                // is visibly in flight, because an AOA switch outlasts the USB base.
+                                reconnectIsUsb = settings.lastConnectionType == Settings.CONNECTION_TYPE_USB
+                                disconnectedAtMs = SystemClock.elapsedRealtime()
+                                lastReconnectProgressAtMs = 0L
+                                val baseMs = ReconnectGracePolicy.baseFor(reconnectIsUsb)
+                                AppLog.i("AapProjectionActivity: Unexpected disconnect. Showing reconnecting overlay and waiting at least ${baseMs / 1000}s for recovery.")
                                 showReconnectingOverlay()
 
                                 // Re-initialize the first frame listener to hide the reconnecting overlay when video starts flowing
@@ -1013,7 +1035,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
                                 }
 
                                 watchdogHandler.removeCallbacks(exitRunnable)
-                                watchdogHandler.postDelayed(exitRunnable, timeoutMs)
+                                watchdogHandler.postDelayed(exitRunnable, ProjectionWatchdogPolicy.WATCHDOG_TICK_MS)
                             }
                         }
                         is CommManager.ConnectionState.HandshakeComplete -> {
@@ -1039,6 +1061,11 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
                         is CommManager.ConnectionState.TransportStarted -> {
                             watchdogHandler.removeCallbacks(exitRunnable)
                         }
+                        // The reconnect is answering. Each of these refreshes the grace.
+                        is CommManager.ConnectionState.Connecting -> noteReconnectProgress("connecting")
+                        is CommManager.ConnectionState.Connected -> noteReconnectProgress("connected")
+                        is CommManager.ConnectionState.StartingTransport ->
+                            noteReconnectProgress("starting the transport")
                         else -> {}
                     }
                 }
@@ -1088,6 +1115,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
 
         // Ensure loading overlay is on top of everything
         loadingOverlay?.bringToFront()
+        performanceOverlay.bringToFront()
 
         // Set up custom loading screen if configured
         setupCustomLoadingScreen()
@@ -1663,10 +1691,10 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
             // Hide UI elements during PiP (like FPS counter, loading overlay)
             findViewById<View>(R.id.loading_overlay)?.visibility = View.GONE
             stopCustomLoadingMedia()
-            fpsTextView?.visibility = View.GONE
+            performanceOverlay.setVisible(false)
         } else {
             // Restore UI if needed
-            fpsTextView?.visibility = if (settings.showFpsCounter) View.VISIBLE else View.GONE
+            performanceOverlay.setVisible(settings.showPerformanceOverlay)
             setFullscreen()
         }
     }
@@ -2167,8 +2195,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         // and the Ken Burns animator outlive the view hierarchy briefly.
         // stopCustomLoadingMedia releases both.
         stopCustomLoadingMedia()
-        stopPerformanceOverlayUpdates()
-        performanceExecutor.shutdownNow()
+        performanceOverlay.release()
         AppLog.i("AapProjectionActivity.onDestroy called. isFinishing=$isFinishing")
         App.isPiPActive = false
         // On a singleTask relaunch the new instance's onCreate runs before this old instance's
@@ -2177,7 +2204,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         // instance strips the live one: its view callback stays armed to fire a stale
         // surface-destroy, and its listeners get nulled out from under it.
         if (::projectionView.isInitialized) projectionView.removeCallback(this)
-        if (videoDecoder.onFpsChanged === fpsListener) videoDecoder.onFpsChanged = null
+        if (videoDecoder.onFpsChanged === performanceOverlay.fpsListener) videoDecoder.onFpsChanged = null
         (if (::projectionView.isInitialized) projectionView as? SoftwareYuvFrameSink else null)?.let {
             if (videoDecoder.softwareYuvFrameSink === it) videoDecoder.softwareYuvFrameSink = null
         }
@@ -2299,182 +2326,12 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         projectionView.addCallback(this)
         // Baseline for the "no frame drawn while streaming" renderer check (issue #767).
         projectionStartMs = SystemClock.elapsedRealtime()
+        performanceOverlay.bringToFront()
     }
 
-    private fun setupFpsCounter() {
-        val container = findViewById<FrameLayout>(R.id.container)
-        fpsTextView = TextView(this).apply {
-            setTextColor(Color.YELLOW)
-            textSize = 12f
-            setTypeface(null, Typeface.BOLD)
-            setBackgroundColor(Color.parseColor("#80000000"))
-            setPadding(10, 5, 10, 5)
-            text = "FPS: --\nCPU: -- / --\nTemp: --\nFrame: --"
-            // Lift it above everything
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                elevation = 100f
-                translationZ = 100f
-            }
-            if (settings.hudMirroring) {
-                scaleX = -1.0f
-            }
-        }
-        val params = FrameLayout.LayoutParams(
-            FrameLayout.LayoutParams.WRAP_CONTENT,
-            FrameLayout.LayoutParams.WRAP_CONTENT
-        ).apply {
-            gravity = Gravity.TOP or Gravity.START
-            setMargins(20, 20, 0, 0)
-        }
-        container.addView(fpsTextView, params)
-
-        videoDecoder.onFpsChanged = fpsListener
-        startPerformanceOverlayUpdates()
-    }
-
-    private fun startPerformanceOverlayUpdates() {
-        performanceHandler.removeCallbacks(performanceOverlayRunnable)
-        performanceOverlayRunnable.run()
-    }
-
-    private fun stopPerformanceOverlayUpdates() {
-        performanceHandler.removeCallbacks(performanceOverlayRunnable)
-    }
-
-    private fun requestPerformanceOverlayUpdate() {
-        if (!performanceSampleInFlight.compareAndSet(false, true)) return
-
-        val fpsSnapshot = currentFps
-        val lastFrameSnapshot = videoDecoder.lastFrameRenderedMs
-        try {
-            performanceExecutor.execute {
-                try {
-                    val text = buildPerformanceOverlayText(fpsSnapshot, lastFrameSnapshot)
-                    runOnUiThread {
-                        if (!isFinishing && fpsTextView?.visibility == View.VISIBLE) {
-                            fpsTextView?.text = text
-                        }
-                    }
-                } catch (e: Exception) {
-                    AppLog.w("Performance overlay update failed: ${e.message}")
-                } finally {
-                    performanceSampleInFlight.set(false)
-                }
-            }
-        } catch (e: java.util.concurrent.RejectedExecutionException) {
-            performanceSampleInFlight.set(false)
-        }
-    }
-
-    private fun buildPerformanceOverlayText(fpsSnapshot: Int?, lastFrameSnapshot: Long): String {
-        val metrics = performanceSampler.sample()
-        val frameAgeText = if (lastFrameSnapshot > 0L) {
-            "${SystemClock.elapsedRealtime() - lastFrameSnapshot}ms"
-        } else {
-            "--"
-        }
-        val fpsText = fpsSnapshot?.toString() ?: "--"
-        val appCpuText = metrics.appCpuPercent?.let { "${it}%" } ?: "--"
-        val totalCpuText = metrics.totalCpuPercent?.let { "${it}%" }
-            ?: metrics.loadAverage?.let { String.format(java.util.Locale.US, "%.2f load", it) }
-            ?: "--"
-        val tempText = metrics.temperatureC?.let { "${it}C" } ?: "--"
-        return "FPS: $fpsText\nCPU: app $appCpuText / sys $totalCpuText\nTemp: $tempText\nFrame: $frameAgeText"
-    }
-
-    private class PerformanceSampler {
-        private data class TotalCpuSnapshot(
-            val totalJiffies: Long,
-            val idleJiffies: Long
-        )
-
-        data class Metrics(
-            val appCpuPercent: Int?,
-            val totalCpuPercent: Int?,
-            val loadAverage: Double?,
-            val temperatureC: Int?
-        )
-
-        private var previousTotalCpu: TotalCpuSnapshot? = null
-        private var previousProcessCpuMs: Long? = null
-        private var previousElapsedMs: Long? = null
-
-        fun sample(): Metrics {
-            val nowElapsedMs = SystemClock.elapsedRealtime()
-            val nowProcessCpuMs = android.os.Process.getElapsedCpuTime()
-            val previousProcess = previousProcessCpuMs
-            val previousElapsed = previousElapsedMs
-            previousProcessCpuMs = nowProcessCpuMs
-            previousElapsedMs = nowElapsedMs
-
-            val appCpu = if (previousProcess != null && previousElapsed != null) {
-                val cpuDelta = (nowProcessCpuMs - previousProcess).coerceAtLeast(0L)
-                val elapsedDelta = (nowElapsedMs - previousElapsed).coerceAtLeast(1L)
-                ((cpuDelta.toDouble() / elapsedDelta) * 100.0).toInt().coerceAtLeast(0)
-            } else {
-                null
-            }
-
-            val currentTotalCpu = readTotalCpuSnapshot()
-            val previousTotal = previousTotalCpu
-            previousTotalCpu = currentTotalCpu
-            val totalCpu = if (currentTotalCpu != null && previousTotal != null) {
-                val totalDelta = (currentTotalCpu.totalJiffies - previousTotal.totalJiffies).coerceAtLeast(1L)
-                val idleDelta = (currentTotalCpu.idleJiffies - previousTotal.idleJiffies).coerceAtLeast(0L)
-                (((totalDelta - idleDelta).toDouble() / totalDelta) * 100.0).toInt().coerceIn(0, 100)
-            } else {
-                null
-            }
-
-            return Metrics(appCpu, totalCpu, readLoadAverage(), readTemperatureC())
-        }
-
-        private fun readTotalCpuSnapshot(): TotalCpuSnapshot? {
-            return try {
-                val cpuLine = File("/proc/stat").useLines { lines ->
-                    lines.firstOrNull { it.startsWith("cpu ") }
-                } ?: return null
-                val cpuValues = cpuLine.trim().split(Regex("\\s+")).drop(1).mapNotNull { it.toLongOrNull() }
-                if (cpuValues.size < 5) return null
-                val idle = cpuValues.getOrElse(3) { 0L } + cpuValues.getOrElse(4) { 0L }
-                val total = cpuValues.take(8).sum()
-                TotalCpuSnapshot(total, idle)
-            } catch (e: Exception) {
-                null
-            }
-        }
-
-        private fun readLoadAverage(): Double? {
-            return try {
-                File("/proc/loadavg")
-                    .readText()
-                    .trim()
-                    .split(Regex("\\s+"))
-                    .firstOrNull()
-                    ?.toDoubleOrNull()
-            } catch (e: Exception) {
-                null
-            }
-        }
-
-        private fun readTemperatureC(): Int? {
-            return try {
-                val thermalRoot = File("/sys/class/thermal")
-                val values = thermalRoot.listFiles()
-                    ?.filter { it.name.startsWith("thermal_zone") }
-                    ?.mapNotNull { zone ->
-                        val raw = zone.resolve("temp").readText().trim().toIntOrNull() ?: return@mapNotNull null
-                        when {
-                            raw in 10000..125000 -> raw / 1000
-                            raw in 10..125 -> raw
-                            else -> null
-                        }
-                    }
-                    .orEmpty()
-                values.maxOrNull()
-            } catch (e: Exception) {
-                null
-            }
-        }
+    private fun attachPerformanceOverlay() {
+        performanceOverlay.attachTo(findViewById(R.id.container))
+        videoDecoder.onFpsChanged = performanceOverlay.fpsListener
+        performanceOverlay.start()
     }
 }

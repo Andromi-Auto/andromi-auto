@@ -22,8 +22,16 @@ class UsbBusHintPolicyTest {
     }
 
     @Test
-    fun `two identities inside the window is a cycling adapter`() {
-        assertEquals(UsbBusHintPolicy.Hint.CYCLING_ADAPTER, UsbBusHintPolicy.hint(1, 0, 2, featureDeclared = true))
+    fun `enough composition changes inside the window is a cycling adapter`() {
+        assertEquals(
+            UsbBusHintPolicy.Hint.CYCLING_ADAPTER,
+            UsbBusHintPolicy.hint(1, 0, UsbBusHintPolicy.CYCLING_CHANGES, featureDeclared = true)
+        )
+    }
+
+    @Test
+    fun `one plug-in is two changes at most and is not a cycling adapter`() {
+        assertEquals(UsbBusHintPolicy.Hint.NONE_USABLE, UsbBusHintPolicy.hint(1, 0, 2, featureDeclared = true))
     }
 
     @Test
@@ -44,7 +52,7 @@ class UsbBusHintPolicyTest {
         )
         assertEquals(
             UsbBusHintPolicy.Hint.CYCLING_ADAPTER,
-            UsbBusHintPolicy.hint(1, 0, 2, featureDeclared = false)
+            UsbBusHintPolicy.hint(1, 0, UsbBusHintPolicy.CYCLING_CHANGES, featureDeclared = false)
         )
         assertNull(UsbBusHintPolicy.hint(1, 1, 0, featureDeclared = false))
     }
@@ -80,5 +88,61 @@ class UsbBusHintPolicyTest {
         val now = 100_000L
         val seen = listOf(now - UsbBusHintPolicy.IDENTITY_WINDOW_MS to "0525:A4A7")
         assertEquals(emptyList<String>(), UsbBusHintPolicy.identitiesInWindow(seen, now))
+    }
+
+    @Test
+    fun `a bus whose devices never change never moves the counter`() {
+        // The reporter's unit: a USB hub and a built-in LTE modem, both permanent, neither usable.
+        val now = 300_000L
+        val bus = setOf("0424:4940", "19D2:1405")
+        val scans = listOf(now - 40_000 to bus, now - 20_000 to bus, now - 1_000 to bus)
+        assertEquals(0, UsbBusHintPolicy.compositionChanges(scans, now))
+        assertEquals(
+            UsbBusHintPolicy.Hint.NONE_USABLE,
+            UsbBusHintPolicy.hint(2, 0, UsbBusHintPolicy.compositionChanges(scans, now), featureDeclared = true)
+        )
+    }
+
+    @Test
+    fun `a phone switching into accessory mode is not a cycling adapter`() {
+        val now = 300_000L
+        val fixed = setOf("0424:4940", "19D2:1405")
+        val scans = listOf(
+            now - 5_000 to fixed + "2717:FF08",   // attached in its own identity
+            now - 4_000 to fixed,                 // gone while it switches
+            now - 3_000 to fixed + "18D1:2D01",   // back as the accessory
+        )
+        assertEquals(2, UsbBusHintPolicy.compositionChanges(scans, now))
+        assertEquals(
+            UsbBusHintPolicy.Hint.NONE_USABLE,
+            UsbBusHintPolicy.hint(3, 0, UsbBusHintPolicy.compositionChanges(scans, now), featureDeclared = true)
+        )
+    }
+
+    @Test
+    fun `a dongle cycling behind a hub still reaches the hint`() {
+        val now = 300_000L
+        val hub = setOf("0424:4940")
+        val scans = listOf(
+            now - 40_000 to hub + "0525:A4A7",
+            now - 30_000 to hub,
+            now - 20_000 to hub + "05AC:12A8",
+            now - 10_000 to hub,
+        )
+        assertEquals(3, UsbBusHintPolicy.compositionChanges(scans, now))
+        assertEquals(
+            UsbBusHintPolicy.Hint.CYCLING_ADAPTER,
+            UsbBusHintPolicy.hint(1, 0, UsbBusHintPolicy.compositionChanges(scans, now), featureDeclared = true)
+        )
+    }
+
+    @Test
+    fun `a change whose earlier side fell out of the window is not counted`() {
+        val now = 300_000L
+        val scans = listOf(
+            now - 90_000 to setOf("0525:A4A7"),   // outside
+            now - 10_000 to setOf("05AC:12A8"),
+        )
+        assertEquals(0, UsbBusHintPolicy.compositionChanges(scans, now))
     }
 }

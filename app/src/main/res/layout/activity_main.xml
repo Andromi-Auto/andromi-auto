@@ -207,8 +207,8 @@
     <!-- Bring-up status pill: up whenever the connection stack is armed, second line naming the
          step, third line the WiFi Direct channel (once toasts, which drew over this pill).
          Anchored to bottom-center to clear the top wifi_direct_info pill and the bottom-right
-         Exit button. Home buttons remain tappable; a tap cancels an attempt in flight and does
-         nothing otherwise. -->
+         Exit button. Home buttons remain tappable; the X stops the bring-up and a tap on the
+         pill's body does nothing. -->
     <LinearLayout
         android:id="@+id/auto_connect_pill"
         android:layout_width="wrap_content"
@@ -273,6 +273,16 @@
                 tools:visibility="visible" />
 
         </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/auto_connect_pill_cancel"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginStart="11dp"
+            app:srcCompat="@android:drawable/ic_menu_close_clear_cancel"
+            app:tint="@color/text_primary"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/auto_connect_pill_cancel" />
 
     </LinearLayout>
 

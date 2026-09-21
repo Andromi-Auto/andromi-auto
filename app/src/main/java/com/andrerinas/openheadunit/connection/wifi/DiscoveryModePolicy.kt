@@ -15,6 +15,13 @@ package com.andrerinas.openheadunit.connection.wifi
 object DiscoveryModePolicy {
 
     /**
+     * Whether the port-5289 probe is worth making. It exists only to wake the phone-side Wireless
+     * Helper, and it is held open 500 ms per address — dead time before the 5277 dial that is the
+     * point of the sweep on every other mode.
+     */
+    fun probesWirelessHelper(mode: Int): Boolean = mode == 2
+
+    /**
      * @param mode 0 = Manual, 1 = Auto (Headunit Server), 2 = Helper, 3 = Native AA.
      * @param strategy only meaningful when [mode] is 2: 0 = Common WiFi (NSD), 1 = WiFi Direct,
      *   2 = Google Nearby, 3 = Phone Hotspot (Host), 4 = Headunit Hotspot (Passive).

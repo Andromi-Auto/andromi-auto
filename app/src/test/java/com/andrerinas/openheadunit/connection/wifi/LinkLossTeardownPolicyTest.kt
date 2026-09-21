@@ -159,4 +159,88 @@ class LinkLossTeardownPolicyTest {
             )
         )
     }
+
+    @Test
+    fun `a named ACC-off closes every route, because the whole board is going`() {
+        for (transport in NativeStrategy.entries) {
+            val launcher = WifiLauncherMock.create(
+                WifiLauncherMode.NATIVE, HelperStrategy.COMMON_WIFI, transport)
+
+            assertTrue(
+                "transport=$transport",
+                LinkLossTeardownPolicy.shouldTearDown(
+                    LinkLossTrigger.ACC_POWER_LOST, launcher,
+                    peerIsHeadUnitServer = false, accSignalIsExplicit = true
+                )
+            )
+        }
+        // USB rides none of the wireless stack and still has a session to close.
+        assertTrue(
+            LinkLossTeardownPolicy.shouldTearDown(
+                LinkLossTrigger.ACC_POWER_LOST, launcher = null,
+                sessionIsWireless = false, accSignalIsExplicit = true
+            )
+        )
+    }
+
+    @Test
+    fun `an inferred ACC-off closes only the head unit server route`() {
+        // Power lost plus the screen going is a guess. It is worth acting on where a missed close
+        // outlives the drive and coming back is one gateway dial.
+        assertTrue(
+            LinkLossTeardownPolicy.shouldTearDown(
+                LinkLossTrigger.ACC_POWER_LOST,
+                WifiLauncherMock.create(WifiLauncherMode.AUTO, HelperStrategy.COMMON_WIFI),
+                peerIsHeadUnitServer = true, accSignalIsExplicit = false
+            )
+        )
+    }
+
+    @Test
+    fun `an inferred ACC-off leaves a native session alone`() {
+        // The regression this guards: a charger unplugged beside a screen blank must not cost a
+        // Native AA session its 45-90s reconnect.
+        for (transport in NativeStrategy.entries) {
+            assertFalse(
+                "transport=$transport",
+                LinkLossTeardownPolicy.shouldTearDown(
+                    LinkLossTrigger.ACC_POWER_LOST,
+                    WifiLauncherMock.create(
+                        WifiLauncherMode.NATIVE, HelperStrategy.COMMON_WIFI, transport),
+                    peerIsHeadUnitServer = false, accSignalIsExplicit = false
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `ACC-off needs one of the two signals, and neither means nothing happens`() {
+        assertFalse(
+            LinkLossTeardownPolicy.shouldTearDown(
+                LinkLossTrigger.ACC_POWER_LOST, launcher = null,
+                peerIsHeadUnitServer = false, accSignalIsExplicit = false
+            )
+        )
+    }
+
+    @Test
+    fun `the new arguments do not change what the older triggers answer`() {
+        val launcher = WifiLauncherMock.create(WifiLauncherMode.AUTO, HelperStrategy.COMMON_WIFI)
+        for (peer in listOf(true, false)) {
+            for (explicit in listOf(true, false)) {
+                assertTrue(
+                    LinkLossTeardownPolicy.shouldTearDown(
+                        LinkLossTrigger.DEVICE_SHUTDOWN, launcher,
+                        peerIsHeadUnitServer = peer, accSignalIsExplicit = explicit
+                    )
+                )
+                assertTrue(
+                    LinkLossTeardownPolicy.shouldTearDown(
+                        LinkLossTrigger.WIFI_STATION_DISABLING, launcher,
+                        peerIsHeadUnitServer = peer, accSignalIsExplicit = explicit
+                    )
+                )
+            }
+        }
+    }
 }

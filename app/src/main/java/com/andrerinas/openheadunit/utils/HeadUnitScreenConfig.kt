@@ -437,6 +437,8 @@ object HeadUnitScreenConfig {
                 wirelessSession = App.provide(context).commManager.isWirelessSession,
                 capEnabled = currentSettings.narrowBandProfileCap,
                 sessionFrequencyMhz = WifiBandCapability.sessionFrequencyMhz(),
+                bandUnreadable = WifiBandCapability.bandUnreadable(),
+                linkProvedTooSlow = currentSettings.videoProfileStarvationCap,
             )?.let { protoForResolution(it, isPortraitDisplay) }
         } catch (e: Exception) {
             AppLog.d("HeadUnitScreenConfig: could not evaluate the band ceiling: ${e.message}")

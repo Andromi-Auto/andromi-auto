@@ -2,6 +2,8 @@ package com.andrerinas.openheadunit.connection.wifi.modes.nativeaa
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -84,6 +86,43 @@ class HfpServiceRecordPolicyTest {
                 ).poke,
                 opens(link = link)
             )
+        }
+    }
+
+    @Test
+    fun `a walk that established is not a refusal`() {
+        assertNull(
+            HfpServiceRecordPolicy.standInRefusalReason(true, HfpSlcInitiator.Stage.ESTABLISHED)
+        )
+    }
+
+    @Test
+    fun `a hold that never spoke reports nothing`() {
+        // The answering half is not a refusal: nothing was asked of the phone.
+        for (stage in HfpSlcInitiator.Stage.entries) {
+            assertNull(stage.name, HfpServiceRecordPolicy.standInRefusalReason(false, stage))
+        }
+    }
+
+    @Test
+    fun `a phone that answered nothing is named as the case it is`() {
+        // The outcome a phone already giving another device its hands-free link produces, and the
+        // one that had no line at all: only the established branch was ever logged.
+        val why = HfpServiceRecordPolicy.standInRefusalReason(true, HfpSlcInitiator.Stage.BRSF)
+        assertNotNull(why)
+        assertTrue(why!!, why.contains("answered nothing"))
+    }
+
+    @Test
+    fun `a walk that stalled partway is a different report`() {
+        for (stage in listOf(
+            HfpSlcInitiator.Stage.CIND_TEST,
+            HfpSlcInitiator.Stage.CIND_READ,
+            HfpSlcInitiator.Stage.CMER,
+        )) {
+            val why = HfpServiceRecordPolicy.standInRefusalReason(true, stage)
+            assertNotNull(stage.name, why)
+            assertTrue(why!!, why.contains("stopped answering"))
         }
     }
 }

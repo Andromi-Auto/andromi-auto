@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.SystemClock
 import com.andrerinas.openheadunit.connection.wifi.direct.GroupIdentityStability
 import com.andrerinas.openheadunit.aap.protocol.proto.Wireless
+import com.andrerinas.openheadunit.connection.wifi.direct.WifiBandCapability
 import com.andrerinas.openheadunit.ssl.SslContextFactory
 import com.andrerinas.openheadunit.utils.AppLog
 import kotlinx.coroutines.CoroutineName
@@ -146,6 +147,16 @@ class WppTcpServer(
                         break
                     }
                     AppLog.i("WppTcpServer: connection from ${socket.inetAddress?.hostAddress}")
+                    // A phone dialling an endpoint from an earlier session, on a unit we have since
+                    // judged unsafe to be remembered by. Serving it hands out a name the next create
+                    // replaces, which it then retries instead of falling back to Bluetooth - fifteen
+                    // minutes of it, measured. See [WppTcpServePolicy].
+                    val decision = WppEndpointPolicy.decide(callbacks.strategy(), listeningPort, callbacks.identity())
+                    if (!WppTcpServePolicy.servesDial(decision)) {
+                        AppLog.w("WppTcpServer: not serving this dial: ${WppTcpServePolicy.refusalReason(decision)}")
+                        try { socket.close() } catch (_: Exception) {}
+                        continue
+                    }
                     scope.launch(Dispatchers.IO + CoroutineName("WppTcp-Session")) {
                         handleConnection(socket, factory)
                     }
@@ -250,7 +261,8 @@ class WppTcpServer(
                             WppMessages.endpoint(callbacks.credentials()?.ip.orEmpty(), decision.port)
                     }
                     AppLog.i("WppTcpServer: [TX] WifiVersionRequest (Type 4) v${WppHandshakeSession.WPP_VERSION_MAJOR}.${WppHandshakeSession.WPP_VERSION_MINOR}")
-                    send(output, WppMessages.versionRequest(callbacks.carInfo(), endpoint).toByteArray(), WppMessageType.VERSION_REQUEST)
+                    val channelType = WppChannelTypePolicy.forHeadUnit(WifiBandCapability.supports5Ghz(context))
+                    send(output, WppMessages.versionRequest(callbacks.carInfo(), endpoint, channelType).toByteArray(), WppMessageType.VERSION_REQUEST)
                 }
                 WppAction.SendStartRequest -> {
                     val endpoint = callbacks.projectionEndpoint()

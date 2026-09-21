@@ -1993,6 +1993,23 @@ public final class Media {
      * @return The ack.
      */
     int getAck();
+
+    /**
+     * <code>repeated uint64 receive_timestamp_ns = 3;</code>
+     * @return A list containing the receiveTimestampNs.
+     */
+    java.util.List<java.lang.Long> getReceiveTimestampNsList();
+    /**
+     * <code>repeated uint64 receive_timestamp_ns = 3;</code>
+     * @return The count of receiveTimestampNs.
+     */
+    int getReceiveTimestampNsCount();
+    /**
+     * <code>repeated uint64 receive_timestamp_ns = 3;</code>
+     * @param index The index of the element to return.
+     * @return The receiveTimestampNs at the given index.
+     */
+    long getReceiveTimestampNs(int index);
   }
   /**
    * Protobuf type {@code com.andrerinas.openheadunit.aap.protocol.proto.Ack}
@@ -2007,6 +2024,7 @@ public final class Media {
       super(builder);
     }
     private Ack() {
+      receiveTimestampNs_ = emptyLongList();
     }
 
     @java.lang.Override
@@ -2068,6 +2086,35 @@ public final class Media {
       return ack_;
     }
 
+    public static final int RECEIVE_TIMESTAMP_NS_FIELD_NUMBER = 3;
+    @SuppressWarnings("serial")
+    private com.google.protobuf.Internal.LongList receiveTimestampNs_ =
+        emptyLongList();
+    /**
+     * <code>repeated uint64 receive_timestamp_ns = 3;</code>
+     * @return A list containing the receiveTimestampNs.
+     */
+    @java.lang.Override
+    public java.util.List<java.lang.Long>
+        getReceiveTimestampNsList() {
+      return receiveTimestampNs_;
+    }
+    /**
+     * <code>repeated uint64 receive_timestamp_ns = 3;</code>
+     * @return The count of receiveTimestampNs.
+     */
+    public int getReceiveTimestampNsCount() {
+      return receiveTimestampNs_.size();
+    }
+    /**
+     * <code>repeated uint64 receive_timestamp_ns = 3;</code>
+     * @param index The index of the element to return.
+     * @return The receiveTimestampNs at the given index.
+     */
+    public long getReceiveTimestampNs(int index) {
+      return receiveTimestampNs_.getLong(index);
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -2096,6 +2143,9 @@ public final class Media {
       if (((bitField0_ & 0x00000002) != 0)) {
         output.writeUInt32(2, ack_);
       }
+      for (int i = 0; i < receiveTimestampNs_.size(); i++) {
+        output.writeUInt64(3, receiveTimestampNs_.getLong(i));
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -2112,6 +2162,15 @@ public final class Media {
       if (((bitField0_ & 0x00000002) != 0)) {
         size += com.google.protobuf.CodedOutputStream
           .computeUInt32Size(2, ack_);
+      }
+      {
+        int dataSize = 0;
+        for (int i = 0; i < receiveTimestampNs_.size(); i++) {
+          dataSize += com.google.protobuf.CodedOutputStream
+            .computeUInt64SizeNoTag(receiveTimestampNs_.getLong(i));
+        }
+        size += dataSize;
+        size += 1 * getReceiveTimestampNsList().size();
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
@@ -2138,6 +2197,8 @@ public final class Media {
         if (getAck()
             != other.getAck()) return false;
       }
+      if (!getReceiveTimestampNsList()
+          .equals(other.getReceiveTimestampNsList())) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -2156,6 +2217,10 @@ public final class Media {
       if (hasAck()) {
         hash = (37 * hash) + ACK_FIELD_NUMBER;
         hash = (53 * hash) + getAck();
+      }
+      if (getReceiveTimestampNsCount() > 0) {
+        hash = (37 * hash) + RECEIVE_TIMESTAMP_NS_FIELD_NUMBER;
+        hash = (53 * hash) + getReceiveTimestampNsList().hashCode();
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
@@ -2290,6 +2355,7 @@ public final class Media {
         bitField0_ = 0;
         sessionId_ = 0;
         ack_ = 0;
+        receiveTimestampNs_ = emptyLongList();
         return this;
       }
 
@@ -2331,6 +2397,10 @@ public final class Media {
         if (((from_bitField0_ & 0x00000002) != 0)) {
           result.ack_ = ack_;
           to_bitField0_ |= 0x00000002;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          receiveTimestampNs_.makeImmutable();
+          result.receiveTimestampNs_ = receiveTimestampNs_;
         }
         result.bitField0_ |= to_bitField0_;
       }
@@ -2385,6 +2455,17 @@ public final class Media {
         if (other.hasAck()) {
           setAck(other.getAck());
         }
+        if (!other.receiveTimestampNs_.isEmpty()) {
+          if (receiveTimestampNs_.isEmpty()) {
+            receiveTimestampNs_ = other.receiveTimestampNs_;
+            receiveTimestampNs_.makeImmutable();
+            bitField0_ |= 0x00000004;
+          } else {
+            ensureReceiveTimestampNsIsMutable();
+            receiveTimestampNs_.addAll(other.receiveTimestampNs_);
+          }
+          onChanged();
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
@@ -2427,6 +2508,22 @@ public final class Media {
                 bitField0_ |= 0x00000002;
                 break;
               } // case 16
+              case 24: {
+                long v = input.readUInt64();
+                ensureReceiveTimestampNsIsMutable();
+                receiveTimestampNs_.addLong(v);
+                break;
+              } // case 24
+              case 26: {
+                int length = input.readRawVarint32();
+                int limit = input.pushLimit(length);
+                ensureReceiveTimestampNsIsMutable();
+                while (input.getBytesUntilLimit() > 0) {
+                  receiveTimestampNs_.addLong(input.readUInt64());
+                }
+                input.popLimit(limit);
+                break;
+              } // case 26
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -2523,6 +2620,90 @@ public final class Media {
         onChanged();
         return this;
       }
+
+      private com.google.protobuf.Internal.LongList receiveTimestampNs_ = emptyLongList();
+      private void ensureReceiveTimestampNsIsMutable() {
+        if (!receiveTimestampNs_.isModifiable()) {
+          receiveTimestampNs_ = makeMutableCopy(receiveTimestampNs_);
+        }
+        bitField0_ |= 0x00000004;
+      }
+      /**
+       * <code>repeated uint64 receive_timestamp_ns = 3;</code>
+       * @return A list containing the receiveTimestampNs.
+       */
+      public java.util.List<java.lang.Long>
+          getReceiveTimestampNsList() {
+        receiveTimestampNs_.makeImmutable();
+        return receiveTimestampNs_;
+      }
+      /**
+       * <code>repeated uint64 receive_timestamp_ns = 3;</code>
+       * @return The count of receiveTimestampNs.
+       */
+      public int getReceiveTimestampNsCount() {
+        return receiveTimestampNs_.size();
+      }
+      /**
+       * <code>repeated uint64 receive_timestamp_ns = 3;</code>
+       * @param index The index of the element to return.
+       * @return The receiveTimestampNs at the given index.
+       */
+      public long getReceiveTimestampNs(int index) {
+        return receiveTimestampNs_.getLong(index);
+      }
+      /**
+       * <code>repeated uint64 receive_timestamp_ns = 3;</code>
+       * @param index The index to set the value at.
+       * @param value The receiveTimestampNs to set.
+       * @return This builder for chaining.
+       */
+      public Builder setReceiveTimestampNs(
+          int index, long value) {
+
+        ensureReceiveTimestampNsIsMutable();
+        receiveTimestampNs_.setLong(index, value);
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated uint64 receive_timestamp_ns = 3;</code>
+       * @param value The receiveTimestampNs to add.
+       * @return This builder for chaining.
+       */
+      public Builder addReceiveTimestampNs(long value) {
+
+        ensureReceiveTimestampNsIsMutable();
+        receiveTimestampNs_.addLong(value);
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated uint64 receive_timestamp_ns = 3;</code>
+       * @param values The receiveTimestampNs to add.
+       * @return This builder for chaining.
+       */
+      public Builder addAllReceiveTimestampNs(
+          java.lang.Iterable<? extends java.lang.Long> values) {
+        ensureReceiveTimestampNsIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, receiveTimestampNs_);
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated uint64 receive_timestamp_ns = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearReceiveTimestampNs() {
+        receiveTimestampNs_ = emptyLongList();
+        bitField0_ = (bitField0_ & ~0x00000004);
+        onChanged();
+        return this;
+      }
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -2582,6 +2763,529 @@ public final class Media {
 
     @java.lang.Override
     public com.andrerinas.openheadunit.aap.protocol.proto.Media.Ack getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface AudioUnderflowNotificationOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:com.andrerinas.openheadunit.aap.protocol.proto.AudioUnderflowNotification)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>required int32 session_id = 1;</code>
+     * @return Whether the sessionId field is set.
+     */
+    boolean hasSessionId();
+    /**
+     * <code>required int32 session_id = 1;</code>
+     * @return The sessionId.
+     */
+    int getSessionId();
+  }
+  /**
+   * <pre>
+   * Type 0x800B, head unit -&gt; phone, no reply. One per underflow, only between the first audio
+   * packet and Stop. Added in AAP 1.6 and must not be sent to a phone that selected less.
+   * </pre>
+   *
+   * Protobuf type {@code com.andrerinas.openheadunit.aap.protocol.proto.AudioUnderflowNotification}
+   */
+  public static final class AudioUnderflowNotification extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:com.andrerinas.openheadunit.aap.protocol.proto.AudioUnderflowNotification)
+      AudioUnderflowNotificationOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use AudioUnderflowNotification.newBuilder() to construct.
+    private AudioUnderflowNotification(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private AudioUnderflowNotification() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new AudioUnderflowNotification();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.andrerinas.openheadunit.aap.protocol.proto.Media.internal_static_com_andrerinas_openheadunit_aap_protocol_proto_AudioUnderflowNotification_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.andrerinas.openheadunit.aap.protocol.proto.Media.internal_static_com_andrerinas_openheadunit_aap_protocol_proto_AudioUnderflowNotification_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.andrerinas.openheadunit.aap.protocol.proto.Media.AudioUnderflowNotification.class, com.andrerinas.openheadunit.aap.protocol.proto.Media.AudioUnderflowNotification.Builder.class);
+    }
+
+    private int bitField0_;
+    public static final int SESSION_ID_FIELD_NUMBER = 1;
+    private int sessionId_ = 0;
+    /**
+     * <code>required int32 session_id = 1;</code>
+     * @return Whether the sessionId field is set.
+     */
+    @java.lang.Override
+    public boolean hasSessionId() {
+      return ((bitField0_ & 0x00000001) != 0);
+    }
+    /**
+     * <code>required int32 session_id = 1;</code>
+     * @return The sessionId.
+     */
+    @java.lang.Override
+    public int getSessionId() {
+      return sessionId_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      if (!hasSessionId()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (((bitField0_ & 0x00000001) != 0)) {
+        output.writeInt32(1, sessionId_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(1, sessionId_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.andrerinas.openheadunit.aap.protocol.proto.Media.AudioUnderflowNotification)) {
+        return super.equals(obj);
+      }
+      com.andrerinas.openheadunit.aap.protocol.proto.Media.AudioUnderflowNotification other = (com.andrerinas.openheadunit.aap.protocol.proto.Media.AudioUnderflowNotification) obj;
+
+      if (hasSessionId() != other.hasSessionId()) return false;
+      if (hasSessionId()) {
+        if (getSessionId()
+            != other.getSessionId()) return false;
+      }
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (hasSessionId()) {
+        hash = (37 * hash) + SESSION_ID_FIELD_NUMBER;
+        hash = (53 * hash) + getSessionId();
+      }
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Media.AudioUnderflowNotification parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Media.AudioUnderflowNotification parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Media.AudioUnderflowNotification parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Media.AudioUnderflowNotification parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Media.AudioUnderflowNotification parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Media.AudioUnderflowNotification parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Media.AudioUnderflowNotification parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Media.AudioUnderflowNotification parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Media.AudioUnderflowNotification parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Media.AudioUnderflowNotification parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Media.AudioUnderflowNotification parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Media.AudioUnderflowNotification parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.andrerinas.openheadunit.aap.protocol.proto.Media.AudioUnderflowNotification prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Type 0x800B, head unit -&gt; phone, no reply. One per underflow, only between the first audio
+     * packet and Stop. Added in AAP 1.6 and must not be sent to a phone that selected less.
+     * </pre>
+     *
+     * Protobuf type {@code com.andrerinas.openheadunit.aap.protocol.proto.AudioUnderflowNotification}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:com.andrerinas.openheadunit.aap.protocol.proto.AudioUnderflowNotification)
+        com.andrerinas.openheadunit.aap.protocol.proto.Media.AudioUnderflowNotificationOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.andrerinas.openheadunit.aap.protocol.proto.Media.internal_static_com_andrerinas_openheadunit_aap_protocol_proto_AudioUnderflowNotification_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.andrerinas.openheadunit.aap.protocol.proto.Media.internal_static_com_andrerinas_openheadunit_aap_protocol_proto_AudioUnderflowNotification_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.andrerinas.openheadunit.aap.protocol.proto.Media.AudioUnderflowNotification.class, com.andrerinas.openheadunit.aap.protocol.proto.Media.AudioUnderflowNotification.Builder.class);
+      }
+
+      // Construct using com.andrerinas.openheadunit.aap.protocol.proto.Media.AudioUnderflowNotification.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        sessionId_ = 0;
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.andrerinas.openheadunit.aap.protocol.proto.Media.internal_static_com_andrerinas_openheadunit_aap_protocol_proto_AudioUnderflowNotification_descriptor;
+      }
+
+      @java.lang.Override
+      public com.andrerinas.openheadunit.aap.protocol.proto.Media.AudioUnderflowNotification getDefaultInstanceForType() {
+        return com.andrerinas.openheadunit.aap.protocol.proto.Media.AudioUnderflowNotification.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.andrerinas.openheadunit.aap.protocol.proto.Media.AudioUnderflowNotification build() {
+        com.andrerinas.openheadunit.aap.protocol.proto.Media.AudioUnderflowNotification result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.andrerinas.openheadunit.aap.protocol.proto.Media.AudioUnderflowNotification buildPartial() {
+        com.andrerinas.openheadunit.aap.protocol.proto.Media.AudioUnderflowNotification result = new com.andrerinas.openheadunit.aap.protocol.proto.Media.AudioUnderflowNotification(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(com.andrerinas.openheadunit.aap.protocol.proto.Media.AudioUnderflowNotification result) {
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.sessionId_ = sessionId_;
+          to_bitField0_ |= 0x00000001;
+        }
+        result.bitField0_ |= to_bitField0_;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.andrerinas.openheadunit.aap.protocol.proto.Media.AudioUnderflowNotification) {
+          return mergeFrom((com.andrerinas.openheadunit.aap.protocol.proto.Media.AudioUnderflowNotification)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.andrerinas.openheadunit.aap.protocol.proto.Media.AudioUnderflowNotification other) {
+        if (other == com.andrerinas.openheadunit.aap.protocol.proto.Media.AudioUnderflowNotification.getDefaultInstance()) return this;
+        if (other.hasSessionId()) {
+          setSessionId(other.getSessionId());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        if (!hasSessionId()) {
+          return false;
+        }
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 8: {
+                sessionId_ = input.readInt32();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 8
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private int sessionId_ ;
+      /**
+       * <code>required int32 session_id = 1;</code>
+       * @return Whether the sessionId field is set.
+       */
+      @java.lang.Override
+      public boolean hasSessionId() {
+        return ((bitField0_ & 0x00000001) != 0);
+      }
+      /**
+       * <code>required int32 session_id = 1;</code>
+       * @return The sessionId.
+       */
+      @java.lang.Override
+      public int getSessionId() {
+        return sessionId_;
+      }
+      /**
+       * <code>required int32 session_id = 1;</code>
+       * @param value The sessionId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setSessionId(int value) {
+
+        sessionId_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required int32 session_id = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearSessionId() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        sessionId_ = 0;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:com.andrerinas.openheadunit.aap.protocol.proto.AudioUnderflowNotification)
+    }
+
+    // @@protoc_insertion_point(class_scope:com.andrerinas.openheadunit.aap.protocol.proto.AudioUnderflowNotification)
+    private static final com.andrerinas.openheadunit.aap.protocol.proto.Media.AudioUnderflowNotification DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.andrerinas.openheadunit.aap.protocol.proto.Media.AudioUnderflowNotification();
+    }
+
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Media.AudioUnderflowNotification getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    @java.lang.Deprecated public static final com.google.protobuf.Parser<AudioUnderflowNotification>
+        PARSER = new com.google.protobuf.AbstractParser<AudioUnderflowNotification>() {
+      @java.lang.Override
+      public AudioUnderflowNotification parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<AudioUnderflowNotification> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<AudioUnderflowNotification> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.andrerinas.openheadunit.aap.protocol.proto.Media.AudioUnderflowNotification getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -4110,6 +4814,14 @@ public final class Media {
        * <code>LAUNCH_NATIVE = 2;</code>
        */
       LAUNCH_NATIVE(2),
+      /**
+       * <code>VIDEO_FOCUS_REASON_LAST_MODE = 3;</code>
+       */
+      VIDEO_FOCUS_REASON_LAST_MODE(3),
+      /**
+       * <code>VIDEO_FOCUS_REASON_USER_SELECTION = 4;</code>
+       */
+      VIDEO_FOCUS_REASON_USER_SELECTION(4),
       ;
 
       /**
@@ -4124,6 +4836,14 @@ public final class Media {
        * <code>LAUNCH_NATIVE = 2;</code>
        */
       public static final int LAUNCH_NATIVE_VALUE = 2;
+      /**
+       * <code>VIDEO_FOCUS_REASON_LAST_MODE = 3;</code>
+       */
+      public static final int VIDEO_FOCUS_REASON_LAST_MODE_VALUE = 3;
+      /**
+       * <code>VIDEO_FOCUS_REASON_USER_SELECTION = 4;</code>
+       */
+      public static final int VIDEO_FOCUS_REASON_USER_SELECTION_VALUE = 4;
 
 
       public final int getNumber() {
@@ -4149,6 +4869,8 @@ public final class Media {
           case 0: return UNKNOWN;
           case 1: return PHONE_SCREEN_OFF;
           case 2: return LAUNCH_NATIVE;
+          case 3: return VIDEO_FOCUS_REASON_LAST_MODE;
+          case 4: return VIDEO_FOCUS_REASON_USER_SELECTION;
           default: return null;
         }
       }
@@ -6078,23 +6800,23 @@ public final class Media {
     public enum ConfigStatus
         implements com.google.protobuf.ProtocolMessageEnum {
       /**
-       * <code>DEVICE = 1;</code>
+       * <code>STATUS_WAIT = 1;</code>
        */
-      DEVICE(1),
+      STATUS_WAIT(1),
       /**
-       * <code>HEADUNIT = 2;</code>
+       * <code>STATUS_READY = 2;</code>
        */
-      HEADUNIT(2),
+      STATUS_READY(2),
       ;
 
       /**
-       * <code>DEVICE = 1;</code>
+       * <code>STATUS_WAIT = 1;</code>
        */
-      public static final int DEVICE_VALUE = 1;
+      public static final int STATUS_WAIT_VALUE = 1;
       /**
-       * <code>HEADUNIT = 2;</code>
+       * <code>STATUS_READY = 2;</code>
        */
-      public static final int HEADUNIT_VALUE = 2;
+      public static final int STATUS_READY_VALUE = 2;
 
 
       public final int getNumber() {
@@ -6117,8 +6839,8 @@ public final class Media {
        */
       public static ConfigStatus forNumber(int value) {
         switch (value) {
-          case 1: return DEVICE;
-          case 2: return HEADUNIT;
+          case 1: return STATUS_WAIT;
+          case 2: return STATUS_READY;
           default: return null;
         }
       }
@@ -6184,7 +6906,7 @@ public final class Media {
      */
     @java.lang.Override public com.andrerinas.openheadunit.aap.protocol.proto.Media.Config.ConfigStatus getStatus() {
       com.andrerinas.openheadunit.aap.protocol.proto.Media.Config.ConfigStatus result = com.andrerinas.openheadunit.aap.protocol.proto.Media.Config.ConfigStatus.forNumber(status_);
-      return result == null ? com.andrerinas.openheadunit.aap.protocol.proto.Media.Config.ConfigStatus.DEVICE : result;
+      return result == null ? com.andrerinas.openheadunit.aap.protocol.proto.Media.Config.ConfigStatus.STATUS_WAIT : result;
     }
 
     public static final int MAX_UNACKED_FIELD_NUMBER = 2;
@@ -6682,7 +7404,7 @@ public final class Media {
       @java.lang.Override
       public com.andrerinas.openheadunit.aap.protocol.proto.Media.Config.ConfigStatus getStatus() {
         com.andrerinas.openheadunit.aap.protocol.proto.Media.Config.ConfigStatus result = com.andrerinas.openheadunit.aap.protocol.proto.Media.Config.ConfigStatus.forNumber(status_);
-        return result == null ? com.andrerinas.openheadunit.aap.protocol.proto.Media.Config.ConfigStatus.DEVICE : result;
+        return result == null ? com.andrerinas.openheadunit.aap.protocol.proto.Media.Config.ConfigStatus.STATUS_WAIT : result;
       }
       /**
        * <code>required .com.andrerinas.openheadunit.aap.protocol.proto.Config.ConfigStatus status = 1;</code>
@@ -9434,15 +10156,19 @@ public final class Media {
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>required uint32 status = 1;</code>
-     * @return Whether the status field is set.
+     * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.UiConfig ui_config = 1;</code>
+     * @return Whether the uiConfig field is set.
      */
-    boolean hasStatus();
+    boolean hasUiConfig();
     /**
-     * <code>required uint32 status = 1;</code>
-     * @return The status.
+     * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.UiConfig ui_config = 1;</code>
+     * @return The uiConfig.
      */
-    int getStatus();
+    com.andrerinas.openheadunit.aap.protocol.proto.Media.UiConfig getUiConfig();
+    /**
+     * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.UiConfig ui_config = 1;</code>
+     */
+    com.andrerinas.openheadunit.aap.protocol.proto.Media.UiConfigOrBuilder getUiConfigOrBuilder();
   }
   /**
    * Protobuf type {@code com.andrerinas.openheadunit.aap.protocol.proto.UpdateUiConfigReply}
@@ -9480,23 +10206,30 @@ public final class Media {
     }
 
     private int bitField0_;
-    public static final int STATUS_FIELD_NUMBER = 1;
-    private int status_ = 0;
+    public static final int UI_CONFIG_FIELD_NUMBER = 1;
+    private com.andrerinas.openheadunit.aap.protocol.proto.Media.UiConfig uiConfig_;
     /**
-     * <code>required uint32 status = 1;</code>
-     * @return Whether the status field is set.
+     * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.UiConfig ui_config = 1;</code>
+     * @return Whether the uiConfig field is set.
      */
     @java.lang.Override
-    public boolean hasStatus() {
+    public boolean hasUiConfig() {
       return ((bitField0_ & 0x00000001) != 0);
     }
     /**
-     * <code>required uint32 status = 1;</code>
-     * @return The status.
+     * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.UiConfig ui_config = 1;</code>
+     * @return The uiConfig.
      */
     @java.lang.Override
-    public int getStatus() {
-      return status_;
+    public com.andrerinas.openheadunit.aap.protocol.proto.Media.UiConfig getUiConfig() {
+      return uiConfig_ == null ? com.andrerinas.openheadunit.aap.protocol.proto.Media.UiConfig.getDefaultInstance() : uiConfig_;
+    }
+    /**
+     * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.UiConfig ui_config = 1;</code>
+     */
+    @java.lang.Override
+    public com.andrerinas.openheadunit.aap.protocol.proto.Media.UiConfigOrBuilder getUiConfigOrBuilder() {
+      return uiConfig_ == null ? com.andrerinas.openheadunit.aap.protocol.proto.Media.UiConfig.getDefaultInstance() : uiConfig_;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -9506,10 +10239,6 @@ public final class Media {
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
-      if (!hasStatus()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
       memoizedIsInitialized = 1;
       return true;
     }
@@ -9518,7 +10247,7 @@ public final class Media {
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       if (((bitField0_ & 0x00000001) != 0)) {
-        output.writeUInt32(1, status_);
+        output.writeMessage(1, getUiConfig());
       }
       getUnknownFields().writeTo(output);
     }
@@ -9531,7 +10260,7 @@ public final class Media {
       size = 0;
       if (((bitField0_ & 0x00000001) != 0)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeUInt32Size(1, status_);
+          .computeMessageSize(1, getUiConfig());
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
@@ -9548,10 +10277,10 @@ public final class Media {
       }
       com.andrerinas.openheadunit.aap.protocol.proto.Media.UpdateUiConfigReply other = (com.andrerinas.openheadunit.aap.protocol.proto.Media.UpdateUiConfigReply) obj;
 
-      if (hasStatus() != other.hasStatus()) return false;
-      if (hasStatus()) {
-        if (getStatus()
-            != other.getStatus()) return false;
+      if (hasUiConfig() != other.hasUiConfig()) return false;
+      if (hasUiConfig()) {
+        if (!getUiConfig()
+            .equals(other.getUiConfig())) return false;
       }
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
@@ -9564,9 +10293,9 @@ public final class Media {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
-      if (hasStatus()) {
-        hash = (37 * hash) + STATUS_FIELD_NUMBER;
-        hash = (53 * hash) + getStatus();
+      if (hasUiConfig()) {
+        hash = (37 * hash) + UI_CONFIG_FIELD_NUMBER;
+        hash = (53 * hash) + getUiConfig().hashCode();
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
@@ -9687,19 +10416,29 @@ public final class Media {
 
       // Construct using com.andrerinas.openheadunit.aap.protocol.proto.Media.UpdateUiConfigReply.newBuilder()
       private Builder() {
-
+        maybeForceBuilderInitialization();
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+          getUiConfigFieldBuilder();
+        }
       }
       @java.lang.Override
       public Builder clear() {
         super.clear();
         bitField0_ = 0;
-        status_ = 0;
+        uiConfig_ = null;
+        if (uiConfigBuilder_ != null) {
+          uiConfigBuilder_.dispose();
+          uiConfigBuilder_ = null;
+        }
         return this;
       }
 
@@ -9735,7 +10474,9 @@ public final class Media {
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
         if (((from_bitField0_ & 0x00000001) != 0)) {
-          result.status_ = status_;
+          result.uiConfig_ = uiConfigBuilder_ == null
+              ? uiConfig_
+              : uiConfigBuilder_.build();
           to_bitField0_ |= 0x00000001;
         }
         result.bitField0_ |= to_bitField0_;
@@ -9785,8 +10526,8 @@ public final class Media {
 
       public Builder mergeFrom(com.andrerinas.openheadunit.aap.protocol.proto.Media.UpdateUiConfigReply other) {
         if (other == com.andrerinas.openheadunit.aap.protocol.proto.Media.UpdateUiConfigReply.getDefaultInstance()) return this;
-        if (other.hasStatus()) {
-          setStatus(other.getStatus());
+        if (other.hasUiConfig()) {
+          mergeUiConfig(other.getUiConfig());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
@@ -9795,9 +10536,6 @@ public final class Media {
 
       @java.lang.Override
       public final boolean isInitialized() {
-        if (!hasStatus()) {
-          return false;
-        }
         return true;
       }
 
@@ -9817,11 +10555,13 @@ public final class Media {
               case 0:
                 done = true;
                 break;
-              case 8: {
-                status_ = input.readUInt32();
+              case 10: {
+                input.readMessage(
+                    getUiConfigFieldBuilder().getBuilder(),
+                    extensionRegistry);
                 bitField0_ |= 0x00000001;
                 break;
-              } // case 8
+              } // case 10
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -9839,44 +10579,125 @@ public final class Media {
       }
       private int bitField0_;
 
-      private int status_ ;
+      private com.andrerinas.openheadunit.aap.protocol.proto.Media.UiConfig uiConfig_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.andrerinas.openheadunit.aap.protocol.proto.Media.UiConfig, com.andrerinas.openheadunit.aap.protocol.proto.Media.UiConfig.Builder, com.andrerinas.openheadunit.aap.protocol.proto.Media.UiConfigOrBuilder> uiConfigBuilder_;
       /**
-       * <code>required uint32 status = 1;</code>
-       * @return Whether the status field is set.
+       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.UiConfig ui_config = 1;</code>
+       * @return Whether the uiConfig field is set.
        */
-      @java.lang.Override
-      public boolean hasStatus() {
+      public boolean hasUiConfig() {
         return ((bitField0_ & 0x00000001) != 0);
       }
       /**
-       * <code>required uint32 status = 1;</code>
-       * @return The status.
+       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.UiConfig ui_config = 1;</code>
+       * @return The uiConfig.
        */
-      @java.lang.Override
-      public int getStatus() {
-        return status_;
+      public com.andrerinas.openheadunit.aap.protocol.proto.Media.UiConfig getUiConfig() {
+        if (uiConfigBuilder_ == null) {
+          return uiConfig_ == null ? com.andrerinas.openheadunit.aap.protocol.proto.Media.UiConfig.getDefaultInstance() : uiConfig_;
+        } else {
+          return uiConfigBuilder_.getMessage();
+        }
       }
       /**
-       * <code>required uint32 status = 1;</code>
-       * @param value The status to set.
-       * @return This builder for chaining.
+       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.UiConfig ui_config = 1;</code>
        */
-      public Builder setStatus(int value) {
-
-        status_ = value;
+      public Builder setUiConfig(com.andrerinas.openheadunit.aap.protocol.proto.Media.UiConfig value) {
+        if (uiConfigBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          uiConfig_ = value;
+        } else {
+          uiConfigBuilder_.setMessage(value);
+        }
         bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
       /**
-       * <code>required uint32 status = 1;</code>
-       * @return This builder for chaining.
+       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.UiConfig ui_config = 1;</code>
        */
-      public Builder clearStatus() {
-        bitField0_ = (bitField0_ & ~0x00000001);
-        status_ = 0;
+      public Builder setUiConfig(
+          com.andrerinas.openheadunit.aap.protocol.proto.Media.UiConfig.Builder builderForValue) {
+        if (uiConfigBuilder_ == null) {
+          uiConfig_ = builderForValue.build();
+        } else {
+          uiConfigBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
+      }
+      /**
+       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.UiConfig ui_config = 1;</code>
+       */
+      public Builder mergeUiConfig(com.andrerinas.openheadunit.aap.protocol.proto.Media.UiConfig value) {
+        if (uiConfigBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) != 0) &&
+            uiConfig_ != null &&
+            uiConfig_ != com.andrerinas.openheadunit.aap.protocol.proto.Media.UiConfig.getDefaultInstance()) {
+            getUiConfigBuilder().mergeFrom(value);
+          } else {
+            uiConfig_ = value;
+          }
+        } else {
+          uiConfigBuilder_.mergeFrom(value);
+        }
+        if (uiConfig_ != null) {
+          bitField0_ |= 0x00000001;
+          onChanged();
+        }
+        return this;
+      }
+      /**
+       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.UiConfig ui_config = 1;</code>
+       */
+      public Builder clearUiConfig() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        uiConfig_ = null;
+        if (uiConfigBuilder_ != null) {
+          uiConfigBuilder_.dispose();
+          uiConfigBuilder_ = null;
+        }
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.UiConfig ui_config = 1;</code>
+       */
+      public com.andrerinas.openheadunit.aap.protocol.proto.Media.UiConfig.Builder getUiConfigBuilder() {
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return getUiConfigFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.UiConfig ui_config = 1;</code>
+       */
+      public com.andrerinas.openheadunit.aap.protocol.proto.Media.UiConfigOrBuilder getUiConfigOrBuilder() {
+        if (uiConfigBuilder_ != null) {
+          return uiConfigBuilder_.getMessageOrBuilder();
+        } else {
+          return uiConfig_ == null ?
+              com.andrerinas.openheadunit.aap.protocol.proto.Media.UiConfig.getDefaultInstance() : uiConfig_;
+        }
+      }
+      /**
+       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.UiConfig ui_config = 1;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.andrerinas.openheadunit.aap.protocol.proto.Media.UiConfig, com.andrerinas.openheadunit.aap.protocol.proto.Media.UiConfig.Builder, com.andrerinas.openheadunit.aap.protocol.proto.Media.UiConfigOrBuilder> 
+          getUiConfigFieldBuilder() {
+        if (uiConfigBuilder_ == null) {
+          uiConfigBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.andrerinas.openheadunit.aap.protocol.proto.Media.UiConfig, com.andrerinas.openheadunit.aap.protocol.proto.Media.UiConfig.Builder, com.andrerinas.openheadunit.aap.protocol.proto.Media.UiConfigOrBuilder>(
+                  getUiConfig(),
+                  getParentForChildren(),
+                  isClean());
+          uiConfig_ = null;
+        }
+        return uiConfigBuilder_;
       }
       @java.lang.Override
       public final Builder setUnknownFields(
@@ -9958,6 +10779,11 @@ public final class Media {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_com_andrerinas_openheadunit_aap_protocol_proto_Ack_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_com_andrerinas_openheadunit_aap_protocol_proto_AudioUnderflowNotification_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_com_andrerinas_openheadunit_aap_protocol_proto_AudioUnderflowNotification_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_MicrophoneRequest_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -10016,71 +10842,76 @@ public final class Media {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\012\013media.proto\022.com.andrerinas.openheadun" +
-      "it.aap.protocol.proto\"]\012\022AudioConfigurat" +
-      "ion\022\023\012\013sample_rate\030\001 \002(\015\022\026\012\016number_of_bi" +
-      "ts\030\002 \002(\015\022\032\012\022number_of_channels\030\003 \002(\015\"8\012\005" +
-      "Start\022\022\012\012session_id\030\001 \002(\005\022\033\012\023configurati" +
-      "on_index\030\002 \002(\015\"&\012\003Ack\022\022\012\012session_id\030\001 \002(" +
-      "\005\022\013\012\003ack\030\002 \002(\015\"_\012\021MicrophoneRequest\022\014\012\004o" +
-      "pen\030\001 \002(\010\022\023\012\013anc_enabled\030\002 \001(\010\022\022\012\012ec_ena" +
-      "bled\030\003 \001(\010\022\023\012\013max_unacked\030\004 \001(\005\"8\012\022Micro" +
-      "phoneResponse\022\016\012\006status\030\001 \002(\005\022\022\012\012session" +
-      "_id\030\002 \002(\015\"\300\002\012\035VideoFocusRequestNotificat" +
-      "ion\022\027\012\017disp_channel_id\030\001 \001(\005\022L\012\004mode\030\002 \002" +
+      "\n\013media.proto\022.com.andrerinas.openheadun" +
+      "it.aap.protocol.proto\"]\n\022AudioConfigurat" +
+      "ion\022\023\n\013sample_rate\030\001 \002(\r\022\026\n\016number_of_bi" +
+      "ts\030\002 \002(\r\022\032\n\022number_of_channels\030\003 \002(\r\"8\n\005" +
+      "Start\022\022\n\nsession_id\030\001 \002(\005\022\033\n\023configurati" +
+      "on_index\030\002 \002(\r\"D\n\003Ack\022\022\n\nsession_id\030\001 \002(" +
+      "\005\022\013\n\003ack\030\002 \002(\r\022\034\n\024receive_timestamp_ns\030\003" +
+      " \003(\004\"0\n\032AudioUnderflowNotification\022\022\n\nse" +
+      "ssion_id\030\001 \002(\005\"_\n\021MicrophoneRequest\022\014\n\004o" +
+      "pen\030\001 \002(\010\022\023\n\013anc_enabled\030\002 \001(\010\022\022\n\nec_ena" +
+      "bled\030\003 \001(\010\022\023\n\013max_unacked\030\004 \001(\005\"8\n\022Micro" +
+      "phoneResponse\022\016\n\006status\030\001 \002(\005\022\022\n\nsession" +
+      "_id\030\002 \002(\r\"\212\003\n\035VideoFocusRequestNotificat" +
+      "ion\022\027\n\017disp_channel_id\030\001 \001(\005\022L\n\004mode\030\002 \002" +
       "(\0162>.com.andrerinas.openheadunit.aap.pro" +
-      "tocol.proto.VideoFocusMode\022n\012\006reason\030\003 \001" +
+      "tocol.proto.VideoFocusMode\022n\n\006reason\030\003 \001" +
       "(\0162^.com.andrerinas.openheadunit.aap.pro" +
       "tocol.proto.VideoFocusRequestNotificatio" +
-      "n.VideoFocusReason\"H\012\020VideoFocusReason\022\013" +
-      "\012\007UNKNOWN\020\000\022\024\012\020PHONE_SCREEN_OFF\020\001\022\021\012\015LAU" +
-      "NCH_NATIVE\020\002\"{\012\026VideoFocusNotification\022L" +
-      "\012\004mode\030\001 \002(\0162>.com.andrerinas.openheadun" +
-      "it.aap.protocol.proto.VideoFocusMode\022\023\012\013" +
-      "unsolicited\030\002 \002(\010\"!\012\021MediaSetupRequest\022\014" +
-      "\012\004type\030\001 \002(\015\"\273\001\012\006Config\022S\012\006status\030\001 \002(\0162" +
-      "C.com.andrerinas.openheadunit.aap.protoc" +
-      "ol.proto.Config.ConfigStatus\022\023\012\013max_unac" +
-      "ked\030\002 \002(\015\022\035\012\025configuration_indices\030\003 \003(\015" +
-      "\"(\012\014ConfigStatus\022\012\012\006DEVICE\020\001\022\014\012\010HEADUNIT" +
-      "\020\002\"B\012\006Insets\022\013\012\003top\030\001 \001(\005\022\016\012\006bottom\030\002 \001(" +
-      "\005\022\014\012\004left\030\003 \001(\005\022\015\012\005right\030\004 \001(\005\"\214\002\012\010UiCon" +
-      "fig\022G\012\007margins\030\001 \001(\01326.com.andrerinas.op" +
-      "enheadunit.aap.protocol.proto.Insets\022N\012\016" +
-      "content_insets\030\002 \001(\01326.com.andrerinas.op" +
-      "enheadunit.aap.protocol.proto.Insets\022U\012\025" +
-      "stable_content_insets\030\003 \001(\01326.com.andrer" +
-      "inas.openheadunit.aap.protocol.proto.Ins" +
-      "ets\022\020\012\010ui_theme\030\004 \001(\005\"d\012\025UpdateUiConfigR" +
-      "equest\022K\012\011ui_config\030\001 \002(\01328.com.andrerin" +
-      "as.openheadunit.aap.protocol.proto.UiCon" +
-      "fig\"%\012\023UpdateUiConfigReply\022\016\012\006status\030\001 \002" +
-      "(\015*\372\003\012\007MsgType\022\026\012\022MEDIA_MESSAGE_DATA\020\000\022\036" +
-      "\012\032MEDIA_MESSAGE_CODEC_CONFIG\020\001\022\031\012\023MEDIA_" +
-      "MESSAGE_SETUP\020\200\200\002\022\031\012\023MEDIA_MESSAGE_START" +
-      "\020\201\200\002\022\030\012\022MEDIA_MESSAGE_STOP\020\202\200\002\022\032\012\024MEDIA_" +
-      "MESSAGE_CONFIG\020\203\200\002\022\027\012\021MEDIA_MESSAGE_ACK\020" +
-      "\204\200\002\022&\012 MEDIA_MESSAGE_MICROPHONE_REQUEST\020" +
-      "\205\200\002\022'\012!MEDIA_MESSAGE_MICROPHONE_RESPONSE" +
-      "\020\206\200\002\022'\012!MEDIA_MESSAGE_VIDEO_FOCUS_REQUES" +
-      "T\020\207\200\002\022,\012&MEDIA_MESSAGE_VIDEO_FOCUS_NOTIF" +
-      "ICATION\020\210\200\002\022,\012&MEDIA_MESSAGE_UPDATE_UI_C" +
-      "ONFIG_REQUEST\020\211\200\002\022*\012$MEDIA_MESSAGE_UPDAT" +
-      "E_UI_CONFIG_REPLY\020\212\200\002\0220\012*MEDIA_MESSAGE_A" +
-      "UDIO_UNDERFLOW_NOTIFICATION\020\213\200\002*\335\001\012\016Medi" +
-      "aCodecType\022\031\012\025MEDIA_CODEC_AUDIO_PCM\020\001\022\034\012" +
-      "\030MEDIA_CODEC_AUDIO_AAC_LC\020\002\022\035\012\031MEDIA_COD" +
-      "EC_VIDEO_H264_BP\020\003\022!\012\035MEDIA_CODEC_AUDIO_" +
-      "AAC_LC_ADTS\020\004\022\031\012\025MEDIA_CODEC_VIDEO_VP9\020\005" +
-      "\022\031\012\025MEDIA_CODEC_VIDEO_AV1\020\006\022\032\012\026MEDIA_COD" +
-      "EC_VIDEO_H265\020\007*s\012\017AudioStreamType\022\010\012\004NO" +
-      "NE\020\000\022\012\012\006SPEECH\020\001\022\012\012\006SYSTEM\020\002\022\011\012\005MEDIA\020\003\022" +
-      "\011\012\005ALARM\020\004\022\014\012\010GUIDANCE\020\005\022\020\012\014ANNOUNCEMENT" +
-      "\020\006\022\010\012\004RING\020\007*\217\001\012\016VideoFocusMode\022\031\012\025VIDEO" +
-      "_FOCUS_PROJECTED\020\001\022\026\012\022VIDEO_FOCUS_NATIVE" +
-      "\020\002\022 \012\034VIDEO_FOCUS_NATIVE_TRANSIENT\020\003\022(\012$" +
-      "VIDEO_FOCUS_PROJECTED_NO_INPUT_FOCUS\020\004B\007" +
-      "B\005Media"
+      "n.VideoFocusReason\"\221\001\n\020VideoFocusReason\022" +
+      "\013\n\007UNKNOWN\020\000\022\024\n\020PHONE_SCREEN_OFF\020\001\022\021\n\rLA" +
+      "UNCH_NATIVE\020\002\022 \n\034VIDEO_FOCUS_REASON_LAST" +
+      "_MODE\020\003\022%\n!VIDEO_FOCUS_REASON_USER_SELEC" +
+      "TION\020\004\"{\n\026VideoFocusNotification\022L\n\004mode" +
+      "\030\001 \002(\0162>.com.andrerinas.openheadunit.aap" +
+      ".protocol.proto.VideoFocusMode\022\023\n\013unsoli" +
+      "cited\030\002 \002(\010\"!\n\021MediaSetupRequest\022\014\n\004type" +
+      "\030\001 \002(\r\"\304\001\n\006Config\022S\n\006status\030\001 \002(\0162C.com." +
+      "andrerinas.openheadunit.aap.protocol.pro" +
+      "to.Config.ConfigStatus\022\023\n\013max_unacked\030\002 " +
+      "\002(\r\022\035\n\025configuration_indices\030\003 \003(\r\"1\n\014Co" +
+      "nfigStatus\022\017\n\013STATUS_WAIT\020\001\022\020\n\014STATUS_RE" +
+      "ADY\020\002\"B\n\006Insets\022\013\n\003top\030\001 \001(\005\022\016\n\006bottom\030\002" +
+      " \001(\005\022\014\n\004left\030\003 \001(\005\022\r\n\005right\030\004 \001(\005\"\214\002\n\010Ui" +
+      "Config\022G\n\007margins\030\001 \001(\01326.com.andrerinas" +
+      ".openheadunit.aap.protocol.proto.Insets\022" +
+      "N\n\016content_insets\030\002 \001(\01326.com.andrerinas" +
+      ".openheadunit.aap.protocol.proto.Insets\022" +
+      "U\n\025stable_content_insets\030\003 \001(\01326.com.and" +
+      "rerinas.openheadunit.aap.protocol.proto." +
+      "Insets\022\020\n\010ui_theme\030\004 \001(\005\"d\n\025UpdateUiConf" +
+      "igRequest\022K\n\tui_config\030\001 \002(\01328.com.andre" +
+      "rinas.openheadunit.aap.protocol.proto.Ui" +
+      "Config\"b\n\023UpdateUiConfigReply\022K\n\tui_conf" +
+      "ig\030\001 \001(\01328.com.andrerinas.openheadunit.a" +
+      "ap.protocol.proto.UiConfig*\372\003\n\007MsgType\022\026" +
+      "\n\022MEDIA_MESSAGE_DATA\020\000\022\036\n\032MEDIA_MESSAGE_" +
+      "CODEC_CONFIG\020\001\022\031\n\023MEDIA_MESSAGE_SETUP\020\200\200" +
+      "\002\022\031\n\023MEDIA_MESSAGE_START\020\201\200\002\022\030\n\022MEDIA_ME" +
+      "SSAGE_STOP\020\202\200\002\022\032\n\024MEDIA_MESSAGE_CONFIG\020\203" +
+      "\200\002\022\027\n\021MEDIA_MESSAGE_ACK\020\204\200\002\022&\n MEDIA_MES" +
+      "SAGE_MICROPHONE_REQUEST\020\205\200\002\022\'\n!MEDIA_MES" +
+      "SAGE_MICROPHONE_RESPONSE\020\206\200\002\022\'\n!MEDIA_ME" +
+      "SSAGE_VIDEO_FOCUS_REQUEST\020\207\200\002\022,\n&MEDIA_M" +
+      "ESSAGE_VIDEO_FOCUS_NOTIFICATION\020\210\200\002\022,\n&M" +
+      "EDIA_MESSAGE_UPDATE_UI_CONFIG_REQUEST\020\211\200" +
+      "\002\022*\n$MEDIA_MESSAGE_UPDATE_UI_CONFIG_REPL" +
+      "Y\020\212\200\002\0220\n*MEDIA_MESSAGE_AUDIO_UNDERFLOW_N" +
+      "OTIFICATION\020\213\200\002*\335\001\n\016MediaCodecType\022\031\n\025ME" +
+      "DIA_CODEC_AUDIO_PCM\020\001\022\034\n\030MEDIA_CODEC_AUD" +
+      "IO_AAC_LC\020\002\022\035\n\031MEDIA_CODEC_VIDEO_H264_BP" +
+      "\020\003\022!\n\035MEDIA_CODEC_AUDIO_AAC_LC_ADTS\020\004\022\031\n" +
+      "\025MEDIA_CODEC_VIDEO_VP9\020\005\022\031\n\025MEDIA_CODEC_" +
+      "VIDEO_AV1\020\006\022\032\n\026MEDIA_CODEC_VIDEO_H265\020\007*" +
+      "s\n\017AudioStreamType\022\010\n\004NONE\020\000\022\n\n\006SPEECH\020\001" +
+      "\022\n\n\006SYSTEM\020\002\022\t\n\005MEDIA\020\003\022\t\n\005ALARM\020\004\022\014\n\010GU" +
+      "IDANCE\020\005\022\020\n\014ANNOUNCEMENT\020\006\022\010\n\004RING\020\007*\217\001\n" +
+      "\016VideoFocusMode\022\031\n\025VIDEO_FOCUS_PROJECTED" +
+      "\020\001\022\026\n\022VIDEO_FOCUS_NATIVE\020\002\022 \n\034VIDEO_FOCU" +
+      "S_NATIVE_TRANSIENT\020\003\022(\n$VIDEO_FOCUS_PROJ" +
+      "ECTED_NO_INPUT_FOCUS\020\004B\007B\005Media"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -10103,67 +10934,73 @@ public final class Media {
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_Ack_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_com_andrerinas_openheadunit_aap_protocol_proto_Ack_descriptor,
-        new java.lang.String[] { "SessionId", "Ack", });
-    internal_static_com_andrerinas_openheadunit_aap_protocol_proto_MicrophoneRequest_descriptor =
+        new java.lang.String[] { "SessionId", "Ack", "ReceiveTimestampNs", });
+    internal_static_com_andrerinas_openheadunit_aap_protocol_proto_AudioUnderflowNotification_descriptor =
       getDescriptor().getMessageTypes().get(3);
+    internal_static_com_andrerinas_openheadunit_aap_protocol_proto_AudioUnderflowNotification_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_com_andrerinas_openheadunit_aap_protocol_proto_AudioUnderflowNotification_descriptor,
+        new java.lang.String[] { "SessionId", });
+    internal_static_com_andrerinas_openheadunit_aap_protocol_proto_MicrophoneRequest_descriptor =
+      getDescriptor().getMessageTypes().get(4);
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_MicrophoneRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_com_andrerinas_openheadunit_aap_protocol_proto_MicrophoneRequest_descriptor,
         new java.lang.String[] { "Open", "AncEnabled", "EcEnabled", "MaxUnacked", });
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_MicrophoneResponse_descriptor =
-      getDescriptor().getMessageTypes().get(4);
+      getDescriptor().getMessageTypes().get(5);
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_MicrophoneResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_com_andrerinas_openheadunit_aap_protocol_proto_MicrophoneResponse_descriptor,
         new java.lang.String[] { "Status", "SessionId", });
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_VideoFocusRequestNotification_descriptor =
-      getDescriptor().getMessageTypes().get(5);
+      getDescriptor().getMessageTypes().get(6);
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_VideoFocusRequestNotification_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_com_andrerinas_openheadunit_aap_protocol_proto_VideoFocusRequestNotification_descriptor,
         new java.lang.String[] { "DispChannelId", "Mode", "Reason", });
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_VideoFocusNotification_descriptor =
-      getDescriptor().getMessageTypes().get(6);
+      getDescriptor().getMessageTypes().get(7);
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_VideoFocusNotification_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_com_andrerinas_openheadunit_aap_protocol_proto_VideoFocusNotification_descriptor,
         new java.lang.String[] { "Mode", "Unsolicited", });
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_MediaSetupRequest_descriptor =
-      getDescriptor().getMessageTypes().get(7);
+      getDescriptor().getMessageTypes().get(8);
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_MediaSetupRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_com_andrerinas_openheadunit_aap_protocol_proto_MediaSetupRequest_descriptor,
         new java.lang.String[] { "Type", });
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_Config_descriptor =
-      getDescriptor().getMessageTypes().get(8);
+      getDescriptor().getMessageTypes().get(9);
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_Config_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_com_andrerinas_openheadunit_aap_protocol_proto_Config_descriptor,
         new java.lang.String[] { "Status", "MaxUnacked", "ConfigurationIndices", });
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_Insets_descriptor =
-      getDescriptor().getMessageTypes().get(9);
+      getDescriptor().getMessageTypes().get(10);
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_Insets_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_com_andrerinas_openheadunit_aap_protocol_proto_Insets_descriptor,
         new java.lang.String[] { "Top", "Bottom", "Left", "Right", });
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_UiConfig_descriptor =
-      getDescriptor().getMessageTypes().get(10);
+      getDescriptor().getMessageTypes().get(11);
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_UiConfig_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_com_andrerinas_openheadunit_aap_protocol_proto_UiConfig_descriptor,
         new java.lang.String[] { "Margins", "ContentInsets", "StableContentInsets", "UiTheme", });
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_UpdateUiConfigRequest_descriptor =
-      getDescriptor().getMessageTypes().get(11);
+      getDescriptor().getMessageTypes().get(12);
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_UpdateUiConfigRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_com_andrerinas_openheadunit_aap_protocol_proto_UpdateUiConfigRequest_descriptor,
         new java.lang.String[] { "UiConfig", });
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_UpdateUiConfigReply_descriptor =
-      getDescriptor().getMessageTypes().get(12);
+      getDescriptor().getMessageTypes().get(13);
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_UpdateUiConfigReply_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_com_andrerinas_openheadunit_aap_protocol_proto_UpdateUiConfigReply_descriptor,
-        new java.lang.String[] { "Status", });
+        new java.lang.String[] { "UiConfig", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

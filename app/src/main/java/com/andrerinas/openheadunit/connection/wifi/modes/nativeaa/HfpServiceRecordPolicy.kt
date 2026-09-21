@@ -46,4 +46,19 @@ object HfpServiceRecordPolicy {
         handsFreeLink: BluetoothWakePolicy.HandsFreeLink,
     ): Boolean =
         enabled && publishedStandIn && handsFreeLink != BluetoothWakePolicy.HandsFreeLink.CONNECTED
+
+    /**
+     * Why a hold that spoke first ended without a service level connection, or null when it did not.
+     *
+     * The stage separates the two causes. Stuck where we opened means the phone answered nothing at
+     * all, which is what one already serving another device's hands-free link does; stopping later
+     * means it answered and then stalled. Only success was logged before, so a refusal said nothing.
+     */
+    fun standInRefusalReason(initiated: Boolean, stage: HfpSlcInitiator.Stage): String? = when {
+        !initiated || stage == HfpSlcInitiator.Stage.ESTABLISHED -> null
+        stage == HfpSlcInitiator.Stage.IDLE || stage == HfpSlcInitiator.Stage.BRSF ->
+            "it answered nothing at all, which is what a phone already giving another device its " +
+                "hands-free connection does"
+        else -> "it stopped answering after $stage"
+    }
 }

@@ -342,39 +342,47 @@ public final class Control {
   public enum BluetoothPairingMethod
       implements com.google.protobuf.ProtocolMessageEnum {
     /**
-     * <code>METHOD_1 = 1;</code>
+     * <code>BLUETOOTH_PAIRING_UNAVAILABLE = -1;</code>
      */
-    METHOD_1(1),
+    BLUETOOTH_PAIRING_UNAVAILABLE(-1),
     /**
-     * <code>A2DP = 2;</code>
+     * <code>BLUETOOTH_PAIRING_OOB = 1;</code>
      */
-    A2DP(2),
+    BLUETOOTH_PAIRING_OOB(1),
     /**
-     * <code>METHOD_3 = 3;</code>
+     * <code>BLUETOOTH_PAIRING_NUMERIC_COMPARISON = 2;</code>
      */
-    METHOD_3(3),
+    BLUETOOTH_PAIRING_NUMERIC_COMPARISON(2),
     /**
-     * <code>HFP = 4;</code>
+     * <code>BLUETOOTH_PAIRING_PASSKEY_ENTRY = 3;</code>
      */
-    HFP(4),
+    BLUETOOTH_PAIRING_PASSKEY_ENTRY(3),
+    /**
+     * <code>BLUETOOTH_PAIRING_PIN = 4;</code>
+     */
+    BLUETOOTH_PAIRING_PIN(4),
     ;
 
     /**
-     * <code>METHOD_1 = 1;</code>
+     * <code>BLUETOOTH_PAIRING_UNAVAILABLE = -1;</code>
      */
-    public static final int METHOD_1_VALUE = 1;
+    public static final int BLUETOOTH_PAIRING_UNAVAILABLE_VALUE = -1;
     /**
-     * <code>A2DP = 2;</code>
+     * <code>BLUETOOTH_PAIRING_OOB = 1;</code>
      */
-    public static final int A2DP_VALUE = 2;
+    public static final int BLUETOOTH_PAIRING_OOB_VALUE = 1;
     /**
-     * <code>METHOD_3 = 3;</code>
+     * <code>BLUETOOTH_PAIRING_NUMERIC_COMPARISON = 2;</code>
      */
-    public static final int METHOD_3_VALUE = 3;
+    public static final int BLUETOOTH_PAIRING_NUMERIC_COMPARISON_VALUE = 2;
     /**
-     * <code>HFP = 4;</code>
+     * <code>BLUETOOTH_PAIRING_PASSKEY_ENTRY = 3;</code>
      */
-    public static final int HFP_VALUE = 4;
+    public static final int BLUETOOTH_PAIRING_PASSKEY_ENTRY_VALUE = 3;
+    /**
+     * <code>BLUETOOTH_PAIRING_PIN = 4;</code>
+     */
+    public static final int BLUETOOTH_PAIRING_PIN_VALUE = 4;
 
 
     public final int getNumber() {
@@ -397,10 +405,11 @@ public final class Control {
      */
     public static BluetoothPairingMethod forNumber(int value) {
       switch (value) {
-        case 1: return METHOD_1;
-        case 2: return A2DP;
-        case 3: return METHOD_3;
-        case 4: return HFP;
+        case -1: return BLUETOOTH_PAIRING_UNAVAILABLE;
+        case 1: return BLUETOOTH_PAIRING_OOB;
+        case 2: return BLUETOOTH_PAIRING_NUMERIC_COMPARISON;
+        case 3: return BLUETOOTH_PAIRING_PASSKEY_ENTRY;
+        case 4: return BLUETOOTH_PAIRING_PIN;
         default: return null;
       }
     }
@@ -693,23 +702,23 @@ public final class Control {
   public enum NavFocusType
       implements com.google.protobuf.ProtocolMessageEnum {
     /**
-     * <code>NAV_FOCUS_1 = 1;</code>
+     * <code>NAV_FOCUS_NATIVE = 1;</code>
      */
-    NAV_FOCUS_1(1),
+    NAV_FOCUS_NATIVE(1),
     /**
-     * <code>NAV_FOCUS_2 = 2;</code>
+     * <code>NAV_FOCUS_PROJECTED = 2;</code>
      */
-    NAV_FOCUS_2(2),
+    NAV_FOCUS_PROJECTED(2),
     ;
 
     /**
-     * <code>NAV_FOCUS_1 = 1;</code>
+     * <code>NAV_FOCUS_NATIVE = 1;</code>
      */
-    public static final int NAV_FOCUS_1_VALUE = 1;
+    public static final int NAV_FOCUS_NATIVE_VALUE = 1;
     /**
-     * <code>NAV_FOCUS_2 = 2;</code>
+     * <code>NAV_FOCUS_PROJECTED = 2;</code>
      */
-    public static final int NAV_FOCUS_2_VALUE = 2;
+    public static final int NAV_FOCUS_PROJECTED_VALUE = 2;
 
 
     public final int getNumber() {
@@ -732,8 +741,8 @@ public final class Control {
      */
     public static NavFocusType forNumber(int value) {
       switch (value) {
-        case 1: return NAV_FOCUS_1;
-        case 2: return NAV_FOCUS_2;
+        case 1: return NAV_FOCUS_NATIVE;
+        case 2: return NAV_FOCUS_PROJECTED;
         default: return null;
       }
     }
@@ -2639,6 +2648,17 @@ public final class Control {
         int getDecoderAdditionalDepth();
 
         /**
+         * <code>optional uint32 viewing_distance = 7;</code>
+         * @return Whether the viewingDistance field is set.
+         */
+        boolean hasViewingDistance();
+        /**
+         * <code>optional uint32 viewing_distance = 7;</code>
+         * @return The viewingDistance.
+         */
+        int getViewingDistance();
+
+        /**
          * <pre>
          * Pixel aspect ratio x 10000 (10000 = 1.0 = square pixels)
          * </pre>
@@ -2656,6 +2676,17 @@ public final class Control {
          * @return The pixelAspectRatioE4.
          */
         int getPixelAspectRatioE4();
+
+        /**
+         * <code>optional uint32 real_density = 9;</code>
+         * @return Whether the realDensity field is set.
+         */
+        boolean hasRealDensity();
+        /**
+         * <code>optional uint32 real_density = 9;</code>
+         * @return The realDensity.
+         */
+        int getRealDensity();
 
         /**
          * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.MediaCodecType video_codec_type = 10;</code>
@@ -3074,6 +3105,25 @@ public final class Control {
           return decoderAdditionalDepth_;
         }
 
+        public static final int VIEWING_DISTANCE_FIELD_NUMBER = 7;
+        private int viewingDistance_ = 0;
+        /**
+         * <code>optional uint32 viewing_distance = 7;</code>
+         * @return Whether the viewingDistance field is set.
+         */
+        @java.lang.Override
+        public boolean hasViewingDistance() {
+          return ((bitField0_ & 0x00000040) != 0);
+        }
+        /**
+         * <code>optional uint32 viewing_distance = 7;</code>
+         * @return The viewingDistance.
+         */
+        @java.lang.Override
+        public int getViewingDistance() {
+          return viewingDistance_;
+        }
+
         public static final int PIXEL_ASPECT_RATIO_E4_FIELD_NUMBER = 8;
         private int pixelAspectRatioE4_ = 0;
         /**
@@ -3086,7 +3136,7 @@ public final class Control {
          */
         @java.lang.Override
         public boolean hasPixelAspectRatioE4() {
-          return ((bitField0_ & 0x00000040) != 0);
+          return ((bitField0_ & 0x00000080) != 0);
         }
         /**
          * <pre>
@@ -3101,6 +3151,25 @@ public final class Control {
           return pixelAspectRatioE4_;
         }
 
+        public static final int REAL_DENSITY_FIELD_NUMBER = 9;
+        private int realDensity_ = 0;
+        /**
+         * <code>optional uint32 real_density = 9;</code>
+         * @return Whether the realDensity field is set.
+         */
+        @java.lang.Override
+        public boolean hasRealDensity() {
+          return ((bitField0_ & 0x00000100) != 0);
+        }
+        /**
+         * <code>optional uint32 real_density = 9;</code>
+         * @return The realDensity.
+         */
+        @java.lang.Override
+        public int getRealDensity() {
+          return realDensity_;
+        }
+
         public static final int VIDEO_CODEC_TYPE_FIELD_NUMBER = 10;
         private int videoCodecType_ = 1;
         /**
@@ -3108,7 +3177,7 @@ public final class Control {
          * @return Whether the videoCodecType field is set.
          */
         @java.lang.Override public boolean hasVideoCodecType() {
-          return ((bitField0_ & 0x00000080) != 0);
+          return ((bitField0_ & 0x00000200) != 0);
         }
         /**
          * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.MediaCodecType video_codec_type = 10;</code>
@@ -3172,9 +3241,15 @@ public final class Control {
             output.writeUInt32(6, decoderAdditionalDepth_);
           }
           if (((bitField0_ & 0x00000040) != 0)) {
-            output.writeUInt32(8, pixelAspectRatioE4_);
+            output.writeUInt32(7, viewingDistance_);
           }
           if (((bitField0_ & 0x00000080) != 0)) {
+            output.writeUInt32(8, pixelAspectRatioE4_);
+          }
+          if (((bitField0_ & 0x00000100) != 0)) {
+            output.writeUInt32(9, realDensity_);
+          }
+          if (((bitField0_ & 0x00000200) != 0)) {
             output.writeEnum(10, videoCodecType_);
           }
           getUnknownFields().writeTo(output);
@@ -3212,9 +3287,17 @@ public final class Control {
           }
           if (((bitField0_ & 0x00000040) != 0)) {
             size += com.google.protobuf.CodedOutputStream
-              .computeUInt32Size(8, pixelAspectRatioE4_);
+              .computeUInt32Size(7, viewingDistance_);
           }
           if (((bitField0_ & 0x00000080) != 0)) {
+            size += com.google.protobuf.CodedOutputStream
+              .computeUInt32Size(8, pixelAspectRatioE4_);
+          }
+          if (((bitField0_ & 0x00000100) != 0)) {
+            size += com.google.protobuf.CodedOutputStream
+              .computeUInt32Size(9, realDensity_);
+          }
+          if (((bitField0_ & 0x00000200) != 0)) {
             size += com.google.protobuf.CodedOutputStream
               .computeEnumSize(10, videoCodecType_);
           }
@@ -3261,10 +3344,20 @@ public final class Control {
             if (getDecoderAdditionalDepth()
                 != other.getDecoderAdditionalDepth()) return false;
           }
+          if (hasViewingDistance() != other.hasViewingDistance()) return false;
+          if (hasViewingDistance()) {
+            if (getViewingDistance()
+                != other.getViewingDistance()) return false;
+          }
           if (hasPixelAspectRatioE4() != other.hasPixelAspectRatioE4()) return false;
           if (hasPixelAspectRatioE4()) {
             if (getPixelAspectRatioE4()
                 != other.getPixelAspectRatioE4()) return false;
+          }
+          if (hasRealDensity() != other.hasRealDensity()) return false;
+          if (hasRealDensity()) {
+            if (getRealDensity()
+                != other.getRealDensity()) return false;
           }
           if (hasVideoCodecType() != other.hasVideoCodecType()) return false;
           if (hasVideoCodecType()) {
@@ -3305,9 +3398,17 @@ public final class Control {
             hash = (37 * hash) + DECODER_ADDITIONAL_DEPTH_FIELD_NUMBER;
             hash = (53 * hash) + getDecoderAdditionalDepth();
           }
+          if (hasViewingDistance()) {
+            hash = (37 * hash) + VIEWING_DISTANCE_FIELD_NUMBER;
+            hash = (53 * hash) + getViewingDistance();
+          }
           if (hasPixelAspectRatioE4()) {
             hash = (37 * hash) + PIXEL_ASPECT_RATIO_E4_FIELD_NUMBER;
             hash = (53 * hash) + getPixelAspectRatioE4();
+          }
+          if (hasRealDensity()) {
+            hash = (37 * hash) + REAL_DENSITY_FIELD_NUMBER;
+            hash = (53 * hash) + getRealDensity();
           }
           if (hasVideoCodecType()) {
             hash = (37 * hash) + VIDEO_CODEC_TYPE_FIELD_NUMBER;
@@ -3450,7 +3551,9 @@ public final class Control {
             marginHeight_ = 0;
             density_ = 0;
             decoderAdditionalDepth_ = 0;
+            viewingDistance_ = 0;
             pixelAspectRatioE4_ = 0;
+            realDensity_ = 0;
             videoCodecType_ = 1;
             return this;
           }
@@ -3511,12 +3614,20 @@ public final class Control {
               to_bitField0_ |= 0x00000020;
             }
             if (((from_bitField0_ & 0x00000040) != 0)) {
-              result.pixelAspectRatioE4_ = pixelAspectRatioE4_;
+              result.viewingDistance_ = viewingDistance_;
               to_bitField0_ |= 0x00000040;
             }
             if (((from_bitField0_ & 0x00000080) != 0)) {
-              result.videoCodecType_ = videoCodecType_;
+              result.pixelAspectRatioE4_ = pixelAspectRatioE4_;
               to_bitField0_ |= 0x00000080;
+            }
+            if (((from_bitField0_ & 0x00000100) != 0)) {
+              result.realDensity_ = realDensity_;
+              to_bitField0_ |= 0x00000100;
+            }
+            if (((from_bitField0_ & 0x00000200) != 0)) {
+              result.videoCodecType_ = videoCodecType_;
+              to_bitField0_ |= 0x00000200;
             }
             result.bitField0_ |= to_bitField0_;
           }
@@ -3583,8 +3694,14 @@ public final class Control {
             if (other.hasDecoderAdditionalDepth()) {
               setDecoderAdditionalDepth(other.getDecoderAdditionalDepth());
             }
+            if (other.hasViewingDistance()) {
+              setViewingDistance(other.getViewingDistance());
+            }
             if (other.hasPixelAspectRatioE4()) {
               setPixelAspectRatioE4(other.getPixelAspectRatioE4());
+            }
+            if (other.hasRealDensity()) {
+              setRealDensity(other.getRealDensity());
             }
             if (other.hasVideoCodecType()) {
               setVideoCodecType(other.getVideoCodecType());
@@ -3674,11 +3791,21 @@ public final class Control {
                     bitField0_ |= 0x00000020;
                     break;
                   } // case 48
-                  case 64: {
-                    pixelAspectRatioE4_ = input.readUInt32();
+                  case 56: {
+                    viewingDistance_ = input.readUInt32();
                     bitField0_ |= 0x00000040;
                     break;
+                  } // case 56
+                  case 64: {
+                    pixelAspectRatioE4_ = input.readUInt32();
+                    bitField0_ |= 0x00000080;
+                    break;
                   } // case 64
+                  case 72: {
+                    realDensity_ = input.readUInt32();
+                    bitField0_ |= 0x00000100;
+                    break;
+                  } // case 72
                   case 80: {
                     int tmpRaw = input.readEnum();
                     com.andrerinas.openheadunit.aap.protocol.proto.Media.MediaCodecType tmpValue =
@@ -3687,7 +3814,7 @@ public final class Control {
                       mergeUnknownVarintField(10, tmpRaw);
                     } else {
                       videoCodecType_ = tmpRaw;
-                      bitField0_ |= 0x00000080;
+                      bitField0_ |= 0x00000200;
                     }
                     break;
                   } // case 80
@@ -3952,6 +4079,46 @@ public final class Control {
             return this;
           }
 
+          private int viewingDistance_ ;
+          /**
+           * <code>optional uint32 viewing_distance = 7;</code>
+           * @return Whether the viewingDistance field is set.
+           */
+          @java.lang.Override
+          public boolean hasViewingDistance() {
+            return ((bitField0_ & 0x00000040) != 0);
+          }
+          /**
+           * <code>optional uint32 viewing_distance = 7;</code>
+           * @return The viewingDistance.
+           */
+          @java.lang.Override
+          public int getViewingDistance() {
+            return viewingDistance_;
+          }
+          /**
+           * <code>optional uint32 viewing_distance = 7;</code>
+           * @param value The viewingDistance to set.
+           * @return This builder for chaining.
+           */
+          public Builder setViewingDistance(int value) {
+
+            viewingDistance_ = value;
+            bitField0_ |= 0x00000040;
+            onChanged();
+            return this;
+          }
+          /**
+           * <code>optional uint32 viewing_distance = 7;</code>
+           * @return This builder for chaining.
+           */
+          public Builder clearViewingDistance() {
+            bitField0_ = (bitField0_ & ~0x00000040);
+            viewingDistance_ = 0;
+            onChanged();
+            return this;
+          }
+
           private int pixelAspectRatioE4_ ;
           /**
            * <pre>
@@ -3963,7 +4130,7 @@ public final class Control {
            */
           @java.lang.Override
           public boolean hasPixelAspectRatioE4() {
-            return ((bitField0_ & 0x00000040) != 0);
+            return ((bitField0_ & 0x00000080) != 0);
           }
           /**
            * <pre>
@@ -3989,7 +4156,7 @@ public final class Control {
           public Builder setPixelAspectRatioE4(int value) {
 
             pixelAspectRatioE4_ = value;
-            bitField0_ |= 0x00000040;
+            bitField0_ |= 0x00000080;
             onChanged();
             return this;
           }
@@ -4002,8 +4169,48 @@ public final class Control {
            * @return This builder for chaining.
            */
           public Builder clearPixelAspectRatioE4() {
-            bitField0_ = (bitField0_ & ~0x00000040);
+            bitField0_ = (bitField0_ & ~0x00000080);
             pixelAspectRatioE4_ = 0;
+            onChanged();
+            return this;
+          }
+
+          private int realDensity_ ;
+          /**
+           * <code>optional uint32 real_density = 9;</code>
+           * @return Whether the realDensity field is set.
+           */
+          @java.lang.Override
+          public boolean hasRealDensity() {
+            return ((bitField0_ & 0x00000100) != 0);
+          }
+          /**
+           * <code>optional uint32 real_density = 9;</code>
+           * @return The realDensity.
+           */
+          @java.lang.Override
+          public int getRealDensity() {
+            return realDensity_;
+          }
+          /**
+           * <code>optional uint32 real_density = 9;</code>
+           * @param value The realDensity to set.
+           * @return This builder for chaining.
+           */
+          public Builder setRealDensity(int value) {
+
+            realDensity_ = value;
+            bitField0_ |= 0x00000100;
+            onChanged();
+            return this;
+          }
+          /**
+           * <code>optional uint32 real_density = 9;</code>
+           * @return This builder for chaining.
+           */
+          public Builder clearRealDensity() {
+            bitField0_ = (bitField0_ & ~0x00000100);
+            realDensity_ = 0;
             onChanged();
             return this;
           }
@@ -4014,7 +4221,7 @@ public final class Control {
            * @return Whether the videoCodecType field is set.
            */
           @java.lang.Override public boolean hasVideoCodecType() {
-            return ((bitField0_ & 0x00000080) != 0);
+            return ((bitField0_ & 0x00000200) != 0);
           }
           /**
            * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.MediaCodecType video_codec_type = 10;</code>
@@ -4034,7 +4241,7 @@ public final class Control {
             if (value == null) {
               throw new NullPointerException();
             }
-            bitField0_ |= 0x00000080;
+            bitField0_ |= 0x00000200;
             videoCodecType_ = value.getNumber();
             onChanged();
             return this;
@@ -4044,7 +4251,7 @@ public final class Control {
            * @return This builder for chaining.
            */
           public Builder clearVideoCodecType() {
-            bitField0_ = (bitField0_ & ~0x00000080);
+            bitField0_ = (bitField0_ & ~0x00000200);
             videoCodecType_ = 1;
             onChanged();
             return this;
@@ -8099,7 +8306,7 @@ public final class Control {
                   java.lang.Integer, com.andrerinas.openheadunit.aap.protocol.proto.Control.BluetoothPairingMethod>() {
                 public com.andrerinas.openheadunit.aap.protocol.proto.Control.BluetoothPairingMethod convert(java.lang.Integer from) {
                   com.andrerinas.openheadunit.aap.protocol.proto.Control.BluetoothPairingMethod result = com.andrerinas.openheadunit.aap.protocol.proto.Control.BluetoothPairingMethod.forNumber(from);
-                  return result == null ? com.andrerinas.openheadunit.aap.protocol.proto.Control.BluetoothPairingMethod.METHOD_1 : result;
+                  return result == null ? com.andrerinas.openheadunit.aap.protocol.proto.Control.BluetoothPairingMethod.BLUETOOTH_PAIRING_UNAVAILABLE : result;
                 }
               };
       /**
@@ -19207,16 +19414,46 @@ public final class Control {
     boolean getProbeForSupport();
 
     /**
+     * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.ConnectionConfiguration connection_configuration = 16;</code>
+     * @return Whether the connectionConfiguration field is set.
+     */
+    boolean hasConnectionConfiguration();
+    /**
+     * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.ConnectionConfiguration connection_configuration = 16;</code>
+     * @return The connectionConfiguration.
+     */
+    com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration getConnectionConfiguration();
+    /**
+     * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.ConnectionConfiguration connection_configuration = 16;</code>
+     */
+    com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfigurationOrBuilder getConnectionConfigurationOrBuilder();
+
+    /**
+     * <pre>
+     * Android Auto reserves 18 for vehicle type. We carry ours on HeadUnitInfo field 9, which is
+     * measured to work; if that ever stops, this is where it moved.
+     * </pre>
+     *
      * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.HeadUnitInfo headunit_info = 17;</code>
      * @return Whether the headunitInfo field is set.
      */
     boolean hasHeadunitInfo();
     /**
+     * <pre>
+     * Android Auto reserves 18 for vehicle type. We carry ours on HeadUnitInfo field 9, which is
+     * measured to work; if that ever stops, this is where it moved.
+     * </pre>
+     *
      * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.HeadUnitInfo headunit_info = 17;</code>
      * @return The headunitInfo.
      */
     com.andrerinas.openheadunit.aap.protocol.proto.Common.HeadUnitInfo getHeadunitInfo();
     /**
+     * <pre>
+     * Android Auto reserves 18 for vehicle type. We carry ours on HeadUnitInfo field 9, which is
+     * measured to work; if that ever stops, this is where it moved.
+     * </pre>
+     *
      * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.HeadUnitInfo headunit_info = 17;</code>
      */
     com.andrerinas.openheadunit.aap.protocol.proto.Common.HeadUnitInfoOrBuilder getHeadunitInfoOrBuilder();
@@ -19844,17 +20081,53 @@ public final class Control {
       return probeForSupport_;
     }
 
+    public static final int CONNECTION_CONFIGURATION_FIELD_NUMBER = 16;
+    private com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration connectionConfiguration_;
+    /**
+     * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.ConnectionConfiguration connection_configuration = 16;</code>
+     * @return Whether the connectionConfiguration field is set.
+     */
+    @java.lang.Override
+    public boolean hasConnectionConfiguration() {
+      return ((bitField0_ & 0x00004000) != 0);
+    }
+    /**
+     * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.ConnectionConfiguration connection_configuration = 16;</code>
+     * @return The connectionConfiguration.
+     */
+    @java.lang.Override
+    public com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration getConnectionConfiguration() {
+      return connectionConfiguration_ == null ? com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration.getDefaultInstance() : connectionConfiguration_;
+    }
+    /**
+     * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.ConnectionConfiguration connection_configuration = 16;</code>
+     */
+    @java.lang.Override
+    public com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfigurationOrBuilder getConnectionConfigurationOrBuilder() {
+      return connectionConfiguration_ == null ? com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration.getDefaultInstance() : connectionConfiguration_;
+    }
+
     public static final int HEADUNIT_INFO_FIELD_NUMBER = 17;
     private com.andrerinas.openheadunit.aap.protocol.proto.Common.HeadUnitInfo headunitInfo_;
     /**
+     * <pre>
+     * Android Auto reserves 18 for vehicle type. We carry ours on HeadUnitInfo field 9, which is
+     * measured to work; if that ever stops, this is where it moved.
+     * </pre>
+     *
      * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.HeadUnitInfo headunit_info = 17;</code>
      * @return Whether the headunitInfo field is set.
      */
     @java.lang.Override
     public boolean hasHeadunitInfo() {
-      return ((bitField0_ & 0x00004000) != 0);
+      return ((bitField0_ & 0x00008000) != 0);
     }
     /**
+     * <pre>
+     * Android Auto reserves 18 for vehicle type. We carry ours on HeadUnitInfo field 9, which is
+     * measured to work; if that ever stops, this is where it moved.
+     * </pre>
+     *
      * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.HeadUnitInfo headunit_info = 17;</code>
      * @return The headunitInfo.
      */
@@ -19863,6 +20136,11 @@ public final class Control {
       return headunitInfo_ == null ? com.andrerinas.openheadunit.aap.protocol.proto.Common.HeadUnitInfo.getDefaultInstance() : headunitInfo_;
     }
     /**
+     * <pre>
+     * Android Auto reserves 18 for vehicle type. We carry ours on HeadUnitInfo field 9, which is
+     * measured to work; if that ever stops, this is where it moved.
+     * </pre>
+     *
      * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.HeadUnitInfo headunit_info = 17;</code>
      */
     @java.lang.Override
@@ -19976,6 +20254,9 @@ public final class Control {
         output.writeBool(15, probeForSupport_);
       }
       if (((bitField0_ & 0x00004000) != 0)) {
+        output.writeMessage(16, getConnectionConfiguration());
+      }
+      if (((bitField0_ & 0x00008000) != 0)) {
         output.writeMessage(17, getHeadunitInfo());
       }
       getUnknownFields().writeTo(output);
@@ -20039,6 +20320,10 @@ public final class Control {
           .computeBoolSize(15, probeForSupport_);
       }
       if (((bitField0_ & 0x00004000) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(16, getConnectionConfiguration());
+      }
+      if (((bitField0_ & 0x00008000) != 0)) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(17, getHeadunitInfo());
       }
@@ -20128,6 +20413,11 @@ public final class Control {
         if (getProbeForSupport()
             != other.getProbeForSupport()) return false;
       }
+      if (hasConnectionConfiguration() != other.hasConnectionConfiguration()) return false;
+      if (hasConnectionConfiguration()) {
+        if (!getConnectionConfiguration()
+            .equals(other.getConnectionConfiguration())) return false;
+      }
       if (hasHeadunitInfo() != other.hasHeadunitInfo()) return false;
       if (hasHeadunitInfo()) {
         if (!getHeadunitInfo()
@@ -20206,6 +20496,10 @@ public final class Control {
         hash = (37 * hash) + PROBE_FOR_SUPPORT_FIELD_NUMBER;
         hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
             getProbeForSupport());
+      }
+      if (hasConnectionConfiguration()) {
+        hash = (37 * hash) + CONNECTION_CONFIGURATION_FIELD_NUMBER;
+        hash = (53 * hash) + getConnectionConfiguration().hashCode();
       }
       if (hasHeadunitInfo()) {
         hash = (37 * hash) + HEADUNIT_INFO_FIELD_NUMBER;
@@ -20342,6 +20636,7 @@ public final class Control {
         if (com.google.protobuf.GeneratedMessageV3
                 .alwaysUseFieldBuilders) {
           getServicesFieldBuilder();
+          getConnectionConfigurationFieldBuilder();
           getHeadunitInfoFieldBuilder();
         }
       }
@@ -20370,6 +20665,11 @@ public final class Control {
         sessionConfiguration_ = 0;
         displayName_ = "";
         probeForSupport_ = false;
+        connectionConfiguration_ = null;
+        if (connectionConfigurationBuilder_ != null) {
+          connectionConfigurationBuilder_.dispose();
+          connectionConfigurationBuilder_ = null;
+        }
         headunitInfo_ = null;
         if (headunitInfoBuilder_ != null) {
           headunitInfoBuilder_.dispose();
@@ -20479,10 +20779,16 @@ public final class Control {
           to_bitField0_ |= 0x00002000;
         }
         if (((from_bitField0_ & 0x00008000) != 0)) {
+          result.connectionConfiguration_ = connectionConfigurationBuilder_ == null
+              ? connectionConfiguration_
+              : connectionConfigurationBuilder_.build();
+          to_bitField0_ |= 0x00004000;
+        }
+        if (((from_bitField0_ & 0x00010000) != 0)) {
           result.headunitInfo_ = headunitInfoBuilder_ == null
               ? headunitInfo_
               : headunitInfoBuilder_.build();
-          to_bitField0_ |= 0x00004000;
+          to_bitField0_ |= 0x00008000;
         }
         result.bitField0_ |= to_bitField0_;
       }
@@ -20616,6 +20922,9 @@ public final class Control {
         }
         if (other.hasProbeForSupport()) {
           setProbeForSupport(other.getProbeForSupport());
+        }
+        if (other.hasConnectionConfiguration()) {
+          mergeConnectionConfiguration(other.getConnectionConfiguration());
         }
         if (other.hasHeadunitInfo()) {
           mergeHeadunitInfo(other.getHeadunitInfo());
@@ -20771,11 +21080,18 @@ public final class Control {
                 bitField0_ |= 0x00004000;
                 break;
               } // case 120
+              case 130: {
+                input.readMessage(
+                    getConnectionConfigurationFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x00008000;
+                break;
+              } // case 130
               case 138: {
                 input.readMessage(
                     getHeadunitInfoFieldBuilder().getBuilder(),
                     extensionRegistry);
-                bitField0_ |= 0x00008000;
+                bitField0_ |= 0x00010000;
                 break;
               } // case 138
               default: {
@@ -21957,17 +22273,148 @@ public final class Control {
         return this;
       }
 
+      private com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration connectionConfiguration_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration, com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration.Builder, com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfigurationOrBuilder> connectionConfigurationBuilder_;
+      /**
+       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.ConnectionConfiguration connection_configuration = 16;</code>
+       * @return Whether the connectionConfiguration field is set.
+       */
+      public boolean hasConnectionConfiguration() {
+        return ((bitField0_ & 0x00008000) != 0);
+      }
+      /**
+       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.ConnectionConfiguration connection_configuration = 16;</code>
+       * @return The connectionConfiguration.
+       */
+      public com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration getConnectionConfiguration() {
+        if (connectionConfigurationBuilder_ == null) {
+          return connectionConfiguration_ == null ? com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration.getDefaultInstance() : connectionConfiguration_;
+        } else {
+          return connectionConfigurationBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.ConnectionConfiguration connection_configuration = 16;</code>
+       */
+      public Builder setConnectionConfiguration(com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration value) {
+        if (connectionConfigurationBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          connectionConfiguration_ = value;
+        } else {
+          connectionConfigurationBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00008000;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.ConnectionConfiguration connection_configuration = 16;</code>
+       */
+      public Builder setConnectionConfiguration(
+          com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration.Builder builderForValue) {
+        if (connectionConfigurationBuilder_ == null) {
+          connectionConfiguration_ = builderForValue.build();
+        } else {
+          connectionConfigurationBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00008000;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.ConnectionConfiguration connection_configuration = 16;</code>
+       */
+      public Builder mergeConnectionConfiguration(com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration value) {
+        if (connectionConfigurationBuilder_ == null) {
+          if (((bitField0_ & 0x00008000) != 0) &&
+            connectionConfiguration_ != null &&
+            connectionConfiguration_ != com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration.getDefaultInstance()) {
+            getConnectionConfigurationBuilder().mergeFrom(value);
+          } else {
+            connectionConfiguration_ = value;
+          }
+        } else {
+          connectionConfigurationBuilder_.mergeFrom(value);
+        }
+        if (connectionConfiguration_ != null) {
+          bitField0_ |= 0x00008000;
+          onChanged();
+        }
+        return this;
+      }
+      /**
+       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.ConnectionConfiguration connection_configuration = 16;</code>
+       */
+      public Builder clearConnectionConfiguration() {
+        bitField0_ = (bitField0_ & ~0x00008000);
+        connectionConfiguration_ = null;
+        if (connectionConfigurationBuilder_ != null) {
+          connectionConfigurationBuilder_.dispose();
+          connectionConfigurationBuilder_ = null;
+        }
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.ConnectionConfiguration connection_configuration = 16;</code>
+       */
+      public com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration.Builder getConnectionConfigurationBuilder() {
+        bitField0_ |= 0x00008000;
+        onChanged();
+        return getConnectionConfigurationFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.ConnectionConfiguration connection_configuration = 16;</code>
+       */
+      public com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfigurationOrBuilder getConnectionConfigurationOrBuilder() {
+        if (connectionConfigurationBuilder_ != null) {
+          return connectionConfigurationBuilder_.getMessageOrBuilder();
+        } else {
+          return connectionConfiguration_ == null ?
+              com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration.getDefaultInstance() : connectionConfiguration_;
+        }
+      }
+      /**
+       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.ConnectionConfiguration connection_configuration = 16;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration, com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration.Builder, com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfigurationOrBuilder> 
+          getConnectionConfigurationFieldBuilder() {
+        if (connectionConfigurationBuilder_ == null) {
+          connectionConfigurationBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration, com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration.Builder, com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfigurationOrBuilder>(
+                  getConnectionConfiguration(),
+                  getParentForChildren(),
+                  isClean());
+          connectionConfiguration_ = null;
+        }
+        return connectionConfigurationBuilder_;
+      }
+
       private com.andrerinas.openheadunit.aap.protocol.proto.Common.HeadUnitInfo headunitInfo_;
       private com.google.protobuf.SingleFieldBuilderV3<
           com.andrerinas.openheadunit.aap.protocol.proto.Common.HeadUnitInfo, com.andrerinas.openheadunit.aap.protocol.proto.Common.HeadUnitInfo.Builder, com.andrerinas.openheadunit.aap.protocol.proto.Common.HeadUnitInfoOrBuilder> headunitInfoBuilder_;
       /**
+       * <pre>
+       * Android Auto reserves 18 for vehicle type. We carry ours on HeadUnitInfo field 9, which is
+       * measured to work; if that ever stops, this is where it moved.
+       * </pre>
+       *
        * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.HeadUnitInfo headunit_info = 17;</code>
        * @return Whether the headunitInfo field is set.
        */
       public boolean hasHeadunitInfo() {
-        return ((bitField0_ & 0x00008000) != 0);
+        return ((bitField0_ & 0x00010000) != 0);
       }
       /**
+       * <pre>
+       * Android Auto reserves 18 for vehicle type. We carry ours on HeadUnitInfo field 9, which is
+       * measured to work; if that ever stops, this is where it moved.
+       * </pre>
+       *
        * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.HeadUnitInfo headunit_info = 17;</code>
        * @return The headunitInfo.
        */
@@ -21979,6 +22426,11 @@ public final class Control {
         }
       }
       /**
+       * <pre>
+       * Android Auto reserves 18 for vehicle type. We carry ours on HeadUnitInfo field 9, which is
+       * measured to work; if that ever stops, this is where it moved.
+       * </pre>
+       *
        * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.HeadUnitInfo headunit_info = 17;</code>
        */
       public Builder setHeadunitInfo(com.andrerinas.openheadunit.aap.protocol.proto.Common.HeadUnitInfo value) {
@@ -21990,11 +22442,16 @@ public final class Control {
         } else {
           headunitInfoBuilder_.setMessage(value);
         }
-        bitField0_ |= 0x00008000;
+        bitField0_ |= 0x00010000;
         onChanged();
         return this;
       }
       /**
+       * <pre>
+       * Android Auto reserves 18 for vehicle type. We carry ours on HeadUnitInfo field 9, which is
+       * measured to work; if that ever stops, this is where it moved.
+       * </pre>
+       *
        * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.HeadUnitInfo headunit_info = 17;</code>
        */
       public Builder setHeadunitInfo(
@@ -22004,16 +22461,21 @@ public final class Control {
         } else {
           headunitInfoBuilder_.setMessage(builderForValue.build());
         }
-        bitField0_ |= 0x00008000;
+        bitField0_ |= 0x00010000;
         onChanged();
         return this;
       }
       /**
+       * <pre>
+       * Android Auto reserves 18 for vehicle type. We carry ours on HeadUnitInfo field 9, which is
+       * measured to work; if that ever stops, this is where it moved.
+       * </pre>
+       *
        * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.HeadUnitInfo headunit_info = 17;</code>
        */
       public Builder mergeHeadunitInfo(com.andrerinas.openheadunit.aap.protocol.proto.Common.HeadUnitInfo value) {
         if (headunitInfoBuilder_ == null) {
-          if (((bitField0_ & 0x00008000) != 0) &&
+          if (((bitField0_ & 0x00010000) != 0) &&
             headunitInfo_ != null &&
             headunitInfo_ != com.andrerinas.openheadunit.aap.protocol.proto.Common.HeadUnitInfo.getDefaultInstance()) {
             getHeadunitInfoBuilder().mergeFrom(value);
@@ -22024,16 +22486,21 @@ public final class Control {
           headunitInfoBuilder_.mergeFrom(value);
         }
         if (headunitInfo_ != null) {
-          bitField0_ |= 0x00008000;
+          bitField0_ |= 0x00010000;
           onChanged();
         }
         return this;
       }
       /**
+       * <pre>
+       * Android Auto reserves 18 for vehicle type. We carry ours on HeadUnitInfo field 9, which is
+       * measured to work; if that ever stops, this is where it moved.
+       * </pre>
+       *
        * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.HeadUnitInfo headunit_info = 17;</code>
        */
       public Builder clearHeadunitInfo() {
-        bitField0_ = (bitField0_ & ~0x00008000);
+        bitField0_ = (bitField0_ & ~0x00010000);
         headunitInfo_ = null;
         if (headunitInfoBuilder_ != null) {
           headunitInfoBuilder_.dispose();
@@ -22043,14 +22510,24 @@ public final class Control {
         return this;
       }
       /**
+       * <pre>
+       * Android Auto reserves 18 for vehicle type. We carry ours on HeadUnitInfo field 9, which is
+       * measured to work; if that ever stops, this is where it moved.
+       * </pre>
+       *
        * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.HeadUnitInfo headunit_info = 17;</code>
        */
       public com.andrerinas.openheadunit.aap.protocol.proto.Common.HeadUnitInfo.Builder getHeadunitInfoBuilder() {
-        bitField0_ |= 0x00008000;
+        bitField0_ |= 0x00010000;
         onChanged();
         return getHeadunitInfoFieldBuilder().getBuilder();
       }
       /**
+       * <pre>
+       * Android Auto reserves 18 for vehicle type. We carry ours on HeadUnitInfo field 9, which is
+       * measured to work; if that ever stops, this is where it moved.
+       * </pre>
+       *
        * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.HeadUnitInfo headunit_info = 17;</code>
        */
       public com.andrerinas.openheadunit.aap.protocol.proto.Common.HeadUnitInfoOrBuilder getHeadunitInfoOrBuilder() {
@@ -22062,6 +22539,11 @@ public final class Control {
         }
       }
       /**
+       * <pre>
+       * Android Auto reserves 18 for vehicle type. We carry ours on HeadUnitInfo field 9, which is
+       * measured to work; if that ever stops, this is where it moved.
+       * </pre>
+       *
        * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.HeadUnitInfo headunit_info = 17;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
@@ -22141,17 +22623,4570 @@ public final class Control {
 
   }
 
+  public interface PingConfigurationOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:com.andrerinas.openheadunit.aap.protocol.proto.PingConfiguration)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * Before the head unit must close the connection on ping timeout. Default 3000.
+     * </pre>
+     *
+     * <code>optional uint32 timeout_ms = 1;</code>
+     * @return Whether the timeoutMs field is set.
+     */
+    boolean hasTimeoutMs();
+    /**
+     * <pre>
+     * Before the head unit must close the connection on ping timeout. Default 3000.
+     * </pre>
+     *
+     * <code>optional uint32 timeout_ms = 1;</code>
+     * @return The timeoutMs.
+     */
+    int getTimeoutMs();
+
+    /**
+     * <pre>
+     * Between ping messages. Default 1000.
+     * </pre>
+     *
+     * <code>optional uint32 interval_ms = 2;</code>
+     * @return Whether the intervalMs field is set.
+     */
+    boolean hasIntervalMs();
+    /**
+     * <pre>
+     * Between ping messages. Default 1000.
+     * </pre>
+     *
+     * <code>optional uint32 interval_ms = 2;</code>
+     * @return The intervalMs.
+     */
+    int getIntervalMs();
+
+    /**
+     * <pre>
+     * Latency above which the user is told the connection is poor. Default 200.
+     * </pre>
+     *
+     * <code>optional uint32 high_latency_threshold_ms = 3;</code>
+     * @return Whether the highLatencyThresholdMs field is set.
+     */
+    boolean hasHighLatencyThresholdMs();
+    /**
+     * <pre>
+     * Latency above which the user is told the connection is poor. Default 200.
+     * </pre>
+     *
+     * <code>optional uint32 high_latency_threshold_ms = 3;</code>
+     * @return The highLatencyThresholdMs.
+     */
+    int getHighLatencyThresholdMs();
+
+    /**
+     * <pre>
+     * Pings above or below the threshold before the verdict flips. Default 5.
+     * </pre>
+     *
+     * <code>optional uint32 tracked_ping_count = 4;</code>
+     * @return Whether the trackedPingCount field is set.
+     */
+    boolean hasTrackedPingCount();
+    /**
+     * <pre>
+     * Pings above or below the threshold before the verdict flips. Default 5.
+     * </pre>
+     *
+     * <code>optional uint32 tracked_ping_count = 4;</code>
+     * @return The trackedPingCount.
+     */
+    int getTrackedPingCount();
+  }
+  /**
+   * <pre>
+   * How this head unit wants the link run. Defaults in the comments are Android Auto's own.
+   * </pre>
+   *
+   * Protobuf type {@code com.andrerinas.openheadunit.aap.protocol.proto.PingConfiguration}
+   */
+  public static final class PingConfiguration extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:com.andrerinas.openheadunit.aap.protocol.proto.PingConfiguration)
+      PingConfigurationOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use PingConfiguration.newBuilder() to construct.
+    private PingConfiguration(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private PingConfiguration() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new PingConfiguration();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.andrerinas.openheadunit.aap.protocol.proto.Control.internal_static_com_andrerinas_openheadunit_aap_protocol_proto_PingConfiguration_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.andrerinas.openheadunit.aap.protocol.proto.Control.internal_static_com_andrerinas_openheadunit_aap_protocol_proto_PingConfiguration_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfiguration.class, com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfiguration.Builder.class);
+    }
+
+    private int bitField0_;
+    public static final int TIMEOUT_MS_FIELD_NUMBER = 1;
+    private int timeoutMs_ = 0;
+    /**
+     * <pre>
+     * Before the head unit must close the connection on ping timeout. Default 3000.
+     * </pre>
+     *
+     * <code>optional uint32 timeout_ms = 1;</code>
+     * @return Whether the timeoutMs field is set.
+     */
+    @java.lang.Override
+    public boolean hasTimeoutMs() {
+      return ((bitField0_ & 0x00000001) != 0);
+    }
+    /**
+     * <pre>
+     * Before the head unit must close the connection on ping timeout. Default 3000.
+     * </pre>
+     *
+     * <code>optional uint32 timeout_ms = 1;</code>
+     * @return The timeoutMs.
+     */
+    @java.lang.Override
+    public int getTimeoutMs() {
+      return timeoutMs_;
+    }
+
+    public static final int INTERVAL_MS_FIELD_NUMBER = 2;
+    private int intervalMs_ = 0;
+    /**
+     * <pre>
+     * Between ping messages. Default 1000.
+     * </pre>
+     *
+     * <code>optional uint32 interval_ms = 2;</code>
+     * @return Whether the intervalMs field is set.
+     */
+    @java.lang.Override
+    public boolean hasIntervalMs() {
+      return ((bitField0_ & 0x00000002) != 0);
+    }
+    /**
+     * <pre>
+     * Between ping messages. Default 1000.
+     * </pre>
+     *
+     * <code>optional uint32 interval_ms = 2;</code>
+     * @return The intervalMs.
+     */
+    @java.lang.Override
+    public int getIntervalMs() {
+      return intervalMs_;
+    }
+
+    public static final int HIGH_LATENCY_THRESHOLD_MS_FIELD_NUMBER = 3;
+    private int highLatencyThresholdMs_ = 0;
+    /**
+     * <pre>
+     * Latency above which the user is told the connection is poor. Default 200.
+     * </pre>
+     *
+     * <code>optional uint32 high_latency_threshold_ms = 3;</code>
+     * @return Whether the highLatencyThresholdMs field is set.
+     */
+    @java.lang.Override
+    public boolean hasHighLatencyThresholdMs() {
+      return ((bitField0_ & 0x00000004) != 0);
+    }
+    /**
+     * <pre>
+     * Latency above which the user is told the connection is poor. Default 200.
+     * </pre>
+     *
+     * <code>optional uint32 high_latency_threshold_ms = 3;</code>
+     * @return The highLatencyThresholdMs.
+     */
+    @java.lang.Override
+    public int getHighLatencyThresholdMs() {
+      return highLatencyThresholdMs_;
+    }
+
+    public static final int TRACKED_PING_COUNT_FIELD_NUMBER = 4;
+    private int trackedPingCount_ = 0;
+    /**
+     * <pre>
+     * Pings above or below the threshold before the verdict flips. Default 5.
+     * </pre>
+     *
+     * <code>optional uint32 tracked_ping_count = 4;</code>
+     * @return Whether the trackedPingCount field is set.
+     */
+    @java.lang.Override
+    public boolean hasTrackedPingCount() {
+      return ((bitField0_ & 0x00000008) != 0);
+    }
+    /**
+     * <pre>
+     * Pings above or below the threshold before the verdict flips. Default 5.
+     * </pre>
+     *
+     * <code>optional uint32 tracked_ping_count = 4;</code>
+     * @return The trackedPingCount.
+     */
+    @java.lang.Override
+    public int getTrackedPingCount() {
+      return trackedPingCount_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (((bitField0_ & 0x00000001) != 0)) {
+        output.writeUInt32(1, timeoutMs_);
+      }
+      if (((bitField0_ & 0x00000002) != 0)) {
+        output.writeUInt32(2, intervalMs_);
+      }
+      if (((bitField0_ & 0x00000004) != 0)) {
+        output.writeUInt32(3, highLatencyThresholdMs_);
+      }
+      if (((bitField0_ & 0x00000008) != 0)) {
+        output.writeUInt32(4, trackedPingCount_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt32Size(1, timeoutMs_);
+      }
+      if (((bitField0_ & 0x00000002) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt32Size(2, intervalMs_);
+      }
+      if (((bitField0_ & 0x00000004) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt32Size(3, highLatencyThresholdMs_);
+      }
+      if (((bitField0_ & 0x00000008) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt32Size(4, trackedPingCount_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfiguration)) {
+        return super.equals(obj);
+      }
+      com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfiguration other = (com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfiguration) obj;
+
+      if (hasTimeoutMs() != other.hasTimeoutMs()) return false;
+      if (hasTimeoutMs()) {
+        if (getTimeoutMs()
+            != other.getTimeoutMs()) return false;
+      }
+      if (hasIntervalMs() != other.hasIntervalMs()) return false;
+      if (hasIntervalMs()) {
+        if (getIntervalMs()
+            != other.getIntervalMs()) return false;
+      }
+      if (hasHighLatencyThresholdMs() != other.hasHighLatencyThresholdMs()) return false;
+      if (hasHighLatencyThresholdMs()) {
+        if (getHighLatencyThresholdMs()
+            != other.getHighLatencyThresholdMs()) return false;
+      }
+      if (hasTrackedPingCount() != other.hasTrackedPingCount()) return false;
+      if (hasTrackedPingCount()) {
+        if (getTrackedPingCount()
+            != other.getTrackedPingCount()) return false;
+      }
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (hasTimeoutMs()) {
+        hash = (37 * hash) + TIMEOUT_MS_FIELD_NUMBER;
+        hash = (53 * hash) + getTimeoutMs();
+      }
+      if (hasIntervalMs()) {
+        hash = (37 * hash) + INTERVAL_MS_FIELD_NUMBER;
+        hash = (53 * hash) + getIntervalMs();
+      }
+      if (hasHighLatencyThresholdMs()) {
+        hash = (37 * hash) + HIGH_LATENCY_THRESHOLD_MS_FIELD_NUMBER;
+        hash = (53 * hash) + getHighLatencyThresholdMs();
+      }
+      if (hasTrackedPingCount()) {
+        hash = (37 * hash) + TRACKED_PING_COUNT_FIELD_NUMBER;
+        hash = (53 * hash) + getTrackedPingCount();
+      }
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfiguration parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfiguration parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfiguration parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfiguration parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfiguration parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfiguration parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfiguration parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfiguration parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfiguration parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfiguration parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfiguration parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfiguration parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfiguration prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * How this head unit wants the link run. Defaults in the comments are Android Auto's own.
+     * </pre>
+     *
+     * Protobuf type {@code com.andrerinas.openheadunit.aap.protocol.proto.PingConfiguration}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:com.andrerinas.openheadunit.aap.protocol.proto.PingConfiguration)
+        com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfigurationOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.andrerinas.openheadunit.aap.protocol.proto.Control.internal_static_com_andrerinas_openheadunit_aap_protocol_proto_PingConfiguration_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.andrerinas.openheadunit.aap.protocol.proto.Control.internal_static_com_andrerinas_openheadunit_aap_protocol_proto_PingConfiguration_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfiguration.class, com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfiguration.Builder.class);
+      }
+
+      // Construct using com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfiguration.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        timeoutMs_ = 0;
+        intervalMs_ = 0;
+        highLatencyThresholdMs_ = 0;
+        trackedPingCount_ = 0;
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.andrerinas.openheadunit.aap.protocol.proto.Control.internal_static_com_andrerinas_openheadunit_aap_protocol_proto_PingConfiguration_descriptor;
+      }
+
+      @java.lang.Override
+      public com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfiguration getDefaultInstanceForType() {
+        return com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfiguration.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfiguration build() {
+        com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfiguration result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfiguration buildPartial() {
+        com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfiguration result = new com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfiguration(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfiguration result) {
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.timeoutMs_ = timeoutMs_;
+          to_bitField0_ |= 0x00000001;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.intervalMs_ = intervalMs_;
+          to_bitField0_ |= 0x00000002;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.highLatencyThresholdMs_ = highLatencyThresholdMs_;
+          to_bitField0_ |= 0x00000004;
+        }
+        if (((from_bitField0_ & 0x00000008) != 0)) {
+          result.trackedPingCount_ = trackedPingCount_;
+          to_bitField0_ |= 0x00000008;
+        }
+        result.bitField0_ |= to_bitField0_;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfiguration) {
+          return mergeFrom((com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfiguration)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfiguration other) {
+        if (other == com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfiguration.getDefaultInstance()) return this;
+        if (other.hasTimeoutMs()) {
+          setTimeoutMs(other.getTimeoutMs());
+        }
+        if (other.hasIntervalMs()) {
+          setIntervalMs(other.getIntervalMs());
+        }
+        if (other.hasHighLatencyThresholdMs()) {
+          setHighLatencyThresholdMs(other.getHighLatencyThresholdMs());
+        }
+        if (other.hasTrackedPingCount()) {
+          setTrackedPingCount(other.getTrackedPingCount());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 8: {
+                timeoutMs_ = input.readUInt32();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 8
+              case 16: {
+                intervalMs_ = input.readUInt32();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 16
+              case 24: {
+                highLatencyThresholdMs_ = input.readUInt32();
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 24
+              case 32: {
+                trackedPingCount_ = input.readUInt32();
+                bitField0_ |= 0x00000008;
+                break;
+              } // case 32
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private int timeoutMs_ ;
+      /**
+       * <pre>
+       * Before the head unit must close the connection on ping timeout. Default 3000.
+       * </pre>
+       *
+       * <code>optional uint32 timeout_ms = 1;</code>
+       * @return Whether the timeoutMs field is set.
+       */
+      @java.lang.Override
+      public boolean hasTimeoutMs() {
+        return ((bitField0_ & 0x00000001) != 0);
+      }
+      /**
+       * <pre>
+       * Before the head unit must close the connection on ping timeout. Default 3000.
+       * </pre>
+       *
+       * <code>optional uint32 timeout_ms = 1;</code>
+       * @return The timeoutMs.
+       */
+      @java.lang.Override
+      public int getTimeoutMs() {
+        return timeoutMs_;
+      }
+      /**
+       * <pre>
+       * Before the head unit must close the connection on ping timeout. Default 3000.
+       * </pre>
+       *
+       * <code>optional uint32 timeout_ms = 1;</code>
+       * @param value The timeoutMs to set.
+       * @return This builder for chaining.
+       */
+      public Builder setTimeoutMs(int value) {
+
+        timeoutMs_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Before the head unit must close the connection on ping timeout. Default 3000.
+       * </pre>
+       *
+       * <code>optional uint32 timeout_ms = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearTimeoutMs() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        timeoutMs_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int intervalMs_ ;
+      /**
+       * <pre>
+       * Between ping messages. Default 1000.
+       * </pre>
+       *
+       * <code>optional uint32 interval_ms = 2;</code>
+       * @return Whether the intervalMs field is set.
+       */
+      @java.lang.Override
+      public boolean hasIntervalMs() {
+        return ((bitField0_ & 0x00000002) != 0);
+      }
+      /**
+       * <pre>
+       * Between ping messages. Default 1000.
+       * </pre>
+       *
+       * <code>optional uint32 interval_ms = 2;</code>
+       * @return The intervalMs.
+       */
+      @java.lang.Override
+      public int getIntervalMs() {
+        return intervalMs_;
+      }
+      /**
+       * <pre>
+       * Between ping messages. Default 1000.
+       * </pre>
+       *
+       * <code>optional uint32 interval_ms = 2;</code>
+       * @param value The intervalMs to set.
+       * @return This builder for chaining.
+       */
+      public Builder setIntervalMs(int value) {
+
+        intervalMs_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Between ping messages. Default 1000.
+       * </pre>
+       *
+       * <code>optional uint32 interval_ms = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearIntervalMs() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        intervalMs_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int highLatencyThresholdMs_ ;
+      /**
+       * <pre>
+       * Latency above which the user is told the connection is poor. Default 200.
+       * </pre>
+       *
+       * <code>optional uint32 high_latency_threshold_ms = 3;</code>
+       * @return Whether the highLatencyThresholdMs field is set.
+       */
+      @java.lang.Override
+      public boolean hasHighLatencyThresholdMs() {
+        return ((bitField0_ & 0x00000004) != 0);
+      }
+      /**
+       * <pre>
+       * Latency above which the user is told the connection is poor. Default 200.
+       * </pre>
+       *
+       * <code>optional uint32 high_latency_threshold_ms = 3;</code>
+       * @return The highLatencyThresholdMs.
+       */
+      @java.lang.Override
+      public int getHighLatencyThresholdMs() {
+        return highLatencyThresholdMs_;
+      }
+      /**
+       * <pre>
+       * Latency above which the user is told the connection is poor. Default 200.
+       * </pre>
+       *
+       * <code>optional uint32 high_latency_threshold_ms = 3;</code>
+       * @param value The highLatencyThresholdMs to set.
+       * @return This builder for chaining.
+       */
+      public Builder setHighLatencyThresholdMs(int value) {
+
+        highLatencyThresholdMs_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Latency above which the user is told the connection is poor. Default 200.
+       * </pre>
+       *
+       * <code>optional uint32 high_latency_threshold_ms = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearHighLatencyThresholdMs() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        highLatencyThresholdMs_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int trackedPingCount_ ;
+      /**
+       * <pre>
+       * Pings above or below the threshold before the verdict flips. Default 5.
+       * </pre>
+       *
+       * <code>optional uint32 tracked_ping_count = 4;</code>
+       * @return Whether the trackedPingCount field is set.
+       */
+      @java.lang.Override
+      public boolean hasTrackedPingCount() {
+        return ((bitField0_ & 0x00000008) != 0);
+      }
+      /**
+       * <pre>
+       * Pings above or below the threshold before the verdict flips. Default 5.
+       * </pre>
+       *
+       * <code>optional uint32 tracked_ping_count = 4;</code>
+       * @return The trackedPingCount.
+       */
+      @java.lang.Override
+      public int getTrackedPingCount() {
+        return trackedPingCount_;
+      }
+      /**
+       * <pre>
+       * Pings above or below the threshold before the verdict flips. Default 5.
+       * </pre>
+       *
+       * <code>optional uint32 tracked_ping_count = 4;</code>
+       * @param value The trackedPingCount to set.
+       * @return This builder for chaining.
+       */
+      public Builder setTrackedPingCount(int value) {
+
+        trackedPingCount_ = value;
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Pings above or below the threshold before the verdict flips. Default 5.
+       * </pre>
+       *
+       * <code>optional uint32 tracked_ping_count = 4;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearTrackedPingCount() {
+        bitField0_ = (bitField0_ & ~0x00000008);
+        trackedPingCount_ = 0;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:com.andrerinas.openheadunit.aap.protocol.proto.PingConfiguration)
+    }
+
+    // @@protoc_insertion_point(class_scope:com.andrerinas.openheadunit.aap.protocol.proto.PingConfiguration)
+    private static final com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfiguration DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfiguration();
+    }
+
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfiguration getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    @java.lang.Deprecated public static final com.google.protobuf.Parser<PingConfiguration>
+        PARSER = new com.google.protobuf.AbstractParser<PingConfiguration>() {
+      @java.lang.Override
+      public PingConfiguration parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<PingConfiguration> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<PingConfiguration> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfiguration getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface WirelessTcpConfigurationOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:com.andrerinas.openheadunit.aap.protocol.proto.WirelessTcpConfiguration)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>optional uint32 socket_receive_buffer_size_kb = 1 [deprecated = true];</code>
+     * @deprecated com.andrerinas.openheadunit.aap.protocol.proto.WirelessTcpConfiguration.socket_receive_buffer_size_kb is deprecated.
+     *     See control.proto;l=273
+     * @return Whether the socketReceiveBufferSizeKb field is set.
+     */
+    @java.lang.Deprecated boolean hasSocketReceiveBufferSizeKb();
+    /**
+     * <code>optional uint32 socket_receive_buffer_size_kb = 1 [deprecated = true];</code>
+     * @deprecated com.andrerinas.openheadunit.aap.protocol.proto.WirelessTcpConfiguration.socket_receive_buffer_size_kb is deprecated.
+     *     See control.proto;l=273
+     * @return The socketReceiveBufferSizeKb.
+     */
+    @java.lang.Deprecated int getSocketReceiveBufferSizeKb();
+
+    /**
+     * <code>optional uint32 socket_send_buffer_size_kb = 2 [deprecated = true];</code>
+     * @deprecated com.andrerinas.openheadunit.aap.protocol.proto.WirelessTcpConfiguration.socket_send_buffer_size_kb is deprecated.
+     *     See control.proto;l=274
+     * @return Whether the socketSendBufferSizeKb field is set.
+     */
+    @java.lang.Deprecated boolean hasSocketSendBufferSizeKb();
+    /**
+     * <code>optional uint32 socket_send_buffer_size_kb = 2 [deprecated = true];</code>
+     * @deprecated com.andrerinas.openheadunit.aap.protocol.proto.WirelessTcpConfiguration.socket_send_buffer_size_kb is deprecated.
+     *     See control.proto;l=274
+     * @return The socketSendBufferSizeKb.
+     */
+    @java.lang.Deprecated int getSocketSendBufferSizeKb();
+
+    /**
+     * <pre>
+     * Read timeout before the connection should be closed. Default 5000.
+     * </pre>
+     *
+     * <code>optional uint32 socket_read_timeout_ms = 3;</code>
+     * @return Whether the socketReadTimeoutMs field is set.
+     */
+    boolean hasSocketReadTimeoutMs();
+    /**
+     * <pre>
+     * Read timeout before the connection should be closed. Default 5000.
+     * </pre>
+     *
+     * <code>optional uint32 socket_read_timeout_ms = 3;</code>
+     * @return The socketReadTimeoutMs.
+     */
+    int getSocketReadTimeoutMs();
+
+    /**
+     * <pre>
+     * Default 16384, maximum 65536.
+     * </pre>
+     *
+     * <code>optional uint32 socket_receive_buffer_size = 4;</code>
+     * @return Whether the socketReceiveBufferSize field is set.
+     */
+    boolean hasSocketReceiveBufferSize();
+    /**
+     * <pre>
+     * Default 16384, maximum 65536.
+     * </pre>
+     *
+     * <code>optional uint32 socket_receive_buffer_size = 4;</code>
+     * @return The socketReceiveBufferSize.
+     */
+    int getSocketReceiveBufferSize();
+
+    /**
+     * <pre>
+     * Default 16384.
+     * </pre>
+     *
+     * <code>optional uint32 socket_send_buffer_size = 5;</code>
+     * @return Whether the socketSendBufferSize field is set.
+     */
+    boolean hasSocketSendBufferSize();
+    /**
+     * <pre>
+     * Default 16384.
+     * </pre>
+     *
+     * <code>optional uint32 socket_send_buffer_size = 5;</code>
+     * @return The socketSendBufferSize.
+     */
+    int getSocketSendBufferSize();
+  }
+  /**
+   * Protobuf type {@code com.andrerinas.openheadunit.aap.protocol.proto.WirelessTcpConfiguration}
+   */
+  public static final class WirelessTcpConfiguration extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:com.andrerinas.openheadunit.aap.protocol.proto.WirelessTcpConfiguration)
+      WirelessTcpConfigurationOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use WirelessTcpConfiguration.newBuilder() to construct.
+    private WirelessTcpConfiguration(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private WirelessTcpConfiguration() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new WirelessTcpConfiguration();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.andrerinas.openheadunit.aap.protocol.proto.Control.internal_static_com_andrerinas_openheadunit_aap_protocol_proto_WirelessTcpConfiguration_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.andrerinas.openheadunit.aap.protocol.proto.Control.internal_static_com_andrerinas_openheadunit_aap_protocol_proto_WirelessTcpConfiguration_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfiguration.class, com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfiguration.Builder.class);
+    }
+
+    private int bitField0_;
+    public static final int SOCKET_RECEIVE_BUFFER_SIZE_KB_FIELD_NUMBER = 1;
+    private int socketReceiveBufferSizeKb_ = 0;
+    /**
+     * <code>optional uint32 socket_receive_buffer_size_kb = 1 [deprecated = true];</code>
+     * @deprecated com.andrerinas.openheadunit.aap.protocol.proto.WirelessTcpConfiguration.socket_receive_buffer_size_kb is deprecated.
+     *     See control.proto;l=273
+     * @return Whether the socketReceiveBufferSizeKb field is set.
+     */
+    @java.lang.Override
+    @java.lang.Deprecated public boolean hasSocketReceiveBufferSizeKb() {
+      return ((bitField0_ & 0x00000001) != 0);
+    }
+    /**
+     * <code>optional uint32 socket_receive_buffer_size_kb = 1 [deprecated = true];</code>
+     * @deprecated com.andrerinas.openheadunit.aap.protocol.proto.WirelessTcpConfiguration.socket_receive_buffer_size_kb is deprecated.
+     *     See control.proto;l=273
+     * @return The socketReceiveBufferSizeKb.
+     */
+    @java.lang.Override
+    @java.lang.Deprecated public int getSocketReceiveBufferSizeKb() {
+      return socketReceiveBufferSizeKb_;
+    }
+
+    public static final int SOCKET_SEND_BUFFER_SIZE_KB_FIELD_NUMBER = 2;
+    private int socketSendBufferSizeKb_ = 0;
+    /**
+     * <code>optional uint32 socket_send_buffer_size_kb = 2 [deprecated = true];</code>
+     * @deprecated com.andrerinas.openheadunit.aap.protocol.proto.WirelessTcpConfiguration.socket_send_buffer_size_kb is deprecated.
+     *     See control.proto;l=274
+     * @return Whether the socketSendBufferSizeKb field is set.
+     */
+    @java.lang.Override
+    @java.lang.Deprecated public boolean hasSocketSendBufferSizeKb() {
+      return ((bitField0_ & 0x00000002) != 0);
+    }
+    /**
+     * <code>optional uint32 socket_send_buffer_size_kb = 2 [deprecated = true];</code>
+     * @deprecated com.andrerinas.openheadunit.aap.protocol.proto.WirelessTcpConfiguration.socket_send_buffer_size_kb is deprecated.
+     *     See control.proto;l=274
+     * @return The socketSendBufferSizeKb.
+     */
+    @java.lang.Override
+    @java.lang.Deprecated public int getSocketSendBufferSizeKb() {
+      return socketSendBufferSizeKb_;
+    }
+
+    public static final int SOCKET_READ_TIMEOUT_MS_FIELD_NUMBER = 3;
+    private int socketReadTimeoutMs_ = 0;
+    /**
+     * <pre>
+     * Read timeout before the connection should be closed. Default 5000.
+     * </pre>
+     *
+     * <code>optional uint32 socket_read_timeout_ms = 3;</code>
+     * @return Whether the socketReadTimeoutMs field is set.
+     */
+    @java.lang.Override
+    public boolean hasSocketReadTimeoutMs() {
+      return ((bitField0_ & 0x00000004) != 0);
+    }
+    /**
+     * <pre>
+     * Read timeout before the connection should be closed. Default 5000.
+     * </pre>
+     *
+     * <code>optional uint32 socket_read_timeout_ms = 3;</code>
+     * @return The socketReadTimeoutMs.
+     */
+    @java.lang.Override
+    public int getSocketReadTimeoutMs() {
+      return socketReadTimeoutMs_;
+    }
+
+    public static final int SOCKET_RECEIVE_BUFFER_SIZE_FIELD_NUMBER = 4;
+    private int socketReceiveBufferSize_ = 0;
+    /**
+     * <pre>
+     * Default 16384, maximum 65536.
+     * </pre>
+     *
+     * <code>optional uint32 socket_receive_buffer_size = 4;</code>
+     * @return Whether the socketReceiveBufferSize field is set.
+     */
+    @java.lang.Override
+    public boolean hasSocketReceiveBufferSize() {
+      return ((bitField0_ & 0x00000008) != 0);
+    }
+    /**
+     * <pre>
+     * Default 16384, maximum 65536.
+     * </pre>
+     *
+     * <code>optional uint32 socket_receive_buffer_size = 4;</code>
+     * @return The socketReceiveBufferSize.
+     */
+    @java.lang.Override
+    public int getSocketReceiveBufferSize() {
+      return socketReceiveBufferSize_;
+    }
+
+    public static final int SOCKET_SEND_BUFFER_SIZE_FIELD_NUMBER = 5;
+    private int socketSendBufferSize_ = 0;
+    /**
+     * <pre>
+     * Default 16384.
+     * </pre>
+     *
+     * <code>optional uint32 socket_send_buffer_size = 5;</code>
+     * @return Whether the socketSendBufferSize field is set.
+     */
+    @java.lang.Override
+    public boolean hasSocketSendBufferSize() {
+      return ((bitField0_ & 0x00000010) != 0);
+    }
+    /**
+     * <pre>
+     * Default 16384.
+     * </pre>
+     *
+     * <code>optional uint32 socket_send_buffer_size = 5;</code>
+     * @return The socketSendBufferSize.
+     */
+    @java.lang.Override
+    public int getSocketSendBufferSize() {
+      return socketSendBufferSize_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (((bitField0_ & 0x00000001) != 0)) {
+        output.writeUInt32(1, socketReceiveBufferSizeKb_);
+      }
+      if (((bitField0_ & 0x00000002) != 0)) {
+        output.writeUInt32(2, socketSendBufferSizeKb_);
+      }
+      if (((bitField0_ & 0x00000004) != 0)) {
+        output.writeUInt32(3, socketReadTimeoutMs_);
+      }
+      if (((bitField0_ & 0x00000008) != 0)) {
+        output.writeUInt32(4, socketReceiveBufferSize_);
+      }
+      if (((bitField0_ & 0x00000010) != 0)) {
+        output.writeUInt32(5, socketSendBufferSize_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt32Size(1, socketReceiveBufferSizeKb_);
+      }
+      if (((bitField0_ & 0x00000002) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt32Size(2, socketSendBufferSizeKb_);
+      }
+      if (((bitField0_ & 0x00000004) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt32Size(3, socketReadTimeoutMs_);
+      }
+      if (((bitField0_ & 0x00000008) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt32Size(4, socketReceiveBufferSize_);
+      }
+      if (((bitField0_ & 0x00000010) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt32Size(5, socketSendBufferSize_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfiguration)) {
+        return super.equals(obj);
+      }
+      com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfiguration other = (com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfiguration) obj;
+
+      if (hasSocketReceiveBufferSizeKb() != other.hasSocketReceiveBufferSizeKb()) return false;
+      if (hasSocketReceiveBufferSizeKb()) {
+        if (getSocketReceiveBufferSizeKb()
+            != other.getSocketReceiveBufferSizeKb()) return false;
+      }
+      if (hasSocketSendBufferSizeKb() != other.hasSocketSendBufferSizeKb()) return false;
+      if (hasSocketSendBufferSizeKb()) {
+        if (getSocketSendBufferSizeKb()
+            != other.getSocketSendBufferSizeKb()) return false;
+      }
+      if (hasSocketReadTimeoutMs() != other.hasSocketReadTimeoutMs()) return false;
+      if (hasSocketReadTimeoutMs()) {
+        if (getSocketReadTimeoutMs()
+            != other.getSocketReadTimeoutMs()) return false;
+      }
+      if (hasSocketReceiveBufferSize() != other.hasSocketReceiveBufferSize()) return false;
+      if (hasSocketReceiveBufferSize()) {
+        if (getSocketReceiveBufferSize()
+            != other.getSocketReceiveBufferSize()) return false;
+      }
+      if (hasSocketSendBufferSize() != other.hasSocketSendBufferSize()) return false;
+      if (hasSocketSendBufferSize()) {
+        if (getSocketSendBufferSize()
+            != other.getSocketSendBufferSize()) return false;
+      }
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (hasSocketReceiveBufferSizeKb()) {
+        hash = (37 * hash) + SOCKET_RECEIVE_BUFFER_SIZE_KB_FIELD_NUMBER;
+        hash = (53 * hash) + getSocketReceiveBufferSizeKb();
+      }
+      if (hasSocketSendBufferSizeKb()) {
+        hash = (37 * hash) + SOCKET_SEND_BUFFER_SIZE_KB_FIELD_NUMBER;
+        hash = (53 * hash) + getSocketSendBufferSizeKb();
+      }
+      if (hasSocketReadTimeoutMs()) {
+        hash = (37 * hash) + SOCKET_READ_TIMEOUT_MS_FIELD_NUMBER;
+        hash = (53 * hash) + getSocketReadTimeoutMs();
+      }
+      if (hasSocketReceiveBufferSize()) {
+        hash = (37 * hash) + SOCKET_RECEIVE_BUFFER_SIZE_FIELD_NUMBER;
+        hash = (53 * hash) + getSocketReceiveBufferSize();
+      }
+      if (hasSocketSendBufferSize()) {
+        hash = (37 * hash) + SOCKET_SEND_BUFFER_SIZE_FIELD_NUMBER;
+        hash = (53 * hash) + getSocketSendBufferSize();
+      }
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfiguration parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfiguration parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfiguration parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfiguration parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfiguration parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfiguration parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfiguration parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfiguration parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfiguration parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfiguration parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfiguration parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfiguration parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfiguration prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code com.andrerinas.openheadunit.aap.protocol.proto.WirelessTcpConfiguration}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:com.andrerinas.openheadunit.aap.protocol.proto.WirelessTcpConfiguration)
+        com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfigurationOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.andrerinas.openheadunit.aap.protocol.proto.Control.internal_static_com_andrerinas_openheadunit_aap_protocol_proto_WirelessTcpConfiguration_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.andrerinas.openheadunit.aap.protocol.proto.Control.internal_static_com_andrerinas_openheadunit_aap_protocol_proto_WirelessTcpConfiguration_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfiguration.class, com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfiguration.Builder.class);
+      }
+
+      // Construct using com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfiguration.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        socketReceiveBufferSizeKb_ = 0;
+        socketSendBufferSizeKb_ = 0;
+        socketReadTimeoutMs_ = 0;
+        socketReceiveBufferSize_ = 0;
+        socketSendBufferSize_ = 0;
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.andrerinas.openheadunit.aap.protocol.proto.Control.internal_static_com_andrerinas_openheadunit_aap_protocol_proto_WirelessTcpConfiguration_descriptor;
+      }
+
+      @java.lang.Override
+      public com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfiguration getDefaultInstanceForType() {
+        return com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfiguration.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfiguration build() {
+        com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfiguration result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfiguration buildPartial() {
+        com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfiguration result = new com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfiguration(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfiguration result) {
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.socketReceiveBufferSizeKb_ = socketReceiveBufferSizeKb_;
+          to_bitField0_ |= 0x00000001;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.socketSendBufferSizeKb_ = socketSendBufferSizeKb_;
+          to_bitField0_ |= 0x00000002;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.socketReadTimeoutMs_ = socketReadTimeoutMs_;
+          to_bitField0_ |= 0x00000004;
+        }
+        if (((from_bitField0_ & 0x00000008) != 0)) {
+          result.socketReceiveBufferSize_ = socketReceiveBufferSize_;
+          to_bitField0_ |= 0x00000008;
+        }
+        if (((from_bitField0_ & 0x00000010) != 0)) {
+          result.socketSendBufferSize_ = socketSendBufferSize_;
+          to_bitField0_ |= 0x00000010;
+        }
+        result.bitField0_ |= to_bitField0_;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfiguration) {
+          return mergeFrom((com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfiguration)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfiguration other) {
+        if (other == com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfiguration.getDefaultInstance()) return this;
+        if (other.hasSocketReceiveBufferSizeKb()) {
+          setSocketReceiveBufferSizeKb(other.getSocketReceiveBufferSizeKb());
+        }
+        if (other.hasSocketSendBufferSizeKb()) {
+          setSocketSendBufferSizeKb(other.getSocketSendBufferSizeKb());
+        }
+        if (other.hasSocketReadTimeoutMs()) {
+          setSocketReadTimeoutMs(other.getSocketReadTimeoutMs());
+        }
+        if (other.hasSocketReceiveBufferSize()) {
+          setSocketReceiveBufferSize(other.getSocketReceiveBufferSize());
+        }
+        if (other.hasSocketSendBufferSize()) {
+          setSocketSendBufferSize(other.getSocketSendBufferSize());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 8: {
+                socketReceiveBufferSizeKb_ = input.readUInt32();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 8
+              case 16: {
+                socketSendBufferSizeKb_ = input.readUInt32();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 16
+              case 24: {
+                socketReadTimeoutMs_ = input.readUInt32();
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 24
+              case 32: {
+                socketReceiveBufferSize_ = input.readUInt32();
+                bitField0_ |= 0x00000008;
+                break;
+              } // case 32
+              case 40: {
+                socketSendBufferSize_ = input.readUInt32();
+                bitField0_ |= 0x00000010;
+                break;
+              } // case 40
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private int socketReceiveBufferSizeKb_ ;
+      /**
+       * <code>optional uint32 socket_receive_buffer_size_kb = 1 [deprecated = true];</code>
+       * @deprecated com.andrerinas.openheadunit.aap.protocol.proto.WirelessTcpConfiguration.socket_receive_buffer_size_kb is deprecated.
+       *     See control.proto;l=273
+       * @return Whether the socketReceiveBufferSizeKb field is set.
+       */
+      @java.lang.Override
+      @java.lang.Deprecated public boolean hasSocketReceiveBufferSizeKb() {
+        return ((bitField0_ & 0x00000001) != 0);
+      }
+      /**
+       * <code>optional uint32 socket_receive_buffer_size_kb = 1 [deprecated = true];</code>
+       * @deprecated com.andrerinas.openheadunit.aap.protocol.proto.WirelessTcpConfiguration.socket_receive_buffer_size_kb is deprecated.
+       *     See control.proto;l=273
+       * @return The socketReceiveBufferSizeKb.
+       */
+      @java.lang.Override
+      @java.lang.Deprecated public int getSocketReceiveBufferSizeKb() {
+        return socketReceiveBufferSizeKb_;
+      }
+      /**
+       * <code>optional uint32 socket_receive_buffer_size_kb = 1 [deprecated = true];</code>
+       * @deprecated com.andrerinas.openheadunit.aap.protocol.proto.WirelessTcpConfiguration.socket_receive_buffer_size_kb is deprecated.
+       *     See control.proto;l=273
+       * @param value The socketReceiveBufferSizeKb to set.
+       * @return This builder for chaining.
+       */
+      @java.lang.Deprecated public Builder setSocketReceiveBufferSizeKb(int value) {
+
+        socketReceiveBufferSizeKb_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional uint32 socket_receive_buffer_size_kb = 1 [deprecated = true];</code>
+       * @deprecated com.andrerinas.openheadunit.aap.protocol.proto.WirelessTcpConfiguration.socket_receive_buffer_size_kb is deprecated.
+       *     See control.proto;l=273
+       * @return This builder for chaining.
+       */
+      @java.lang.Deprecated public Builder clearSocketReceiveBufferSizeKb() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        socketReceiveBufferSizeKb_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int socketSendBufferSizeKb_ ;
+      /**
+       * <code>optional uint32 socket_send_buffer_size_kb = 2 [deprecated = true];</code>
+       * @deprecated com.andrerinas.openheadunit.aap.protocol.proto.WirelessTcpConfiguration.socket_send_buffer_size_kb is deprecated.
+       *     See control.proto;l=274
+       * @return Whether the socketSendBufferSizeKb field is set.
+       */
+      @java.lang.Override
+      @java.lang.Deprecated public boolean hasSocketSendBufferSizeKb() {
+        return ((bitField0_ & 0x00000002) != 0);
+      }
+      /**
+       * <code>optional uint32 socket_send_buffer_size_kb = 2 [deprecated = true];</code>
+       * @deprecated com.andrerinas.openheadunit.aap.protocol.proto.WirelessTcpConfiguration.socket_send_buffer_size_kb is deprecated.
+       *     See control.proto;l=274
+       * @return The socketSendBufferSizeKb.
+       */
+      @java.lang.Override
+      @java.lang.Deprecated public int getSocketSendBufferSizeKb() {
+        return socketSendBufferSizeKb_;
+      }
+      /**
+       * <code>optional uint32 socket_send_buffer_size_kb = 2 [deprecated = true];</code>
+       * @deprecated com.andrerinas.openheadunit.aap.protocol.proto.WirelessTcpConfiguration.socket_send_buffer_size_kb is deprecated.
+       *     See control.proto;l=274
+       * @param value The socketSendBufferSizeKb to set.
+       * @return This builder for chaining.
+       */
+      @java.lang.Deprecated public Builder setSocketSendBufferSizeKb(int value) {
+
+        socketSendBufferSizeKb_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional uint32 socket_send_buffer_size_kb = 2 [deprecated = true];</code>
+       * @deprecated com.andrerinas.openheadunit.aap.protocol.proto.WirelessTcpConfiguration.socket_send_buffer_size_kb is deprecated.
+       *     See control.proto;l=274
+       * @return This builder for chaining.
+       */
+      @java.lang.Deprecated public Builder clearSocketSendBufferSizeKb() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        socketSendBufferSizeKb_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int socketReadTimeoutMs_ ;
+      /**
+       * <pre>
+       * Read timeout before the connection should be closed. Default 5000.
+       * </pre>
+       *
+       * <code>optional uint32 socket_read_timeout_ms = 3;</code>
+       * @return Whether the socketReadTimeoutMs field is set.
+       */
+      @java.lang.Override
+      public boolean hasSocketReadTimeoutMs() {
+        return ((bitField0_ & 0x00000004) != 0);
+      }
+      /**
+       * <pre>
+       * Read timeout before the connection should be closed. Default 5000.
+       * </pre>
+       *
+       * <code>optional uint32 socket_read_timeout_ms = 3;</code>
+       * @return The socketReadTimeoutMs.
+       */
+      @java.lang.Override
+      public int getSocketReadTimeoutMs() {
+        return socketReadTimeoutMs_;
+      }
+      /**
+       * <pre>
+       * Read timeout before the connection should be closed. Default 5000.
+       * </pre>
+       *
+       * <code>optional uint32 socket_read_timeout_ms = 3;</code>
+       * @param value The socketReadTimeoutMs to set.
+       * @return This builder for chaining.
+       */
+      public Builder setSocketReadTimeoutMs(int value) {
+
+        socketReadTimeoutMs_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Read timeout before the connection should be closed. Default 5000.
+       * </pre>
+       *
+       * <code>optional uint32 socket_read_timeout_ms = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearSocketReadTimeoutMs() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        socketReadTimeoutMs_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int socketReceiveBufferSize_ ;
+      /**
+       * <pre>
+       * Default 16384, maximum 65536.
+       * </pre>
+       *
+       * <code>optional uint32 socket_receive_buffer_size = 4;</code>
+       * @return Whether the socketReceiveBufferSize field is set.
+       */
+      @java.lang.Override
+      public boolean hasSocketReceiveBufferSize() {
+        return ((bitField0_ & 0x00000008) != 0);
+      }
+      /**
+       * <pre>
+       * Default 16384, maximum 65536.
+       * </pre>
+       *
+       * <code>optional uint32 socket_receive_buffer_size = 4;</code>
+       * @return The socketReceiveBufferSize.
+       */
+      @java.lang.Override
+      public int getSocketReceiveBufferSize() {
+        return socketReceiveBufferSize_;
+      }
+      /**
+       * <pre>
+       * Default 16384, maximum 65536.
+       * </pre>
+       *
+       * <code>optional uint32 socket_receive_buffer_size = 4;</code>
+       * @param value The socketReceiveBufferSize to set.
+       * @return This builder for chaining.
+       */
+      public Builder setSocketReceiveBufferSize(int value) {
+
+        socketReceiveBufferSize_ = value;
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Default 16384, maximum 65536.
+       * </pre>
+       *
+       * <code>optional uint32 socket_receive_buffer_size = 4;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearSocketReceiveBufferSize() {
+        bitField0_ = (bitField0_ & ~0x00000008);
+        socketReceiveBufferSize_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int socketSendBufferSize_ ;
+      /**
+       * <pre>
+       * Default 16384.
+       * </pre>
+       *
+       * <code>optional uint32 socket_send_buffer_size = 5;</code>
+       * @return Whether the socketSendBufferSize field is set.
+       */
+      @java.lang.Override
+      public boolean hasSocketSendBufferSize() {
+        return ((bitField0_ & 0x00000010) != 0);
+      }
+      /**
+       * <pre>
+       * Default 16384.
+       * </pre>
+       *
+       * <code>optional uint32 socket_send_buffer_size = 5;</code>
+       * @return The socketSendBufferSize.
+       */
+      @java.lang.Override
+      public int getSocketSendBufferSize() {
+        return socketSendBufferSize_;
+      }
+      /**
+       * <pre>
+       * Default 16384.
+       * </pre>
+       *
+       * <code>optional uint32 socket_send_buffer_size = 5;</code>
+       * @param value The socketSendBufferSize to set.
+       * @return This builder for chaining.
+       */
+      public Builder setSocketSendBufferSize(int value) {
+
+        socketSendBufferSize_ = value;
+        bitField0_ |= 0x00000010;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Default 16384.
+       * </pre>
+       *
+       * <code>optional uint32 socket_send_buffer_size = 5;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearSocketSendBufferSize() {
+        bitField0_ = (bitField0_ & ~0x00000010);
+        socketSendBufferSize_ = 0;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:com.andrerinas.openheadunit.aap.protocol.proto.WirelessTcpConfiguration)
+    }
+
+    // @@protoc_insertion_point(class_scope:com.andrerinas.openheadunit.aap.protocol.proto.WirelessTcpConfiguration)
+    private static final com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfiguration DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfiguration();
+    }
+
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfiguration getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    @java.lang.Deprecated public static final com.google.protobuf.Parser<WirelessTcpConfiguration>
+        PARSER = new com.google.protobuf.AbstractParser<WirelessTcpConfiguration>() {
+      @java.lang.Override
+      public WirelessTcpConfiguration parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<WirelessTcpConfiguration> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<WirelessTcpConfiguration> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfiguration getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface ConnectionConfigurationOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:com.andrerinas.openheadunit.aap.protocol.proto.ConnectionConfiguration)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.PingConfiguration ping_configuration = 1;</code>
+     * @return Whether the pingConfiguration field is set.
+     */
+    boolean hasPingConfiguration();
+    /**
+     * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.PingConfiguration ping_configuration = 1;</code>
+     * @return The pingConfiguration.
+     */
+    com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfiguration getPingConfiguration();
+    /**
+     * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.PingConfiguration ping_configuration = 1;</code>
+     */
+    com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfigurationOrBuilder getPingConfigurationOrBuilder();
+
+    /**
+     * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.WirelessTcpConfiguration wireless_tcp_configuration = 2;</code>
+     * @return Whether the wirelessTcpConfiguration field is set.
+     */
+    boolean hasWirelessTcpConfiguration();
+    /**
+     * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.WirelessTcpConfiguration wireless_tcp_configuration = 2;</code>
+     * @return The wirelessTcpConfiguration.
+     */
+    com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfiguration getWirelessTcpConfiguration();
+    /**
+     * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.WirelessTcpConfiguration wireless_tcp_configuration = 2;</code>
+     */
+    com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfigurationOrBuilder getWirelessTcpConfigurationOrBuilder();
+  }
+  /**
+   * Protobuf type {@code com.andrerinas.openheadunit.aap.protocol.proto.ConnectionConfiguration}
+   */
+  public static final class ConnectionConfiguration extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:com.andrerinas.openheadunit.aap.protocol.proto.ConnectionConfiguration)
+      ConnectionConfigurationOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use ConnectionConfiguration.newBuilder() to construct.
+    private ConnectionConfiguration(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private ConnectionConfiguration() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ConnectionConfiguration();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.andrerinas.openheadunit.aap.protocol.proto.Control.internal_static_com_andrerinas_openheadunit_aap_protocol_proto_ConnectionConfiguration_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.andrerinas.openheadunit.aap.protocol.proto.Control.internal_static_com_andrerinas_openheadunit_aap_protocol_proto_ConnectionConfiguration_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration.class, com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration.Builder.class);
+    }
+
+    private int bitField0_;
+    public static final int PING_CONFIGURATION_FIELD_NUMBER = 1;
+    private com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfiguration pingConfiguration_;
+    /**
+     * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.PingConfiguration ping_configuration = 1;</code>
+     * @return Whether the pingConfiguration field is set.
+     */
+    @java.lang.Override
+    public boolean hasPingConfiguration() {
+      return ((bitField0_ & 0x00000001) != 0);
+    }
+    /**
+     * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.PingConfiguration ping_configuration = 1;</code>
+     * @return The pingConfiguration.
+     */
+    @java.lang.Override
+    public com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfiguration getPingConfiguration() {
+      return pingConfiguration_ == null ? com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfiguration.getDefaultInstance() : pingConfiguration_;
+    }
+    /**
+     * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.PingConfiguration ping_configuration = 1;</code>
+     */
+    @java.lang.Override
+    public com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfigurationOrBuilder getPingConfigurationOrBuilder() {
+      return pingConfiguration_ == null ? com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfiguration.getDefaultInstance() : pingConfiguration_;
+    }
+
+    public static final int WIRELESS_TCP_CONFIGURATION_FIELD_NUMBER = 2;
+    private com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfiguration wirelessTcpConfiguration_;
+    /**
+     * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.WirelessTcpConfiguration wireless_tcp_configuration = 2;</code>
+     * @return Whether the wirelessTcpConfiguration field is set.
+     */
+    @java.lang.Override
+    public boolean hasWirelessTcpConfiguration() {
+      return ((bitField0_ & 0x00000002) != 0);
+    }
+    /**
+     * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.WirelessTcpConfiguration wireless_tcp_configuration = 2;</code>
+     * @return The wirelessTcpConfiguration.
+     */
+    @java.lang.Override
+    public com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfiguration getWirelessTcpConfiguration() {
+      return wirelessTcpConfiguration_ == null ? com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfiguration.getDefaultInstance() : wirelessTcpConfiguration_;
+    }
+    /**
+     * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.WirelessTcpConfiguration wireless_tcp_configuration = 2;</code>
+     */
+    @java.lang.Override
+    public com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfigurationOrBuilder getWirelessTcpConfigurationOrBuilder() {
+      return wirelessTcpConfiguration_ == null ? com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfiguration.getDefaultInstance() : wirelessTcpConfiguration_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (((bitField0_ & 0x00000001) != 0)) {
+        output.writeMessage(1, getPingConfiguration());
+      }
+      if (((bitField0_ & 0x00000002) != 0)) {
+        output.writeMessage(2, getWirelessTcpConfiguration());
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, getPingConfiguration());
+      }
+      if (((bitField0_ & 0x00000002) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(2, getWirelessTcpConfiguration());
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration)) {
+        return super.equals(obj);
+      }
+      com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration other = (com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration) obj;
+
+      if (hasPingConfiguration() != other.hasPingConfiguration()) return false;
+      if (hasPingConfiguration()) {
+        if (!getPingConfiguration()
+            .equals(other.getPingConfiguration())) return false;
+      }
+      if (hasWirelessTcpConfiguration() != other.hasWirelessTcpConfiguration()) return false;
+      if (hasWirelessTcpConfiguration()) {
+        if (!getWirelessTcpConfiguration()
+            .equals(other.getWirelessTcpConfiguration())) return false;
+      }
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (hasPingConfiguration()) {
+        hash = (37 * hash) + PING_CONFIGURATION_FIELD_NUMBER;
+        hash = (53 * hash) + getPingConfiguration().hashCode();
+      }
+      if (hasWirelessTcpConfiguration()) {
+        hash = (37 * hash) + WIRELESS_TCP_CONFIGURATION_FIELD_NUMBER;
+        hash = (53 * hash) + getWirelessTcpConfiguration().hashCode();
+      }
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code com.andrerinas.openheadunit.aap.protocol.proto.ConnectionConfiguration}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:com.andrerinas.openheadunit.aap.protocol.proto.ConnectionConfiguration)
+        com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfigurationOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.andrerinas.openheadunit.aap.protocol.proto.Control.internal_static_com_andrerinas_openheadunit_aap_protocol_proto_ConnectionConfiguration_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.andrerinas.openheadunit.aap.protocol.proto.Control.internal_static_com_andrerinas_openheadunit_aap_protocol_proto_ConnectionConfiguration_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration.class, com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration.Builder.class);
+      }
+
+      // Construct using com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+          getPingConfigurationFieldBuilder();
+          getWirelessTcpConfigurationFieldBuilder();
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        pingConfiguration_ = null;
+        if (pingConfigurationBuilder_ != null) {
+          pingConfigurationBuilder_.dispose();
+          pingConfigurationBuilder_ = null;
+        }
+        wirelessTcpConfiguration_ = null;
+        if (wirelessTcpConfigurationBuilder_ != null) {
+          wirelessTcpConfigurationBuilder_.dispose();
+          wirelessTcpConfigurationBuilder_ = null;
+        }
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.andrerinas.openheadunit.aap.protocol.proto.Control.internal_static_com_andrerinas_openheadunit_aap_protocol_proto_ConnectionConfiguration_descriptor;
+      }
+
+      @java.lang.Override
+      public com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration getDefaultInstanceForType() {
+        return com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration build() {
+        com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration buildPartial() {
+        com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration result = new com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration result) {
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.pingConfiguration_ = pingConfigurationBuilder_ == null
+              ? pingConfiguration_
+              : pingConfigurationBuilder_.build();
+          to_bitField0_ |= 0x00000001;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.wirelessTcpConfiguration_ = wirelessTcpConfigurationBuilder_ == null
+              ? wirelessTcpConfiguration_
+              : wirelessTcpConfigurationBuilder_.build();
+          to_bitField0_ |= 0x00000002;
+        }
+        result.bitField0_ |= to_bitField0_;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration) {
+          return mergeFrom((com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration other) {
+        if (other == com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration.getDefaultInstance()) return this;
+        if (other.hasPingConfiguration()) {
+          mergePingConfiguration(other.getPingConfiguration());
+        }
+        if (other.hasWirelessTcpConfiguration()) {
+          mergeWirelessTcpConfiguration(other.getWirelessTcpConfiguration());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                input.readMessage(
+                    getPingConfigurationFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              case 18: {
+                input.readMessage(
+                    getWirelessTcpConfigurationFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 18
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfiguration pingConfiguration_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfiguration, com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfiguration.Builder, com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfigurationOrBuilder> pingConfigurationBuilder_;
+      /**
+       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.PingConfiguration ping_configuration = 1;</code>
+       * @return Whether the pingConfiguration field is set.
+       */
+      public boolean hasPingConfiguration() {
+        return ((bitField0_ & 0x00000001) != 0);
+      }
+      /**
+       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.PingConfiguration ping_configuration = 1;</code>
+       * @return The pingConfiguration.
+       */
+      public com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfiguration getPingConfiguration() {
+        if (pingConfigurationBuilder_ == null) {
+          return pingConfiguration_ == null ? com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfiguration.getDefaultInstance() : pingConfiguration_;
+        } else {
+          return pingConfigurationBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.PingConfiguration ping_configuration = 1;</code>
+       */
+      public Builder setPingConfiguration(com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfiguration value) {
+        if (pingConfigurationBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          pingConfiguration_ = value;
+        } else {
+          pingConfigurationBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.PingConfiguration ping_configuration = 1;</code>
+       */
+      public Builder setPingConfiguration(
+          com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfiguration.Builder builderForValue) {
+        if (pingConfigurationBuilder_ == null) {
+          pingConfiguration_ = builderForValue.build();
+        } else {
+          pingConfigurationBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.PingConfiguration ping_configuration = 1;</code>
+       */
+      public Builder mergePingConfiguration(com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfiguration value) {
+        if (pingConfigurationBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) != 0) &&
+            pingConfiguration_ != null &&
+            pingConfiguration_ != com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfiguration.getDefaultInstance()) {
+            getPingConfigurationBuilder().mergeFrom(value);
+          } else {
+            pingConfiguration_ = value;
+          }
+        } else {
+          pingConfigurationBuilder_.mergeFrom(value);
+        }
+        if (pingConfiguration_ != null) {
+          bitField0_ |= 0x00000001;
+          onChanged();
+        }
+        return this;
+      }
+      /**
+       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.PingConfiguration ping_configuration = 1;</code>
+       */
+      public Builder clearPingConfiguration() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        pingConfiguration_ = null;
+        if (pingConfigurationBuilder_ != null) {
+          pingConfigurationBuilder_.dispose();
+          pingConfigurationBuilder_ = null;
+        }
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.PingConfiguration ping_configuration = 1;</code>
+       */
+      public com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfiguration.Builder getPingConfigurationBuilder() {
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return getPingConfigurationFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.PingConfiguration ping_configuration = 1;</code>
+       */
+      public com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfigurationOrBuilder getPingConfigurationOrBuilder() {
+        if (pingConfigurationBuilder_ != null) {
+          return pingConfigurationBuilder_.getMessageOrBuilder();
+        } else {
+          return pingConfiguration_ == null ?
+              com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfiguration.getDefaultInstance() : pingConfiguration_;
+        }
+      }
+      /**
+       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.PingConfiguration ping_configuration = 1;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfiguration, com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfiguration.Builder, com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfigurationOrBuilder> 
+          getPingConfigurationFieldBuilder() {
+        if (pingConfigurationBuilder_ == null) {
+          pingConfigurationBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfiguration, com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfiguration.Builder, com.andrerinas.openheadunit.aap.protocol.proto.Control.PingConfigurationOrBuilder>(
+                  getPingConfiguration(),
+                  getParentForChildren(),
+                  isClean());
+          pingConfiguration_ = null;
+        }
+        return pingConfigurationBuilder_;
+      }
+
+      private com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfiguration wirelessTcpConfiguration_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfiguration, com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfiguration.Builder, com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfigurationOrBuilder> wirelessTcpConfigurationBuilder_;
+      /**
+       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.WirelessTcpConfiguration wireless_tcp_configuration = 2;</code>
+       * @return Whether the wirelessTcpConfiguration field is set.
+       */
+      public boolean hasWirelessTcpConfiguration() {
+        return ((bitField0_ & 0x00000002) != 0);
+      }
+      /**
+       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.WirelessTcpConfiguration wireless_tcp_configuration = 2;</code>
+       * @return The wirelessTcpConfiguration.
+       */
+      public com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfiguration getWirelessTcpConfiguration() {
+        if (wirelessTcpConfigurationBuilder_ == null) {
+          return wirelessTcpConfiguration_ == null ? com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfiguration.getDefaultInstance() : wirelessTcpConfiguration_;
+        } else {
+          return wirelessTcpConfigurationBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.WirelessTcpConfiguration wireless_tcp_configuration = 2;</code>
+       */
+      public Builder setWirelessTcpConfiguration(com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfiguration value) {
+        if (wirelessTcpConfigurationBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          wirelessTcpConfiguration_ = value;
+        } else {
+          wirelessTcpConfigurationBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.WirelessTcpConfiguration wireless_tcp_configuration = 2;</code>
+       */
+      public Builder setWirelessTcpConfiguration(
+          com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfiguration.Builder builderForValue) {
+        if (wirelessTcpConfigurationBuilder_ == null) {
+          wirelessTcpConfiguration_ = builderForValue.build();
+        } else {
+          wirelessTcpConfigurationBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.WirelessTcpConfiguration wireless_tcp_configuration = 2;</code>
+       */
+      public Builder mergeWirelessTcpConfiguration(com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfiguration value) {
+        if (wirelessTcpConfigurationBuilder_ == null) {
+          if (((bitField0_ & 0x00000002) != 0) &&
+            wirelessTcpConfiguration_ != null &&
+            wirelessTcpConfiguration_ != com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfiguration.getDefaultInstance()) {
+            getWirelessTcpConfigurationBuilder().mergeFrom(value);
+          } else {
+            wirelessTcpConfiguration_ = value;
+          }
+        } else {
+          wirelessTcpConfigurationBuilder_.mergeFrom(value);
+        }
+        if (wirelessTcpConfiguration_ != null) {
+          bitField0_ |= 0x00000002;
+          onChanged();
+        }
+        return this;
+      }
+      /**
+       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.WirelessTcpConfiguration wireless_tcp_configuration = 2;</code>
+       */
+      public Builder clearWirelessTcpConfiguration() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        wirelessTcpConfiguration_ = null;
+        if (wirelessTcpConfigurationBuilder_ != null) {
+          wirelessTcpConfigurationBuilder_.dispose();
+          wirelessTcpConfigurationBuilder_ = null;
+        }
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.WirelessTcpConfiguration wireless_tcp_configuration = 2;</code>
+       */
+      public com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfiguration.Builder getWirelessTcpConfigurationBuilder() {
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return getWirelessTcpConfigurationFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.WirelessTcpConfiguration wireless_tcp_configuration = 2;</code>
+       */
+      public com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfigurationOrBuilder getWirelessTcpConfigurationOrBuilder() {
+        if (wirelessTcpConfigurationBuilder_ != null) {
+          return wirelessTcpConfigurationBuilder_.getMessageOrBuilder();
+        } else {
+          return wirelessTcpConfiguration_ == null ?
+              com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfiguration.getDefaultInstance() : wirelessTcpConfiguration_;
+        }
+      }
+      /**
+       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.WirelessTcpConfiguration wireless_tcp_configuration = 2;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfiguration, com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfiguration.Builder, com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfigurationOrBuilder> 
+          getWirelessTcpConfigurationFieldBuilder() {
+        if (wirelessTcpConfigurationBuilder_ == null) {
+          wirelessTcpConfigurationBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfiguration, com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfiguration.Builder, com.andrerinas.openheadunit.aap.protocol.proto.Control.WirelessTcpConfigurationOrBuilder>(
+                  getWirelessTcpConfiguration(),
+                  getParentForChildren(),
+                  isClean());
+          wirelessTcpConfiguration_ = null;
+        }
+        return wirelessTcpConfigurationBuilder_;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:com.andrerinas.openheadunit.aap.protocol.proto.ConnectionConfiguration)
+    }
+
+    // @@protoc_insertion_point(class_scope:com.andrerinas.openheadunit.aap.protocol.proto.ConnectionConfiguration)
+    private static final com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration();
+    }
+
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    @java.lang.Deprecated public static final com.google.protobuf.Parser<ConnectionConfiguration>
+        PARSER = new com.google.protobuf.AbstractParser<ConnectionConfiguration>() {
+      @java.lang.Override
+      public ConnectionConfiguration parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<ConnectionConfiguration> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<ConnectionConfiguration> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface VersionRequestOptionsOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:com.andrerinas.openheadunit.aap.protocol.proto.VersionRequestOptions)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>optional int64 snapshot_version = 1;</code>
+     * @return Whether the snapshotVersion field is set.
+     */
+    boolean hasSnapshotVersion();
+    /**
+     * <code>optional int64 snapshot_version = 1;</code>
+     * @return The snapshotVersion.
+     */
+    long getSnapshotVersion();
+  }
+  /**
+   * <pre>
+   * Appended to the raw VersionRequest frame after major and minor. We send none.
+   * </pre>
+   *
+   * Protobuf type {@code com.andrerinas.openheadunit.aap.protocol.proto.VersionRequestOptions}
+   */
+  public static final class VersionRequestOptions extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:com.andrerinas.openheadunit.aap.protocol.proto.VersionRequestOptions)
+      VersionRequestOptionsOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use VersionRequestOptions.newBuilder() to construct.
+    private VersionRequestOptions(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private VersionRequestOptions() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new VersionRequestOptions();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.andrerinas.openheadunit.aap.protocol.proto.Control.internal_static_com_andrerinas_openheadunit_aap_protocol_proto_VersionRequestOptions_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.andrerinas.openheadunit.aap.protocol.proto.Control.internal_static_com_andrerinas_openheadunit_aap_protocol_proto_VersionRequestOptions_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionRequestOptions.class, com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionRequestOptions.Builder.class);
+    }
+
+    private int bitField0_;
+    public static final int SNAPSHOT_VERSION_FIELD_NUMBER = 1;
+    private long snapshotVersion_ = 0L;
+    /**
+     * <code>optional int64 snapshot_version = 1;</code>
+     * @return Whether the snapshotVersion field is set.
+     */
+    @java.lang.Override
+    public boolean hasSnapshotVersion() {
+      return ((bitField0_ & 0x00000001) != 0);
+    }
+    /**
+     * <code>optional int64 snapshot_version = 1;</code>
+     * @return The snapshotVersion.
+     */
+    @java.lang.Override
+    public long getSnapshotVersion() {
+      return snapshotVersion_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (((bitField0_ & 0x00000001) != 0)) {
+        output.writeInt64(1, snapshotVersion_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(1, snapshotVersion_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionRequestOptions)) {
+        return super.equals(obj);
+      }
+      com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionRequestOptions other = (com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionRequestOptions) obj;
+
+      if (hasSnapshotVersion() != other.hasSnapshotVersion()) return false;
+      if (hasSnapshotVersion()) {
+        if (getSnapshotVersion()
+            != other.getSnapshotVersion()) return false;
+      }
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (hasSnapshotVersion()) {
+        hash = (37 * hash) + SNAPSHOT_VERSION_FIELD_NUMBER;
+        hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+            getSnapshotVersion());
+      }
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionRequestOptions parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionRequestOptions parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionRequestOptions parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionRequestOptions parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionRequestOptions parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionRequestOptions parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionRequestOptions parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionRequestOptions parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionRequestOptions parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionRequestOptions parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionRequestOptions parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionRequestOptions parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionRequestOptions prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Appended to the raw VersionRequest frame after major and minor. We send none.
+     * </pre>
+     *
+     * Protobuf type {@code com.andrerinas.openheadunit.aap.protocol.proto.VersionRequestOptions}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:com.andrerinas.openheadunit.aap.protocol.proto.VersionRequestOptions)
+        com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionRequestOptionsOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.andrerinas.openheadunit.aap.protocol.proto.Control.internal_static_com_andrerinas_openheadunit_aap_protocol_proto_VersionRequestOptions_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.andrerinas.openheadunit.aap.protocol.proto.Control.internal_static_com_andrerinas_openheadunit_aap_protocol_proto_VersionRequestOptions_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionRequestOptions.class, com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionRequestOptions.Builder.class);
+      }
+
+      // Construct using com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionRequestOptions.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        snapshotVersion_ = 0L;
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.andrerinas.openheadunit.aap.protocol.proto.Control.internal_static_com_andrerinas_openheadunit_aap_protocol_proto_VersionRequestOptions_descriptor;
+      }
+
+      @java.lang.Override
+      public com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionRequestOptions getDefaultInstanceForType() {
+        return com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionRequestOptions.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionRequestOptions build() {
+        com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionRequestOptions result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionRequestOptions buildPartial() {
+        com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionRequestOptions result = new com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionRequestOptions(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionRequestOptions result) {
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.snapshotVersion_ = snapshotVersion_;
+          to_bitField0_ |= 0x00000001;
+        }
+        result.bitField0_ |= to_bitField0_;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionRequestOptions) {
+          return mergeFrom((com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionRequestOptions)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionRequestOptions other) {
+        if (other == com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionRequestOptions.getDefaultInstance()) return this;
+        if (other.hasSnapshotVersion()) {
+          setSnapshotVersion(other.getSnapshotVersion());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 8: {
+                snapshotVersion_ = input.readInt64();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 8
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private long snapshotVersion_ ;
+      /**
+       * <code>optional int64 snapshot_version = 1;</code>
+       * @return Whether the snapshotVersion field is set.
+       */
+      @java.lang.Override
+      public boolean hasSnapshotVersion() {
+        return ((bitField0_ & 0x00000001) != 0);
+      }
+      /**
+       * <code>optional int64 snapshot_version = 1;</code>
+       * @return The snapshotVersion.
+       */
+      @java.lang.Override
+      public long getSnapshotVersion() {
+        return snapshotVersion_;
+      }
+      /**
+       * <code>optional int64 snapshot_version = 1;</code>
+       * @param value The snapshotVersion to set.
+       * @return This builder for chaining.
+       */
+      public Builder setSnapshotVersion(long value) {
+
+        snapshotVersion_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int64 snapshot_version = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearSnapshotVersion() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        snapshotVersion_ = 0L;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:com.andrerinas.openheadunit.aap.protocol.proto.VersionRequestOptions)
+    }
+
+    // @@protoc_insertion_point(class_scope:com.andrerinas.openheadunit.aap.protocol.proto.VersionRequestOptions)
+    private static final com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionRequestOptions DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionRequestOptions();
+    }
+
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionRequestOptions getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    @java.lang.Deprecated public static final com.google.protobuf.Parser<VersionRequestOptions>
+        PARSER = new com.google.protobuf.AbstractParser<VersionRequestOptions>() {
+      @java.lang.Override
+      public VersionRequestOptions parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<VersionRequestOptions> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<VersionRequestOptions> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionRequestOptions getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface VersionResponseOptionsOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:com.andrerinas.openheadunit.aap.protocol.proto.VersionResponseOptions)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.ConnectionConfiguration connection_configuration = 1;</code>
+     * @return Whether the connectionConfiguration field is set.
+     */
+    boolean hasConnectionConfiguration();
+    /**
+     * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.ConnectionConfiguration connection_configuration = 1;</code>
+     * @return The connectionConfiguration.
+     */
+    com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration getConnectionConfiguration();
+    /**
+     * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.ConnectionConfiguration connection_configuration = 1;</code>
+     */
+    com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfigurationOrBuilder getConnectionConfigurationOrBuilder();
+  }
+  /**
+   * <pre>
+   * Appended to the raw VersionResponse frame after major, minor and status. The phone uses it to
+   * ask this head unit to change connection parameters; the agreed set goes back out in
+   * ServiceDiscoveryResponse field 16.
+   * </pre>
+   *
+   * Protobuf type {@code com.andrerinas.openheadunit.aap.protocol.proto.VersionResponseOptions}
+   */
+  public static final class VersionResponseOptions extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:com.andrerinas.openheadunit.aap.protocol.proto.VersionResponseOptions)
+      VersionResponseOptionsOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use VersionResponseOptions.newBuilder() to construct.
+    private VersionResponseOptions(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private VersionResponseOptions() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new VersionResponseOptions();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.andrerinas.openheadunit.aap.protocol.proto.Control.internal_static_com_andrerinas_openheadunit_aap_protocol_proto_VersionResponseOptions_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.andrerinas.openheadunit.aap.protocol.proto.Control.internal_static_com_andrerinas_openheadunit_aap_protocol_proto_VersionResponseOptions_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionResponseOptions.class, com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionResponseOptions.Builder.class);
+    }
+
+    private int bitField0_;
+    public static final int CONNECTION_CONFIGURATION_FIELD_NUMBER = 1;
+    private com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration connectionConfiguration_;
+    /**
+     * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.ConnectionConfiguration connection_configuration = 1;</code>
+     * @return Whether the connectionConfiguration field is set.
+     */
+    @java.lang.Override
+    public boolean hasConnectionConfiguration() {
+      return ((bitField0_ & 0x00000001) != 0);
+    }
+    /**
+     * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.ConnectionConfiguration connection_configuration = 1;</code>
+     * @return The connectionConfiguration.
+     */
+    @java.lang.Override
+    public com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration getConnectionConfiguration() {
+      return connectionConfiguration_ == null ? com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration.getDefaultInstance() : connectionConfiguration_;
+    }
+    /**
+     * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.ConnectionConfiguration connection_configuration = 1;</code>
+     */
+    @java.lang.Override
+    public com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfigurationOrBuilder getConnectionConfigurationOrBuilder() {
+      return connectionConfiguration_ == null ? com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration.getDefaultInstance() : connectionConfiguration_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (((bitField0_ & 0x00000001) != 0)) {
+        output.writeMessage(1, getConnectionConfiguration());
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, getConnectionConfiguration());
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionResponseOptions)) {
+        return super.equals(obj);
+      }
+      com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionResponseOptions other = (com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionResponseOptions) obj;
+
+      if (hasConnectionConfiguration() != other.hasConnectionConfiguration()) return false;
+      if (hasConnectionConfiguration()) {
+        if (!getConnectionConfiguration()
+            .equals(other.getConnectionConfiguration())) return false;
+      }
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (hasConnectionConfiguration()) {
+        hash = (37 * hash) + CONNECTION_CONFIGURATION_FIELD_NUMBER;
+        hash = (53 * hash) + getConnectionConfiguration().hashCode();
+      }
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionResponseOptions parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionResponseOptions parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionResponseOptions parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionResponseOptions parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionResponseOptions parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionResponseOptions parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionResponseOptions parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionResponseOptions parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionResponseOptions parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionResponseOptions parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionResponseOptions parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionResponseOptions parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionResponseOptions prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Appended to the raw VersionResponse frame after major, minor and status. The phone uses it to
+     * ask this head unit to change connection parameters; the agreed set goes back out in
+     * ServiceDiscoveryResponse field 16.
+     * </pre>
+     *
+     * Protobuf type {@code com.andrerinas.openheadunit.aap.protocol.proto.VersionResponseOptions}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:com.andrerinas.openheadunit.aap.protocol.proto.VersionResponseOptions)
+        com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionResponseOptionsOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.andrerinas.openheadunit.aap.protocol.proto.Control.internal_static_com_andrerinas_openheadunit_aap_protocol_proto_VersionResponseOptions_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.andrerinas.openheadunit.aap.protocol.proto.Control.internal_static_com_andrerinas_openheadunit_aap_protocol_proto_VersionResponseOptions_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionResponseOptions.class, com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionResponseOptions.Builder.class);
+      }
+
+      // Construct using com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionResponseOptions.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+          getConnectionConfigurationFieldBuilder();
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        connectionConfiguration_ = null;
+        if (connectionConfigurationBuilder_ != null) {
+          connectionConfigurationBuilder_.dispose();
+          connectionConfigurationBuilder_ = null;
+        }
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.andrerinas.openheadunit.aap.protocol.proto.Control.internal_static_com_andrerinas_openheadunit_aap_protocol_proto_VersionResponseOptions_descriptor;
+      }
+
+      @java.lang.Override
+      public com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionResponseOptions getDefaultInstanceForType() {
+        return com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionResponseOptions.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionResponseOptions build() {
+        com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionResponseOptions result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionResponseOptions buildPartial() {
+        com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionResponseOptions result = new com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionResponseOptions(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionResponseOptions result) {
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.connectionConfiguration_ = connectionConfigurationBuilder_ == null
+              ? connectionConfiguration_
+              : connectionConfigurationBuilder_.build();
+          to_bitField0_ |= 0x00000001;
+        }
+        result.bitField0_ |= to_bitField0_;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionResponseOptions) {
+          return mergeFrom((com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionResponseOptions)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionResponseOptions other) {
+        if (other == com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionResponseOptions.getDefaultInstance()) return this;
+        if (other.hasConnectionConfiguration()) {
+          mergeConnectionConfiguration(other.getConnectionConfiguration());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                input.readMessage(
+                    getConnectionConfigurationFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration connectionConfiguration_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration, com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration.Builder, com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfigurationOrBuilder> connectionConfigurationBuilder_;
+      /**
+       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.ConnectionConfiguration connection_configuration = 1;</code>
+       * @return Whether the connectionConfiguration field is set.
+       */
+      public boolean hasConnectionConfiguration() {
+        return ((bitField0_ & 0x00000001) != 0);
+      }
+      /**
+       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.ConnectionConfiguration connection_configuration = 1;</code>
+       * @return The connectionConfiguration.
+       */
+      public com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration getConnectionConfiguration() {
+        if (connectionConfigurationBuilder_ == null) {
+          return connectionConfiguration_ == null ? com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration.getDefaultInstance() : connectionConfiguration_;
+        } else {
+          return connectionConfigurationBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.ConnectionConfiguration connection_configuration = 1;</code>
+       */
+      public Builder setConnectionConfiguration(com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration value) {
+        if (connectionConfigurationBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          connectionConfiguration_ = value;
+        } else {
+          connectionConfigurationBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.ConnectionConfiguration connection_configuration = 1;</code>
+       */
+      public Builder setConnectionConfiguration(
+          com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration.Builder builderForValue) {
+        if (connectionConfigurationBuilder_ == null) {
+          connectionConfiguration_ = builderForValue.build();
+        } else {
+          connectionConfigurationBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.ConnectionConfiguration connection_configuration = 1;</code>
+       */
+      public Builder mergeConnectionConfiguration(com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration value) {
+        if (connectionConfigurationBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) != 0) &&
+            connectionConfiguration_ != null &&
+            connectionConfiguration_ != com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration.getDefaultInstance()) {
+            getConnectionConfigurationBuilder().mergeFrom(value);
+          } else {
+            connectionConfiguration_ = value;
+          }
+        } else {
+          connectionConfigurationBuilder_.mergeFrom(value);
+        }
+        if (connectionConfiguration_ != null) {
+          bitField0_ |= 0x00000001;
+          onChanged();
+        }
+        return this;
+      }
+      /**
+       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.ConnectionConfiguration connection_configuration = 1;</code>
+       */
+      public Builder clearConnectionConfiguration() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        connectionConfiguration_ = null;
+        if (connectionConfigurationBuilder_ != null) {
+          connectionConfigurationBuilder_.dispose();
+          connectionConfigurationBuilder_ = null;
+        }
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.ConnectionConfiguration connection_configuration = 1;</code>
+       */
+      public com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration.Builder getConnectionConfigurationBuilder() {
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return getConnectionConfigurationFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.ConnectionConfiguration connection_configuration = 1;</code>
+       */
+      public com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfigurationOrBuilder getConnectionConfigurationOrBuilder() {
+        if (connectionConfigurationBuilder_ != null) {
+          return connectionConfigurationBuilder_.getMessageOrBuilder();
+        } else {
+          return connectionConfiguration_ == null ?
+              com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration.getDefaultInstance() : connectionConfiguration_;
+        }
+      }
+      /**
+       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.ConnectionConfiguration connection_configuration = 1;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration, com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration.Builder, com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfigurationOrBuilder> 
+          getConnectionConfigurationFieldBuilder() {
+        if (connectionConfigurationBuilder_ == null) {
+          connectionConfigurationBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration, com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfiguration.Builder, com.andrerinas.openheadunit.aap.protocol.proto.Control.ConnectionConfigurationOrBuilder>(
+                  getConnectionConfiguration(),
+                  getParentForChildren(),
+                  isClean());
+          connectionConfiguration_ = null;
+        }
+        return connectionConfigurationBuilder_;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:com.andrerinas.openheadunit.aap.protocol.proto.VersionResponseOptions)
+    }
+
+    // @@protoc_insertion_point(class_scope:com.andrerinas.openheadunit.aap.protocol.proto.VersionResponseOptions)
+    private static final com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionResponseOptions DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionResponseOptions();
+    }
+
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionResponseOptions getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    @java.lang.Deprecated public static final com.google.protobuf.Parser<VersionResponseOptions>
+        PARSER = new com.google.protobuf.AbstractParser<VersionResponseOptions>() {
+      @java.lang.Override
+      public VersionResponseOptions parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<VersionResponseOptions> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<VersionResponseOptions> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.andrerinas.openheadunit.aap.protocol.proto.Control.VersionResponseOptions getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface ServiceDiscoveryUpdateOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:com.andrerinas.openheadunit.aap.protocol.proto.ServiceDiscoveryUpdate)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.Service service = 1;</code>
+     * @return Whether the service field is set.
+     */
+    boolean hasService();
+    /**
+     * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.Service service = 1;</code>
+     * @return The service.
+     */
+    com.andrerinas.openheadunit.aap.protocol.proto.Control.Service getService();
+    /**
+     * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.Service service = 1;</code>
+     */
+    com.andrerinas.openheadunit.aap.protocol.proto.Control.ServiceOrBuilder getServiceOrBuilder();
+  }
+  /**
+   * <pre>
+   * Type 26. Re-announces one service after discovery is complete. The only message in the protocol
+   * that claims a service's configuration can change mid-session.
+   * </pre>
+   *
+   * Protobuf type {@code com.andrerinas.openheadunit.aap.protocol.proto.ServiceDiscoveryUpdate}
+   */
+  public static final class ServiceDiscoveryUpdate extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:com.andrerinas.openheadunit.aap.protocol.proto.ServiceDiscoveryUpdate)
+      ServiceDiscoveryUpdateOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use ServiceDiscoveryUpdate.newBuilder() to construct.
+    private ServiceDiscoveryUpdate(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private ServiceDiscoveryUpdate() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ServiceDiscoveryUpdate();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.andrerinas.openheadunit.aap.protocol.proto.Control.internal_static_com_andrerinas_openheadunit_aap_protocol_proto_ServiceDiscoveryUpdate_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.andrerinas.openheadunit.aap.protocol.proto.Control.internal_static_com_andrerinas_openheadunit_aap_protocol_proto_ServiceDiscoveryUpdate_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.andrerinas.openheadunit.aap.protocol.proto.Control.ServiceDiscoveryUpdate.class, com.andrerinas.openheadunit.aap.protocol.proto.Control.ServiceDiscoveryUpdate.Builder.class);
+    }
+
+    private int bitField0_;
+    public static final int SERVICE_FIELD_NUMBER = 1;
+    private com.andrerinas.openheadunit.aap.protocol.proto.Control.Service service_;
+    /**
+     * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.Service service = 1;</code>
+     * @return Whether the service field is set.
+     */
+    @java.lang.Override
+    public boolean hasService() {
+      return ((bitField0_ & 0x00000001) != 0);
+    }
+    /**
+     * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.Service service = 1;</code>
+     * @return The service.
+     */
+    @java.lang.Override
+    public com.andrerinas.openheadunit.aap.protocol.proto.Control.Service getService() {
+      return service_ == null ? com.andrerinas.openheadunit.aap.protocol.proto.Control.Service.getDefaultInstance() : service_;
+    }
+    /**
+     * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.Service service = 1;</code>
+     */
+    @java.lang.Override
+    public com.andrerinas.openheadunit.aap.protocol.proto.Control.ServiceOrBuilder getServiceOrBuilder() {
+      return service_ == null ? com.andrerinas.openheadunit.aap.protocol.proto.Control.Service.getDefaultInstance() : service_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      if (hasService()) {
+        if (!getService().isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (((bitField0_ & 0x00000001) != 0)) {
+        output.writeMessage(1, getService());
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, getService());
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.andrerinas.openheadunit.aap.protocol.proto.Control.ServiceDiscoveryUpdate)) {
+        return super.equals(obj);
+      }
+      com.andrerinas.openheadunit.aap.protocol.proto.Control.ServiceDiscoveryUpdate other = (com.andrerinas.openheadunit.aap.protocol.proto.Control.ServiceDiscoveryUpdate) obj;
+
+      if (hasService() != other.hasService()) return false;
+      if (hasService()) {
+        if (!getService()
+            .equals(other.getService())) return false;
+      }
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (hasService()) {
+        hash = (37 * hash) + SERVICE_FIELD_NUMBER;
+        hash = (53 * hash) + getService().hashCode();
+      }
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.ServiceDiscoveryUpdate parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.ServiceDiscoveryUpdate parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.ServiceDiscoveryUpdate parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.ServiceDiscoveryUpdate parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.ServiceDiscoveryUpdate parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.ServiceDiscoveryUpdate parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.ServiceDiscoveryUpdate parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.ServiceDiscoveryUpdate parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.ServiceDiscoveryUpdate parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.ServiceDiscoveryUpdate parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.ServiceDiscoveryUpdate parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.ServiceDiscoveryUpdate parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.andrerinas.openheadunit.aap.protocol.proto.Control.ServiceDiscoveryUpdate prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Type 26. Re-announces one service after discovery is complete. The only message in the protocol
+     * that claims a service's configuration can change mid-session.
+     * </pre>
+     *
+     * Protobuf type {@code com.andrerinas.openheadunit.aap.protocol.proto.ServiceDiscoveryUpdate}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:com.andrerinas.openheadunit.aap.protocol.proto.ServiceDiscoveryUpdate)
+        com.andrerinas.openheadunit.aap.protocol.proto.Control.ServiceDiscoveryUpdateOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.andrerinas.openheadunit.aap.protocol.proto.Control.internal_static_com_andrerinas_openheadunit_aap_protocol_proto_ServiceDiscoveryUpdate_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.andrerinas.openheadunit.aap.protocol.proto.Control.internal_static_com_andrerinas_openheadunit_aap_protocol_proto_ServiceDiscoveryUpdate_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.andrerinas.openheadunit.aap.protocol.proto.Control.ServiceDiscoveryUpdate.class, com.andrerinas.openheadunit.aap.protocol.proto.Control.ServiceDiscoveryUpdate.Builder.class);
+      }
+
+      // Construct using com.andrerinas.openheadunit.aap.protocol.proto.Control.ServiceDiscoveryUpdate.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+          getServiceFieldBuilder();
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        service_ = null;
+        if (serviceBuilder_ != null) {
+          serviceBuilder_.dispose();
+          serviceBuilder_ = null;
+        }
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.andrerinas.openheadunit.aap.protocol.proto.Control.internal_static_com_andrerinas_openheadunit_aap_protocol_proto_ServiceDiscoveryUpdate_descriptor;
+      }
+
+      @java.lang.Override
+      public com.andrerinas.openheadunit.aap.protocol.proto.Control.ServiceDiscoveryUpdate getDefaultInstanceForType() {
+        return com.andrerinas.openheadunit.aap.protocol.proto.Control.ServiceDiscoveryUpdate.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.andrerinas.openheadunit.aap.protocol.proto.Control.ServiceDiscoveryUpdate build() {
+        com.andrerinas.openheadunit.aap.protocol.proto.Control.ServiceDiscoveryUpdate result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.andrerinas.openheadunit.aap.protocol.proto.Control.ServiceDiscoveryUpdate buildPartial() {
+        com.andrerinas.openheadunit.aap.protocol.proto.Control.ServiceDiscoveryUpdate result = new com.andrerinas.openheadunit.aap.protocol.proto.Control.ServiceDiscoveryUpdate(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(com.andrerinas.openheadunit.aap.protocol.proto.Control.ServiceDiscoveryUpdate result) {
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.service_ = serviceBuilder_ == null
+              ? service_
+              : serviceBuilder_.build();
+          to_bitField0_ |= 0x00000001;
+        }
+        result.bitField0_ |= to_bitField0_;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.andrerinas.openheadunit.aap.protocol.proto.Control.ServiceDiscoveryUpdate) {
+          return mergeFrom((com.andrerinas.openheadunit.aap.protocol.proto.Control.ServiceDiscoveryUpdate)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.andrerinas.openheadunit.aap.protocol.proto.Control.ServiceDiscoveryUpdate other) {
+        if (other == com.andrerinas.openheadunit.aap.protocol.proto.Control.ServiceDiscoveryUpdate.getDefaultInstance()) return this;
+        if (other.hasService()) {
+          mergeService(other.getService());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        if (hasService()) {
+          if (!getService().isInitialized()) {
+            return false;
+          }
+        }
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                input.readMessage(
+                    getServiceFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private com.andrerinas.openheadunit.aap.protocol.proto.Control.Service service_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.andrerinas.openheadunit.aap.protocol.proto.Control.Service, com.andrerinas.openheadunit.aap.protocol.proto.Control.Service.Builder, com.andrerinas.openheadunit.aap.protocol.proto.Control.ServiceOrBuilder> serviceBuilder_;
+      /**
+       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.Service service = 1;</code>
+       * @return Whether the service field is set.
+       */
+      public boolean hasService() {
+        return ((bitField0_ & 0x00000001) != 0);
+      }
+      /**
+       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.Service service = 1;</code>
+       * @return The service.
+       */
+      public com.andrerinas.openheadunit.aap.protocol.proto.Control.Service getService() {
+        if (serviceBuilder_ == null) {
+          return service_ == null ? com.andrerinas.openheadunit.aap.protocol.proto.Control.Service.getDefaultInstance() : service_;
+        } else {
+          return serviceBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.Service service = 1;</code>
+       */
+      public Builder setService(com.andrerinas.openheadunit.aap.protocol.proto.Control.Service value) {
+        if (serviceBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          service_ = value;
+        } else {
+          serviceBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.Service service = 1;</code>
+       */
+      public Builder setService(
+          com.andrerinas.openheadunit.aap.protocol.proto.Control.Service.Builder builderForValue) {
+        if (serviceBuilder_ == null) {
+          service_ = builderForValue.build();
+        } else {
+          serviceBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.Service service = 1;</code>
+       */
+      public Builder mergeService(com.andrerinas.openheadunit.aap.protocol.proto.Control.Service value) {
+        if (serviceBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) != 0) &&
+            service_ != null &&
+            service_ != com.andrerinas.openheadunit.aap.protocol.proto.Control.Service.getDefaultInstance()) {
+            getServiceBuilder().mergeFrom(value);
+          } else {
+            service_ = value;
+          }
+        } else {
+          serviceBuilder_.mergeFrom(value);
+        }
+        if (service_ != null) {
+          bitField0_ |= 0x00000001;
+          onChanged();
+        }
+        return this;
+      }
+      /**
+       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.Service service = 1;</code>
+       */
+      public Builder clearService() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        service_ = null;
+        if (serviceBuilder_ != null) {
+          serviceBuilder_.dispose();
+          serviceBuilder_ = null;
+        }
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.Service service = 1;</code>
+       */
+      public com.andrerinas.openheadunit.aap.protocol.proto.Control.Service.Builder getServiceBuilder() {
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return getServiceFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.Service service = 1;</code>
+       */
+      public com.andrerinas.openheadunit.aap.protocol.proto.Control.ServiceOrBuilder getServiceOrBuilder() {
+        if (serviceBuilder_ != null) {
+          return serviceBuilder_.getMessageOrBuilder();
+        } else {
+          return service_ == null ?
+              com.andrerinas.openheadunit.aap.protocol.proto.Control.Service.getDefaultInstance() : service_;
+        }
+      }
+      /**
+       * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.Service service = 1;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.andrerinas.openheadunit.aap.protocol.proto.Control.Service, com.andrerinas.openheadunit.aap.protocol.proto.Control.Service.Builder, com.andrerinas.openheadunit.aap.protocol.proto.Control.ServiceOrBuilder> 
+          getServiceFieldBuilder() {
+        if (serviceBuilder_ == null) {
+          serviceBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.andrerinas.openheadunit.aap.protocol.proto.Control.Service, com.andrerinas.openheadunit.aap.protocol.proto.Control.Service.Builder, com.andrerinas.openheadunit.aap.protocol.proto.Control.ServiceOrBuilder>(
+                  getService(),
+                  getParentForChildren(),
+                  isClean());
+          service_ = null;
+        }
+        return serviceBuilder_;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:com.andrerinas.openheadunit.aap.protocol.proto.ServiceDiscoveryUpdate)
+    }
+
+    // @@protoc_insertion_point(class_scope:com.andrerinas.openheadunit.aap.protocol.proto.ServiceDiscoveryUpdate)
+    private static final com.andrerinas.openheadunit.aap.protocol.proto.Control.ServiceDiscoveryUpdate DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.andrerinas.openheadunit.aap.protocol.proto.Control.ServiceDiscoveryUpdate();
+    }
+
+    public static com.andrerinas.openheadunit.aap.protocol.proto.Control.ServiceDiscoveryUpdate getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    @java.lang.Deprecated public static final com.google.protobuf.Parser<ServiceDiscoveryUpdate>
+        PARSER = new com.google.protobuf.AbstractParser<ServiceDiscoveryUpdate>() {
+      @java.lang.Override
+      public ServiceDiscoveryUpdate parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<ServiceDiscoveryUpdate> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<ServiceDiscoveryUpdate> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.andrerinas.openheadunit.aap.protocol.proto.Control.ServiceDiscoveryUpdate getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   public interface ChannelOpenRequestOrBuilder extends
       // @@protoc_insertion_point(interface_extends:com.andrerinas.openheadunit.aap.protocol.proto.ChannelOpenRequest)
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>required int32 priority = 1;</code>
+     * <code>required sint32 priority = 1;</code>
      * @return Whether the priority field is set.
      */
     boolean hasPriority();
     /**
-     * <code>required int32 priority = 1;</code>
+     * <code>required sint32 priority = 1;</code>
      * @return The priority.
      */
     int getPriority();
@@ -22206,7 +27241,7 @@ public final class Control {
     public static final int PRIORITY_FIELD_NUMBER = 1;
     private int priority_ = 0;
     /**
-     * <code>required int32 priority = 1;</code>
+     * <code>required sint32 priority = 1;</code>
      * @return Whether the priority field is set.
      */
     @java.lang.Override
@@ -22214,7 +27249,7 @@ public final class Control {
       return ((bitField0_ & 0x00000001) != 0);
     }
     /**
-     * <code>required int32 priority = 1;</code>
+     * <code>required sint32 priority = 1;</code>
      * @return The priority.
      */
     @java.lang.Override
@@ -22264,7 +27299,7 @@ public final class Control {
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       if (((bitField0_ & 0x00000001) != 0)) {
-        output.writeInt32(1, priority_);
+        output.writeSInt32(1, priority_);
       }
       if (((bitField0_ & 0x00000002) != 0)) {
         output.writeInt32(2, serviceId_);
@@ -22280,7 +27315,7 @@ public final class Control {
       size = 0;
       if (((bitField0_ & 0x00000001) != 0)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(1, priority_);
+          .computeSInt32Size(1, priority_);
       }
       if (((bitField0_ & 0x00000002) != 0)) {
         size += com.google.protobuf.CodedOutputStream
@@ -22591,7 +27626,7 @@ public final class Control {
                 done = true;
                 break;
               case 8: {
-                priority_ = input.readInt32();
+                priority_ = input.readSInt32();
                 bitField0_ |= 0x00000001;
                 break;
               } // case 8
@@ -22619,7 +27654,7 @@ public final class Control {
 
       private int priority_ ;
       /**
-       * <code>required int32 priority = 1;</code>
+       * <code>required sint32 priority = 1;</code>
        * @return Whether the priority field is set.
        */
       @java.lang.Override
@@ -22627,7 +27662,7 @@ public final class Control {
         return ((bitField0_ & 0x00000001) != 0);
       }
       /**
-       * <code>required int32 priority = 1;</code>
+       * <code>required sint32 priority = 1;</code>
        * @return The priority.
        */
       @java.lang.Override
@@ -22635,7 +27670,7 @@ public final class Control {
         return priority_;
       }
       /**
-       * <code>required int32 priority = 1;</code>
+       * <code>required sint32 priority = 1;</code>
        * @param value The priority to set.
        * @return This builder for chaining.
        */
@@ -22647,7 +27682,7 @@ public final class Control {
         return this;
       }
       /**
-       * <code>required int32 priority = 1;</code>
+       * <code>required sint32 priority = 1;</code>
        * @return This builder for chaining.
        */
       public Builder clearPriority() {
@@ -27409,7 +32444,7 @@ public final class Control {
      */
     @java.lang.Override public com.andrerinas.openheadunit.aap.protocol.proto.Control.NavFocusType getFocusType() {
       com.andrerinas.openheadunit.aap.protocol.proto.Control.NavFocusType result = com.andrerinas.openheadunit.aap.protocol.proto.Control.NavFocusType.forNumber(focusType_);
-      return result == null ? com.andrerinas.openheadunit.aap.protocol.proto.Control.NavFocusType.NAV_FOCUS_1 : result;
+      return result == null ? com.andrerinas.openheadunit.aap.protocol.proto.Control.NavFocusType.NAV_FOCUS_NATIVE : result;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -27766,7 +32801,7 @@ public final class Control {
       @java.lang.Override
       public com.andrerinas.openheadunit.aap.protocol.proto.Control.NavFocusType getFocusType() {
         com.andrerinas.openheadunit.aap.protocol.proto.Control.NavFocusType result = com.andrerinas.openheadunit.aap.protocol.proto.Control.NavFocusType.forNumber(focusType_);
-        return result == null ? com.andrerinas.openheadunit.aap.protocol.proto.Control.NavFocusType.NAV_FOCUS_1 : result;
+        return result == null ? com.andrerinas.openheadunit.aap.protocol.proto.Control.NavFocusType.NAV_FOCUS_NATIVE : result;
       }
       /**
        * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.NavFocusType focus_type = 1;</code>
@@ -27923,7 +32958,7 @@ public final class Control {
      */
     @java.lang.Override public com.andrerinas.openheadunit.aap.protocol.proto.Control.NavFocusType getFocusType() {
       com.andrerinas.openheadunit.aap.protocol.proto.Control.NavFocusType result = com.andrerinas.openheadunit.aap.protocol.proto.Control.NavFocusType.forNumber(focusType_);
-      return result == null ? com.andrerinas.openheadunit.aap.protocol.proto.Control.NavFocusType.NAV_FOCUS_1 : result;
+      return result == null ? com.andrerinas.openheadunit.aap.protocol.proto.Control.NavFocusType.NAV_FOCUS_NATIVE : result;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -28287,7 +33322,7 @@ public final class Control {
       @java.lang.Override
       public com.andrerinas.openheadunit.aap.protocol.proto.Control.NavFocusType getFocusType() {
         com.andrerinas.openheadunit.aap.protocol.proto.Control.NavFocusType result = com.andrerinas.openheadunit.aap.protocol.proto.Control.NavFocusType.forNumber(focusType_);
-        return result == null ? com.andrerinas.openheadunit.aap.protocol.proto.Control.NavFocusType.NAV_FOCUS_1 : result;
+        return result == null ? com.andrerinas.openheadunit.aap.protocol.proto.Control.NavFocusType.NAV_FOCUS_NATIVE : result;
       }
       /**
        * <code>required .com.andrerinas.openheadunit.aap.protocol.proto.NavFocusType focus_type = 1;</code>
@@ -30801,7 +35836,7 @@ public final class Control {
       super(builder);
     }
     private UserSwitchResponse() {
-      status_ = 0;
+      status_ = -9;
     }
 
     @java.lang.Override
@@ -30830,11 +35865,83 @@ public final class Control {
     public enum UserSwitchStatus
         implements com.google.protobuf.ProtocolMessageEnum {
       /**
+       * <code>ERROR_REQUEST_TIMEOUT = -9;</code>
+       */
+      ERROR_REQUEST_TIMEOUT(-9),
+      /**
+       * <code>ERROR_INVALID_REQUEST = -8;</code>
+       */
+      ERROR_INVALID_REQUEST(-8),
+      /**
+       * <code>ERROR_HU_INTERNAL = -7;</code>
+       */
+      ERROR_HU_INTERNAL(-7),
+      /**
+       * <code>ERROR_MULTIPLE_USER_SWITCH_REQUEST = -6;</code>
+       */
+      ERROR_MULTIPLE_USER_SWITCH_REQUEST(-6),
+      /**
+       * <code>ERROR_PHONE_UNABLE_TO_CONNECT_WIFI = -5;</code>
+       */
+      ERROR_PHONE_UNABLE_TO_CONNECT_WIFI(-5),
+      /**
+       * <code>ERROR_INCOMPATIBLE_PHONE_PROTOCOL_VERSION = -4;</code>
+       */
+      ERROR_INCOMPATIBLE_PHONE_PROTOCOL_VERSION(-4),
+      /**
+       * <code>ERROR_BT_CLOSED_AFTER_START = -3;</code>
+       */
+      ERROR_BT_CLOSED_AFTER_START(-3),
+      /**
+       * <code>ERROR_BT_CLOSED_BEFORE_START = -2;</code>
+       */
+      ERROR_BT_CLOSED_BEFORE_START(-2),
+      /**
+       * <code>ERROR_NO_RFCOMM_CONNECTION = -1;</code>
+       */
+      ERROR_NO_RFCOMM_CONNECTION(-1),
+      /**
        * <code>STATUS_OK = 0;</code>
        */
       STATUS_OK(0),
       ;
 
+      /**
+       * <code>ERROR_REQUEST_TIMEOUT = -9;</code>
+       */
+      public static final int ERROR_REQUEST_TIMEOUT_VALUE = -9;
+      /**
+       * <code>ERROR_INVALID_REQUEST = -8;</code>
+       */
+      public static final int ERROR_INVALID_REQUEST_VALUE = -8;
+      /**
+       * <code>ERROR_HU_INTERNAL = -7;</code>
+       */
+      public static final int ERROR_HU_INTERNAL_VALUE = -7;
+      /**
+       * <code>ERROR_MULTIPLE_USER_SWITCH_REQUEST = -6;</code>
+       */
+      public static final int ERROR_MULTIPLE_USER_SWITCH_REQUEST_VALUE = -6;
+      /**
+       * <code>ERROR_PHONE_UNABLE_TO_CONNECT_WIFI = -5;</code>
+       */
+      public static final int ERROR_PHONE_UNABLE_TO_CONNECT_WIFI_VALUE = -5;
+      /**
+       * <code>ERROR_INCOMPATIBLE_PHONE_PROTOCOL_VERSION = -4;</code>
+       */
+      public static final int ERROR_INCOMPATIBLE_PHONE_PROTOCOL_VERSION_VALUE = -4;
+      /**
+       * <code>ERROR_BT_CLOSED_AFTER_START = -3;</code>
+       */
+      public static final int ERROR_BT_CLOSED_AFTER_START_VALUE = -3;
+      /**
+       * <code>ERROR_BT_CLOSED_BEFORE_START = -2;</code>
+       */
+      public static final int ERROR_BT_CLOSED_BEFORE_START_VALUE = -2;
+      /**
+       * <code>ERROR_NO_RFCOMM_CONNECTION = -1;</code>
+       */
+      public static final int ERROR_NO_RFCOMM_CONNECTION_VALUE = -1;
       /**
        * <code>STATUS_OK = 0;</code>
        */
@@ -30861,6 +35968,15 @@ public final class Control {
        */
       public static UserSwitchStatus forNumber(int value) {
         switch (value) {
+          case -9: return ERROR_REQUEST_TIMEOUT;
+          case -8: return ERROR_INVALID_REQUEST;
+          case -7: return ERROR_HU_INTERNAL;
+          case -6: return ERROR_MULTIPLE_USER_SWITCH_REQUEST;
+          case -5: return ERROR_PHONE_UNABLE_TO_CONNECT_WIFI;
+          case -4: return ERROR_INCOMPATIBLE_PHONE_PROTOCOL_VERSION;
+          case -3: return ERROR_BT_CLOSED_AFTER_START;
+          case -2: return ERROR_BT_CLOSED_BEFORE_START;
+          case -1: return ERROR_NO_RFCOMM_CONNECTION;
           case 0: return STATUS_OK;
           default: return null;
         }
@@ -30913,7 +36029,7 @@ public final class Control {
 
     private int bitField0_;
     public static final int STATUS_FIELD_NUMBER = 1;
-    private int status_ = 0;
+    private int status_ = -9;
     /**
      * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.UserSwitchResponse.UserSwitchStatus status = 1;</code>
      * @return Whether the status field is set.
@@ -30927,7 +36043,7 @@ public final class Control {
      */
     @java.lang.Override public com.andrerinas.openheadunit.aap.protocol.proto.Control.UserSwitchResponse.UserSwitchStatus getStatus() {
       com.andrerinas.openheadunit.aap.protocol.proto.Control.UserSwitchResponse.UserSwitchStatus result = com.andrerinas.openheadunit.aap.protocol.proto.Control.UserSwitchResponse.UserSwitchStatus.forNumber(status_);
-      return result == null ? com.andrerinas.openheadunit.aap.protocol.proto.Control.UserSwitchResponse.UserSwitchStatus.STATUS_OK : result;
+      return result == null ? com.andrerinas.openheadunit.aap.protocol.proto.Control.UserSwitchResponse.UserSwitchStatus.ERROR_REQUEST_TIMEOUT : result;
     }
 
     public static final int SELECTED_DEVICE_FIELD_NUMBER = 2;
@@ -31173,7 +36289,7 @@ public final class Control {
       public Builder clear() {
         super.clear();
         bitField0_ = 0;
-        status_ = 0;
+        status_ = -9;
         selectedDevice_ = null;
         if (selectedDeviceBuilder_ != null) {
           selectedDeviceBuilder_.dispose();
@@ -31338,7 +36454,7 @@ public final class Control {
       }
       private int bitField0_;
 
-      private int status_ = 0;
+      private int status_ = -9;
       /**
        * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.UserSwitchResponse.UserSwitchStatus status = 1;</code>
        * @return Whether the status field is set.
@@ -31353,7 +36469,7 @@ public final class Control {
       @java.lang.Override
       public com.andrerinas.openheadunit.aap.protocol.proto.Control.UserSwitchResponse.UserSwitchStatus getStatus() {
         com.andrerinas.openheadunit.aap.protocol.proto.Control.UserSwitchResponse.UserSwitchStatus result = com.andrerinas.openheadunit.aap.protocol.proto.Control.UserSwitchResponse.UserSwitchStatus.forNumber(status_);
-        return result == null ? com.andrerinas.openheadunit.aap.protocol.proto.Control.UserSwitchResponse.UserSwitchStatus.STATUS_OK : result;
+        return result == null ? com.andrerinas.openheadunit.aap.protocol.proto.Control.UserSwitchResponse.UserSwitchStatus.ERROR_REQUEST_TIMEOUT : result;
       }
       /**
        * <code>optional .com.andrerinas.openheadunit.aap.protocol.proto.UserSwitchResponse.UserSwitchStatus status = 1;</code>
@@ -31375,7 +36491,7 @@ public final class Control {
        */
       public Builder clearStatus() {
         bitField0_ = (bitField0_ & ~0x00000001);
-        status_ = 0;
+        status_ = -9;
         onChanged();
         return this;
       }
@@ -32172,6 +37288,36 @@ public final class Control {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_com_andrerinas_openheadunit_aap_protocol_proto_ServiceDiscoveryResponse_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_com_andrerinas_openheadunit_aap_protocol_proto_PingConfiguration_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_com_andrerinas_openheadunit_aap_protocol_proto_PingConfiguration_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_com_andrerinas_openheadunit_aap_protocol_proto_WirelessTcpConfiguration_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_com_andrerinas_openheadunit_aap_protocol_proto_WirelessTcpConfiguration_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_com_andrerinas_openheadunit_aap_protocol_proto_ConnectionConfiguration_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_com_andrerinas_openheadunit_aap_protocol_proto_ConnectionConfiguration_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_com_andrerinas_openheadunit_aap_protocol_proto_VersionRequestOptions_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_com_andrerinas_openheadunit_aap_protocol_proto_VersionRequestOptions_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_com_andrerinas_openheadunit_aap_protocol_proto_VersionResponseOptions_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_com_andrerinas_openheadunit_aap_protocol_proto_VersionResponseOptions_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_com_andrerinas_openheadunit_aap_protocol_proto_ServiceDiscoveryUpdate_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_com_andrerinas_openheadunit_aap_protocol_proto_ServiceDiscoveryUpdate_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_ChannelOpenRequest_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -32260,221 +37406,260 @@ public final class Control {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\012\015control.proto\022.com.andrerinas.openhead" +
+      "\n\rcontrol.proto\022.com.andrerinas.openhead" +
       "unit.aap.protocol.proto\032\014common.proto\032\013m" +
-      "edia.proto\032\015sensors.proto\"\310\"\012\007Service\022h\012" +
-      "\024phone_status_service\030\012 \001(\0132J.com.andrer" +
+      "edia.proto\032\rsensors.proto\"\370\"\n\007Service\022h\n" +
+      "\024phone_status_service\030\n \001(\0132J.com.andrer" +
       "inas.openheadunit.aap.protocol.proto.Ser" +
-      "vice.PhoneStatusService\022\012\012\002id\030\001 \002(\015\022j\012\025s" +
+      "vice.PhoneStatusService\022\n\n\002id\030\001 \002(\r\022j\n\025s" +
       "ensor_source_service\030\002 \001(\0132K.com.andreri" +
       "nas.openheadunit.aap.protocol.proto.Serv" +
-      "ice.SensorSourceService\022d\012\022media_sink_se" +
+      "ice.SensorSourceService\022d\n\022media_sink_se" +
       "rvice\030\003 \001(\0132H.com.andrerinas.openheaduni" +
       "t.aap.protocol.proto.Service.MediaSinkSe" +
-      "rvice\022h\012\024input_source_service\030\004 \001(\0132J.co" +
+      "rvice\022h\n\024input_source_service\030\004 \001(\0132J.co" +
       "m.andrerinas.openheadunit.aap.protocol.p" +
-      "roto.Service.InputSourceService\022h\012\024media" +
+      "roto.Service.InputSourceService\022h\n\024media" +
       "_source_service\030\005 \001(\0132J.com.andrerinas.o" +
       "penheadunit.aap.protocol.proto.Service.M" +
-      "ediaSourceService\022c\012\021bluetooth_service\030\006" +
+      "ediaSourceService\022c\n\021bluetooth_service\030\006" +
       " \001(\0132H.com.andrerinas.openheadunit.aap.p" +
       "rotocol.proto.Service.BluetoothService\022r" +
-      "\012\031navigation_status_service\030\010 \001(\0132O.com." +
+      "\n\031navigation_status_service\030\010 \001(\0132O.com." +
       "andrerinas.openheadunit.aap.protocol.pro" +
-      "to.Service.NavigationStatusService\022r\012\026me" +
-      "dia_playback_service\030\011 \001(\0132R.com.andreri" +
+      "to.Service.NavigationStatusService\022r\n\026me" +
+      "dia_playback_service\030\t \001(\0132R.com.andreri" +
       "nas.openheadunit.aap.protocol.proto.Serv" +
-      "ice.MediaPlaybackStatusService\022p\012\030vendor" +
+      "ice.MediaPlaybackStatusService\022p\n\030vendor" +
       "_extension_service\030\014 \001(\0132N.com.andrerina" +
       "s.openheadunit.aap.protocol.proto.Servic" +
-      "e.VendorExtensionService\022x\012\034generic_noti" +
-      "fication_service\030\015 \001(\0132R.com.andrerinas." +
+      "e.VendorExtensionService\022x\n\034generic_noti" +
+      "fication_service\030\r \001(\0132R.com.andrerinas." +
       "openheadunit.aap.protocol.proto.Service." +
-      "GenericNotificationService\022n\012\027wifi_proje" +
+      "GenericNotificationService\022n\n\027wifi_proje" +
       "ction_service\030\016 \001(\0132M.com.andrerinas.ope" +
       "nheadunit.aap.protocol.proto.Service.Wif" +
-      "iProjectionService\032\316\001\012\023SensorSourceServi" +
-      "ce\022c\012\007sensors\030\001 \003(\0132R.com.andrerinas.ope" +
+      "iProjectionService\032\316\001\n\023SensorSourceServi" +
+      "ce\022c\n\007sensors\030\001 \003(\0132R.com.andrerinas.ope" +
       "nheadunit.aap.protocol.proto.Service.Sen" +
-      "sorSourceService.Sensor\032R\012\006Sensor\022H\012\004typ" +
+      "sorSourceService.Sensor\032R\n\006Sensor\022H\n\004typ" +
       "e\030\001 \002(\0162:.com.andrerinas.openheadunit.aa" +
-      "p.protocol.proto.SensorType\032\206\011\012\020MediaSin" +
-      "kService\022V\012\016available_type\030\001 \002(\0162>.com.a" +
+      "p.protocol.proto.SensorType\032\266\t\n\020MediaSin" +
+      "kService\022V\n\016available_type\030\001 \002(\0162>.com.a" +
       "ndrerinas.openheadunit.aap.protocol.prot" +
-      "o.MediaCodecType\022S\012\012audio_type\030\002 \001(\0162?.c" +
+      "o.MediaCodecType\022S\n\naudio_type\030\002 \001(\0162?.c" +
       "om.andrerinas.openheadunit.aap.protocol." +
-      "proto.AudioStreamType\022Y\012\015audio_configs\030\003" +
+      "proto.AudioStreamType\022Y\n\raudio_configs\030\003" +
       " \003(\0132B.com.andrerinas.openheadunit.aap.p" +
-      "rotocol.proto.AudioConfiguration\022r\012\015vide" +
+      "rotocol.proto.AudioConfiguration\022r\n\rvide" +
       "o_configs\030\004 \003(\0132[.com.andrerinas.openhea" +
       "dunit.aap.protocol.proto.Service.MediaSi" +
-      "nkService.VideoConfiguration\022\037\012\027availabl" +
-      "e_while_in_call\030\005 \001(\010\032\324\005\012\022VideoConfigura" +
-      "tion\022\216\001\012\020codec_resolution\030\001 \002(\0162t.com.an" +
+      "nkService.VideoConfiguration\022\037\n\027availabl" +
+      "e_while_in_call\030\005 \001(\010\032\204\006\n\022VideoConfigura" +
+      "tion\022\216\001\n\020codec_resolution\030\001 \002(\0162t.com.an" +
       "drerinas.openheadunit.aap.protocol.proto" +
       ".Service.MediaSinkService.VideoConfigura" +
-      "tion.VideoCodecResolutionType\022\202\001\012\012frame_" +
+      "tion.VideoCodecResolutionType\022\202\001\n\nframe_" +
       "rate\030\002 \002(\0162n.com.andrerinas.openheadunit" +
       ".aap.protocol.proto.Service.MediaSinkSer" +
       "vice.VideoConfiguration.VideoFrameRateTy" +
-      "pe\022\024\012\014margin_width\030\003 \002(\015\022\025\012\015margin_heigh" +
-      "t\030\004 \002(\015\022\017\012\007density\030\005 \002(\015\022 \012\030decoder_addi" +
-      "tional_depth\030\006 \001(\015\022\035\012\025pixel_aspect_ratio" +
-      "_e4\030\010 \001(\015\022X\012\020video_codec_type\030\012 \001(\0162>.co" +
-      "m.andrerinas.openheadunit.aap.protocol.p" +
-      "roto.MediaCodecType\"\246\001\012\030VideoCodecResolu" +
-      "tionType\022\014\012\010_800x480\020\001\022\015\012\011_1280x720\020\002\022\016\012" +
-      "\012_1920x1080\020\003\022\016\012\012_2560x1440\020\004\022\016\012\012_3840x2" +
-      "160\020\005\022\015\012\011_720x1280\020\006\022\016\012\012_1080x1920\020\007\022\016\012\012" +
-      "_1440x2560\020\010\022\016\012\012_2160x3840\020\011\"&\012\022VideoFra" +
-      "meRateType\022\007\012\003_60\020\001\022\007\012\003_30\020\002\032\265\002\012\022InputSo" +
-      "urceService\022\032\012\022keycodes_supported\030\001 \003(\015\022" +
-      "k\012\013touchscreen\030\002 \001(\0132V.com.andrerinas.op" +
-      "enheadunit.aap.protocol.proto.Service.In" +
-      "putSourceService.TouchConfig\022h\012\010touchpad" +
-      "\030\003 \001(\0132V.com.andrerinas.openheadunit.aap" +
-      ".protocol.proto.Service.InputSourceServi" +
-      "ce.TouchConfig\032,\012\013TouchConfig\022\015\012\005width\030\001" +
-      " \002(\015\022\016\012\006height\030\002 \002(\015\032\335\001\012\022MediaSourceServ" +
-      "ice\022L\012\004type\030\001 \002(\0162>.com.andrerinas.openh" +
-      "eadunit.aap.protocol.proto.MediaCodecTyp" +
-      "e\022X\012\014audio_config\030\002 \002(\0132B.com.andrerinas" +
-      ".openheadunit.aap.protocol.proto.AudioCo" +
-      "nfiguration\022\037\012\027available_while_in_call\030\003" +
-      " \001(\010\032\222\001\012\020BluetoothService\022\023\012\013car_address" +
-      "\030\001 \002(\011\022i\012\031supported_pairing_methods\030\002 \003(" +
-      "\0162F.com.andrerinas.openheadunit.aap.prot" +
-      "ocol.proto.BluetoothPairingMethod\032\234\003\012\027Na" +
-      "vigationStatusService\022\033\012\023minimum_interva" +
-      "l_ms\030\001 \002(\015\022i\012\004type\030\002 \002(\0162[.com.andrerina" +
-      "s.openheadunit.aap.protocol.proto.Servic" +
-      "e.NavigationStatusService.ClusterType\022s\012" +
-      "\015image_options\030\003 \001(\0132\\.com.andrerinas.op" +
-      "enheadunit.aap.protocol.proto.Service.Na" +
-      "vigationStatusService.ImageOptions\032G\012\014Im" +
-      "ageOptions\022\015\012\005width\030\001 \002(\005\022\016\012\006height\030\002 \002(" +
-      "\005\022\030\012\020colour_deth_bits\030\003 \002(\005\";\012\013ClusterTy" +
-      "pe\022\030\012\024CustomImageSupported\020\001\022\022\012\016ImageCod" +
-      "esOnly\020\002\032\034\012\032MediaPlaybackStatusService\032\344" +
-      "\001\012\020PhoneStatus_Call\022X\012\005state\030\001 \001(\0162I.com" +
-      ".andrerinas.openheadunit.aap.protocol.pr" +
-      "oto.Service.PhoneStatus_State\022\035\012\025call_du" +
-      "ration_seconds\030\002 \001(\015\022\025\012\015caller_number\030\003 " +
-      "\001(\011\022\021\012\011caller_id\030\004 \001(\011\022\032\012\022caller_number_" +
-      "type\030\005 \001(\011\022\021\012\011thumbnail\030\006 \001(\014\032=\012\021PhoneSt" +
-      "atus_Input\022\025\012\015caller_number\030\001 \001(\011\022\021\012\011cal" +
-      "ler_id\030\002 \001(\011\032\206\001\012\022PhoneStatusService\022W\012\005c" +
-      "alls\030\001 \003(\0132H.com.andrerinas.openheadunit" +
-      ".aap.protocol.proto.Service.PhoneStatus_" +
-      "Call\022\027\012\017signal_strength\030\002 \001(\015\032P\012\026VendorE" +
-      "xtensionService\022\014\012\004name\030\001 \001(\011\022\032\012\022package" +
-      "_white_list\030\002 \003(\011\022\014\012\004data\030\003 \001(\014\032\034\012\032Gener" +
-      "icNotificationService\032/\012\025WifiProjectionS" +
-      "ervice\022\026\012\016car_wifi_bssid\030\001 \001(\011\"d\012\021PhoneS" +
-      "tatus_State\022\012\012\006InCall\020\001\022\012\012\006OnHold\020\002\022\015\012\011H" +
-      "angingUp\020\003\022\014\012\010Incoming\020\004\022\011\012\005Muted\020\005\022\017\012\013C" +
-      "onferenced\020\006\"B\012\027ServiceDiscoveryRequest\022" +
-      "\022\012\012phone_name\030\004 \002(\011\022\023\012\013phone_brand\030\005 \002(\011" +
-      "\"\340\004\012\030ServiceDiscoveryResponse\022I\012\010service" +
-      "s\030\001 \003(\01327.com.andrerinas.openheadunit.aa" +
-      "p.protocol.proto.Service\022\014\012\004make\030\002 \002(\011\022\015" +
-      "\012\005model\030\003 \002(\011\022\014\012\004year\030\004 \002(\011\022\022\012\012vehicle_i" +
-      "d\030\005 \002(\011\022W\012\017driver_position\030\006 \002(\0162>.com.a" +
+      "pe\022\024\n\014margin_width\030\003 \002(\r\022\025\n\rmargin_heigh" +
+      "t\030\004 \002(\r\022\017\n\007density\030\005 \002(\r\022 \n\030decoder_addi" +
+      "tional_depth\030\006 \001(\r\022\030\n\020viewing_distance\030\007" +
+      " \001(\r\022\035\n\025pixel_aspect_ratio_e4\030\010 \001(\r\022\024\n\014r" +
+      "eal_density\030\t \001(\r\022X\n\020video_codec_type\030\n " +
+      "\001(\0162>.com.andrerinas.openheadunit.aap.pr" +
+      "otocol.proto.MediaCodecType\"\246\001\n\030VideoCod" +
+      "ecResolutionType\022\014\n\010_800x480\020\001\022\r\n\t_1280x" +
+      "720\020\002\022\016\n\n_1920x1080\020\003\022\016\n\n_2560x1440\020\004\022\016\n" +
+      "\n_3840x2160\020\005\022\r\n\t_720x1280\020\006\022\016\n\n_1080x19" +
+      "20\020\007\022\016\n\n_1440x2560\020\010\022\016\n\n_2160x3840\020\t\"&\n\022" +
+      "VideoFrameRateType\022\007\n\003_60\020\001\022\007\n\003_30\020\002\032\265\002\n" +
+      "\022InputSourceService\022\032\n\022keycodes_supporte" +
+      "d\030\001 \003(\r\022k\n\013touchscreen\030\002 \001(\0132V.com.andre" +
+      "rinas.openheadunit.aap.protocol.proto.Se" +
+      "rvice.InputSourceService.TouchConfig\022h\n\010" +
+      "touchpad\030\003 \001(\0132V.com.andrerinas.openhead" +
+      "unit.aap.protocol.proto.Service.InputSou" +
+      "rceService.TouchConfig\032,\n\013TouchConfig\022\r\n" +
+      "\005width\030\001 \002(\r\022\016\n\006height\030\002 \002(\r\032\335\001\n\022MediaSo" +
+      "urceService\022L\n\004type\030\001 \002(\0162>.com.andrerin" +
+      "as.openheadunit.aap.protocol.proto.Media" +
+      "CodecType\022X\n\014audio_config\030\002 \002(\0132B.com.an" +
+      "drerinas.openheadunit.aap.protocol.proto" +
+      ".AudioConfiguration\022\037\n\027available_while_i" +
+      "n_call\030\003 \001(\010\032\222\001\n\020BluetoothService\022\023\n\013car" +
+      "_address\030\001 \002(\t\022i\n\031supported_pairing_meth" +
+      "ods\030\002 \003(\0162F.com.andrerinas.openheadunit." +
+      "aap.protocol.proto.BluetoothPairingMetho" +
+      "d\032\234\003\n\027NavigationStatusService\022\033\n\023minimum" +
+      "_interval_ms\030\001 \002(\r\022i\n\004type\030\002 \002(\0162[.com.a" +
       "ndrerinas.openheadunit.aap.protocol.prot" +
-      "o.DriverPosition\022\026\012\016head_unit_make\030\007 \002(\011" +
-      "\022\027\012\017head_unit_model\030\010 \002(\011\022 \012\030head_unit_s" +
-      "oftware_build\030\011 \002(\011\022\"\012\032head_unit_softwar" +
-      "e_version\030\012 \002(\011\022'\012\037can_play_native_media" +
-      "_during_vr\030\013 \002(\010\022\034\012\024hide_projected_clock" +
-      "\030\014 \001(\010\022\035\012\025session_configuration\030\015 \001(\005\022\024\012" +
-      "\014display_name\030\016 \001(\011\022\031\012\021probe_for_support" +
-      "\030\017 \001(\010\022S\012\015headunit_info\030\021 \001(\0132<.com.andr" +
-      "erinas.openheadunit.aap.protocol.proto.H" +
-      "eadUnitInfo\":\012\022ChannelOpenRequest\022\020\012\010pri" +
-      "ority\030\001 \002(\005\022\022\012\012service_id\030\002 \002(\005\"d\012\023Chann" +
-      "elOpenResponse\022M\012\006status\030\001 \002(\0162=.com.and" +
-      "rerinas.openheadunit.aap.protocol.proto." +
-      "MessageStatus\"4\012\013PingRequest\022\021\012\011timestam" +
-      "p\030\001 \002(\003\022\022\012\012bug_report\030\002 \001(\005\"!\012\014PingRespo" +
-      "nse\022\021\012\011timestamp\030\001 \002(\003\"]\012\015ByeByeRequest\022" +
-      "L\012\006reason\030\001 \002(\0162<.com.andrerinas.openhea" +
-      "dunit.aap.protocol.proto.ByeByeReason\"\020\012" +
-      "\016ByeByeResponse\"\314\001\012\030VoiceSessionNotifica" +
-      "tion\022k\012\006status\030\001 \002(\0162[.com.andrerinas.op" +
-      "enheadunit.aap.protocol.proto.VoiceSessi" +
-      "onNotification.VoiceSessionStatus\"C\012\022Voi" +
-      "ceSessionStatus\022\026\012\022VOICE_STATUS_START\020\001\022" +
-      "\025\012\021VOICE_STATUS_STOP\020\002\"\200\002\012\035AudioFocusReq" +
-      "uestNotification\022t\012\007request\030\001 \001(\0162c.com." +
-      "andrerinas.openheadunit.aap.protocol.pro" +
-      "to.AudioFocusRequestNotification.AudioFo" +
-      "cusRequestType\"i\012\025AudioFocusRequestType\022" +
-      "\010\012\004NONE\020\000\022\010\012\004GAIN\020\001\022\022\012\016GAIN_TRANSIENT\020\002\022" +
-      "\033\012\027GAIN_TRANSIENT_MAY_DUCK\020\003\022\013\012\007RELEASE\020" +
-      "\004\"\360\002\012\026AudioFocusNotification\022o\012\013focus_st" +
-      "ate\030\001 \002(\0162Z.com.andrerinas.openheadunit." +
-      "aap.protocol.proto.AudioFocusNotificatio" +
-      "n.AudioFocusStateType\022\023\012\013unsolicited\030\002 \001" +
-      "(\010\"\317\001\012\023AudioFocusStateType\022\016\012\012STATE_GAIN" +
-      "\020\001\022\030\012\024STATE_GAIN_TRANSIENT\020\002\022\016\012\012STATE_LO" +
-      "SS\020\003\022!\012\035STATE_LOSS_TRANSIENT_CAN_DUCK\020\004\022" +
-      "\030\012\024STATE_LOSS_TRANSIENT\020\005\022\031\012\025STATE_GAIN_" +
-      "MEDIA_ONLY\020\006\022&\012\"STATE_GAIN_TRANSIENT_GUI" +
-      "DANCE_ONLY\020\007\"o\012\033NavFocusRequestNotificat" +
-      "ion\022P\012\012focus_type\030\001 \001(\0162<.com.andrerinas" +
-      ".openheadunit.aap.protocol.proto.NavFocu" +
-      "sType\"h\012\024NavFocusNotification\022P\012\012focus_t" +
-      "ype\030\001 \002(\0162<.com.andrerinas.openheadunit." +
-      "aap.protocol.proto.NavFocusType\"f\012\031Batte" +
-      "ryStatusNotification\022\025\012\015battery_level\030\001 " +
-      "\002(\015\022\030\012\020time_remaining_s\030\002 \001(\015\022\030\012\020critica" +
-      "l_battery\030\003 \001(\010\"9\012\017ConnectedDevice\022\023\012\013de" +
-      "vice_name\030\001 \001(\011\022\021\012\011device_id\030\002 \001(\005\"\240\001\012\023C" +
-      "arConnectedDevices\022Z\012\021connected_devices\030" +
-      "\001 \003(\0132?.com.andrerinas.openheadunit.aap." +
-      "protocol.proto.ConnectedDevice\022\023\012\013unsoli" +
-      "cited\030\002 \001(\010\022\030\012\012final_list\030\003 \001(\010:\004true\"\366\001" +
-      "\012\022UserSwitchResponse\022c\012\006status\030\001 \001(\0162S.c" +
-      "om.andrerinas.openheadunit.aap.protocol." +
-      "proto.UserSwitchResponse.UserSwitchStatu" +
-      "s\022X\012\017selected_device\030\002 \001(\0132?.com.andreri" +
-      "nas.openheadunit.aap.protocol.proto.Conn" +
-      "ectedDevice\"!\012\020UserSwitchStatus\022\015\012\011STATU" +
-      "S_OK\020\000\"0\012\026CallAvailabilityStatus\022\026\012\016call" +
-      "_available\030\001 \001(\010*\255\007\012\016ControlMsgType\022\033\012\027M" +
-      "ESSAGE_VERSION_REQUEST\020\001\022\034\012\030MESSAGE_VERS" +
-      "ION_RESPONSE\020\002\022\034\012\030MESSAGE_ENCAPSULATED_S" +
-      "SL\020\003\022\031\012\025MESSAGE_AUTH_COMPLETE\020\004\022%\012!MESSA" +
-      "GE_SERVICE_DISCOVERY_REQUEST\020\005\022&\012\"MESSAG" +
-      "E_SERVICE_DISCOVERY_RESPONSE\020\006\022 \012\034MESSAG" +
-      "E_CHANNEL_OPEN_REQUEST\020\007\022!\012\035MESSAGE_CHAN" +
-      "NEL_OPEN_RESPONSE\020\010\022&\012\"MESSAGE_CHANNEL_C" +
-      "LOSE_NOTIFICATION\020\011\022\030\012\024MESSAGE_PING_REQU" +
-      "EST\020\013\022\031\012\025MESSAGE_PING_RESPONSE\020\014\022\035\012\031MESS" +
-      "AGE_NAV_FOCUS_REQUEST\020\015\022\"\012\036MESSAGE_NAV_F" +
-      "OCUS_NOTIFICATION\020\016\022\032\012\026MESSAGE_BYEBYE_RE" +
-      "QUEST\020\017\022\033\012\027MESSAGE_BYEBYE_RESPONSE\020\020\022&\012\"" +
-      "MESSAGE_VOICE_SESSION_NOTIFICATION\020\021\022\037\012\033" +
-      "MESSAGE_AUDIO_FOCUS_REQUEST\020\022\022$\012 MESSAGE" +
-      "_AUDIO_FOCUS_NOTIFICATION\020\023\022)\012%MESSAGE_C" +
-      "AR_CONNECTED_DEVICES_REQUEST\020\024\022*\012&MESSAG" +
-      "E_CAR_CONNECTED_DEVICES_RESPONSE\020\025\022\037\012\033ME" +
-      "SSAGE_USER_SWITCH_REQUEST\020\026\022'\012#MESSAGE_B" +
-      "ATTERY_STATUS_NOTIFICATION\020\027\022$\012 MESSAGE_" +
-      "CALL_AVAILABILITY_STATUS\020\030\022 \012\034MESSAGE_US" +
-      "ER_SWITCH_RESPONSE\020\031\022$\012 MESSAGE_SERVICE_" +
-      "DISCOVERY_UPDATE\020\032\022\037\012\032MESSAGE_UNEXPECTED" +
-      "_MESSAGE\020\377\001\022\033\012\025MESSAGE_FRAMING_ERROR\020\377\377\003" +
-      "*G\012\026BluetoothPairingMethod\022\014\012\010METHOD_1\020\001" +
-      "\022\010\012\004A2DP\020\002\022\014\012\010METHOD_3\020\003\022\007\012\003HFP\020\004*z\012\014Bye" +
-      "ByeReason\022\022\012\016USER_SELECTION\020\001\022\021\012\015DEVICE_" +
-      "SWITCH\020\002\022\021\012\015NOT_SUPPORTED\020\003\022\033\012\027NOT_CURRE" +
-      "NTLY_SUPPORTED\020\004\022\023\012\017PROBE_SUPPORTED\020\005*~\012" +
-      "\016DriverPosition\022\030\012\024DRIVER_POSITION_LEFT\020" +
-      "\000\022\031\012\025DRIVER_POSITION_RIGHT\020\001\022\032\012\026DRIVER_P" +
-      "OSITION_CENTER\020\002\022\033\012\027DRIVER_POSITION_UNKN" +
-      "OWN\020\003*0\012\014NavFocusType\022\017\012\013NAV_FOCUS_1\020\001\022\017" +
-      "\012\013NAV_FOCUS_2\020\002B\011B\007Control"
+      "o.Service.NavigationStatusService.Cluste" +
+      "rType\022s\n\rimage_options\030\003 \001(\0132\\.com.andre" +
+      "rinas.openheadunit.aap.protocol.proto.Se" +
+      "rvice.NavigationStatusService.ImageOptio" +
+      "ns\032G\n\014ImageOptions\022\r\n\005width\030\001 \002(\005\022\016\n\006hei" +
+      "ght\030\002 \002(\005\022\030\n\020colour_deth_bits\030\003 \002(\005\";\n\013C" +
+      "lusterType\022\030\n\024CustomImageSupported\020\001\022\022\n\016" +
+      "ImageCodesOnly\020\002\032\034\n\032MediaPlaybackStatusS" +
+      "ervice\032\344\001\n\020PhoneStatus_Call\022X\n\005state\030\001 \001" +
+      "(\0162I.com.andrerinas.openheadunit.aap.pro" +
+      "tocol.proto.Service.PhoneStatus_State\022\035\n" +
+      "\025call_duration_seconds\030\002 \001(\r\022\025\n\rcaller_n" +
+      "umber\030\003 \001(\t\022\021\n\tcaller_id\030\004 \001(\t\022\032\n\022caller" +
+      "_number_type\030\005 \001(\t\022\021\n\tthumbnail\030\006 \001(\014\032=\n" +
+      "\021PhoneStatus_Input\022\025\n\rcaller_number\030\001 \001(" +
+      "\t\022\021\n\tcaller_id\030\002 \001(\t\032\206\001\n\022PhoneStatusServ" +
+      "ice\022W\n\005calls\030\001 \003(\0132H.com.andrerinas.open" +
+      "headunit.aap.protocol.proto.Service.Phon" +
+      "eStatus_Call\022\027\n\017signal_strength\030\002 \001(\r\032P\n" +
+      "\026VendorExtensionService\022\014\n\004name\030\001 \001(\t\022\032\n" +
+      "\022package_white_list\030\002 \003(\t\022\014\n\004data\030\003 \001(\014\032" +
+      "\034\n\032GenericNotificationService\032/\n\025WifiPro" +
+      "jectionService\022\026\n\016car_wifi_bssid\030\001 \001(\t\"d" +
+      "\n\021PhoneStatus_State\022\n\n\006InCall\020\001\022\n\n\006OnHol" +
+      "d\020\002\022\r\n\tHangingUp\020\003\022\014\n\010Incoming\020\004\022\t\n\005Mute" +
+      "d\020\005\022\017\n\013Conferenced\020\006\"B\n\027ServiceDiscovery" +
+      "Request\022\022\n\nphone_name\030\004 \002(\t\022\023\n\013phone_bra" +
+      "nd\030\005 \002(\t\"\313\005\n\030ServiceDiscoveryResponse\022I\n" +
+      "\010services\030\001 \003(\01327.com.andrerinas.openhea" +
+      "dunit.aap.protocol.proto.Service\022\014\n\004make" +
+      "\030\002 \002(\t\022\r\n\005model\030\003 \002(\t\022\014\n\004year\030\004 \002(\t\022\022\n\nv" +
+      "ehicle_id\030\005 \002(\t\022W\n\017driver_position\030\006 \002(\016" +
+      "2>.com.andrerinas.openheadunit.aap.proto" +
+      "col.proto.DriverPosition\022\026\n\016head_unit_ma" +
+      "ke\030\007 \002(\t\022\027\n\017head_unit_model\030\010 \002(\t\022 \n\030hea" +
+      "d_unit_software_build\030\t \002(\t\022\"\n\032head_unit" +
+      "_software_version\030\n \002(\t\022\'\n\037can_play_nati" +
+      "ve_media_during_vr\030\013 \002(\010\022\034\n\024hide_project" +
+      "ed_clock\030\014 \001(\010\022\035\n\025session_configuration\030" +
+      "\r \001(\005\022\024\n\014display_name\030\016 \001(\t\022\031\n\021probe_for" +
+      "_support\030\017 \001(\010\022i\n\030connection_configurati" +
+      "on\030\020 \001(\0132G.com.andrerinas.openheadunit.a" +
+      "ap.protocol.proto.ConnectionConfiguratio" +
+      "n\022S\n\rheadunit_info\030\021 \001(\0132<.com.andrerina" +
+      "s.openheadunit.aap.protocol.proto.HeadUn" +
+      "itInfo\"{\n\021PingConfiguration\022\022\n\ntimeout_m" +
+      "s\030\001 \001(\r\022\023\n\013interval_ms\030\002 \001(\r\022!\n\031high_lat" +
+      "ency_threshold_ms\030\003 \001(\r\022\032\n\022tracked_ping_" +
+      "count\030\004 \001(\r\"\322\001\n\030WirelessTcpConfiguration" +
+      "\022)\n\035socket_receive_buffer_size_kb\030\001 \001(\rB" +
+      "\002\030\001\022&\n\032socket_send_buffer_size_kb\030\002 \001(\rB" +
+      "\002\030\001\022\036\n\026socket_read_timeout_ms\030\003 \001(\r\022\"\n\032s" +
+      "ocket_receive_buffer_size\030\004 \001(\r\022\037\n\027socke" +
+      "t_send_buffer_size\030\005 \001(\r\"\346\001\n\027ConnectionC" +
+      "onfiguration\022]\n\022ping_configuration\030\001 \001(\013" +
+      "2A.com.andrerinas.openheadunit.aap.proto" +
+      "col.proto.PingConfiguration\022l\n\032wireless_" +
+      "tcp_configuration\030\002 \001(\0132H.com.andrerinas" +
+      ".openheadunit.aap.protocol.proto.Wireles" +
+      "sTcpConfiguration\"1\n\025VersionRequestOptio" +
+      "ns\022\030\n\020snapshot_version\030\001 \001(\003\"\203\001\n\026Version" +
+      "ResponseOptions\022i\n\030connection_configurat" +
+      "ion\030\001 \001(\0132G.com.andrerinas.openheadunit." +
+      "aap.protocol.proto.ConnectionConfigurati" +
+      "on\"b\n\026ServiceDiscoveryUpdate\022H\n\007service\030" +
+      "\001 \001(\01327.com.andrerinas.openheadunit.aap." +
+      "protocol.proto.Service\":\n\022ChannelOpenReq" +
+      "uest\022\020\n\010priority\030\001 \002(\021\022\022\n\nservice_id\030\002 \002" +
+      "(\005\"d\n\023ChannelOpenResponse\022M\n\006status\030\001 \002(" +
+      "\0162=.com.andrerinas.openheadunit.aap.prot" +
+      "ocol.proto.MessageStatus\"4\n\013PingRequest\022" +
+      "\021\n\ttimestamp\030\001 \002(\003\022\022\n\nbug_report\030\002 \001(\005\"!" +
+      "\n\014PingResponse\022\021\n\ttimestamp\030\001 \002(\003\"]\n\rBye" +
+      "ByeRequest\022L\n\006reason\030\001 \002(\0162<.com.andreri" +
+      "nas.openheadunit.aap.protocol.proto.ByeB" +
+      "yeReason\"\020\n\016ByeByeResponse\"\314\001\n\030VoiceSess" +
+      "ionNotification\022k\n\006status\030\001 \002(\0162[.com.an" +
+      "drerinas.openheadunit.aap.protocol.proto" +
+      ".VoiceSessionNotification.VoiceSessionSt" +
+      "atus\"C\n\022VoiceSessionStatus\022\026\n\022VOICE_STAT" +
+      "US_START\020\001\022\025\n\021VOICE_STATUS_STOP\020\002\"\200\002\n\035Au" +
+      "dioFocusRequestNotification\022t\n\007request\030\001" +
+      " \001(\0162c.com.andrerinas.openheadunit.aap.p" +
+      "rotocol.proto.AudioFocusRequestNotificat" +
+      "ion.AudioFocusRequestType\"i\n\025AudioFocusR" +
+      "equestType\022\010\n\004NONE\020\000\022\010\n\004GAIN\020\001\022\022\n\016GAIN_T" +
+      "RANSIENT\020\002\022\033\n\027GAIN_TRANSIENT_MAY_DUCK\020\003\022" +
+      "\013\n\007RELEASE\020\004\"\360\002\n\026AudioFocusNotification\022" +
+      "o\n\013focus_state\030\001 \002(\0162Z.com.andrerinas.op" +
+      "enheadunit.aap.protocol.proto.AudioFocus" +
+      "Notification.AudioFocusStateType\022\023\n\013unso" +
+      "licited\030\002 \001(\010\"\317\001\n\023AudioFocusStateType\022\016\n" +
+      "\nSTATE_GAIN\020\001\022\030\n\024STATE_GAIN_TRANSIENT\020\002\022" +
+      "\016\n\nSTATE_LOSS\020\003\022!\n\035STATE_LOSS_TRANSIENT_" +
+      "CAN_DUCK\020\004\022\030\n\024STATE_LOSS_TRANSIENT\020\005\022\031\n\025" +
+      "STATE_GAIN_MEDIA_ONLY\020\006\022&\n\"STATE_GAIN_TR" +
+      "ANSIENT_GUIDANCE_ONLY\020\007\"o\n\033NavFocusReque" +
+      "stNotification\022P\n\nfocus_type\030\001 \001(\0162<.com" +
+      ".andrerinas.openheadunit.aap.protocol.pr" +
+      "oto.NavFocusType\"h\n\024NavFocusNotification" +
+      "\022P\n\nfocus_type\030\001 \002(\0162<.com.andrerinas.op" +
+      "enheadunit.aap.protocol.proto.NavFocusTy" +
+      "pe\"f\n\031BatteryStatusNotification\022\025\n\rbatte" +
+      "ry_level\030\001 \002(\r\022\030\n\020time_remaining_s\030\002 \001(\r" +
+      "\022\030\n\020critical_battery\030\003 \001(\010\"9\n\017ConnectedD" +
+      "evice\022\023\n\013device_name\030\001 \001(\t\022\021\n\tdevice_id\030" +
+      "\002 \001(\005\"\240\001\n\023CarConnectedDevices\022Z\n\021connect" +
+      "ed_devices\030\001 \003(\0132?.com.andrerinas.openhe" +
+      "adunit.aap.protocol.proto.ConnectedDevic" +
+      "e\022\023\n\013unsolicited\030\002 \001(\010\022\030\n\nfinal_list\030\003 \001" +
+      "(\010:\004true\"\367\004\n\022UserSwitchResponse\022c\n\006statu" +
+      "s\030\001 \001(\0162S.com.andrerinas.openheadunit.aa" +
+      "p.protocol.proto.UserSwitchResponse.User" +
+      "SwitchStatus\022X\n\017selected_device\030\002 \001(\0132?." +
+      "com.andrerinas.openheadunit.aap.protocol" +
+      ".proto.ConnectedDevice\"\241\003\n\020UserSwitchSta" +
+      "tus\022\"\n\025ERROR_REQUEST_TIMEOUT\020\367\377\377\377\377\377\377\377\377\001\022" +
+      "\"\n\025ERROR_INVALID_REQUEST\020\370\377\377\377\377\377\377\377\377\001\022\036\n\021E" +
+      "RROR_HU_INTERNAL\020\371\377\377\377\377\377\377\377\377\001\022/\n\"ERROR_MUL" +
+      "TIPLE_USER_SWITCH_REQUEST\020\372\377\377\377\377\377\377\377\377\001\022/\n\"" +
+      "ERROR_PHONE_UNABLE_TO_CONNECT_WIFI\020\373\377\377\377\377" +
+      "\377\377\377\377\001\0226\n)ERROR_INCOMPATIBLE_PHONE_PROTOC" +
+      "OL_VERSION\020\374\377\377\377\377\377\377\377\377\001\022(\n\033ERROR_BT_CLOSED" +
+      "_AFTER_START\020\375\377\377\377\377\377\377\377\377\001\022)\n\034ERROR_BT_CLOS" +
+      "ED_BEFORE_START\020\376\377\377\377\377\377\377\377\377\001\022\'\n\032ERROR_NO_R" +
+      "FCOMM_CONNECTION\020\377\377\377\377\377\377\377\377\377\001\022\r\n\tSTATUS_OK" +
+      "\020\000\"0\n\026CallAvailabilityStatus\022\026\n\016call_ava" +
+      "ilable\030\001 \001(\010*\255\007\n\016ControlMsgType\022\033\n\027MESSA" +
+      "GE_VERSION_REQUEST\020\001\022\034\n\030MESSAGE_VERSION_" +
+      "RESPONSE\020\002\022\034\n\030MESSAGE_ENCAPSULATED_SSL\020\003" +
+      "\022\031\n\025MESSAGE_AUTH_COMPLETE\020\004\022%\n!MESSAGE_S" +
+      "ERVICE_DISCOVERY_REQUEST\020\005\022&\n\"MESSAGE_SE" +
+      "RVICE_DISCOVERY_RESPONSE\020\006\022 \n\034MESSAGE_CH" +
+      "ANNEL_OPEN_REQUEST\020\007\022!\n\035MESSAGE_CHANNEL_" +
+      "OPEN_RESPONSE\020\010\022&\n\"MESSAGE_CHANNEL_CLOSE" +
+      "_NOTIFICATION\020\t\022\030\n\024MESSAGE_PING_REQUEST\020" +
+      "\013\022\031\n\025MESSAGE_PING_RESPONSE\020\014\022\035\n\031MESSAGE_" +
+      "NAV_FOCUS_REQUEST\020\r\022\"\n\036MESSAGE_NAV_FOCUS" +
+      "_NOTIFICATION\020\016\022\032\n\026MESSAGE_BYEBYE_REQUES" +
+      "T\020\017\022\033\n\027MESSAGE_BYEBYE_RESPONSE\020\020\022&\n\"MESS" +
+      "AGE_VOICE_SESSION_NOTIFICATION\020\021\022\037\n\033MESS" +
+      "AGE_AUDIO_FOCUS_REQUEST\020\022\022$\n MESSAGE_AUD" +
+      "IO_FOCUS_NOTIFICATION\020\023\022)\n%MESSAGE_CAR_C" +
+      "ONNECTED_DEVICES_REQUEST\020\024\022*\n&MESSAGE_CA" +
+      "R_CONNECTED_DEVICES_RESPONSE\020\025\022\037\n\033MESSAG" +
+      "E_USER_SWITCH_REQUEST\020\026\022\'\n#MESSAGE_BATTE" +
+      "RY_STATUS_NOTIFICATION\020\027\022$\n MESSAGE_CALL" +
+      "_AVAILABILITY_STATUS\020\030\022 \n\034MESSAGE_USER_S" +
+      "WITCH_RESPONSE\020\031\022$\n MESSAGE_SERVICE_DISC" +
+      "OVERY_UPDATE\020\032\022\037\n\032MESSAGE_UNEXPECTED_MES" +
+      "SAGE\020\377\001\022\033\n\025MESSAGE_FRAMING_ERROR\020\377\377\003*\311\001\n" +
+      "\026BluetoothPairingMethod\022*\n\035BLUETOOTH_PAI" +
+      "RING_UNAVAILABLE\020\377\377\377\377\377\377\377\377\377\001\022\031\n\025BLUETOOTH" +
+      "_PAIRING_OOB\020\001\022(\n$BLUETOOTH_PAIRING_NUME" +
+      "RIC_COMPARISON\020\002\022#\n\037BLUETOOTH_PAIRING_PA" +
+      "SSKEY_ENTRY\020\003\022\031\n\025BLUETOOTH_PAIRING_PIN\020\004" +
+      "*z\n\014ByeByeReason\022\022\n\016USER_SELECTION\020\001\022\021\n\r" +
+      "DEVICE_SWITCH\020\002\022\021\n\rNOT_SUPPORTED\020\003\022\033\n\027NO" +
+      "T_CURRENTLY_SUPPORTED\020\004\022\023\n\017PROBE_SUPPORT" +
+      "ED\020\005*~\n\016DriverPosition\022\030\n\024DRIVER_POSITIO" +
+      "N_LEFT\020\000\022\031\n\025DRIVER_POSITION_RIGHT\020\001\022\032\n\026D" +
+      "RIVER_POSITION_CENTER\020\002\022\033\n\027DRIVER_POSITI" +
+      "ON_UNKNOWN\020\003*=\n\014NavFocusType\022\024\n\020NAV_FOCU" +
+      "S_NATIVE\020\001\022\027\n\023NAV_FOCUS_PROJECTED\020\002B\tB\007C" +
+      "ontrol"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -32512,7 +37697,7 @@ public final class Control {
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_Service_MediaSinkService_VideoConfiguration_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_com_andrerinas_openheadunit_aap_protocol_proto_Service_MediaSinkService_VideoConfiguration_descriptor,
-        new java.lang.String[] { "CodecResolution", "FrameRate", "MarginWidth", "MarginHeight", "Density", "DecoderAdditionalDepth", "PixelAspectRatioE4", "VideoCodecType", });
+        new java.lang.String[] { "CodecResolution", "FrameRate", "MarginWidth", "MarginHeight", "Density", "DecoderAdditionalDepth", "ViewingDistance", "PixelAspectRatioE4", "RealDensity", "VideoCodecType", });
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_Service_InputSourceService_descriptor =
       internal_static_com_andrerinas_openheadunit_aap_protocol_proto_Service_descriptor.getNestedTypes().get(2);
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_Service_InputSourceService_fieldAccessorTable = new
@@ -32602,99 +37787,135 @@ public final class Control {
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_ServiceDiscoveryResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_com_andrerinas_openheadunit_aap_protocol_proto_ServiceDiscoveryResponse_descriptor,
-        new java.lang.String[] { "Services", "Make", "Model", "Year", "VehicleId", "DriverPosition", "HeadUnitMake", "HeadUnitModel", "HeadUnitSoftwareBuild", "HeadUnitSoftwareVersion", "CanPlayNativeMediaDuringVr", "HideProjectedClock", "SessionConfiguration", "DisplayName", "ProbeForSupport", "HeadunitInfo", });
-    internal_static_com_andrerinas_openheadunit_aap_protocol_proto_ChannelOpenRequest_descriptor =
+        new java.lang.String[] { "Services", "Make", "Model", "Year", "VehicleId", "DriverPosition", "HeadUnitMake", "HeadUnitModel", "HeadUnitSoftwareBuild", "HeadUnitSoftwareVersion", "CanPlayNativeMediaDuringVr", "HideProjectedClock", "SessionConfiguration", "DisplayName", "ProbeForSupport", "ConnectionConfiguration", "HeadunitInfo", });
+    internal_static_com_andrerinas_openheadunit_aap_protocol_proto_PingConfiguration_descriptor =
       getDescriptor().getMessageTypes().get(3);
+    internal_static_com_andrerinas_openheadunit_aap_protocol_proto_PingConfiguration_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_com_andrerinas_openheadunit_aap_protocol_proto_PingConfiguration_descriptor,
+        new java.lang.String[] { "TimeoutMs", "IntervalMs", "HighLatencyThresholdMs", "TrackedPingCount", });
+    internal_static_com_andrerinas_openheadunit_aap_protocol_proto_WirelessTcpConfiguration_descriptor =
+      getDescriptor().getMessageTypes().get(4);
+    internal_static_com_andrerinas_openheadunit_aap_protocol_proto_WirelessTcpConfiguration_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_com_andrerinas_openheadunit_aap_protocol_proto_WirelessTcpConfiguration_descriptor,
+        new java.lang.String[] { "SocketReceiveBufferSizeKb", "SocketSendBufferSizeKb", "SocketReadTimeoutMs", "SocketReceiveBufferSize", "SocketSendBufferSize", });
+    internal_static_com_andrerinas_openheadunit_aap_protocol_proto_ConnectionConfiguration_descriptor =
+      getDescriptor().getMessageTypes().get(5);
+    internal_static_com_andrerinas_openheadunit_aap_protocol_proto_ConnectionConfiguration_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_com_andrerinas_openheadunit_aap_protocol_proto_ConnectionConfiguration_descriptor,
+        new java.lang.String[] { "PingConfiguration", "WirelessTcpConfiguration", });
+    internal_static_com_andrerinas_openheadunit_aap_protocol_proto_VersionRequestOptions_descriptor =
+      getDescriptor().getMessageTypes().get(6);
+    internal_static_com_andrerinas_openheadunit_aap_protocol_proto_VersionRequestOptions_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_com_andrerinas_openheadunit_aap_protocol_proto_VersionRequestOptions_descriptor,
+        new java.lang.String[] { "SnapshotVersion", });
+    internal_static_com_andrerinas_openheadunit_aap_protocol_proto_VersionResponseOptions_descriptor =
+      getDescriptor().getMessageTypes().get(7);
+    internal_static_com_andrerinas_openheadunit_aap_protocol_proto_VersionResponseOptions_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_com_andrerinas_openheadunit_aap_protocol_proto_VersionResponseOptions_descriptor,
+        new java.lang.String[] { "ConnectionConfiguration", });
+    internal_static_com_andrerinas_openheadunit_aap_protocol_proto_ServiceDiscoveryUpdate_descriptor =
+      getDescriptor().getMessageTypes().get(8);
+    internal_static_com_andrerinas_openheadunit_aap_protocol_proto_ServiceDiscoveryUpdate_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_com_andrerinas_openheadunit_aap_protocol_proto_ServiceDiscoveryUpdate_descriptor,
+        new java.lang.String[] { "Service", });
+    internal_static_com_andrerinas_openheadunit_aap_protocol_proto_ChannelOpenRequest_descriptor =
+      getDescriptor().getMessageTypes().get(9);
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_ChannelOpenRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_com_andrerinas_openheadunit_aap_protocol_proto_ChannelOpenRequest_descriptor,
         new java.lang.String[] { "Priority", "ServiceId", });
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_ChannelOpenResponse_descriptor =
-      getDescriptor().getMessageTypes().get(4);
+      getDescriptor().getMessageTypes().get(10);
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_ChannelOpenResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_com_andrerinas_openheadunit_aap_protocol_proto_ChannelOpenResponse_descriptor,
         new java.lang.String[] { "Status", });
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_PingRequest_descriptor =
-      getDescriptor().getMessageTypes().get(5);
+      getDescriptor().getMessageTypes().get(11);
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_PingRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_com_andrerinas_openheadunit_aap_protocol_proto_PingRequest_descriptor,
         new java.lang.String[] { "Timestamp", "BugReport", });
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_PingResponse_descriptor =
-      getDescriptor().getMessageTypes().get(6);
+      getDescriptor().getMessageTypes().get(12);
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_PingResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_com_andrerinas_openheadunit_aap_protocol_proto_PingResponse_descriptor,
         new java.lang.String[] { "Timestamp", });
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_ByeByeRequest_descriptor =
-      getDescriptor().getMessageTypes().get(7);
+      getDescriptor().getMessageTypes().get(13);
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_ByeByeRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_com_andrerinas_openheadunit_aap_protocol_proto_ByeByeRequest_descriptor,
         new java.lang.String[] { "Reason", });
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_ByeByeResponse_descriptor =
-      getDescriptor().getMessageTypes().get(8);
+      getDescriptor().getMessageTypes().get(14);
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_ByeByeResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_com_andrerinas_openheadunit_aap_protocol_proto_ByeByeResponse_descriptor,
         new java.lang.String[] { });
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_VoiceSessionNotification_descriptor =
-      getDescriptor().getMessageTypes().get(9);
+      getDescriptor().getMessageTypes().get(15);
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_VoiceSessionNotification_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_com_andrerinas_openheadunit_aap_protocol_proto_VoiceSessionNotification_descriptor,
         new java.lang.String[] { "Status", });
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_AudioFocusRequestNotification_descriptor =
-      getDescriptor().getMessageTypes().get(10);
+      getDescriptor().getMessageTypes().get(16);
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_AudioFocusRequestNotification_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_com_andrerinas_openheadunit_aap_protocol_proto_AudioFocusRequestNotification_descriptor,
         new java.lang.String[] { "Request", });
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_AudioFocusNotification_descriptor =
-      getDescriptor().getMessageTypes().get(11);
+      getDescriptor().getMessageTypes().get(17);
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_AudioFocusNotification_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_com_andrerinas_openheadunit_aap_protocol_proto_AudioFocusNotification_descriptor,
         new java.lang.String[] { "FocusState", "Unsolicited", });
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_NavFocusRequestNotification_descriptor =
-      getDescriptor().getMessageTypes().get(12);
+      getDescriptor().getMessageTypes().get(18);
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_NavFocusRequestNotification_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_com_andrerinas_openheadunit_aap_protocol_proto_NavFocusRequestNotification_descriptor,
         new java.lang.String[] { "FocusType", });
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_NavFocusNotification_descriptor =
-      getDescriptor().getMessageTypes().get(13);
+      getDescriptor().getMessageTypes().get(19);
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_NavFocusNotification_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_com_andrerinas_openheadunit_aap_protocol_proto_NavFocusNotification_descriptor,
         new java.lang.String[] { "FocusType", });
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_BatteryStatusNotification_descriptor =
-      getDescriptor().getMessageTypes().get(14);
+      getDescriptor().getMessageTypes().get(20);
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_BatteryStatusNotification_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_com_andrerinas_openheadunit_aap_protocol_proto_BatteryStatusNotification_descriptor,
         new java.lang.String[] { "BatteryLevel", "TimeRemainingS", "CriticalBattery", });
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_ConnectedDevice_descriptor =
-      getDescriptor().getMessageTypes().get(15);
+      getDescriptor().getMessageTypes().get(21);
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_ConnectedDevice_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_com_andrerinas_openheadunit_aap_protocol_proto_ConnectedDevice_descriptor,
         new java.lang.String[] { "DeviceName", "DeviceId", });
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_CarConnectedDevices_descriptor =
-      getDescriptor().getMessageTypes().get(16);
+      getDescriptor().getMessageTypes().get(22);
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_CarConnectedDevices_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_com_andrerinas_openheadunit_aap_protocol_proto_CarConnectedDevices_descriptor,
         new java.lang.String[] { "ConnectedDevices", "Unsolicited", "FinalList", });
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_UserSwitchResponse_descriptor =
-      getDescriptor().getMessageTypes().get(17);
+      getDescriptor().getMessageTypes().get(23);
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_UserSwitchResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_com_andrerinas_openheadunit_aap_protocol_proto_UserSwitchResponse_descriptor,
         new java.lang.String[] { "Status", "SelectedDevice", });
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_CallAvailabilityStatus_descriptor =
-      getDescriptor().getMessageTypes().get(18);
+      getDescriptor().getMessageTypes().get(24);
     internal_static_com_andrerinas_openheadunit_aap_protocol_proto_CallAvailabilityStatus_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_com_andrerinas_openheadunit_aap_protocol_proto_CallAvailabilityStatus_descriptor,

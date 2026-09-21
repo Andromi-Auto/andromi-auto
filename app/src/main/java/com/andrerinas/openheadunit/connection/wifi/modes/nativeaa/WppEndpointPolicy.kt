@@ -43,6 +43,12 @@ object WppEndpointPolicy {
                 "this unit gives its WiFi Direct group a new address on every create, and the " +
                     "phone would keep dialling the one it stored. $HOW_TO_CLEAR"
             )
+        strategy != NativeStrategy.HOTSPOT && identity == GroupIdentityStability.RENAMED ->
+            WppEndpointDecision.Withhold(
+                "this unit's Android is too old to name its own WiFi Direct group, and the platform " +
+                    "has picked a new name every create, so there is nothing for the phone to " +
+                    "remember. $HOW_TO_CLEAR"
+            )
         strategy != NativeStrategy.HOTSPOT && identity != GroupIdentityStability.STABLE ->
             WppEndpointDecision.Withhold(
                 "the WiFi Direct group's name and address have not yet been seen to repeat on " +

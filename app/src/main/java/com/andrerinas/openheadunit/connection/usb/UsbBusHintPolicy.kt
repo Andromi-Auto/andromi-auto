@@ -13,8 +13,14 @@ object UsbBusHintPolicy {
     /** How far back distinct identities are counted. */
     const val IDENTITY_WINDOW_MS = 60_000L
 
-    /** Distinct VID:PIDs inside the window that mean a device is cycling rather than being swapped. */
-    const val CYCLING_IDENTITIES = 2
+    /**
+     * Changes of the bus's whole composition inside the window that mean a device is cycling.
+     *
+     * Counting coexisting identities instead read a permanent hub plus a built-in LTE modem as a
+     * re-enumerating dongle on every scan, and fired again mid-AOA-switch. One plug-in or one
+     * switch moves the composition at most twice, so the threshold sits above that.
+     */
+    const val CYCLING_CHANGES = 3
 
     enum class Hint { NO_HOST_SUPPORT, EMPTY_BUS, CYCLING_ADAPTER, NONE_USABLE }
 
@@ -22,11 +28,13 @@ object UsbBusHintPolicy {
      * @param featureDeclared `android.hardware.usb.host`. A ROM that omits it never starts the
      *   framework's host stack, so the bus stays empty whatever is plugged in - a permanent fact
      *   about the unit rather than the three-way guess [Hint.EMPTY_BUS] offers.
+     * @param compositionChangesInWindow from [compositionChanges]: how many times the set of
+     *   identities on the bus changed, never how many devices are on it at once.
      */
     fun hint(
         deviceCount: Int,
         acceptedCount: Int,
-        distinctIdentitiesInWindow: Int,
+        compositionChangesInWindow: Int,
         featureDeclared: Boolean,
     ): Hint? = when {
         // Only when nothing enumerated: some ROMs omit the declaration and host devices anyway, and
@@ -34,8 +42,19 @@ object UsbBusHintPolicy {
         deviceCount == 0 && !featureDeclared -> Hint.NO_HOST_SUPPORT
         deviceCount == 0 -> Hint.EMPTY_BUS
         acceptedCount > 0 -> null
-        distinctIdentitiesInWindow >= CYCLING_IDENTITIES -> Hint.CYCLING_ADAPTER
+        compositionChangesInWindow >= CYCLING_CHANGES -> Hint.CYCLING_ADAPTER
         else -> Hint.NONE_USABLE
+    }
+
+    /**
+     * How many times the bus looked different from the scan before it, inside the window.
+     *
+     * A bus whose devices never change scores 0 however many of them there are, which is the whole
+     * point: only something arriving or leaving moves this.
+     */
+    fun compositionChanges(scans: List<Pair<Long, Set<String>>>, nowMs: Long): Int {
+        val inWindow = scans.filter { nowMs - it.first < IDENTITY_WINDOW_MS }.sortedBy { it.first }
+        return inWindow.zipWithNext().count { (before, after) -> before.second != after.second }
     }
 
     /** Identities seen strictly inside the window, newest first, deduplicated. */

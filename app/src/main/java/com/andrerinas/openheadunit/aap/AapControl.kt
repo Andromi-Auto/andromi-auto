@@ -107,7 +107,7 @@ internal class AapControlMedia(
 
         val maxUnacked = maxUnackedFor(channel)
         val configResponse = Media.Config.newBuilder().apply {
-            status = Media.Config.ConfigStatus.HEADUNIT
+            status = Media.Config.ConfigStatus.STATUS_READY
             this.maxUnacked = maxUnacked
 
             addConfigurationIndices(0)
@@ -145,12 +145,10 @@ internal class AapControlMedia(
                 // backlog turn into visible input lag when 2K HEVC is decoded in software.
                 return if (aapTransport.isWireless) 6 else 8
             }
-            // Left wide for hardware decode, deliberately. The window is counted in messages, not
-            // frames, and a keyframe fragments into a dozen or more of them, so narrowing it makes
-            // the phone stall mid-keyframe and caps throughput at window/RTT, worst on exactly the
-            // congested links where the backlog it would be trying to bound shows up. The backlog
-            // is bounded where it costs nothing instead: the decoder discards decoded frames it is
-            // behind on rather than having the phone send fewer.
+            // Left wide for hardware decode, deliberately: a keyframe fragments into a dozen or
+            // more messages, so narrowing this stalls the phone mid-keyframe and caps throughput at
+            // window/RTT. The phone does not hold to it either - one told 12 ran our backlog to 120
+            // - so the bound that works is the decoder discarding frames it is behind on.
             return if (aapTransport.isWireless) 12 else 16
         }
 
@@ -385,7 +383,7 @@ internal class AapControlService(
         AppLog.i("Navigation Focus Request: %s", request.focusType)
 
         val response = Control.NavFocusNotification.newBuilder()
-                .setFocusType(Control.NavFocusType.NAV_FOCUS_2)
+                .setFocusType(Control.NavFocusType.NAV_FOCUS_PROJECTED)
                 .build()
 
         val msg = AapMessage(channel, Control.ControlMsgType.MESSAGE_NAV_FOCUS_NOTIFICATION_VALUE, response)
