@@ -1065,6 +1065,7 @@
     <string name="connection_issue_banner_headunit_server_deaf">Android Auto\'s head unit server on your phone is accepting connections and answering none of them. It does not recover on its own: on the phone, stop the head unit server in Android Auto\'s developer settings and start it again. This unit will reconnect by itself.</string>
     <string name="connection_issue_banner_stale_endpoint">Your phone keeps trying to reach this unit at a network address it was given earlier, which this unit no longer uses. It prefers that address over reconnecting by Bluetooth and will not give up on its own. This unit is telling it to stop, which usually takes one attempt. If the connection still does not start, open Android Auto on your phone, forget this head unit, and connect again.</string>
     <string name="connection_issue_banner_hands_free_held">Another device is already using this unit\'s hands-free connection, so the phone this unit is waking cannot have it. Android Auto will not start a wireless connection unless the head unit\'s Bluetooth is connected with a profile, and a unit that serves one hands-free link at a time has none left to give. Disconnect the other device, or switch its Bluetooth off, and this unit will try again by itself.</string>
+    <string name="connection_issue_banner_hands_free_record_refused">This unit\'s Bluetooth would not publish a hands-free record, which the app needs so your phone sees a hands-free profile here. Android Auto will not start a wireless connection unless the head unit\'s Bluetooth is connected with a profile, so it may never call back after being woken. The app asks for the record again on every connection attempt. Connecting by cable, or over Wi-Fi in one of the other wireless modes, does not need it.</string>
     <string name="connection_issue_banner_dismiss">Dismiss</string>
     <string name="auto_connect_pill_cancel">Stop connecting</string>
     <!-- What the hotspot banner types into the settings search. Both override rows carry it
@@ -1083,6 +1084,12 @@
     <string name="preflight_invalid_bssid">That is not a WiFi address. Enter six pairs of hex digits, like 02:1A:11:FF:3C:4D.</string>
     <string name="native_aa_complete_hfp_slc">Complete the Bluetooth connection</string>
     <string name="native_aa_complete_hfp_slc_description">Some phones will not start wireless Android Auto until this unit\'s Bluetooth counts as connected, not just paired. On by default; turn it off if calls on this device stop working.</string>
+    <string name="native_aa_wake_remeasure">Re-measure the Bluetooth wake</string>
+    <string name="native_aa_wake_verdict_unmeasured">Not measured yet</string>
+    <string name="native_aa_wake_verdict_safe">Safe on this unit</string>
+    <string name="native_aa_wake_verdict_destructive">Held back on this unit</string>
+    <string name="native_aa_wake_remeasure_confirm">Android Auto only starts wireless when it sees the Bluetooth connection change. Where this unit already holds the hands-free link, the app has to break it to make that happen, so it measures once whether the link comes back and stops if it does not. Use this if wireless stopped starting on its own and you are willing to lose hands-free for a moment while it tries again.</string>
+    <string name="native_aa_wake_remeasure_done">The Bluetooth wake will be measured again on the next connection.</string>
     <string name="announce_connection_configuration">Ask for a longer link timeout</string>
     <string name="announce_connection_configuration_description">Tells Android Auto to wait 15 seconds before treating the link as dead instead of 3, and to use larger socket buffers. It is aimed at a radio that goes off channel for a few seconds mid session and takes the connection with it. Whether your phone honours any of it has not been measured.</string>
     <string name="native_aa_ignore_external_bt">Ignore the Bluetooth compatibility check</string>

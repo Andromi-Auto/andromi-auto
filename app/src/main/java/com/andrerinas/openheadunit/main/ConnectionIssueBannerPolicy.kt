@@ -22,6 +22,7 @@ object ConnectionIssueBannerPolicy {
         ConnectionIssue.BLUETOOTH_SENT_NO_DATA,
         ConnectionIssue.VIDEO_LINK_TOO_SLOW,
         ConnectionIssue.HANDS_FREE_HELD_ELSEWHERE,
+        ConnectionIssue.HANDS_FREE_RECORD_REFUSED,
         ConnectionIssue.PHONE_HOLDS_STALE_ENDPOINT
     )
 
@@ -52,6 +53,8 @@ object ConnectionIssueBannerPolicy {
      *   platform refuses to switch it on, so no group is ever asked for. Same transport, same key.
      * - `HANDS_FREE_HELD_ELSEWHERE` is raised by the wake poke in `NativeAaHandshakeManager`, which
      *   only runs in Native AA but runs on both of its transports, so it is keyed to both.
+     * - `HANDS_FREE_RECORD_REFUSED` is raised where that manager opens its listeners, which is the
+     *   same mode on the same two transports, so it is keyed the same way.
      *
      * A record is not deleted when it stops applying. It describes what the hardware did, and the
      * user may well be back on that route tomorrow; it is only hidden while it cannot be the
@@ -114,7 +117,9 @@ object ConnectionIssueBannerPolicy {
      * `HANDS_FREE_HELD_ELSEWHERE` has none for the same shape of reason: the lever is the other
      * device, and the next wake pass that reads the link free retires it.
      * `PHONE_HOLDS_STALE_ENDPOINT` has none either: the record lives on the phone, no setting here
-     * reaches it, and a dial this unit serves disproves it.
+     * reaches it, and a dial this unit serves disproves it. `HANDS_FREE_RECORD_REFUSED` has none
+     * because it is this unit's own Bluetooth stack refusing, and a registration that succeeds on a
+     * later arming retires it.
      *
      * @param hotspotSsid [com.andrerinas.openheadunit.utils.Settings.hotspotSsid]
      * @param hotspotPassword [com.andrerinas.openheadunit.utils.Settings.hotspotPassword] — needed

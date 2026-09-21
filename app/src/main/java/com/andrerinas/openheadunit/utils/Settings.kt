@@ -2187,6 +2187,11 @@ class Settings(private val context: Context) {
         get() = prefs.getLong("connection-issue-hands-free-held", 0L)
         set(value) = prefs.edit().putLong("connection-issue-hands-free-held", value).apply()
 
+    /** This unit's Bluetooth would not publish a hands-free record to stand in with. */
+    var connectionIssueHandsFreeRecordRefusedAtEpochMs: Long
+        get() = prefs.getLong("connection-issue-hands-free-record-refused", 0L)
+        set(value) = prefs.edit().putLong("connection-issue-hands-free-record-refused", value).apply()
+
     /** The phone kept dialling a TCP endpoint this unit no longer honours. */
     var connectionIssueStaleEndpointAtEpochMs: Long
         get() = prefs.getLong("connection-issue-stale-endpoint", 0L)
@@ -2290,6 +2295,20 @@ class Settings(private val context: Context) {
     var nativeAaWakeDamageVerdict: Int
         get() = prefs.getInt("native-aa-wake-damage-verdict", 0)
         set(value) = prefs.edit().putInt("native-aa-wake-damage-verdict", value).apply()
+
+    // Armings that reached the wake and produced no session, so a DESTRUCTIVE verdict can be
+    // measured again instead of holding for the life of the install. One reading used to refuse
+    // every poke on a unit the poke was the only thing that ever connected.
+    var nativeAaWakeArmingsWithoutSession: Int
+        get() = prefs.getInt("native-aa-wake-armings-without-session", 0)
+        set(value) = prefs.edit().putInt("native-aa-wake-armings-without-session", value).apply()
+
+    // What cycling this unit's own Bluetooth did, as BluetoothRadioCyclePolicy. The cycle is the
+    // wake that gives the hands-free link back rather than taking it, but only where the radio
+    // comes back and reconnects on its own, which is a property of the unit.
+    var nativeAaRadioCycleVerdict: Int
+        get() = prefs.getInt("native-aa-radio-cycle-verdict", 0)
+        set(value) = prefs.edit().putInt("native-aa-radio-cycle-verdict", value).apply()
 
     // Run the Native AA Bluetooth route on a unit ExternalBtPolicy has flagged, instead of refusing
     // to start it. The detection marks a class of hardware rather than measuring the unit in front

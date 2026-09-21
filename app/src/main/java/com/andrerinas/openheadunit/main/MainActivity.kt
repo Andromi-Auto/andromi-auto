@@ -1270,6 +1270,8 @@ class MainActivity : BaseActivity() {
                     R.string.connection_issue_banner_headunit_server_deaf
                 ConnectionIssue.HANDS_FREE_HELD_ELSEWHERE ->
                     R.string.connection_issue_banner_hands_free_held
+                ConnectionIssue.HANDS_FREE_RECORD_REFUSED ->
+                    R.string.connection_issue_banner_hands_free_record_refused
                 ConnectionIssue.PHONE_HOLDS_STALE_ENDPOINT ->
                     R.string.connection_issue_banner_stale_endpoint
             }
@@ -1310,6 +1312,8 @@ class MainActivity : BaseActivity() {
             ConnectionIssue.HEADUNIT_SERVER_NOT_ANSWERING -> return
             // The remedy is the other device's Bluetooth connection, which no setting here reaches.
             ConnectionIssue.HANDS_FREE_HELD_ELSEWHERE -> return
+            // This unit's own Bluetooth stack refused the record. No row here changes its answer.
+            ConnectionIssue.HANDS_FREE_RECORD_REFUSED -> return
             // The remedy is on the phone, and this unit is already applying the one it has.
             ConnectionIssue.PHONE_HOLDS_STALE_ENDPOINT -> return
             ConnectionIssue.BLUETOOTH_SENT_NO_DATA -> getString(R.string.wireless_mode)
