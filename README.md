@@ -82,6 +82,9 @@ adb shell am start -a android.intent.action.VIEW -d "headunit://connect?ip=192.1
 - more customization options for the UI and the app itself
 
 ## Changelog
+### v.3.5.0-alpha
+- Added: Option to use Open Headunit as a launcher
+
 ### v.3.4.0
 - USB: connect non-Pixel phones without fighting a fast-reverting dongle
 - Feat/automation command surface
