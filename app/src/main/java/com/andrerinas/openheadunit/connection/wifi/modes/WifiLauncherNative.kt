@@ -56,6 +56,8 @@ class WifiLauncherNative : WifiLauncher {
 
     override fun hasWifiDirect() = strategy == NativeStrategy.WIFI_DIRECT
 
+    override fun hostsOwnAccessPoint() = strategy == NativeStrategy.HOTSPOT
+
     // Both transports, not just the P2P one. The credentials this mode hands the phone name
     // port 5288 whichever network carries them, and the phone dials it the moment it has
     // joined. Gated on the strategy, the hotspot route bound nothing until the handshake

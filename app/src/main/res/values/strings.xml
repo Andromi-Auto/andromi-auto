@@ -977,6 +977,8 @@
 
     <string name="exit_dialog_title">Exit Android Auto</string>
     <string name="exit_dialog_stop">Stop Connection</string>
+    <string name="exit_dialog_end_stay_armed">End session, stay ready</string>
+    <string name="exit_dialog_end_stay_armed_note">Session ended. The WiFi network stays up, so your phone may reconnect on its own.</string>
     <string name="exit_dialog_pip">Picture-in-Picture</string>
     <string name="exit_dialog_background">Move to Background</string>
     <string name="exit_dialog_settings">Quick Settings</string>
