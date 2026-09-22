@@ -12,6 +12,8 @@ import android.content.Intent
 import android.content.IntentFilter
 import com.andrerinas.openheadunit.connection.wifi.direct.GroupIdentityStability
 import com.andrerinas.openheadunit.connection.wifi.direct.GroupIdentityStabilityPolicy
+import com.andrerinas.openheadunit.connection.wifi.direct.P2pIdentityRotationPolicy
+import com.andrerinas.openheadunit.connection.wifi.direct.StoredP2pIdentity
 import com.andrerinas.openheadunit.aap.AapService
 
 import com.andrerinas.openheadunit.connection.wifi.direct.WifiBandCapability
@@ -2874,6 +2876,8 @@ class NativeAaHandshakeManager(
                         AppLog.i("NativeAA: WiFi session landed. Handshake session ending, releasing Bluetooth connection.")
                         ifOwner(link) {
                             retireStaleEndpointRecord()
+                            // A phone holding the endpoint never comes over Bluetooth, so one that did holds none.
+                            retireAdvertisedEndpoint("a phone completed the Bluetooth handshake on it")
                             resetJoinRefusals()
                             handoffSettlingSince = 0L
                             // Stop accepting new AA_UUID connections too, not just this socket —
@@ -3380,11 +3384,39 @@ class NativeAaHandshakeManager(
             is WppEndpointDecision.Advertise ->
                 WppMessages.endpoint(credentials?.ip.orEmpty(), decision.port).also {
                     AppLog.i("NativeAA: advertising WPP over TCP at ${it.ip}:${it.port}")
+                    recordAdvertisedEndpoint(transport)
                 }
         }
         val channelType = WppChannelTypePolicy.forHeadUnit(WifiBandCapability.supports5Ghz(context))
         val request = WppMessages.versionRequest(carInfo(), endpoint, channelType)
         sendProtobuf(output, request.toByteArray(), WppMessageType.VERSION_REQUEST)
+    }
+
+    /** Remembers the network an endpoint went out under, which is the one the phone will insist on. */
+    private fun recordAdvertisedEndpoint(transport: NativeStrategy) {
+        val creds = credentials ?: return
+        val pair = EndpointRetirementPolicy.recordsAdvertisement(transport, creds.ssid, creds.psk) ?: return
+        if (settings.wifiDirectAdvertisedIdentity != pair) settings.wifiDirectAdvertisedIdentity = pair
+    }
+
+    /** The advertised pair when the group on the air is the one being retired, else null. */
+    private fun retiringIdentity(): StoredP2pIdentity? {
+        val creds = credentials ?: return null
+        val advertised = settings.wifiDirectAdvertisedIdentity ?: return null
+        return advertised.takeIf {
+            EndpointRetirementPolicy.isRetiring(
+                advertised, settings.wifiDirectStableIdentity, settings.wifiDirectGroupIdentity,
+                Build.VERSION.SDK_INT >= P2pIdentityRotationPolicy.NAMED_CREATE_SDK,
+                settings.wifiDirectRotationPending, creds.ssid, creds.psk,
+            )
+        }
+    }
+
+    /** Forgets the advertised pair once a phone has been rejected on it or came back over Bluetooth. */
+    private fun retireAdvertisedEndpoint(how: String) {
+        val retiring = retiringIdentity() ?: return
+        settings.wifiDirectAdvertisedIdentity = null
+        AppLog.i("NativeAA: the WPP endpoint advertised under ${retiring.networkName} is retired ($how); the next bring-up uses the current identity.")
     }
 
     /**
@@ -3418,6 +3450,12 @@ class NativeAaHandshakeManager(
                 this@NativeAaHandshakeManager.credentials?.ip?.takeIf { it.isNotBlank() }?.let { it to 5288 }
 
             override fun noteDialRefused() { dialRefusedSinceLastLanding = true }
+
+            override fun retiringNetworkName(): String? = retiringIdentity()?.networkName
+
+            override fun noteEndpointRetired() = retireAdvertisedEndpoint("the phone's dial was rejected")
+
+            override fun noteEndpointAdvertised() = recordAdvertisedEndpoint(launcher.strategy)
         })
         wppTcpServer = server
         server.start()

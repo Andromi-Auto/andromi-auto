@@ -662,6 +662,24 @@ class Settings(private val context: Context) {
         }
 
     /**
+     * The WiFi Direct pair a WPP endpoint was last advertised under, which the phone stored and will
+     * join and nothing else. Kept until a rejection or a Bluetooth landing on it retires it
+     * ([com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.EndpointRetirementPolicy]).
+     */
+    var wifiDirectAdvertisedIdentity: StoredP2pIdentity?
+        get() {
+            val name = prefs.getString("wifi-direct-advertised-name", null) ?: return null
+            val passphrase = prefs.getString("wifi-direct-advertised-passphrase", null) ?: return null
+            return StoredP2pIdentity(name, passphrase)
+        }
+        set(value) {
+            prefs.edit()
+                .putString("wifi-direct-advertised-name", value?.networkName)
+                .putString("wifi-direct-advertised-passphrase", value?.passphrase)
+                .apply()
+        }
+
+    /**
      * Whether the kept pair was typed by the user rather than drawn by the app. Provenance only:
      * it decides what the identity rows say, and warns before "New identity" throws the typing away.
      */

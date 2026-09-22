@@ -34,6 +34,7 @@ import com.andrerinas.openheadunit.connection.wifi.FiveGhzChannelPolicy
 import com.andrerinas.openheadunit.connection.wifi.MacAddressPolicy
 import com.andrerinas.openheadunit.connection.wifi.WifiLauncherMode
 import com.andrerinas.openheadunit.connection.wifi.modes.helper.HelperStrategy
+import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.EndpointRetirementPolicy
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.NativeHandoffPolicy
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.SoftApBssidPolicy
 import com.andrerinas.openheadunit.main.MainActivity
@@ -1234,7 +1235,21 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
                 // entirely while this bring-up is still deciding whether to adopt the group it
                 // found, because that answer is what says whether anything was created to compare.
                 val bssidUsable = SoftApBssidPolicy.isUsable(bssid)
-                if (!nativeAdoptDecisionPending &&
+                if (isRetiringGroup(ssid, psk)) {
+                    // Withheld whatever it would grade, so the stored phone's dial is rejected, and
+                    // not remembered, so the identity replacing it is judged against the last real one.
+                    nativeIdentityStability = GroupIdentityStability.UNPROVEN
+                    // For the group's whole life: the retirement completing mid-group must not let
+                    // the next callback grade this same network and advertise it all over again.
+                    nativeIdentityAssessedSsid = ssid
+                    if (ssid != lastIdentityReportSsid) {
+                        lastIdentityReportSsid = ssid
+                        AppLog.i(
+                            "WifiDirectManager: group identity ssid=$ssid bssid=$bssid is being retired: " +
+                                "the WPP endpoint is withheld, and a phone that dials the one it stored is rejected."
+                        )
+                    }
+                } else if (!nativeAdoptDecisionPending &&
                     ssid != nativeIdentityAssessedSsid && (bssidUsable || ssid != lastIdentityReportSsid)) {
                     val appNamesGroup = Build.VERSION.SDK_INT >= P2pIdentityRotationPolicy.NAMED_CREATE_SDK
                     val verdict = GroupIdentityStabilityPolicy.assess(
@@ -2362,6 +2377,17 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
      */
     private fun chooseNativeGroupIdentity(): P2pGroupIdentity.Named {
         val appSettings = App.provide(context).settings
+        val advertised = appSettings.wifiDirectAdvertisedIdentity
+        if (advertised != null && endpointRetirementOwed()) {
+            // A phone that stored the endpoint joins this pair or nothing, so it goes up once more
+            // for that phone's dial to be rejected before the new identity replaces it.
+            AppLog.i(
+                "WifiDirectManager: group identity: bringing up ${advertised.networkName} once more, " +
+                    "the network a WPP endpoint was advertised under, so a phone that stored it can " +
+                    "be told to drop it before the new identity goes on the air."
+            )
+            return P2pGroupIdentity.Named(advertised.networkName, advertised.passphrase, persistent = true)
+        }
         val choice = P2pGroupIdentityPolicy.decide(
             keepIdentity = appSettings.wifiDirectStableIdentity,
             stored = appSettings.wifiDirectGroupIdentity,
@@ -2371,6 +2397,23 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
         choice.toStore?.let { appSettings.wifiDirectGroupIdentity = it }
         AppLog.i("WifiDirectManager: ${choice.reason}")
         return choice.identity
+    }
+
+    private fun endpointRetirementOwed(): Boolean {
+        val s = App.provide(context).settings
+        return EndpointRetirementPolicy.owed(
+            s.wifiDirectAdvertisedIdentity, s.wifiDirectStableIdentity, s.wifiDirectGroupIdentity,
+            Build.VERSION.SDK_INT >= P2pIdentityRotationPolicy.NAMED_CREATE_SDK, s.wifiDirectRotationPending,
+        )
+    }
+
+    private fun isRetiringGroup(ssid: String, psk: String): Boolean {
+        val s = App.provide(context).settings
+        return EndpointRetirementPolicy.isRetiring(
+            s.wifiDirectAdvertisedIdentity, s.wifiDirectStableIdentity, s.wifiDirectGroupIdentity,
+            Build.VERSION.SDK_INT >= P2pIdentityRotationPolicy.NAMED_CREATE_SDK, s.wifiDirectRotationPending,
+            ssid, psk,
+        )
     }
 
     private fun getP2pErrorString(reason: Int): String {
@@ -2636,6 +2679,14 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
             // phone will keep trying to join - the opposite of what the exit asked for.
             if (supersededByStop(gen, "Native AA group recreate")) {
                 Unit
+            } else if (Build.VERSION.SDK_INT < P2pIdentityRotationPolicy.NAMED_CREATE_SDK &&
+                endpointRetirementOwed()
+            ) {
+                // Below Q the purge is the rename, so it waits: this create reinvokes the advertised
+                // profile for the retirement, and the pending request survives for the create after.
+                AppLog.i("WifiDirectManager: holding the persistent profile purge until the advertised WPP endpoint is retired.")
+                lastPersistentPurgeVerdict = null
+                create()
             } else if (P2pIdentityRotationPolicy.purgeBeforeCreate(
                     Build.VERSION.SDK_INT,
                     appSettings.wifiDirectStableIdentity,

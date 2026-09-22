@@ -78,6 +78,15 @@ class WppTcpServer(
          * Bluetooth handshake landing without one, which only the owner sees.
          */
         fun noteDialRefused()
+
+        /** The network being retired when the group on the air is one, so a rejection there is expected. */
+        fun retiringNetworkName(): String?
+
+        /** A rejection went out on the retiring network, which is what retires it. */
+        fun noteEndpointRetired()
+
+        /** An endpoint went out on a served dial, so the phone now stores this network. */
+        fun noteEndpointAdvertised()
     }
 
     companion object {
@@ -266,6 +275,14 @@ class WppTcpServer(
             AppLog.i("WppTcpServer: a dial arrived while projection is up; holding it silent: $reason")
             return
         }
+        val retiring = callbacks.retiringNetworkName()
+        if (retiring != null && WppTcpServePolicy.rejectsDial(decision, callbacks.canRunRfcomm(), projectionUp)) {
+            // Expected, not a fault to show: this network is up only for this rejection.
+            AppLog.w("WppTcpServer: rejecting this dial so the phone drops the endpoint it stored for $retiring and goes back to Bluetooth")
+            send(socket.outputStream, WppMessages.connectionRejection().toByteArray(), WppMessageType.CONNECTION_REJECTION)
+            callbacks.noteEndpointRetired()
+            return
+        }
         // Once, not per dial: the phone re-dials on its own backoff and a moving stamp would
         // overtake the user's dismissal every time.
         ConnectionIssues.raiseOnce(context, ConnectionIssue.PHONE_HOLDS_STALE_ENDPOINT)
@@ -311,6 +328,7 @@ class WppTcpServer(
                         }
                         is WppEndpointDecision.Advertise ->
                             WppMessages.endpoint(callbacks.credentials()?.ip.orEmpty(), decision.port)
+                                .also { callbacks.noteEndpointAdvertised() }
                     }
                     AppLog.i("WppTcpServer: [TX] WifiVersionRequest (Type 4) v${WppHandshakeSession.WPP_VERSION_MAJOR}.${WppHandshakeSession.WPP_VERSION_MINOR}")
                     val channelType = WppChannelTypePolicy.forHeadUnit(WifiBandCapability.supports5Ghz(context))

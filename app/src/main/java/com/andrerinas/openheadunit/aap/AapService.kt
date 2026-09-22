@@ -2332,7 +2332,7 @@ class AapService : Service() {
     /** True while the setup QR dialog needs the running launcher to read a network off. */
     @Volatile private var settingsQrHold = false
 
-    /** A wireless setting was saved while the screen had the stack down; the close re-arms it. */
+    /** A wireless Save or a Bluetooth auto-start arrived while the screen had the stack down; the close re-arms it. */
     @Volatile private var wirelessRearmPendingForSettings = false
 
     private var settingsRearmJob: Job? = null
@@ -2381,7 +2381,7 @@ class AapService : Service() {
         }
 
         val why = if (settingsQrHold) "the setup QR needs the running launcher"
-            else "the settings screen closed with a wireless setting saved behind it"
+            else "the settings screen closed with a wireless request held behind it"
         AppLog.i("AapService: $why, re-arming wireless mode $mode")
         settingsRearmJob = serviceScope.launch {
             delay(1500) // Same settle the Native AA reconnect path allows the P2P hardware.
@@ -2952,7 +2952,13 @@ class AapService : Service() {
                     userExitedAA = false
                     userExitCooldownUntil = 0L
                 }
-                if (actions.forceRearmWireless) {
+                if (wirelessPausedForSettings && (actions.forceRearmWireless || actions.armWirelessIfIdle)) {
+                    // Held like a Save: this arrival's own MainActivity launch closes the screen,
+                    // so a refused request would never be asked again.
+                    wirelessRearmPendingForSettings = true
+                    AppLog.i("AapService: Bluetooth auto-start while the settings screen is open; " +
+                        "re-arming when it closes.")
+                } else if (actions.forceRearmWireless) {
                     wifiLauncherManager.setActiveFromSettings(force = true)
                 } else if (networkComingUp == true) {
                     // Nothing to do and nothing safe to do: the network this arrival would rebuild
