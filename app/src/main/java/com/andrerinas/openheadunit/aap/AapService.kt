@@ -86,6 +86,9 @@ import com.andrerinas.openheadunit.connection.usb.UsbLauncherManager
 import com.andrerinas.openheadunit.connection.wifi.LinkLossTeardownPolicy
 import com.andrerinas.openheadunit.connection.wifi.LinkLossTrigger
 import com.andrerinas.openheadunit.connection.wifi.modes.helper.HelperStrategy
+import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.ExternalBtTransportPolicy
+import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.ModuleRearmPolicy
+import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.NativeAaHandshakeManager
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.NativeStrategy
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.ProjectionQrSnapshot
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.SessionEndGroupPolicy
@@ -2803,6 +2806,32 @@ class AapService : Service() {
                         } else {
                             ToastUtils.showToast(this, "Native AA mode not active.")
                         }
+                    }
+                } else if (App.provide(this).settings.wifiConnectionMode == WifiLauncherMode.NATIVE &&
+                    NativeAaHandshakeManager.wifiButtonRoute(this) == ExternalBtTransportPolicy.WifiButton.MODULE
+                ) {
+                    // The module route names no Android device, so the button arrives without one.
+                    userExitedAA = false
+                    userExitCooldownUntil = 0L
+                    val native = wifiLauncherManager.active as? WifiLauncherNative
+                    val action = ModuleRearmPolicy.action(
+                        nativeLauncherStarted = native != null && wifiLauncherManager.activeIsStarted,
+                        handshakeStarted = native?.handshakeManager?.isStarted() == true,
+                    )
+                    AppLog.i("AapService: WiFi button on the Bluetooth module route: $action")
+                    when (action) {
+                        ModuleRearmPolicy.Action.REBUILD_LAUNCHER ->
+                            wifiLauncherManager.setActiveFromSettings(force = true, userRequested = true)
+                        ModuleRearmPolicy.Action.START_HANDSHAKE -> {
+                            native?.handshakeManager?.start()
+                            native?.handshakeManager?.notStartedReason()?.let {
+                                ToastUtils.showToast(this, getString(R.string.native_aa_poke_not_running))
+                            }
+                        }
+                        ModuleRearmPolicy.Action.WAKE_PHONE ->
+                            if (native?.handshakeManager?.wakeOverModule() != true) {
+                                AppLog.i("AapService: no module channel is open yet, so the bring-up in flight wakes the phone.")
+                            }
                     }
                 }
             }

@@ -126,6 +126,17 @@ class NativeAaHandshakeManager(
             )
         }
 
+        /** What the main screen's WiFi button arms; read here so the screen and the service agree. */
+        fun wifiButtonRoute(context: Context): ExternalBtTransportPolicy.WifiButton {
+            val settings = App.provide(context).settings
+            return ExternalBtTransportPolicy.wifiButton(
+                BluetoothHelper.externalBtEvidence,
+                settings.externalBtZbtTransport,
+                settings.nativeAaIgnoreExternalBt,
+                ZbtDaemonReachability.cached()
+            )
+        }
+
         fun checkCompatibility(context: Context): Boolean {
             when (transportRoute(context)) {
                 // The module has its own listener and its own compatibility, established by the
@@ -2354,23 +2365,29 @@ class NativeAaHandshakeManager(
     }
 
 
+    /** The WiFi button on the module route: there is no Android device to name, only the module. */
+    fun wakeOverModule(): Boolean {
+        val carrier = zbtCarrier ?: return false
+        wakeStoodDown = false
+        sessionEndedAt = 0L
+        ConnectionStageTracker.report(ConnectionStage.WAKING_PHONE)
+        AppLog.i("NativeAA: Manual poke requested — asking the Bluetooth module to connect Android Auto.")
+        resetHandshakeBackoff()
+        resetJoinRefusals()
+        carrier.requestWake()
+        return true
+    }
+
     /**
      * Start a manual poke (wakeup) for a specific Bluetooth device.
      */
     fun manualPoke(address: String) {
         // Pressing the button is the way out of the stand-down and its settle, as well as of a
         // backoff: the user wants this phone woken now, whatever the last session ended on.
+        // The user asking to try again is the way out of a backoff on either route.
+        if (wakeOverModule()) return
         wakeStoodDown = false
         sessionEndedAt = 0L
-        // The user asking to try again is the way out of a backoff on either route.
-        zbtCarrier?.let {
-            ConnectionStageTracker.report(ConnectionStage.WAKING_PHONE)
-            AppLog.i("NativeAA: Manual poke requested — asking the Bluetooth module to connect Android Auto.")
-            resetHandshakeBackoff()
-            resetJoinRefusals()
-            it.requestWake()
-            return
-        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             if (ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT)
                 != PackageManager.PERMISSION_GRANTED) {

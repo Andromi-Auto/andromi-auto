@@ -25,6 +25,8 @@ import android.os.Build
 import android.bluetooth.BluetoothDevice
 import android.os.CountDownTimer
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.DriverCandidatePolicy
+import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.ExternalBtTransportPolicy
+import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.NativeAaHandshakeManager
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.NativeDriverSelectionPolicy
 import com.andrerinas.openheadunit.App
 import com.andrerinas.openheadunit.R
@@ -531,7 +533,18 @@ class HomeFragment : Fragment() {
                     }
                 }
                 WifiLauncherMode.NATIVE -> { // Native AA
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+                    // A unit whose Bluetooth is an external module has no Android radio to check
+                    // and no Android device to pick; AapService arms the module route instead.
+                    val route = NativeAaHandshakeManager.wifiButtonRoute(requireContext())
+                    if (route == ExternalBtTransportPolicy.WifiButton.MODULE) {
+                        ToastUtils.showToast(requireContext(), getString(R.string.searching_phone), Toast.LENGTH_SHORT)
+                        val intent = Intent(requireContext(), AapService::class.java).apply {
+                            action = AapService.ACTION_NATIVE_AA_POKE
+                        }
+                        ContextCompat.startForegroundService(requireContext(), intent)
+                    } else if (route == ExternalBtTransportPolicy.WifiButton.REFUSED) {
+                        ToastUtils.showToast(requireContext(), getString(R.string.native_aa_poke_not_running), Toast.LENGTH_LONG, force = true)
+                    } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
                         ContextCompat.checkSelfPermission(requireContext(), android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
                         bluetoothPermissionLauncher.launch(android.Manifest.permission.BLUETOOTH_CONNECT)
                     } else {
