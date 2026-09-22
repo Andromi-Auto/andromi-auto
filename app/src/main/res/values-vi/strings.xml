@@ -458,6 +458,7 @@
     <string name="wifi_disabled_info">Thông tin: Wi-Fi đang tắt.</string>
     <string name="bt_not_enabled">Bluetooth đang tắt</string>
     <string name="bt_permission_denied">Đã từ chối quyền Bluetooth. Không thể quét thiết bị.</string>
+    <string name="bt_external_module_no_picker">Bluetooth của thiết bị này do một mô-đun bên ngoài cung cấp chứ không phải sóng Bluetooth của chính Android, nên ở đây không có danh sách thiết bị Bluetooth của Android để chọn.</string>
 
     <!-- Vehicle Info Settings -->
     <string name="vehicle_info_settings">Thông tin xe</string>

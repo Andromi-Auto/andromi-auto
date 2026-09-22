@@ -572,6 +572,7 @@
     <string name="mic_auto_gain_control_description">Regola automaticamente il volume del microfono. Disabilita se il volume è instabile.</string>
     <string name="mic_feature_unsupported">Questa funzionalità non è supportata sul tuo dispositivo.</string>
     <string name="bt_permission_denied">Autorizzazione Bluetooth negata. Impossibile scansionare i dispositivi.</string>
+    <string name="bt_external_module_no_picker">Il Bluetooth di questa unità è fornito da un modulo esterno, non dalla radio di Android, quindi qui non c\'è un elenco di dispositivi Bluetooth Android da cui scegliere.</string>
     <string name="wifi_autostart_title">Avvio automatico WiFi</string>
     <string name="wifi_autostart_content">Connesso a %s. Tocca per avviare Android Auto.</string>
 

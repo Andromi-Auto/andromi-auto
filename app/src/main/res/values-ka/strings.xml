@@ -485,6 +485,7 @@
     <string name="wifi_disabled_info">ინფორმაცია: Wi-Fi გამორთულია.</string>
     <string name="bt_not_enabled">Bluetooth გამორთულია</string>
     <string name="bt_permission_denied">Bluetooth ნებართვა უარყოფილია. მოწყობილობების ძებნა შეუძლებელია.</string>
+    <string name="bt_external_module_no_picker">ამ მოწყობილობის Bluetooth-ს უზრუნველყოფს გარე მოდული და არა Android-ის საკუთარი რადიო, ამიტომ აქ ასარჩევი Android-ის Bluetooth მოწყობილობების სია არ არსებობს.</string>
 
     <string name="vehicle_info_settings">ავტომობილის ინფორმაცია</string>
     <string name="vehicle_info_settings_description">მოახდინეთ თქვენი ავტომობილის იდენტიფიკაციის მორგება ტელეფონისთვის</string>

@@ -897,6 +897,7 @@
     <string name="wifi_disabled_info">Info: Wi-Fi is disabled.</string>
     <string name="bt_not_enabled">Bluetooth is disabled</string>
     <string name="bt_permission_denied">Bluetooth permission denied. Cannot scan for devices.</string>
+    <string name="bt_external_module_no_picker">This unit\'s Bluetooth is provided by an external module, not by Android\'s own radio, so there\'s no Android Bluetooth device list to choose from here.</string>
 
     <!-- Vehicle Info Settings -->
     <string name="vehicle_info_settings">Vehicle information</string>

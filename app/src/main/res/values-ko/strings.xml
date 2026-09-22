@@ -505,6 +505,7 @@
     <string name="wifi_disabled_info">Wi-Fi가 비활성화되어 있습니다.</string>
     <string name="bt_not_enabled">블루투스가 비활성화되어 있습니다</string>
     <string name="bt_permission_denied">블루투스 권한이 거부되었습니다. 기기를 검색할 수 없습니다.</string>
+    <string name="bt_external_module_no_picker">이 장치의 블루투스는 Android 자체 무선이 아니라 외부 모듈에서 제공되므로 여기에서 선택할 수 있는 Android 블루투스 기기 목록이 없습니다.</string>
 
     <!-- Vehicle Info Settings -->
     <string name="vehicle_info_settings">차량 정보</string>

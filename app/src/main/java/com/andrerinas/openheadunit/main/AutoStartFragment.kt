@@ -537,6 +537,14 @@ class AutoStartFragment : Fragment() {
         val adapter = BluetoothHelper.getBluetoothAdapter(requireContext())
 
         if (adapter == null || !adapter.isEnabled) {
+            // This unit's Bluetooth may genuinely have no android.bluetooth adapter to enable - the
+            // phone pairs to the external module instead, and none of these pickers' android.bluetooth
+            // device lists or MAC-targeted triggers apply there. Asking the user to turn on a radio
+            // that may not exist is a dead end, not a fix.
+            if (BluetoothHelper.externalBtEvidence != null) {
+                ToastUtils.showToast(requireContext(), getString(R.string.bt_external_module_no_picker), Toast.LENGTH_LONG, force = true)
+                return
+            }
             val enableIntent = Intent(android.bluetooth.BluetoothAdapter.ACTION_REQUEST_ENABLE)
             bluetoothEnableLauncher.launch(enableIntent)
             return

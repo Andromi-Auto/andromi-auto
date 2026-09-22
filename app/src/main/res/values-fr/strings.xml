@@ -735,6 +735,7 @@
     <string name="wifi_disabled_info">Info : Le Wi-Fi est désactivé.</string>
     <string name="bt_not_enabled">Le Bluetooth est désactivé</string>
     <string name="bt_permission_denied">Permission Bluetooth refusée. Impossible de chercher des appareils.</string>
+    <string name="bt_external_module_no_picker">Le Bluetooth de cet appareil est fourni par un module externe et non par la radio d\'Android, il n\'y a donc pas de liste d\'appareils Bluetooth Android à choisir ici.</string>
 
     <!-- Vehicle Info Settings -->
     <string name="vehicle_info_settings">Informations sur le véhicule</string>

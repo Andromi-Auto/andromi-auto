@@ -565,6 +565,7 @@
     <string name="mic_auto_gain_control_description">يضبط مستوى صوت الميكروفون تلقائياً. قم بتعطيله إذا كان مستوى الصوت غير مستقر.</string>
     <string name="mic_feature_unsupported">هذه الميزة غير مدعومة على جهازك.</string>
     <string name="bt_permission_denied">تم رفض إذن البلوتوث. لا يمكن مسح الأجهزة.</string>
+    <string name="bt_external_module_no_picker">بلوتوث هذه الوحدة توفره وحدة خارجية، وليس راديو أندرويد نفسه، لذلك لا توجد هنا قائمة أجهزة بلوتوث من أندرويد للاختيار منها.</string>
     <string name="wifi_autostart_title">بدء تشغيل WiFi تلقائياً</string>
     <string name="wifi_autostart_content">متصل بـ %s. اضغط لبدء أندرويد أوتو.</string>
 

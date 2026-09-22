@@ -539,6 +539,7 @@
     <string name="mic_auto_gain_control_description">Mikrofon ses seviyesini otomatik olarak ayarlar. Ses seviyesi dengesizse bunu devre dışı bırakın.</string>
     <string name="mic_feature_unsupported">Bu özellik cihazınızda desteklenmiyor.</string>
     <string name="bt_permission_denied">Bluetooth izni reddedildi. Cihazlar taranamıyor.</string>
+    <string name="bt_external_module_no_picker">Bu ünitenin Bluetooth\'u Android\'in kendi radyosu yerine harici bir modül tarafından sağlanıyor, bu yüzden burada seçilebilecek bir Android Bluetooth cihaz listesi yok.</string>
     <string name="wifi_autostart_title">WiFi Otomatik Başlatma</string>
     <string name="wifi_autostart_content">%s ağına bağlandı. Android Auto\'yu başlatmak için dokunun.</string>
 

@@ -564,6 +564,7 @@
     <string name="mic_auto_gain_control_description">Automatikusan szabályozza a mikrofon hangerejét. Kapcsolja ki, ha a hangerő instabil.</string>
     <string name="mic_feature_unsupported">Ez a funkció nem támogatott az eszközén.</string>
     <string name="bt_permission_denied">Bluetooth engedély megtagadva. Nem lehet eszközöket keresni.</string>
+    <string name="bt_external_module_no_picker">Ennek az egységnek a Bluetooth-át külső modul biztosítja, nem az Android saját rádiója, ezért itt nincs Android Bluetooth-eszközlista, amelyből választani lehetne.</string>
     <string name="wifi_autostart_title">WiFi automatikus indítás</string>
     <string name="wifi_autostart_content">Csatlakozva a következőhöz: %s. Koppintson az Android Auto indításához.</string>
 

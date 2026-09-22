@@ -568,6 +568,7 @@
     <string name="mic_auto_gain_control_description">Автоматически регулирует громкость микрофона. Отключите, если громкость нестабильна.</string>
     <string name="mic_feature_unsupported">Эта функция не поддерживается на вашем устройстве.</string>
     <string name="bt_permission_denied">В разрешении Bluetooth отказано. Невозможно сканировать устройства.</string>
+    <string name="bt_external_module_no_picker">Bluetooth этого устройства обеспечивает внешний модуль, а не собственный радиомодуль Android, поэтому здесь нет списка устройств Bluetooth Android для выбора.</string>
     <string name="wifi_autostart_title">Автозапуск Wi‑Fi</string>
     <string name="wifi_autostart_content">Подключено к %s. Нажмите, чтобы запустить Android Auto.</string>
 
