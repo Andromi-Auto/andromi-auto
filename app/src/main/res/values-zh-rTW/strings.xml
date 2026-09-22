@@ -1221,4 +1221,9 @@
     <string name="native_aa_wake_verdict_destructive">在本機會被保留</string>
     <string name="native_aa_wake_remeasure_confirm">Android Auto 只有在偵測到藍牙連線發生變化時才會啟動無線連線。若本機已佔用免持連線，應用程式必須中斷它才能觸發這個變化，因此會測量一次連線是否恢復，若沒有恢復則停止。如果無線連線已不再自行啟動，而你願意在它重試時暫時失去免持功能，請使用這個選項。</string>
     <string name="native_aa_wake_remeasure_done">下次連線時將重新測量藍牙喚醒。</string>
+    <string name="pref_enable_car_launcher_title">用作車載啟動器</string>
+    <string name="pref_enable_car_launcher_summary">按下車機首頁鍵時，將 Open Headunit 註冊為主畫面應用程式</string>
+    <string name="pref_set_default_launcher_title">預設主畫面應用程式</string>
+    <string name="pref_default_launcher_status_active">已啟用（輕觸以管理）</string>
+    <string name="pref_default_launcher_status_inactive">未設定（輕觸以設定為預設）</string>
 </resources>

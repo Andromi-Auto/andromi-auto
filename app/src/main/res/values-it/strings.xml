@@ -1225,4 +1225,9 @@
     <string name="native_aa_wake_verdict_destructive">Trattenuto su questa unità</string>
     <string name="native_aa_wake_remeasure_confirm">Android Auto avvia il wireless solo quando vede il cambiamento della connessione Bluetooth. Dove questa unità detiene già il collegamento vivavoce, l\'app deve interromperlo per farlo accadere, quindi misura una volta se il collegamento ritorna e si ferma se non ritorna. Usa questo se il wireless ha smesso di avviarsi da solo e sei disposto a perdere il vivavoce per un momento mentre riprova.</string>
     <string name="native_aa_wake_remeasure_done">Il risveglio Bluetooth verrà misurato di nuovo alla prossima connessione.</string>
+    <string name="pref_enable_car_launcher_title">Usa come launcher auto</string>
+    <string name="pref_enable_car_launcher_summary">Registra Open Headunit come schermata iniziale quando si preme il pulsante Home dell\'auto</string>
+    <string name="pref_set_default_launcher_title">App Home predefinita</string>
+    <string name="pref_default_launcher_status_active">Attivo (Tocca per gestire)</string>
+    <string name="pref_default_launcher_status_inactive">Non impostato (Tocca per impostare)</string>
 </resources>

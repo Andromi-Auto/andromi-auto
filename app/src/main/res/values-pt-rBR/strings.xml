@@ -1223,4 +1223,9 @@
     <string name="native_aa_wake_verdict_destructive">Contido nesta unidade</string>
     <string name="native_aa_wake_remeasure_confirm">O Android Auto só inicia uma conexão sem fio quando percebe a mudança na conexão Bluetooth. Onde esta unidade já mantém o vínculo mãos-livres, o app precisa quebrá-lo para provocar isso, então ele mede uma vez se o vínculo volta e para se não voltar. Use isso se a conexão sem fio parou de iniciar sozinha e você aceita perder o mãos-livres por um instante enquanto ele tenta de novo.</string>
     <string name="native_aa_wake_remeasure_done">O despertar por Bluetooth será medido de novo na próxima conexão.</string>
+    <string name="pref_enable_car_launcher_title">Usar como inicializador do carro</string>
+    <string name="pref_enable_car_launcher_summary">Registra o Open Headunit como tela inicial ao pressionar o botão Home do carro</string>
+    <string name="pref_set_default_launcher_title">App de início padrão</string>
+    <string name="pref_default_launcher_status_active">Ativo (Toque para gerenciar)</string>
+    <string name="pref_default_launcher_status_inactive">Não definido (Toque para definir)</string>
 </resources>

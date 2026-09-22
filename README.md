@@ -85,6 +85,7 @@ adb shell am start -a android.intent.action.VIEW -d "headunit://connect?ip=192.1
 ## Changelog
 ### v.3.5.0-alpha
 - Native AA: reconnect to a network that is still there, instead of rebuilding it every time
+- Added: Option to use Open Headunit as a launcher
 
 ### v.3.4.0
 - USB: connect non-Pixel phones without fighting a fast-reverting dongle

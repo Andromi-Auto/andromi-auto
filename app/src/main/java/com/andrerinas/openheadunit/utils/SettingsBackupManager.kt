@@ -61,6 +61,7 @@ object SettingsBackupManager {
         // not know, so without this an old backup loses the setting; Settings.videoFitMode
         // migrates the restored boolean on first read.
         "stretch_to_fill" to ValueType.BOOLEAN,
+        "enable-car-launcher" to ValueType.BOOLEAN,
         "enable-floating-button" to ValueType.BOOLEAN,
         "floating-button-x-percent" to ValueType.INT,
         "floating-button-y-percent" to ValueType.INT,

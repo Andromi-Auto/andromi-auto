@@ -1221,4 +1221,9 @@
     <string name="native_aa_wake_verdict_destructive">Wstrzymane na tym urządzeniu</string>
     <string name="native_aa_wake_remeasure_confirm">Android Auto uruchamia połączenie bezprzewodowe tylko wtedy, gdy zauważy zmianę połączenia Bluetooth. Tam, gdzie to urządzenie już utrzymuje połączenie głośnomówiące, aplikacja musi je zerwać, aby to wywołać, więc mierzy raz, czy połączenie wraca, i zatrzymuje się, jeśli nie wraca. Użyj tego, jeśli połączenie bezprzewodowe przestało uruchamiać się samo, a akceptujesz chwilową utratę głośnomówiącego, dopóki nie spróbuje ponownie.</string>
     <string name="native_aa_wake_remeasure_done">Wybudzenie Bluetooth zostanie zmierzone ponownie przy następnym połączeniu.</string>
+    <string name="pref_enable_car_launcher_title">Używaj jako launchera samochodowego</string>
+    <string name="pref_enable_car_launcher_summary">Rejestruje Open Headunit jako aplikację ekranu głównego po naciśnięciu przycisku Home w samochodzie</string>
+    <string name="pref_set_default_launcher_title">Domyślna aplikacja główna</string>
+    <string name="pref_default_launcher_status_active">Aktywny (Dotknij, aby zarządzać)</string>
+    <string name="pref_default_launcher_status_inactive">Nie ustawiono (Dotknij, aby ustawić)</string>
 </resources>

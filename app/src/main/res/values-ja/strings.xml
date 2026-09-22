@@ -1227,4 +1227,9 @@
     <string name="native_aa_wake_verdict_destructive">この機器では保留されています</string>
     <string name="native_aa_wake_remeasure_confirm">Android AutoはBluetooth接続の変化を検知したときだけワイヤレスを開始します。この機器がすでにハンズフリーリンクを保持している場合、アプリはそれを切断してこれを起こす必要があるため、リンクが戻るかどうかを一度だけ測定し、戻らない場合は停止します。ワイヤレスが自動的に開始しなくなり、再試行の間ハンズフリーを一瞬失ってもよい場合はこれを使用してください。</string>
     <string name="native_aa_wake_remeasure_done">Bluetoothの起動は次回の接続時に再測定されます。</string>
+    <string name="pref_enable_car_launcher_title">カーランチャーとして使用</string>
+    <string name="pref_enable_car_launcher_summary">車載機のホームボタンが押されたときにOpen Headunitをホーム画面アプリとして登録します</string>
+    <string name="pref_set_default_launcher_title">デフォルトのホームアプリ</string>
+    <string name="pref_default_launcher_status_active">有効（タップして管理）</string>
+    <string name="pref_default_launcher_status_inactive">未設定（タップして設定）</string>
 </resources>

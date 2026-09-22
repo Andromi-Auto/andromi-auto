@@ -1220,4 +1220,9 @@
     <string name="native_aa_wake_verdict_destructive">مُحتجز على هذه الوحدة</string>
     <string name="native_aa_wake_remeasure_confirm">لا يبدأ Android Auto الاتصال اللاسلكي إلا عندما يرى تغيّر اتصال البلوتوث. وحيث تحتفظ هذه الوحدة بالفعل بوصلة اليدين الحرة، يتعين على التطبيق قطعها لإحداث ذلك، لذا يقيس مرة واحدة ما إذا كانت الوصلة تعود ويتوقف إن لم تعد. استخدم هذا إذا توقف الاتصال اللاسلكي عن البدء من تلقاء نفسه وكنت مستعدًا لفقدان ميزة اليدين الحرة للحظة بينما يحاول مجددًا.</string>
     <string name="native_aa_wake_remeasure_done">سيُعاد قياس إيقاظ البلوتوث عند الاتصال التالي.</string>
+    <string name="pref_enable_car_launcher_title">الاستخدام كمشغل سيارة</string>
+    <string name="pref_enable_car_launcher_summary">تسجيل Open Headunit كتطبيق الشاشة الرئيسية عند الضغط على زر الصفحة الرئيسية</string>
+    <string name="pref_set_default_launcher_title">تطبيق الصفحة الرئيسية الافتراضي</string>
+    <string name="pref_default_launcher_status_active">نشط (اضغط للإدارة)</string>
+    <string name="pref_default_launcher_status_inactive">غير محدد (اضغط لتعيين كافتراضي)</string>
 </resources>

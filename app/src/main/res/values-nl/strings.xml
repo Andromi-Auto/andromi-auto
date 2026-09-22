@@ -1222,4 +1222,9 @@
     <string name="native_aa_wake_verdict_destructive">Tegengehouden op dit apparaat</string>
     <string name="native_aa_wake_remeasure_confirm">Android Auto start draadloos alleen als het de Bluetooth-verbinding ziet veranderen. Als dit apparaat de handsfreeverbinding al vasthoudt, moet de app die verbreken om dat te laten gebeuren, dus meet hij één keer of de verbinding terugkomt en stopt hij als dat niet zo is. Gebruik dit als draadloos niet meer vanzelf start en je bereid bent handsfree even kwijt te raken terwijl hij het opnieuw probeert.</string>
     <string name="native_aa_wake_remeasure_done">De Bluetooth-wekking wordt bij de volgende verbinding opnieuw gemeten.</string>
+    <string name="pref_enable_car_launcher_title">Als auto-launcher gebruiken</string>
+    <string name="pref_enable_car_launcher_summary">Registreert Open Headunit als startscherm-app wanneer op de Home-knop van de auto wordt gedrukt</string>
+    <string name="pref_set_default_launcher_title">Standaard start-app</string>
+    <string name="pref_default_launcher_status_active">Actief (Tik om te beheren)</string>
+    <string name="pref_default_launcher_status_inactive">Niet ingesteld (Tik om in te stellen)</string>
 </resources>

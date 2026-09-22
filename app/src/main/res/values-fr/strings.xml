@@ -1262,4 +1262,9 @@
     <string name="native_aa_wake_verdict_destructive">Retenu sur cet appareil</string>
     <string name="native_aa_wake_remeasure_confirm">Android Auto ne démarre le sans fil que lorsqu\'il voit le changement de connexion Bluetooth. Là où cet appareil détient déjà la liaison mains libres, l\'application doit la rompre pour provoquer ce changement, donc elle mesure une fois si la liaison revient et s\'arrête si elle ne revient pas. Utilisez ceci si le sans fil a cessé de démarrer tout seul et que vous acceptez de perdre les mains libres un instant pendant qu\'il réessaie.</string>
     <string name="native_aa_wake_remeasure_done">Le réveil Bluetooth sera remesuré à la prochaine connexion.</string>
+    <string name="pref_enable_car_launcher_title">Utiliser comme lanceur de voiture</string>
+    <string name="pref_enable_car_launcher_summary">Enregistre Open Headunit comme application d\'accueil lorsque le bouton d\'accueil de la voiture est pressé</string>
+    <string name="pref_set_default_launcher_title">Application d\'accueil par défaut</string>
+    <string name="pref_default_launcher_status_active">Actif (Appuyer pour gérer)</string>
+    <string name="pref_default_launcher_status_inactive">Non défini (Appuyer pour configurer)</string>
 </resources>

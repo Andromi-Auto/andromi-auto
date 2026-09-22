@@ -1218,4 +1218,9 @@
     <string name="native_aa_wake_verdict_destructive">Visszatartva ezen az egységen</string>
     <string name="native_aa_wake_remeasure_confirm">Az Android Auto csak akkor indítja el a vezeték nélküli kapcsolatot, ha látja a Bluetooth-kapcsolat változását. Ahol ez az egység már tartja a kihangosító kapcsolatot, az alkalmazásnak meg kell szakítania azt, hogy ez megtörténjen, ezért egyszer méri, hogy a kapcsolat visszatér-e, és leáll, ha nem. Ezt akkor használja, ha a vezeték nélküli kapcsolat magától leállt, és hajlandó egy pillanatra elveszíteni a kihangosítást, amíg újra megpróbálja.</string>
     <string name="native_aa_wake_remeasure_done">A Bluetooth-ébresztés a következő csatlakozáskor újra mérésre kerül.</string>
+    <string name="pref_enable_car_launcher_title">Használat autós indítóként</string>
+    <string name="pref_enable_car_launcher_summary">Regisztrálja az Open Headunitot kezdőképernyőként a jármű Home gombjának megnyomásakor</string>
+    <string name="pref_set_default_launcher_title">Alapértelmezett kezdőképernyő</string>
+    <string name="pref_default_launcher_status_active">Aktív (Koppintson a kezeléshez)</string>
+    <string name="pref_default_launcher_status_inactive">Nincs beállítva (Koppintson a beállításhoz)</string>
 </resources>

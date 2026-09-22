@@ -1231,4 +1231,9 @@
     <string name="native_aa_wake_verdict_destructive">Retenido en esta unidad</string>
     <string name="native_aa_wake_remeasure_confirm">Android Auto solo inicia la conexión inalámbrica cuando ve el cambio en la conexión Bluetooth. Cuando esta unidad ya tiene la conexión de manos libres, la app tiene que romperla para provocar eso, así que mide una vez si la conexión vuelve y se detiene si no vuelve. Usa esto si la conexión inalámbrica dejó de iniciarse por sí sola y estás dispuesto a perder el manos libres un momento mientras lo intenta de nuevo.</string>
     <string name="native_aa_wake_remeasure_done">El despertar Bluetooth se volverá a medir en la próxima conexión.</string>
+    <string name="pref_enable_car_launcher_title">Usar como lanzador del coche</string>
+    <string name="pref_enable_car_launcher_summary">Registra Open Headunit como aplicación de inicio al pulsar el botón de inicio del coche</string>
+    <string name="pref_set_default_launcher_title">Aplicación de inicio predeterminada</string>
+    <string name="pref_default_launcher_status_active">Activo (Tocar para gestionar)</string>
+    <string name="pref_default_launcher_status_inactive">No establecido (Tocar para configurar)</string>
 </resources>

@@ -1225,4 +1225,9 @@
     <string name="native_aa_wake_verdict_destructive">Bị giữ lại trên thiết bị này</string>
     <string name="native_aa_wake_remeasure_confirm">Android Auto chỉ khởi động kết nối không dây khi thấy kết nối Bluetooth thay đổi. Ở nơi thiết bị này đã đang giữ liên kết rảnh tay, ứng dụng phải ngắt nó để tạo ra thay đổi đó, nên nó đo một lần xem liên kết có quay lại không và dừng nếu không quay lại. Hãy dùng cái này nếu kết nối không dây đã ngừng tự khởi động và bạn chấp nhận mất rảnh tay trong chốc lát trong khi nó thử lại.</string>
     <string name="native_aa_wake_remeasure_done">Việc đánh thức Bluetooth sẽ được đo lại vào lần kết nối tiếp theo.</string>
+    <string name="pref_enable_car_launcher_title">Sử dụng làm trình khởi chạy trên xe</string>
+    <string name="pref_enable_car_launcher_summary">Đăng ký Open Headunit làm ứng dụng màn hình chính khi nhấn nút Home của xe</string>
+    <string name="pref_set_default_launcher_title">Ứng dụng màn hình chính mặc định</string>
+    <string name="pref_default_launcher_status_active">Đang hoạt động (Chạm để quản lý)</string>
+    <string name="pref_default_launcher_status_inactive">Chưa đặt (Chạm để đặt làm mặc định)</string>
 </resources>

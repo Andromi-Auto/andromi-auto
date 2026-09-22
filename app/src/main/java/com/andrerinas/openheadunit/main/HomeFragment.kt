@@ -36,6 +36,7 @@ import com.andrerinas.openheadunit.connection.usb.UsbDeviceDiagnostics
 import android.content.res.Configuration
 import com.andrerinas.openheadunit.utils.AppLog
 import com.andrerinas.openheadunit.utils.AppPermissions
+import com.andrerinas.openheadunit.utils.CarLauncherManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -125,6 +126,7 @@ class HomeFragment : Fragment() {
         updateProjectionButtonText()
         updateButtonStyle()
         updateButtonScale()
+        updateExitButtonVisibility()
 
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -342,6 +344,16 @@ class HomeFragment : Fragment() {
         val density = resources.displayMetrics.density
         val isPortrait = resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
         HomeUiHelper.applyButtonScale(v, appSettings.homeButtonScalePercent, isPortrait, density)
+    }
+
+    private fun updateExitButtonVisibility() {
+        val ctx = context ?: return
+        val appSettings = App.provide(ctx).settings
+        val shouldShow = CarLauncherManager.shouldShowExitButton(
+            isCarLauncherEnabled = appSettings.enableCarLauncher,
+            isDefaultLauncher = CarLauncherManager.isDefaultLauncher(ctx)
+        )
+        exitButton.visibility = if (shouldShow) View.VISIBLE else View.GONE
     }
 
     private fun setupListeners() {
@@ -672,6 +684,7 @@ class HomeFragment : Fragment() {
         updateButtonStyle()
         updateButtonScale()
         updateTextColors()
+        updateExitButtonVisibility()
         if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
             view?.let { constrainPortraitGridWidth(it) }
         }

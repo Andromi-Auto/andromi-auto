@@ -44,6 +44,7 @@ import com.andrerinas.openheadunit.connection.ConnectionStageTracker
 import com.andrerinas.openheadunit.connection.PhoneExitQuietPolicy
 import com.andrerinas.openheadunit.utils.AppLog
 import com.andrerinas.openheadunit.utils.AppPermissions
+import com.andrerinas.openheadunit.utils.CarLauncherManager
 import com.andrerinas.openheadunit.utils.ConnectionIssue
 import com.andrerinas.openheadunit.utils.ConnectionIssues
 import android.content.res.Configuration
@@ -182,11 +183,10 @@ class MainActivity : BaseActivity() {
         val appSettings = Settings(this)
         requestedOrientation = appSettings.screenOrientation.androidOrientation
 
-        // Sync UsbAttachedActivity component state with the listen for USB devices setting.
-        // This covers first install, app updates (manifest may reset component state),
-        // and ensures the USB system modal only appears when the user has opted in to listen for ALL USB devices.
+        // Sync UsbAttachedActivity and CarLauncher component states with settings.
         lifecycleScope.launch(Dispatchers.IO) {
             Settings.setUsbAttachedActivityEnabled(applicationContext, appSettings.listenForUsbDevices)
+            CarLauncherManager.syncWithSettings(applicationContext, appSettings.enableCarLauncher)
         }
 
         // Start main service immediately to handle connections and wireless server
@@ -209,6 +209,10 @@ class MainActivity : BaseActivity() {
                     return
                 }
                 if (navController.navigateUp()) {
+                    return
+                } else if (appSettings.enableCarLauncher || CarLauncherManager.isDefaultLauncher(this@MainActivity)) {
+                    // When in Car Launcher mode or active system Home launcher,
+                    // back press at the root of the app should not finish the launcher.
                     return
                 } else if (System.currentTimeMillis() - lastBackPressTime < 2000) {
                     finish()

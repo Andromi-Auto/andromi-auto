@@ -1219,4 +1219,9 @@
     <string name="native_aa_wake_verdict_destructive">Reținută pe această unitate</string>
     <string name="native_aa_wake_remeasure_confirm">Android Auto pornește conexiunea wireless doar când vede schimbarea conexiunii Bluetooth. Acolo unde această unitate deține deja legătura hands-free, aplicația trebuie să o rupă ca să provoace asta, așa că măsoară o dată dacă legătura revine și se oprește dacă nu revine. Folosește asta dacă wireless-ul a încetat să pornească singur și ești dispus să pierzi hands-free-ul pentru o clipă cât încearcă din nou.</string>
     <string name="native_aa_wake_remeasure_done">Trezirea Bluetooth va fi măsurată din nou la următoarea conexiune.</string>
+    <string name="pref_enable_car_launcher_title">Utilizare ca lansator auto</string>
+    <string name="pref_enable_car_launcher_summary">Înregistrează Open Headunit ca aplicație pentru ecranul principal la apăsarea butonului Home</string>
+    <string name="pref_set_default_launcher_title">Aplicație principală implicită</string>
+    <string name="pref_default_launcher_status_active">Activ (Atingeți pentru gestionare)</string>
+    <string name="pref_default_launcher_status_inactive">Nesetat (Atingeți pentru configurare)</string>
 </resources>

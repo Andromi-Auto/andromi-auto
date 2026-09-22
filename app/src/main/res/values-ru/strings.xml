@@ -1221,4 +1221,9 @@
     <string name="native_aa_wake_verdict_destructive">Сдерживается на этом устройстве</string>
     <string name="native_aa_wake_remeasure_confirm">Android Auto запускает беспроводное подключение, только когда видит изменение подключения Bluetooth. Там, где это устройство уже удерживает громкую связь, приложению приходится её разорвать, чтобы это вызвать, поэтому оно один раз измеряет, вернётся ли связь, и останавливается, если не вернётся. Используйте это, если беспроводное подключение перестало запускаться само и вы готовы на мгновение потерять громкую связь, пока оно пробует снова.</string>
     <string name="native_aa_wake_remeasure_done">Пробуждение по Bluetooth будет измерено заново при следующем подключении.</string>
+    <string name="pref_enable_car_launcher_title">Использовать как лаунчер авто</string>
+    <string name="pref_enable_car_launcher_summary">Регистрирует Open Headunit как домашний экран при нажатии кнопки Home в автомобиле</string>
+    <string name="pref_set_default_launcher_title">Главное приложение по умолчанию</string>
+    <string name="pref_default_launcher_status_active">Активно (Нажмите для управления)</string>
+    <string name="pref_default_launcher_status_inactive">Не задано (Нажмите для настройки)</string>
 </resources>

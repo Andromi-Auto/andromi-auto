@@ -1203,4 +1203,9 @@
     <string name="native_aa_wake_verdict_destructive">შეკავებულია ამ მოწყობილობაზე</string>
     <string name="native_aa_wake_remeasure_confirm">Android Auto უსადენო კავშირს მხოლოდ მაშინ იწყებს, როცა ხედავს Bluetooth კავშირის ცვლილებას. სადაც ეს მოწყობილობა უკვე ინარჩუნებს ჰენდსფრის კავშირს, აპმა უნდა გაწყვიტოს ის ამის გამოსაწვევად, ამიტომ ერთხელ ზომავს, უბრუნდება თუ არა კავშირი, და ჩერდება, თუ არ უბრუნდება. გამოიყენეთ ეს, თუ უსადენო კავშირმა შეწყვიტა თავისით დაწყება და მზად ხართ, წამით დაკარგოთ ჰენდსფრი, სანამ ის ხელახლა ცდის.</string>
     <string name="native_aa_wake_remeasure_done">Bluetooth გაღვიძება ხელახლა გაიზომება შემდეგ დაკავშირებაზე.</string>
+    <string name="pref_enable_car_launcher_title">მანქანის გამშვებად გამოყენება</string>
+    <string name="pref_enable_car_launcher_summary">Open Headunit-ის მთავარ ეკრანად რეგისტრაცია მანქანის Home ღილაკზე დაჭერისას</string>
+    <string name="pref_set_default_launcher_title">ნაგულისხმევი მთავარი აპი</string>
+    <string name="pref_default_launcher_status_active">აქტიური (შეეხეთ მართვისთვის)</string>
+    <string name="pref_default_launcher_status_inactive">არ არის დაყენებული (შეეხეთ ასარჩევად)</string>
 </resources>

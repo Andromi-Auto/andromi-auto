@@ -1226,4 +1226,9 @@
     <string name="native_aa_wake_verdict_destructive">Auf diesem Gerät zurückgehalten</string>
     <string name="native_aa_wake_remeasure_confirm">Android Auto startet drahtlose Verbindungen nur, wenn es die Bluetooth-Verbindungsänderung sieht. Wo dieses Gerät die Freisprechverbindung bereits hält, muss die App sie trennen, um das auszulösen, deshalb misst sie einmal, ob die Verbindung zurückkommt, und stoppt, wenn nicht. Nutze dies, wenn die drahtlose Verbindung nicht mehr von selbst startet und du bereit bist, die Freisprechfunktion kurz zu verlieren, während sie es erneut versucht.</string>
     <string name="native_aa_wake_remeasure_done">Das Bluetooth-Wecken wird bei der nächsten Verbindung erneut gemessen.</string>
+    <string name="pref_enable_car_launcher_title">Als Car-Launcher verwenden</string>
+    <string name="pref_enable_car_launcher_summary">Registriert Open Headunit als Startbildschirm-App beim Drücken der Home-Taste des Autos</string>
+    <string name="pref_set_default_launcher_title">Standard-Start-App</string>
+    <string name="pref_default_launcher_status_active">Aktiv (Tippen zum Verwalten)</string>
+    <string name="pref_default_launcher_status_inactive">Nicht gesetzt (Tippen zum Festlegen)</string>
 </resources>
