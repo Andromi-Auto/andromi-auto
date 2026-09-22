@@ -36,8 +36,12 @@ import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.NativeAaWakeDa
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.zbt.ZbtProbe
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.zbt.ZbtDaemonReachability
 import com.andrerinas.openheadunit.input.MediaKeyRoutingPolicy
-import com.andrerinas.openheadunit.connection.wifi.direct.P2pGroupIdentityPolicy
+import com.andrerinas.openheadunit.connection.wifi.direct.ObservedP2pCredentials
+import com.andrerinas.openheadunit.connection.wifi.direct.P2pIdentityEdit
+import com.andrerinas.openheadunit.connection.wifi.direct.P2pIdentityEditPolicy
+import com.andrerinas.openheadunit.connection.wifi.direct.P2pIdentityRejection
 import com.andrerinas.openheadunit.connection.wifi.direct.P2pIdentityRotationPolicy
+import com.andrerinas.openheadunit.connection.wifi.direct.StoredP2pIdentity
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.NativeCredentialsPreflightPolicy
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.NativeDriverSelectionPolicy
 import com.andrerinas.openheadunit.aap.NativeTransport
@@ -125,6 +129,8 @@ class SettingsFragment : Fragment() {
         // network on a channel the phone's regulatory domain forbids is one it never lists.
         "fiveGhzChannel",
         "hotspotSsidOverride", "hotspotPasswordOverride",
+        // "What is my head unit's WiFi password" is an everyday question, not an Advanced one.
+        "wifiDirectLastNetwork", "wifiDirectGroupIdentity",
         "hotspotInterfaceOverride",
         // Dark mode
         "darkModeSettings",
@@ -209,6 +215,10 @@ class SettingsFragment : Fragment() {
     private var pendingNativePreferredDeviceMac: String? = null
     private var pendingWifiDirectBand: Int? = null
     private var pendingWifiDirectStableIdentity: Boolean? = null
+    // The pair and its provenance move together; null on the second means neither was edited,
+    // which is the only way null on the first can mean "back to a pair the app draws".
+    private var pendingWifiDirectGroupIdentity: StoredP2pIdentity? = null
+    private var pendingWifiDirectIdentityUserSet: Boolean? = null
     private var pendingStationStandDownMode: Int? = null
     private var pendingHotspotBand: Int? = null
     private var pendingFiveGhzChannel: Int? = null
@@ -391,6 +401,8 @@ class SettingsFragment : Fragment() {
         pendingNativePreferredDeviceMac = settings.nativePreferredDeviceMac
         pendingWifiDirectBand = settings.wifiDirectBand
         pendingWifiDirectStableIdentity = settings.wifiDirectStableIdentity
+        pendingWifiDirectGroupIdentity = settings.wifiDirectGroupIdentity
+        pendingWifiDirectIdentityUserSet = settings.wifiDirectIdentityUserSet
         pendingStationStandDownMode = settings.stationStandDownMode
         pendingHotspotBand = settings.hotspotBand
         pendingFiveGhzChannel = settings.fiveGhzChannel
@@ -523,6 +535,8 @@ class SettingsFragment : Fragment() {
         pendingNativePreferredDeviceMac = ""
         pendingWifiDirectBand = settings.wifiDirectBand
         pendingWifiDirectStableIdentity = settings.wifiDirectStableIdentity
+        pendingWifiDirectGroupIdentity = settings.wifiDirectGroupIdentity
+        pendingWifiDirectIdentityUserSet = settings.wifiDirectIdentityUserSet
         pendingStationStandDownMode = settings.stationStandDownMode
         pendingHotspotBand = settings.hotspotBand
         pendingFiveGhzChannel = settings.fiveGhzChannel
@@ -765,6 +779,13 @@ class SettingsFragment : Fragment() {
         pendingNativePreferredDeviceMac?.let { settings.nativePreferredDeviceMac = it }
         pendingWifiDirectBand?.let { settings.wifiDirectBand = it }
         pendingWifiDirectStableIdentity?.let { settings.wifiDirectStableIdentity = it }
+        // The pair is written whole, null included, so a Reset really does hand the choice back.
+        pendingWifiDirectIdentityUserSet?.let {
+            val moved = settings.wifiDirectGroupIdentity != pendingWifiDirectGroupIdentity
+            settings.wifiDirectIdentityUserSet = it
+            settings.wifiDirectGroupIdentity = pendingWifiDirectGroupIdentity
+            if (moved) rotateWifiDirectIdentityNow()
+        }
         pendingStationStandDownMode?.let { settings.stationStandDownMode = it }
         pendingHotspotBand?.let { settings.hotspotBand = it }
         pendingFiveGhzChannel?.let { settings.fiveGhzChannel = it }
@@ -896,6 +917,8 @@ class SettingsFragment : Fragment() {
                         pendingNativePreferredDeviceMac != settings.nativePreferredDeviceMac ||
                         pendingWifiDirectBand != settings.wifiDirectBand ||
                         pendingWifiDirectStableIdentity != settings.wifiDirectStableIdentity ||
+                        pendingWifiDirectIdentityUserSet != settings.wifiDirectIdentityUserSet ||
+                        pendingWifiDirectGroupIdentity != settings.wifiDirectGroupIdentity ||
                         pendingStationStandDownMode != settings.stationStandDownMode ||
                         pendingHotspotBand != settings.hotspotBand ||
                         pendingFiveGhzChannel != settings.fiveGhzChannel ||
@@ -4233,15 +4256,15 @@ class SettingsFragment : Fragment() {
     }
 
     /**
-     * Whether the group keeps its name and passphrase between bring-ups, and a way to draw new ones.
+     * Whether the group keeps its name and passphrase between bring-ups, and what can change them.
      *
-     * Only where the group is ours to name: the hotspot's identity is the access point's own. The
-     * switch is read at the next create, so Save needs no re-arm for it. The "new identity" action
-     * replaces both halves together, which is the one rotation a phone's saved profile survives.
+     * Only where the group is ours to name: the hotspot's identity is the access point's own. From
+     * API 29 one row owns the pair, typed or drawn. Below it nothing can name a group, so the rotate
+     * row is the only lever and it works by purging the platform's stored profile.
      */
     private fun addWifiDirectIdentitySettings(items: MutableList<SettingItem>) {
         // Below API 29 the app cannot name the group at all: the platform picks the name and keeps
-        // its own profile, so the toggle and the row describe that arrangement instead of this one.
+        // its own profile, so the toggle and the rows describe that arrangement instead of this one.
         val appNamesGroup = Build.VERSION.SDK_INT >= P2pIdentityRotationPolicy.NAMED_CREATE_SDK
         items.add(SettingItem.ToggleSettingEntry(
             stableId = "wifiDirectStableIdentity",
@@ -4256,14 +4279,28 @@ class SettingsFragment : Fragment() {
                 updateSettingsList()
             }
         ))
+        // Above the early return below: what the last group actually was is worth reading whether or
+        // not its identity is kept, and below API 29 it is the only place the pair is ever legible.
+        addWifiDirectLastNetworkRow(items)
         if (pendingWifiDirectStableIdentity == false) return
+        if (appNamesGroup) {
+            // One row owns the pair here, and its "pick new ones" button is what the separate
+            // rotate row below does, so that row would be a second way to do the same thing.
+            addWifiDirectIdentityEditRow(items)
+            return
+        }
+        items.add(SettingItem.InfoBanner(
+            stableId = "wifiDirectIdentityLegacy",
+            textResId = R.string.wifi_direct_group_identity_legacy
+        ))
+        // Below API 29 this is the only rename lever there is: nothing can name a group, so the
+        // platform's stored profile has to be purged for it to pick a different one.
         items.add(SettingItem.SettingEntry(
             stableId = "wifiDirectNewIdentity",
             nameResId = R.string.wifi_direct_new_identity,
-            // The name the app asked for where it names the group, and the one the last group
-            // actually came up under where the platform does.
-            value = (if (appNamesGroup) settings.wifiDirectGroupIdentity?.networkName
-                else settings.wifiDirectLastGroup?.ssid)
+            // The read-back record, not the stability yardstick: that one is only written on an
+            // assessed create, so it can name a group older than the one on the air.
+            value = settings.wifiDirectLastReadBack?.networkName
                 ?: getString(R.string.wifi_direct_new_identity_none),
             searchKeywords = "forget reset ssid passphrase password group name",
             onClick = { _ ->
@@ -4271,39 +4308,193 @@ class SettingsFragment : Fragment() {
                     .setTitle(R.string.wifi_direct_new_identity)
                     .setMessage(R.string.wifi_direct_new_identity_confirm)
                     .setPositiveButton(android.R.string.ok) { _, _ ->
-                        if (appNamesGroup) {
-                            settings.wifiDirectGroupIdentity =
-                                P2pGroupIdentityPolicy.mint(AapService.wifiDirectName.value)
-                        } else {
-                            settings.wifiDirectRotationPending = true
-                        }
-                        requireContext().startService(
-                            Intent(requireContext(), AapService::class.java).apply {
-                                action = AapService.ACTION_ROTATE_WIFI_DIRECT_IDENTITY
-                            }
-                        )
-                        // The saved mode, not the pending one: the running launcher is what the
-                        // service asks, and it is still the authority on whether this applies now.
-                        // A handshake is invisible from here, so the toast can only be hopeful.
-                        val appliesNow = P2pIdentityRotationPolicy.applyNow(
-                            sessionLive = App.provide(requireContext()).commManager.isConnected,
-                            handshakeInFlight = false,
-                            nativeWifiDirectActive = settings.wifiConnectionMode == WifiLauncherMode.NATIVE &&
-                                settings.nativeApStrategy == NativeStrategy.WIFI_DIRECT,
-                        )
-                        ToastUtils.showToast(
-                            requireContext(),
-                            if (appliesNow) R.string.wifi_direct_new_identity_applied
-                            else R.string.wifi_direct_new_identity_done,
-                            Toast.LENGTH_LONG,
-                            force = true
-                        )
+                        settings.wifiDirectRotationPending = true
+                        rotateWifiDirectIdentityNow()
                         updateSettingsList()
                     }
                     .setNegativeButton(android.R.string.cancel, null)
                     .show()
             }
         ))
+    }
+
+    /**
+     * Fires the rotate, which the service applies now or defers, and says which it did.
+     *
+     * The saved mode, not the pending one: the running launcher is what the service asks. A
+     * handshake is invisible from here, so the toast can only be hopeful.
+     */
+    private fun rotateWifiDirectIdentityNow() {
+        requireContext().startService(
+            Intent(requireContext(), AapService::class.java).apply {
+                action = AapService.ACTION_ROTATE_WIFI_DIRECT_IDENTITY
+            }
+        )
+        val appliesNow = P2pIdentityRotationPolicy.applyNow(
+            sessionLive = App.provide(requireContext()).commManager.isConnected,
+            handshakeInFlight = false,
+            nativeWifiDirectActive = settings.wifiConnectionMode == WifiLauncherMode.NATIVE &&
+                settings.nativeApStrategy == NativeStrategy.WIFI_DIRECT,
+        )
+        ToastUtils.showToast(
+            requireContext(),
+            if (appliesNow) R.string.wifi_direct_new_identity_applied
+            else R.string.wifi_direct_new_identity_done,
+            Toast.LENGTH_LONG,
+            force = true
+        )
+    }
+
+    /**
+     * The name, password and address the last group actually came up with, whatever named it.
+     *
+     * Read from a persisted record rather than the live group, because this screen stops the
+     * wireless stack before it draws. The row never shows the password; the dialog does.
+     */
+    private fun addWifiDirectLastNetworkRow(items: MutableList<SettingItem>) {
+        val onAir = settings.wifiDirectLastReadBack
+        items.add(SettingItem.SettingEntry(
+            stableId = "wifiDirectLastNetwork",
+            nameResId = R.string.wifi_direct_last_network,
+            value = onAir?.networkName ?: getString(R.string.wifi_direct_last_network_none),
+            searchKeywords = "wifi direct ssid passphrase password bssid mac address show see what is my network",
+            onClick = { _ -> showWifiDirectLastNetworkDialog(onAir) }
+        ))
+    }
+
+    private fun showWifiDirectLastNetworkDialog(onAir: ObservedP2pCredentials?) {
+        val body = StringBuilder()
+        if (onAir == null) {
+            body.append(getString(R.string.wifi_direct_last_network_none))
+        } else {
+            body.append(
+                getString(
+                    R.string.wifi_direct_last_network_details,
+                    onAir.networkName,
+                    onAir.passphrase,
+                    onAir.bssid.ifEmpty { getString(R.string.wifi_direct_last_network_address_unknown) },
+                )
+            )
+            // The one failure this dialog is most often opened for, named in the user's terms.
+            if (!SoftApBssidPolicy.isUsable(onAir.bssid)) {
+                body.append("\n\n").append(getString(R.string.wifi_direct_last_network_no_bssid))
+            }
+            val asked = settings.wifiDirectGroupIdentity
+            if (Build.VERSION.SDK_INT >= P2pIdentityRotationPolicy.NAMED_CREATE_SDK && asked != null &&
+                (asked.networkName != onAir.networkName || asked.passphrase != onAir.passphrase)
+            ) {
+                body.append("\n\n").append(getString(R.string.wifi_direct_last_network_differs))
+            }
+        }
+        body.append("\n\n").append(getString(R.string.wifi_direct_last_network_hint))
+        val builder = MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
+            .setTitle(R.string.wifi_direct_last_network_title)
+            .setMessage(body.toString())
+            .setPositiveButton(android.R.string.ok, null)
+        if (onAir != null) {
+            builder.setNeutralButton(R.string.copy) { _, _ ->
+                val clipboard = requireContext()
+                    .getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
+                clipboard?.setPrimaryClip(ClipData.newPlainText(onAir.networkName, onAir.passphrase))
+                ToastUtils.showToast(
+                    requireContext(), R.string.wifi_direct_credentials_copied,
+                    Toast.LENGTH_SHORT, force = true
+                )
+            }
+        }
+        builder.show()
+    }
+
+    /** The typed pair. Both fields in one dialog, because a password moves the name with it. */
+    private fun addWifiDirectIdentityEditRow(items: MutableList<SettingItem>) {
+        val userSet = pendingWifiDirectIdentityUserSet ?: settings.wifiDirectIdentityUserSet
+        val pair = pendingWifiDirectGroupIdentity
+        items.add(SettingItem.SettingEntry(
+            stableId = "wifiDirectGroupIdentity",
+            nameResId = R.string.wifi_direct_group_identity,
+            value = if (userSet && pair != null)
+                pair.networkName + "  ·  " + "•".repeat(pair.passphrase.length)
+            else getString(R.string.wifi_direct_group_identity_auto),
+            searchKeywords = "wifi direct ssid network name passphrase password set change custom own known",
+            onClick = { _ ->
+                DialogUtils.showTwoFieldDialog(
+                    requireContext(),
+                    R.string.wifi_direct_group_identity,
+                    R.string.wifi_direct_group_identity_message,
+                    R.string.wifi_direct_group_identity_name_hint,
+                    if (userSet) pair?.networkName else null,
+                    R.string.wifi_direct_group_identity_passphrase_hint,
+                    if (userSet) pair?.passphrase else null,
+                    neutralResId = R.string.wifi_direct_group_identity_pick_new,
+                    onNeutral = { clearWifiDirectIdentity() },
+                ) { typedName, typedPassphrase ->
+                    applyWifiDirectIdentityEdit(typedName, typedPassphrase)
+                }
+            }
+        ))
+    }
+
+    /**
+     * Hands the pair back to the app, which draws a fresh one at the next create. Unlike an empty
+     * OK this always applies: asking for new values is a request even when none were typed.
+     */
+    private fun clearWifiDirectIdentity() {
+        pendingWifiDirectGroupIdentity = null
+        pendingWifiDirectIdentityUserSet = false
+        checkChanges()
+        updateSettingsList()
+    }
+
+    private fun applyWifiDirectIdentityEdit(typedName: String, typedPassphrase: String) {
+        when (val outcome = P2pIdentityEditPolicy.edit(
+            current = pendingWifiDirectGroupIdentity,
+            typedName = typedName,
+            typedPassphrase = typedPassphrase,
+            deviceName = AapService.wifiDirectName.value,
+        )) {
+            is P2pIdentityEdit.Rejected -> {
+                // Rejected at the dialog, like the static BSSID row: a pair the platform refuses
+                // fails much later, at createGroup, where nothing points back at what was typed.
+                ToastUtils.showToast(
+                    requireContext(),
+                    when (outcome.why) {
+                        P2pIdentityRejection.NAME_SHAPE ->
+                            R.string.wifi_direct_group_identity_invalid_name
+                        P2pIdentityRejection.PASSPHRASE_LENGTH ->
+                            R.string.wifi_direct_group_identity_invalid_passphrase_length
+                        P2pIdentityRejection.PASSPHRASE_CHARSET ->
+                            R.string.wifi_direct_group_identity_invalid_passphrase_charset
+                    },
+                    Toast.LENGTH_LONG, force = true
+                )
+                return
+            }
+            P2pIdentityEdit.Unchanged -> return
+            P2pIdentityEdit.Cleared -> {
+                // OK on an untouched dialog must not read as "discard the pair": clearing is only a
+                // change where there was typing to clear, and otherwise renames the group for nothing.
+                // The neutral button is the deliberate ask and goes through clearWifiDirectIdentity.
+                if (pendingWifiDirectIdentityUserSet != true) return
+                pendingWifiDirectGroupIdentity = null
+                pendingWifiDirectIdentityUserSet = false
+            }
+            is P2pIdentityEdit.Accepted -> {
+                pendingWifiDirectGroupIdentity = outcome.identity
+                pendingWifiDirectIdentityUserSet = true
+                if (outcome.recoded) {
+                    ToastUtils.showToast(
+                        requireContext(),
+                        getString(
+                            R.string.wifi_direct_group_identity_recoded,
+                            outcome.identity.networkName
+                        ),
+                        Toast.LENGTH_LONG, force = true
+                    )
+                }
+            }
+        }
+        checkChanges()
+        updateSettingsList()
     }
 
     /**

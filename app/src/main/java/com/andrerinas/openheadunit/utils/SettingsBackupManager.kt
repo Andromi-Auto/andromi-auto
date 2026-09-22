@@ -213,6 +213,12 @@ object SettingsBackupManager {
         // Wireless hotspot host credentials and manual BSSID override.
         "hotspot-ssid" to ValueType.STRING,
         "hotspot-password" to ValueType.STRING,
+        // The WiFi Direct pair, for the same reason: the user typed it and a reinstall is exactly
+        // when they want it back. No half-pair guard is needed because Settings.wifiDirectGroupIdentity
+        // reads null unless both keys are present, and a fresh pair is then minted.
+        "wifi-direct-group-name" to ValueType.STRING,
+        "wifi-direct-group-passphrase" to ValueType.STRING,
+        "wifi-direct-identity-user-set" to ValueType.BOOLEAN,
         // Which band to ask for, on either transport: a property of this unit's radio, found by
         // trial, so it should survive the reinstall that is exactly when somebody exports their
         // settings.

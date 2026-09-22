@@ -1223,6 +1223,11 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
             if (isNativeAaMode() && isOwner) {
                 // The group answered, so a refresh landing now may hand it out rather than wait.
                 nativeCreateRequestedAtMs = 0L
+                // What the settings screen shows the user. Written as read, masked address included,
+                // because an address that cannot be read is exactly what they are looking for. Ahead
+                // of the assessment below, which does not run on every callback or every group.
+                val onAir = ObservedP2pCredentials(ssid, psk, bssid)
+                if (appSettings.wifiDirectLastReadBack != onAir) appSettings.wifiDirectLastReadBack = onAir
                 // Said once per group, and once more if the address only became readable later.
                 // The comparison is made once per group, on the first callback with an address:
                 // made again on the next callback it would compare the group to itself. Held off
@@ -1945,7 +1950,8 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
                 // bring-up that has since re-armed owns it now.
                 if (supersededByStop(gen, "the adopt-or-create decision")) return@requestGroupInfo
                 if (group != null && P2pIdentityRotationPolicy.readsExistingGroup(
-                        Build.VERSION.SDK_INT, group.isGroupOwner, group.networkName, kept.networkName
+                        Build.VERSION.SDK_INT, group.isGroupOwner, group.networkName, kept.networkName,
+                        group.passphrase, kept.passphrase
                     )
                 ) {
                     AppLog.i(
@@ -2360,6 +2366,7 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
             keepIdentity = appSettings.wifiDirectStableIdentity,
             stored = appSettings.wifiDirectGroupIdentity,
             deviceName = nativeGroupNameSuffixSource(),
+            userSet = appSettings.wifiDirectIdentityUserSet,
         )
         choice.toStore?.let { appSettings.wifiDirectGroupIdentity = it }
         AppLog.i("WifiDirectManager: ${choice.reason}")

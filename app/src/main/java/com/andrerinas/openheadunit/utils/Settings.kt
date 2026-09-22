@@ -19,6 +19,7 @@ import com.andrerinas.openheadunit.app.UsbAttachedActivity
 import com.andrerinas.openheadunit.connection.usb.UsbBlacklistPolicy
 import com.andrerinas.openheadunit.connection.usb.UsbDeviceCompat
 import com.andrerinas.openheadunit.connection.wifi.direct.GroupIdentityStability
+import com.andrerinas.openheadunit.connection.wifi.direct.ObservedP2pCredentials
 import com.andrerinas.openheadunit.connection.wifi.direct.ObservedP2pGroup
 import com.andrerinas.openheadunit.connection.wifi.direct.StoredP2pIdentity
 import com.andrerinas.openheadunit.connection.wifi.modes.helper.HelperStrategy
@@ -652,6 +653,34 @@ class Settings(private val context: Context) {
             prefs.edit()
                 .putString("wifi-direct-group-name", value?.networkName)
                 .putString("wifi-direct-group-passphrase", value?.passphrase)
+                .apply()
+        }
+
+    /**
+     * Whether the kept pair was typed by the user rather than drawn by the app. Provenance only:
+     * it decides what the identity rows say, and warns before "New identity" throws the typing away.
+     */
+    var wifiDirectIdentityUserSet: Boolean
+        get() = prefs.getBoolean("wifi-direct-identity-user-set", false)
+        set(value) { prefs.edit().putBoolean("wifi-direct-identity-user-set", value).apply() }
+
+    /**
+     * The last group actually read off the air, so the settings screen can show the name, password
+     * and address a phone was offered. Persisted because that screen stops the wireless stack before
+     * it draws, and because below API 29 the platform's own pair is legible nowhere else.
+     */
+    var wifiDirectLastReadBack: ObservedP2pCredentials?
+        get() {
+            val name = prefs.getString("wifi-direct-readback-name", null) ?: return null
+            val passphrase = prefs.getString("wifi-direct-readback-passphrase", null) ?: return null
+            val bssid = prefs.getString("wifi-direct-readback-bssid", null) ?: return null
+            return ObservedP2pCredentials(name, passphrase, bssid)
+        }
+        set(value) {
+            prefs.edit()
+                .putString("wifi-direct-readback-name", value?.networkName)
+                .putString("wifi-direct-readback-passphrase", value?.passphrase)
+                .putString("wifi-direct-readback-bssid", value?.bssid)
                 .apply()
         }
 
