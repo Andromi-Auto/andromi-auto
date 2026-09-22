@@ -325,6 +325,12 @@ class AapService : Service() {
      */
     @Volatile
     var userExitedAA = false
+
+    /**
+     * Whether this session was ended at the head unit with the network deliberately left up, so the
+     * re-arm does not wake the phone straight back into the session the user just ended.
+     */
+    @Volatile private var sessionEndedByHand = false
     @Volatile
     var userExitCooldownUntil = 0L
 
@@ -1641,8 +1647,12 @@ class AapService : Service() {
                     commManager.awaitDisconnectComplete()
                     val launcher = wifiLauncherManager.active as? WifiLauncherNative
                     AppLog.i("AapService: Native AA session ended; keeping the ${launcher?.strategy ?: "wireless"} network up for the phone's return.")
+                    val endedByHand = sessionEndedByHand
+                    sessionEndedByHand = false
                     launcher?.rearmAfterSessionEnd(
-                        wakePhone = SessionEndGroupPolicy.wakesPhoneAfterSessionEnd(state.isClean),
+                        wakePhone = SessionEndGroupPolicy.wakesPhoneAfterSessionEnd(
+                            state.isClean, endedByHand
+                        ),
                     )
                 }
                 SessionEndGroupPolicy.Action.NONE -> {}
@@ -2796,6 +2806,22 @@ class AapService : Service() {
                     }
                 }
             }
+            ACTION_END_SESSION_STAY_ARMED -> {
+                AppLog.i("AapService: ACTION_END_SESSION_STAY_ARMED received")
+                serviceScope.launch {
+                    if (commManager.isConnected) {
+                        // Not a user exit, which would STOP the launcher and take the network with
+                        // it. The phone keeps a profile naming a network that still exists, so its
+                        // way back is a scan and an association rather than a whole handshake.
+                        sessionEndedByHand = true
+                        commManager.disconnect(
+                            sendByeBye = true,
+                            isUserExit = false,
+                            honorKillOnDisconnect = false
+                        )
+                    }
+                }
+            }
             ACTION_NATIVE_AA_SWITCH_DEVICE -> {
                 val targetMac = intent?.getStringExtra(EXTRA_MAC)
                 AppLog.i("AapService: ACTION_NATIVE_AA_SWITCH_DEVICE received (targetMac=$targetMac)")
@@ -3289,6 +3315,7 @@ class AapService : Service() {
         const val ACTION_ROTATE_WIFI_DIRECT_IDENTITY = "com.andrerinas.openheadunit.ACTION_ROTATE_WIFI_DIRECT_IDENTITY"
         const val ACTION_NATIVE_AA_POKE            = "com.andrerinas.openheadunit.ACTION_NATIVE_AA_POKE"
         const val ACTION_NATIVE_AA_SWITCH_DEVICE   = "com.andrerinas.openheadunit.ACTION_NATIVE_AA_SWITCH_DEVICE"
+        const val ACTION_END_SESSION_STAY_ARMED    = "com.andrerinas.openheadunit.ACTION_END_SESSION_STAY_ARMED"
         const val ACTION_NATIVE_AA_CANCEL_POKE      = "com.andrerinas.openheadunit.ACTION_NATIVE_AA_CANCEL_POKE"
         const val ACTION_NATIVE_AA_PROMPT_SHOWN     = "com.andrerinas.openheadunit.ACTION_NATIVE_AA_PROMPT_SHOWN"
         const val ACTION_NATIVE_AA_PROMPT_DISMISSED = "com.andrerinas.openheadunit.ACTION_NATIVE_AA_PROMPT_DISMISSED"

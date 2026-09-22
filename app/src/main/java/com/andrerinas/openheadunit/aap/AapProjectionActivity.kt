@@ -1572,6 +1572,11 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
 
         if (settings.wifiConnectionMode == com.andrerinas.openheadunit.connection.wifi.WifiLauncherMode.NATIVE) {
             options.add(ExitOption(R.string.switch_driver, R.drawable.ic_phone, Color.LTGRAY))
+            // WiFi Direct only: the group is ours, created for the session. An access point is
+            // usually the user's own, and UserExitHotspotPolicy already leaves it alone.
+            if (settings.nativeApStrategy == com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.NativeStrategy.WIFI_DIRECT) {
+                options.add(1, ExitOption(R.string.exit_dialog_end_stay_armed, R.drawable.ic_stop, Color.LTGRAY))
+            }
         }
 
         val adapter = object : android.widget.BaseAdapter() {
@@ -1601,6 +1606,9 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
                         commManager.disconnect(sendByeBye = true)
                         finish()
                     }
+                    R.string.exit_dialog_end_stay_armed -> {
+                        endSessionStayArmed()
+                    }
                     R.string.exit_dialog_pip -> {
                         enterPiP()
                     }
@@ -1628,6 +1636,20 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         // We will implement QuickSettingsFragment as a DialogFragment for easy overlay
         val quickSettings = com.andrerinas.openheadunit.main.QuickSettingsFragment()
         quickSettings.show(supportFragmentManager, "quick_settings")
+    }
+
+    /**
+     * Ends the session and leaves the network up, so the phone's saved profile still names one that
+     * exists. Said out loud, because a phone that reconnects on its own reads as the stop failing.
+     */
+    private fun endSessionStayArmed() {
+        AppLog.i("AapProjectionActivity: User ended the session and asked to stay ready")
+        val intent = Intent(this, AapService::class.java).apply {
+            action = AapService.ACTION_END_SESSION_STAY_ARMED
+        }
+        ContextCompat.startForegroundService(this, intent)
+        ToastUtils.showToast(this, R.string.exit_dialog_end_stay_armed_note, Toast.LENGTH_LONG, force = true)
+        finish()
     }
 
     private fun switchDriver() {
@@ -1805,7 +1827,9 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
      * Exact where the confirm window is a guess, and it is what catches an outgoing call whose
      * dialling outlasts the window. API 31+; below it the window is the whole story.
      */
-    private var audioModeListener: android.media.AudioManager.OnModeChangedListener? = null
+    // Untyped on purpose: the listener interface is API 31, and naming it here fails to resolve
+    // the whole class on Android 8 with a NoClassDefFoundError the guards below cannot prevent.
+    private var audioModeListener: Any? = null
 
     private fun registerAudioModeListener() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return
@@ -1829,7 +1853,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return
         try {
             (getSystemService(Context.AUDIO_SERVICE) as android.media.AudioManager)
-                .removeOnModeChangedListener(listener)
+                .removeOnModeChangedListener(listener as android.media.AudioManager.OnModeChangedListener)
         } catch (_: Exception) {
         }
     }

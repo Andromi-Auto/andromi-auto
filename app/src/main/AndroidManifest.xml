@@ -276,6 +276,7 @@
                 <action android:name="com.andrerinas.openheadunit.ACTION_START_WIRELESS" />
                 <action android:name="com.andrerinas.openheadunit.ACTION_STOP_WIRELESS" />
                 <action android:name="com.andrerinas.openheadunit.ACTION_CANCEL_WIRELESS" />
+                <action android:name="com.andrerinas.openheadunit.ACTION_END_SESSION_STAY_ARMED" />
                 <action android:name="com.andrerinas.openheadunit.ACTION_START_WIRELESS_SCAN" />
                 <action android:name="com.andrerinas.openheadunit.ACTION_NATIVE_AA_POKE" />
                 <action android:name="com.andrerinas.openheadunit.ACTION_NATIVE_AA_CANCEL_POKE" />

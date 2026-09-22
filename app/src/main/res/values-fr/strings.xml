@@ -735,6 +735,7 @@
     <string name="wifi_disabled_info">Info : Le Wi-Fi est désactivé.</string>
     <string name="bt_not_enabled">Le Bluetooth est désactivé</string>
     <string name="bt_permission_denied">Permission Bluetooth refusée. Impossible de chercher des appareils.</string>
+    <string name="bt_external_module_no_picker">Le Bluetooth de cet appareil est fourni par un module externe et non par la radio d\'Android, il n\'y a donc pas de liste d\'appareils Bluetooth Android à choisir ici.</string>
 
     <!-- Vehicle Info Settings -->
     <string name="vehicle_info_settings">Informations sur le véhicule</string>
@@ -1049,8 +1050,6 @@
     <string name="preflight_open_location">Localisation</string>
     <string name="preflight_later">Plus tard</string>
     <string name="preflight_invalid_bssid">Adresse Wi-Fi non valide. Entrez 6 paires de caractères hexadécimaux (ex. 02:1A:11:FF:3C:4D).</string>
-    <string name="native_wifi_version_exchange">Se connecter via le réseau (nouveau handshake AA)</string>
-    <string name="native_wifi_version_exchange_description">Permet au téléphone de se reconnecter en Wi-Fi plutôt qu\'en Bluetooth, via le point d\'accès de cet appareil. Utile sur les appareils dont le Bluetooth ne peut pas transporter le handshake, et avec les versions récentes d\'Android Auto. Désactivé par défaut, et la première connexion passe toujours par le Bluetooth.</string>
     <string name="native_aa_complete_hfp_slc">Terminer la connexion Bluetooth</string>
     <string name="native_aa_complete_hfp_slc_description">Certains téléphones ne démarrent Android Auto sans fil que lorsque le Bluetooth de cet appareil est considéré comme connecté, et pas seulement appairé. Activé par défaut ; désactivez-le si les appels sur cet appareil cessent de fonctionner.</string>
     <string name="announce_connection_configuration">Demander un délai de liaison plus long</string>
@@ -1156,13 +1155,13 @@
     <string name="five_ghz_channel_option">Canal %1$d (%2$d MHz)</string>
     <string name="five_ghz_channel_hint">Un canal est une demande, pas une garantie. Beaucoup d\'unités ne créent le réseau que sur le canal choisi par leur propre pilote WiFi, et l\'application ne peut te le dire qu\'après avoir essayé. Si aucun canal 5 GHz ne fonctionne et que ton téléphone ne voit toujours pas le réseau, c\'est la bande ci-dessus qui réglera le problème.</string>
     <string name="wifi_direct_stable_identity">Conserver le même réseau Wi-Fi Direct</string>
-    <string name="wifi_direct_stable_identity_description">Demande le groupe avec le même nom et mot de passe à chaque fois, afin que votre téléphone rejoigne un réseau connu au lieu d\'en configurer un nouveau à chaque trajet. Désactivez cette option pour obtenir un nouveau réseau à chaque connexion (comme dans les versions 3.2 et 3.3) si le téléphone refuse le réseau enregistré. Essayer une nouvelle identité ci-dessous est la solution la plus simple.</string>
+    <string name="wifi_direct_stable_identity_description">Utilise le même nom de réseau et le même mot de passe à chaque fois, afin que votre téléphone rejoigne un réseau qu\'il connaît déjà. Utilisez la ligne ci-dessous pour les renouveler.</string>
     <string name="wifi_direct_new_identity">Nouvelle identité réseau Wi-Fi Direct</string>
     <string name="wifi_direct_new_identity_none">Choisie lors de la prochaine connexion</string>
     <string name="wifi_direct_new_identity_confirm">Choisit un nouveau nom et mot de passe pour le groupe, appliqués dès la prochaine connexion. Votre téléphone sera configuré via Bluetooth comme s\'il s\'agissait d\'un nouvel autoradio. Utilisez cette option si le téléphone persiste à essayer un réseau inaccessible.</string>
     <string name="wifi_direct_new_identity_done">Une nouvelle identité réseau sera utilisée dès la prochaine connexion.</string>
     <string name="wifi_direct_new_identity_applied">Une nouvelle identité réseau est en cours de configuration. Votre téléphone sera invité à la rejoindre lors de la prochaine connexion.</string>
-    <string name="wifi_direct_stable_identity_description_legacy">Sur cette version d\'Android, le nom du réseau vient du système, et certains appareils en choisissent un nouveau à chaque connexion. L\'application ne peut pas demander un nom précis ici. Laissez cette option activée pour que votre téléphone rejoigne un réseau connu lorsque le système en conserve un, et essayez une nouvelle identité ci-dessous s\'il refuse toujours le réseau enregistré. Désactivez-la pour que le système oublie le réseau avant chaque connexion.</string>
+    <string name="wifi_direct_stable_identity_description_legacy">Sur cette version d\'Android, le système choisit le nom, et l\'application ne peut pas en demander un. Laissez cette option activée pour que votre téléphone rejoigne un réseau qu\'il connaît déjà partout où le système en conserve un, et utilisez la ligne ci-dessous pour le renouveler.</string>
     <string name="debug_video_feed_hold">Simuler un décodeur lent</string>
     <string name="oem_app_management">Gestion des conflits d\'apps OEM (ADB)</string>
     <string name="oem_app_management_desc">Détecter et désactiver les apps conflictuelles (Zlink, AutoKit, etc.)</string>
@@ -1230,4 +1229,37 @@
     <string name="network_detail_unfriendly_channel">WiFi Direct est sur le canal %1$d, que la plupart des téléphones ne peuvent pas rejoindre. Redémarrez le WiFi.</string>
     <string name="native_aa_requires_wifi">Android Auto natif a besoin du WiFi de cet appareil. Veuillez l\'activer.</string>
     <string name="connection_issue_banner_wifi_radio_off">Le WiFi de cet appareil est désactivé, et cette version d\'Android ne laisse pas l\'application l\'activer. Le réseau WiFi Direct que votre téléphone devait rejoindre n\'a donc jamais pu être créé. Activez le WiFi sur cet appareil. S\'il ne reste pas activé parce que cet appareil héberge son propre point d\'accès, appuyez ici pour choisir ce point d\'accès comme méthode réseau.</string>
+    <string name="static_p2p_bssid_title">BSSID statique (WiFi Direct)</string>
+    <string name="static_p2p_bssid_desc">Définissez à la main la BSSID du groupe WiFi Direct. Distincte de celle du point d\'accès, car ce sont des interfaces différentes, et l\'une n\'est jamais la réponse pour l\'autre.</string>
+    <string name="wifi_direct_last_network">Détails du réseau proposé à votre téléphone</string>
+    <string name="wifi_direct_last_network_none">Rien vu pour l\'instant. Connectez-vous une fois, puis revenez ici.</string>
+    <string name="wifi_direct_last_network_title">Réseau proposé à votre téléphone</string>
+    <string name="wifi_direct_last_network_details">Nom\n%1$s\n\nMot de passe\n%2$s\n\nAdresse\n%3$s</string>
+    <string name="wifi_direct_last_network_address_unknown">Impossible à lire</string>
+    <string name="wifi_direct_last_network_no_bssid">L\'application n\'a pas pu lire l\'adresse de ce réseau. Cela seul empêche un téléphone de le rejoindre, et activer la localisation sur cet appareil résout presque toujours le problème.</string>
+    <string name="wifi_direct_last_network_differs">Ce n\'est pas le nom et le mot de passe que l\'application a demandés, donc le système les a remplacés. Utilisez \"Nouvelle identité réseau Wi-Fi Direct\" ci-dessus pour qu\'elle prenne une nouvelle paire.</string>
+    <string name="wifi_direct_last_network_hint">Rejoindre ce réseau à la main sur votre téléphone ne démarre pas Android Auto, car le téléphone le rejoint lui-même une fois configuré par Bluetooth. C\'est une façon de vérifier que le réseau fonctionne.</string>
+    <string name="wifi_direct_group_identity">Nom et mot de passe WiFi Direct</string>
+    <string name="wifi_direct_group_identity_auto">Choisis par l\'application. Appuyez pour définir les vôtres.</string>
+    <string name="wifi_direct_group_identity_pick_new">En choisir de nouveaux pour moi</string>
+    <string name="wifi_direct_group_identity_message">Le nom et le mot de passe donnés à votre téléphone pour rejoindre cet autoradio. Changer le mot de passe change aussi le nom, car un téléphone ne peut pas rejoindre à nouveau un réseau dont le nom est resté le même mais dont le mot de passe a changé.</string>
+    <string name="wifi_direct_group_identity_name_hint">Nom du réseau</string>
+    <string name="wifi_direct_group_identity_passphrase_hint">Mot de passe, de 8 à 63 caractères</string>
+    <string name="wifi_direct_group_identity_invalid_name">Ce nom ne peut pas être utilisé. Saisissez un nom court comme MyCar, ou un nom complet commençant par DIRECT- suivi de deux lettres ou chiffres, jusqu\'à 32 caractères.</string>
+    <string name="wifi_direct_group_identity_invalid_passphrase_length">Un mot de passe WiFi doit comporter entre 8 et 63 caractères.</string>
+    <string name="wifi_direct_group_identity_invalid_passphrase_charset">Un mot de passe WiFi ne peut utiliser que des caractères de clavier ordinaires, sans tabulations ni accents.</string>
+    <string name="wifi_direct_group_identity_recoded">Enregistré. Le nom du réseau a aussi changé pour %1$s, afin que votre téléphone accepte le nouveau mot de passe.</string>
+    <string name="wifi_direct_group_identity_legacy">Sur cette version d\'Android, le système choisit le nom et le mot de passe, et aucune application ne peut les modifier. La ligne ci-dessus montre ce qu\'il a choisi.</string>
+    <string name="copy">Copier</string>
+    <string name="wifi_direct_credentials_copied">Nom du réseau et mot de passe copiés.</string>
+    <string name="exit_dialog_end_stay_armed">Terminer la session, rester prêt</string>
+    <string name="exit_dialog_end_stay_armed_note">Session terminée. Le réseau WiFi reste actif, donc votre téléphone peut se reconnecter de lui-même.</string>
+    <string name="connection_issue_banner_stale_endpoint">Votre téléphone continue d\'essayer de joindre cet appareil à une adresse réseau qui lui a été donnée plus tôt et que cet appareil n\'utilise plus. Il préfère cette adresse à une reconnexion par Bluetooth et n\'abandonnera pas de lui-même. Cet appareil lui dit d\'arrêter, ce qui suffit généralement en une tentative. Si la connexion ne démarre toujours pas, ouvrez Android Auto sur votre téléphone, oubliez cet appareil, puis reconnectez-vous.</string>
+    <string name="connection_issue_banner_hands_free_record_refused">Le Bluetooth de cet appareil n\'a pas publié d\'enregistrement mains libres, dont l\'application a besoin pour que votre téléphone voie ici un profil mains libres. Android Auto ne démarrera pas de connexion sans fil tant que le Bluetooth de cet appareil n\'est pas connecté avec un profil, donc il pourrait ne jamais rappeler après avoir été réveillé. L\'application redemande l\'enregistrement à chaque tentative de connexion. Se connecter par câble, ou par Wi-Fi dans l\'un des autres modes sans fil, n\'en a pas besoin.</string>
+    <string name="native_aa_wake_remeasure">Remesurer le réveil Bluetooth</string>
+    <string name="native_aa_wake_verdict_unmeasured">Pas encore mesuré</string>
+    <string name="native_aa_wake_verdict_safe">Sûr sur cet appareil</string>
+    <string name="native_aa_wake_verdict_destructive">Retenu sur cet appareil</string>
+    <string name="native_aa_wake_remeasure_confirm">Android Auto ne démarre le sans fil que lorsqu\'il voit le changement de connexion Bluetooth. Là où cet appareil détient déjà la liaison mains libres, l\'application doit la rompre pour provoquer ce changement, donc elle mesure une fois si la liaison revient et s\'arrête si elle ne revient pas. Utilisez ceci si le sans fil a cessé de démarrer tout seul et que vous acceptez de perdre les mains libres un instant pendant qu\'il réessaie.</string>
+    <string name="native_aa_wake_remeasure_done">Le réveil Bluetooth sera remesuré à la prochaine connexion.</string>
 </resources>

@@ -6,19 +6,22 @@ import com.andrerinas.openheadunit.App
 import com.andrerinas.openheadunit.connection.CommManager
 import com.andrerinas.openheadunit.connection.ConnectionStage
 import com.andrerinas.openheadunit.connection.ConnectionStageTracker
+import com.andrerinas.openheadunit.connection.wifi.MacAddressPolicy
+import com.andrerinas.openheadunit.connection.wifi.WifiLauncher
+import com.andrerinas.openheadunit.connection.wifi.WifiLauncherManager
+import com.andrerinas.openheadunit.connection.wifi.WifiLauncherMode
+import com.andrerinas.openheadunit.connection.wifi.WifiLauncherStopSequence
 import com.andrerinas.openheadunit.connection.wifi.direct.GroupIdentityStability
+import com.andrerinas.openheadunit.connection.wifi.direct.GroupIdentityStabilityPolicy
 import com.andrerinas.openheadunit.connection.wifi.direct.StationStandDown
 import com.andrerinas.openheadunit.connection.wifi.direct.StationStandDownSettlePolicy
 import com.andrerinas.openheadunit.connection.wifi.direct.WifiDirectManager
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.ExternalBtTransportPolicy
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.NativeAaHandshakeManager
-import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.SoftApCredentialsProvider
+import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.NativeCredentialsPolicy
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.NativeStrategy
+import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.SoftApCredentialsProvider
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.zbt.ZbtDaemonReachability
-import com.andrerinas.openheadunit.connection.wifi.WifiLauncher
-import com.andrerinas.openheadunit.connection.wifi.WifiLauncherManager
-import com.andrerinas.openheadunit.connection.wifi.WifiLauncherMode
-import com.andrerinas.openheadunit.connection.wifi.WifiLauncherStopSequence
 import com.andrerinas.openheadunit.main.SettingsActivity
 import com.andrerinas.openheadunit.utils.AppLog
 import com.andrerinas.openheadunit.utils.BluetoothHelper
@@ -52,6 +55,8 @@ class WifiLauncherNative : WifiLauncher {
     override fun hasSameStartConfiguration(launcher: WifiLauncher) = launcher is WifiLauncherNative && launcher.strategy == strategy
 
     override fun hasWifiDirect() = strategy == NativeStrategy.WIFI_DIRECT
+
+    override fun hostsOwnAccessPoint() = strategy == NativeStrategy.HOTSPOT
 
     // Both transports, not just the P2P one. The credentials this mode hands the phone name
     // port 5288 whichever network carries them, and the phone dials it the moment it has
@@ -209,10 +214,48 @@ class WifiLauncherNative : WifiLauncher {
      * handshake then waited on credentials that had already been found, the refresh it asks for
      * every ten seconds published into the same latch, and the unit sat there looking healthy.
      */
+    /** Latched per bring-up: the provider re-resolves, and a reading compared with itself is stable. */
+    private var softApIdentityAssessedSsid: String? = null
+    private var softApIdentityStability = GroupIdentityStability.UNPROVEN
+
+    /**
+     * The access point graded the way a group is, across bring-ups.
+     *
+     * Android has randomised soft AP addresses since 10, so one poisons the phone exactly as a
+     * group's does. The locally-administered bit says only that the platform made the address up,
+     * not that it moves, and persistent randomisation keeps it: measuring is what separates them.
+     */
+    private fun softApIdentity(ssid: String, bssid: String): GroupIdentityStability {
+        if (ssid == softApIdentityAssessedSsid) return softApIdentityStability
+        val typed = MacAddressPolicy.parse(settings.staticBSSID)
+        val verdict = GroupIdentityStabilityPolicy.assess(
+            keepIdentity = true,
+            requestedName = null,
+            ssid = ssid,
+            bssid = bssid,
+            bssidUsable = MacAddressPolicy.isUsable(bssid),
+            staticOverride = typed != null && typed == MacAddressPolicy.parse(bssid),
+            previous = settings.softApLastGroup,
+            previousStability = settings.softApLastIdentityVerdict,
+        )
+        verdict.remember?.let {
+            settings.softApLastGroup = it
+            settings.softApLastIdentityVerdict = verdict.stability
+        }
+        softApIdentityAssessedSsid = ssid
+        softApIdentityStability = verdict.stability
+        AppLog.i(
+            "WifiLauncherNative: access point identity ssid=$ssid bssid=$bssid " +
+                "address=${MacAddressPolicy.label(bssid)} " +
+                "stable=${GroupIdentityStabilityPolicy.label(verdict.stability)} (${verdict.reason})"
+        )
+        return verdict.stability
+    }
+
     private fun setupSoftAp() {
+        softApIdentityAssessedSsid = null
         softApCredentialsProvider?.setCredentialsListener { ssid, psk, ip, bssid ->
-            // An access point's identity is its own; the question is only asked of a P2P group.
-            onNativeCredentials(ssid, psk, ip, bssid, GroupIdentityStability.NOT_MEASURED)
+            onNativeCredentials(ssid, psk, ip, bssid, softApIdentity(ssid, bssid))
         }
         softApCredentialsProvider?.setInvalidatedListener { handshakeManager?.invalidateCredentials() }
     }
@@ -340,6 +383,10 @@ class WifiLauncherNative : WifiLauncher {
         if (commManager.isConnected ||
             commManager.connectionState.value is CommManager.ConnectionState.Connecting) {
             AppLog.i("AapService: USB/other session already active. Skipping auto-poke to avoid pulling phone into wireless flow.")
+        } else if (!NativeCredentialsPolicy.isUsablePassphrase(psk)) {
+            // A poke takes the phone's hands-free link and nothing gives it back, so it is not
+            // spent on a network the phone will refuse. The handshake says what to set.
+            AppLog.w("AapService: not waking the phone for '$ssid', which has no passphrase to join with.")
         } else if (handshakeManager?.wakesPhone() == false) {
             // The pill is reported here as well as poked, so both stand down together or it claims
             // a wake that will not run.

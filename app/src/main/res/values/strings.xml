@@ -455,7 +455,9 @@
 
     <string name="static_bssid_title">Static BSSID (MAC Address)</string>
     <string name="static_bssid_enter_value">Enter BSSID (XX:XX:XX:XX:XX:XX)</string>
-    <string name="static_bssid_desc">Set the BSSID for the wireless handshake by hand. Only needed where nothing on this device reports one; the log names every source that was asked.</string>
+    <string name="static_bssid_desc">Set the access point\'s BSSID by hand. Only needed where nothing on this device reports one; the log names every source that was asked.</string>
+    <string name="static_p2p_bssid_title">Static BSSID (WiFi Direct)</string>
+    <string name="static_p2p_bssid_desc">Set the WiFi Direct group\'s BSSID by hand. Separate from the access point\'s, because they are different interfaces and one is never an answer for the other.</string>
 
     <string name="custom_insets">Custom Insets (Margins)</string>
     <string name="inset_top">Top</string>
@@ -856,13 +858,34 @@
     <string name="five_ghz_channel_option">Channel %1$d (%2$d MHz)</string>
     <string name="five_ghz_channel_hint">A channel is a request, not a guarantee. Many units will only host a network where their own WiFi driver chooses, and the app can only tell you so after trying. If no 5 GHz channel works and your phone still cannot see the network, the band above is the setting that will.</string>
     <string name="wifi_direct_stable_identity">Keep the same WiFi Direct network</string>
-    <string name="wifi_direct_stable_identity_description">Asks for the group with the same name and password every time, so your phone rejoins a network it already knows instead of being set up for a new one on every drive. Turn it off to get a new network on every connection, which is how versions 3.2 and 3.3 worked, if a phone keeps refusing the saved one. Trying a new identity below is the lighter fix.</string>
+    <string name="wifi_direct_stable_identity_description">Uses the same network name and password every time, so your phone rejoins a network it already knows. Use the row below to renew them.</string>
     <string name="wifi_direct_new_identity">New WiFi Direct network identity</string>
     <string name="wifi_direct_new_identity_none">Chosen at the next connection</string>
     <string name="wifi_direct_new_identity_confirm">Picks a new name and password for the group, used from the next connection on. Your phone will be set up for it over Bluetooth as if this were a new head unit. Do this if the phone keeps trying a network it can no longer join.</string>
     <string name="wifi_direct_new_identity_done">A new network identity will be used from the next connection.</string>
     <string name="wifi_direct_new_identity_applied">A new network identity is being set up now. Your phone will be asked to join it on the next connection.</string>
-    <string name="wifi_direct_stable_identity_description_legacy">On this Android version the network name comes from the system, and some units pick a new one on every connection. The app cannot ask for a particular name here. Leave this on so your phone rejoins a network it already knows wherever the system keeps one, and use a new identity below if it keeps refusing the saved one. Turn it off to make the system forget the network before every connection.</string>
+    <string name="wifi_direct_stable_identity_description_legacy">On this Android version the system picks the name and the app cannot ask for one. Leave this on so your phone rejoins a network it already knows wherever the system keeps one, and use the row below to renew it.</string>
+    <string name="wifi_direct_last_network">Details of the network your phone is offered</string>
+    <string name="wifi_direct_last_network_none">Nothing seen yet. Connect once, then come back here.</string>
+    <string name="wifi_direct_last_network_title">Network your phone is offered</string>
+    <string name="wifi_direct_last_network_details">Name\n%1$s\n\nPassword\n%2$s\n\nAddress\n%3$s</string>
+    <string name="wifi_direct_last_network_address_unknown">Could not be read</string>
+    <string name="wifi_direct_last_network_no_bssid">The app could not read this network\'s address. That alone stops a phone joining, and switching Location on for this device is almost always the fix.</string>
+    <string name="wifi_direct_last_network_differs">This is not the name and password the app asked for, so the system overrode them. Use "New WiFi Direct network identity" above to make it take a fresh pair.</string>
+    <string name="wifi_direct_last_network_hint">Joining this network by hand on your phone does not start Android Auto, because the phone joins it itself once it has been set up over Bluetooth. It is a way to check the network works at all.</string>
+    <string name="wifi_direct_group_identity">WiFi Direct name and password</string>
+    <string name="wifi_direct_group_identity_auto">Chosen by the app. Tap to set your own.</string>
+    <string name="wifi_direct_group_identity_pick_new">Pick new ones for me</string>
+    <string name="wifi_direct_group_identity_message">The name and password your phone is given to join this head unit. Changing the password also changes the name, because a phone cannot rejoin a network whose name stayed the same and whose password did not.</string>
+    <string name="wifi_direct_group_identity_name_hint">Network name</string>
+    <string name="wifi_direct_group_identity_passphrase_hint">Password, 8 to 63 characters</string>
+    <string name="wifi_direct_group_identity_invalid_name">That name cannot be used. Type a short name like MyCar, or a full one starting with DIRECT- and two letters or digits, up to 32 characters.</string>
+    <string name="wifi_direct_group_identity_invalid_passphrase_length">A WiFi password has to be between 8 and 63 characters.</string>
+    <string name="wifi_direct_group_identity_invalid_passphrase_charset">A WiFi password can only use ordinary keyboard characters, with no tabs or accents.</string>
+    <string name="wifi_direct_group_identity_recoded">Saved. The network name changed to %1$s as well, so your phone accepts the new password.</string>
+    <string name="wifi_direct_group_identity_legacy">On this Android version the system picks the name and password, and no app can change them. The row above shows what it picked.</string>
+    <string name="copy">Copy</string>
+    <string name="wifi_direct_credentials_copied">Network name and password copied.</string>
     <string name="debug_video_low_latency">Request decoder low-latency mode</string>
     <string name="debug_video_low_latency_description">Sets the vendor low-latency MediaFormat key when configuring the video decoder. Falls back automatically if the decoder rejects it.</string>
     <string name="debug_video_feed_hold">Simulate a slow decoder</string>
@@ -895,6 +918,7 @@
     <string name="wifi_disabled_info">Info: Wi-Fi is disabled.</string>
     <string name="bt_not_enabled">Bluetooth is disabled</string>
     <string name="bt_permission_denied">Bluetooth permission denied. Cannot scan for devices.</string>
+    <string name="bt_external_module_no_picker">This unit\'s Bluetooth is provided by an external module, not by Android\'s own radio, so there\'s no Android Bluetooth device list to choose from here.</string>
 
     <!-- Vehicle Info Settings -->
     <string name="vehicle_info_settings">Vehicle information</string>
@@ -975,6 +999,8 @@
 
     <string name="exit_dialog_title">Exit Android Auto</string>
     <string name="exit_dialog_stop">Stop Connection</string>
+    <string name="exit_dialog_end_stay_armed">End session, stay ready</string>
+    <string name="exit_dialog_end_stay_armed_note">Session ended. The WiFi network stays up, so your phone may reconnect on its own.</string>
     <string name="exit_dialog_pip">Picture-in-Picture</string>
     <string name="exit_dialog_background">Move to Background</string>
     <string name="exit_dialog_settings">Quick Settings</string>
@@ -1061,7 +1087,9 @@
     <string name="connection_issue_banner_video_link_too_slow">Your phone gave up on the video before a single frame arrived, several times in a row. The WiFi link is too slow to carry the picture, so it is now being asked for 720p at 30 FPS with AAC audio. Tap to set the resolution or the FPS limit yourself, which also takes this back off; a 5 GHz network is the other fix.</string>
     <string name="connection_issue_banner_five_ghz_channel_refused">This unit refused to put its WiFi Direct network on any 5 GHz channel you chose, so it went up on the one its own WiFi driver picked. That channel is often one phones in stricter countries cannot even see. Tap to set the WiFi Direct band to 2.4 GHz, which every country allows; expect 720p rather than 1080p on it.</string>
     <string name="connection_issue_banner_headunit_server_deaf">Android Auto\'s head unit server on your phone is accepting connections and answering none of them. It does not recover on its own: on the phone, stop the head unit server in Android Auto\'s developer settings and start it again. This unit will reconnect by itself.</string>
+    <string name="connection_issue_banner_stale_endpoint">Your phone keeps trying to reach this unit at a network address it was given earlier, which this unit no longer uses. It prefers that address over reconnecting by Bluetooth and will not give up on its own. This unit is telling it to stop, which usually takes one attempt. If the connection still does not start, open Android Auto on your phone, forget this head unit, and connect again.</string>
     <string name="connection_issue_banner_hands_free_held">Another device is already using this unit\'s hands-free connection, so the phone this unit is waking cannot have it. Android Auto will not start a wireless connection unless the head unit\'s Bluetooth is connected with a profile, and a unit that serves one hands-free link at a time has none left to give. Disconnect the other device, or switch its Bluetooth off, and this unit will try again by itself.</string>
+    <string name="connection_issue_banner_hands_free_record_refused">This unit\'s Bluetooth would not publish a hands-free record, which the app needs so your phone sees a hands-free profile here. Android Auto will not start a wireless connection unless the head unit\'s Bluetooth is connected with a profile, so it may never call back after being woken. The app asks for the record again on every connection attempt. Connecting by cable, or over Wi-Fi in one of the other wireless modes, does not need it.</string>
     <string name="connection_issue_banner_dismiss">Dismiss</string>
     <string name="auto_connect_pill_cancel">Stop connecting</string>
     <!-- What the hotspot banner types into the settings search. Both override rows carry it
@@ -1078,10 +1106,14 @@
     <string name="preflight_open_location">Location</string>
     <string name="preflight_later">Later</string>
     <string name="preflight_invalid_bssid">That is not a WiFi address. Enter six pairs of hex digits, like 02:1A:11:FF:3C:4D.</string>
-    <string name="native_wifi_version_exchange">Connect over network (new AA handshake)</string>
-    <string name="native_wifi_version_exchange_description">Lets the phone reconnect over WiFi instead of Bluetooth, using this head unit\'s hotspot. Helps on units whose Bluetooth cannot carry the handshake, and on newer Android Auto versions. Off by default, and the first connection still goes over Bluetooth.</string>
     <string name="native_aa_complete_hfp_slc">Complete the Bluetooth connection</string>
     <string name="native_aa_complete_hfp_slc_description">Some phones will not start wireless Android Auto until this unit\'s Bluetooth counts as connected, not just paired. On by default; turn it off if calls on this device stop working.</string>
+    <string name="native_aa_wake_remeasure">Re-measure the Bluetooth wake</string>
+    <string name="native_aa_wake_verdict_unmeasured">Not measured yet</string>
+    <string name="native_aa_wake_verdict_safe">Safe on this unit</string>
+    <string name="native_aa_wake_verdict_destructive">Held back on this unit</string>
+    <string name="native_aa_wake_remeasure_confirm">Android Auto only starts wireless when it sees the Bluetooth connection change. Where this unit already holds the hands-free link, the app has to break it to make that happen, so it measures once whether the link comes back and stops if it does not. Use this if wireless stopped starting on its own and you are willing to lose hands-free for a moment while it tries again.</string>
+    <string name="native_aa_wake_remeasure_done">The Bluetooth wake will be measured again on the next connection.</string>
     <string name="announce_connection_configuration">Ask for a longer link timeout</string>
     <string name="announce_connection_configuration_description">Tells Android Auto to wait 15 seconds before treating the link as dead instead of 3, and to use larger socket buffers. It is aimed at a radio that goes off channel for a few seconds mid session and takes the connection with it. Whether your phone honours any of it has not been measured.</string>
     <string name="native_aa_ignore_external_bt">Ignore the Bluetooth compatibility check</string>
