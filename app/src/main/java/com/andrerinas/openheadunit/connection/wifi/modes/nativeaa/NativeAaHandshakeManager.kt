@@ -12,6 +12,8 @@ import android.content.Intent
 import android.content.IntentFilter
 import com.andrerinas.openheadunit.connection.wifi.direct.GroupIdentityStability
 import com.andrerinas.openheadunit.connection.wifi.direct.GroupIdentityStabilityPolicy
+import com.andrerinas.openheadunit.connection.wifi.direct.P2pIdentityRotationPolicy
+import com.andrerinas.openheadunit.connection.wifi.direct.StoredP2pIdentity
 import com.andrerinas.openheadunit.aap.AapService
 
 import com.andrerinas.openheadunit.connection.wifi.direct.WifiBandCapability
@@ -122,6 +124,17 @@ class NativeAaHandshakeManager(
                 settings.externalBtZbtTransport,
                 settings.nativeAaIgnoreExternalBt,
                 // A read, never a dial. This runs on the UI path, and the dial is a socket connect.
+                ZbtDaemonReachability.cached()
+            )
+        }
+
+        /** What the main screen's WiFi button arms; read here so the screen and the service agree. */
+        fun wifiButtonRoute(context: Context): ExternalBtTransportPolicy.WifiButton {
+            val settings = App.provide(context).settings
+            return ExternalBtTransportPolicy.wifiButton(
+                BluetoothHelper.externalBtEvidence,
+                settings.externalBtZbtTransport,
+                settings.nativeAaIgnoreExternalBt,
                 ZbtDaemonReachability.cached()
             )
         }
@@ -2354,23 +2367,29 @@ class NativeAaHandshakeManager(
     }
 
 
+    /** The WiFi button on the module route: there is no Android device to name, only the module. */
+    fun wakeOverModule(): Boolean {
+        val carrier = zbtCarrier ?: return false
+        wakeStoodDown = false
+        sessionEndedAt = 0L
+        ConnectionStageTracker.report(ConnectionStage.WAKING_PHONE)
+        AppLog.i("NativeAA: Manual poke requested — asking the Bluetooth module to connect Android Auto.")
+        resetHandshakeBackoff()
+        resetJoinRefusals()
+        carrier.requestWake()
+        return true
+    }
+
     /**
      * Start a manual poke (wakeup) for a specific Bluetooth device.
      */
     fun manualPoke(address: String) {
         // Pressing the button is the way out of the stand-down and its settle, as well as of a
         // backoff: the user wants this phone woken now, whatever the last session ended on.
+        // The user asking to try again is the way out of a backoff on either route.
+        if (wakeOverModule()) return
         wakeStoodDown = false
         sessionEndedAt = 0L
-        // The user asking to try again is the way out of a backoff on either route.
-        zbtCarrier?.let {
-            ConnectionStageTracker.report(ConnectionStage.WAKING_PHONE)
-            AppLog.i("NativeAA: Manual poke requested — asking the Bluetooth module to connect Android Auto.")
-            resetHandshakeBackoff()
-            resetJoinRefusals()
-            it.requestWake()
-            return
-        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             if (ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -2857,6 +2876,8 @@ class NativeAaHandshakeManager(
                         AppLog.i("NativeAA: WiFi session landed. Handshake session ending, releasing Bluetooth connection.")
                         ifOwner(link) {
                             retireStaleEndpointRecord()
+                            // A phone holding the endpoint never comes over Bluetooth, so one that did holds none.
+                            retireAdvertisedEndpoint("a phone completed the Bluetooth handshake on it")
                             resetJoinRefusals()
                             handoffSettlingSince = 0L
                             // Stop accepting new AA_UUID connections too, not just this socket —
@@ -3363,11 +3384,39 @@ class NativeAaHandshakeManager(
             is WppEndpointDecision.Advertise ->
                 WppMessages.endpoint(credentials?.ip.orEmpty(), decision.port).also {
                     AppLog.i("NativeAA: advertising WPP over TCP at ${it.ip}:${it.port}")
+                    recordAdvertisedEndpoint(transport)
                 }
         }
         val channelType = WppChannelTypePolicy.forHeadUnit(WifiBandCapability.supports5Ghz(context))
         val request = WppMessages.versionRequest(carInfo(), endpoint, channelType)
         sendProtobuf(output, request.toByteArray(), WppMessageType.VERSION_REQUEST)
+    }
+
+    /** Remembers the network an endpoint went out under, which is the one the phone will insist on. */
+    private fun recordAdvertisedEndpoint(transport: NativeStrategy) {
+        val creds = credentials ?: return
+        val pair = EndpointRetirementPolicy.recordsAdvertisement(transport, creds.ssid, creds.psk) ?: return
+        if (settings.wifiDirectAdvertisedIdentity != pair) settings.wifiDirectAdvertisedIdentity = pair
+    }
+
+    /** The advertised pair when the group on the air is the one being retired, else null. */
+    private fun retiringIdentity(): StoredP2pIdentity? {
+        val creds = credentials ?: return null
+        val advertised = settings.wifiDirectAdvertisedIdentity ?: return null
+        return advertised.takeIf {
+            EndpointRetirementPolicy.isRetiring(
+                advertised, settings.wifiDirectStableIdentity, settings.wifiDirectGroupIdentity,
+                Build.VERSION.SDK_INT >= P2pIdentityRotationPolicy.NAMED_CREATE_SDK,
+                settings.wifiDirectRotationPending, creds.ssid, creds.psk,
+            )
+        }
+    }
+
+    /** Forgets the advertised pair once a phone has been rejected on it or came back over Bluetooth. */
+    private fun retireAdvertisedEndpoint(how: String) {
+        val retiring = retiringIdentity() ?: return
+        settings.wifiDirectAdvertisedIdentity = null
+        AppLog.i("NativeAA: the WPP endpoint advertised under ${retiring.networkName} is retired ($how); the next bring-up uses the current identity.")
     }
 
     /**
@@ -3401,6 +3450,12 @@ class NativeAaHandshakeManager(
                 this@NativeAaHandshakeManager.credentials?.ip?.takeIf { it.isNotBlank() }?.let { it to 5288 }
 
             override fun noteDialRefused() { dialRefusedSinceLastLanding = true }
+
+            override fun retiringNetworkName(): String? = retiringIdentity()?.networkName
+
+            override fun noteEndpointRetired() = retireAdvertisedEndpoint("the phone's dial was rejected")
+
+            override fun noteEndpointAdvertised() = recordAdvertisedEndpoint(launcher.strategy)
         })
         wppTcpServer = server
         server.start()

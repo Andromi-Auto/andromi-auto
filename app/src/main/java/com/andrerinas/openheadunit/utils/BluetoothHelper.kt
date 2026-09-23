@@ -486,15 +486,18 @@ object BluetoothHelper {
      * [ExternalBtPolicy] for what the evidence means and why it decides whether Bluetooth-based
      * wireless can work here at all.
      *
-     * Cached: the answer is a property of the hardware and cannot change within a process, and
-     * this is consulted on every handshake start.
+     * A positive answer is held for the process; a negative one is re-read, because the vendor app
+     * sets its properties only once it has run after a boot.
      */
-    val externalBtEvidence: String? by lazy {
+    private val externalBtLatch = ExternalBtPolicy.Latch {
         ExternalBtPolicy.detect(
             nodeExists = { path -> try { java.io.File(path).exists() } catch (e: Exception) { false } },
             property = { key -> SystemProperties.get(key, "") }
         )
     }
+
+    val externalBtEvidence: String?
+        get() = externalBtLatch.evidence()
 
     /**
      * The address as canonical `AA:BB:CC:DD:EE:FF`, or null when it is not an address at all.
