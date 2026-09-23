@@ -86,6 +86,7 @@ adb shell am start -a android.intent.action.VIEW -d "headunit://connect?ip=192.1
 ### v.3.5.0-alpha
 - Native AA: reconnect to a network that is still there, instead of rebuilding it every time
 - Added: Option to use Open Headunit as a launcher
+- External Bluetooth module: make the WiFi button work, find the module after a boot, and keep a Bluetooth auto-start from being lost behind the settings screen
 
 ### v.3.4.0
 - USB: connect non-Pixel phones without fighting a fast-reverting dongle
