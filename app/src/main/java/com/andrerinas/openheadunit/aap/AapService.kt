@@ -21,12 +21,14 @@ import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import android.os.Build
 import android.os.IBinder
+import android.os.Looper
 import android.os.PowerManager
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.IntentCompat
 import androidx.core.content.PermissionChecker
 import com.andrerinas.openheadunit.App
+import com.andrerinas.openheadunit.app.AccPowerState
 import com.andrerinas.openheadunit.app.ActivityLaunchPolicy
 import com.andrerinas.openheadunit.app.BootCompleteReceiver
 import com.andrerinas.openheadunit.app.BootLoopPolicy
@@ -53,7 +55,11 @@ import com.andrerinas.openheadunit.utils.ToastUtils
 import com.andrerinas.openheadunit.aap.protocol.messages.NightModeEvent
 import com.andrerinas.openheadunit.aap.protocol.proto.MediaPlayback
 import com.andrerinas.openheadunit.decoder.audio.MicRecorder
+import com.andrerinas.openheadunit.connection.AutoConnectHoldPolicy
 import com.andrerinas.openheadunit.connection.CommManager
+import com.andrerinas.openheadunit.connection.ConnectionArbiter
+import com.andrerinas.openheadunit.connection.ConnectionPriorityPolicy
+import com.andrerinas.openheadunit.connection.ConnectionStage
 import com.andrerinas.openheadunit.connection.ConnectionStageTracker
 import com.andrerinas.openheadunit.connection.carkey.CarKeysManager
 import com.andrerinas.openheadunit.connection.wifi.NetworkDiscovery
@@ -645,6 +651,7 @@ class AapService : Service() {
                     screenOffTimestamp = 0
 
                     AppLog.i("WakeDetect: SCREEN_ON (screen was off for ${offSec}s)")
+                    AccPowerState.noteOn()
                     FloatingButtonManager.update(this@AapService)
 
                     if (commManager.isConnected) {
@@ -690,6 +697,7 @@ class AapService : Service() {
                     // does not know as a wake and would auto-start us as the car is switched off.
                     AppLog.i("WakeDetect: ACC off ($action)")
                     commManager.pauseForSleep()
+                    AccPowerState.noteOff(action)
                     maybeTearDownBeforeLinkGoes(
                         LinkLossTrigger.ACC_POWER_LOST, accSignalIsExplicit = true
                     ) { goAsync() }
@@ -723,6 +731,7 @@ class AapService : Service() {
      * a long time, or an OEM boot/ACC intent was received by the dynamic receiver).
      */
     private fun onHibernateWake(trigger: String) {
+        AccPowerState.noteOn()
         // Debounce: don't re-trigger within 10 seconds (covers BootCompleteReceiver + this)
         val now = SystemClock.elapsedRealtime()
         if (now - lastWakeHandledTimestamp < 10_000) {
@@ -990,6 +999,7 @@ class AapService : Service() {
         super.onCreate()
         AppLog.i("AapService creating...")
         instance = this
+        AccPowerState.noteOn()
 
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -1130,10 +1140,13 @@ class AapService : Service() {
                         onConnected()
                     }
                     is CommManager.ConnectionState.HandshakeComplete -> {
+                        // At SSL, not at the transport open: until then the arbiter owns the window.
+                        quiesceWirelessForWiredSession()
                         projectionRaisesThisSession = 0
                         armProjectionRaiseDeadline(launchAapProjectionActivity())
                     }
                     is CommManager.ConnectionState.TransportStarted -> {
+                        quiesceWirelessForWiredSession() // The flow is conflated: HandshakeComplete can be skipped.
                         cancelProjectionRaiseDeadline()
                         hasEverConnected = true
                         projectingSinceMs = SystemClock.elapsedRealtime()
@@ -1355,7 +1368,6 @@ class AapService : Service() {
         // than left to the loop's own 15 s poll. A wireless session also marks the P2P group as
         // one that works, which is what keeps it up when the phone leaves later.
         (wifiLauncherManager.active as? WifiLauncherNative)?.onSessionEstablished()
-        quiesceWirelessForWiredSession()
         if (UsbSessionQuiescePolicy.shouldAcquireWifiLock(commManager.isWirelessSession)) {
             acquireWifiLock()
         }
@@ -1630,6 +1642,7 @@ class AapService : Service() {
         updateMediaSessionState(false)
         serviceScope.launch(Dispatchers.IO) {
             val rearmedAfterWiredSession = rearmWirelessAfterWiredSession()
+            ConnectionArbiter.sessionEnded(wirelessAlreadyRearmed = rearmedAfterWiredSession, userExit = state.isUserExit)
 
             // Read before anything stops the launcher, and remembered. WifiLauncherManager.stop()
             // nulls `active`, so both decisions further down used to be taken from a launcher that
@@ -1879,7 +1892,44 @@ class AapService : Service() {
         super.attachBaseContext(LocaleHelper.wrapContext(newBase))
     }
 
+    /** What the connection arbiter asks of the service. See [ConnectionArbiter]. */
+    private val arbiterActions = object : ConnectionArbiter.Actions {
+        override fun preempt(loser: ConnectionArbiter.Claim) {
+            if (loser.owner == ConnectionPriorityPolicy.Owner.USB) usbLauncherManager.preemptAttempt()
+            // The loser's claim lives until SSL, so its transport may be open and handshaking.
+            val state = commManager.connectionState.value
+            if (state is CommManager.ConnectionState.Connecting || (commManager.isConnected && !sessionFormed())) {
+                commManager.disconnect(sendByeBye = false, isUserExit = false, honorKillOnDisconnect = false)
+            }
+        }
+
+        override fun standDownWireless(by: ConnectionArbiter.Claim): Boolean {
+            if (!wifiLauncherManager.activeIsStarted) return false
+            // stop() clears the status pill, so on Main it runs before the claimer reports its stage.
+            if (Looper.myLooper() == Looper.getMainLooper()) wifiLauncherManager.stop()
+            else serviceScope.launch { wifiLauncherManager.stop() }
+            return true
+        }
+
+        override fun giveBack(wireless: Boolean, usb: Boolean) {
+            serviceScope.launch {
+                delay(1500) // The same settle the wired-session re-arm gives the hardware.
+                if (isDestroying) return@launch
+                if (wireless) initWifiModeWithOptionalWait()
+                if (usb) usbLauncherManager.checkAlreadyConnected(force = true)
+            }
+        }
+
+        override fun schedule(delayMs: Long, block: () -> Unit) {
+            serviceScope.launch {
+                delay(delayMs)
+                if (!isDestroying) block()
+            }
+        }
+    }
+
     private fun registerReceivers() {
+        ConnectionArbiter.actions = arbiterActions
         usbLauncherManager.register()
         stationScanMonitor.start(this)
         ContextCompat.registerReceiver(
@@ -1960,6 +2010,9 @@ class AapService : Service() {
             // Microntek / MTCD / PX3 head units (ACC wake)
             addAction("com.cayboy.action.ACC_ON")
             addAction("com.carboy.action.ACC_ON")
+            // XYAuto head units (ACC wake). Sent without the background flag, so only this
+            // runtime receiver can hear it, and only in a process that survived the sleep.
+            addAction("xy.android.acc.on")
             // The counterparts: the car being switched off. On FYT units Android then deep-sleeps,
             // which is exactly when a session would otherwise vanish without closing. See
             // LinkLossTeardownPolicy.
@@ -2146,6 +2199,8 @@ class AapService : Service() {
      */
     private fun deferWirelessForUsbHandoff(): Boolean {
         if (isDestroying) return false
+        // A plug-in that has failed for its whole budget no longer holds wireless off.
+        if (ConnectionArbiter.usbEpisodeSpent()) return false
 
         val accessoryOnBus = try {
             val usbManager = getSystemService(Context.USB_SERVICE) as UsbManager
@@ -2188,7 +2243,9 @@ class AapService : Service() {
         usbDeferralJob = serviceScope.launch {
             delay(USB_DEFERRAL_RECHECK_MS)
             usbDeferralJob = null
-            if (commManager.isConnected) usbDeferralStartedMs = 0L
+            // Only a formed session ends the wait: an open transport still handshaking used to
+            // restart the budget on every retry, holding wireless off for as long as USB failed.
+            if (sessionFormed()) usbDeferralStartedMs = 0L
             else initWifiModeWithOptionalWait()
         }
         return true
@@ -2204,6 +2261,10 @@ class AapService : Service() {
      *
      * When the setting is disabled, or the mode is not 2, [initWifiMode] runs immediately.
      */
+    private fun sessionFormed(): Boolean = commManager.connectionState.value.let {
+        it is CommManager.ConnectionState.HandshakeComplete || it is CommManager.ConnectionState.TransportStarted
+    }
+
     private fun initWifiModeWithOptionalWait() {
         if (deferWirelessForUsbHandoff()) return
 
@@ -2299,6 +2360,7 @@ class AapService : Service() {
      * [UsbSessionQuiescePolicy] for why any of it is running in the first place.
      */
     private fun quiesceWirelessForWiredSession() {
+        if (wirelessQuiescedForWiredSession) return
         if (!UsbSessionQuiescePolicy.shouldQuiesce(commManager.isWirelessSession)) return
 
         val settings = App.provide(this).settings
@@ -2327,7 +2389,8 @@ class AapService : Service() {
         AppLog.i("AapService: wired session ended — re-arming wireless mode $mode")
         serviceScope.launch {
             delay(1500) // Same settle the Native AA reconnect path allows the P2P hardware.
-            wifiLauncherManager.setActiveFromSettings(force = true)
+            // Through the USB deferral: after a failed handshake the retry is 1.5 s away too.
+            initWifiModeWithOptionalWait()
         }
         return true
     }
@@ -2342,6 +2405,12 @@ class AapService : Service() {
 
     /** Whether the status pill's X is holding the stack down, so no pill is raised over nothing. */
     fun wirelessCancelledByUser(): Boolean = wifiLauncherManager.cancelledByUser
+
+    /** Whether the status pill's X is holding automatic USB connections off. */
+    fun usbCancelledByUser(): Boolean = usbLauncherManager.cancelledByUser
+
+    /** A USB connection asked for by hand; the re-enumeration it causes must not meet the X. */
+    fun liftUsbCancel(reason: String) = usbLauncherManager.liftUserCancel(reason)
 
     /** True while the setup QR dialog needs the running launcher to read a network off. */
     @Volatile private var settingsQrHold = false
@@ -2403,6 +2472,63 @@ class AapService : Service() {
             if (wirelessPausedForSettings) return@launch
             if (!settingsQrHold) wirelessRearmPendingForSettings = false
             wifiLauncherManager.setActiveFromSettings(force = true)
+        }
+    }
+
+    /** A USB auto-connect arrived while the settings screen was on show; its close asks again. */
+    @Volatile private var usbCheckPendingForSettings = false
+
+    /** A Bluetooth arrival did not raise the home screen over settings; its close raises it. */
+    @Volatile private var bluetoothLaunchPendingForSettings = false
+
+    private var settingsReplayJob: Job? = null
+
+    fun holdUsbCheckForSettings() {
+        usbCheckPendingForSettings = true
+    }
+
+    /**
+     * The settings screen came on show or left it. Unlike [onSettingsScreenChanged] this survives
+     * a translucent activity over it, which is how every USB attach arrives.
+     */
+    fun onSettingsScreenVisibility(visible: Boolean) {
+        if (visible) {
+            settingsReplayJob?.cancel()
+            return
+        }
+        if (!AutoConnectHoldPolicy.replaysOnRelease(
+                usbHeld = usbCheckPendingForSettings,
+                bluetoothLaunchHeld = bluetoothLaunchPendingForSettings,
+            )) return
+
+        settingsReplayJob?.cancel()
+        settingsReplayJob = serviceScope.launch {
+            delay(1500) // The same settle the wireless re-arm gives the screen.
+            // Reopened inside the settle: keep both held for the real close.
+            if (SettingsActivity.isVisible) return@launch
+            if (bluetoothLaunchPendingForSettings) {
+                bluetoothLaunchPendingForSettings = false
+                AppLog.i("AapService: the settings screen closed with a Bluetooth arrival held " +
+                    "behind it, raising the home screen now.")
+                launchMainActivityForBluetooth()
+            }
+            if (usbCheckPendingForSettings) {
+                usbCheckPendingForSettings = false
+                AppLog.i("AapService: the settings screen closed with a USB auto-connect held " +
+                    "behind it, checking USB now.")
+                usbLauncherManager.checkAlreadyConnected(force = true)
+            }
+        }
+    }
+
+    private fun launchMainActivityForBluetooth() {
+        try {
+            startActivity(Intent(this, MainActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                putExtra(MainActivity.EXTRA_LAUNCH_SOURCE, MainActivity.LAUNCH_SOURCE_BLUETOOTH)
+            })
+        } catch (e: Exception) {
+            AppLog.w("AapService: could not raise the home screen for a held Bluetooth arrival: ${e.message}")
         }
     }
 
@@ -2537,6 +2663,7 @@ class AapService : Service() {
         AppLog.i("AapService destroying... (wakeLock held=${bootWakeLock?.isHeld == true})")
         FloatingButtonManager.removeOverlay(this)
         isDestroying = true
+        ConnectionArbiter.actions = null
         // Nothing else clears it here, and the manager outlives the service instance.
         selfLauncherManager.isActive = false
         autoResumePlaybackJob?.cancel()
@@ -2746,6 +2873,19 @@ class AapService : Service() {
                 wifiLauncherManager.stop()
             }
             ACTION_CANCEL_WIRELESS       -> {
+                usbCheckPendingForSettings = false
+                bluetoothLaunchPendingForSettings = false
+                val stage = ConnectionStageTracker.stage.value
+                if (intent?.getBooleanExtra(EXTRA_USB_ATTEMPT, false) == true ||
+                    usbLauncherManager.isSwitchingToProjection() || commManager.isUsbSession ||
+                    stage == ConnectionStage.USB_ATTACHED || stage == ConnectionStage.USB_SWITCHING) {
+                    AppLog.i("AapService: the status pill's X stopped the USB attempt. USB stays " +
+                        "down until the USB button asks for it.")
+                    usbLauncherManager.stopForUser()
+                    commManager.disconnect()
+                    ConnectionStageTracker.clear()
+                    return START_STICKY
+                }
                 AppLog.i("AapService: the status pill's X stopped the wireless bring-up. It stays " +
                     "down until the WiFi button or a wireless setting asks for it.")
                 wirelessRearmPendingForSettings = false
@@ -2966,9 +3106,13 @@ class AapService : Service() {
                     userExitedAA = false
                     userExitCooldownUntil = 0L
                 }
+                if (intent?.getBooleanExtra(EXTRA_UI_HELD, false) == true) {
+                    bluetoothLaunchPendingForSettings = true
+                    AppLog.i("AapService: Bluetooth auto-start while the settings screen is on show; " +
+                        "raising the home screen when it closes.")
+                }
                 if (wirelessPausedForSettings && (actions.forceRearmWireless || actions.armWirelessIfIdle)) {
-                    // Held like a Save: this arrival's own MainActivity launch closes the screen,
-                    // so a refused request would never be asked again.
+                    // Held like a Save: nothing else asks again once the screen closes.
                     wirelessRearmPendingForSettings = true
                     AppLog.i("AapService: Bluetooth auto-start while the settings screen is open; " +
                         "re-arming when it closes.")
@@ -3025,7 +3169,10 @@ class AapService : Service() {
                 // Caller already invoked commManager.connect(socket); the connectionState
                 // observer in observeConnectionState() handles the rest — nothing to do here.
             }
-            ACTION_CHECK_USB             -> usbLauncherManager.checkAlreadyConnected(force = true)
+            ACTION_CHECK_USB             -> usbLauncherManager.checkAlreadyConnected(
+                force = true,
+                userRequested = intent?.getBooleanExtra(EXTRA_USER_REQUESTED, false) == true,
+            )
             else                         -> {
                 if (intent?.action == null || intent.action == Intent.ACTION_MAIN) {
                     usbLauncherManager.checkAlreadyConnected()
@@ -3142,6 +3289,10 @@ class AapService : Service() {
     fun launchMainActivityIfNeeded(source: String) {
         val settings = App.provide(this).settings
         if (!settings.autoStartOnUsb || !settings.reopenOnReconnection) return
+        if (!AutoConnectHoldPolicy.raisesUi(SettingsActivity.isVisible, usbLauncherManager.cancelledByUser)) {
+            AppLog.i("Reopen on reconnection: not raised over settings or after the status pill's X ($source)")
+            return
+        }
 
         AppLog.i("Reopen on reconnection: launching MainActivity ($source)")
         launchMainActivityOnBoot()
@@ -3415,6 +3566,7 @@ class AapService : Service() {
             "com.glsx.boot.ACCOFF",
             "com.cayboy.action.ACC_OFF",
             "com.carboy.action.ACC_OFF",
+            "xy.android.acc.off",
             "android.intent.action.ACTION_MT_COMMAND_SLEEP_IN",
             "com.syu.canbus.action.ACC_OFF",
             "com.ts.car.acc_off",
@@ -3443,6 +3595,12 @@ class AapService : Service() {
 
         /** Ask for the session without raising the projection. See [suppressNextProjectionRaise]. */
         const val EXTRA_NO_UI = "no_ui"
+        /** On [ACTION_CHECK_USB]: the user asked by hand, which lifts the status pill's X. */
+        const val EXTRA_USER_REQUESTED = "user_requested"
+        /** On [ACTION_CANCEL_WIRELESS]: the X was pressed on a USB attempt, read before it disconnected. */
+        const val EXTRA_USB_ATTEMPT = "usb_attempt"
+        /** On [ACTION_BT_AUTO_START]: the receiver did not raise the home screen over settings. */
+        const val EXTRA_UI_HELD = "ui_held"
         const val EXTRA_MAC = "extra_mac"
         const val EXTRA_ENDPOINT_ID = "extra_endpoint_id"
     }

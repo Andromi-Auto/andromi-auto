@@ -373,6 +373,8 @@
                 <!-- Microntek / MTCD / PX3 head units (ACC wake) -->
                 <action android:name="com.cayboy.action.ACC_ON" />
                 <action android:name="com.carboy.action.ACC_ON" />
+                <!-- XYAuto head units (ACC wake) -->
+                <action android:name="xy.android.acc.on" />
             </intent-filter>
         </receiver>
 

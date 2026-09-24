@@ -416,6 +416,8 @@ class HomeFragment : Fragment() {
                 return@setOnClickListener
             }
 
+            AapService.instance?.liftUsbCancel("the USB button was pressed")
+
             // Get list of Android USB devices
             val usbManager = requireContext().getSystemService(Context.USB_SERVICE) as UsbManager
             UsbDeviceDiagnostics.logDeviceList(requireContext(), usbManager, "USB button")

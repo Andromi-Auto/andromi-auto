@@ -40,4 +40,14 @@ class StaleEndpointRecordPolicyTest {
             )
         }
     }
+
+    @Test
+    fun `a hotspot landing never retires it, because the old address can never be refused`() {
+        for (refused in listOf(true, false)) {
+            assertFalse(
+                "refused=$refused",
+                StaleEndpointRecordPolicy.retiredByHandshake(refused, onHotspot = true)
+            )
+        }
+    }
 }

@@ -1,5 +1,6 @@
 package com.andrerinas.openheadunit.connection.wifi.modes
 
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import com.andrerinas.openheadunit.App
@@ -21,10 +22,13 @@ import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.NativeAaHandsh
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.NativeCredentialsPolicy
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.NativeStrategy
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.SoftApCredentialsProvider
+import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.SoftApEndpointStabilityPolicy
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.zbt.ZbtDaemonReachability
 import com.andrerinas.openheadunit.main.SettingsActivity
 import com.andrerinas.openheadunit.utils.AppLog
 import com.andrerinas.openheadunit.utils.BluetoothHelper
+import com.andrerinas.openheadunit.utils.ConnectionIssue
+import com.andrerinas.openheadunit.utils.ConnectionIssues
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 
@@ -215,18 +219,16 @@ class WifiLauncherNative : WifiLauncher {
      * every ten seconds published into the same latch, and the unit sat there looking healthy.
      */
     /** Latched per bring-up: the provider re-resolves, and a reading compared with itself is stable. */
-    private var softApIdentityAssessedSsid: String? = null
+    private var softApIdentityAssessedKey: String? = null
     private var softApIdentityStability = GroupIdentityStability.UNPROVEN
 
     /**
-     * The access point graded the way a group is, across bring-ups.
-     *
-     * Android has randomised soft AP addresses since 10, so one poisons the phone exactly as a
-     * group's does. The locally-administered bit says only that the platform made the address up,
-     * not that it moves, and persistent randomisation keeps it: measuring is what separates them.
+     * The access point graded the way a group is, across bring-ups, plus the address and password
+     * the phone also stores, which a group never needed because its owner is always 192.168.49.1.
      */
-    private fun softApIdentity(ssid: String, bssid: String): GroupIdentityStability {
-        if (ssid == softApIdentityAssessedSsid) return softApIdentityStability
+    private fun softApIdentity(ssid: String, psk: String, ip: String, bssid: String): GroupIdentityStability {
+        val key = "$ssid|$ip|${SoftApEndpointStabilityPolicy.passphraseDigest(psk)}"
+        if (key == softApIdentityAssessedKey) return softApIdentityStability
         val typed = MacAddressPolicy.parse(settings.staticBSSID)
         val verdict = GroupIdentityStabilityPolicy.assess(
             keepIdentity = true,
@@ -238,24 +240,51 @@ class WifiLauncherNative : WifiLauncher {
             previous = settings.softApLastGroup,
             previousStability = settings.softApLastIdentityVerdict,
         )
-        verdict.remember?.let {
-            settings.softApLastGroup = it
-            settings.softApLastIdentityVerdict = verdict.stability
-        }
-        softApIdentityAssessedSsid = ssid
-        softApIdentityStability = verdict.stability
-        AppLog.i(
-            "WifiLauncherNative: access point identity ssid=$ssid bssid=$bssid " +
-                "address=${MacAddressPolicy.label(bssid)} " +
-                "stable=${GroupIdentityStabilityPolicy.label(verdict.stability)} (${verdict.reason})"
+        verdict.remember?.let { settings.softApLastGroup = it }
+        val address = SoftApEndpointStabilityPolicy.grade(
+            verdict.stability, ip, psk, bootCount(), settings.softApAddressRecord,
         )
-        return verdict.stability
+        address.remember?.let { settings.softApAddressRecord = it }
+        if (verdict.remember != null) settings.softApLastIdentityVerdict = address.stability
+        softApIdentityAssessedKey = key
+        softApIdentityStability = address.stability
+        AppLog.i(
+            "WifiLauncherNative: access point identity ssid=$ssid bssid=$bssid ip=$ip " +
+                "address=${MacAddressPolicy.label(bssid)} " +
+                "stable=${GroupIdentityStabilityPolicy.label(address.stability)} " +
+                "(${address.reason ?: verdict.reason})"
+        )
+        noteAdvertisedEndpointMoved(ssid, psk, bssid, ip)
+        return address.stability
+    }
+
+    /** A phone given an endpoint on an access point that has since moved dials the old one forever. */
+    private fun noteAdvertisedEndpointMoved(ssid: String, psk: String, bssid: String, ip: String) {
+        val advertised = settings.softApAdvertisedEndpoint
+        val moved = SoftApEndpointStabilityPolicy.movedSinceAdvertised(advertised, ssid, psk, bssid, ip) ?: return
+        settings.softApAdvertisedEndpoint = null
+        AppLog.w(
+            "NativeAA: the WPP endpoint advertised on the access point at ${advertised?.ip} no longer " +
+                "matches ($moved); a phone holding it needs this head unit forgotten in Android Auto."
+        )
+        ConnectionIssues.raiseOnce(service, ConnectionIssue.PHONE_HOLDS_STALE_ENDPOINT)
+    }
+
+    /** Null below API 24, where the platform does not count boots and tethering used a fixed address. */
+    private fun bootCount(): Int? {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) return null
+        return try {
+            android.provider.Settings.Global.getInt(service.contentResolver, android.provider.Settings.Global.BOOT_COUNT, -1)
+                .takeIf { it >= 0 }
+        } catch (e: Exception) {
+            null
+        }
     }
 
     private fun setupSoftAp() {
-        softApIdentityAssessedSsid = null
+        softApIdentityAssessedKey = null
         softApCredentialsProvider?.setCredentialsListener { ssid, psk, ip, bssid ->
-            onNativeCredentials(ssid, psk, ip, bssid, softApIdentity(ssid, bssid))
+            onNativeCredentials(ssid, psk, ip, bssid, softApIdentity(ssid, psk, ip, bssid))
         }
         softApCredentialsProvider?.setInvalidatedListener { handshakeManager?.invalidateCredentials() }
     }

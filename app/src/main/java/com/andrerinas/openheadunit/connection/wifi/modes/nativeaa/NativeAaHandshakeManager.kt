@@ -34,6 +34,8 @@ import android.os.SystemClock
 import android.content.pm.PackageManager
 import androidx.core.content.ContextCompat
 import com.andrerinas.openheadunit.App
+import com.andrerinas.openheadunit.connection.ConnectionArbiter
+import com.andrerinas.openheadunit.connection.ConnectionPriorityPolicy
 import com.andrerinas.openheadunit.connection.CommManager
 import com.andrerinas.openheadunit.decoder.audio.CallState
 import com.andrerinas.openheadunit.decoder.audio.MicRecorder
@@ -2601,7 +2603,7 @@ class NativeAaHandshakeManager(
     private fun retireStaleEndpointRecord() {
         val refused = dialRefusedSinceLastLanding
         dialRefusedSinceLastLanding = false
-        if (!StaleEndpointRecordPolicy.retiredByHandshake(refused)) return
+        if (!StaleEndpointRecordPolicy.retiredByHandshake(refused, launcher.strategy == NativeStrategy.HOTSPOT)) return
         ConnectionIssues.clear(context, ConnectionIssue.PHONE_HOLDS_STALE_ENDPOINT)
     }
 
@@ -2703,6 +2705,7 @@ class NativeAaHandshakeManager(
         // them, and the phone is free to interject a ping at any point in between.
         val inbound = Channel<ProtobufMessage>(Channel.UNLIMITED)
         var readerJob: Job? = null
+        var arbiterClaim: ConnectionArbiter.Claim? = null
         try {
             val peerName = link.peerName
             val peerAddress = link.peerAddress
@@ -2711,6 +2714,16 @@ class NativeAaHandshakeManager(
             if (commManager.isConnected ||
                 commManager.connectionState.value is CommManager.ConnectionState.Connecting) {
                 AppLog.i("NativeAA: USB/other session already active. Aborting BT handshake so phone does not start a parallel wireless attempt.")
+                abortedLocally = true
+                closePhoneLink(link)
+                return@withContext
+            }
+            arbiterClaim = ConnectionArbiter.claim(
+                ConnectionPriorityPolicy.Tier.WIRELESS_HANDSHAKE,
+                ConnectionPriorityPolicy.Owner.WIRELESS_STACK,
+                "the Native AA handshake with $peerName"
+            )
+            if (arbiterClaim == null) {
                 abortedLocally = true
                 closePhoneLink(link)
                 return@withContext
@@ -3246,6 +3259,7 @@ class NativeAaHandshakeManager(
             readerJob?.cancel()
             inbound.close()
             closePhoneLink(link)
+            ConnectionArbiter.release(arbiterClaim, sessionFormed = commManager.isConnected)
             AppLog.i("NativeAA: BT Handshake link closed.")
         }
     }
@@ -3395,6 +3409,11 @@ class NativeAaHandshakeManager(
     /** Remembers the network an endpoint went out under, which is the one the phone will insist on. */
     private fun recordAdvertisedEndpoint(transport: NativeStrategy) {
         val creds = credentials ?: return
+        if (transport == NativeStrategy.HOTSPOT) {
+            val ap = SoftApEndpointStabilityPolicy.advertisement(creds.ssid, creds.psk, creds.bssid, creds.ip) ?: return
+            if (settings.softApAdvertisedEndpoint != ap) settings.softApAdvertisedEndpoint = ap
+            return
+        }
         val pair = EndpointRetirementPolicy.recordsAdvertisement(transport, creds.ssid, creds.psk) ?: return
         if (settings.wifiDirectAdvertisedIdentity != pair) settings.wifiDirectAdvertisedIdentity = pair
     }

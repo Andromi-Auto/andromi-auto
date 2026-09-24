@@ -194,6 +194,7 @@ class CommManager(
     // Whether the session now ending ever completed its handshake, and how many sessions in a row
     // have completed one and then carried no video at all. See VideoStarvationPolicy.
     @Volatile private var sessionReachedHandshake = false
+    @Volatile private var sessionClaim: ConnectionArbiter.Claim? = null
     @Volatile private var starvedSessionStreak = 0
 
     private val _backgroundNotification = BackgroundNotification(context)
@@ -246,6 +247,10 @@ class CommManager(
     val isWirelessSession: Boolean
         get() = _connection is SocketProjectionConnection
 
+    /** `true` when this session, or the attempt in flight, runs over a USB cable. */
+    val isUsbSession: Boolean
+        get() = _connection is AbstractUsbProjectionConnection
+
     /**
      * `true` when this session's peer is this device itself — Self Mode, on either of its routes.
      *
@@ -273,10 +278,19 @@ class CommManager(
      * On success emits [ConnectionState.Connected] and persists the device as the last-used
      * connection so it can be auto-reconnected on the next launch.
      */
-    suspend fun connect(device: UsbDevice) = withContext(Dispatchers.IO) {
+    suspend fun connect(
+        device: UsbDevice,
+        tier: ConnectionPriorityPolicy.Tier = ConnectionPriorityPolicy.Tier.USB,
+    ) = withContext(Dispatchers.IO) {
+        val claim = ConnectionArbiter.claim(tier, ConnectionPriorityPolicy.Owner.USB,
+            "USB ${UsbDeviceCompat.getUniqueName(device)}") ?: return@withContext
+        try { connectUsb(device) } finally { releaseClaim(claim) }
+    }
+
+    private suspend fun connectUsb(device: UsbDevice) {
         // Another caller already started the connection — do nothing.
         if (_connectionState.value is ConnectionState.Connecting)
-            return@withContext
+            return
 
 
         lastAttemptedEndpoint = null
@@ -285,7 +299,7 @@ class CommManager(
         if (!usbManager.hasPermission(device)) {
             onSessionFailure?.invoke("connect_failed")
             _connectionState.emit(ConnectionState.Error("USB permission not granted for device"))
-            return@withContext
+            return
         }
 
         // Wait for any in-progress cleanup to finish before opening the USB device.
@@ -293,22 +307,27 @@ class CommManager(
         // UsbDeviceConnection hasn't been close()d yet.
         _disconnectJob?.join()
 
+        var conn: ProjectionConnection? = null
         try {
             _connectionState.emit(ConnectionState.Connecting)
             _connection?.disconnect()
-            _connection = if (settings.useLibusb) {
+            conn = if (settings.useLibusb) {
                 LibusbProjectionConnection(usbManager, device)
             } else {
                 StandardUsbProjectionConnection(usbManager, device)
             }
+            _connection = conn
 
-            if (_connection?.connect() ?: false) {
+            val opened = conn.connect()
+            if (_connection !== conn) return  // Preempted: a newer connect owns the state now.
+            if (opened) {
                 settings.saveLastConnection(type = Settings.CONNECTION_TYPE_USB, usbDevice = UsbDeviceCompat.getUniqueName(device))
                 _connectionState.emit(ConnectionState.Connected)
             } else {
                 _connectionState.emit(ConnectionState.Disconnected())
             }
         } catch (e: Exception) {
+            if (conn != null && _connection !== conn) return
             onSessionFailure?.invoke("connect_failed")
             _connectionState.emit(ConnectionState.Error("Connection failed: ${e.message}"))
             disconnect()
@@ -322,7 +341,20 @@ class CommManager(
      * The socket must already be connected; this overload skips the TCP handshake and only
      * sets up the AAP framing layer.
      */
-    suspend fun connect(socket: Socket) = withContext(Dispatchers.IO) {
+    suspend fun connect(
+        socket: Socket,
+        tier: ConnectionPriorityPolicy.Tier = ConnectionPriorityPolicy.Tier.WIRELESS_HANDSHAKE,
+    ) = withContext(Dispatchers.IO) {
+        val claim = ConnectionArbiter.claim(tier, socketOwner(tier),
+            "the socket from ${socket.inetAddress?.hostAddress}")
+        if (claim == null) {
+            try { socket.close() } catch (e: Exception) {}
+            return@withContext
+        }
+        try { connectSocket(socket) } finally { releaseClaim(claim) }
+    }
+
+    private suspend fun connectSocket(socket: Socket) {
         // Another caller already started the connection — do nothing.
         if (_connectionState.value is ConnectionState.Connecting) {
             // [BUG_FIX] But close what we are refusing. A socket handed to connect() has no
@@ -338,19 +370,23 @@ class CommManager(
             // the user restarts it by hand.
             AppLog.i("CommManager: Connect already in progress; closing the handed-over socket")
             try { socket.close() } catch (e: Exception) {}
-            return@withContext
+            return
         }
 
         lastAttemptedEndpoint = socket.inetAddress?.hostAddress?.let { "$it:${socket.port}" }
 
         _disconnectJob?.join()
 
+        var conn: ProjectionConnection? = null
         try {
             _connectionState.emit(ConnectionState.Connecting)
             _connection?.disconnect()
-            _connection = SocketProjectionConnection(socket, context)
+            conn = SocketProjectionConnection(socket, context)
+            _connection = conn
 
-            if (_connection?.connect() ?: false) {
+            val opened = conn.connect()
+            if (_connection !== conn) return  // Preempted: a newer connect owns the state now.
+            if (opened) {
                 // [FIX] Don't overwrite NEARBY connection type with WIFI + localhost IP (::1)
                 if (socket !is NearbySocket) {
                     settings.saveLastConnection(type = Settings.CONNECTION_TYPE_WIFI, ip = socket.inetAddress?.hostAddress ?: "")
@@ -360,6 +396,7 @@ class CommManager(
                 _connectionState.emit(ConnectionState.Disconnected())
             }
         } catch (e: Exception) {
+            if (conn != null && _connection !== conn) return
             onSessionFailure?.invoke("connect_failed")
             _connectionState.emit(ConnectionState.Error("Connection failed: ${e.message}"))
             disconnect()
@@ -371,31 +408,66 @@ class CommManager(
      *
      * Used by the manual IP entry flow and the NSD-discovered device list.
      */
-    suspend fun connect(ip: String, port: Int) = withContext(Dispatchers.IO) {
+    suspend fun connect(
+        ip: String,
+        port: Int,
+        tier: ConnectionPriorityPolicy.Tier = ConnectionPriorityPolicy.Tier.WIRELESS_HANDSHAKE,
+    ) = withContext(Dispatchers.IO) {
+        val claim = ConnectionArbiter.claim(tier, socketOwner(tier), "$ip:$port") ?: return@withContext
+        try { connectIp(ip, port) } finally { releaseClaim(claim) }
+    }
+
+    private suspend fun connectIp(ip: String, port: Int) {
         // Another caller already started the connection — do nothing.
         if (_connectionState.value is ConnectionState.Connecting)
-            return@withContext
+            return
 
         lastAttemptedEndpoint = "$ip:$port"
 
         _disconnectJob?.join()
 
+        var conn: ProjectionConnection? = null
         try {
             _connectionState.emit(ConnectionState.Connecting)
             _connection?.disconnect()
-            _connection = SocketProjectionConnection(ip, port, context)
+            conn = SocketProjectionConnection(ip, port, context)
+            _connection = conn
 
-            if (_connection?.connect() ?: false) {
+            val opened = conn.connect()
+            if (_connection !== conn) return  // Preempted: a newer connect owns the state now.
+            if (opened) {
                 settings.saveLastConnection(type = Settings.CONNECTION_TYPE_WIFI, ip = ip)
                 _connectionState.emit(ConnectionState.Connected)
             } else {
                 _connectionState.emit(ConnectionState.Disconnected())
             }
         } catch (e: Exception) {
+            if (conn != null && _connection !== conn) return
             onSessionFailure?.invoke("connect_failed")
             _connectionState.emit(ConnectionState.Error("Connection failed: ${e.message}"))
             disconnect()
         }
+    }
+
+    /** A socket the user asked for is theirs; any other belongs to the wireless stack. */
+    private fun socketOwner(tier: ConnectionPriorityPolicy.Tier) =
+        if (tier == ConnectionPriorityPolicy.Tier.USER) ConnectionPriorityPolicy.Owner.MANUAL
+        else ConnectionPriorityPolicy.Owner.WIRELESS_STACK
+
+    /** An opened transport keeps its claim through the handshake; anything else lets it go. */
+    private fun releaseClaim(claim: ConnectionArbiter.Claim) {
+        if (_connectionState.value is ConnectionState.Connected && ConnectionArbiter.holds(claim)) {
+            sessionClaim = claim
+        } else {
+            ConnectionArbiter.release(claim, sessionFormed = false)
+        }
+    }
+
+    /** Ends the claim an opened transport carried into its handshake. */
+    private fun settleSessionClaim(formed: Boolean) {
+        val claim = sessionClaim ?: return
+        sessionClaim = null
+        ConnectionArbiter.release(claim, sessionFormed = formed)
     }
 
     // -----------------------------------------------------------------------------------------
@@ -453,7 +525,10 @@ class CommManager(
                 // quitting nulls _transport before it returns — the failure reason would be
                 // unreachable by the time we came to report it.
                 val transport = _transport
-                if (transport?.startHandshake(_connection!!) == true) {
+                val conn = _connection!!
+                val shook = transport?.startHandshake(conn) == true
+                if (_connection !== conn) return@withContext  // Preempted: a newer connect owns the state now.
+                if (shook) {
                     // A session that got this far had a working link to carry video on. See
                     // VideoStarvationPolicy for what it means when one ends without carrying any.
                     sessionReachedHandshake = true
@@ -461,6 +536,7 @@ class CommManager(
                     silentPeerFailures = 0
                     // The peer answered, which is what the deaf-server record claims it cannot.
                     ConnectionIssues.clear(context, ConnectionIssue.HEADUNIT_SERVER_NOT_ANSWERING)
+                    settleSessionClaim(formed = true)
                     _connectionState.emit(ConnectionState.HandshakeComplete)
                 } else {
                     val silent = transport?.lastHandshakeFailure == AapTransport.HandshakeFailure.PEER_SILENT
@@ -473,7 +549,9 @@ class CommManager(
                     _connectionState.emit(
                         ConnectionState.Error(if (silent) ERROR_HANDSHAKE_PEER_SILENT else "Handshake failed")
                     )
-                    disconnect()
+                    settleSessionClaim(formed = false)
+                    // Not a user exit: nobody chose to end a session that never formed.
+                    disconnect(sendByeBye = false, isUserExit = false)
                 }
             } else {
                 onSessionFailure?.invoke("handshake_failed")
@@ -485,7 +563,8 @@ class CommManager(
             noteHandshakeOutcome(silent = false)
             onSessionFailure?.invoke("handshake_failed")
             _connectionState.emit(ConnectionState.Error("Handshake failed: ${e.message}"))
-            disconnect()
+            settleSessionClaim(formed = false)
+            disconnect(sendByeBye = false, isUserExit = false)
         }
     }
 
@@ -954,6 +1033,7 @@ class CommManager(
         val connection = _connection
         _transport = null
         _connection = null
+        settleSessionClaim(formed = false)
         keyStates.clear()
         btMediaLinkCached = null
         btMediaLinkCheckedAt = null
