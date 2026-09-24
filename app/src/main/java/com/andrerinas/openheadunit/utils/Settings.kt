@@ -25,6 +25,8 @@ import com.andrerinas.openheadunit.connection.wifi.direct.StoredP2pIdentity
 import com.andrerinas.openheadunit.connection.wifi.modes.helper.HelperStrategy
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.NativeDriverSelectionPolicy
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.NativeStrategy
+import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.SoftApAddressRecord
+import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.SoftApAdvertisedEndpoint
 import com.andrerinas.openheadunit.connection.wifi.WifiLauncherMode
 
 class Settings(private val context: Context) {
@@ -739,6 +741,41 @@ class Settings(private val context: Context) {
             GroupIdentityStability.UNPROVEN
         }
         set(value) = prefs.edit().putString("soft-ap-last-identity-verdict", value.name).apply()
+
+    /** The access point's address as last read, graded by SoftApEndpointStabilityPolicy. */
+    var softApAddressRecord: SoftApAddressRecord?
+        get() {
+            val ip = prefs.getString("soft-ap-last-ip", null) ?: return null
+            val digest = prefs.getString("soft-ap-last-psk-digest", null) ?: return null
+            val boot = prefs.getInt("soft-ap-ip-boot", -1).takeIf { it >= 0 }
+            return SoftApAddressRecord(ip, digest, boot, prefs.getBoolean("soft-ap-ip-spanned-boot", false))
+        }
+        set(value) {
+            prefs.edit()
+                .putString("soft-ap-last-ip", value?.ip)
+                .putString("soft-ap-last-psk-digest", value?.passphraseDigest)
+                .putInt("soft-ap-ip-boot", value?.bootCount ?: -1)
+                .putBoolean("soft-ap-ip-spanned-boot", value?.spannedBoot ?: false)
+                .apply()
+        }
+
+    /** The access point a WPP endpoint last went out on, so a bring-up that moved it can say so. */
+    var softApAdvertisedEndpoint: SoftApAdvertisedEndpoint?
+        get() {
+            val ssid = prefs.getString("soft-ap-advertised-ssid", null) ?: return null
+            val digest = prefs.getString("soft-ap-advertised-psk-digest", null) ?: return null
+            val bssid = prefs.getString("soft-ap-advertised-bssid", null) ?: return null
+            val ip = prefs.getString("soft-ap-advertised-ip", null) ?: return null
+            return SoftApAdvertisedEndpoint(ssid, digest, bssid, ip)
+        }
+        set(value) {
+            prefs.edit()
+                .putString("soft-ap-advertised-ssid", value?.ssid)
+                .putString("soft-ap-advertised-psk-digest", value?.passphraseDigest)
+                .putString("soft-ap-advertised-bssid", value?.bssid)
+                .putString("soft-ap-advertised-ip", value?.ip)
+                .apply()
+        }
 
     /**
      * The verdict the last *create* earned, so a group found already up and read as-is hands it

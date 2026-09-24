@@ -2601,7 +2601,7 @@ class NativeAaHandshakeManager(
     private fun retireStaleEndpointRecord() {
         val refused = dialRefusedSinceLastLanding
         dialRefusedSinceLastLanding = false
-        if (!StaleEndpointRecordPolicy.retiredByHandshake(refused)) return
+        if (!StaleEndpointRecordPolicy.retiredByHandshake(refused, launcher.strategy == NativeStrategy.HOTSPOT)) return
         ConnectionIssues.clear(context, ConnectionIssue.PHONE_HOLDS_STALE_ENDPOINT)
     }
 
@@ -3395,6 +3395,11 @@ class NativeAaHandshakeManager(
     /** Remembers the network an endpoint went out under, which is the one the phone will insist on. */
     private fun recordAdvertisedEndpoint(transport: NativeStrategy) {
         val creds = credentials ?: return
+        if (transport == NativeStrategy.HOTSPOT) {
+            val ap = SoftApEndpointStabilityPolicy.advertisement(creds.ssid, creds.psk, creds.bssid, creds.ip) ?: return
+            if (settings.softApAdvertisedEndpoint != ap) settings.softApAdvertisedEndpoint = ap
+            return
+        }
         val pair = EndpointRetirementPolicy.recordsAdvertisement(transport, creds.ssid, creds.psk) ?: return
         if (settings.wifiDirectAdvertisedIdentity != pair) settings.wifiDirectAdvertisedIdentity = pair
     }
