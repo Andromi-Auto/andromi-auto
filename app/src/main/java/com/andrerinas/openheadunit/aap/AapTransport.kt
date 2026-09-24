@@ -940,7 +940,10 @@ class AapTransport(
                 // "version response received" would hand a random payload to the SSL layer and
                 // cause a 15 s timeout. Instead, discard unexpected messages and keep reading
                 // until the deadline expires.
-                val recvDeadline = SystemClock.elapsedRealtime() + 2000
+                // The last request waits out the whole budget: a USB dongle relaying over WiFi can
+                // answer after 6 s, and giving up there leaves its answers for the next attempt.
+                val recvDeadline = if (attempt < 3) SystemClock.elapsedRealtime() + 2000
+                    else maxOf(versionDeadline, SystemClock.elapsedRealtime() + 2000)
                 while (SystemClock.elapsedRealtime() < recvDeadline) {
                     val remaining = (recvDeadline - SystemClock.elapsedRealtime())
                         .toInt().coerceAtLeast(100)
@@ -979,7 +982,7 @@ class AapTransport(
                              "Waiting for VERSION_RESPONSE.")
                 }
                 if (received) break
-                AppLog.w("Handshake: No VERSION_RESPONSE within 2s (attempt $attempt), ret=$ret")
+                AppLog.w("Handshake: No VERSION_RESPONSE within ${if (attempt < 3) "2s" else "the handshake budget"} (attempt $attempt), ret=$ret")
                 SystemClock.sleep(200)
             }
 
