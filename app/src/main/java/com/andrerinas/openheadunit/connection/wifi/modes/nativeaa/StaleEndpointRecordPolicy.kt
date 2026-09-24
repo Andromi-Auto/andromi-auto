@@ -11,8 +11,9 @@ object StaleEndpointRecordPolicy {
     /**
      * A phone runs its dial loop *beside* its Bluetooth handshake rather than instead of it, which
      * is measured, so one landing is not on its own proof the dialling stopped. A landing with no
-     * dial since the previous one is.
+     * dial since the previous one is. Never on a hotspot: a phone holding its old address dials an
+     * address nobody holds, so no refusal is ever recorded and a landing disproves nothing.
      */
-    fun retiredByHandshake(refusedADialSinceLastLanding: Boolean): Boolean =
-        !refusedADialSinceLastLanding
+    fun retiredByHandshake(refusedADialSinceLastLanding: Boolean, onHotspot: Boolean = false): Boolean =
+        !onHotspot && !refusedADialSinceLastLanding
 }

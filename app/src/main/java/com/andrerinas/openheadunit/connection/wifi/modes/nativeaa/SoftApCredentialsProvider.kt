@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import androidx.core.content.ContextCompat
+import com.andrerinas.openheadunit.app.AccPowerState
 import com.andrerinas.openheadunit.R
 import com.andrerinas.openheadunit.connection.ConnectionStage
 import com.andrerinas.openheadunit.connection.ConnectionStageTracker
@@ -64,9 +65,6 @@ class SoftApCredentialsProvider(
          */
         private const val NO_AP_REPORT_INTERVAL_MS = 60_000L
 
-        /** How long to wait for a user-configured AP before trying to switch one on ourselves. */
-        private const val AUTO_ENABLE_AFTER_MS = 5_000L
-
         /** Not in any public SDK constant: the soft AP state broadcast and its disabled state. */
         private const val WIFI_AP_STATE_CHANGED = "android.net.wifi.WIFI_AP_STATE_CHANGED"
         private const val EXTRA_WIFI_AP_STATE = "wifi_state"
@@ -90,14 +88,19 @@ class SoftApCredentialsProvider(
     @Volatile private var autoEnabled = false
 
     /**
-     * Whether switching the hotspot on has already been tried since [start].
-     *
-     * A field rather than a local in [beginResolve], because [refresh] restarts that loop and the
-     * handshake calls it every time it has been waiting too long — which used to re-arm auto-enable
-     * on each one, so a slow access point got a second start sweep on top of the first, racing it
-     * band for band. One attempt per run is the whole of the best effort on offer.
+     * Auto-enable attempts since [start], kept off [beginResolve] because [refresh] restarts that
+     * loop every ~10 s and used to re-arm a start on top of one still running. SoftApAutoEnablePolicy
+     * spaces the second one out, and only after the first failed.
      */
-    @Volatile private var triedAutoEnable = false
+    @Volatile private var autoEnableAttempts = 0
+    /** When the last start returned: the retry is spaced from a failure, not from the ask. */
+    @Volatile private var lastAutoEnableAtMs = 0L
+    /** A start blocks for up to ~20 s and survives [refresh] cancelling its loop; never ask over it. */
+    @Volatile private var autoEnableInFlight = false
+    /** The ACC wake already counted, so each time the car comes back gets its own attempts. */
+    @Volatile private var seenWokeAtMs = 0L
+    /** The ACC-off action already reported, so a car left off says so once. */
+    @Volatile private var reportedAccOff: String? = null
 
     /** So the once-per-second poll reports "nothing here" once, not thirty times. */
     @Volatile private var reportedNoInterface = false
@@ -129,13 +132,14 @@ class SoftApCredentialsProvider(
             if (intent.getIntExtra(EXTRA_WIFI_AP_STATE, -1) != WIFI_AP_STATE_DISABLED) return
             AppLog.w("SoftApCredentials: The hotspot went down — the credentials the phone was given are no longer valid.")
             onInvalidated?.invoke()
-            if (autoEnabled && isRunning) {
+            if (autoEnabled && isRunning && !AccPowerState.isOff) {
                 AppLog.i("SoftApCredentials: Re-enabling the hotspot we started, once.")
                 autoEnabled = false
+                autoEnableInFlight = true
                 // Off the main thread: setHotspotEnabled waits for the access point to actually
                 // come up, and onReceive() has an ANR budget measured in seconds.
                 scope.launch(Dispatchers.IO + CoroutineName("SoftApCredentials-Reenable")) {
-                    HotspotManager.setHotspotEnabled(context, true)
+                    enableHotspot()
                     refresh()
                 }
             }
@@ -157,7 +161,9 @@ class SoftApCredentialsProvider(
         }
         isRunning = true
         runStartedAt = System.currentTimeMillis()
-        triedAutoEnable = false
+        autoEnableAttempts = 0
+        lastAutoEnableAtMs = 0L
+        seenWokeAtMs = AccPowerState.wokeAtMs
         reportedConfigUnreadable = false
         lastNoApReportAtMs = 0L
         if (!isReceiverRegistered) {
@@ -188,7 +194,8 @@ class SoftApCredentialsProvider(
         // The network these describe is going away with this run; the next one resolves its own.
         credentialsHandoff.clear()
         autoEnabled = false
-        triedAutoEnable = false
+        autoEnableAttempts = 0
+        lastAutoEnableAtMs = 0L
         reportedConfigUnreadable = false
         lastNoApReportAtMs = 0L
         if (isReceiverRegistered) {
@@ -197,6 +204,14 @@ class SoftApCredentialsProvider(
             try { context.unregisterReceiver(apStateReceiver) } catch (e: Exception) {}
             isReceiverRegistered = false
         }
+    }
+
+    /** Callers set [autoEnableInFlight] first, so a loop restarted meanwhile sees it. */
+    private fun enableHotspot(): Boolean = try {
+        HotspotManager.setHotspotEnabled(context, true)
+    } finally {
+        lastAutoEnableAtMs = System.currentTimeMillis()
+        autoEnableInFlight = false
     }
 
     private fun beginResolve() {
@@ -236,13 +251,39 @@ class SoftApCredentialsProvider(
                         // Nothing on air yet, which is exactly what auto-enable is for. Reached only
                         // here, so an access point that is up but unreadable never triggers it.
                         val waited = System.currentTimeMillis() - runStartedAt
-                        reportNoAccessPoint(waited)
-                        if (!triedAutoEnable && waited >= AUTO_ENABLE_AFTER_MS && settings.autoEnableHotspot) {
-                            triedAutoEnable = true
-                            AppLog.i("SoftApCredentials: No access point after ${waited / 1000}s — trying to switch this device's hotspot on.")
+                        val accOff = AccPowerState.offAction
+                        if (accOff != null) {
+                            if (reportedAccOff != accOff) {
+                                reportedAccOff = accOff
+                                AppLog.i("SoftApCredentials: the car is off ($accOff), not switching the hotspot on.")
+                            }
+                        } else {
+                            reportedAccOff = null
+                            reportNoAccessPoint(waited)
+                        }
+                        val now = System.currentTimeMillis()
+                        val wokeAt = AccPowerState.wokeAtMs
+                        if (wokeAt != seenWokeAtMs) {
+                            seenWokeAtMs = wokeAt
+                            autoEnableAttempts = 0
+                        }
+                        if (SoftApAutoEnablePolicy.shouldAttempt(
+                                enabledInSettings = settings.autoEnableHotspot,
+                                attempts = autoEnableAttempts,
+                                waitedMs = waited,
+                                lastAttemptEndedAtMs = lastAutoEnableAtMs,
+                                lastAttemptSucceeded = autoEnabled,
+                                nowMs = now,
+                                accOff = accOff != null,
+                                attemptInFlight = autoEnableInFlight,
+                                sinceWakeMs = if (wokeAt > runStartedAt) now - wokeAt else null)) {
+                            val attempt = ++autoEnableAttempts
+                            autoEnableInFlight = true
+                            AppLog.i("SoftApCredentials: No access point after ${waited / 1000}s — trying to switch this device's hotspot on (attempt $attempt of ${SoftApAutoEnablePolicy.MAX_ATTEMPTS}).")
                             // Best effort; most unrooted units lack the permission. Keep polling
                             // anyway, since the user may switch it on by hand.
-                            autoEnabled = HotspotManager.setHotspotEnabled(context, true)
+                            autoEnabled = enableHotspot()
+                            if (!autoEnabled) AppLog.w("SoftApCredentials: the hotspot did not come up on attempt $attempt.")
                         }
                     }
                 }
@@ -273,7 +314,8 @@ class SoftApCredentialsProvider(
             "SoftApCredentials: No usable access point after ${waited / 1000}s. " +
                 "Turn this device's hotspot on before connecting — 5 GHz is strongly " +
                 "recommended, Android Auto video is poor over 2.4 GHz — or switch the " +
-                "Android Auto network transport back to WiFi Direct."
+                "Android Auto network transport back to WiFi Direct." +
+                (if (settings.autoEnableHotspot) "" else " 'Auto-Enable Hotspot' is off, so the app did not try to switch it on.")
         )
         // The durable half. The line above is the instruction; this is what still says it after the
         // log has rolled and the user is back in front of the app.

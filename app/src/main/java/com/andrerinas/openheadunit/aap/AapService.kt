@@ -28,6 +28,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.IntentCompat
 import androidx.core.content.PermissionChecker
 import com.andrerinas.openheadunit.App
+import com.andrerinas.openheadunit.app.AccPowerState
 import com.andrerinas.openheadunit.app.ActivityLaunchPolicy
 import com.andrerinas.openheadunit.app.BootCompleteReceiver
 import com.andrerinas.openheadunit.app.BootLoopPolicy
@@ -642,6 +643,7 @@ class AapService : Service() {
                     screenOffTimestamp = 0
 
                     AppLog.i("WakeDetect: SCREEN_ON (screen was off for ${offSec}s)")
+                    AccPowerState.noteOn()
                     FloatingButtonManager.update(this@AapService)
 
                     val settings = App.provide(this@AapService).settings
@@ -681,6 +683,7 @@ class AapService : Service() {
                     // Matched here rather than left to the else branch, which treats anything it
                     // does not know as a wake and would auto-start us as the car is switched off.
                     AppLog.i("WakeDetect: ACC off ($action)")
+                    AccPowerState.noteOff(action)
                     maybeTearDownBeforeLinkGoes(
                         LinkLossTrigger.ACC_POWER_LOST, accSignalIsExplicit = true
                     ) { goAsync() }
@@ -714,6 +717,7 @@ class AapService : Service() {
      * a long time, or an OEM boot/ACC intent was received by the dynamic receiver).
      */
     private fun onHibernateWake(trigger: String) {
+        AccPowerState.noteOn()
         // Debounce: don't re-trigger within 10 seconds (covers BootCompleteReceiver + this)
         val now = SystemClock.elapsedRealtime()
         if (now - lastWakeHandledTimestamp < 10_000) {
@@ -981,6 +985,7 @@ class AapService : Service() {
         super.onCreate()
         AppLog.i("AapService creating...")
         instance = this
+        AccPowerState.noteOn()
 
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -1991,6 +1996,9 @@ class AapService : Service() {
             // Microntek / MTCD / PX3 head units (ACC wake)
             addAction("com.cayboy.action.ACC_ON")
             addAction("com.carboy.action.ACC_ON")
+            // XYAuto head units (ACC wake). Sent without the background flag, so only this
+            // runtime receiver can hear it, and only in a process that survived the sleep.
+            addAction("xy.android.acc.on")
             // The counterparts: the car being switched off. On FYT units Android then deep-sleeps,
             // which is exactly when a session would otherwise vanish without closing. See
             // LinkLossTeardownPolicy.
@@ -3535,6 +3543,7 @@ class AapService : Service() {
             "com.glsx.boot.ACCOFF",
             "com.cayboy.action.ACC_OFF",
             "com.carboy.action.ACC_OFF",
+            "xy.android.acc.off",
             "android.intent.action.ACTION_MT_COMMAND_SLEEP_IN"
         )
 
