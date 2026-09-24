@@ -32,6 +32,7 @@ import com.andrerinas.openheadunit.connection.projection.SocketProjectionConnect
 import com.andrerinas.openheadunit.contract.ProjectionActivityRequest
 import com.andrerinas.openheadunit.decoder.audio.AudioDecoder
 import com.andrerinas.openheadunit.decoder.audio.MicRecorder
+import com.andrerinas.openheadunit.decoder.video.DecoderStopPolicy
 import com.andrerinas.openheadunit.decoder.video.VideoDecoder
 import com.andrerinas.openheadunit.main.BackgroundNotification
 import com.andrerinas.openheadunit.ssl.SingleKeyKeyManager
@@ -655,6 +656,13 @@ class AapTransport(
             // AapDump.logvHex("US", 0, ba.data, ba.limit) // AapDump might be removed or changed
         }
         return 0
+    }
+
+    internal fun pauseForSleep() {
+        AppLog.i("AapTransport: Pausing media/audio/mic and hardware video decoder for sleep")
+        aapAudio.pauseAllAudio()
+        micRecorder.stop()
+        videoDecoder.stop(DecoderStopPolicy.REASON_SCREEN_OFF_SLEEP)
     }
 
     internal fun stop(reason: Control.ByeByeReason = Control.ByeByeReason.USER_SELECTION) {

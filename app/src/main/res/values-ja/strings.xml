@@ -211,6 +211,7 @@
     <string name="auto_start_settings">自動起動設定</string>
     <string name="auto_start_settings_description">アプリが自動起動するタイミングを設定します</string>
     <string name="auto_start_oem_warning">このデバイスでは、このアプリの自動起動を有効にし、バッテリー最適化またはバックグラウンド制限を解除する必要がある場合があります。\n\nクイックブート（高速起動）対応のヘッドユニットでは、自動起動が機能しない場合があります。システム設定で「DuraSpeed」を探し、そこでこのアプリを有効にしてください。一部のヘッドユニットでは、DuraSpeedは非表示になっているため、「Hidden Settings」などのアプリが必要になる場合があります。DuraSpeedがない場合は、クイックブートを無効にしてみてください。</string>
+    <string name="car_launcher_autostart_info">Open Headunitはカーランチャーとして設定されています。システムの起動時に自動的に開始されます。</string>
     <string name="auto_start_on_boot_label">ブート時に開始</string>
     <string name="auto_start_on_boot_description">端末起動時にアプリを自動的に開きます。Android 10以降では「他のアプリの上に表示」権限が必要です。</string>
     <string name="auto_start_screen_on_label">オンスクリーンで開始</string>

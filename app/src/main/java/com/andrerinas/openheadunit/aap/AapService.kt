@@ -46,6 +46,7 @@ import com.andrerinas.openheadunit.R
 import com.andrerinas.openheadunit.utils.AppLog
 import com.andrerinas.openheadunit.utils.AppPermissions
 import com.andrerinas.openheadunit.utils.BluetoothAddressSeedPolicy
+import com.andrerinas.openheadunit.utils.CarLauncherManager
 import com.andrerinas.openheadunit.utils.BluetoothHelper
 import com.andrerinas.openheadunit.utils.DummyVpnPolicy
 import com.andrerinas.openheadunit.utils.ToastUtils
@@ -221,6 +222,12 @@ class AapService : Service() {
             if (key == Settings.KEY_MEDIA_VOLUME_OFFSET || key == Settings.KEY_ASSISTANT_VOLUME_OFFSET || key == Settings.KEY_NAVIGATION_VOLUME_OFFSET) {
                 serviceScope.launch(Dispatchers.Main) {
                     commManager.updateAudioGains()
+                }
+            }
+
+            if (key == Settings.KEY_ENABLE_CAR_LAUNCHER) {
+                serviceScope.launch(Dispatchers.Main) {
+                    updateNotification()
                 }
             }
         }
@@ -628,6 +635,7 @@ class AapService : Service() {
                 Intent.ACTION_SCREEN_OFF -> {
                     screenOffTimestamp = SystemClock.elapsedRealtime()
                     AppLog.i("WakeDetect: SCREEN_OFF")
+                    commManager.pauseForSleep()
                     maybeInferredAccPowerLoss { goAsync() }
                 }
                 Intent.ACTION_SCREEN_ON -> {
@@ -638,6 +646,11 @@ class AapService : Service() {
 
                     AppLog.i("WakeDetect: SCREEN_ON (screen was off for ${offSec}s)")
                     FloatingButtonManager.update(this@AapService)
+
+                    if (commManager.isConnected) {
+                        AppLog.i("WakeDetect: Requesting video focus on wake to restore keyframe")
+                        commManager.retakeVideoFocusForKeyframe()
+                    }
 
                     val settings = App.provide(this@AapService).settings
 
@@ -676,6 +689,7 @@ class AapService : Service() {
                     // Matched here rather than left to the else branch, which treats anything it
                     // does not know as a wake and would auto-start us as the car is switched off.
                     AppLog.i("WakeDetect: ACC off ($action)")
+                    commManager.pauseForSleep()
                     maybeTearDownBeforeLinkGoes(
                         LinkLossTrigger.ACC_POWER_LOST, accSignalIsExplicit = true
                     ) { goAsync() }
@@ -3075,7 +3089,12 @@ class AapService : Service() {
         else
             getString(R.string.notification_service_running)
 
-        return NotificationCompat.Builder(this, App.defaultChannel)
+        val showExit = CarLauncherManager.shouldShowExitButton(
+            isCarLauncherEnabled = settings.enableCarLauncher,
+            isDefaultLauncher = CarLauncherManager.isDefaultLauncher(this)
+        )
+
+        val builder = NotificationCompat.Builder(this, App.defaultChannel)
             .setSmallIcon(R.drawable.ic_stat_aa)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setOngoing(true)
@@ -3086,8 +3105,12 @@ class AapService : Service() {
                 PendingIntent.FLAG_UPDATE_CURRENT or
                     (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0)
             ))
-            .addAction(R.drawable.ic_exit_to_app_white_24dp, getString(R.string.exit), stopPendingIntent)
-            .build()
+
+        if (showExit) {
+            builder.addAction(R.drawable.ic_exit_to_app_white_24dp, getString(R.string.exit), stopPendingIntent)
+        }
+
+        return builder.build()
     }
 
     private fun updateNotification() {
@@ -3392,7 +3415,13 @@ class AapService : Service() {
             "com.glsx.boot.ACCOFF",
             "com.cayboy.action.ACC_OFF",
             "com.carboy.action.ACC_OFF",
-            "android.intent.action.ACTION_MT_COMMAND_SLEEP_IN"
+            "android.intent.action.ACTION_MT_COMMAND_SLEEP_IN",
+            "com.syu.canbus.action.ACC_OFF",
+            "com.ts.car.acc_off",
+            "com.microntek.acc_off",
+            "com.microntek.boot.ACCOFF",
+            "android.intent.action.QUICKBOOT_POWEROFF",
+            "com.htc.intent.action.QUICKBOOT_POWEROFF"
         )
 
 

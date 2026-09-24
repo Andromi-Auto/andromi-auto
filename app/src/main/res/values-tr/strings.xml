@@ -208,6 +208,7 @@
     <string name="auto_start_settings">Otomatik başlatma ayarları</string>
     <string name="auto_start_settings_description">Uygulamanın ne zaman otomatik başlayacağını yapılandırın</string>
     <string name="auto_start_oem_warning">Bu cihaz, otomatik başlatmanın etkinleştirilmesini ve bu uygulama için pil optimizasyonunun veya arka plan kısıtlamalarının kaldırılmasını gerektirebilir.\n\nQuick Boot (hızlı önyükleme) özelliğine sahip multimedya sistemlerinde otomatik başlatma çalışmayabilir. Sistem ayarlarınızda \"DuraSpeed\" seçeneğini arayın ve bu uygulamayı orada etkinleştirin. Bazı sistemlerde DuraSpeed gizlidir; bulmak için \"Hidden Settings\" gibi bir uygulamaya ihtiyacınız olabilir. DuraSpeed yoksa, Quick Boot\'u devre dışı bırakmayı deneyin.</string>
+    <string name="car_launcher_autostart_info">Open Headunit araç başlatıcısı olarak yapılandırıldı. Sistem açılışında otomatik olarak başlar.</string>
     <string name="auto_start_on_boot_label">Açılışta başlat</string>
     <string name="auto_start_on_boot_description">Cihaz açıldığında uygulamayı otomatik olarak açar. Android 10+ sürümlerinde \'Diğer uygulamaların üzerinde görüntüleme\' izni gerektirir</string>
     <string name="auto_start_screen_on_label">Ekran açıldığında başlat</string>

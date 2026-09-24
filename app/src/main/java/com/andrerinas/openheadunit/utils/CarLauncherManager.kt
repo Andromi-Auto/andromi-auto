@@ -17,7 +17,7 @@ object CarLauncherManager {
      */
     fun isLauncherEnabled(context: Context): Boolean {
         return try {
-            val pm = context.packageManager
+            val pm = context.packageManager ?: return false
             val component = ComponentName(context, ALIAS_CLASS_NAME)
             val state = pm.getComponentEnabledSetting(component)
             state == PackageManager.COMPONENT_ENABLED_STATE_ENABLED
@@ -62,8 +62,9 @@ object CarLauncherManager {
      */
     fun isDefaultLauncher(context: Context): Boolean {
         return try {
+            val pm = context.packageManager ?: return false
             val intent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME)
-            val resolveInfo = context.packageManager.resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY)
+            val resolveInfo = pm.resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY)
             resolveInfo?.activityInfo?.packageName == context.packageName
         } catch (e: Exception) {
             AppLog.w("CarLauncherManager: failed to check default launcher: ${e.message}")

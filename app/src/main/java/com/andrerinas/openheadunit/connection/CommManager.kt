@@ -859,6 +859,10 @@ class CommManager(
         }
     }
 
+    fun pauseForSleep() {
+        _transport?.pauseForSleep()
+    }
+
     fun updateAudioGains() {
         _transport?.aapAudio?.updateGains()
     }

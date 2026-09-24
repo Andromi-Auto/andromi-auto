@@ -194,6 +194,7 @@
     <string name="auto_start_settings">Cài đặt tự khởi động</string>
     <string name="auto_start_settings_description">Cấu hình khi nào ứng dụng tự khởi động</string>
     <string name="auto_start_oem_warning">Máy này có thể cần bật tự khởi động và bỏ tối ưu pin hoặc giới hạn nền cho ứng dụng.\n\nVới các headunit có Quick Boot (khởi động nhanh), tự khởi động có thể không hoạt động. Tìm \"DuraSpeed\" trong cài đặt hệ thống và bật cho ứng dụng này. Trên một số headunit, DuraSpeed bị ẩn và có thể cần ứng dụng như \"Hidden Settings\" để tìm. Nếu không có DuraSpeed, hãy thử tắt Quick Boot.</string>
+    <string name="car_launcher_autostart_info">Open Headunit được định cấu hình làm trình khởi chạy trên xe. Ứng dụng sẽ tự động khởi động khi hệ thống khởi động.</string>
     <string name="auto_start_on_boot_label">Khởi động khi mở máy</string>
     <string name="auto_start_on_boot_description">Tự động mở ứng dụng khi thiết bị khởi động. Cần quyền \'Hiển thị trên ứng dụng khác\' trên Android 10+</string>
     <string name="auto_start_screen_on_label">Khởi động khi bật màn hình</string>
