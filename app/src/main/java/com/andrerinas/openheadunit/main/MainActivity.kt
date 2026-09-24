@@ -29,6 +29,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.andrerinas.openheadunit.connection.ConnectionPriorityPolicy
 import com.andrerinas.openheadunit.App
 import com.andrerinas.openheadunit.R
 import com.andrerinas.openheadunit.aap.AapProjectionActivity
@@ -367,10 +368,15 @@ class MainActivity : BaseActivity() {
      * which are the ones the pill spends most of its life showing.
      */
     private fun cancelBringUp() {
-        AppLog.i("MainActivity: status pill X pressed, stopping the wireless bring-up")
+        AppLog.i("MainActivity: status pill X pressed, stopping the bring-up")
+        // Read before the disconnect below, which drops the connection the service would ask.
+        val stage = ConnectionStageTracker.stage.value
+        val usbAttempt = App.provide(this).commManager.isUsbSession ||
+            stage == ConnectionStage.USB_ATTACHED || stage == ConnectionStage.USB_SWITCHING
         cancelAutoConnect()
         ContextCompat.startForegroundService(this, Intent(this, AapService::class.java).apply {
             action = AapService.ACTION_CANCEL_WIRELESS
+            putExtra(AapService.EXTRA_USB_ATTEMPT, usbAttempt)
         })
     }
 
@@ -1102,11 +1108,12 @@ class MainActivity : BaseActivity() {
                     ContextCompat.startForegroundService(this, Intent(this, AapService::class.java).apply {
                         action = AapService.ACTION_CONNECT_SOCKET
                     })
-                    lifecycleScope.launch(Dispatchers.IO) { App.provide(this@MainActivity).commManager.connect(ip, 5277) }
+                    lifecycleScope.launch(Dispatchers.IO) { App.provide(this@MainActivity).commManager.connect(ip, 5277, ConnectionPriorityPolicy.Tier.USER) }
                 } else {
                     AppLog.i("Received connect intent without IP -> triggering last session auto-connect")
                     val autoIntent = Intent(this, AapService::class.java).apply {
                         action = AapService.ACTION_CHECK_USB
+                        putExtra(AapService.EXTRA_USER_REQUESTED, true)
                     }
                     ContextCompat.startForegroundService(this, autoIntent)
                 }
