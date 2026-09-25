@@ -221,6 +221,31 @@ class WppHandshakeSessionTest {
         assertEquals(WppStage.SETTLING, settling.stage)
     }
 
+    @Test
+    fun `a network taken down under a joining phone ends the handshake and wakes it again`() {
+        val s = settledSession()
+        s.on(msg(WppMessageType.START_RESPONSE, 0))
+
+        val actions = s.on(WppEvent.NetworkWithdrawn)
+
+        assertEquals(WppStage.FAILED, s.stage)
+        val fail = actions[0] as WppAction.Fail
+        assertEquals(WppAction.ResumePoke, actions[1])
+        // Ours, not the phone's: it must not spend the join-refusal backoff or read as silence.
+        assertFalse(fail.joinRefused)
+        assertFalse(fail.phoneWasSilent)
+    }
+
+    @Test
+    fun `a withdrawal before the credentials went out changes nothing`() {
+        val s = openedSession()
+        s.on(WppEvent.CredentialsReady)
+        assertEquals(WppStage.AWAIT_INFO_REQUEST, s.stage)
+
+        assertEquals(emptyList<WppAction>(), s.on(WppEvent.NetworkWithdrawn))
+        assertEquals(WppStage.AWAIT_INFO_REQUEST, s.stage)
+    }
+
     // --- a phone that needs no credentials ------------------------------------------------
 
     @Test
@@ -397,6 +422,7 @@ class WppHandshakeSessionTest {
             WppEvent.StageTimeout,
             WppEvent.CredentialsReady,
             WppEvent.CredentialsUnavailable,
+            WppEvent.NetworkWithdrawn,
             msg(WppMessageType.PING_REQUEST),
             msg(WppMessageType.CONNECT_STATUS, -1)
         )) {

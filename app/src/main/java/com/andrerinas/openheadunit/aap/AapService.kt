@@ -612,6 +612,7 @@ class AapService : Service() {
      * receiver fire for the same wake event.
      */
     private var lastWakeHandledTimestamp = 0L
+    private var lastWakeRearmTimestamp = 0L
 
     /**
      * Runtime-registered receiver for system wake/boot/power/screen events.
@@ -652,6 +653,10 @@ class AapService : Service() {
 
                     AppLog.i("WakeDetect: SCREEN_ON (screen was off for ${offSec}s)")
                     AccPowerState.noteOn()
+                    if (offDuration > HIBERNATE_WAKE_THRESHOLD_MS) {
+                        AccPowerState.noteWake()
+                        rearmNativeHotspotAfterWake("SCREEN_ON after ${offSec}s sleep")
+                    }
                     FloatingButtonManager.update(this@AapService)
 
                     if (commManager.isConnected) {
@@ -731,7 +736,7 @@ class AapService : Service() {
      * a long time, or an OEM boot/ACC intent was received by the dynamic receiver).
      */
     private fun onHibernateWake(trigger: String) {
-        AccPowerState.noteOn()
+        AccPowerState.noteWake()
         // Debounce: don't re-trigger within 10 seconds (covers BootCompleteReceiver + this)
         val now = SystemClock.elapsedRealtime()
         if (now - lastWakeHandledTimestamp < 10_000) {
@@ -746,6 +751,7 @@ class AapService : Service() {
             AppLog.i("WakeDetect: already connected/connecting, skipping ($trigger)")
             return
         }
+        rearmNativeHotspotAfterWake(trigger)
 
         val settings = App.provide(this).settings
 
@@ -758,6 +764,21 @@ class AapService : Service() {
             AppLog.i("WakeDetect: checking USB devices (trigger=$trigger)")
             usbLauncherManager.checkAlreadyConnected(force = true)
         }
+    }
+
+    /**
+     * A sleep can take the hotspot down under an armed Native run, which nothing else re-reads.
+     * The Bluetooth listeners are left to their own radio-state recovery.
+     */
+    private fun rearmNativeHotspotAfterWake(trigger: String) {
+        val launcher = wifiLauncherManager.active as? WifiLauncherNative ?: return
+        if (launcher.strategy != NativeStrategy.HOTSPOT || !wifiLauncherManager.activeIsStarted) return
+        if (commManager.isConnected || commManager.connectionState.value is CommManager.ConnectionState.Connecting) return
+        val now = SystemClock.elapsedRealtime()
+        if (now - lastWakeRearmTimestamp < 10_000) return
+        lastWakeRearmTimestamp = now
+        AppLog.i("WakeDetect: re-reading the Native AA hotspot after a wake ($trigger)")
+        launcher.refreshAfterWake()
     }
 
     /**
@@ -786,6 +807,7 @@ class AapService : Service() {
         if (screenOff <= 0L || powerOff <= 0L) return
         if (kotlin.math.abs(screenOff - powerOff) > ACC_POWER_LOSS_CORROBORATION_WINDOW_MS) return
         AppLog.i("WakeDetect: power lost beside a screen-off; treating it as the car being switched off")
+        AccPowerState.noteOff("inferred: power lost beside a screen-off")
         maybeTearDownBeforeLinkGoes(LinkLossTrigger.ACC_POWER_LOST, accSignalIsExplicit = false, pendingResult)
     }
 
@@ -2013,6 +2035,8 @@ class AapService : Service() {
             // XYAuto head units (ACC wake). Sent without the background flag, so only this
             // runtime receiver can hear it, and only in a process that survived the sleep.
             addAction("xy.android.acc.on")
+            // Autochips / MediaTek QuickBoot units (ACC wake)
+            addAction("autochips.intent.action.QB_POWERON")
             // The counterparts: the car being switched off. On FYT units Android then deep-sleeps,
             // which is exactly when a session would otherwise vanish without closing. See
             // LinkLossTeardownPolicy.
@@ -3568,6 +3592,7 @@ class AapService : Service() {
             "com.carboy.action.ACC_OFF",
             "xy.android.acc.off",
             "android.intent.action.ACTION_MT_COMMAND_SLEEP_IN",
+            "autochips.intent.action.QB_POWEROFF",
             "com.syu.canbus.action.ACC_OFF",
             "com.ts.car.acc_off",
             "com.microntek.acc_off",

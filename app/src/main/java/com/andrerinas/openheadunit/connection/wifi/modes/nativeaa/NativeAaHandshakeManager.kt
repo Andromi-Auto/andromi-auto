@@ -648,7 +648,11 @@ class NativeAaHandshakeManager(
      *  that's about to be torn down. */
     fun invalidateCredentials() {
         credentials = null
+        credentialsWithdrawals.incrementAndGet()
     }
+
+    /** Counts groups taken down, so a handshake can tell the network it sent has since gone. */
+    private val credentialsWithdrawals = java.util.concurrent.atomic.AtomicInteger()
 
     // isRunning alone isn't enough once closeAaListeners() can close the AA_UUID listener while
     // leaving the manager otherwise running (HFP stays up) — callers like AutoStartReceiver's
@@ -2777,6 +2781,8 @@ class NativeAaHandshakeManager(
             var capturedCreds = NativeNetworkCredentials("", "", "", "")
             // Set when the network named above stopped existing before Type 3 could go out.
             var credentialsWentStale = false
+            // The withdrawal count the credentials were sent under, or -1 before Type 3.
+            var sentUnderWithdrawals = -1
             // When the opening message last went out, for the transports that have to repeat it.
             var lastOpenerSentAt = 0L
 
@@ -2812,6 +2818,7 @@ class NativeAaHandshakeManager(
                         // Read again here rather than trusting the snapshot this exchange started
                         // with. A group removed inside the pause above leaves the phone hunting an
                         // SSID that is gone, which it cannot recover from without a new handshake.
+                        val withdrawalsAtSend = credentialsWithdrawals.get()
                         val live = credentials
                         when (CredentialFreshnessPolicy.decide(
                             captured = capturedCreds,
@@ -2855,6 +2862,7 @@ class NativeAaHandshakeManager(
                         // we put bytes on the channel, and a phone that opened the exchange itself
                         // can reach this having had nothing from us before it.
                         spokeToPhone = true
+                        sentUnderWithdrawals = withdrawalsAtSend
                         AppLog.i("NativeAA: Handshake completed successfully on Bluetooth side.")
                         val remoteMac = link.peerAddress.orEmpty()
                         if (remoteMac.isNotEmpty()) {
@@ -2991,6 +2999,13 @@ class NativeAaHandshakeManager(
                     commManager.connectionState.value is CommManager.ConnectionState.Connecting
                 if (commManager.isConnected || handoffLanding) {
                     feed(WppEvent.TcpSessionUp)
+                    return
+                }
+                if (session.stage == WppStage.SETTLING && sentUnderWithdrawals >= 0 &&
+                    credentialsWithdrawals.get() != sentUnderWithdrawals
+                ) {
+                    AppLog.w("NativeAA: the network the phone was sent was taken down while it was joining, so this handshake ends now and the phone is woken for the new one.")
+                    feed(WppEvent.NetworkWithdrawn)
                     return
                 }
                 val limit = session.currentStageTimeoutMs() ?: return

@@ -4,6 +4,8 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.os.Build
+import android.os.PowerManager
 import androidx.core.content.ContextCompat
 import com.andrerinas.openheadunit.app.AccPowerState
 import com.andrerinas.openheadunit.R
@@ -99,6 +101,8 @@ class SoftApCredentialsProvider(
     @Volatile private var autoEnableInFlight = false
     /** The ACC wake already counted, so each time the car comes back gets its own attempts. */
     @Volatile private var seenWokeAtMs = 0L
+    /** When the access point last went down, so no enable is asked for while the radio settles. */
+    @Volatile private var apDownAtMs = 0L
     /** The ACC-off action already reported, so a car left off says so once. */
     @Volatile private var reportedAccOff: String? = null
 
@@ -132,17 +136,15 @@ class SoftApCredentialsProvider(
             if (intent.getIntExtra(EXTRA_WIFI_AP_STATE, -1) != WIFI_AP_STATE_DISABLED) return
             AppLog.w("SoftApCredentials: The hotspot went down — the credentials the phone was given are no longer valid.")
             onInvalidated?.invoke()
+            apDownAtMs = System.currentTimeMillis()
             if (autoEnabled && isRunning && !AccPowerState.isOff) {
-                AppLog.i("SoftApCredentials: Re-enabling the hotspot we started, once.")
+                // An enable at the moment of the drop fails and used to spend the only one; ours gets
+                // a fresh budget, which the resolve loop spaces from the drop.
+                AppLog.i("SoftApCredentials: the hotspot we started went down; asking for it again in ${SoftApAutoEnablePolicy.RETRY_AFTER_MS / 1000}s at the earliest.")
                 autoEnabled = false
-                autoEnableInFlight = true
-                // Off the main thread: setHotspotEnabled waits for the access point to actually
-                // come up, and onReceive() has an ANR budget measured in seconds.
-                scope.launch(Dispatchers.IO + CoroutineName("SoftApCredentials-Reenable")) {
-                    enableHotspot()
-                    refresh()
-                }
+                autoEnableAttempts = 0
             }
+            refresh()
         }
     }
 
@@ -163,6 +165,7 @@ class SoftApCredentialsProvider(
         runStartedAt = System.currentTimeMillis()
         autoEnableAttempts = 0
         lastAutoEnableAtMs = 0L
+        apDownAtMs = 0L
         seenWokeAtMs = AccPowerState.wokeAtMs
         reportedConfigUnreadable = false
         lastNoApReportAtMs = 0L
@@ -206,6 +209,15 @@ class SoftApCredentialsProvider(
         }
     }
 
+    /** A dark screen on a head unit is a unit asleep or going to sleep, and an enable fights that. */
+    private fun screenIsOff(): Boolean = try {
+        val pm = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+        @Suppress("DEPRECATION")
+        !(if (Build.VERSION.SDK_INT >= 20) pm.isInteractive else pm.isScreenOn)
+    } catch (e: Exception) {
+        false
+    }
+
     /** Callers set [autoEnableInFlight] first, so a loop restarted meanwhile sees it. */
     private fun enableHotspot(): Boolean = try {
         HotspotManager.setHotspotEnabled(context, true)
@@ -219,8 +231,20 @@ class SoftApCredentialsProvider(
         reportedNoInterface = false
         resolveJob = scope.launch(Dispatchers.IO + CoroutineName("SoftApCredentials-Resolve")) {
             val deadline = System.currentTimeMillis() + RESOLVE_BUDGET_MS
+            var budgetReported = false
 
-            while (isActive && isRunning && System.currentTimeMillis() < deadline) {
+            while (isActive && isRunning) {
+                // Past the budget, say so once, but keep looking while an enable is still owed:
+                // a loop that ended here left the retry to a refresh that might never come.
+                if (System.currentTimeMillis() >= deadline) {
+                    if (!budgetReported) {
+                        budgetReported = true
+                        reportNoAccessPoint(System.currentTimeMillis() - runStartedAt, force = true)
+                        onInvalidated?.invoke()
+                    }
+                    if (!SoftApAutoEnablePolicy.attemptOwed(
+                            settings.autoEnableHotspot, autoEnableAttempts, autoEnabled, autoEnableInFlight)) break
+                }
                 val chosen = pickApInterface()
                 val apName = chosen?.iface?.name ?: "the access point"
                 when (if (chosen == null) SoftApCredentialsAttempt.NO_AP_YET else publish(chosen)) {
@@ -276,7 +300,9 @@ class SoftApCredentialsProvider(
                                 nowMs = now,
                                 accOff = accOff != null,
                                 attemptInFlight = autoEnableInFlight,
-                                sinceWakeMs = if (wokeAt > runStartedAt) now - wokeAt else null)) {
+                                sinceWakeMs = if (wokeAt > runStartedAt) now - wokeAt else null,
+                                sinceApDownMs = apDownAtMs.takeIf { it > 0L }?.let { now - it },
+                                screenOff = screenIsOff())) {
                             val attempt = ++autoEnableAttempts
                             autoEnableInFlight = true
                             AppLog.i("SoftApCredentials: No access point after ${waited / 1000}s — trying to switch this device's hotspot on (attempt $attempt of ${SoftApAutoEnablePolicy.MAX_ATTEMPTS}).")
@@ -288,11 +314,6 @@ class SoftApCredentialsProvider(
                     }
                 }
                 delay(POLL_INTERVAL_MS)
-            }
-
-            if (isActive && isRunning) {
-                reportNoAccessPoint(System.currentTimeMillis() - runStartedAt, force = true)
-                onInvalidated?.invoke()
             }
         }
     }

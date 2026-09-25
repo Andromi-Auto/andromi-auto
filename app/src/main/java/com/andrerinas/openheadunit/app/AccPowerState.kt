@@ -28,4 +28,10 @@ object AccPowerState {
         offAction = null
         wokeAtMs = System.currentTimeMillis()
     }
+
+    /** A long sleep ended on a unit that may name no ACC intent: a wake all the same. */
+    fun noteWake(nowMs: Long = System.currentTimeMillis()) {
+        offAction = null
+        wokeAtMs = nowMs
+    }
 }

@@ -803,6 +803,10 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
                         manager?.requestConnectionInfo(channel, this@WifiDirectManager)
                         AapService.scanningState.value = false
                     } else {
+                        val isNative = App.provide(context).settings.wifiConnectionMode == WifiLauncherMode.NATIVE
+                        if (NativeGroupLossPolicy.invalidatesOnDisconnect(isNative, isGroupOwner)) {
+                            invalidateNativeGroupCredentials("the platform took it down")
+                        }
                         isConnected = false
                         isClientConnected = false
                         lastNativeGroupStatusMessage = null

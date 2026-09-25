@@ -37,6 +37,7 @@ import com.andrerinas.openheadunit.decoder.video.VideoDecoder
 import com.andrerinas.openheadunit.main.BackgroundNotification
 import com.andrerinas.openheadunit.ssl.SingleKeyKeyManager
 import com.andrerinas.openheadunit.utils.AppLog
+import com.andrerinas.openheadunit.utils.BluetoothLinkMonitor
 import com.andrerinas.openheadunit.utils.Settings
 import com.andrerinas.openheadunit.aap.protocol.proto.Control
 import com.andrerinas.openheadunit.aap.protocol.proto.Media
@@ -254,6 +255,9 @@ class AapTransport(
      */
     private val inboundRateMonitor = InboundRateMonitor()
 
+    /** Which Bluetooth profiles share the radio, printed beside each quiet window. */
+    private val bluetoothLinkMonitor = BluetoothLinkMonitor(context)
+
     /** What the microphone session sent, so a silent assistant has something to read. */
     private val micUplinkMonitor = MicUplinkMonitor()
 
@@ -270,13 +274,16 @@ class AapTransport(
         val now = SystemClock.elapsedRealtime()
         lastMessageReceivedMs = now
         linkGapMonitor.onMessage(now)?.let { AppLog.i("AapTransport: %s", it) }
-        inboundRateMonitor.onMessage(channel, bytes, now)?.let { AppLog.i("AapTransport: %s", it) }
-        when {
-            channel == Channel.ID_VID ->
-                videoGapMonitor.onMessage(now)?.let { AppLog.i("AapTransport: %s", it) }
-            Channel.isAudio(channel) ->
-                audioGapMonitor.onMessage(now)?.let { AppLog.i("AapTransport: %s", it) }
+        inboundRateMonitor.onMessage(channel, bytes, now)?.let {
+            AppLog.i("AapTransport: %s", it)
+            bluetoothLinkMonitor.onWindow()
         }
+        val quiet = when {
+            channel == Channel.ID_VID -> videoGapMonitor.onMessage(now)
+            Channel.isAudio(channel) -> audioGapMonitor.onMessage(now)
+            else -> null
+        }
+        quiet?.let { AppLog.i("AapTransport: %s | bluetooth %s", it, bluetoothLinkMonitor.describeNow()) }
     }
 
     /**
@@ -837,6 +844,7 @@ class AapTransport(
         inboundRateMonitor.reset()
         micUplinkMonitor.reset()
         micChunks.reset()
+        bluetoothLinkMonitor.onSessionStart()
 
         videoThread = HandlerThread("AapTransport:Handler::Video", Process.THREAD_PRIORITY_DISPLAY)
         videoThread!!.start()

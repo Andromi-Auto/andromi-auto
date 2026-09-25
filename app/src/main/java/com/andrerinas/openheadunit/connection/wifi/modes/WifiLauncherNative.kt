@@ -373,6 +373,15 @@ class WifiLauncherNative : WifiLauncher {
     }
 
     /**
+     * After a sleep: checks the TCP port and re-reads the network, and nothing else. Unlike
+     * [reopenListeners] it keeps the driver-selection and handshake state a user may have set.
+     */
+    fun refreshAfterWake() {
+        manager.sharedServices.startWirelessServer(this)
+        triggerWifiDirectRefresh()
+    }
+
+    /**
      * Triggers a refresh of the WiFi Direct "quiet host" state.
      * Called by NativeAaHandshakeManager if it's waiting for credentials that haven't arrived yet.
      */
