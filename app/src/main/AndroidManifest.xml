@@ -375,6 +375,8 @@
                 <action android:name="com.carboy.action.ACC_ON" />
                 <!-- XYAuto head units (ACC wake) -->
                 <action android:name="xy.android.acc.on" />
+                <!-- Autochips / MediaTek QuickBoot units (ACC wake) -->
+                <action android:name="autochips.intent.action.QB_POWERON" />
             </intent-filter>
         </receiver>
 

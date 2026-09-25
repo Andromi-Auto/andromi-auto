@@ -63,6 +63,8 @@ sealed class WppEvent {
     object TcpSessionUp : WppEvent()
     /** The settling window elapsed with no session. */
     object SettleTimeout : WppEvent()
+    /** The network the phone was sent has been taken down, so its join can no longer succeed. */
+    object NetworkWithdrawn : WppEvent()
 }
 
 /**
@@ -311,6 +313,10 @@ class WppHandshakeSession {
         // has not given up, and refusing it would strand a handoff that could still complete.
         event is WppEvent.MessageReceived && event.type == WppMessageType.INFO_REQUEST ->
             listOf(WppAction.SendInfoResponse)
+        // Some platforms drop an emptied group the moment the phone's first try leaves it, and
+        // the phone then hunts the old name until it gives up. Ending now hands it the new one.
+        event is WppEvent.NetworkWithdrawn ->
+            fail("the network the phone was sent was taken down while it was joining") + WppAction.ResumePoke
         // Today's behaviour: leave the listeners open and let the wake poke retry.
         event is WppEvent.SettleTimeout -> {
             stage = WppStage.FAILED
