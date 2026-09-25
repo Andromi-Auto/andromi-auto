@@ -205,6 +205,7 @@
     <string name="auto_start_settings">ავტო-გაშვების პარამეტრები</string>
     <string name="auto_start_settings_description">კონფიგურაცია, თუ როდის ჩაირთოს აპლიკაცია ავტომატურად</string>
     <string name="auto_start_oem_warning">ამ მოწყობილობაზე შესაძლოა საჭირო გახდეს ავტო-გაშვების ნებართვის ჩართვა და ამ აპისთვის ელემენტის ოპტიმიზაციის ან ფონური შეზღუდვების მოხსნა.\n\nსწრაფი ჩატვირთვის (Quick Boot) მქონე მონიტორებზე ავტო-გაშვება შეიძლება საიმედოდ არ იმუშაოს. მოძებნეთ \"DuraSpeed\" სისტემურ პარამეტრებში და ჩართეთ ეს აპი იქ. ზოგიერთ მონიტორზე DuraSpeed დამალულია და მის საპოვნელად შესაძლოა დაგჭირდეთ აპლიკაცია \"Hidden Settings\". თუ DuraSpeed არ გაქვთ, სცადეთ Quick Boot-ის გამორთვა.</string>
+    <string name="car_launcher_autostart_info">Open Headunit კონფიგურირებულია, როგორც მანქანის გამშვები. ის ავტომატურად იწყება სისტემის ჩატვირთვისას.</string>
     <string name="auto_start_on_boot_label">გაშვება ჩატვირთვისას (Boot)</string>
     <string name="auto_start_on_boot_description">აპლიკაციის ავტომატური გახსნა მოწყობილობის ჩართვისას. საჭიროებს \'სხვა აპებზე ჩვენების\' (Display over other apps) ნებართვას Android 10+ ვერსიებზე</string>
     <string name="auto_start_screen_on_label">გაშვება ეკრანის ჩართვისას</string>

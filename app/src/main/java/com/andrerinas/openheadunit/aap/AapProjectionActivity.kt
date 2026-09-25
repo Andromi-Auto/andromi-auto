@@ -1186,6 +1186,14 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         maybeOpenCallRaiseEpisode()
     }
 
+    override fun onStop() {
+        super.onStop()
+        AppLog.i("AapProjectionActivity: onStop")
+        if (!App.isPiPActive && !isChangingConfigurations) {
+            videoDecoder.stop(DecoderStopPolicy.REASON_ACTIVITY_STOPPED)
+        }
+    }
+
     override fun onResume() {
         super.onResume()
         isForeground = true
@@ -1196,6 +1204,9 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         RenameNotice.maybeShow(this, App.provide(this).settings)
         Aa174Notice.maybeShow(this, App.provide(this).settings)
         applyStickyOrientation()
+        if (isSurfaceSet && commManager.isConnected) {
+            commManager.retakeVideoFocusForKeyframe()
+        }
         watchdogHandler.postDelayed(watchdogRunnable, 2000)
         watchdogHandler.postDelayed(videoWatchdogRunnable, 3000)
         watchdogHandler.postDelayed(reconnectingWatchdog, 5000)
@@ -2166,6 +2177,15 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
             return true
         }
 
+        // 1b. Handle hardware/panel HOME key: return to App Home without dropping the connection (Option A).
+        if (ProjectionKeyPolicy.isHomeKey(event.keyCode)) {
+            if (action == KeyEvent.ACTION_DOWN) {
+                AppLog.i("AapProjectionActivity: KEYCODE_HOME pressed -> returning to App Home")
+                returnToAppHome(this)
+            }
+            return true
+        }
+
         if (event.keyCode == KeyEvent.KEYCODE_BACK ||
             event.keyCode == KeyEvent.KEYCODE_VOLUME_UP ||
             event.keyCode == KeyEvent.KEYCODE_VOLUME_DOWN ||
@@ -2180,6 +2200,13 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
 
     private fun onKeyEvent(keyCode: Int, isPress: Boolean) {
         // Broadcasts (e.g. from CarKeyReceiver) still use this path.
+        if (ProjectionKeyPolicy.isHomeKey(keyCode)) {
+            if (isPress) {
+                AppLog.i("AapProjectionActivity: KEYCODE_HOME broadcast received -> returning to App Home")
+                returnToAppHome(this)
+            }
+            return
+        }
         commManager.sendKey(keyCode, isPress, null, "key-broadcast")
     }
 

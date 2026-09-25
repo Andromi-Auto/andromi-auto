@@ -29,6 +29,7 @@ import com.andrerinas.openheadunit.utils.AppPermissions
 import com.andrerinas.openheadunit.connection.wifi.WifiLauncherMode
 import com.andrerinas.openheadunit.utils.Settings
 import com.andrerinas.openheadunit.utils.BluetoothHelper
+import com.andrerinas.openheadunit.utils.CarLauncherManager
 import com.andrerinas.openheadunit.utils.ToastUtils
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
@@ -102,7 +103,7 @@ class AutoStartFragment : Fragment() {
         pendingAutoDisconnectBtDelaySeconds = settings.autoDisconnectBtDelaySeconds
         pendingAutoStartOnWifi = settings.autoStartOnWifi
         pendingAutoStartWifiSsid = settings.autoStartWifiSsid
-        pendingReopenOnReconnection = settings.reopenOnReconnection
+        pendingReopenOnReconnection = settings.rawReopenOnReconnection
 
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
@@ -222,7 +223,7 @@ class AutoStartFragment : Fragment() {
             settings.autoStartWifiSsid = it
             Settings.syncAutoStartWifiSsidToDeviceStorage(requireContext(), it)
         }
-        pendingReopenOnReconnection?.let { settings.reopenOnReconnection = it }
+        pendingReopenOnReconnection?.let { settings.rawReopenOnReconnection = it }
         settings.autoDisconnectBluetoothDeviceMacs = pendingAutoDisconnectBtMacs.toSet()
         pendingAutoDisconnectBtDelaySeconds?.let { settings.autoDisconnectBtDelaySeconds = it }
 
@@ -285,7 +286,7 @@ class AutoStartFragment : Fragment() {
                 pendingAutoDisconnectBtDelaySeconds != settings.autoDisconnectBtDelaySeconds ||
                 pendingAutoStartOnWifi != settings.autoStartOnWifi ||
                 pendingAutoStartWifiSsid != settings.autoStartWifiSsid ||
-                pendingReopenOnReconnection != settings.reopenOnReconnection
+                pendingReopenOnReconnection != settings.rawReopenOnReconnection
 
         updateSaveButtonState()
     }
@@ -301,17 +302,27 @@ class AutoStartFragment : Fragment() {
             textResId = R.string.auto_start_oem_warning
         ))
 
-        items.add(SettingItem.ToggleSettingEntry(
-            stableId = "autoStartOnBoot",
-            nameResId = R.string.auto_start_on_boot_label,
-            descriptionResId = R.string.auto_start_on_boot_description,
-            isChecked = pendingAutoStartOnBoot!!,
-            onCheckedChanged = { isChecked ->
-                pendingAutoStartOnBoot = isChecked
-                checkChanges()
-                updateSettingsList()
-            }
-        ))
+        val isCarLauncherActive = settings.enableCarLauncher ||
+            CarLauncherManager.isDefaultLauncher(requireContext())
+
+        if (isCarLauncherActive) {
+            items.add(SettingItem.InfoBanner(
+                stableId = "carLauncherAutoStartInfo",
+                textResId = R.string.car_launcher_autostart_info
+            ))
+        } else {
+            items.add(SettingItem.ToggleSettingEntry(
+                stableId = "autoStartOnBoot",
+                nameResId = R.string.auto_start_on_boot_label,
+                descriptionResId = R.string.auto_start_on_boot_description,
+                isChecked = pendingAutoStartOnBoot!!,
+                onCheckedChanged = { isChecked ->
+                    pendingAutoStartOnBoot = isChecked
+                    checkChanges()
+                    updateSettingsList()
+                }
+            ))
+        }
 
         items.add(SettingItem.ToggleSettingEntry(
             stableId = "autoStartOnScreenOn",
@@ -349,12 +360,12 @@ class AutoStartFragment : Fragment() {
             }
         ))
 
-        if (pendingAutoStartOnUsb == true) {
+        if (!isCarLauncherActive && pendingAutoStartOnUsb == true) {
             items.add(SettingItem.ToggleSettingEntry(
                 stableId = "reopenOnReconnection",
                 nameResId = R.string.reopen_on_reconnection_label,
                 descriptionResId = R.string.reopen_on_reconnection_description,
-                isChecked = pendingReopenOnReconnection!!,
+                isChecked = pendingReopenOnReconnection ?: settings.rawReopenOnReconnection,
                 onCheckedChanged = { isChecked ->
                     pendingReopenOnReconnection = isChecked
                     checkChanges()

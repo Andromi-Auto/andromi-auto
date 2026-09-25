@@ -207,6 +207,7 @@
     <string name="auto_start_settings">Setări pornire automată</string>
     <string name="auto_start_settings_description">Configurează când aplicația pornește automat</string>
     <string name="auto_start_oem_warning">Acest dispozitiv poate necesita activarea pornirii automate și eliminarea optimizării bateriei sau a restricțiilor de fundal pentru această aplicație.\n\nPe unitățile cu Quick Boot (pornire rapidă), pornirea automată ar putea să nu funcționeze. Căutați \"DuraSpeed\" în setările de sistem și activați această aplicație acolo. Pe unele unități, DuraSpeed este ascuns și este posibil să aveți nevoie de o aplicație precum \"Hidden Settings\" pentru a-l găsi. Dacă nu aveți DuraSpeed, încercați să dezactivați Quick Boot.</string>
+    <string name="car_launcher_autostart_info">Open Headunit este configurat ca lansator auto. Pornește automat la pornirea sistemului.</string>
     <string name="auto_start_on_boot_label">Pornire la boot</string>
     <string name="auto_start_on_boot_description">Deschide aplicația automat când dispozitivul pornește. Necesită permisiunea \'Afișare peste alte aplicații\' pe Android 10+</string>
     <string name="auto_start_screen_on_label">Pornire la aprinderea ecranului</string>

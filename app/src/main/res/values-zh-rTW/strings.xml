@@ -185,6 +185,7 @@
     <string name="auto_start_settings">自動啟動設定</string>
     <string name="auto_start_settings_description">設定應用程式自動啟動的時機</string>
     <string name="auto_start_oem_warning">此裝置可能需要啟用自動啟動並移除此應用程式的電池最佳化或背景限制。\n\n在具有快速開機（Quick Boot）的車機上，自動啟動可能無法運作。在系統設定中尋找「DuraSpeed」並在其中啟用此應用程式。在某些車機上，DuraSpeed 是隱藏的，您可能需要使用「Hidden Settings」等應用程式來找到它。如果沒有 DuraSpeed，請嘗試關閉快速開機。</string>
+    <string name="car_launcher_autostart_info">Open Headunit 已配置為車載啟動器。系統開機時會自動啟動。</string>
     <string name="auto_start_on_boot_label">開機時啟動</string>
     <string name="auto_start_on_boot_description">裝置啟動時自動開啟應用程式。Android 10+ 需要「顯示在其他應用程式上層」權限</string>
     <string name="auto_start_screen_on_label">螢幕開啟時啟動</string>

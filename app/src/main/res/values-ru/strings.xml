@@ -186,6 +186,7 @@
     <string name="auto_start_settings">Настройки автозапуска</string>
     <string name="auto_start_settings_description">Настройте, когда приложение запускается автоматически</string>
     <string name="auto_start_oem_warning">Это устройство может потребовать включения автозапуска и отключения оптимизации батареи или фоновых ограничений для этого приложения.\n\nНа головных устройствах с Quick Boot (быстрая загрузка) автозапуск может не работать. Найдите \"DuraSpeed\" в системных настройках и включите там это приложение. На некоторых устройствах DuraSpeed скрыт, и вам может понадобиться приложение вроде \"Hidden Settings\" чтобы его найти. Если у вас нет DuraSpeed, попробуйте отключить Quick Boot.</string>
+    <string name="car_launcher_autostart_info">Open Headunit настроен как лаунчер авто. Он запускается автоматически при загрузке системы.</string>
     <string name="auto_start_on_boot_label">Запуск при загрузке</string>
     <string name="auto_start_on_boot_description">Автоматически открывать приложение при запуске устройства. Требуется разрешение \'Поверх других приложений\' на Android 10+</string>
     <string name="auto_start_screen_on_label">Запуск при включении экрана</string>

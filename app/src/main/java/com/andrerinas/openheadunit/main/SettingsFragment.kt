@@ -373,12 +373,12 @@ class SettingsFragment : Fragment() {
         pendingFloatingButtonOpacityPercent = settings.floatingButtonOpacityPercent
         pendingFloatingButtonXPercent = settings.floatingButtonXPercent
         pendingFloatingButtonYPercent = settings.floatingButtonYPercent
-        pendingAaExitAction = settings.aaExitAction
+        pendingAaExitAction = settings.rawAaExitAction
         pendingVideoFitMode = settings.videoFitMode
         pendingForcedScale = settings.forcedScale
         pendingHudMirroring = settings.hudMirroring
 
-        pendingKillOnDisconnect = settings.killOnDisconnect
+        pendingKillOnDisconnect = settings.rawKillOnDisconnect
         pendingAutoKillOemApps = settings.autoKillOemApps
         pendingRaiseProjectionDuringCall = settings.raiseProjectionDuringCall
         pendingAutoEnableHotspot = settings.autoEnableHotspot
@@ -511,11 +511,11 @@ class SettingsFragment : Fragment() {
         pendingFloatingButtonOpacityPercent = settings.floatingButtonOpacityPercent
         pendingFloatingButtonXPercent = settings.floatingButtonXPercent
         pendingFloatingButtonYPercent = settings.floatingButtonYPercent
-        pendingAaExitAction = settings.aaExitAction
+        pendingAaExitAction = settings.rawAaExitAction
         pendingVideoFitMode = settings.videoFitMode
         pendingForcedScale = settings.forcedScale
         pendingHudMirroring = settings.hudMirroring
-        pendingKillOnDisconnect = settings.killOnDisconnect
+        pendingKillOnDisconnect = settings.rawKillOnDisconnect
         pendingAutoKillOemApps = settings.autoKillOemApps
         pendingRaiseProjectionDuringCall = settings.raiseProjectionDuringCall
         pendingAutoEnableHotspot = settings.autoEnableHotspot
@@ -754,13 +754,13 @@ class SettingsFragment : Fragment() {
         pendingFloatingButtonOpacityPercent?.let { settings.floatingButtonOpacityPercent = it }
         pendingFloatingButtonXPercent?.let { settings.floatingButtonXPercent = it }
         pendingFloatingButtonYPercent?.let { settings.floatingButtonYPercent = it }
-        pendingAaExitAction?.let { settings.aaExitAction = it }
+        pendingAaExitAction?.let { settings.rawAaExitAction = it }
         FloatingButtonManager.update(requireContext())
         pendingVideoFitMode?.let { settings.videoFitMode = it }
         pendingForcedScale?.let { settings.forcedScale = it }
         pendingHudMirroring?.let { settings.hudMirroring = it }
 
-        pendingKillOnDisconnect?.let { settings.killOnDisconnect = it }
+        pendingKillOnDisconnect?.let { settings.rawKillOnDisconnect = it }
         pendingAutoKillOemApps?.let { settings.autoKillOemApps = it }
         pendingRaiseProjectionDuringCall?.let { settings.raiseProjectionDuringCall = it }
         pendingAutoEnableHotspot?.let { settings.autoEnableHotspot = it }
@@ -895,7 +895,7 @@ class SettingsFragment : Fragment() {
                         pendingFloatingButtonOpacityPercent != settings.floatingButtonOpacityPercent ||
                         pendingFloatingButtonXPercent != settings.floatingButtonXPercent ||
                         pendingFloatingButtonYPercent != settings.floatingButtonYPercent ||
-                        pendingAaExitAction != settings.aaExitAction ||
+                        pendingAaExitAction != settings.rawAaExitAction ||
                         pendingVideoFitMode != settings.videoFitMode ||
                         pendingForcedScale != settings.forcedScale ||
                         pendingHudMirroring != settings.hudMirroring ||
@@ -906,7 +906,7 @@ class SettingsFragment : Fragment() {
                         pendingMediaVolumeOffset != settings.mediaVolumeOffset ||
                         pendingGuidanceVolumeOffset != settings.guidanceVolumeOffset ||
                         pendingSystemVolumeOffset != settings.systemVolumeOffset ||
-                        pendingKillOnDisconnect != settings.killOnDisconnect ||
+                        pendingKillOnDisconnect != settings.rawKillOnDisconnect ||
                         pendingAutoKillOemApps != settings.autoKillOemApps ||
                         pendingRaiseProjectionDuringCall != settings.raiseProjectionDuringCall ||
                         pendingAutoEnableHotspot != settings.autoEnableHotspot ||
@@ -1746,32 +1746,37 @@ class SettingsFragment : Fragment() {
             }
         ))
 
-        items.add(SettingItem.ToggleSettingEntry(
-            stableId = "killOnDisconnect",
-            nameResId = R.string.kill_on_disconnect,
-            descriptionResId = R.string.kill_on_disconnect_description,
-            isChecked = pendingKillOnDisconnect ?: settings.killOnDisconnect,
-            onCheckedChanged = { isChecked ->
-                if (isChecked) {
-                    val conflicts = getKillOnDisconnectConflicts()
-                    val hasAutoStartOnBoot = settings.autoStartOnBoot
-                    val hasAutoStartOnScreenOn = settings.autoStartOnScreenOn
-                    if (conflicts.isNotEmpty() || hasAutoStartOnBoot || hasAutoStartOnScreenOn) {
-                        pendingKillOnDisconnect = true
-                        updateSettingsList()
-                        showKillOnDisconnectWarning(conflicts, hasAutoStartOnBoot, hasAutoStartOnScreenOn)
+        val isCarLauncherActive = (pendingEnableCarLauncher ?: settings.enableCarLauncher) ||
+            CarLauncherManager.isDefaultLauncher(requireContext())
+
+        if (!isCarLauncherActive) {
+            items.add(SettingItem.ToggleSettingEntry(
+                stableId = "killOnDisconnect",
+                nameResId = R.string.kill_on_disconnect,
+                descriptionResId = R.string.kill_on_disconnect_description,
+                isChecked = pendingKillOnDisconnect ?: settings.rawKillOnDisconnect,
+                onCheckedChanged = { isChecked ->
+                    if (isChecked) {
+                        val conflicts = getKillOnDisconnectConflicts()
+                        val hasAutoStartOnBoot = settings.autoStartOnBoot
+                        val hasAutoStartOnScreenOn = settings.autoStartOnScreenOn
+                        if (conflicts.isNotEmpty() || hasAutoStartOnBoot || hasAutoStartOnScreenOn) {
+                            pendingKillOnDisconnect = true
+                            updateSettingsList()
+                            showKillOnDisconnectWarning(conflicts, hasAutoStartOnBoot, hasAutoStartOnScreenOn)
+                        } else {
+                            pendingKillOnDisconnect = true
+                            checkChanges()
+                            updateSettingsList()
+                        }
                     } else {
-                        pendingKillOnDisconnect = true
+                        pendingKillOnDisconnect = false
                         checkChanges()
                         updateSettingsList()
                     }
-                } else {
-                    pendingKillOnDisconnect = false
-                    checkChanges()
-                    updateSettingsList()
                 }
-            }
-        ))
+            ))
+        }
 
         // Self Mode is the only mode where the phone's call screen and the projection share a
         // screen, so it is the only mode this can do anything in.
@@ -1898,29 +1903,31 @@ class SettingsFragment : Fragment() {
             ))
         }
 
-        val exitActions = arrayOf(
-            getString(R.string.aa_exit_action_oem_launcher),
-            getString(R.string.aa_exit_action_app_home),
-            getString(R.string.aa_exit_action_disconnect)
-        )
-        val currentExitActionIdx = (pendingAaExitAction ?: settings.aaExitAction).value
-        items.add(SettingItem.SettingEntry(
-            stableId = "aaExitAction",
-            nameResId = R.string.pref_aa_exit_action_title,
-            value = exitActions.getOrElse(currentExitActionIdx) { exitActions[0] },
-            searchKeywords = getString(R.string.pref_aa_exit_action_summary),
-            onClick = { _ ->
-                MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
-                    .setTitle(R.string.pref_aa_exit_action_title)
-                    .setSingleChoiceItems(exitActions, currentExitActionIdx) { dialog, which ->
-                        Settings.ExitAction.fromInt(which)?.let { pendingAaExitAction = it }
-                        checkChanges()
-                        dialog.dismiss()
-                        updateSettingsList()
-                    }
-                    .show()
-            }
-        ))
+        if (!isCarLauncherActive) {
+            val exitActions = arrayOf(
+                getString(R.string.aa_exit_action_oem_launcher),
+                getString(R.string.aa_exit_action_app_home),
+                getString(R.string.aa_exit_action_disconnect)
+            )
+            val currentExitActionIdx = (pendingAaExitAction ?: settings.rawAaExitAction).value
+            items.add(SettingItem.SettingEntry(
+                stableId = "aaExitAction",
+                nameResId = R.string.pref_aa_exit_action_title,
+                value = exitActions.getOrElse(currentExitActionIdx) { exitActions[0] },
+                searchKeywords = getString(R.string.pref_aa_exit_action_summary),
+                onClick = { _ ->
+                    MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
+                        .setTitle(R.string.pref_aa_exit_action_title)
+                        .setSingleChoiceItems(exitActions, currentExitActionIdx) { dialog, which ->
+                            Settings.ExitAction.fromInt(which)?.let { pendingAaExitAction = it }
+                            checkChanges()
+                            dialog.dismiss()
+                            updateSettingsList()
+                        }
+                        .show()
+                }
+            ))
+        }
 
         // --- Navigation Settings ---
                 items.add(SettingItem.SettingEntry(

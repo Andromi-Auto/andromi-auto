@@ -185,6 +185,7 @@
     <string name="auto_start_settings">Automatikus indítás beállításai</string>
     <string name="auto_start_settings_description">Adja meg, mikor induljon el az alkalmazás automatikusan</string>
     <string name="auto_start_oem_warning">Ez az eszköz megkövetelheti az automatikus indítás engedélyezését és az akkumulátor-optimalizálás vagy háttérkorlátozások eltávolítását ehhez az alkalmazáshoz.\n\nA Quick Boot (gyorsindítás) funkcióval rendelkező fejegységeken az automatikus indítás nem feltétlenül működik. Keresse a \"DuraSpeed\" opciót a rendszerbeállításokban és engedélyezze ott ezt az alkalmazást. Egyes fejegységeken a DuraSpeed rejtett, és szükség lehet egy olyan alkalmazásra, mint a \"Hidden Settings\" a megtalálásához. Ha nincs DuraSpeed, próbálja meg kikapcsolni a Quick Boot funkciót.</string>
+    <string name="car_launcher_autostart_info">Az Open Headunit autós indítóként van beállítva. A rendszer indításakor automatikusan elindul.</string>
     <string name="auto_start_on_boot_label">Indítás rendszerindításkor</string>
     <string name="auto_start_on_boot_description">Az alkalmazás automatikus megnyitása az eszköz indításakor. Android 10+-on szükséges a \'Megjelenítés más alkalmazások felett\' engedély</string>
     <string name="auto_start_screen_on_label">Indítás képernyő bekapcsolásakor</string>

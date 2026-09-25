@@ -416,6 +416,7 @@
     <string name="auto_start_settings">Auto-start settings</string>
     <string name="auto_start_settings_description">Configure when the app starts automatically</string>
     <string name="auto_start_oem_warning">This device may require enabling auto-start and removing battery optimization or background restrictions for this app.\n\nOn head units with Quick Boot (fast boot), auto-start may not work. Look for \"DuraSpeed\" in your system settings and enable this app there. On some head units, DuraSpeed is hidden and you may need an app like \"Hidden Settings\" to find it. If you don\'t have DuraSpeed, try disabling Quick Boot.</string>
+    <string name="car_launcher_autostart_info">Open Headunit is configured as your car launcher. It starts automatically on system boot.</string>
     <string name="auto_start_on_boot_label">Start on boot</string>
     <string name="auto_start_on_boot_description">Open the app automatically when the device starts up. Requires \'Display over other apps\' permission on Android 10+</string>
     <string name="auto_start_screen_on_label">Start on screen on</string>

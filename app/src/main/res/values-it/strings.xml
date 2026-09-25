@@ -211,6 +211,7 @@
     <string name="auto_start_settings">Impostazioni avvio automatico</string>
     <string name="auto_start_settings_description">Configura quando l\'app deve avviarsi automaticamente</string>
     <string name="auto_start_oem_warning">Questo dispositivo potrebbe richiedere l\'abilitazione dell\'avvio automatico e la rimozione dell\'ottimizzazione della batteria o delle restrizioni in background per questa app.\n\nSulle head unit con Quick Boot (avvio rapido), l\'avvio automatico potrebbe non funzionare. Cerca \"DuraSpeed\" nelle impostazioni di sistema e abilita questa app. Su alcune head unit, DuraSpeed è nascosto e potrebbe essere necessaria un\'app come \"Hidden Settings\" per trovarlo. Se non hai DuraSpeed, prova a disabilitare Quick Boot.</string>
+    <string name="car_launcher_autostart_info">Open Headunit è configurato come launcher auto. Si avvia automaticamente all\'avvio del sistema.</string>
     <string name="auto_start_on_boot_label">Avvia all\'accensione</string>
     <string name="auto_start_on_boot_description">Apri l\'app automaticamente all\'avvio del dispositivo. Richiede il permesso \'Mostra sopra altre app\' su Android 10+</string>
     <string name="auto_start_screen_on_label">Avvia all\'accensione dello schermo</string>

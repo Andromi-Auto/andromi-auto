@@ -370,6 +370,7 @@
     <string name="auto_start_settings">Paramètres de démarrage automatique</string>
     <string name="auto_start_settings_description">Configurer quand l\'application démarre automatiquement</string>
     <string name="auto_start_oem_warning">Cet appareil peut nécessiter d\'activer le démarrage automatique et de supprimer l\'optimisation de la batterie ou les restrictions en arrière-plan pour cette application.\n\nSur les autoradios avec Quick Boot (démarrage rapide), le démarrage automatique peut ne pas fonctionner. Cherche \"DuraSpeed\" dans tes paramètres système et active cette application là-bas. Sur certains autoradios, DuraSpeed est caché et tu pourrais avoir besoin d\'une application comme \"Hidden Settings\" pour le trouver. Si tu n\'as pas DuraSpeed, essaie de désactiver le Quick Boot.</string>
+    <string name="car_launcher_autostart_info">Open Headunit est configuré comme lanceur de voiture. Il démarre automatiquement au démarrage du système.</string>
     <string name="auto_start_on_boot_label">Démarrer au démarrage</string>
     <string name="auto_start_on_boot_description">Ouvrir l\'application automatiquement au démarrage de l\'appareil. Nécessite la permission \'Afficher sur les autres applications\' sur Android 10+</string>
     <string name="auto_start_screen_on_label">Démarrer à l\'allumage de l\'écran</string>
