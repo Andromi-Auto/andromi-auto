@@ -100,7 +100,9 @@ class BootCompleteReceiver : BroadcastReceiver() {
             "com.cayboy.action.ACC_ON",
             "com.carboy.action.ACC_ON",
             // XYAuto head units (ACC wake)
-            "xy.android.acc.on"
+            "xy.android.acc.on",
+            // Autochips / MediaTek QuickBoot units (ACC wake)
+            "autochips.intent.action.QB_POWERON"
         )
     }
 }
