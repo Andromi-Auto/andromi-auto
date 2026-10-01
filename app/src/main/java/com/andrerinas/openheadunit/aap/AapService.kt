@@ -1164,11 +1164,13 @@ class AapService : Service() {
                     is CommManager.ConnectionState.HandshakeComplete -> {
                         // At SSL, not at the transport open: until then the arbiter owns the window.
                         quiesceWirelessForWiredSession()
+                        StationStandDown.onSessionLive(this@AapService, wifiLockHeldForMs())
                         projectionRaisesThisSession = 0
                         armProjectionRaiseDeadline(launchAapProjectionActivity())
                     }
                     is CommManager.ConnectionState.TransportStarted -> {
                         quiesceWirelessForWiredSession() // The flow is conflated: HandshakeComplete can be skipped.
+                        StationStandDown.onSessionLive(this@AapService, wifiLockHeldForMs())
                         cancelProjectionRaiseDeadline()
                         hasEverConnected = true
                         projectingSinceMs = SystemClock.elapsedRealtime()
@@ -2030,6 +2032,12 @@ class AapService : Service() {
      * between a phone found as the drive starts and one found a minute into it.
      */
     private fun onWifiJoinDetected(source: String, isConnected: Boolean) {
+        // First, before the debounce below: a rejoin inside an unrelated event's window must not be dropped.
+        if (isConnected) {
+            StationStandDown.onStationJoined(this, wifiLockHeldForMs())
+        } else {
+            StationStandDown.onStationLeft(this)
+        }
         // Whatever else this network is, it ends the wait a WiFi teardown started. The
         // forceStartDiscoveryScan() below is what actually revives the loop.
         if (isConnected && discoveryDormantAfterWifiLoss) {
@@ -2079,6 +2087,7 @@ class AapService : Service() {
             }
             override fun onLost(network: Network) {
                 AppLog.w("NetworkMonitor: Network lost: $network")
+                StationStandDown.onStationLeft(this@AapService)
             }
             override fun onCapabilitiesChanged(network: Network, caps: NetworkCapabilities) {
                 AppLog.d("NetworkMonitor: Capabilities changed: $network → $caps")
@@ -2449,6 +2458,11 @@ class AapService : Service() {
         }
     }
 
+    private var wifiLockAcquiredAtMs = 0L
+
+    private fun wifiLockHeldForMs(): Long? =
+        wifiLockAcquiredAtMs.takeIf { it != 0L }?.let { SystemClock.elapsedRealtime() - it }
+
     private fun acquireWifiLock() {
         val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
         if (wifiLock == null) {
@@ -2456,6 +2470,7 @@ class AapService : Service() {
         }
         if (wifiLock?.isHeld == false) {
             wifiLock?.acquire()
+            wifiLockAcquiredAtMs = SystemClock.elapsedRealtime()
             AppLog.i("WifiLock acquired (HIGH_PERF)")
         }
         // LOW_LATENCY disables radio power-save batching while projection is visible. Retain
@@ -2484,6 +2499,7 @@ class AapService : Service() {
         }
         if (wifiLock?.isHeld == true) {
             wifiLock?.release()
+            wifiLockAcquiredAtMs = 0L
             AppLog.i("WifiLock released")
         }
     }
