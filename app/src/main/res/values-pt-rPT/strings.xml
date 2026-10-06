@@ -841,6 +841,12 @@
     <string name="nav_action_ferry">Ferry</string>
     <string name="nav_action_ferry_train">Ferry / comboio</string>
     <string name="nav_action_destination">Chegada ao destino</string>
+    <string name="performance_overlay_settings">Sobreposição de desempenho</string>
+    <string name="overlay_field_fps">FPS</string>
+    <string name="overlay_field_cpu">CPU</string>
+    <string name="overlay_field_temperature">Temperatura</string>
+    <string name="overlay_field_frame_age">Atraso de fotogramas</string>
+    <string name="performance_overlay_no_lines">Sem linhas</string>
     <string name="show_performance_overlay">Apresentar sobreposição de desempenho</string>
     <string name="overlay_position">Posição da sobreposição de desempenho</string>
     <string name="five_ghz_channel">Canal de 5 GHz</string>

@@ -711,6 +711,12 @@
     <string name="nav_action_ferry">Ferry</string>
     <string name="nav_action_ferry_train">Ferry / train</string>
     <string name="nav_action_destination">Arrivée</string>
+    <string name="performance_overlay_settings">Superposition de performances</string>
+    <string name="overlay_field_fps">FPS</string>
+    <string name="overlay_field_cpu">CPU</string>
+    <string name="overlay_field_temperature">Température</string>
+    <string name="overlay_field_frame_age">Âge de l\'image</string>
+    <string name="performance_overlay_no_lines">Aucune ligne</string>
     <string name="show_performance_overlay">Afficher la superposition de performances</string>
     <string name="overlay_position">Position de la superposition de performances</string>
     <!-- Debug-only: deliberately corrupts the projected video stream so the reassembler's

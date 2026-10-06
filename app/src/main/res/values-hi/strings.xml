@@ -841,6 +841,12 @@
     <string name="nav_action_ferry">नौका (फेरी)</string>
     <string name="nav_action_ferry_train">फेरी / ट्रेन</string>
     <string name="nav_action_destination">आगमन</string>
+    <string name="performance_overlay_settings">प्रदर्शन ओवरले</string>
+    <string name="overlay_field_fps">FPS</string>
+    <string name="overlay_field_cpu">CPU</string>
+    <string name="overlay_field_temperature">तापमान</string>
+    <string name="overlay_field_frame_age">फ्रेम की आयु</string>
+    <string name="performance_overlay_no_lines">कोई पंक्ति नहीं</string>
     <string name="show_performance_overlay">प्रदर्शन ओवरले दिखाएं</string>
     <string name="overlay_position">प्रदर्शन ओवरले स्थिति</string>
     <string name="five_ghz_channel">5 GHz चैनल</string>

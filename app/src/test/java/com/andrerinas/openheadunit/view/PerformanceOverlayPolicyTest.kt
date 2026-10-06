@@ -156,4 +156,36 @@ class PerformanceOverlayPolicyTest {
     fun `overlay-fields is in the settings backup as an int`() {
         assertEquals(SettingsBackupManager.ValueType.INT, SettingsBackupManager.backupKeys["overlay-fields"])
     }
+
+    private val labels = mapOf(
+        PerformanceOverlayField.FPS to "FPS",
+        PerformanceOverlayField.CPU to "CPU",
+        PerformanceOverlayField.TEMP to "Temperature",
+        PerformanceOverlayField.FRAME to "Frame age"
+    )
+
+    private fun summary(show: Boolean, fields: Set<PerformanceOverlayField>, side: String) =
+        PerformanceOverlayPolicy.entrySummary(show, fields, labels, "Off", "No lines", side)
+
+    @Test
+    fun `the entry row reads off while the overlay is off`() {
+        assertEquals("Off", summary(false, all, "left"))
+    }
+
+    @Test
+    fun `the entry row names the lines and the side`() {
+        val set = setOf(PerformanceOverlayField.FPS, PerformanceOverlayField.CPU)
+        assertEquals("FPS, CPU (left)", summary(true, set, "left"))
+    }
+
+    @Test
+    fun `the entry row keeps the line order`() {
+        val set = setOf(PerformanceOverlayField.FRAME, PerformanceOverlayField.FPS)
+        assertEquals("FPS, Frame age (right)", summary(true, set, "right"))
+    }
+
+    @Test
+    fun `the entry row says when no line is chosen`() {
+        assertEquals("No lines (left)", summary(true, emptySet(), "left"))
+    }
 }

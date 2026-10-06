@@ -432,6 +432,12 @@
     <string name="monochrome_icons_description">Použít šedé ikony na domovské obrazovce v tmavém nebo extrémně tmavém režimu</string>
     <string name="use_extreme_dark">Použít extrémně tmavý režim</string>
     <string name="use_extreme_dark_description">Použít čistě černé pozadí při aktivním tmavém režimu</string>
+    <string name="performance_overlay_settings">Výkonnostní překryv</string>
+    <string name="overlay_field_fps">FPS</string>
+    <string name="overlay_field_cpu">CPU</string>
+    <string name="overlay_field_temperature">Teplota</string>
+    <string name="overlay_field_frame_age">Stáří snímku</string>
+    <string name="performance_overlay_no_lines">Žádné řádky</string>
     <string name="show_performance_overlay">Zobrazit výkonnostní překryv</string>
     <string name="overlay_position">Umístění výkonnostního překryvu</string>
     <string name="show_performance_overlay_description">Zobrazí snímkovou frekvenci, zatížení procesoru, teplotu a stáří snímku přes projekci.</string>

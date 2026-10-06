@@ -433,6 +433,12 @@
     <string name="nav_action_ferry">フェリー</string>
     <string name="nav_action_ferry_train">フェリー / 列車</string>
     <string name="nav_action_destination">到着</string>
+    <string name="performance_overlay_settings">パフォーマンス表示</string>
+    <string name="overlay_field_fps">FPS</string>
+    <string name="overlay_field_cpu">CPU</string>
+    <string name="overlay_field_temperature">温度</string>
+    <string name="overlay_field_frame_age">フレーム経過時間</string>
+    <string name="performance_overlay_no_lines">行なし</string>
     <string name="show_performance_overlay">パフォーマンス表示を表示</string>
     <string name="overlay_position">パフォーマンス表示の位置</string>
     <string name="show_performance_overlay_description">FPS、CPU 負荷、温度、フレーム経過時間を投影画面に重ねて表示します。</string>

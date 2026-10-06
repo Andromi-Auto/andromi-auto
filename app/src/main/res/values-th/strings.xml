@@ -841,6 +841,12 @@
     <string name="nav_action_ferry">เรือข้ามฟาก</string>
     <string name="nav_action_ferry_train">เรือข้ามฟาก / รถไฟ</string>
     <string name="nav_action_destination">ถึงที่หมาย</string>
+    <string name="performance_overlay_settings">ข้อมูลประสิทธิภาพ</string>
+    <string name="overlay_field_fps">FPS</string>
+    <string name="overlay_field_cpu">CPU</string>
+    <string name="overlay_field_temperature">อุณหภูมิ</string>
+    <string name="overlay_field_frame_age">อายุเฟรม</string>
+    <string name="performance_overlay_no_lines">ไม่มีบรรทัด</string>
     <string name="show_performance_overlay">แสดงข้อมูลประสิทธิภาพ (Performance Overlay)</string>
     <string name="overlay_position">ตำแหน่งข้อมูลประสิทธิภาพ</string>
     <string name="five_ghz_channel">ช่องสัญญาณ 5 GHz</string>

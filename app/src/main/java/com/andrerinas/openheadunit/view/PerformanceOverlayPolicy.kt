@@ -53,6 +53,21 @@ object PerformanceOverlayPolicy {
         return sources
     }
 
+    /** The settings row's value: the chosen lines and the side, or [off] while the overlay is off. */
+    fun entrySummary(
+        show: Boolean,
+        fields: Set<PerformanceOverlayField>,
+        labels: Map<PerformanceOverlayField, String>,
+        off: String,
+        none: String,
+        side: String
+    ): String {
+        if (!show) return off
+        val names = PerformanceOverlayField.values().filter { it in fields }
+            .joinToString(", ") { labels[it] ?: it.name }
+        return "${names.ifEmpty { none }} ($side)"
+    }
+
     fun describe(fields: Set<PerformanceOverlayField>): String {
         val names = PerformanceOverlayField.values().filter { it in fields }.joinToString(",") { it.name }
         val sources = PerformanceOverlaySource.values().filter { it in sampling(fields) }

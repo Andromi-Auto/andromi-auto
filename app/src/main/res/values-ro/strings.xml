@@ -430,6 +430,12 @@
     <string name="monochrome_icons_description">Utilizați pictograme în tonuri de gri pe ecranul principal în modul Întunecat sau Negru extrem</string>
     <string name="use_extreme_dark">Folosiți negru extrem</string>
     <string name="use_extreme_dark_description">Utilizați fundal negru pur când modul întunecat este activ</string>
+    <string name="performance_overlay_settings">Suprapunere de performanță</string>
+    <string name="overlay_field_fps">FPS</string>
+    <string name="overlay_field_cpu">CPU</string>
+    <string name="overlay_field_temperature">Temperatură</string>
+    <string name="overlay_field_frame_age">Vechimea cadrului</string>
+    <string name="performance_overlay_no_lines">Fără linii</string>
     <string name="show_performance_overlay">Afișează suprapunerea de performanță</string>
     <string name="overlay_position">Poziția suprapunerii de performanță</string>
     <string name="overlay_permission_required">Pornirea automată necesită permisiunea \'Afișare peste alte aplicații\'</string>

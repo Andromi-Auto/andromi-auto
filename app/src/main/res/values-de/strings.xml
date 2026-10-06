@@ -485,6 +485,12 @@
     <string name="nav_action_ferry">Fähre</string>
     <string name="nav_action_ferry_train">Fähre / Zug</string>
     <string name="nav_action_destination">Ankunft</string>
+    <string name="performance_overlay_settings">Leistungsanzeige</string>
+    <string name="overlay_field_fps">Bildrate</string>
+    <string name="overlay_field_cpu">CPU</string>
+    <string name="overlay_field_temperature">Temperatur</string>
+    <string name="overlay_field_frame_age">Bildalter</string>
+    <string name="performance_overlay_no_lines">Keine Zeilen</string>
     <string name="show_performance_overlay">Leistungsanzeige einblenden</string>
     <string name="overlay_position">Position der Leistungsanzeige</string>
     <string name="show_performance_overlay_description">Zeigt Bildrate, CPU-Last, Temperatur und Bildalter über der Projektion an.</string>
