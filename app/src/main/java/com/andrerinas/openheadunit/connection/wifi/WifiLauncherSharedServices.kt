@@ -9,6 +9,8 @@ import com.andrerinas.openheadunit.aap.AapService
 import com.andrerinas.openheadunit.aap.AapService.Companion.scanningState
 import com.andrerinas.openheadunit.connection.ConnectionStage
 import com.andrerinas.openheadunit.connection.ConnectionStageTracker
+import com.andrerinas.openheadunit.connection.HeldServerSocket
+import com.andrerinas.openheadunit.connection.SameEndpointConnectPolicy
 import com.andrerinas.openheadunit.connection.UnresponsivePeerPolicy
 import com.andrerinas.openheadunit.connection.wifi.direct.WifiDirectManager
 import com.andrerinas.openheadunit.connection.wifi.direct.WifiRadioSwitchPolicy
@@ -18,6 +20,7 @@ import com.andrerinas.openheadunit.connection.wifi.server.WirelessServerRestartP
 import com.andrerinas.openheadunit.utils.AppLog
 import com.andrerinas.openheadunit.utils.HotspotManager
 import java.net.Socket
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -210,9 +213,9 @@ class WifiLauncherSharedServices(val service: AapService) {
                             // Connected, or connecting, by the time this callback fired; discard the
                             // socket. isBusy rather than isConnected because handing it to connect()
                             // during a connect in flight only gets it closed one frame later.
-                            try {
-                                socket?.close()
-                            } catch (e: Exception) {
+                            // Not when a user connect adopted it: that socket is the session now.
+                            if (socket != null && HeldServerSocket.discard(socket)) {
+                                try { socket.close() } catch (e: Exception) {}
                             }
                             return
                         }
@@ -222,10 +225,16 @@ class WifiLauncherSharedServices(val service: AapService) {
                                 AppLog.i("Auto-connecting to Headunit Server at $ip:$port (reusing socket)")
                                 ConnectionStageTracker.report(ConnectionStage.PHONE_ANSWERED)
                                 service.serviceScope.launch {
-                                    if (socket != null && socket.isConnected)
-                                        commManager.connect(socket)
-                                    else
+                                    val endpoint = SameEndpointConnectPolicy.endpoint(ip, 5277)
+                                    if (socket == null) {
                                         commManager.connect(ip, 5277)
+                                    } else if (HeldServerSocket.take(endpoint) !== socket) {
+                                        AppLog.i("WifiLauncherSharedServices: $endpoint is no longer held for discovery; not dialling it")
+                                    } else {
+                                        try { commManager.connect(socket) } catch (e: CancellationException) {
+                                            HeldServerSocket.abandon(socket); throw e
+                                        }
+                                    }
                                 }
                             }
 
@@ -296,5 +305,6 @@ class WifiLauncherSharedServices(val service: AapService) {
         service.discoveryDormantAfterWifiLoss = false
         localDiscovery?.stop()
         localDiscovery = null
+        HeldServerSocket.discardAll()
     }
 }

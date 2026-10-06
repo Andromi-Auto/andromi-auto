@@ -5,6 +5,8 @@ import android.net.ConnectivityManager
 import android.net.wifi.WifiManager
 import android.os.Build
 import com.andrerinas.openheadunit.App
+import com.andrerinas.openheadunit.connection.HeldServerSocket
+import com.andrerinas.openheadunit.connection.SameEndpointConnectPolicy
 import com.andrerinas.openheadunit.utils.AppLog
 import com.andrerinas.openheadunit.utils.NetworkAddresses
 import kotlinx.coroutines.CancellationException
@@ -400,6 +402,7 @@ class NetworkDiscovery(private val context: Context, private val listener: Liste
         if (serverSocket != null) {
             AppLog.i("NetworkDiscovery: Found Headunit Server on $ip:5277")
             reportedIps.add(ip)
+            HeldServerSocket.hold(SameEndpointConnectPolicy.endpoint(ip, 5277), serverSocket)
             var handedOver = false
             try {
                 withContext(Dispatchers.Main) {
@@ -417,7 +420,7 @@ class NetworkDiscovery(private val context: Context, private val listener: Liste
                 // behind.
                 // A cancelled scan closes the socket rather than delivering it: cancellation
                 // means stop working, and connecting is work.
-                if (!handedOver) {
+                if (!handedOver && HeldServerSocket.discard(serverSocket)) {
                     AppLog.w("NetworkDiscovery: Handover of $ip:5277 aborted; closing the probe socket")
                     try { serverSocket.close() } catch (e: Exception) {}
                 }
