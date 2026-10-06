@@ -42,7 +42,7 @@ class UsbAttachedActivity : Activity() {
     }
 
     private fun resolveUsbDevice(intent: Intent?): UsbDevice? {
-        val usbManager = getSystemService(Context.USB_SERVICE) as UsbManager
+        val usbManager = UsbDeviceCompat.usbManager(this) ?: return null
         UsbDeviceDiagnostics.logDeviceList(this, usbManager, "USB attach")
         val androidDevices = usbManager.deviceList.values.filter { UsbDeviceCompat.isAndroidDevice(it) }
         return resolveDevice(intent, androidDevices)
@@ -122,7 +122,7 @@ class UsbAttachedActivity : Activity() {
         }
 
         if (UsbDeviceCompat.isInAccessoryMode(device)) {
-            val usbManager = getSystemService(Context.USB_SERVICE) as UsbManager
+            val usbManager = UsbDeviceCompat.usbManager(this) ?: run { finish(); return }
             if (!usbManager.hasPermission(device)) {
                 AppLog.i("Usb in accessory mode but no permission. Requesting...")
                 val permissionIntent = UsbReceiver.createPermissionPendingIntent(this)
@@ -202,6 +202,8 @@ class UsbAttachedActivity : Activity() {
             return
         }
 
+        val usbManager = UsbDeviceCompat.usbManager(this) ?: run { finish(); return }
+
         // The switch starts the USB attempt, so it takes the connection arbiter here, before the
         // stage is reported: standing the wireless stack down clears the status pill.
         val arbiterClaim = ConnectionArbiter.claim(
@@ -215,7 +217,6 @@ class UsbAttachedActivity : Activity() {
         ConnectionStageTracker.beginAttempt(ConnectionStage.USB_ATTACHED)
         ConnectionStageTracker.report(ConnectionStage.USB_SWITCHING)
 
-        val usbManager = getSystemService(Context.USB_SERVICE) as UsbManager
         val usbMode = UsbAccessoryMode(usbManager)
         AppLog.i("Switching USB device to accessory mode " + deviceCompat.uniqueName)
         ToastUtils.showToast(this, getString(R.string.switching_usb_accessory_mode, deviceCompat.uniqueName), Toast.LENGTH_SHORT)

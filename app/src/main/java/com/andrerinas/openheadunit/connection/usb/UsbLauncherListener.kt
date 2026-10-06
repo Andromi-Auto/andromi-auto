@@ -93,6 +93,7 @@ class UsbLauncherListener(private val manager: UsbLauncherManager) : UsbReceiver
             AppLog.i("Ignoring USB permission callback (VID: ${device.vendorId}): ${UsbDeviceCompat.matchReason(device)}")
             return
         }
+        val usbManager = UsbDeviceCompat.usbManager(service) ?: return
         val deviceName = UsbDeviceCompat(device).uniqueName
         if (granted) {
             AppLog.i("USB permission granted for $deviceName")
@@ -106,7 +107,6 @@ class UsbLauncherListener(private val manager: UsbLauncherManager) : UsbReceiver
                     }
                 }
             } else {
-                val usbManager = service.getSystemService(Context.USB_SERVICE) as UsbManager
                 val settings = App.provide(service).settings
                 val usbMode = UsbAccessoryMode(usbManager)
                 manager.attemptJob = service.serviceScope.launch(Dispatchers.IO) {
