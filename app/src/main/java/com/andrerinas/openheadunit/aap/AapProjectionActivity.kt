@@ -320,6 +320,33 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
      */
     private val warmRelaunchCheckRunnable = Runnable { maybeRecoverWarmRelaunch() }
 
+    /** Starts the no-picture window afresh, for a new surface or a return to a kept one. */
+    private fun armWarmRelaunch() {
+        lastSurfaceSetMs = SystemClock.elapsedRealtime()
+        warmRelaunchCycleSpent = false
+        loggedKeyframelessPicture = false
+        watchdogHandler.removeCallbacks(warmRelaunchCheckRunnable)
+        watchdogHandler.postDelayed(
+            warmRelaunchCheckRunnable,
+            WarmRelaunchKeyframePolicy.ESCALATE_AFTER_SURFACE_MS
+        )
+    }
+
+    /** Set when onStop stopped the decoder, so onResume knows a kept surface needs re-arming. */
+    private var decoderStoppedOnStop = false
+    private var resumedAtMs = 0L
+    private val returnRearmRunnable = Runnable {
+        val stopped = decoderStoppedOnStop
+        decoderStoppedOnStop = false
+        if (ReturnRearmPolicy.shouldRearm(stopped, isSurfaceSet, lastSurfaceSetMs, resumedAtMs)) {
+            AppLog.i("AapProjectionActivity: returned to a kept surface with a stopped decoder; re-arming keyframe recovery")
+            armWarmRelaunch()
+            if (commManager.connectionState.value is CommManager.ConnectionState.TransportStarted) {
+                commManager.send(VideoFocusEvent(gain = true, unsolicited = true))
+            }
+        }
+    }
+
     private var focusCycleGainPending = false
 
     /**
@@ -1166,6 +1193,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         // Before the handler is cleared below, and never after it.
         settleFocusCycle()
         watchdogHandler.removeCallbacks(warmRelaunchCheckRunnable)
+        watchdogHandler.removeCallbacks(returnRearmRunnable)
         watchdogHandler.removeCallbacks(watchdogRunnable)
         watchdogHandler.removeCallbacks(videoWatchdogRunnable)
         watchdogHandler.removeCallbacks(reconnectingWatchdog)
@@ -1195,6 +1223,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         AppLog.i("AapProjectionActivity: onStop")
         if (!App.isPiPActive && !isChangingConfigurations) {
             videoDecoder.stop(DecoderStopPolicy.REASON_ACTIVITY_STOPPED)
+            decoderStoppedOnStop = true
         }
     }
 
@@ -1211,6 +1240,9 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         if (isSurfaceSet && commManager.isConnected) {
             commManager.retakeVideoFocusForKeyframe()
         }
+        resumedAtMs = SystemClock.elapsedRealtime()
+        watchdogHandler.removeCallbacks(returnRearmRunnable)
+        watchdogHandler.postDelayed(returnRearmRunnable, RETURN_REARM_DELAY_MS)
         watchdogHandler.postDelayed(watchdogRunnable, 2000)
         watchdogHandler.postDelayed(videoWatchdogRunnable, 3000)
         watchdogHandler.postDelayed(reconnectingWatchdog, 5000)
@@ -1955,14 +1987,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         videoDecoder.setSurface(surface)
         // A surface arriving inside a cycle's own gap must not strand the pending gain.
         settleFocusCycle()
-        lastSurfaceSetMs = SystemClock.elapsedRealtime()
-        warmRelaunchCycleSpent = false
-        loggedKeyframelessPicture = false
-        watchdogHandler.removeCallbacks(warmRelaunchCheckRunnable)
-        watchdogHandler.postDelayed(
-            warmRelaunchCheckRunnable,
-            WarmRelaunchKeyframePolicy.ESCALATE_AFTER_SURFACE_MS
-        )
+        armWarmRelaunch()
 
         // --- Surface Mismatch Detection ---
         // Compare actual surface dimensions with what HeadUnitScreenConfig negotiated.
@@ -2281,6 +2306,8 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
     }
 
     companion object {
+        /** Long enough for a surface callback to arrive first on a return, short enough to beat the stall window. */
+        private const val RETURN_REARM_DELAY_MS = 300L
         const val EXTRA_FOCUS = "focus"
         @Volatile var isForeground = false
 
