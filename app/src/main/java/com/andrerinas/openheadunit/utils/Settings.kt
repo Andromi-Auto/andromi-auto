@@ -10,6 +10,8 @@ import android.location.Location
 import android.media.AudioManager
 import android.os.Build
 import com.andrerinas.openheadunit.input.MediaKeyRoutingPolicy
+import com.andrerinas.openheadunit.view.PerformanceOverlayField
+import com.andrerinas.openheadunit.view.PerformanceOverlayPolicy
 import com.andrerinas.openheadunit.decoder.video.VideoFaultInjector
 import com.andrerinas.openheadunit.decoder.video.DeviceMemoryProfile
 import com.andrerinas.openheadunit.decoder.audio.PlaybackFocusPolicy
@@ -1695,6 +1697,15 @@ class Settings(private val context: Context) {
         }
         set(value) {
             prefs.edit().putInt("overlay-position", value.value).apply()
+        }
+
+    // One bit per overlay line; the default keeps all four.
+    var overlayFields: Set<PerformanceOverlayField>
+        get() = PerformanceOverlayPolicy.fromBits(
+            prefs.getInt("overlay-fields", PerformanceOverlayPolicy.DEFAULT_BITS)
+        )
+        set(value) {
+            prefs.edit().putInt("overlay-fields", PerformanceOverlayPolicy.toBits(value)).apply()
         }
 
     companion object {

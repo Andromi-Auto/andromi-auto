@@ -1,10 +1,64 @@
 package com.andrerinas.openheadunit.view
 
+import java.util.Locale
+
+/** One overlay line each. Declaration order is the print order; the bit is the stored flag. */
+enum class PerformanceOverlayField(val bit: Int) { FPS(1), CPU(2), TEMP(4), FRAME(8) }
+
+/** What the sampler must read for the chosen lines. */
+enum class PerformanceOverlaySource { CPU, TEMP }
+
 /**
- * The decidable half of the projection performance overlay: the two CPU figures it prints beside
- * each other, and the temperature it picks out of the thermal zones.
+ * The decidable half of the projection performance overlay: which lines print, what they say, what
+ * must be sampled for them, the two CPU figures and the temperature it picks out of the thermal zones.
  */
 object PerformanceOverlayPolicy {
+
+    const val DEFAULT_BITS = 0b1111
+
+    fun toBits(fields: Set<PerformanceOverlayField>): Int = fields.fold(0) { acc, f -> acc or f.bit }
+
+    fun fromBits(bits: Int): Set<PerformanceOverlayField> =
+        PerformanceOverlayField.values().filter { bits and it.bit != 0 }.toSet()
+
+    fun isEmpty(fields: Set<PerformanceOverlayField>): Boolean = fields.isEmpty()
+
+    fun format(
+        fields: Set<PerformanceOverlayField>,
+        fps: Int?,
+        appCpu: Int?,
+        totalCpu: Int?,
+        loadAverage: Double?,
+        tempC: Int?,
+        frameAgeMs: Long?
+    ): String = PerformanceOverlayField.values().filter { it in fields }.joinToString("\n") { field ->
+        when (field) {
+            PerformanceOverlayField.FPS -> "FPS: ${fps?.toString() ?: "--"}"
+            PerformanceOverlayField.CPU -> {
+                val app = appCpu?.let { "$it%" } ?: "--"
+                val sys = totalCpu?.let { "$it%" }
+                    ?: loadAverage?.let { String.format(Locale.US, "%.2f load", it) }
+                    ?: "--"
+                "CPU: app $app / sys $sys"
+            }
+            PerformanceOverlayField.TEMP -> "Temp: ${tempC?.let { "${it}C" } ?: "--"}"
+            PerformanceOverlayField.FRAME -> "Frame: ${frameAgeMs?.let { "${it}ms" } ?: "--"}"
+        }
+    }
+
+    fun sampling(fields: Set<PerformanceOverlayField>): Set<PerformanceOverlaySource> {
+        val sources = mutableSetOf<PerformanceOverlaySource>()
+        if (PerformanceOverlayField.CPU in fields) sources.add(PerformanceOverlaySource.CPU)
+        if (PerformanceOverlayField.TEMP in fields) sources.add(PerformanceOverlaySource.TEMP)
+        return sources
+    }
+
+    fun describe(fields: Set<PerformanceOverlayField>): String {
+        val names = PerformanceOverlayField.values().filter { it in fields }.joinToString(",") { it.name }
+        val sources = PerformanceOverlaySource.values().filter { it in sampling(fields) }
+            .joinToString(",") { it.name.lowercase(Locale.US) }
+        return "fields=${names.ifEmpty { "none" }} sources=${sources.ifEmpty { "none" }}"
+    }
 
     /**
      * Process CPU time sums every thread, so on a multi-core unit it can exceed the wall clock it
