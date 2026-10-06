@@ -532,7 +532,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
                 // video focus for the new view's running stream.
                 projectionView.removeCallback(this)
                 videoDecoder.softwareYuvFrameSink = null
-                videoDecoder.stop(DecoderStopPolicy.REASON_PROJECTION_VIEW_RECREATE)
+                videoDecoder.detachCurrentSurface(DecoderStopPolicy.REASON_PROJECTION_VIEW_RECREATE)
                 container.removeView(projectionView as View)
             }
             isSurfaceSet = false
@@ -2065,7 +2065,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
                     "a touch - holding video focus so Android Auto keeps its keyboard up"
             )
         }
-        videoDecoder.stopIfCurrentSurface(surface, DecoderStopPolicy.REASON_SURFACE_DESTROYED)
+        videoDecoder.detachSurface(surface, DecoderStopPolicy.REASON_SURFACE_DESTROYED)
     }
 
 

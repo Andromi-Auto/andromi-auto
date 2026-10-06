@@ -201,7 +201,9 @@ class VideoDecoder(
     private var codec: MediaCodec? = null
     private var softwareHevcDecoder: FfmpegHevcDecoder? = null
     private var codecBufferInfo: MediaCodec.BufferInfo? = null
-    private var mSurface: Surface? = null
+    @Volatile private var mSurface: Surface? = null
+    // The surface last detached, so a teardown callback arriving after the detach is not mistaken for a stale one.
+    private var detachedSurface: Surface? = null
     private var outputThread: Thread? = null
     @Volatile private var running = false
     private var startTime = 0L
@@ -680,6 +682,7 @@ class VideoDecoder(
             // stop() is idempotent when nothing is running.
             stop(DecoderStopPolicy.REASON_NEW_SURFACE)
             mSurface = surface
+            detachedSurface = null
             lastFrameRenderedMs = 0L
             keyframeRepair.reset()
             lastKeyframeFedMs = 0L
@@ -694,7 +697,9 @@ class VideoDecoder(
      * it created, so `===` distinguishes a live owner from a torn-down view whose callback is
      * arriving late.
      */
-    fun isCurrentSurface(surface: Surface): Boolean = synchronized(this) { mSurface === surface }
+    fun isCurrentSurface(surface: Surface): Boolean = synchronized(this) {
+        mSurface === surface || (mSurface == null && detachedSurface === surface)
+    }
 
     /**
      * Stops the decoder only if [surface] still owns it. Compare-and-stop is atomic under the
@@ -711,6 +716,29 @@ class VideoDecoder(
         }
         stop(reason)
         true
+    }
+
+    /**
+     * Stops and forgets [surface] if it still owns the decoder, so [decode] cannot rebuild a codec
+     * on a surface its view is about to release. The next [setSurface] re-arms it.
+     */
+    fun detachSurface(surface: Surface, reason: String): Boolean = synchronized(this) {
+        if (mSurface == null && detachedSurface === surface) return true
+        if (mSurface !== surface) {
+            AppLog.i("Decoder detach ($reason) skipped: surface is no longer current")
+            return false
+        }
+        stop(reason)
+        detachedSurface = mSurface
+        mSurface = null
+        true
+    }
+
+    /** Detach whatever surface is held, for a view that is discarded with its surface. */
+    fun detachCurrentSurface(reason: String) = synchronized(this) {
+        stop(reason)
+        if (mSurface != null) detachedSurface = mSurface
+        mSurface = null
     }
 
     /**
@@ -1185,7 +1213,7 @@ class VideoDecoder(
             } ?: continue
 
             try {
-                if (!running || feedThread !== self || codec == null) continue
+                if (!FeedLoopPolicy.shouldFeed(running, feedThread === self, codec != null, decoderNeedsRestart)) continue
                 val buf = ByteBuffer.wrap(frame.data, 0, frame.size)
                 when (feedInputBuffer(buf, frame.arrivalNanos)) {
                     FeedResult.FED -> {
@@ -1917,6 +1945,8 @@ class VideoDecoder(
      */
     private fun feedInputBuffer(buffer: ByteBuffer, arrivalNanos: Long): FeedResult {
         val currentCodec = codec ?: return FeedResult.NO_INPUT_BUFFER
+        // Snapshot with the codec: stop() nulls the field, and a pre-API 21 buffer must be this codec's.
+        @Suppress("DEPRECATION") val currentInputBuffers = inputBuffers
         // Outside the try so the catch can hand a dequeued buffer back, and so it can tell a
         // throw before queueInputBuffer from one after it - the frame's fate differs.
         var inputIndex = -1
@@ -1938,6 +1968,7 @@ class VideoDecoder(
             while (running && SystemClock.elapsedRealtime() - waitStart < VideoFeedQueuePolicy.INPUT_DEQUEUE_PATIENCE_MS) {
                 inputIndex = currentCodec.dequeueInputBuffer(TIMEOUT_US)
                 if (inputIndex >= 0) break
+                if (decoderNeedsRestart) break
             }
             inputWaitMs += SystemClock.elapsedRealtime() - waitStart
 
@@ -1949,10 +1980,12 @@ class VideoDecoder(
                 return FeedResult.NO_INPUT_BUFFER
             }
 
+            // The output thread may have declared this codec dead while the dequeue ran.
+            if (decoderNeedsRestart) return FeedResult.NO_INPUT_BUFFER
             val inputBuffer = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 currentCodec.getInputBuffer(inputIndex)
             } else {
-                @Suppress("DEPRECATION") inputBuffers?.get(inputIndex)
+                currentInputBuffers?.get(inputIndex)
             }
 
             if (inputBuffer == null) {
