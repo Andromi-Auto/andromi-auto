@@ -94,6 +94,9 @@ object AutomationCommandPolicy {
         HeadUnitCommand.LEGACY_ACTION_RAISE_PROJECTION to AapService.ACTION_RAISE_PROJECTION
     )
 
+    /** The service actions the plain relays start, for the test that each has a handler. */
+    internal val relayTargets: Set<String> get() = PLAIN_RELAYS.values.toSet()
+
     fun effectsFor(action: String?, extras: Extras, state: State): List<Effect> {
         if (action == null) return listOf(Effect.Refuse("no action"))
 
