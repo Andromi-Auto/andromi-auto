@@ -555,15 +555,24 @@ class AapService : Service() {
 
     private val sensorRefreshReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            if (intent.action == ACTION_REFRESH_SENSORS) {
-                AppLog.i("AapService: Received request to refresh all sensors")
-                // Re-send current states
-                nightModeManager?.resendCurrentState()
-            } else if (intent.action == ACTION_RESTART_AUDIO) {
-                AppLog.i("AapService: Received request to restart audio")
-                commManager.restartAudio()
-            }
+            if (intent.action == ACTION_REFRESH_SENSORS) refreshSensors()
+            else if (intent.action == ACTION_RESTART_AUDIO) restartAudio()
         }
+    }
+
+    private fun refreshSensors() {
+        AppLog.i("AapService: Received request to refresh all sensors")
+        // Re-send current states
+        nightModeManager?.resendCurrentState()
+    }
+
+    private fun restartAudio() {
+        AppLog.i("AapService: Received request to restart audio")
+        commManager.restartAudio()
+    }
+
+    private fun raiseProjection() {
+        launchAapProjectionActivity(allowNotificationFallback = false)
     }
 
     // Receives ACTION_RAISE_PROJECTION, sent by the projection activity when a call screen has
@@ -572,7 +581,7 @@ class AapService : Service() {
     private val raiseProjectionReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             if (intent.action != ACTION_RAISE_PROJECTION) return
-            launchAapProjectionActivity(allowNotificationFallback = false)
+            raiseProjection()
         }
     }
 
@@ -2999,6 +3008,12 @@ class AapService : Service() {
                     }
                 }
             }
+            ACTION_RESTART_AUDIO         -> restartAudio()
+            ACTION_REFRESH_SENSORS       -> refreshSensors()
+            ACTION_RAISE_PROJECTION      -> {
+                if (commManager.isConnected) raiseProjection()
+                else AppLog.i("AapService: raise projection ignored, no session")
+            }
             ACTION_NATIVE_AA_CANCEL_POKE -> {
                 AppLog.i("AapService: ACTION_NATIVE_AA_CANCEL_POKE received — user explicitly canceled driver selection")
                 userExitedAA = true
@@ -3496,6 +3511,13 @@ class AapService : Service() {
         const val ACTION_REFRESH_SENSORS         = "com.andrerinas.openheadunit.aap.action.REFRESH_SENSORS"
         const val ACTION_RESTART_AUDIO           = "com.andrerinas.openheadunit.aap.action.RESTART_AUDIO"
         const val ACTION_RAISE_PROJECTION        = "com.andrerinas.openheadunit.aap.action.RAISE_PROJECTION"
+
+        /** Every action [onStartCommand] has a branch for; an automation relay outside it is dropped silently. */
+        val HANDLED_START_ACTIONS: Set<String> = setOf(
+            ACTION_STOP_SERVICE, ACTION_DISCONNECT, ACTION_STOP_WIRELESS, ACTION_CANCEL_WIRELESS,
+            ACTION_START_WIRELESS_SCAN, ACTION_END_SESSION_STAY_ARMED, ACTION_NATIVE_AA_CANCEL_POKE,
+            ACTION_RESTART_AUDIO, ACTION_REFRESH_SENSORS, ACTION_RAISE_PROJECTION,
+        )
         /**
          * Sent after the caller has already invoked [CommManager.connect(socket)].
          * The [observeConnectionState] flow observer handles the result — [onStartCommand]
