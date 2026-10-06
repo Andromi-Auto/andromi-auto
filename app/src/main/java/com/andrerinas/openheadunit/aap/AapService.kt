@@ -2120,8 +2120,8 @@ class AapService : Service() {
         if (ConnectionArbiter.usbEpisodeSpent()) return false
 
         val accessoryOnBus = try {
-            val usbManager = getSystemService(Context.USB_SERVICE) as UsbManager
-            usbManager.deviceList.values.any { UsbDeviceCompat.isInAccessoryMode(it) }
+            UsbDeviceCompat.usbManager(this)?.deviceList?.values
+                ?.any { UsbDeviceCompat.isInAccessoryMode(it) } ?: false
         } catch (e: Exception) {
             AppLog.w("AapService: Could not read the USB bus before wireless bring-up: ${e.message}")
             false

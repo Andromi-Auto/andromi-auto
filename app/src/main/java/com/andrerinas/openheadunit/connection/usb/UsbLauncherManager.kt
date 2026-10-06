@@ -32,6 +32,7 @@ class UsbLauncherManager(val service: AapService) {
     var isRegistered = false
     private lateinit var receiver: UsbReceiver
     var projectionHandshakeFailures = 0
+    private var noUsbServiceLogged = false
 
     /**
      * Guards against duplicate [UsbAccessoryMode.connectAndSwitch] calls AND duplicate
@@ -133,7 +134,7 @@ class UsbLauncherManager(val service: AapService) {
     }
 
     private fun requestPermission(device: UsbDevice) {
-        val usbManager = service.getSystemService(Context.USB_SERVICE) as UsbManager
+        val usbManager = UsbDeviceCompat.usbManager(service) ?: return
         val permissionIntent = UsbReceiver.createPermissionPendingIntent(service)
 
         AppLog.i("Requesting USB permission for ${UsbDeviceCompat(device).uniqueName}")
@@ -155,7 +156,7 @@ class UsbLauncherManager(val service: AapService) {
      * starts with clean buffers.
      */
     fun onHandshakeFailed() {
-        val usbManager = service.getSystemService(Context.USB_SERVICE) as UsbManager
+        val usbManager = UsbDeviceCompat.usbManager(service) ?: return
         val accessoryDevice = usbManager.deviceList.values.firstOrNull {
             UsbDeviceCompat.isInAccessoryMode(it)
         } ?: return
@@ -233,7 +234,11 @@ class UsbLauncherManager(val service: AapService) {
             AutoConnectHoldPolicy.Verdict.PROCEED -> Unit
         }
 
-        val usbManager = service.getSystemService(Context.USB_SERVICE) as UsbManager
+        val usbManager = UsbDeviceCompat.usbManager(service) ?: run {
+            if (!noUsbServiceLogged) AppLog.i("UsbLauncher: this unit has no USB service; USB connections are unavailable")
+            noUsbServiceLogged = true
+            return
+        }
         UsbDeviceDiagnostics.logDeviceList(service, usbManager, "service scan (force=$force)")
         val deviceList = usbManager.deviceList.values.filter { UsbDeviceCompat.isConnectable(service, it) }
 
@@ -352,7 +357,7 @@ class UsbLauncherManager(val service: AapService) {
 
     private fun performSingleConnect(device: UsbDevice, tier: Tier) {
         val settings = App.provide(service).settings
-        val usbManager = service.getSystemService(Context.USB_SERVICE) as UsbManager
+        val usbManager = UsbDeviceCompat.usbManager(service) ?: return
 
         if (usbManager.hasPermission(device)) {
             val deviceName = UsbDeviceCompat(device).uniqueName

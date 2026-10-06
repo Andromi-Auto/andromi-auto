@@ -49,8 +49,10 @@ class MainViewModel(application: Application): AndroidViewModel(application), Us
     }
 
     private fun createDeviceList(allowDevices: Set<String>): List<UsbDeviceCompat> {
-        val manager = app.getSystemService(android.content.Context.USB_SERVICE) as? UsbManager
-            ?: return emptyList().also { AppLog.w("USB service is unavailable; USB device list is empty") }
+        val manager = UsbDeviceCompat.usbManager(app) ?: run {
+            AppLog.w("MainViewModel: USB service is unavailable; USB device list is empty")
+            return emptyList()
+        }
         UsbDeviceDiagnostics.logDeviceList(app, manager, "USB list")
         val devices = manager.deviceList.values.map { UsbDeviceCompat(it) }
         return filterAndSort(devices, allowDevices)

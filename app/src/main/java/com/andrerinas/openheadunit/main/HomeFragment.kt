@@ -287,11 +287,11 @@ class HomeFragment : Fragment() {
             Settings.CONNECTION_TYPE_USB -> {
                 val lastUsbDevice = appSettings.lastConnectionUsbDevice
                 if (lastUsbDevice.isNotEmpty()) {
-                    val usbManager = requireContext().getSystemService(Context.USB_SERVICE) as UsbManager
-                    val matchingDevice = usbManager.deviceList.values.find { device ->
+                    val usbManager = UsbDeviceCompat.usbManager(requireContext())
+                    val matchingDevice = usbManager?.deviceList?.values?.find { device ->
                         UsbDeviceCompat.getUniqueName(device) == lastUsbDevice
                     }
-                    if (matchingDevice != null && usbManager.hasPermission(matchingDevice)) {
+                    if (usbManager != null && matchingDevice != null && usbManager.hasPermission(matchingDevice)) {
                         AppLog.i("Auto-connect: Attempting USB connection to $lastUsbDevice")
                         ToastUtils.showToast(requireContext(), getString(R.string.auto_connecting_usb), Toast.LENGTH_SHORT)
                         ContextCompat.startForegroundService(requireContext(), Intent(requireContext(), AapService::class.java).apply {
@@ -433,13 +433,14 @@ class HomeFragment : Fragment() {
             AapService.instance?.liftUsbCancel("the USB button was pressed")
 
             // Get list of Android USB devices
-            val usbManager = requireContext().getSystemService(Context.USB_SERVICE) as UsbManager
-            UsbDeviceDiagnostics.logDeviceList(requireContext(), usbManager, "USB button")
-            val androidDevices = usbManager.deviceList.values
-                .filter { UsbDeviceCompat.isConnectable(requireContext(), it) }
+            val usbManager = UsbDeviceCompat.usbManager(requireContext())
+            val androidDevices = if (usbManager == null) emptyList() else {
+                UsbDeviceDiagnostics.logDeviceList(requireContext(), usbManager, "USB button")
+                usbManager.deviceList.values.filter { UsbDeviceCompat.isConnectable(requireContext(), it) }
+            }
 
             // If exactly one device found - auto-connect
-            if (androidDevices.size == 1) {
+            if (usbManager != null && androidDevices.size == 1) {
                 val device = UsbDeviceCompat(androidDevices[0])
                 AppLog.i("USB button: Single device found - ${device.uniqueName}, auto-connecting")
                 (requireActivity() as? MainActivity)?.beginAutoConnect(

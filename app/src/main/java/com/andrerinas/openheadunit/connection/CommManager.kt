@@ -295,8 +295,8 @@ class CommManager(
 
         lastAttemptedEndpoint = null
 
-        val usbManager = context.getSystemService(Context.USB_SERVICE) as UsbManager
-        if (!usbManager.hasPermission(device)) {
+        val usbManager = UsbDeviceCompat.usbManager(context)
+        if (usbManager == null || !usbManager.hasPermission(device)) {
             onSessionFailure?.invoke("connect_failed")
             _connectionState.emit(ConnectionState.Error("USB permission not granted for device"))
             return
