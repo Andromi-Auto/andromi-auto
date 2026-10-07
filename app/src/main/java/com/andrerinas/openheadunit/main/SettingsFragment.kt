@@ -22,7 +22,9 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import com.andrerinas.openheadunit.utils.OemAppManager
 import com.andrerinas.openheadunit.utils.CarLauncherManager
+import com.andrerinas.openheadunit.ssl.ConscryptInitializer
 import com.andrerinas.openheadunit.utils.UpdateChecker
+import com.andrerinas.openheadunit.utils.UpdateLinkPolicy
 import androidx.activity.OnBackPressedCallback
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
@@ -5277,7 +5279,11 @@ class SettingsFragment : Fragment() {
                             }
                         } else {
                             builder.setPositiveButton(R.string.open_github_releases) { _, _ ->
-                                UpdateChecker.openGitHubReleases(ctx, info.releaseUrl)
+                                val link = UpdateLinkPolicy.linkToOpen(
+                                    info.releaseUrl, info.apkUrl, ConscryptInitializer.isNeededForTls12()
+                                )
+                                AppLog.i("SettingsFragment: opening update link $link")
+                                UpdateChecker.openGitHubReleases(ctx, link)
                             }
                         }
                         builder.show()
