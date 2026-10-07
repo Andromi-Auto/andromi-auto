@@ -428,6 +428,12 @@
     <string name="nav_action_ferry">Feribot</string>
     <string name="nav_action_ferry_train">Feribot / tren</string>
     <string name="nav_action_destination">Varış</string>
+    <string name="performance_overlay_settings">Performans katmanı</string>
+    <string name="overlay_field_fps">FPS</string>
+    <string name="overlay_field_cpu">CPU</string>
+    <string name="overlay_field_temperature">Sıcaklık</string>
+    <string name="overlay_field_frame_age">Kare yaşı</string>
+    <string name="performance_overlay_no_lines">Satır yok</string>
     <string name="show_performance_overlay">Performans katmanını göster</string>
     <string name="overlay_position">Performans katmanının konumu</string>
     <string name="show_performance_overlay_description">Yansıtmanın üzerinde FPS, CPU yükü, sıcaklık ve kare yaşını gösterir.</string>

@@ -430,6 +430,12 @@
     <string name="monochrome_icons_description">Usar ícones em tons de cinza na tela inicial no modo Escuro ou Escuro Extremo</string>
     <string name="use_extreme_dark">Usar escuro extremo</string>
     <string name="use_extreme_dark_description">Usar fundo preto puro quando o modo escuro está ativo</string>
+    <string name="performance_overlay_settings">Sobreposição de desempenho</string>
+    <string name="overlay_field_fps">FPS</string>
+    <string name="overlay_field_cpu">CPU</string>
+    <string name="overlay_field_temperature">Temperatura</string>
+    <string name="overlay_field_frame_age">Idade do quadro</string>
+    <string name="performance_overlay_no_lines">Sem linhas</string>
     <string name="show_performance_overlay">Mostrar sobreposição de desempenho</string>
     <string name="overlay_position">Posição da sobreposição de desempenho</string>
     <string name="show_performance_overlay_description">Exibe FPS, carga da CPU, temperatura e idade do quadro sobre a projeção.</string>

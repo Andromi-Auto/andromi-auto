@@ -429,6 +429,12 @@
     <string name="monochrome_icons_description">Grijstinten pictogrammen op het startscherm gebruiken in Donker of Extra donker modus</string>
     <string name="use_extreme_dark">Extra donker gebruiken</string>
     <string name="use_extreme_dark_description">Puur zwarte achtergrond gebruiken wanneer donkere modus actief is</string>
+    <string name="performance_overlay_settings">Prestatie-overlay</string>
+    <string name="overlay_field_fps">FPS</string>
+    <string name="overlay_field_cpu">CPU</string>
+    <string name="overlay_field_temperature">Temperatuur</string>
+    <string name="overlay_field_frame_age">Frameleeftijd</string>
+    <string name="performance_overlay_no_lines">Geen regels</string>
     <string name="show_performance_overlay">Prestatie-overlay tonen</string>
     <string name="overlay_position">Positie van prestatie-overlay</string>
     <string name="overlay_permission_required">Automatisch starten vereist de machtiging \'Weergeven over andere apps\'</string>

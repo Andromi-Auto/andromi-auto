@@ -178,6 +178,7 @@ object SettingsBackupManager {
         "app-theme-manual-end" to ValueType.INT,
         "show-fps-counter" to ValueType.BOOLEAN,
         "overlay-position" to ValueType.INT,
+        "overlay-fields" to ValueType.INT,
         "monochrome-icons" to ValueType.BOOLEAN,
         "auto-monochrome-buttons-at-night" to ValueType.BOOLEAN,
         "home-background-night-mode" to ValueType.INT,

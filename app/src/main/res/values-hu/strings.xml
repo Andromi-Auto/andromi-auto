@@ -431,6 +431,12 @@
     <string name="monochrome_icons_description">Szürkeárnyalatos ikonok használata a kezdőképernyőn Sötét vagy Extrém sötét módban</string>
     <string name="use_extreme_dark">Extrém sötét használata</string>
     <string name="use_extreme_dark_description">Tiszta fekete háttér használata sötét módban</string>
+    <string name="performance_overlay_settings">Teljesítményjelző</string>
+    <string name="overlay_field_fps">FPS</string>
+    <string name="overlay_field_cpu">CPU</string>
+    <string name="overlay_field_temperature">Hőmérséklet</string>
+    <string name="overlay_field_frame_age">Képkocka kora</string>
+    <string name="performance_overlay_no_lines">Nincs sor</string>
     <string name="show_performance_overlay">Teljesítményjelző megjelenítése</string>
     <string name="overlay_position">Teljesítményjelző helye</string>
     <string name="overlay_permission_required">Az automatikus indításhoz szükséges a \'Megjelenítés más alkalmazások felett\' engedély</string>

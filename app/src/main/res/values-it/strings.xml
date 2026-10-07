@@ -432,6 +432,12 @@
     <string name="nav_action_ferry">Traghetto</string>
     <string name="nav_action_ferry_train">Traghetto / treno</string>
     <string name="nav_action_destination">Arrivo</string>
+    <string name="performance_overlay_settings">Pannello prestazioni</string>
+    <string name="overlay_field_fps">FPS</string>
+    <string name="overlay_field_cpu">CPU</string>
+    <string name="overlay_field_temperature">Temperatura</string>
+    <string name="overlay_field_frame_age">Età del fotogramma</string>
+    <string name="performance_overlay_no_lines">Nessuna riga</string>
     <string name="show_performance_overlay">Mostra pannello prestazioni</string>
     <string name="overlay_position">Posizione del pannello prestazioni</string>
     <string name="show_performance_overlay_description">Mostra FPS, carico CPU, temperatura ed età del fotogramma sopra la proiezione.</string>

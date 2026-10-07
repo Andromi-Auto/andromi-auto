@@ -2,6 +2,8 @@ package com.andrerinas.openheadunit.view
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
+import com.andrerinas.openheadunit.utils.SettingsBackupManager
 import org.junit.Test
 
 class PerformanceOverlayPolicyTest {
@@ -57,5 +59,133 @@ class PerformanceOverlayPolicyTest {
         // D-HU's measured shape: 17 zones read, osctsen and outtsen answer EINVAL.
         val zones = List(17) { 60000 + it * 500 } + listOf(null, null)
         assertEquals(68, PerformanceOverlayPolicy.temperatureC(zones))
+    }
+
+    private val all = PerformanceOverlayField.values().toSet()
+
+    private fun text(fields: Set<PerformanceOverlayField>) =
+        PerformanceOverlayPolicy.format(fields, 60, 12, 40, null, 45, 16L)
+
+    @Test
+    fun `all four lines print the text the overlay printed before`() {
+        assertEquals("FPS: 60\nCPU: app 12% / sys 40%\nTemp: 45C\nFrame: 16ms", text(all))
+    }
+
+    @Test
+    fun `fps alone is one line with no newline`() {
+        assertEquals("FPS: 60", text(setOf(PerformanceOverlayField.FPS)))
+    }
+
+    @Test
+    fun `each field alone prints only its own line`() {
+        assertEquals("FPS: 60", text(setOf(PerformanceOverlayField.FPS)))
+        assertEquals("CPU: app 12% / sys 40%", text(setOf(PerformanceOverlayField.CPU)))
+        assertEquals("Temp: 45C", text(setOf(PerformanceOverlayField.TEMP)))
+        assertEquals("Frame: 16ms", text(setOf(PerformanceOverlayField.FRAME)))
+    }
+
+    @Test
+    fun `lines keep the order fps cpu temp frame`() {
+        val set = setOf(PerformanceOverlayField.FRAME, PerformanceOverlayField.FPS)
+        assertEquals("FPS: 60\nFrame: 16ms", text(set))
+    }
+
+    @Test
+    fun `no field prints nothing`() {
+        assertEquals("", text(emptySet()))
+        assertTrue(PerformanceOverlayPolicy.isEmpty(emptySet()))
+    }
+
+    @Test
+    fun `an unreadable value prints dashes`() {
+        assertEquals(
+            "FPS: --\nCPU: app -- / sys --\nTemp: --\nFrame: --",
+            PerformanceOverlayPolicy.format(all, null, null, null, null, null, null)
+        )
+    }
+
+    @Test
+    fun `system cpu falls back to the load average`() {
+        assertEquals(
+            "CPU: app 12% / sys 1.50 load",
+            PerformanceOverlayPolicy.format(
+                setOf(PerformanceOverlayField.CPU), null, 12, null, 1.5, null, null
+            )
+        )
+    }
+
+    @Test
+    fun `the field set round-trips through its stored int`() {
+        for (bits in 0..15) {
+            val fields = PerformanceOverlayPolicy.fromBits(bits)
+            assertEquals(bits, PerformanceOverlayPolicy.toBits(fields))
+            assertEquals(fields, PerformanceOverlayPolicy.fromBits(PerformanceOverlayPolicy.toBits(fields)))
+        }
+    }
+
+    @Test
+    fun `the stored default is all four lines`() {
+        assertEquals(all, PerformanceOverlayPolicy.fromBits(PerformanceOverlayPolicy.DEFAULT_BITS))
+    }
+
+    @Test
+    fun `unknown bits are ignored`() {
+        assertEquals(all, PerformanceOverlayPolicy.fromBits(0xFF))
+    }
+
+    @Test
+    fun `sampling names only the sources a line needs`() {
+        assertEquals(emptySet<PerformanceOverlaySource>(),
+            PerformanceOverlayPolicy.sampling(setOf(PerformanceOverlayField.FPS, PerformanceOverlayField.FRAME)))
+        assertEquals(setOf(PerformanceOverlaySource.CPU),
+            PerformanceOverlayPolicy.sampling(setOf(PerformanceOverlayField.CPU)))
+        assertEquals(setOf(PerformanceOverlaySource.TEMP),
+            PerformanceOverlayPolicy.sampling(setOf(PerformanceOverlayField.TEMP)))
+        assertEquals(PerformanceOverlaySource.values().toSet(), PerformanceOverlayPolicy.sampling(all))
+    }
+
+    @Test
+    fun `describe names the fields and the sources`() {
+        assertEquals("fields=FPS sources=none",
+            PerformanceOverlayPolicy.describe(setOf(PerformanceOverlayField.FPS)))
+        assertEquals("fields=FPS,CPU,TEMP,FRAME sources=cpu,temp", PerformanceOverlayPolicy.describe(all))
+        assertEquals("fields=none sources=none", PerformanceOverlayPolicy.describe(emptySet()))
+    }
+
+    @Test
+    fun `overlay-fields is in the settings backup as an int`() {
+        assertEquals(SettingsBackupManager.ValueType.INT, SettingsBackupManager.backupKeys["overlay-fields"])
+    }
+
+    private val labels = mapOf(
+        PerformanceOverlayField.FPS to "FPS",
+        PerformanceOverlayField.CPU to "CPU",
+        PerformanceOverlayField.TEMP to "Temperature",
+        PerformanceOverlayField.FRAME to "Frame age"
+    )
+
+    private fun summary(show: Boolean, fields: Set<PerformanceOverlayField>, side: String) =
+        PerformanceOverlayPolicy.entrySummary(show, fields, labels, "Off", "No lines", side)
+
+    @Test
+    fun `the entry row reads off while the overlay is off`() {
+        assertEquals("Off", summary(false, all, "left"))
+    }
+
+    @Test
+    fun `the entry row names the lines and the side`() {
+        val set = setOf(PerformanceOverlayField.FPS, PerformanceOverlayField.CPU)
+        assertEquals("FPS, CPU (left)", summary(true, set, "left"))
+    }
+
+    @Test
+    fun `the entry row keeps the line order`() {
+        val set = setOf(PerformanceOverlayField.FRAME, PerformanceOverlayField.FPS)
+        assertEquals("FPS, Frame age (right)", summary(true, set, "right"))
+    }
+
+    @Test
+    fun `the entry row says when no line is chosen`() {
+        assertEquals("No lines (left)", summary(true, emptySet(), "left"))
     }
 }

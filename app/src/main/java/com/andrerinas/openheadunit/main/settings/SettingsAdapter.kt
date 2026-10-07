@@ -24,6 +24,7 @@ sealed class SettingItem {
         // Extra terms matched by the settings search (e.g. picker options or the
         // names of the settings inside a sub-screen). Not shown in the UI.
         val searchKeywords: String? = null,
+        val isEnabled: Boolean = true,
         val onClick: (settingId: String) -> Unit // Callback when the setting is clicked
     ) : SettingItem()
 
@@ -184,7 +185,9 @@ class SettingsAdapter : ListAdapter<SettingItem, RecyclerView.ViewHolder>(Settin
             if (setting.nameOverride != null) settingName.text = setting.nameOverride
             else settingName.setText(setting.nameResId)
             settingValue.text = setting.value
-            itemView.setOnClickListener { setting.onClick(setting.stableId) }
+            itemView.alpha = if (setting.isEnabled) 1.0f else 0.5f
+            itemView.isClickable = setting.isEnabled
+            itemView.setOnClickListener { if (setting.isEnabled) setting.onClick(setting.stableId) }
         }
     }
 
@@ -372,7 +375,7 @@ class SettingsAdapter : ListAdapter<SettingItem, RecyclerView.ViewHolder>(Settin
         override fun areContentsTheSame(oldItem: SettingItem, newItem: SettingItem): Boolean {
             return when {
                 oldItem is SettingItem.SettingEntry && newItem is SettingItem.SettingEntry ->
-                    oldItem.nameResId == newItem.nameResId && oldItem.value == newItem.value
+                    oldItem.nameResId == newItem.nameResId && oldItem.value == newItem.value && oldItem.isEnabled == newItem.isEnabled
                 oldItem is SettingItem.ToggleSettingEntry && newItem is SettingItem.ToggleSettingEntry ->
                     oldItem.nameResId == newItem.nameResId && oldItem.descriptionResId == newItem.descriptionResId && oldItem.isChecked == newItem.isChecked && oldItem.isEnabled == newItem.isEnabled && oldItem.nameOverride == newItem.nameOverride && oldItem.descriptionOverride == newItem.descriptionOverride
                 oldItem is SettingItem.SliderSettingEntry && newItem is SettingItem.SliderSettingEntry ->

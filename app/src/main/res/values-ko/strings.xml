@@ -492,6 +492,12 @@
     <string name="nav_action_ferry">페리</string>
     <string name="nav_action_ferry_train">페리/열차</string>
     <string name="nav_action_destination">도착</string>
+    <string name="performance_overlay_settings">성능 오버레이</string>
+    <string name="overlay_field_fps">FPS</string>
+    <string name="overlay_field_cpu">CPU</string>
+    <string name="overlay_field_temperature">온도</string>
+    <string name="overlay_field_frame_age">프레임 경과 시간</string>
+    <string name="performance_overlay_no_lines">표시 안 함</string>
     <string name="show_performance_overlay">성능 오버레이 표시</string>
     <string name="overlay_position">성능 오버레이 위치</string>
     <string name="show_performance_overlay_description">투영 화면 위에 FPS, CPU 부하, 온도, 프레임 경과 시간을 표시합니다.</string>

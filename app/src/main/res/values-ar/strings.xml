@@ -432,6 +432,12 @@
     <string name="monochrome_icons_description">استخدام أيقونات رمادية على الشاشة الرئيسية في الوضع الداكن أو الداكن المطلق</string>
     <string name="use_extreme_dark">استخدام الوضع الداكن المطلق</string>
     <string name="use_extreme_dark_description">استخدام خلفية سوداء بالكامل عند تفعيل الوضع الداكن</string>
+    <string name="performance_overlay_settings">لوحة الأداء</string>
+    <string name="overlay_field_fps">FPS</string>
+    <string name="overlay_field_cpu">CPU</string>
+    <string name="overlay_field_temperature">درجة الحرارة</string>
+    <string name="overlay_field_frame_age">عمر الإطار</string>
+    <string name="performance_overlay_no_lines">بدون أسطر</string>
     <string name="show_performance_overlay">إظهار لوحة الأداء</string>
     <string name="overlay_position">موضع لوحة الأداء</string>
     <string name="show_performance_overlay_description">عرض معدل الإطارات وحمل المعالج ودرجة الحرارة وعمر الإطار فوق العرض.</string>

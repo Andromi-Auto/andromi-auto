@@ -841,6 +841,12 @@
     <string name="nav_action_ferry">Kapal feri</string>
     <string name="nav_action_ferry_train">Feri / kereta</string>
     <string name="nav_action_destination">Tiba di tujuan</string>
+    <string name="performance_overlay_settings">Hamparan Performa</string>
+    <string name="overlay_field_fps">FPS</string>
+    <string name="overlay_field_cpu">CPU</string>
+    <string name="overlay_field_temperature">Suhu</string>
+    <string name="overlay_field_frame_age">Usia bingkai</string>
+    <string name="performance_overlay_no_lines">Tanpa baris</string>
     <string name="show_performance_overlay">Tampilkan Hamparan Performa</string>
     <string name="overlay_position">Posisi hamparan performa</string>
     <string name="five_ghz_channel">Saluran 5 GHz</string>

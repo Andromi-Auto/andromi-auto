@@ -429,6 +429,12 @@
     <string name="monochrome_icons_description">在深色或極致黑暗模式中使用灰階圖示</string>
     <string name="use_extreme_dark">使用極致黑暗</string>
     <string name="use_extreme_dark_description">在深色模式啟用時使用純黑背景</string>
+    <string name="performance_overlay_settings">效能疊加層</string>
+    <string name="overlay_field_fps">FPS</string>
+    <string name="overlay_field_cpu">CPU</string>
+    <string name="overlay_field_temperature">溫度</string>
+    <string name="overlay_field_frame_age">幀齡</string>
+    <string name="performance_overlay_no_lines">無行</string>
     <string name="show_performance_overlay">顯示效能疊加層</string>
     <string name="overlay_position">效能疊加層位置</string>
     <string name="overlay_permission_required">自動啟動需要「顯示在其他應用程式上層」權限</string>
