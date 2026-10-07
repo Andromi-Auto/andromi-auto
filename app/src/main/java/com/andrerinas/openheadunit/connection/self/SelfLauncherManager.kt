@@ -1,6 +1,7 @@
 package com.andrerinas.openheadunit.connection.self
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import com.andrerinas.openheadunit.App
@@ -55,21 +56,6 @@ class SelfLauncherManager(
      * AA Wireless activity requires; they are constructed reflectively because the
      * relevant Android classes have no public constructors.
      */
-    private fun isAaVersion174OrHigher(): Boolean {
-        return try {
-            val pInfo = service.packageManager.getPackageInfo(AA_PACKAGE, 0)
-            val vName = pInfo.versionName ?: ""
-            val parts = vName.split(".")
-            val major = parts.getOrNull(0)?.toIntOrNull() ?: 0
-            val minor = parts.getOrNull(1)?.toIntOrNull() ?: 0
-            AppLog.i("SelfMode: Installed AA version: $vName (major=$major, minor=$minor)")
-            major > 17 || (major == 17 && minor >= 4)
-        } catch (e: Exception) {
-            AppLog.w("SelfMode: Failed to query AA version: ${e.message}")
-            false
-        }
-    }
-
     fun openAaSettings() {
         val intent = Intent().apply {
             setClassName(
@@ -117,18 +103,16 @@ class SelfLauncherManager(
             val services = SelfLauncherServices(service, wifiLauncherManager)
             val launchers: Array<SelfLauncher>
 
-            val path: SelfLaunchPath
+            val path = installedPath(service)
 
-            if (isAaVersion174OrHigher()) {
+            if (path == SelfLaunchPath.HEADUNIT_SERVER) {
                 AppLog.i("SelfMode: AA 17.4+ detected. Connecting directly to Headunit Server on 127.0.0.1:5277...")
-                path = SelfLaunchPath.HEADUNIT_SERVER
                 launchers = arrayOf(
                     SelfLauncherV17_4(this@SelfLauncherManager, services)
                 )
 
             } else {
                 AppLog.i("SelfMode: AA < 17.4 detected. Starting WirelessServer on 5288 and running legacy triggers...")
-                path = SelfLaunchPath.LEGACY
                 launchers = arrayOf(
                     SelfLauncherLegacy(this@SelfLauncherManager, services),
                     SelfLauncherBroadcast(this@SelfLauncherManager, services), // fallback #1
@@ -288,5 +272,18 @@ class SelfLauncherManager(
         private const val VPN_TIMEOUT_MS = 120_000L
 
         const val AA_PACKAGE = "com.google.android.projection.gearhead"
+
+        /** Which route the installed Android Auto takes; an unreadable version is LEGACY. */
+        fun installedPath(context: Context): SelfLaunchPath {
+            val vName = try {
+                val name = context.packageManager.getPackageInfo(AA_PACKAGE, 0).versionName
+                AppLog.i("SelfMode: Installed AA version: $name")
+                name
+            } catch (e: Exception) {
+                AppLog.w("SelfMode: Failed to query AA version: ${e.message}")
+                null
+            }
+            return SelfLaunchRoutePolicy.pathFor(vName)
+        }
     }
 }
