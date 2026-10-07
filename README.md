@@ -114,7 +114,7 @@ adb shell am start -a android.intent.action.VIEW -d "headunit://connect?ip=192.1
 - Info/Help descriptions to the settings for better understanding
 
 ## Changelog
-### v.3.5.0-beta3
+### v.3.5.0-beta4
 - Native AA: reconnect to a network that is still there, instead of rebuilding it every time
 - Native AA: wake the phone over the Bluetooth module on a cold start, and from the WiFi button
 - Native AA over hotspot: stop advertising an endpoint that moves, bring the hotspot back after a boot or ACC wake- #1014
@@ -130,6 +130,17 @@ adb shell am start -a android.intent.action.VIEW -d "headunit://connect?ip=192.1
 - Mic: isolate capture sessions and bound uplink flow control, thanks to @emotionbug
 - Audio: stabilize playback and AAC recovery with opt-in AAudio, thanks to @emotionbug
 - WPP: retain active control connections and isolate listener generations, thanks to @emotionbug
+- Added: Apps drawer, thanks to @amp3r1
+- Navigation: stop the road name from sticking after the road changes
+- Self Mode: release the dummy VPN once the session is up, and start none for Android Auto 17.4 and later
+- Wireless: hold every automatic bring-up while the unit is asleep, and replay it once when the screen comes on
+- WiFi Direct: stand the station down again when the platform rejoins it mid-session
+- Native AA: ride out a ZLink daemon restart at cold start, and confirm a restarted hotspot stays up
+- Video: no codec on a dying surface, and a picture after a screen-off return in Texture mode
+- Automation: restore the three dropped automation commands, and stop Headunit Server connects preempting each other
+- Fix: crash when the USB service is missing, thanks to @muayyad-alsadi - #1057
+- Added: Performance overlay with its own settings screen, choose which lines it shows
+- Added: Root workaround for Android Auto 17.4+ wireless startup in the README, thanks to @mixalbl4-127
 
 ### v.3.4.0
 - USB: connect non-Pixel phones without fighting a fast-reverting dongle
