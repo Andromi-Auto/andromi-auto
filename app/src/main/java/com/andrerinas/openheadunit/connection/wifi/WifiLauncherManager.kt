@@ -8,6 +8,7 @@ import com.andrerinas.openheadunit.connection.ConnectionStage
 import com.andrerinas.openheadunit.connection.ConnectionStageTracker
 import com.andrerinas.openheadunit.connection.wifi.direct.NativeBringUpReentryPolicy
 import com.andrerinas.openheadunit.utils.AppLog
+import com.andrerinas.openheadunit.utils.ScreenPower
 import com.andrerinas.openheadunit.utils.Settings
 
 open class WifiLauncherManager(val service: AapService) {
@@ -142,6 +143,16 @@ open class WifiLauncherManager(val service: AapService) {
                 "status pill. Not arming it; the WiFi button still works.")
             return
         }
+        // A relaunch during the unit's sleep armed the radios within seconds. The wake replays it.
+        val screen = ScreenPower.isInteractive(service)
+        val asleep = WirelessSleepHold.isAsleep(screen)
+        if (WirelessSleepHold.refusesBringUp(asleep, userRequested, newLauncher.mode == WifiLauncherMode.MANUAL)) {
+            if (WirelessSleepHold.hold(force)) {
+                AppLog.i("WifiLauncher: wireless bring-up held while the screen is off. " +
+                    "The screen coming on re-arms it.")
+            }
+            return
+        }
         // A USB or user connection attempt in flight outranks the background stack; it is re-armed
         // when that attempt ends. A bring-up the user asked for ends that attempt instead.
         if (ConnectionArbiter.refusesBackground(userRequested)) return
@@ -174,6 +185,8 @@ open class WifiLauncherManager(val service: AapService) {
             ConnectionStageTracker.beginAttempt(ConnectionStage.ARMED)
         }
 
+        WirelessSleepHold.started(userRequested)
+
         // stop old launcher
         active?.stop(WifiLauncherStopSequence.ANY)
 
@@ -195,6 +208,7 @@ open class WifiLauncherManager(val service: AapService) {
     fun stop(seq: WifiLauncherStopSequence = WifiLauncherStopSequence.ANY) {
         active?.stop(seq)
         activeIsStarted = false
+        WirelessSleepHold.stopped()
         // A stop asked for on its own ends the mode, so the re-arm that follows it is not a
         // duplicate of anything. Only setActive()'s own internal teardown keeps the stamp.
         lastNativeRearmAtMs = 0L

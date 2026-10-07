@@ -41,6 +41,7 @@ import com.andrerinas.openheadunit.connection.wifi.HotspotExitAction
 import com.andrerinas.openheadunit.connection.wifi.UsbSessionQuiescePolicy
 import com.andrerinas.openheadunit.connection.wifi.SettingsScreenPausePolicy
 import com.andrerinas.openheadunit.connection.wifi.WirelessBringUpDeferralPolicy
+import com.andrerinas.openheadunit.connection.wifi.WirelessSleepHold
 import com.andrerinas.openheadunit.connection.wifi.UserExitHotspotPolicy
 import com.andrerinas.openheadunit.main.MainActivity
 import com.andrerinas.openheadunit.R
@@ -75,6 +76,7 @@ import com.andrerinas.openheadunit.utils.LogExporter
 import com.andrerinas.openheadunit.utils.NightModeManager
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.hardware.usb.UsbManager
@@ -111,6 +113,7 @@ import com.andrerinas.openheadunit.connection.wifi.server.WirelessServer
 import com.andrerinas.openheadunit.main.BackgroundNotification
 import com.andrerinas.openheadunit.main.SettingsActivity
 import com.andrerinas.openheadunit.main.FloatingButtonManager
+import com.andrerinas.openheadunit.utils.ScreenPower
 import com.andrerinas.openheadunit.utils.Settings
 import com.andrerinas.openheadunit.utils.VpnControl
 import com.andrerinas.openheadunit.utils.protoUint32ToLong
@@ -659,6 +662,7 @@ class AapService : Service() {
 
                     AppLog.i("WakeDetect: SCREEN_ON (screen was off for ${offSec}s)")
                     AccPowerState.noteOn()
+                    replaySleepHold("SCREEN_ON")
                     if (offDuration > HIBERNATE_WAKE_THRESHOLD_MS) {
                         AccPowerState.noteWake()
                         rearmNativeHotspotAfterWake("SCREEN_ON after ${offSec}s sleep")
@@ -743,6 +747,7 @@ class AapService : Service() {
      */
     private fun onHibernateWake(trigger: String) {
         AccPowerState.noteWake()
+        replaySleepHold(trigger)
         // Debounce: don't re-trigger within 10 seconds (covers BootCompleteReceiver + this)
         val now = SystemClock.elapsedRealtime()
         if (now - lastWakeHandledTimestamp < 10_000) {
@@ -1026,7 +1031,8 @@ class AapService : Service() {
         super.onCreate()
         AppLog.i("AapService creating...")
         instance = this
-        AccPowerState.noteOn()
+        // A dark screen is not evidence that the car is on.
+        if (ScreenPower.isInteractive(this) != false) AccPowerState.noteOn()
 
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -2356,6 +2362,62 @@ class AapService : Service() {
 
     private var settingsRearmJob: Job? = null
 
+    private var sleepReplayJob: Job? = null
+
+    /** Re-arms a bring-up that [WirelessSleepHold] refused while the unit was asleep. */
+    private fun replaySleepHold(trigger: String) {
+        val held = WirelessSleepHold.take() ?: return
+        val startsAtTake = WirelessSleepHold.startsAtTake // A later take moves the global baseline.
+        if (sleepReplayForce(held) == null) {
+            AppLog.i("WakeDetect: a session is up, so the wireless bring-up held while the unit was asleep is dropped (trigger=$trigger)")
+            return
+        }
+        if (wirelessPausedForSettings) {
+            AppLog.i("WakeDetect: the wireless bring-up held while the unit was asleep waits for the settings screen to close")
+            wirelessRearmPendingForSettings = true
+            return
+        }
+        AppLog.i("WakeDetect: re-arming the wireless bring-up held while the unit was asleep (force=$held, trigger=$trigger)")
+        sleepReplayJob?.cancel()
+        sleepReplayJob = serviceScope.launch {
+            delay(1500) // Same settle the settings re-arm allows the P2P hardware.
+            while (WirelessSleepHold.waitsForAttempt(held, commManager.isConnected, sleepReplayConnecting())) {
+                AppLog.i("WakeDetect: a connection attempt is in flight, so the held forced wireless bring-up waits for it to end")
+                commManager.connectionState.first { it !is CommManager.ConnectionState.Connecting }
+            }
+            val heldForce = sleepReplayForce(held) ?: run {
+                AppLog.i("WakeDetect: a session came up during the settle, so the held wireless bring-up is dropped")
+                return@launch
+            }
+            // A bring-up that started after the take already rebuilt, so the replay does not force a second.
+            val force = WirelessSleepHold.replayKeepsForce(
+                heldForce, startsAtTake, WirelessSleepHold.starts
+            )
+            if (heldForce && !force) {
+                AppLog.i("WakeDetect: a wireless bring-up started after the hold was taken, so the held one replays unforced")
+            }
+            val launcher = wifiLauncherManager.active as? WifiLauncherNative
+            WirelessSleepHold.replayVeto(
+                force,
+                networkComingUp = launcher?.networkComingUp(),
+                attemptInFlight = launcher?.handshakeManager?.isAttemptInFlight(),
+            )?.let { reason ->
+                AppLog.i("WakeDetect: the held wireless bring-up is dropped, because $reason")
+                return@launch
+            }
+            wifiLauncherManager.setActiveFromSettings(force = force)
+        }
+    }
+
+    private fun sleepReplayForce(held: Boolean): Boolean? = WirelessSleepHold.replayForce(
+        held,
+        connected = commManager.isConnected,
+        connecting = sleepReplayConnecting(),
+    )
+
+    private fun sleepReplayConnecting(): Boolean =
+        commManager.connectionState.value is CommManager.ConnectionState.Connecting
+
     /** The settings screen opened or closed, or its QR dialog took or released its hold. */
     fun onSettingsScreenChanged(inForeground: Boolean? = null, qrHold: Boolean? = null) {
         if (qrHold != null) settingsQrHold = qrHold
@@ -2628,6 +2690,9 @@ class AapService : Service() {
         FloatingButtonManager.removeOverlay(this)
         isDestroying = true
         ConnectionArbiter.actions = null
+        // The hold outlives this instance; the next one arms from its own onCreate.
+        WirelessSleepHold.clear()
+        sleepReplayJob?.cancel()
         // Nothing else clears it here, and the manager outlives the service instance.
         selfLauncherManager.isActive = false
         autoResumePlaybackJob?.cancel()
@@ -2686,6 +2751,7 @@ class AapService : Service() {
         usbLauncherManager.unregister()
         try { unregisterReceiver(mediaButtonReceiver) } catch (_: Exception) {}
         try { unregisterReceiver(wakeDetectReceiver) } catch (_: Exception) {}
+        sleepReplayJob?.cancel()
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
             try { unregisterReceiver(legacyWifiJoinReceiver) } catch (_: Exception) {}
         }

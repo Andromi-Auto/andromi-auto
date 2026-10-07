@@ -33,12 +33,14 @@ import com.andrerinas.openheadunit.connection.ConnectionStageTracker
 import com.andrerinas.openheadunit.connection.wifi.FiveGhzChannelPolicy
 import com.andrerinas.openheadunit.connection.wifi.MacAddressPolicy
 import com.andrerinas.openheadunit.connection.wifi.WifiLauncherMode
+import com.andrerinas.openheadunit.connection.wifi.WirelessSleepHold
 import com.andrerinas.openheadunit.connection.wifi.modes.helper.HelperStrategy
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.EndpointRetirementPolicy
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.NativeHandoffPolicy
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.SoftApBssidPolicy
 import com.andrerinas.openheadunit.main.MainActivity
 import com.andrerinas.openheadunit.utils.AppLog
+import com.andrerinas.openheadunit.utils.ScreenPower
 import com.andrerinas.openheadunit.utils.ConnectionIssue
 import com.andrerinas.openheadunit.utils.ConnectionIssues
 import com.andrerinas.openheadunit.utils.InterfaceMacReader
@@ -1934,6 +1936,17 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
         // auto-start rebuild that is the only thing that frees this radio again.
         val wifiManager = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
         if (!wifiManager.isWifiEnabled) {
+            // A radio switched on while the unit sleeps is what the sleep hold keeps off; the wake rebuilds.
+            val screen = ScreenPower.isInteractive(context)
+            if (WirelessSleepHold.refusesRadioEnable(WirelessSleepHold.isAsleep(screen), WirelessSleepHold.startedByUser)) {
+                if (WirelessSleepHold.hold(force = true)) {
+                    AppLog.i("WifiDirectManager: WiFi is off and the screen is off, so it is not switched on. " +
+                        "The screen coming on re-arms the group.")
+                }
+                isGroupCreatingOrCreated = false
+                releaseNativeCreateWindow("the unit is asleep")
+                return
+            }
             // Counted so the lines below are said once per bring-up: a credential refresh re-enters
             // this method every ten seconds while the handshake waits for one.
             val attempt = ++wifiEnableAttempts
@@ -2798,6 +2811,16 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
                 return
             }
             NativeJoinRecoveryPolicy.Step.RECREATE -> Unit
+        }
+        val screen = ScreenPower.isInteractive(context)
+        // The watchdog asks again, so a recreate that the wake does not rebuild is not lost.
+        if (WirelessSleepHold.refusesGroupRecreate(WirelessSleepHold.isAsleep(screen), WirelessSleepHold.startedByUser)) {
+            if (WirelessSleepHold.hold(force = true)) {
+                AppLog.i("WifiDirectManager: Native AA recovery ($reason) held while the screen is off. " +
+                    "The screen coming on re-arms the group.")
+            }
+            armNativeJoinWatchdog()
+            return
         }
         nativeRecreateCount++
         val forceStandard = nativeRecreateCount >= NATIVE_FORCE_STANDARD_AFTER
