@@ -49,6 +49,9 @@ import com.andrerinas.openheadunit.utils.ColorUtils
 import com.andrerinas.openheadunit.utils.HomeUiHelper
 import com.andrerinas.openheadunit.utils.ToastUtils
 import com.andrerinas.openheadunit.utils.VpnControl
+import com.andrerinas.openheadunit.connection.self.SelfLaunchPath
+import com.andrerinas.openheadunit.connection.self.SelfLaunchRoutePolicy
+import com.andrerinas.openheadunit.connection.self.SelfLauncherManager
 import com.andrerinas.openheadunit.utils.BluetoothHelper
 import com.andrerinas.openheadunit.connection.usb.UsbReceiver
 import com.andrerinas.openheadunit.connection.usb.UsbAccessoryMode
@@ -219,7 +222,10 @@ class HomeFragment : Fragment() {
             connectivityManager.activeNetwork
         } else null
 
-        if (activeNetwork == null && VpnControl.isVpnAvailable()) {
+        val path = SelfLauncherManager.installedPath(requireContext())
+        val offline = activeNetwork == null
+
+        if (SelfLaunchRoutePolicy.needsDummyVpn(path, offline, VpnControl.isVpnAvailable())) {
             AppLog.i("Device is offline. Preparing Dummy VPN for Self Mode.")
             val vpnIntent = VpnControl.consentIntent(requireContext())
             if (vpnIntent != null) {
@@ -229,8 +235,12 @@ class HomeFragment : Fragment() {
                 AppLog.i("VPN permission already granted. Starting VPN service.")
                 VpnControl.startVpn(requireContext());
             }
-        } else if (activeNetwork == null) {
-            AppLog.i("Device is offline and VPN is not available in this build. Self Mode may fail.")
+        } else if (offline) {
+            if (path == SelfLaunchPath.HEADUNIT_SERVER) {
+                AppLog.i("HomeFragment: Device is offline; Android Auto 17.4+ connects over 127.0.0.1:5277, so no dummy VPN.")
+            } else {
+                AppLog.i("Device is offline and VPN is not available in this build. Self Mode may fail.")
+            }
         }
         startSelfModeInternal()
     }

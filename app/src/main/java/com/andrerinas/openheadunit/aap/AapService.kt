@@ -1181,6 +1181,8 @@ class AapService : Service() {
                     is CommManager.ConnectionState.TransportStarted -> {
                         quiesceWirelessForWiredSession() // The flow is conflated: HandshakeComplete can be skipped.
                         StationStandDown.onSessionLive(this@AapService, wifiLockHeldForMs())
+                        // Backstop for a skipped Connected; a no-op once onConnected released it.
+                        stopDummyVpn(DummyVpnPolicy.Reason.SELF_MODE_SESSION_LIVE)
                         cancelProjectionRaiseDeadline()
                         hasEverConnected = true
                         projectingSinceMs = SystemClock.elapsedRealtime()
@@ -1300,6 +1302,9 @@ class AapService : Service() {
         }
         // After the quiesce, which may have just stopped the P2P group: shouldStartForSession()
         // asks for a wireless Native AA session, so a wired one gets no VPN either way.
+        // The tun only lets Android Auto launch offline; held for the session it takes IPv4
+        // from every network joined later.
+        stopDummyVpn(DummyVpnPolicy.Reason.SELF_MODE_SESSION_LIVE)
         maybeStartSessionDummyVpn()
 
         // Activate session-scoped car key receivers (e.g. FYT)

@@ -22,6 +22,7 @@ class DummyVpnPolicyTest {
             setOf(
                 Reason.SESSION_ENDED,
                 Reason.SELF_MODE_NEVER_CONNECTED,
+                Reason.SELF_MODE_SESSION_LIVE,
                 Reason.SERVICE_DESTROYED,
             ),
             Reason.entries.toSet()
@@ -44,6 +45,12 @@ class DummyVpnPolicyTest {
         // attached to a live connection, so the watchdog must never reach one.
         assertTrue(DummyVpnPolicy.shouldStop(Owner.SELF_MODE, Reason.SELF_MODE_NEVER_CONNECTED))
         assertFalse(DummyVpnPolicy.shouldStop(Owner.SESSION, Reason.SELF_MODE_NEVER_CONNECTED))
+    }
+
+    @Test
+    fun `a live self mode session releases only a self mode VPN`() {
+        assertTrue(DummyVpnPolicy.shouldStop(Owner.SELF_MODE, Reason.SELF_MODE_SESSION_LIVE))
+        assertFalse(DummyVpnPolicy.shouldStop(Owner.SESSION, Reason.SELF_MODE_SESSION_LIVE))
     }
 
     @Test
