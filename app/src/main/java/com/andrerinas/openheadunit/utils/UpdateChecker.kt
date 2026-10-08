@@ -77,6 +77,7 @@ data class UpdateInfo(
     val latestVersionName: String,
     val currentVersionName: String,
     val releaseUrl: String,
+    val apkUrl: String?,
     val isPlayStore: Boolean
 )
 
@@ -131,6 +132,7 @@ object UpdateChecker {
             var newestVersion: AppVersion? = null
             var newestRawTag = ""
             var newestUrl = GITHUB_RELEASES_WEB
+            var newestApkUrl: String? = null
 
             for (i in 0 until releasesJson.length()) {
                 val rel = releasesJson.getJSONObject(i)
@@ -144,6 +146,7 @@ object UpdateChecker {
                     newestVersion = parsed
                     newestRawTag = tagName.removePrefix("v.").removePrefix("v")
                     newestUrl = rel.optString("html_url", GITHUB_RELEASES_WEB)
+                    newestApkUrl = UpdateLinkPolicy.pickApk(assetPairs(rel.optJSONArray("assets")))
                 }
             }
 
@@ -166,6 +169,7 @@ object UpdateChecker {
                     latestVersionName = newestRawTag,
                     currentVersionName = BuildConfig.VERSION_NAME,
                     releaseUrl = newestUrl,
+                    apkUrl = newestApkUrl,
                     isPlayStore = isPlayStore
                 )
             )
@@ -173,6 +177,16 @@ object UpdateChecker {
             AppLog.e("$TAG: Update check failed: ${e.message}", e)
             Result.failure(e)
         }
+    }
+
+    private fun assetPairs(assets: JSONArray?): List<Pair<String, String>> {
+        if (assets == null) return emptyList()
+        val pairs = ArrayList<Pair<String, String>>(assets.length())
+        for (i in 0 until assets.length()) {
+            val asset = assets.optJSONObject(i) ?: continue
+            pairs.add(asset.optString("name", "") to asset.optString("browser_download_url", ""))
+        }
+        return pairs
     }
 
     fun openPlayStore(context: Context) {
