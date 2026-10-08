@@ -648,7 +648,7 @@ class CustomizationFragment : Fragment() {
             previewButton.isEnabled = isEnabled
             if (!isEnabled) {
                 val disabledBackground = ContextCompat.getDrawable(ctx, R.drawable.gradient_monochrome)
-                val disabledIconTint = ColorStateList.valueOf(0x40FFFFFF)
+                val disabledIconTint = ContextCompat.getColorStateList(ctx, R.color.disabled_icon_tint)
                 previewButton.background = disabledBackground?.constantState?.newDrawable()?.mutate()
                 previewButton.iconTint = disabledIconTint
             } else {

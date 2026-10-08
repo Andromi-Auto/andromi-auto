@@ -35,17 +35,20 @@ object HomeUiHelper {
         selfBtn?.visibility = View.VISIBLE
         selfBtn?.isEnabled = showsSelf
         selfBtn?.isClickable = showsSelf
-        selfTxt?.visibility = if (showsSelf) View.VISIBLE else View.INVISIBLE
+        selfTxt?.visibility = View.VISIBLE
+        selfTxt?.alpha = if (showsSelf) 1.0f else 0.4f
 
         usbBtn?.visibility = View.VISIBLE
         usbBtn?.isEnabled = showsUsb
         usbBtn?.isClickable = showsUsb
-        usbTxt?.visibility = if (showsUsb) View.VISIBLE else View.INVISIBLE
+        usbTxt?.visibility = View.VISIBLE
+        usbTxt?.alpha = if (showsUsb) 1.0f else 0.4f
 
         wifiBtn?.visibility = View.VISIBLE
         wifiBtn?.isEnabled = showsWifi
         wifiBtn?.isClickable = showsWifi
-        wifiTxt?.visibility = if (showsWifi) View.VISIBLE else View.INVISIBLE
+        wifiTxt?.visibility = View.VISIBLE
+        wifiTxt?.alpha = if (showsWifi) 1.0f else 0.4f
     }
 
     fun applyButtonScale(
@@ -108,11 +111,11 @@ object HomeUiHelper {
         val showsWifi = settings.showsWifi()
 
         val disabledBackground = ContextCompat.getDrawable(context, R.drawable.gradient_monochrome)
-        val disabledIconTint = ColorStateList.valueOf(0x40FFFFFF)
+        val disabledIconTint = ContextCompat.getColorStateList(context, R.color.disabled_icon_tint)
 
         val isMonochrome = isDarkTheme && settings.autoMonochromeButtonsAtNight
         val monochromeBackground = ContextCompat.getDrawable(context, R.drawable.gradient_monochrome)
-        val monochromeIconTint = ColorStateList.valueOf(0xFF808080.toInt())
+        val monochromeIconTint = ContextCompat.getColorStateList(context, R.color.monochrome_icon_tint)
         val whiteTint = ColorStateList.valueOf(0xFFFFFFFF.toInt())
 
         val buttonConfigs = listOf(
