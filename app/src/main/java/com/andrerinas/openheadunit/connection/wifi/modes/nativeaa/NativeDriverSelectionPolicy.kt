@@ -150,10 +150,17 @@ object NativeDriverSelectionPolicy {
         chosenAgeMs: Long,
         switchedAwayFrom: String?,
         switchAgeMs: Long,
-        chosenWakeActive: Boolean = false
+        chosenWakeActive: Boolean,
+        chosenExplicit: Boolean,
+        chosenWakeUnanswered: Boolean,
+        handshakePeerMac: String?
     ): SwitchGate = when {
         remoteMac.isEmpty() -> SwitchGate.ACCEPT
-        !chosenMac.isNullOrEmpty() && chosenExclusive(chosenAgeMs, chosenWakeActive) ->
+        !chosenMac.isNullOrEmpty() &&
+            chosenExclusive(
+                chosenAgeMs, chosenWakeActive, chosenExplicit, chosenWakeUnanswered,
+                chosenHandshaking = handshakePeerMac.equals(chosenMac, ignoreCase = true)
+            ) ->
             if (remoteMac.equals(chosenMac, ignoreCase = true)) SwitchGate.ACCEPT
             else SwitchGate.WRONG_PHONE
         !switchedAwayFrom.isNullOrEmpty() && switchAgeMs < SWITCH_AWAY_REFUSAL_MS &&
@@ -164,12 +171,32 @@ object NativeDriverSelectionPolicy {
     /**
      * Whether the chosen driver is still the only phone the accept gate lets in.
      *
-     * Tied to the wake rather than to a flat deadline: the phone gets one 20 s hold per round, so a
-     * window that outran the wake handed the session back to the phone the driver had just left.
+     * Only a pick the user made locks it. A pick the phone never answered lapses after the floor,
+     * but the chosen phone's own handshake keeps the lock; the ceiling ends every lock.
      */
-    fun chosenExclusive(chosenAgeMs: Long, wakeActive: Boolean): Boolean =
-        chosenAgeMs < CHOSEN_EXCLUSIVE_MAX_MS &&
-            (wakeActive || chosenAgeMs < CHOSEN_EXCLUSIVE_MS)
+    fun chosenExclusive(
+        chosenAgeMs: Long,
+        wakeActive: Boolean,
+        explicit: Boolean,
+        wakeUnanswered: Boolean,
+        chosenHandshaking: Boolean
+    ): Boolean =
+        explicit && chosenAgeMs < CHOSEN_EXCLUSIVE_MAX_MS &&
+            (chosenAgeMs < CHOSEN_EXCLUSIVE_MS || chosenHandshaking || (wakeActive && !wakeUnanswered))
+
+    /**
+     * Whether an explicit pick has lapsed after this wake round. A round the phone never answered
+     * says it may be off; an answer says it is there, so the lock holds again.
+     */
+    fun pickLapsedAfterRound(
+        outcome: BluetoothWakePolicy.WakeOutcome,
+        answeredSincePick: Boolean,
+        lapsed: Boolean
+    ): Boolean = when (outcome) {
+        BluetoothWakePolicy.WakeOutcome.ANSWERED -> false
+        BluetoothWakePolicy.WakeOutcome.DIALLED -> lapsed || !answeredSincePick
+        else -> lapsed
+    }
 
     /**
      * The phones an automatic pick may name: those the wake list allows.

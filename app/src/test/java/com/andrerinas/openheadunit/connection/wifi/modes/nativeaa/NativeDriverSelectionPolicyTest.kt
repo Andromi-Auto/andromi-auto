@@ -298,11 +298,11 @@ class NativeDriverSelectionPolicyTest {
     fun `a chosen driver is the only phone accepted while the window stands`() {
         assertEquals(
             SwitchGate.ACCEPT,
-            NativeDriverSelectionPolicy.switchGate("aa:bb", "AA:BB", 0L, null, 0L)
+            NativeDriverSelectionPolicy.switchGate("aa:bb", "AA:BB", 0L, null, 0L, chosenWakeActive = false, chosenExplicit = true, chosenWakeUnanswered = false, handshakePeerMac = null)
         )
         assertEquals(
             SwitchGate.WRONG_PHONE,
-            NativeDriverSelectionPolicy.switchGate("cc:dd", "AA:BB", 0L, null, 0L)
+            NativeDriverSelectionPolicy.switchGate("cc:dd", "AA:BB", 0L, null, 0L, chosenWakeActive = false, chosenExplicit = true, chosenWakeUnanswered = false, handshakePeerMac = null)
         )
     }
 
@@ -311,8 +311,7 @@ class NativeDriverSelectionPolicyTest {
         assertEquals(
             SwitchGate.ACCEPT,
             NativeDriverSelectionPolicy.switchGate(
-                "cc:dd", "AA:BB", NativeDriverSelectionPolicy.CHOSEN_EXCLUSIVE_MS, null, 0L
-            )
+                "cc:dd", "AA:BB", NativeDriverSelectionPolicy.CHOSEN_EXCLUSIVE_MS, null, 0L, chosenWakeActive = false, chosenExplicit = true, chosenWakeUnanswered = false, handshakePeerMac = null)
         )
     }
 
@@ -320,11 +319,11 @@ class NativeDriverSelectionPolicyTest {
     fun `the phone a switch moved away from waits while nobody is chosen`() {
         assertEquals(
             SwitchGate.SWITCHED_AWAY,
-            NativeDriverSelectionPolicy.switchGate("aa:bb", null, 0L, "AA:BB", 0L)
+            NativeDriverSelectionPolicy.switchGate("aa:bb", null, 0L, "AA:BB", 0L, chosenWakeActive = false, chosenExplicit = true, chosenWakeUnanswered = false, handshakePeerMac = null)
         )
         assertEquals(
             SwitchGate.ACCEPT,
-            NativeDriverSelectionPolicy.switchGate("cc:dd", null, 0L, "AA:BB", 0L)
+            NativeDriverSelectionPolicy.switchGate("cc:dd", null, 0L, "AA:BB", 0L, chosenWakeActive = false, chosenExplicit = true, chosenWakeUnanswered = false, handshakePeerMac = null)
         )
     }
 
@@ -333,8 +332,7 @@ class NativeDriverSelectionPolicyTest {
         assertEquals(
             SwitchGate.ACCEPT,
             NativeDriverSelectionPolicy.switchGate(
-                "aa:bb", null, 0L, "AA:BB", NativeDriverSelectionPolicy.SWITCH_AWAY_REFUSAL_MS
-            )
+                "aa:bb", null, 0L, "AA:BB", NativeDriverSelectionPolicy.SWITCH_AWAY_REFUSAL_MS, chosenWakeActive = false, chosenExplicit = true, chosenWakeUnanswered = false, handshakePeerMac = null)
         )
     }
 
@@ -343,7 +341,7 @@ class NativeDriverSelectionPolicyTest {
         // Picking the same phone again is allowed: the switch is what the choice answers.
         assertEquals(
             SwitchGate.ACCEPT,
-            NativeDriverSelectionPolicy.switchGate("aa:bb", "AA:BB", 0L, "AA:BB", 0L)
+            NativeDriverSelectionPolicy.switchGate("aa:bb", "AA:BB", 0L, "AA:BB", 0L, chosenWakeActive = false, chosenExplicit = true, chosenWakeUnanswered = false, handshakePeerMac = null)
         )
     }
 
@@ -351,7 +349,7 @@ class NativeDriverSelectionPolicyTest {
     fun `an unreadable remote address is never refused on a guess`() {
         assertEquals(
             SwitchGate.ACCEPT,
-            NativeDriverSelectionPolicy.switchGate("", "AA:BB", 0L, "CC:DD", 0L)
+            NativeDriverSelectionPolicy.switchGate("", "AA:BB", 0L, "CC:DD", 0L, chosenWakeActive = false, chosenExplicit = true, chosenWakeUnanswered = false, handshakePeerMac = null)
         )
     }
 
@@ -359,7 +357,7 @@ class NativeDriverSelectionPolicyTest {
     fun `no switch and no choice accepts everything`() {
         assertEquals(
             SwitchGate.ACCEPT,
-            NativeDriverSelectionPolicy.switchGate("aa:bb", null, 0L, null, 0L)
+            NativeDriverSelectionPolicy.switchGate("aa:bb", null, 0L, null, 0L, chosenWakeActive = false, chosenExplicit = true, chosenWakeUnanswered = false, handshakePeerMac = null)
         )
     }
 
@@ -389,19 +387,17 @@ class NativeDriverSelectionPolicyTest {
     fun `a chosen driver stays exclusive while its wake is still running`() {
         assertTrue(
             NativeDriverSelectionPolicy.chosenExclusive(
-                NativeDriverSelectionPolicy.CHOSEN_EXCLUSIVE_MS, wakeActive = true
-            )
+                NativeDriverSelectionPolicy.CHOSEN_EXCLUSIVE_MS, wakeActive = true, explicit = true, wakeUnanswered = false, chosenHandshaking = false)
         )
-        assertTrue(NativeDriverSelectionPolicy.chosenExclusive(90_000L, wakeActive = true))
+        assertTrue(NativeDriverSelectionPolicy.chosenExclusive(90_000L, wakeActive = true, explicit = true, wakeUnanswered = false, chosenHandshaking = false))
     }
 
     @Test
     fun `a chosen driver stops being exclusive when nothing is waking it`() {
-        assertTrue(NativeDriverSelectionPolicy.chosenExclusive(29_999L, wakeActive = false))
+        assertTrue(NativeDriverSelectionPolicy.chosenExclusive(29_999L, wakeActive = false, explicit = true, wakeUnanswered = false, chosenHandshaking = false))
         assertFalse(
             NativeDriverSelectionPolicy.chosenExclusive(
-                NativeDriverSelectionPolicy.CHOSEN_EXCLUSIVE_MS, wakeActive = false
-            )
+                NativeDriverSelectionPolicy.CHOSEN_EXCLUSIVE_MS, wakeActive = false, explicit = true, wakeUnanswered = false, chosenHandshaking = false)
         )
     }
 
@@ -409,18 +405,16 @@ class NativeDriverSelectionPolicyTest {
     fun `an unreachable choice cannot hold the gate for good`() {
         assertFalse(
             NativeDriverSelectionPolicy.chosenExclusive(
-                NativeDriverSelectionPolicy.CHOSEN_EXCLUSIVE_MAX_MS, wakeActive = true
-            )
+                NativeDriverSelectionPolicy.CHOSEN_EXCLUSIVE_MAX_MS, wakeActive = true, explicit = true, wakeUnanswered = false, chosenHandshaking = false)
         )
     }
 
     @Test
-    fun `the wrong phone waits for as long as the chosen one is being woken`() {
+    fun `the wrong phone waits while the explicit pick is woken and has not missed a round`() {
         assertEquals(
             SwitchGate.WRONG_PHONE,
             NativeDriverSelectionPolicy.switchGate(
-                "cc:dd", "AA:BB", 60_000L, null, 0L, chosenWakeActive = true
-            )
+                "cc:dd", "AA:BB", 60_000L, null, 0L, chosenWakeActive = true, chosenExplicit = true, chosenWakeUnanswered = false, handshakePeerMac = null)
         )
     }
 
@@ -429,8 +423,7 @@ class NativeDriverSelectionPolicyTest {
         assertEquals(
             SwitchGate.ACCEPT,
             NativeDriverSelectionPolicy.switchGate(
-                "aa:bb", "AA:BB", 90_000L, null, 0L, chosenWakeActive = true
-            )
+                "aa:bb", "AA:BB", 90_000L, null, 0L, chosenWakeActive = true, chosenExplicit = true, chosenWakeUnanswered = false, handshakePeerMac = null)
         )
     }
 
@@ -440,8 +433,7 @@ class NativeDriverSelectionPolicyTest {
             SwitchGate.ACCEPT,
             NativeDriverSelectionPolicy.switchGate(
                 "cc:dd", "AA:BB", NativeDriverSelectionPolicy.CHOSEN_EXCLUSIVE_MAX_MS, null, 0L,
-                chosenWakeActive = true
-            )
+                chosenWakeActive = true, chosenExplicit = true, chosenWakeUnanswered = false, handshakePeerMac = null)
         )
     }
 
@@ -450,8 +442,7 @@ class NativeDriverSelectionPolicyTest {
         assertEquals(
             SwitchGate.SWITCHED_AWAY,
             NativeDriverSelectionPolicy.switchGate(
-                "aa:bb", "CC:DD", 40_000L, "AA:BB", 40_000L, chosenWakeActive = false
-            )
+                "aa:bb", "CC:DD", 40_000L, "AA:BB", 40_000L, chosenWakeActive = false, chosenExplicit = true, chosenWakeUnanswered = false, handshakePeerMac = null)
         )
     }
 
@@ -460,8 +451,7 @@ class NativeDriverSelectionPolicyTest {
         assertEquals(
             SwitchGate.ACCEPT,
             NativeDriverSelectionPolicy.switchGate(
-                "aa:bb", "AA:BB", 1_000L, "AA:BB", 5_000L, chosenWakeActive = true
-            )
+                "aa:bb", "AA:BB", 1_000L, "AA:BB", 5_000L, chosenWakeActive = true, chosenExplicit = true, chosenWakeUnanswered = false, handshakePeerMac = null)
         )
     }
 
@@ -815,5 +805,129 @@ class NativeDriverSelectionPolicyTest {
     @Test
     fun `ALWAYS counts every offered phone whatever the scope`() {
         assertTrue(NativeDriverSelectionPolicy.shouldShowSelector(Mode.ALWAYS, pairedCount = 2, connectedCount = 0, scopedCount = 1))
+    }
+
+    private fun gate(
+        remote: String = "cc:dd",
+        chosen: String? = "AA:BB",
+        ageMs: Long,
+        switchedAway: String? = null,
+        switchAgeMs: Long = 0L,
+        wakeActive: Boolean = true,
+        explicit: Boolean,
+        unanswered: Boolean,
+        handshakePeer: String? = null
+    ) = NativeDriverSelectionPolicy.switchGate(
+        remote, chosen, ageMs, switchedAway, switchAgeMs, wakeActive, explicit, unanswered, handshakePeer
+    )
+
+    @Test
+    fun `an automatic pick is never exclusive`() {
+        assertEquals(SwitchGate.ACCEPT, gate(ageMs = 0L, explicit = false, unanswered = false))
+    }
+
+    @Test
+    fun `an automatic pick still refuses the phone a switch moved away from`() {
+        assertEquals(
+            SwitchGate.SWITCHED_AWAY,
+            gate(remote = "aa:bb", chosen = "CC:DD", ageMs = 10_000L, switchedAway = "AA:BB",
+                switchAgeMs = 10_000L, explicit = false, unanswered = false)
+        )
+    }
+
+    @Test
+    fun `an explicit pick that has not missed a round keeps the lock while its wake runs`() {
+        assertEquals(SwitchGate.WRONG_PHONE, gate(ageMs = 90_000L, explicit = true, unanswered = false))
+    }
+
+    @Test
+    fun `an explicit pick that missed a round keeps the floor`() {
+        assertEquals(SwitchGate.WRONG_PHONE, gate(ageMs = 20_000L, explicit = true, unanswered = true))
+    }
+
+    @Test
+    fun `an explicit pick that missed a round lets others in after the floor`() {
+        assertEquals(SwitchGate.ACCEPT, gate(ageMs = 31_000L, explicit = true, unanswered = true))
+    }
+
+    @Test
+    fun `an unanswered explicit pick is not exclusive past the floor`() {
+        assertFalse(NativeDriverSelectionPolicy.chosenExclusive(31_000L, wakeActive = true, explicit = true, wakeUnanswered = true, chosenHandshaking = false))
+    }
+
+    @Test
+    fun `the ceiling ends an explicit lock whose wake is active and answered`() {
+        assertFalse(
+            NativeDriverSelectionPolicy.chosenExclusive(
+                NativeDriverSelectionPolicy.CHOSEN_EXCLUSIVE_MAX_MS, wakeActive = true, explicit = true, wakeUnanswered = false, chosenHandshaking = false
+            )
+        )
+    }
+
+    @Test
+    fun `pickLapsedAfterRound truth table`() {
+        val p = NativeDriverSelectionPolicy
+        assertTrue(p.pickLapsedAfterRound(BluetoothWakePolicy.WakeOutcome.DIALLED, answeredSincePick = false, lapsed = false))
+        assertFalse(p.pickLapsedAfterRound(BluetoothWakePolicy.WakeOutcome.DIALLED, answeredSincePick = true, lapsed = false))
+        assertFalse(p.pickLapsedAfterRound(BluetoothWakePolicy.WakeOutcome.ANSWERED, answeredSincePick = false, lapsed = true))
+        assertFalse(p.pickLapsedAfterRound(BluetoothWakePolicy.WakeOutcome.ANSWERED, answeredSincePick = false, lapsed = false))
+        assertTrue(p.pickLapsedAfterRound(BluetoothWakePolicy.WakeOutcome.STOOD_DOWN, answeredSincePick = false, lapsed = true))
+        assertFalse(p.pickLapsedAfterRound(BluetoothWakePolicy.WakeOutcome.STOOD_DOWN, answeredSincePick = false, lapsed = false))
+        assertTrue(p.pickLapsedAfterRound(BluetoothWakePolicy.WakeOutcome.NOT_PAIRED, answeredSincePick = false, lapsed = true))
+        assertFalse(p.pickLapsedAfterRound(BluetoothWakePolicy.WakeOutcome.NOT_PAIRED, answeredSincePick = false, lapsed = false))
+    }
+
+    @Test
+    fun `a lapsed pick that answers a later round holds the gate again`() {
+        val p = NativeDriverSelectionPolicy
+        val lapsed = p.pickLapsedAfterRound(BluetoothWakePolicy.WakeOutcome.ANSWERED, false, p.pickLapsedAfterRound(BluetoothWakePolicy.WakeOutcome.DIALLED, false, false))
+        assertEquals(
+            SwitchGate.WRONG_PHONE,
+            p.switchGate("cc:dd", "AA:BB", 60_000L, null, 0L, chosenWakeActive = true, chosenExplicit = true,
+                chosenWakeUnanswered = lapsed, handshakePeerMac = null)
+        )
+    }
+
+    @Test
+    fun `an answered pick does not lapse again on a later dialled round`() {
+        val p = NativeDriverSelectionPolicy
+        val afterAnswer = p.pickLapsedAfterRound(BluetoothWakePolicy.WakeOutcome.ANSWERED, false, false)
+        assertFalse(p.pickLapsedAfterRound(BluetoothWakePolicy.WakeOutcome.DIALLED, answeredSincePick = true, lapsed = afterAnswer))
+    }
+
+    @Test
+    fun `a lapsed pick still holds the gate while its own handshake runs`() {
+        assertEquals(SwitchGate.WRONG_PHONE, gate(ageMs = 60_000L, explicit = true, unanswered = true, handshakePeer = "aa:bb"))
+    }
+
+    @Test
+    fun `another phone's handshake does not hold a lapsed pick`() {
+        assertEquals(SwitchGate.ACCEPT, gate(ageMs = 60_000L, explicit = true, unanswered = true, handshakePeer = "ee:ff"))
+    }
+
+    @Test
+    fun `a lapsed pick with no handshake lets others in after the floor`() {
+        assertEquals(SwitchGate.ACCEPT, gate(ageMs = 60_000L, explicit = true, unanswered = true, handshakePeer = null))
+    }
+
+    @Test
+    fun `the chosen phone's handshake does not outlast the ceiling`() {
+        assertEquals(
+            SwitchGate.ACCEPT,
+            gate(ageMs = NativeDriverSelectionPolicy.CHOSEN_EXCLUSIVE_MAX_MS, explicit = true, unanswered = true, handshakePeer = "AA:BB")
+        )
+    }
+
+    @Test
+    fun `an automatic pick gets no lock from its handshake`() {
+        assertEquals(SwitchGate.ACCEPT, gate(ageMs = 10_000L, explicit = false, unanswered = false, handshakePeer = "AA:BB"))
+    }
+
+    @Test
+    fun `chosenExclusive holds for the chosen phone's handshake`() {
+        assertTrue(
+            NativeDriverSelectionPolicy.chosenExclusive(
+                60_000L, wakeActive = false, explicit = true, wakeUnanswered = true, chosenHandshaking = true)
+        )
     }
 }
