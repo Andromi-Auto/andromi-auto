@@ -172,36 +172,45 @@ object NativeDriverSelectionPolicy {
             (wakeActive || chosenAgeMs < CHOSEN_EXCLUSIVE_MS)
 
     /**
+     * The phones an automatic pick may name: those the wake list allows.
+     * A phone outside it may be off, and waking it holds the reachable one back.
+     */
+    fun autoScope(offeredMacs: List<String>, targets: PokeTargets): List<String> = when (targets) {
+        is PokeTargets.Selected -> offeredMacs.filter { o -> targets.macs.any { it.equals(o, ignoreCase = true) } }
+        PokeTargets.AllPaired -> offeredMacs
+        PokeTargets.None -> emptyList()
+    }
+
+    /**
      * Determines whether the driver/device selection dialog should be displayed.
      *
      * @param mode User preference mode (DISABLED, AUTO, ALWAYS)
      * @param pairedCount Total number of paired phone candidates
      * @param connectedCount Number of devices currently connected via Bluetooth
+     * @param scopedCount Phones in the wake scope; in AUTO, none asks and exactly one skips the prompt
      * @param hasHistory Whether a preferred or previously connected device is recorded
      */
     fun shouldShowSelector(
         mode: Mode,
         pairedCount: Int,
         connectedCount: Int,
+        scopedCount: Int,
         hasHistory: Boolean = true
     ): Boolean {
         if (mode == Mode.DISABLED) return false
-        if (pairedCount <= 1) return false
+        if (pairedCount == 0) return false
 
         return when (mode) {
-            Mode.ALWAYS -> true
-            Mode.AUTO -> {
-                // If exactly one phone is already connected to the car's Bluetooth, we know
-                // unambiguously which driver is in the vehicle, so skip the prompt!
-                if (connectedCount == 1) {
-                    false
-                } else if (!hasHistory) {
-                    // On first start with multiple paired phones and no history, prompt user to choose
-                    true
-                } else {
-                    // Multiple paired phones and either 0 or multiple connected
-                    true
-                }
+            Mode.ALWAYS -> pairedCount > 1
+            Mode.AUTO -> when {
+                // One connected phone names the driver unambiguously.
+                connectedCount == 1 -> false
+                // Nothing in the wake scope and nothing connected: ask, with no countdown.
+                connectedCount == 0 && scopedCount == 0 -> true
+                pairedCount <= 1 -> false
+                // One phone the wake list allows and none connected: nothing to ask.
+                connectedCount == 0 && scopedCount == 1 -> false
+                else -> true
             }
             Mode.DISABLED -> false
         }
@@ -212,16 +221,17 @@ object NativeDriverSelectionPolicy {
      *
      * Priority:
      * 1. If exactly 1 device is currently connected via Bluetooth in the car, choose it.
-     * 2. If preferred device is specified and available, choose it (connected takes precedence over paired).
-     * 3. If last-used device is specified and available, choose it (connected takes precedence over paired).
-     * 4. If exactly 1 device is in the candidate paired list, choose it.
+     * 2. If preferred device is specified, in scope and available, choose it (connected first).
+     * 3. If last-used device is specified, in scope and available, choose it (connected first).
+     * 4. If none is connected and exactly 1 device is in the wake scope, choose it.
      * 5. Otherwise, return null (never blindly pick among multiple unknown devices).
      */
     fun resolveAutoConnectTarget(
         preferredMac: String,
         lastUsedMac: String,
         connectedMacs: List<String>,
-        pairedMacs: List<String>
+        pairedMacs: List<String>,
+        scopeMacs: List<String>
     ): String? {
         if (pairedMacs.isEmpty()) return null
 
@@ -234,27 +244,27 @@ object NativeDriverSelectionPolicy {
 
         // 2. Preferred MAC (if multiple connected and preferred is among them, or if none connected and preferred is paired)
         if (preferredMac.isNotEmpty()) {
-            if (preferredMac in validConnected) {
+            if (preferredMac in validConnected && preferredMac in scopeMacs) {
                 return preferredMac
             }
-            if (validConnected.isEmpty() && preferredMac in pairedMacs) {
+            if (validConnected.isEmpty() && preferredMac in pairedMacs && preferredMac in scopeMacs) {
                 return preferredMac
             }
         }
 
         // 3. Last used MAC (if multiple connected and last-used is among them, or if none connected and last-used is paired)
         if (lastUsedMac.isNotEmpty()) {
-            if (lastUsedMac in validConnected) {
+            if (lastUsedMac in validConnected && lastUsedMac in scopeMacs) {
                 return lastUsedMac
             }
-            if (validConnected.isEmpty() && lastUsedMac in pairedMacs) {
+            if (validConnected.isEmpty() && lastUsedMac in pairedMacs && lastUsedMac in scopeMacs) {
                 return lastUsedMac
             }
         }
 
         // 4. Exactly 1 candidate phone available
-        if (pairedMacs.size == 1) {
-            return pairedMacs[0]
+        if (validConnected.isEmpty() && scopeMacs.size == 1) {
+            return scopeMacs[0]
         }
 
         // Multiple candidates, none or multiple connected without history/preference
