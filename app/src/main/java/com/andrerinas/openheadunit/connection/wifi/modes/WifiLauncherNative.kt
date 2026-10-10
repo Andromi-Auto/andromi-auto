@@ -232,7 +232,7 @@ class WifiLauncherNative : WifiLauncher {
 
     /**
      * The access point graded the way a group is, across bring-ups, plus the address and password
-     * the phone also stores, which a group never needed because its owner is always 192.168.49.1.
+     * the phone also stores, which a group grades separately.
      */
     private fun softApIdentity(ssid: String, psk: String, ip: String, bssid: String): GroupIdentityStability {
         val key = "$ssid|$ip|${SoftApEndpointStabilityPolicy.passphraseDigest(psk)}"
@@ -278,6 +278,23 @@ class WifiLauncherNative : WifiLauncher {
         ConnectionIssues.raiseOnce(service, ConnectionIssue.PHONE_HOLDS_STALE_ENDPOINT)
     }
 
+    /** A phone given an endpoint at a group IP that has since moved dials the old one forever. */
+    @Synchronized
+    private fun noteAdvertisedGroupAddressMoved(ssid: String, psk: String, ip: String) {
+        val advertised = settings.wifiDirectAdvertisedEndpoint ?: return
+        if (!SoftApEndpointStabilityPolicy.sameNetwork(advertised, ssid, psk)) {
+            settings.wifiDirectAdvertisedEndpoint = null
+            return
+        }
+        val moved = SoftApEndpointStabilityPolicy.groupAddressMoved(advertised, ssid, psk, ip) ?: return
+        settings.wifiDirectAdvertisedEndpoint = null
+        AppLog.w(
+            "NativeAA: the WPP endpoint advertised on the WiFi Direct group at ${advertised.ip} no longer " +
+                "matches ($moved); a phone holding it needs this head unit forgotten in Android Auto."
+        )
+        ConnectionIssues.raiseOnce(service, ConnectionIssue.PHONE_HOLDS_STALE_ENDPOINT)
+    }
+
     /** Null below API 24, where the platform does not count boots and tethering used a fixed address. */
     private fun bootCount(): Int? {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) return null
@@ -301,6 +318,7 @@ class WifiLauncherNative : WifiLauncher {
         val commManager = App.provide(service).commManager
 
         wifiDirectManager.setCredentialsListener { ssid, psk, ip, bssid, identity ->
+            noteAdvertisedGroupAddressMoved(ssid, psk, ip)
             onNativeCredentials(ssid, psk, ip, bssid, identity)
         }
 

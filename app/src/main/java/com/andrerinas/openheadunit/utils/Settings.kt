@@ -812,6 +812,21 @@ class Settings(private val context: Context) {
                 .apply()
         }
 
+    /** The WiFi Direct group's IP as last read on a create, graded by SoftApEndpointStabilityPolicy. */
+    var wifiDirectAddressRecord: SoftApAddressRecord?
+        get() {
+            val ip = prefs.getString("wifi-direct-last-ip", null) ?: return null
+            val digest = prefs.getString("wifi-direct-last-ip-psk-digest", null) ?: return null
+            return SoftApAddressRecord(ip, digest, null, prefs.getBoolean("wifi-direct-ip-repeated", false))
+        }
+        set(value) {
+            prefs.edit()
+                .putString("wifi-direct-last-ip", value?.ip)
+                .putString("wifi-direct-last-ip-psk-digest", value?.passphraseDigest)
+                .putBoolean("wifi-direct-ip-repeated", value?.spannedBoot ?: false)
+                .apply()
+        }
+
     /** The access point a WPP endpoint last went out on, so a bring-up that moved it can say so. */
     var softApAdvertisedEndpoint: SoftApAdvertisedEndpoint?
         get() {
@@ -827,6 +842,24 @@ class Settings(private val context: Context) {
                 .putString("soft-ap-advertised-psk-digest", value?.passphraseDigest)
                 .putString("soft-ap-advertised-bssid", value?.bssid)
                 .putString("soft-ap-advertised-ip", value?.ip)
+                .apply()
+        }
+
+    /** The WiFi Direct group an endpoint last went out on, kept apart from the identity retirement clears. */
+    var wifiDirectAdvertisedEndpoint: SoftApAdvertisedEndpoint?
+        get() {
+            val ssid = prefs.getString("wifi-direct-advertised-endpoint-ssid", null) ?: return null
+            val digest = prefs.getString("wifi-direct-advertised-endpoint-psk-digest", null) ?: return null
+            val bssid = prefs.getString("wifi-direct-advertised-endpoint-bssid", null) ?: return null
+            val ip = prefs.getString("wifi-direct-advertised-endpoint-ip", null) ?: return null
+            return SoftApAdvertisedEndpoint(ssid, digest, bssid, ip)
+        }
+        set(value) {
+            prefs.edit()
+                .putString("wifi-direct-advertised-endpoint-ssid", value?.ssid)
+                .putString("wifi-direct-advertised-endpoint-psk-digest", value?.passphraseDigest)
+                .putString("wifi-direct-advertised-endpoint-bssid", value?.bssid)
+                .putString("wifi-direct-advertised-endpoint-ip", value?.ip)
                 .apply()
         }
 
