@@ -33,12 +33,16 @@ import com.andrerinas.openheadunit.connection.ConnectionStageTracker
 import com.andrerinas.openheadunit.connection.wifi.FiveGhzChannelPolicy
 import com.andrerinas.openheadunit.connection.wifi.MacAddressPolicy
 import com.andrerinas.openheadunit.connection.wifi.WifiLauncherMode
+import com.andrerinas.openheadunit.connection.wifi.WirelessSleepHold
 import com.andrerinas.openheadunit.connection.wifi.modes.helper.HelperStrategy
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.EndpointRetirementPolicy
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.NativeHandoffPolicy
+import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.SoftApAddressRecord
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.SoftApBssidPolicy
+import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.SoftApEndpointStabilityPolicy
 import com.andrerinas.openheadunit.main.MainActivity
 import com.andrerinas.openheadunit.utils.AppLog
+import com.andrerinas.openheadunit.utils.ScreenPower
 import com.andrerinas.openheadunit.utils.ConnectionIssue
 import com.andrerinas.openheadunit.utils.ConnectionIssues
 import com.andrerinas.openheadunit.utils.InterfaceMacReader
@@ -466,6 +470,8 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
         lastKnownBssid = null
         lastKnownBssidIface = null
         forgetPerGroupKeys()
+        // A version request sent before the next group reports must not name this one's channel.
+        WifiBandCapability.reportSessionFrequency(0)
         credentialsEpoch++
         onNativeGroupInvalidated?.invoke()
         AppLog.i("WifiDirectManager: the group is being removed ($why), so its credentials are no longer handed out.")
@@ -488,17 +494,19 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
     @Volatile
     private var nativeIdentityStability = GroupIdentityStability.UNPROVEN
 
+    /** The group whose IP was graded, and the stored record it was graded against, per group. */
+    private var groupAddressGradeKey: String? = null
+    private var groupAddressBaseline: SoftApAddressRecord? = null
+
     /** Whether the group now up was adopted as found rather than created by this bring-up. */
     @Volatile private var nativeGroupWasRead = false
 
     /**
-     * Whether the adopt-or-recreate decision below is still outstanding.
-     *
-     * A callback that lands inside that window carries [nativeGroupWasRead] false for a group that
-     * is about to be adopted, and the assessment is made once per group, so it would compare a
-     * surviving group to itself and grade a unit that re-addresses every create stable for good.
+     * Whether no bring-up has chosen to adopt or create since this manager started or stopped.
+     * A refresh can deliver a surviving group before that choice, with [nativeGroupWasRead] false,
+     * and grading it as a create would compare it to itself and call it stable for good.
      */
-    @Volatile private var nativeAdoptDecisionPending = false
+    @Volatile private var nativeAdoptDecisionPending = SoftApEndpointStabilityPolicy.UNDECIDED_UNTIL_BRING_UP
 
     /**
      * Bumped by [stop]. Every P2P callback that continues into another framework call captures this
@@ -556,6 +564,46 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
     private var lastNativeGroupStatusMessage: String? = null
 
     /**
+     * Grades the IP the group's interface answered, which a name and BSSID do not cover. Only the
+     * first decided call with an address writes the record, so repeat deliveries cannot prove it alone.
+     */
+    @Synchronized
+    private fun gradeGroupAddress(
+        ssid: String,
+        psk: String,
+        readIp: String?,
+        epoch: Int,
+        identity: GroupIdentityStability,
+        origin: SoftApEndpointStabilityPolicy.GroupOrigin,
+    ): GroupIdentityStability {
+        val appSettings = App.provide(context).settings
+        val key = "$ssid#$epoch"
+        val records = SoftApEndpointStabilityPolicy.recordsAddress(origin, readIp)
+        val first = records && groupAddressGradeKey != key
+        if (first) {
+            groupAddressGradeKey = key
+            groupAddressBaseline = appSettings.wifiDirectAddressRecord
+        }
+        val baseline = if (groupAddressGradeKey == key) groupAddressBaseline else appSettings.wifiDirectAddressRecord
+        val verdict = SoftApEndpointStabilityPolicy.grade(
+            identity, readIp.orEmpty(), psk, null, baseline,
+            readNotCreated = SoftApEndpointStabilityPolicy.gradesAsRead(origin), network = "WiFi Direct group",
+        )
+        if (first) {
+            verdict.remember?.let { appSettings.wifiDirectAddressRecord = it }
+            AppLog.i(
+                "WifiDirectManager: group address ip=${readIp ?: "unread"} " +
+                    "stable=${GroupIdentityStabilityPolicy.label(verdict.stability)} " +
+                    "(${verdict.reason ?: "name, BSSID and address repeat"})"
+            )
+        } else if (!records) {
+            val why = if (readIp.isNullOrBlank()) "no address read yet" else "graded before the adopt decision"
+            AppLog.d("WifiDirectManager: group address ip=${readIp ?: "unread"} $why; not recorded.")
+        }
+        return verdict.stability
+    }
+
+    /**
      * Forgets every "said once per group" key, so the next group says its lines again.
      *
      * Those keys are the SSID, which used to change on every create and so reset them for free.
@@ -565,6 +613,8 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
      */
     private fun forgetPerGroupKeys() {
         nativeGroupWasRead = false
+        groupAddressGradeKey = null
+        groupAddressBaseline = null
         // Its window is a bring-up's, so a teardown or the next bring-up ends it whatever the
         // framework did with the request it was taken for.
         nativeAdoptDecisionPending = false
@@ -1371,6 +1421,8 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
                 val deliveryStability =
                     if (isNativeAaMode() && isOwner) nativeIdentityStability
                     else GroupIdentityStability.NOT_MEASURED
+                val deliveryOrigin = SoftApEndpointStabilityPolicy.groupOrigin(
+                    nativeGroupWasRead, nativeAdoptDecisionPending)
                 val ipRetries = GroupIpResolutionPolicy.retriesAfterFirstRead(isOwner)
                 Thread {
                     try {
@@ -1383,8 +1435,8 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
                             retries++
                         }
 
-                        // A group owner is 192.168.49.1 by platform, so waiting for the interface to
-                        // say so only delays the credentials and the wake poke behind them.
+                        // AOSP gives an owner 192.168.49.1 but some units do not, so the fallback is
+                        // sent without waiting and is never graded.
                         val finalIp = GroupIpResolutionPolicy.resolve(ip, isOwner)
                         if (deliveryEpoch != credentialsEpoch) {
                             AppLog.i(
@@ -1393,11 +1445,15 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
                                     "sent a network that no longer exists."
                             )
                         } else if (finalIp != null) {
-                            AppLog.i("WifiDirectManager: SUCCESS - Providing credentials to listener. SSID=$ssid, IP=$finalIp, BSSID=$bssid, identity stable=${GroupIdentityStabilityPolicy.label(deliveryStability)}")
+                            val deliveredStability =
+                                if (isNativeAaMode() && isOwner) {
+                                    gradeGroupAddress(ssid, psk, ip, deliveryEpoch, deliveryStability, deliveryOrigin)
+                                } else deliveryStability
+                            AppLog.i("WifiDirectManager: SUCCESS - Providing credentials to listener. SSID=$ssid, IP=$finalIp, BSSID=$bssid, identity stable=${GroupIdentityStabilityPolicy.label(deliveredStability)}")
                             // Our own listener, not the phone, and it fires three or four times
                             // per group — so it stays on the network step and re-reports as a no-op.
                             ConnectionStageTracker.report(ConnectionStage.CREATING_NETWORK)
-                            onCredentialsReady?.invoke(ssid, psk, finalIp, bssid, deliveryStability)
+                            onCredentialsReady?.invoke(ssid, psk, finalIp, bssid, deliveredStability)
                         } else {
                             AppLog.e("WifiDirectManager: FAILED to get valid IP for credentials delivery.")
                         }
@@ -1673,6 +1729,20 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
     }
 
     @SuppressLint("MissingPermission")
+    fun refreshHelperGroup() {
+        val mgr = manager ?: return
+        val ch = channel ?: return
+        val gen = generation
+        mgr.requestGroupInfo(ch) { group ->
+            if (supersededByStop(gen, "settings Helper refresh")) return@requestGroupInfo
+            // makeVisible deliberately recreates a stale WPS registrar. A timed Save fallback
+            // cannot distinguish that from an associating phone, so it must preserve this group.
+            // A missing group may still have createGroup in flight; let that owner finish.
+            if (group == null && !isGroupCreatingOrCreated && !checkGroupAndCreateInFlight) makeVisible()
+            else if (group == null) AppLog.i("WifiDirectManager: settings refresh keeps the pending group creation")
+        }
+    }
+
     fun makeVisible() {
         registerReceiverIfNeeded()
         val mgr = manager ?: return
@@ -1934,6 +2004,17 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
         // auto-start rebuild that is the only thing that frees this radio again.
         val wifiManager = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
         if (!wifiManager.isWifiEnabled) {
+            // A radio switched on while the unit sleeps is what the sleep hold keeps off; the wake rebuilds.
+            val screen = ScreenPower.isInteractive(context)
+            if (WirelessSleepHold.refusesRadioEnable(WirelessSleepHold.isAsleep(screen), WirelessSleepHold.startedByUser)) {
+                if (WirelessSleepHold.hold(force = true)) {
+                    AppLog.i("WifiDirectManager: WiFi is off and the screen is off, so it is not switched on. " +
+                        "The screen coming on re-arms the group.")
+                }
+                isGroupCreatingOrCreated = false
+                releaseNativeCreateWindow("the unit is asleep")
+                return
+            }
             // Counted so the lines below are said once per bring-up: a credential refresh re-enters
             // this method every ten seconds while the handshake waits for one.
             val attempt = ++wifiEnableAttempts
@@ -2017,7 +2098,7 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
             mgr.requestGroupInfo(ch) { group ->
                 // An exit delivered to a stopped app starts the service, whose onCreate arms this,
                 // so the stop lands mid-flight and this callback adopted a group on a manager that
-                // had already stopped. The pending flag is left alone: stop() cleared it, and a
+                // had already stopped. The pending flag is left alone: stop() set it again, and a
                 // bring-up that has since re-armed owns it now.
                 if (supersededByStop(gen, "the adopt-or-create decision")) return@requestGroupInfo
                 if (group != null && P2pIdentityRotationPolicy.readsExistingGroup(
@@ -2799,6 +2880,16 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
             }
             NativeJoinRecoveryPolicy.Step.RECREATE -> Unit
         }
+        val screen = ScreenPower.isInteractive(context)
+        // The watchdog asks again, so a recreate that the wake does not rebuild is not lost.
+        if (WirelessSleepHold.refusesGroupRecreate(WirelessSleepHold.isAsleep(screen), WirelessSleepHold.startedByUser)) {
+            if (WirelessSleepHold.hold(force = true)) {
+                AppLog.i("WifiDirectManager: Native AA recovery ($reason) held while the screen is off. " +
+                    "The screen coming on re-arms the group.")
+            }
+            armNativeJoinWatchdog()
+            return
+        }
         nativeRecreateCount++
         val forceStandard = nativeRecreateCount >= NATIVE_FORCE_STANDARD_AFTER
         // Not "forcing 2.4GHz", which this line claimed for as long as it has existed: forceStandard
@@ -3071,6 +3162,8 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
         nativeGroupCreationMode = NATIVE_GROUP_MODE_UNKNOWN
         native5GhzBandMismatchRetries = 0
         forgetPerGroupKeys()
+        // A group can outlive this stop, and the next bring-up has not chosen yet.
+        nativeAdoptDecisionPending = SoftApEndpointStabilityPolicy.UNDECIDED_UNTIL_BRING_UP
         nativeRecreateCount = 0
         lastNativeGroupStatusMessage = null
         ConnectionStageTracker.reportNetwork(null)

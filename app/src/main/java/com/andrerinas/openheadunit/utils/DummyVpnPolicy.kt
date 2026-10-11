@@ -34,6 +34,9 @@ object DummyVpnPolicy {
         /** Self Mode brought the VPN up and no phone ever arrived. */
         SELF_MODE_NEVER_CONNECTED,
 
+        /** The Self Mode session is up, so the tun has done its job. */
+        SELF_MODE_SESSION_LIVE,
+
         SERVICE_DESTROYED,
     }
 
@@ -42,7 +45,7 @@ object DummyVpnPolicy {
         if (owner == null) return false
         return when (reason) {
             Reason.SESSION_ENDED, Reason.SERVICE_DESTROYED -> true
-            Reason.SELF_MODE_NEVER_CONNECTED -> owner == Owner.SELF_MODE
+            Reason.SELF_MODE_NEVER_CONNECTED, Reason.SELF_MODE_SESSION_LIVE -> owner == Owner.SELF_MODE
         }
     }
 

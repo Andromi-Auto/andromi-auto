@@ -429,6 +429,12 @@
     <string name="monochrome_icons_description">在深色或極致黑暗模式中使用灰階圖示</string>
     <string name="use_extreme_dark">使用極致黑暗</string>
     <string name="use_extreme_dark_description">在深色模式啟用時使用純黑背景</string>
+    <string name="performance_overlay_settings">效能疊加層</string>
+    <string name="overlay_field_fps">FPS</string>
+    <string name="overlay_field_cpu">CPU</string>
+    <string name="overlay_field_temperature">溫度</string>
+    <string name="overlay_field_frame_age">幀齡</string>
+    <string name="performance_overlay_no_lines">無行</string>
     <string name="show_performance_overlay">顯示效能疊加層</string>
     <string name="overlay_position">效能疊加層位置</string>
     <string name="overlay_permission_required">自動啟動需要「顯示在其他應用程式上層」權限</string>
@@ -475,7 +481,7 @@
     <string name="vehicle_type_car">汽車</string>
     <string name="vehicle_type_truck">卡車</string>
     <string name="vehicle_type_motorcycle">機車</string>
-    <string name="vehicle_type_forced_by_microphone">主機麥克風已關閉，因此無論在此選擇什麼，系統都會告訴 Android Auto 這是機車。這正是讓手機自行錄音的原因。</string>
+    <string name="vehicle_type_forced_by_microphone">主機麥克風已關閉，因此手機會使用自己的麥克風。Android Auto 會視為機車。</string>
     <string name="vehicle_id_description">僅為內部識別碼。更改此項將導致您的手機將此視為不同的車輛，重置此車的 Android Auto 偏好設定。</string>
     <string name="head_unit_make_label">製造商</string>
     <string name="head_unit_make_description">車機製造商</string>
@@ -637,6 +643,8 @@
     <!-- Native USB Driver -->
     <string name="use_libusb">使用原生 USB 驅動程式</string>
     <string name="use_libusb_description">使用 libusb 進行通訊。停用以使用 Android 的標準 USB API。</string>
+    <string name="usb_keep_phone_media_audio">透過 USB 保持手機媒體音訊開啟</string>
+    <string name="usb_keep_phone_media_audio_description">在 USB 連線期間，Android Auto 可能會關閉手機對此車機的藍牙媒體音訊。開啟此選項可避免這種情況。這樣一來，通話可能會留在手機上，而不是車機上。</string>
 
     <string name="software_video_decoder">軟體解碼器來源</string>
     <string name="software_video_decoder_bundled">內置 FFmpeg</string>
@@ -1016,8 +1024,6 @@
     <string name="preflight_open_location">定位服務</string>
     <string name="preflight_later">稍後</string>
     <string name="preflight_invalid_bssid">無效的 WiFi 位址。請輸入 6 組十六進位數字（例如 02:1A:11:FF:3C:4D）。</string>
-    <string name="announce_connection_configuration">要求更長的連線逾時</string>
-    <string name="announce_connection_configuration_description">告訴 Android Auto 在判定連線中斷前等待 15 秒，而不是 3 秒，並使用較大的通訊端緩衝區。這是針對在工作階段中途離開頻道幾秒鐘、並將連線一併中斷的無線電。尚未測得你的手機是否會遵循其中任何一項。</string>
     <string name="native_aa_ignore_external_bt">忽略藍牙相容性檢查</string>
     <string name="native_aa_ignore_external_bt_description">此裝置似乎將藍牙置於 Android 無法存取的獨立模組上，因此無線 Android Auto 會自動關閉。預設關閉。只有在你認為判斷有誤時才開啟：若判斷正確，連線會無聲失敗，而記錄看起來一切正常。</string>
     <string name="native_aa_setup_qr_title">以 QR 碼設定</string>
@@ -1137,8 +1143,11 @@
     <string name="category_more_features">更多功能</string>
     <string name="pref_enable_floating_button_title">懸浮快捷按鈕</string>
     <string name="pref_enable_floating_button_summary">在原廠啟動器及其他應用程式上方顯示懸浮按鈕，以便快速返回 Open Headunit</string>
+    <string name="pref_floating_button_connection_status_title">連線狀態指示</string>
+    <string name="pref_floating_button_connection_status_summary">未連線手機時使用「未連線時不透明度」，手機連線後漸變為「懸浮按鈕不透明度」。為0%時，按鈕會隱藏並讓觸控穿透。</string>
     <string name="pref_floating_button_size_title">懸浮按鈕大小</string>
     <string name="pref_floating_button_opacity_title">懸浮按鈕不透明度</string>
+    <string name="pref_floating_button_disconnected_opacity_title">未連線時不透明度</string>
     <string name="pref_floating_button_x_title">水平位置 (X)</string>
     <string name="pref_floating_button_y_title">垂直位置 (Y)</string>
     <string name="pref_aa_exit_action_title">離開 Android Auto 的動作</string>
@@ -1227,6 +1236,8 @@
     <string name="exit_dialog_end_stay_armed_note">工作階段已結束。WiFi 網路仍保持連線，因此你的手機可能會自行重新連線。</string>
     <string name="connection_issue_banner_stale_endpoint">手機正在嘗試連上本機的舊網路位址。如果無法連線，請在手機的 Android Auto 中忘記本機，然後重新連線。</string>
     <string name="connection_issue_banner_hands_free_record_refused">本機的藍牙拒絕了 Android Auto 所需的免持設定，因此無線連線可能無法啟動。使用傳輸線或其他無線模式則不需要此設定。</string>
+    <string name="connection_issue_banner_home_wifi_rejoined">本機在 Android Auto 期間不斷重新加入您家中的 WiFi，可能造成畫面卡頓，在 2.4 GHz 的機器上尤其明顯。輕觸以關閉該網路的自動重新連線，或等到您離開其涵蓋範圍。</string>
+    <string name="connection_issue_banner_stale_usb_accessory">手機上的 Android Auto 已停止透過 USB 回應，應用程式無法將其重新啟動。請拔下手機，等待五秒後再重新插入。</string>
     <string name="native_aa_wake_remeasure">重新測量藍牙喚醒</string>
     <string name="native_aa_wake_verdict_unmeasured">尚未測量</string>
     <string name="native_aa_wake_verdict_safe">在本機是安全的</string>

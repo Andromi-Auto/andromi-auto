@@ -45,6 +45,10 @@ class WifiLauncherNative : WifiLauncher {
         private set
     private var softApCredentialsProvider: SoftApCredentialsProvider? = null
 
+    /** Set when start() skipped the network on a measured refusal; the WiFi button rebuilds then. */
+    var refusedModuleAtStart = false
+        private set
+
     constructor(manager: WifiLauncherManager) : super(manager) {
         // copy settings early in construction to align with #hasSameStartConfiguration
         this.strategy = settings.nativeApStrategy
@@ -95,6 +99,7 @@ class WifiLauncherNative : WifiLauncher {
             settings.externalBtBlinkTransport,
             BluetoothHelper.fytModuleEvidence,
         )
+        refusedModuleAtStart = blockedByExternalBt
         if (blockedByExternalBt) NativeAaHandshakeManager.externalBtDiagnostic()?.let { AppLog.e(it) }
 
         if (!blockedByExternalBt) {
@@ -205,6 +210,7 @@ class WifiLauncherNative : WifiLauncher {
 
         if (seq.handledAt(WifiLauncherStopSequence.LAST)) {
             handshakeManager?.stop()
+            refusedModuleAtStart = false
             // Whatever the mode is switching to, this unit gets its own network back. AapService
             // restores as well, because a force-stop never reaches here at all.
             StationStandDown.restore(service)
@@ -226,7 +232,7 @@ class WifiLauncherNative : WifiLauncher {
 
     /**
      * The access point graded the way a group is, across bring-ups, plus the address and password
-     * the phone also stores, which a group never needed because its owner is always 192.168.49.1.
+     * the phone also stores, which a group grades separately.
      */
     private fun softApIdentity(ssid: String, psk: String, ip: String, bssid: String): GroupIdentityStability {
         val key = "$ssid|$ip|${SoftApEndpointStabilityPolicy.passphraseDigest(psk)}"
@@ -272,6 +278,23 @@ class WifiLauncherNative : WifiLauncher {
         ConnectionIssues.raiseOnce(service, ConnectionIssue.PHONE_HOLDS_STALE_ENDPOINT)
     }
 
+    /** A phone given an endpoint at a group IP that has since moved dials the old one forever. */
+    @Synchronized
+    private fun noteAdvertisedGroupAddressMoved(ssid: String, psk: String, ip: String) {
+        val advertised = settings.wifiDirectAdvertisedEndpoint ?: return
+        if (!SoftApEndpointStabilityPolicy.sameNetwork(advertised, ssid, psk)) {
+            settings.wifiDirectAdvertisedEndpoint = null
+            return
+        }
+        val moved = SoftApEndpointStabilityPolicy.groupAddressMoved(advertised, ssid, psk, ip) ?: return
+        settings.wifiDirectAdvertisedEndpoint = null
+        AppLog.w(
+            "NativeAA: the WPP endpoint advertised on the WiFi Direct group at ${advertised.ip} no longer " +
+                "matches ($moved); a phone holding it needs this head unit forgotten in Android Auto."
+        )
+        ConnectionIssues.raiseOnce(service, ConnectionIssue.PHONE_HOLDS_STALE_ENDPOINT)
+    }
+
     /** Null below API 24, where the platform does not count boots and tethering used a fixed address. */
     private fun bootCount(): Int? {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) return null
@@ -295,6 +318,7 @@ class WifiLauncherNative : WifiLauncher {
         val commManager = App.provide(service).commManager
 
         wifiDirectManager.setCredentialsListener { ssid, psk, ip, bssid, identity ->
+            noteAdvertisedGroupAddressMoved(ssid, psk, ip)
             onNativeCredentials(ssid, psk, ip, bssid, identity)
         }
 
@@ -430,7 +454,7 @@ class WifiLauncherNative : WifiLauncher {
         } else if (handshakeManager?.wakesPhone() == false) {
             // The pill is reported here as well as poked, so both stand down together or it claims
             // a wake that will not run.
-            AppLog.i("AapService: the phone ended the last session itself. Skipping auto-poke until it comes back.")
+            AppLog.i("AapService: automatic wake is paused by the session policy. Keeping listeners available.")
         } else if (!service.userExitedAA) {
             if (handshakeManager?.reportsWake() != false) ConnectionStageTracker.report(ConnectionStage.WAKING_PHONE)
             handshakeManager?.triggerPoke()

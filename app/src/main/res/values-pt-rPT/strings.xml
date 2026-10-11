@@ -512,8 +512,11 @@
     <string name="pref_default_launcher_status_inactive">Não definido (Toque para definir como predefinição)</string>
     <string name="pref_enable_floating_button_title">Botão flutuante de abertura</string>
     <string name="pref_enable_floating_button_summary">Apresenta um botão flutuante sobre o lançador de fábrica e outras aplicações para regressar rapidamente ao Open Headunit</string>
+    <string name="pref_floating_button_connection_status_title">Indicador de estado da ligação</string>
+    <string name="pref_floating_button_connection_status_summary">Usa a Opacidade desligado quando nenhum telemóvel está ligado e desvanece para a Opacidade do botão flutuante enquanto um telemóvel está ligado. A 0%, o botão fica oculto e deixa passar os toques.</string>
     <string name="pref_floating_button_size_title">Tamanho do botão flutuante</string>
     <string name="pref_floating_button_opacity_title">Opacidade do botão flutuante</string>
+    <string name="pref_floating_button_disconnected_opacity_title">Opacidade desligado</string>
     <string name="pref_floating_button_x_title">Posição horizontal (X)</string>
     <string name="pref_floating_button_y_title">Posição vertical (Y)</string>
     <string name="pref_aa_exit_action_title">Ação ao sair do Android Auto</string>
@@ -841,6 +844,12 @@
     <string name="nav_action_ferry">Ferry</string>
     <string name="nav_action_ferry_train">Ferry / comboio</string>
     <string name="nav_action_destination">Chegada ao destino</string>
+    <string name="performance_overlay_settings">Sobreposição de desempenho</string>
+    <string name="overlay_field_fps">FPS</string>
+    <string name="overlay_field_cpu">CPU</string>
+    <string name="overlay_field_temperature">Temperatura</string>
+    <string name="overlay_field_frame_age">Atraso de fotogramas</string>
+    <string name="performance_overlay_no_lines">Sem linhas</string>
     <string name="show_performance_overlay">Apresentar sobreposição de desempenho</string>
     <string name="overlay_position">Posição da sobreposição de desempenho</string>
     <string name="five_ghz_channel">Canal de 5 GHz</string>
@@ -932,7 +941,7 @@
     <string name="vehicle_type_car">Carro</string>
     <string name="vehicle_type_truck">Camião</string>
     <string name="vehicle_type_motorcycle">Motociclo</string>
-    <string name="vehicle_type_forced_by_microphone">O microfone da unidade está desligado, pelo que o Android Auto é informado de que se trata de um motociclo.</string>
+    <string name="vehicle_type_forced_by_microphone">O microfone da unidade está desligado, por isso o telemóvel usa o seu. O Android Auto vai ver um motociclo.</string>
     <string name="vehicle_id_description">Identificador apenas interno. Alterar isto fará com que o telemóvel trate este como um veículo diferente.</string>
     <string name="head_unit_make_label">Fabricante</string>
     <string name="head_unit_make_description">Fabricante da unidade</string>
@@ -1079,6 +1088,8 @@
     <string name="connection_issue_banner_stale_endpoint">O seu telemóvel continua a tentar contactar esta unidade num endereço antigo. Abra o Android Auto no telemóvel, esqueça esta unidade e volte a ligar.</string>
     <string name="connection_issue_banner_hands_free_held">Outro dispositivo já está a utilizar a ligação mãos-livres desta unidade. Desligue o outro dispositivo ou desligue o Bluetooth.</string>
     <string name="connection_issue_banner_hands_free_record_refused">O Bluetooth desta unidade não publicou o registo de mãos-livres necessário. A ligação por cabo ou outros modos sem fios não requerem este registo.</string>
+    <string name="connection_issue_banner_home_wifi_rejoined">Esta unidade volta a ligar-se constantemente ao Wi-Fi da sua casa durante o Android Auto, o que pode fazer a imagem encravar, sobretudo em unidades de 2.4 GHz. Toque para desativar a religação automática a essa rede, ou aguarde até estar fora do alcance.</string>
+    <string name="connection_issue_banner_stale_usb_accessory">O Android Auto no telemóvel deixou de responder por USB e a app não conseguiu reiniciá-lo. Desligue o telemóvel, aguarde cinco segundos e volte a ligá-lo.</string>
     <string name="connection_issue_banner_dismiss">Fechar</string>
     <string name="auto_connect_pill_cancel">Parar ligação</string>
     <string name="connection_issue_remedy_hotspot_query">Nome e palavra-passe do hotspot</string>
@@ -1099,8 +1110,6 @@
     <string name="native_aa_wake_verdict_destructive">Retido nesta unidade</string>
     <string name="native_aa_wake_remeasure_confirm">O Android Auto só inicia a ligação sem fios quando deteta uma alteração na ligação Bluetooth.</string>
     <string name="native_aa_wake_remeasure_done">O despertar por Bluetooth será medido novamente na próxima ligação.</string>
-    <string name="announce_connection_configuration">Pedir um tempo limite de ligação mais longo</string>
-    <string name="announce_connection_configuration_description">Diz ao Android Auto para aguardar 15 segundos em vez de 3 antes de considerar a ligação perdida e utilizar buffers maiores.</string>
     <string name="native_aa_ignore_external_bt">Ignorar verificação de compatibilidade Bluetooth</string>
     <string name="native_aa_ignore_external_bt_description">Esta unidade parece ter o Bluetooth num módulo separado ao qual o Android não tem acesso. Desativado por predefinição.</string>
 
@@ -1138,6 +1147,8 @@
     <string name="share_hotspot_qr_error">Não foi possível obter os dados do hotspot Wi-Fi ativo. Certifique-se de que o hotspot e a Localização estão ligados.</string>
     <string name="use_libusb">Utilizar controlador USB nativo</string>
     <string name="use_libusb_description">Utilizar libusb para comunicação. Desative para utilizar a API USB padrão do Android.</string>
+    <string name="usb_keep_phone_media_audio">Manter o áudio multimédia do telemóvel por USB</string>
+    <string name="usb_keep_phone_media_audio_description">O Android Auto pode desativar o áudio multimédia Bluetooth do telemóvel para esta unidade principal durante uma sessão USB. Esta opção impede isso. As chamadas podem ficar no telemóvel em vez de na unidade principal.</string>
 
     <string name="btn_show_qr">Apresentar código QR</string>
     <string name="su_needed_keymaps_warning">Aviso: A sua unidade tem de estar desbloqueada (root) ou ter o Shizuku instalado. Deve permitir os direitos SU quando solicitado.</string>

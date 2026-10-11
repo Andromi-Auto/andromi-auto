@@ -429,6 +429,12 @@
     <string name="monochrome_icons_description">Grijstinten pictogrammen op het startscherm gebruiken in Donker of Extra donker modus</string>
     <string name="use_extreme_dark">Extra donker gebruiken</string>
     <string name="use_extreme_dark_description">Puur zwarte achtergrond gebruiken wanneer donkere modus actief is</string>
+    <string name="performance_overlay_settings">Prestatie-overlay</string>
+    <string name="overlay_field_fps">FPS</string>
+    <string name="overlay_field_cpu">CPU</string>
+    <string name="overlay_field_temperature">Temperatuur</string>
+    <string name="overlay_field_frame_age">Frameleeftijd</string>
+    <string name="performance_overlay_no_lines">Geen regels</string>
     <string name="show_performance_overlay">Prestatie-overlay tonen</string>
     <string name="overlay_position">Positie van prestatie-overlay</string>
     <string name="overlay_permission_required">Automatisch starten vereist de machtiging \'Weergeven over andere apps\'</string>
@@ -475,7 +481,7 @@
     <string name="vehicle_type_car">Auto</string>
     <string name="vehicle_type_truck">Vrachtwagen</string>
     <string name="vehicle_type_motorcycle">Motorfiets</string>
-    <string name="vehicle_type_forced_by_microphone">De microfoon van de hoofdunit staat uit, dus Android Auto krijgt te horen dat dit een motorfiets is, wat hier ook wordt gekozen. Dat is wat de telefoon zelf laat opnemen.</string>
+    <string name="vehicle_type_forced_by_microphone">De microfoon van de hoofdunit staat uit, dus de telefoon gebruikt zijn eigen microfoon. Android Auto ziet een motorfiets.</string>
     <string name="vehicle_id_description">Alleen interne identificatie. Wijzigen zorgt ervoor dat uw telefoon dit als een ander voertuig detecteert, waardoor uw Android Auto-voorkeuren voor deze auto worden gereset.</string>
     <string name="head_unit_make_label">Merk</string>
     <string name="head_unit_make_description">Fabrikant van de headunit</string>
@@ -637,6 +643,8 @@
     <!-- Native USB Driver -->
     <string name="use_libusb">Gebruik native USB-stuurprogramma</string>
     <string name="use_libusb_description">Gebruik libusb voor communicatie. Uitschakelen om de standaard USB-API van Android te gebruiken.</string>
+    <string name="usb_keep_phone_media_audio">Media-audio van de telefoon aanhouden via USB</string>
+    <string name="usb_keep_phone_media_audio_description">Android Auto kan tijdens een USB-sessie de Bluetooth-media-audio van de telefoon voor deze autoradio uitschakelen. Met deze optie gebeurt dat niet. Gesprekken kunnen dan op de telefoon blijven in plaats van op de autoradio.</string>
 
     <string name="software_video_decoder">Software decoder bron</string>
     <string name="software_video_decoder_bundled">Gebundeld FFmpeg</string>
@@ -1017,8 +1025,6 @@
     <string name="preflight_open_location">Locatie</string>
     <string name="preflight_later">Later</string>
     <string name="preflight_invalid_bssid">Ongeldig WiFi-adres. Voer zes paren hex-cijfers in (bijv. 02:1A:11:FF:3C:4D).</string>
-    <string name="announce_connection_configuration">Vragen om een langere verbindingstime-out</string>
-    <string name="announce_connection_configuration_description">Vertelt Android Auto om 15 seconden te wachten in plaats van 3 voordat de verbinding als dood wordt beschouwd, en om grotere socketbuffers te gebruiken. Dit is bedoeld voor een radio die midden in een sessie een paar seconden van kanaal wisselt en de verbinding meesleurt. Of je telefoon hier iets mee doet, is niet gemeten.</string>
     <string name="native_aa_ignore_external_bt">Bluetooth-compatibiliteitscontrole negeren</string>
     <string name="native_aa_ignore_external_bt_description">Dit apparaat lijkt Bluetooth op een aparte module te hebben die Android niet kan bereiken, daarom wordt draadloos Android Auto automatisch uitgeschakeld. Standaard uit. Schakel het alleen in als je denkt dat dat niet klopt: als de detectie klopt, mislukt de verbinding geruisloos en ziet het logboek er gezond uit.</string>
     <string name="native_aa_setup_qr_title">Instellen met QR-code</string>
@@ -1138,8 +1144,11 @@
     <string name="category_more_features">Meer functies</string>
     <string name="pref_enable_floating_button_title">Zwevende startknop</string>
     <string name="pref_enable_floating_button_summary">Toont een zwevende knop over het OEM-startscherm en andere apps om snel terug te keren naar Open Headunit</string>
+    <string name="pref_floating_button_connection_status_title">Verbindingsstatus-indicator</string>
+    <string name="pref_floating_button_connection_status_summary">Gebruikt de transparantie bij verbroken verbinding als er geen telefoon is verbonden en vervaagt naar de Transparantie van zwevende knop zodra er een telefoon is verbonden. Bij 0% is de knop verborgen en laat hij tikken door.</string>
     <string name="pref_floating_button_size_title">Grootte van zwevende knop</string>
     <string name="pref_floating_button_opacity_title">Transparantie van zwevende knop</string>
+    <string name="pref_floating_button_disconnected_opacity_title">Transparantie bij verbroken verbinding</string>
     <string name="pref_floating_button_x_title">Horizontale positie (X)</string>
     <string name="pref_floating_button_y_title">Verticale positie (Y)</string>
     <string name="pref_aa_exit_action_title">Actie bij afsluiten Android Auto</string>
@@ -1228,6 +1237,8 @@
     <string name="exit_dialog_end_stay_armed_note">Sessie beëindigd. Het WiFi-netwerk blijft actief, dus je telefoon kan vanzelf opnieuw verbinden.</string>
     <string name="connection_issue_banner_stale_endpoint">Je telefoon probeert een oud netwerkadres van dit apparaat. Verbindt hij niet, vergeet dit apparaat dan in Android Auto op je telefoon en maak opnieuw verbinding.</string>
     <string name="connection_issue_banner_hands_free_record_refused">De Bluetooth van dit apparaat weigerde de handsfree-instelling die Android Auto nodig heeft, dus start de draadloze verbinding mogelijk niet. Een kabel of een andere draadloze modus heeft dit niet nodig.</string>
+    <string name="connection_issue_banner_home_wifi_rejoined">Dit apparaat blijft tijdens Android Auto opnieuw verbinding maken met je WiFi thuis, waardoor het beeld kan haperen, vooral op apparaten met 2,4GHz. Tik om automatisch opnieuw verbinden met dat netwerk uit te zetten, of wacht tot je buiten bereik bent.</string>
+    <string name="connection_issue_banner_stale_usb_accessory">Android Auto op de telefoon reageert niet meer via USB en de app kon het niet opnieuw starten. Koppel de telefoon los, wacht vijf seconden en sluit hem weer aan.</string>
     <string name="native_aa_wake_remeasure">Bluetooth-wekking opnieuw meten</string>
     <string name="native_aa_wake_verdict_unmeasured">Nog niet gemeten</string>
     <string name="native_aa_wake_verdict_safe">Veilig op dit apparaat</string>

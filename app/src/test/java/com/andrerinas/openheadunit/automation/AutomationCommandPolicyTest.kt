@@ -190,8 +190,15 @@ class AutomationCommandPolicyTest {
     // --- required extras ------------------------------------------------------------------------
 
     @Test
-    fun `a poke without a MAC is refused rather than sent`() {
-        assertTrue(single(HeadUnitCommand.ACTION_NATIVE_AA_POKE) is AutomationCommandPolicy.Effect.Refuse)
+    fun `a poke without a MAC is sent as the module WiFi button sends it`() {
+        assertEquals(
+            AutomationCommandPolicy.Effect.StartService(AapService.ACTION_NATIVE_AA_POKE),
+            single(HeadUnitCommand.ACTION_NATIVE_AA_POKE)
+        )
+        assertEquals(
+            AutomationCommandPolicy.Effect.StartService(AapService.ACTION_NATIVE_AA_POKE),
+            single(HeadUnitCommand.ACTION_NATIVE_AA_POKE, mapOf(HeadUnitCommand.EXTRA_MAC to "  "))
+        )
         assertEquals(
             AutomationCommandPolicy.Effect.StartService(
                 AapService.ACTION_NATIVE_AA_POKE,
@@ -360,4 +367,11 @@ class AutomationCommandPolicyTest {
         HeadUnitCommand.ACTION_STOP_LOG_CAPTURE, HeadUnitCommand.ACTION_EXPORT_LOG,
         HeadUnitCommand.ACTION_LOG_MARKER
     )
+
+    /** A relay to an action the service has no branch for is dropped silently, which is how three verbs died once. */
+    @Test
+    fun `every relayed service action has a handler in the service`() {
+        val unhandled = AutomationCommandPolicy.relayTargets - AapService.HANDLED_START_ACTIONS
+        assertTrue("relayed but not handled: $unhandled", unhandled.isEmpty())
+    }
 }

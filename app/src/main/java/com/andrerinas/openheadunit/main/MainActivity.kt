@@ -1285,6 +1285,10 @@ class MainActivity : BaseActivity() {
                     R.string.connection_issue_banner_hands_free_record_refused
                 ConnectionIssue.PHONE_HOLDS_STALE_ENDPOINT ->
                     R.string.connection_issue_banner_stale_endpoint
+                ConnectionIssue.HOME_WIFI_REJOINED_BESIDE_GROUP ->
+                    R.string.connection_issue_banner_home_wifi_rejoined
+                ConnectionIssue.STALE_USB_ACCESSORY ->
+                    R.string.connection_issue_banner_stale_usb_accessory
             }
         )
         banner.setOnClickListener { openRemedyFor(issue) }
@@ -1321,12 +1325,23 @@ class MainActivity : BaseActivity() {
         val query = when (issue) {
             // The remedy is on the phone, so there is no row here to send anyone to.
             ConnectionIssue.HEADUNIT_SERVER_NOT_ANSWERING -> return
+            // The remedy is the cable.
+            ConnectionIssue.STALE_USB_ACCESSORY -> return
             // The remedy is the other device's Bluetooth connection, which no setting here reaches.
             ConnectionIssue.HANDS_FREE_HELD_ELSEWHERE -> return
             // This unit's own Bluetooth stack refused the record. No row here changes its answer.
             ConnectionIssue.HANDS_FREE_RECORD_REFUSED -> return
             // The remedy is on the phone, and this unit is already applying the one it has.
             ConnectionIssue.PHONE_HOLDS_STALE_ENDPOINT -> return
+            // Auto-reconnect is a per-network switch in Android's own WiFi settings.
+            ConnectionIssue.HOME_WIFI_REJOINED_BESIDE_GROUP -> {
+                try {
+                    startActivity(Intent(android.provider.Settings.ACTION_WIFI_SETTINGS))
+                } catch (e: Exception) {
+                    AppLog.w("MainActivity: could not open the WiFi settings: ${e.message}")
+                }
+                return
+            }
             ConnectionIssue.BLUETOOTH_SENT_NO_DATA -> getString(R.string.wireless_mode)
             ConnectionIssue.BSSID_UNAVAILABLE -> getString(R.string.static_bssid_title)
             ConnectionIssue.HOTSPOT_CONFIG_UNREADABLE ->

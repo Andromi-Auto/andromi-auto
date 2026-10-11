@@ -519,8 +519,11 @@
     <string name="pref_default_launcher_status_inactive">Not set (Tap to set as default)</string>
     <string name="pref_enable_floating_button_title">Floating Launcher Button</string>
     <string name="pref_enable_floating_button_summary">Displays a floating button over the OEM launcher and other apps to quickly return to Open Headunit</string>
+    <string name="pref_floating_button_connection_status_title">Connection Status Indicator</string>
+    <string name="pref_floating_button_connection_status_summary">Uses Disconnected Opacity when no phone is connected, and fades to Floating Button Opacity while a phone is connected. At 0% the button is hidden and lets taps through.</string>
     <string name="pref_floating_button_size_title">Floating Button Size</string>
     <string name="pref_floating_button_opacity_title">Floating Button Opacity</string>
+    <string name="pref_floating_button_disconnected_opacity_title">Disconnected Opacity</string>
     <string name="pref_floating_button_x_title">Horizontal Position (X)</string>
     <string name="pref_floating_button_y_title">Vertical Position (Y)</string>
     <string name="pref_aa_exit_action_title">Android Auto Exit Action</string>
@@ -863,6 +866,12 @@
     <string name="nav_action_ferry">Ferry</string>
     <string name="nav_action_ferry_train">Ferry / train</string>
     <string name="nav_action_destination">Arrival</string>
+    <string name="performance_overlay_settings">Performance overlay</string>
+    <string name="overlay_field_fps">FPS</string>
+    <string name="overlay_field_cpu">CPU</string>
+    <string name="overlay_field_temperature">Temperature</string>
+    <string name="overlay_field_frame_age">Frame age</string>
+    <string name="performance_overlay_no_lines">No lines</string>
     <string name="show_performance_overlay">Show Performance Overlay</string>
     <string name="overlay_position">Performance overlay position</string>
     <!-- Debug-only: deliberately corrupts the projected video stream so the reassembler's
@@ -961,7 +970,7 @@
     <string name="vehicle_type_car">Car</string>
     <string name="vehicle_type_truck">Truck</string>
     <string name="vehicle_type_motorcycle">Motorcycle</string>
-    <string name="vehicle_type_forced_by_microphone">The head unit microphone is off, so Android Auto is told this is a motorcycle whatever is picked here. That is what makes the phone record for itself.</string>
+    <string name="vehicle_type_forced_by_microphone">Head unit microphone is off, so the phone uses its own. Android Auto will see a motorcycle.</string>
     <string name="vehicle_id_description">Internal identifier only. Changing this will cause your phone to treat this as a different vehicle, resetting your Android Auto preferences for this car.</string>
     <string name="head_unit_make_label">Make</string>
     <string name="head_unit_make_description">Head unit manufacturer</string>
@@ -1111,6 +1120,8 @@
     <string name="connection_issue_banner_stale_endpoint">Your phone is trying an old network address for this unit. If it does not connect, forget this unit in Android Auto on your phone and connect again.</string>
     <string name="connection_issue_banner_hands_free_held">Another device is using this unit\'s hands-free connection, which Android Auto needs. Disconnect that device and this unit will try again.</string>
     <string name="connection_issue_banner_hands_free_record_refused">This unit\'s Bluetooth refused the hands-free setup Android Auto needs, so wireless may not start. A cable or another wireless mode does not need it.</string>
+    <string name="connection_issue_banner_home_wifi_rejoined">This unit keeps rejoining your home WiFi during Android Auto, which can make the picture stutter, mostly on 2.4 GHz units. Tap to turn off auto-reconnect for that network, or wait until you are out of its range.</string>
+    <string name="connection_issue_banner_stale_usb_accessory">Android Auto on the phone stopped answering over USB, and the app could not restart it. Unplug the phone, wait five seconds, and plug it back in.</string>
     <string name="connection_issue_banner_dismiss">Dismiss</string>
     <string name="auto_connect_pill_cancel">Stop connecting</string>
     <!-- What the hotspot banner types into the settings search. Both override rows carry it
@@ -1133,8 +1144,6 @@
     <string name="native_aa_wake_verdict_destructive">Held back on this unit</string>
     <string name="native_aa_wake_remeasure_confirm">Android Auto only starts wireless when it sees the Bluetooth connection change. Where this unit already holds the hands-free link, the app has to break it to make that happen, so it measures once whether the link comes back and stops if it does not. Use this if wireless stopped starting on its own and you are willing to lose hands-free for a moment while it tries again.</string>
     <string name="native_aa_wake_remeasure_done">The Bluetooth wake will be measured again on the next connection.</string>
-    <string name="announce_connection_configuration">Ask for a longer link timeout</string>
-    <string name="announce_connection_configuration_description">Tells Android Auto to wait 15 seconds before treating the link as dead instead of 3, and to use larger socket buffers. It is aimed at a radio that goes off channel for a few seconds mid session and takes the connection with it. Whether your phone honours any of it has not been measured.</string>
     <string name="native_aa_ignore_external_bt">Ignore the Bluetooth compatibility check</string>
     <string name="native_aa_ignore_external_bt_description">This unit looks like it keeps Bluetooth on a separate module that Android cannot reach, so wireless Android Auto is switched off automatically. Off by default. Turn it on only if you think that is wrong: where it is right, the connection fails silently and the log looks healthy.</string>
 
@@ -1180,6 +1189,8 @@
     <string name="share_hotspot_qr_error">Could not retrieve active Wi-Fi hotspot credentials. Please ensure your hotspot is turned on and Location is enabled.</string>
     <string name="use_libusb">Use Native USB Driver</string>
     <string name="use_libusb_description">Use libusb for communication. Disable to use Android\'s standard USB API.</string>
+    <string name="usb_keep_phone_media_audio">Keep the phone\'s Media audio on over USB</string>
+    <string name="usb_keep_phone_media_audio_description">Android Auto can turn off the phone\'s Bluetooth Media audio for this head unit during a USB session. This stops that. Phone calls may then stay on the phone instead of the head unit.</string>
 
     <string name="btn_show_qr">Show QR Code</string>
     <string name="su_needed_keymaps_warning">Warning: Your headunit must be either rooted, or have Shizuku installed. If that\'s the case, you must allow SU rights, once prompted. Steering keys likely are not functional until this is fixed.</string>
@@ -1315,4 +1326,5 @@
     <string name="oem_app_action_failed">Execution failed: %s</string>
     <string name="copy_to_clipboard">Copy</string>
     <string name="copied_to_clipboard">Copied to clipboard</string>
+    <string name="audio_settings_reconnect">Audio settings saved. Reconnect Android Auto to apply them.</string>
 </resources>

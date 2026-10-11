@@ -431,6 +431,12 @@
     <string name="monochrome_icons_description">Szürkeárnyalatos ikonok használata a kezdőképernyőn Sötét vagy Extrém sötét módban</string>
     <string name="use_extreme_dark">Extrém sötét használata</string>
     <string name="use_extreme_dark_description">Tiszta fekete háttér használata sötét módban</string>
+    <string name="performance_overlay_settings">Teljesítményjelző</string>
+    <string name="overlay_field_fps">FPS</string>
+    <string name="overlay_field_cpu">CPU</string>
+    <string name="overlay_field_temperature">Hőmérséklet</string>
+    <string name="overlay_field_frame_age">Képkocka kora</string>
+    <string name="performance_overlay_no_lines">Nincs sor</string>
     <string name="show_performance_overlay">Teljesítményjelző megjelenítése</string>
     <string name="overlay_position">Teljesítményjelző helye</string>
     <string name="overlay_permission_required">Az automatikus indításhoz szükséges a \'Megjelenítés más alkalmazások felett\' engedély</string>
@@ -477,7 +483,7 @@
     <string name="vehicle_type_car">Autó</string>
     <string name="vehicle_type_truck">Teherautó</string>
     <string name="vehicle_type_motorcycle">Motorkerékpár</string>
-    <string name="vehicle_type_forced_by_microphone">A fejegység mikrofonja ki van kapcsolva, így az Android Auto azt az információt kapja, hogy ez motorkerékpár, bármi is legyen itt kiválasztva. Éppen ez készteti a telefont saját rögzítésre.</string>
+    <string name="vehicle_type_forced_by_microphone">A fejegység mikrofonja ki van kapcsolva, ezért a telefon a sajátját használja. Az Android Auto motorkerékpárt fog látni.</string>
     <string name="vehicle_id_description">Csak belső azonosító. Megváltoztatása azt eredményezi, hogy telefonja ezt más járműként érzékeli, visszaállítva az Android Auto beállításait ehhez az autóhoz.</string>
     <string name="head_unit_make_label">Gyártó</string>
     <string name="head_unit_make_description">Fejegység gyártója</string>
@@ -636,6 +642,8 @@
     <!-- Native USB Driver -->
     <string name="use_libusb">Natív USB-illesztőprogram használata</string>
     <string name="use_libusb_description">Libusb használata a kommunikációhoz. Kapcsolja ki az Android szabványos USB API-jának használatához.</string>
+    <string name="usb_keep_phone_media_audio">A telefon média hangjának megtartása USB-n</string>
+    <string name="usb_keep_phone_media_audio_description">Az Android Auto USB-munkamenet alatt kikapcsolhatja a telefon Bluetooth média hangját ehhez a fejegységhez. Ez a beállítás megakadályozza ezt. A hívások ilyenkor a fejegység helyett a telefonon maradhatnak.</string>
 
     <string name="software_video_decoder">Szoftveres dekódoló forrása</string>
     <string name="software_video_decoder_bundled">Beépített FFmpeg</string>
@@ -1013,8 +1021,6 @@
     <string name="preflight_open_location">Helymeghatározás</string>
     <string name="preflight_later">Később</string>
     <string name="preflight_invalid_bssid">Érvénytelen WiFi cím. Adjon meg 6 hexadecimális számpárt (pl. 02:1A:11:FF:3C:4D).</string>
-    <string name="announce_connection_configuration">Hosszabb kapcsolat-időtúllépés kérése</string>
-    <string name="announce_connection_configuration_description">Megkéri az Android Autót, hogy a kapcsolat holtnak nyilvánítása előtt 15 másodpercet várjon 3 helyett, és nagyobb socketpuffereket használjon. Ez egy olyan rádiónak szól, amely a munkamenet közepén néhány másodpercre elhagyja a csatornát, és magával viszi a kapcsolatot. Nem mértük, hogy a telefon ezt egyáltalán figyelembe veszi-e.</string>
     <string name="native_aa_ignore_external_bt">Bluetooth-kompatibilitási ellenőrzés figyelmen kívül hagyása</string>
     <string name="native_aa_ignore_external_bt_description">Úgy tűnik, ez a készülék külön modulon kezeli a Bluetooth-t, amelyet az Android nem ér el, ezért a vezeték nélküli Android Auto automatikusan kikapcsol. Alapértelmezés szerint kikapcsolva. Csak akkor kapcsolja be, ha úgy gondolja, hogy ez téves: ha a felismerés helyes, a kapcsolat némán meghiúsul, a napló pedig rendben lévőnek tűnik.</string>
     <string name="native_aa_setup_qr_title">Beállítás QR-kóddal</string>
@@ -1134,8 +1140,11 @@
     <string name="category_more_features">További funkciók</string>
     <string name="pref_enable_floating_button_title">Lebegő indítógomb</string>
     <string name="pref_enable_floating_button_summary">Lebegő gomb megjelenítése az OEM indító és egyéb alkalmazások felett az Open Headunit gyors eléréséhez</string>
+    <string name="pref_floating_button_connection_status_title">Kapcsolat állapotjelző</string>
+    <string name="pref_floating_button_connection_status_summary">Ha nincs telefon csatlakoztatva, a Lebegő gomb átlátszatlansága helyett a Szétkapcsolt állapot átlátszatlanságát használja, csatlakoztatott telefonnál pedig a Lebegő gomb átlátszatlanságára halványul. 0%-nál a gomb rejtett, és átengedi az érintéseket.</string>
     <string name="pref_floating_button_size_title">Lebegő gomb mérete</string>
     <string name="pref_floating_button_opacity_title">Lebegő gomb átlátszatlansága</string>
+    <string name="pref_floating_button_disconnected_opacity_title">Szétkapcsolt állapot átlátszatlansága</string>
     <string name="pref_floating_button_x_title">Vízszintes pozíció (X)</string>
     <string name="pref_floating_button_y_title">Függőleges pozíció (Y)</string>
     <string name="pref_aa_exit_action_title">Android Auto kilépési művelet</string>
@@ -1224,6 +1233,8 @@
     <string name="exit_dialog_end_stay_armed_note">A munkamenet véget ért. A WiFi hálózat aktív marad, így a telefonja magától újra csatlakozhat.</string>
     <string name="connection_issue_banner_stale_endpoint">A telefon egy régi hálózati címet próbál az egységhez. Ha nem csatlakozik, felejtse el az egységet az Android Autóban a telefonon, majd csatlakozzon újra.</string>
     <string name="connection_issue_banner_hands_free_record_refused">Az egység Bluetooth-ja elutasította az Android Auto által igényelt kihangosító beállítást, így a vezeték nélküli kapcsolat nem biztos, hogy elindul. Egy kábel vagy másik vezeték nélküli mód nem igényli.</string>
+    <string name="connection_issue_banner_home_wifi_rejoined">Az egység az Android Auto alatt újra és újra csatlakozik az otthoni WiFihez, ami akadozóvá teheti a képet, főleg a 2,4 GHz-es egységeken. Érintse meg az adott hálózathoz tartozó automatikus újracsatlakozás kikapcsolásához, vagy várjon, amíg hatókörén kívülre kerül.</string>
+    <string name="connection_issue_banner_stale_usb_accessory">A telefonon az Android Auto nem válaszol USB-n, és az alkalmazás nem tudta újraindítani. Húzd ki a telefont, várj öt másodpercet, majd dugd vissza.</string>
     <string name="native_aa_wake_remeasure">Bluetooth-ébresztés újramérése</string>
     <string name="native_aa_wake_verdict_unmeasured">Még nincs megmérve</string>
     <string name="native_aa_wake_verdict_safe">Biztonságos ezen az egységen</string>

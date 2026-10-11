@@ -89,6 +89,16 @@ class WifiLauncherHelper : WifiLauncher {
         }
     }
 
+    /** A settings retry may overlap association; refreshing must not rebuild its network. */
+    fun refreshAfterSettingsRestart() {
+        manager.sharedServices.startWirelessServer(this)
+        when (strategy) {
+            HelperStrategy.WIFI_DIRECT -> manager.sharedServices.wifiDirectManager?.refreshHelperGroup()
+            HelperStrategy.NEARBY_DEVICES -> nearbyManager?.resumeDiscoveryIfIdle()
+            else -> restartDiscovery()
+        }
+    }
+
     override fun restartDiscovery() {
         when (strategy) {
             HelperStrategy.NEARBY_DEVICES -> nearbyManager?.start()
@@ -126,12 +136,10 @@ class WifiLauncherHelper : WifiLauncher {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             try {
-                nearbyManager = NearbyManager(service, service.serviceScope) { socket ->
+                nearbyManager = NearbyManager(service, service.serviceScope) { socket, admission ->
                     val appSettings = App.provide(service).settings
-                    appSettings.saveLastConnection(Settings.CONNECTION_TYPE_NEARBY)
-                    service.serviceScope.launch(Dispatchers.IO) {
-                        App.provide(service).commManager.connect(socket)
-                    }
+                    admission.run { appSettings.saveLastConnection(Settings.CONNECTION_TYPE_NEARBY) }
+                    App.provide(service).commManager.connect(socket, admission = admission)
                 }
             } catch (e: Exception) {
                 AppLog.e("AapService: Failed to init NearbyManager: ${e.message}")

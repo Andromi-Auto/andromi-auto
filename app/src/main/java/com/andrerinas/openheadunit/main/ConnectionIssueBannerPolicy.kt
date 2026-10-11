@@ -55,6 +55,10 @@ object ConnectionIssueBannerPolicy {
      *   only runs in Native AA but runs on both of its transports, so it is keyed to both.
      * - `HANDS_FREE_RECORD_REFUSED` is raised where that manager opens its listeners, which is the
      *   same mode on the same two transports, so it is keyed the same way.
+     * - `HOME_WIFI_REJOINED_BESIDE_GROUP` is raised in `StationStandDown`, which only stands the
+     *   station down for a Native AA WiFi Direct group.
+     * - `STALE_USB_ACCESSORY` is raised in `UsbLauncherManager` once both recovery steps fail. USB
+     *   runs in every wireless mode and on a cable-only unit, so it is keyed to all of them.
      *
      * A record is not deleted when it stops applying. It describes what the hardware did, and the
      * user may well be back on that route tomorrow; it is only hidden while it cannot be the
@@ -68,7 +72,10 @@ object ConnectionIssueBannerPolicy {
         // Keyed on its endpoint rather than on a mode or on wireless being chosen: it is raised
         // only when the peer we dialled was Android Auto's own head unit server, so its presence
         // already proves the route that produces it ran. Self Mode reaches it either way.
-        val anyMode = setOf(ConnectionIssue.HEADUNIT_SERVER_NOT_ANSWERING)
+        val anyMode = setOf(
+            ConnectionIssue.HEADUNIT_SERVER_NOT_ANSWERING,
+            ConnectionIssue.STALE_USB_ACCESSORY
+        )
         // A cable-only unit never brings the wireless stack up, so none of the rest can be the
         // reason its last attempt failed, however recently the record was written.
         if (!wirelessSelected) return anyMode
@@ -79,7 +86,8 @@ object ConnectionIssueBannerPolicy {
                 ConnectionIssue.WIFI_DIRECT_GROUP_REFUSED,
                 ConnectionIssue.WIFI_DIRECT_STACK_CYCLED,
                 ConnectionIssue.WIFI_RADIO_OFF,
-                ConnectionIssue.FIVE_GHZ_CHANNEL_REFUSED
+                ConnectionIssue.FIVE_GHZ_CHANNEL_REFUSED,
+                ConnectionIssue.HOME_WIFI_REJOINED_BESIDE_GROUP
             )
             NativeTransport.HOTSPOT -> EITHER_NATIVE_TRANSPORT + setOf(
                 ConnectionIssue.HOTSPOT_CONFIG_UNREADABLE,
@@ -119,7 +127,8 @@ object ConnectionIssueBannerPolicy {
      * `PHONE_HOLDS_STALE_ENDPOINT` has none either: the record lives on the phone, no setting here
      * reaches it, and a dial this unit serves disproves it. `HANDS_FREE_RECORD_REFUSED` has none
      * because it is this unit's own Bluetooth stack refusing, and a registration that succeeds on a
-     * later arming retires it.
+     * later arming retires it. `HOME_WIFI_REJOINED_BESIDE_GROUP` has none: its lever is in Android's
+     * WiFi settings, and a stand-down that holds through a session retires it.
      *
      * @param hotspotSsid [com.andrerinas.openheadunit.utils.Settings.hotspotSsid]
      * @param hotspotPassword [com.andrerinas.openheadunit.utils.Settings.hotspotPassword] — needed

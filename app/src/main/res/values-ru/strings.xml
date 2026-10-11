@@ -438,6 +438,12 @@
     <string name="monochrome_icons_description">Использовать серые значки на главном экране в тёмном или сверхтёмном режиме</string>
     <string name="use_extreme_dark">Использовать сверхтёмный режим</string>
     <string name="use_extreme_dark_description">Использовать чисто чёрный фон при активном тёмном режиме</string>
+    <string name="performance_overlay_settings">Панель производительности</string>
+    <string name="overlay_field_fps">FPS</string>
+    <string name="overlay_field_cpu">CPU</string>
+    <string name="overlay_field_temperature">Температура</string>
+    <string name="overlay_field_frame_age">Возраст кадра</string>
+    <string name="performance_overlay_no_lines">Нет строк</string>
     <string name="show_performance_overlay">Показывать панель производительности</string>
     <string name="overlay_position">Положение панели производительности</string>
     <string name="show_performance_overlay_description">Показывает FPS, загрузку процессора, температуру и возраст кадра поверх проекции.</string>
@@ -484,7 +490,7 @@
     <string name="vehicle_type_car">Автомобиль</string>
     <string name="vehicle_type_truck">Грузовик</string>
     <string name="vehicle_type_motorcycle">Мотоцикл</string>
-    <string name="vehicle_type_forced_by_microphone">Микрофон головного устройства выключен, поэтому Android Auto сообщается, что это мотоцикл, независимо от выбора здесь. Именно это заставляет телефон записывать самостоятельно.</string>
+    <string name="vehicle_type_forced_by_microphone">Микрофон головного устройства выключен, поэтому телефон использует свой. Android Auto увидит мотоцикл.</string>
     <string name="vehicle_id_description">Только внутренний идентификатор. Его изменение приведёт к тому, что телефон определит это как другой автомобиль, сбросив настройки Android Auto для этой машины.</string>
     <string name="head_unit_make_label">Производитель</string>
     <string name="head_unit_make_description">Производитель головного устройства</string>
@@ -640,6 +646,8 @@
     <!-- Native USB Driver -->
     <string name="use_libusb">Использовать нативный USB-драйвер</string>
     <string name="use_libusb_description">Использовать libusb для связи. Отключите для использования стандартного USB API Android.</string>
+    <string name="usb_keep_phone_media_audio">Оставить мультимедийный звук телефона по USB</string>
+    <string name="usb_keep_phone_media_audio_description">Во время USB-сеанса Android Auto может отключить мультимедийный звук Bluetooth телефона для этой магнитолы. Эта настройка не даёт этого сделать. Тогда звонки могут остаться на телефоне, а не на магнитоле.</string>
 
     <string name="btn_show_qr">Показать QR-код</string>
     <string name="renderer_fallback_surface">Видео постоянно зависало, поэтому отображение переключено на SurfaceView на эту сессию. Если работает стабильно, установите Режим отображения на SurfaceView в настройках.</string>
@@ -1016,8 +1024,6 @@
     <string name="preflight_open_location">Геолокация</string>
     <string name="preflight_later">Позже</string>
     <string name="preflight_invalid_bssid">Неверный адрес WiFi. Введите 6 пар шестнадцатеричных цифр (например, 02:1A:11:FF:3C:4D).</string>
-    <string name="announce_connection_configuration">Запросить более длинный тайм-аут соединения</string>
-    <string name="announce_connection_configuration_description">Указывает Android Auto ждать 15 секунд вместо 3, прежде чем считать соединение разорванным, и использовать буферы сокета большего размера. Это рассчитано на радиомодуль, который на несколько секунд уходит с канала в середине сеанса и забирает с собой соединение. Не измерялось, учитывает ли телефон хоть что-то из этого.</string>
     <string name="native_aa_ignore_external_bt">Игнорировать проверку совместимости Bluetooth</string>
     <string name="native_aa_ignore_external_bt_description">Похоже, что это устройство держит Bluetooth на отдельном модуле, недоступном для Android, поэтому беспроводной Android Auto отключается автоматически. По умолчанию выключено. Включайте, только если считаете это ошибкой: если определение верное, подключение молча не удастся, а журнал будет выглядеть нормально.</string>
     <string name="native_aa_setup_qr_title">Настройка по QR-коду</string>
@@ -1137,8 +1143,11 @@
     <string name="category_more_features">Дополнительные функции</string>
     <string name="pref_enable_floating_button_title">Плавающая кнопка запуска</string>
     <string name="pref_enable_floating_button_summary">Отображает плавающую кнопку поверх штатного лаунчера и других приложений для быстрого возврата в Open Headunit</string>
+    <string name="pref_floating_button_connection_status_title">Индикатор состояния подключения</string>
+    <string name="pref_floating_button_connection_status_summary">Использует прозрачность при отключении, когда телефон не подключён, и плавно меняет её на прозрачность плавающей кнопки, пока телефон подключён. При 0% кнопка скрыта и пропускает касания.</string>
     <string name="pref_floating_button_size_title">Размер плавающей кнопки</string>
     <string name="pref_floating_button_opacity_title">Прозрачность плавающей кнопки</string>
+    <string name="pref_floating_button_disconnected_opacity_title">Прозрачность при отключении</string>
     <string name="pref_floating_button_x_title">Горизонтальное положение (X)</string>
     <string name="pref_floating_button_y_title">Вертикальное положение (Y)</string>
     <string name="pref_aa_exit_action_title">Действие при выходе из Android Auto</string>
@@ -1227,6 +1236,8 @@
     <string name="exit_dialog_end_stay_armed_note">Сеанс завершён. Сеть WiFi остаётся включённой, поэтому телефон может подключиться заново сам.</string>
     <string name="connection_issue_banner_stale_endpoint">Телефон пытается подключиться по старому сетевому адресу этого устройства. Если подключение не устанавливается, забудьте это устройство в Android Auto на телефоне и подключитесь снова.</string>
     <string name="connection_issue_banner_hands_free_record_refused">Bluetooth этого устройства отклонил настройку громкой связи, необходимую Android Auto, поэтому беспроводное соединение может не начаться. Кабель или другой беспроводной режим этого не требуют.</string>
+    <string name="connection_issue_banner_home_wifi_rejoined">Это устройство постоянно переподключается к вашему домашнему WiFi во время Android Auto, из-за чего изображение может подтормаживать, особенно на устройствах с 2,4 ГГц. Нажмите, чтобы отключить автоподключение к этой сети, или подождите, пока вы окажетесь вне её зоны действия.</string>
+    <string name="connection_issue_banner_stale_usb_accessory">Android Auto на телефоне перестал отвечать по USB, и приложению не удалось его перезапустить. Отсоедините телефон, подождите пять секунд и подключите его снова.</string>
     <string name="native_aa_wake_remeasure">Измерить пробуждение по Bluetooth заново</string>
     <string name="native_aa_wake_verdict_unmeasured">Пока не измерено</string>
     <string name="native_aa_wake_verdict_safe">Безопасно на этом устройстве</string>

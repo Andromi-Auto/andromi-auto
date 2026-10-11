@@ -13,7 +13,6 @@ import android.widget.TextView
 import com.andrerinas.openheadunit.utils.AppLog
 import com.andrerinas.openheadunit.utils.Settings
 import java.io.File
-import java.util.Locale
 import java.util.concurrent.Executors
 import java.util.concurrent.RejectedExecutionException
 import java.util.concurrent.atomic.AtomicBoolean
@@ -30,6 +29,8 @@ class PerformanceOverlay(
     private var textView: TextView? = null
     private var currentFps: Int? = null
     private var released = false
+    private var fields = emptySet<PerformanceOverlayField>()
+    private var sources = emptySet<PerformanceOverlaySource>()
 
     private val handler = Handler(Looper.getMainLooper())
     private val sampler = PerformanceSampler()
@@ -54,13 +55,21 @@ class PerformanceOverlay(
 
     fun attachTo(container: FrameLayout) {
         if (textView != null) return
+        fields = settings.overlayFields
+        sources = PerformanceOverlayPolicy.sampling(fields)
+        AppLog.i("PerformanceOverlay: ${PerformanceOverlayPolicy.describe(fields)}")
         val view = TextView(container.context).apply {
             setTextColor(Color.YELLOW)
             textSize = 12f
             setTypeface(null, Typeface.BOLD)
             setBackgroundColor(Color.parseColor("#80000000"))
             setPadding(10, 5, 10, 5)
-            text = "FPS: --\nCPU: -- / --\nTemp: --\nFrame: --"
+            text = PerformanceOverlayPolicy.format(fields, null, null, null, null, null, null)
+            // An empty text view still draws its padding and background, so strip both.
+            if (PerformanceOverlayPolicy.isEmpty(fields)) {
+                setBackgroundColor(Color.TRANSPARENT)
+                setPadding(0, 0, 0, 0)
+            }
             // Lift it above everything. Only from API 21, which is why bringToFront exists below.
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 elevation = 100f
@@ -100,6 +109,7 @@ class PerformanceOverlay(
 
     fun start() {
         handler.removeCallbacks(tick)
+        if (PerformanceOverlayPolicy.isEmpty(fields)) return
         tick.run()
     }
 
@@ -139,19 +149,16 @@ class PerformanceOverlay(
     }
 
     private fun buildText(fpsSnapshot: Int?, lastFrameSnapshot: Long): String {
-        val metrics = sampler.sample()
-        val frameAgeText = if (lastFrameSnapshot > 0L) {
-            "${SystemClock.elapsedRealtime() - lastFrameSnapshot}ms"
+        val metrics = sampler.sample(sources)
+        val frameAgeMs = if (lastFrameSnapshot > 0L) {
+            SystemClock.elapsedRealtime() - lastFrameSnapshot
         } else {
-            "--"
+            null
         }
-        val fpsText = fpsSnapshot?.toString() ?: "--"
-        val appCpuText = metrics.appCpuPercent?.let { "${it}%" } ?: "--"
-        val totalCpuText = metrics.totalCpuPercent?.let { "${it}%" }
-            ?: metrics.loadAverage?.let { String.format(Locale.US, "%.2f load", it) }
-            ?: "--"
-        val tempText = metrics.temperatureC?.let { "${it}C" } ?: "--"
-        return "FPS: $fpsText\nCPU: app $appCpuText / sys $totalCpuText\nTemp: $tempText\nFrame: $frameAgeText"
+        return PerformanceOverlayPolicy.format(
+            fields, fpsSnapshot, metrics.appCpuPercent, metrics.totalCpuPercent,
+            metrics.loadAverage, metrics.temperatureC, frameAgeMs
+        )
     }
 
     private class PerformanceSampler {
@@ -172,37 +179,39 @@ class PerformanceOverlay(
         private var previousProcessCpuMs: Long? = null
         private var previousElapsedMs: Long? = null
 
-        fun sample(): Metrics {
-            val nowElapsedMs = SystemClock.elapsedRealtime()
-            val nowProcessCpuMs = android.os.Process.getElapsedCpuTime()
-            val previousProcess = previousProcessCpuMs
-            val previousElapsed = previousElapsedMs
-            previousProcessCpuMs = nowProcessCpuMs
-            previousElapsedMs = nowElapsedMs
+        fun sample(sources: Set<PerformanceOverlaySource>): Metrics {
+            var appCpu: Int? = null
+            var totalCpu: Int? = null
+            var load: Double? = null
+            if (PerformanceOverlaySource.CPU in sources) {
+                val nowElapsedMs = SystemClock.elapsedRealtime()
+                val nowProcessCpuMs = android.os.Process.getElapsedCpuTime()
+                val previousProcess = previousProcessCpuMs
+                val previousElapsed = previousElapsedMs
+                previousProcessCpuMs = nowProcessCpuMs
+                previousElapsedMs = nowElapsedMs
 
-            val appCpu = if (previousProcess != null && previousElapsed != null) {
-                PerformanceOverlayPolicy.appCpuPercent(
-                    nowProcessCpuMs - previousProcess,
-                    nowElapsedMs - previousElapsed,
-                    coreCount
-                )
-            } else {
-                null
+                if (previousProcess != null && previousElapsed != null) {
+                    appCpu = PerformanceOverlayPolicy.appCpuPercent(
+                        nowProcessCpuMs - previousProcess,
+                        nowElapsedMs - previousElapsed,
+                        coreCount
+                    )
+                }
+
+                val currentTotalCpu = readTotalCpuSnapshot()
+                val previousTotal = previousTotalCpu
+                previousTotalCpu = currentTotalCpu
+                if (currentTotalCpu != null && previousTotal != null) {
+                    totalCpu = PerformanceOverlayPolicy.totalCpuPercent(
+                        currentTotalCpu.totalJiffies - previousTotal.totalJiffies,
+                        currentTotalCpu.idleJiffies - previousTotal.idleJiffies
+                    )
+                }
+                load = readLoadAverage()
             }
-
-            val currentTotalCpu = readTotalCpuSnapshot()
-            val previousTotal = previousTotalCpu
-            previousTotalCpu = currentTotalCpu
-            val totalCpu = if (currentTotalCpu != null && previousTotal != null) {
-                PerformanceOverlayPolicy.totalCpuPercent(
-                    currentTotalCpu.totalJiffies - previousTotal.totalJiffies,
-                    currentTotalCpu.idleJiffies - previousTotal.idleJiffies
-                )
-            } else {
-                null
-            }
-
-            return Metrics(appCpu, totalCpu, readLoadAverage(), readTemperatureC())
+            val temp = if (PerformanceOverlaySource.TEMP in sources) readTemperatureC() else null
+            return Metrics(appCpu, totalCpu, load, temp)
         }
 
         private fun readTotalCpuSnapshot(): TotalCpuSnapshot? {

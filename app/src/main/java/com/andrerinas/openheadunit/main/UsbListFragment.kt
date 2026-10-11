@@ -236,7 +236,7 @@ class UsbListFragment : Fragment() {
                     })
                 } else {
                     // Standard connection flow
-                    val usbManager = mContext.getSystemService(Context.USB_SERVICE) as UsbManager
+                    val usbManager = UsbDeviceCompat.usbManager(mContext) ?: return
                     if (usbManager.hasPermission(device.wrappedDevice)) {
                         val usbMode = UsbAccessoryMode(usbManager)
                         val useLibusb = mSettings.useLibusb

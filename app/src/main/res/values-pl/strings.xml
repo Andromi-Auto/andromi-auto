@@ -430,6 +430,12 @@
     <string name="monochrome_icons_description">Używaj szarych ikon na ekranie głównym w trybie ciemnym lub ekstremalnie ciemnym</string>
     <string name="use_extreme_dark">Użyj ekstremalnie ciemnego</string>
     <string name="use_extreme_dark_description">Używaj czystego czarnego tła gdy tryb ciemny jest aktywny</string>
+    <string name="performance_overlay_settings">Nakładka wydajności</string>
+    <string name="overlay_field_fps">FPS</string>
+    <string name="overlay_field_cpu">CPU</string>
+    <string name="overlay_field_temperature">Temperatura</string>
+    <string name="overlay_field_frame_age">Wiek klatki</string>
+    <string name="performance_overlay_no_lines">Brak wierszy</string>
     <string name="show_performance_overlay">Pokaż nakładkę wydajności</string>
     <string name="overlay_position">Pozycja nakładki wydajności</string>
     <string name="overlay_permission_required">Automatyczne uruchamianie wymaga uprawnienia \'Wyświetlaj nad innymi aplikacjami\'</string>
@@ -476,7 +482,7 @@
     <string name="vehicle_type_car">Samochód</string>
     <string name="vehicle_type_truck">Ciężarówka</string>
     <string name="vehicle_type_motorcycle">Motocykl</string>
-    <string name="vehicle_type_forced_by_microphone">Mikrofon jednostki głównej jest wyłączony, więc Android Auto jest informowany, że to motocykl, niezależnie od wyboru dokonanego tutaj. To właśnie sprawia, że telefon nagrywa samodzielnie.</string>
+    <string name="vehicle_type_forced_by_microphone">Mikrofon jednostki głównej jest wyłączony, więc telefon używa własnego. Android Auto zobaczy motocykl.</string>
     <string name="vehicle_id_description">Tylko wewnętrzny identyfikator. Jego zmiana spowoduje, że telefon potraktuje to jako inny pojazd, resetując preferencje Android Auto dla tego samochodu.</string>
     <string name="head_unit_make_label">Producent</string>
     <string name="head_unit_make_description">Producent radia</string>
@@ -638,6 +644,8 @@
     <!-- Native USB Driver -->
     <string name="use_libusb">Użyj natywnego sterownika USB</string>
     <string name="use_libusb_description">Używa libusb do komunikacji. Wyłącz, aby korzystać ze standardowego interfejsu API USB systemu Android.</string>
+    <string name="usb_keep_phone_media_audio">Pozostaw dźwięk multimediów telefonu przez USB</string>
+    <string name="usb_keep_phone_media_audio_description">Android Auto może wyłączyć dźwięk multimediów Bluetooth telefonu dla tej stacji podczas sesji USB. Ta opcja temu zapobiega. Połączenia mogą wtedy zostać na telefonie zamiast na stacji.</string>
 
     <string name="software_video_decoder">Źródło dekodera programowego</string>
     <string name="software_video_decoder_bundled">Wbudowany FFmpeg</string>
@@ -1016,8 +1024,6 @@
     <string name="preflight_open_location">Lokalizacja</string>
     <string name="preflight_later">Później</string>
     <string name="preflight_invalid_bssid">Nieprawidłowy adres WiFi. Wprowadź 6 par cyfr szesnastkowych (np. 02:1A:11:FF:3C:4D).</string>
-    <string name="announce_connection_configuration">Poproś o dłuższy limit czasu połączenia</string>
-    <string name="announce_connection_configuration_description">Każe Android Auto czekać 15 sekund zamiast 3, zanim uzna połączenie za martwe, oraz używać większych buforów gniazda. Jest przeznaczone dla radia, które na kilka sekund schodzi z kanału w trakcie sesji i zabiera ze sobą połączenie. Nie zmierzono, czy twój telefon w ogóle to respektuje.</string>
     <string name="native_aa_ignore_external_bt">Zignoruj sprawdzanie zgodności Bluetooth</string>
     <string name="native_aa_ignore_external_bt_description">Ta jednostka wygląda na taką, która trzyma Bluetooth w osobnym module niedostępnym dla Androida, dlatego bezprzewodowe Android Auto jest wyłączane automatycznie. Domyślnie wyłączone. Włącz tylko wtedy, gdy uważasz, że to błąd: jeśli wykrycie jest trafne, połączenie zawodzi bez żadnego sygnału, a dziennik wygląda poprawnie.</string>
     <string name="native_aa_setup_qr_title">Konfiguracja kodem QR</string>
@@ -1137,8 +1143,11 @@
     <string name="category_more_features">Więcej funkcji</string>
     <string name="pref_enable_floating_button_title">Pływający przycisk launchera</string>
     <string name="pref_enable_floating_button_summary">Wyświetla pływający przycisk nad launcherem OEM i innymi aplikacjami, aby szybko powrócić do Open Headunit</string>
+    <string name="pref_floating_button_connection_status_title">Wskaźnik stanu połączenia</string>
+    <string name="pref_floating_button_connection_status_summary">Gdy żaden telefon nie jest połączony, używa przezroczystości po rozłączeniu, a po połączeniu telefonu przechodzi płynnie do przezroczystości pływającego przycisku. Przy 0% przycisk jest ukryty i przepuszcza dotknięcia.</string>
     <string name="pref_floating_button_size_title">Rozmiar pływającego przycisku</string>
     <string name="pref_floating_button_opacity_title">Przezroczystość pływającego przycisku</string>
+    <string name="pref_floating_button_disconnected_opacity_title">Przezroczystość po rozłączeniu</string>
     <string name="pref_floating_button_x_title">Pozycja pozioma (X)</string>
     <string name="pref_floating_button_y_title">Pozycja pionowa (Y)</string>
     <string name="pref_aa_exit_action_title">Działanie przy wyjściu z Android Auto</string>
@@ -1227,6 +1236,8 @@
     <string name="exit_dialog_end_stay_armed_note">Sesja zakończona. Sieć WiFi pozostaje aktywna, więc telefon może połączyć się ponownie sam.</string>
     <string name="connection_issue_banner_stale_endpoint">Telefon próbuje połączyć się ze starym adresem sieciowym tego urządzenia. Jeśli się nie połączy, zapomnij to urządzenie w Android Auto na telefonie i połącz się ponownie.</string>
     <string name="connection_issue_banner_hands_free_record_refused">Bluetooth tego urządzenia odmówił konfiguracji głośnomówiącej wymaganej przez Android Auto, więc połączenie bezprzewodowe może się nie rozpocząć. Kabel lub inny tryb bezprzewodowy tego nie wymaga.</string>
+    <string name="connection_issue_banner_home_wifi_rejoined">To urządzenie podczas Android Auto stale łączy się ponownie z twoim domowym WiFi, co może powodować zacinanie się obrazu, głównie na urządzeniach z 2,4 GHz. Dotknij, aby wyłączyć automatyczne ponowne łączenie z tą siecią, albo poczekaj, aż wyjdziesz poza jej zasięg.</string>
+    <string name="connection_issue_banner_stale_usb_accessory">Android Auto na telefonie przestał odpowiadać przez USB, a aplikacja nie mogła go uruchomić ponownie. Odłącz telefon, poczekaj pięć sekund i podłącz go ponownie.</string>
     <string name="native_aa_wake_remeasure">Zmierz ponownie wybudzenie Bluetooth</string>
     <string name="native_aa_wake_verdict_unmeasured">Jeszcze nie zmierzono</string>
     <string name="native_aa_wake_verdict_safe">Bezpieczne na tym urządzeniu</string>

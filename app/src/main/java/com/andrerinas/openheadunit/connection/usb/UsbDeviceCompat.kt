@@ -5,6 +5,7 @@ import android.hardware.usb.UsbConstants
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbEndpoint
 import android.hardware.usb.UsbInterface
+import android.hardware.usb.UsbManager
 import android.os.Build
 import com.andrerinas.openheadunit.utils.Settings
 import com.andrerinas.openheadunit.utils.Utils
@@ -32,6 +33,10 @@ class UsbDeviceCompat(val wrappedDevice: UsbDevice) {
         get() = isInAccessoryMode(wrappedDevice)
 
     companion object {
+        /** Null on head units whose ROM ships without the USB service; treat that as no devices. */
+        fun usbManager(context: Context): UsbManager? =
+            context.getSystemService(Context.USB_SERVICE) as? UsbManager
+
         fun getUniqueName(device: UsbDevice): String {
             val vendorId = device.vendorId
             val productId = device.productId

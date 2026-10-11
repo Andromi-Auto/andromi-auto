@@ -433,6 +433,12 @@
     <string name="monochrome_icons_description">Usar iconos en escala de grises en la pantalla principal en modo Oscuro u Oscuro Extremo</string>
     <string name="use_extreme_dark">Usar oscuro extremo</string>
     <string name="use_extreme_dark_description">Usar fondo negro puro cuando el modo oscuro está activo</string>
+    <string name="performance_overlay_settings">Panel de rendimiento</string>
+    <string name="overlay_field_fps">FPS</string>
+    <string name="overlay_field_cpu">CPU</string>
+    <string name="overlay_field_temperature">Temperatura</string>
+    <string name="overlay_field_frame_age">Antigüedad del fotograma</string>
+    <string name="performance_overlay_no_lines">Sin líneas</string>
     <string name="show_performance_overlay">Mostrar panel de rendimiento</string>
     <string name="overlay_position">Posición del panel de rendimiento</string>
     <string name="show_performance_overlay_description">Muestra los FPS, la carga de CPU, la temperatura y la antigüedad del fotograma sobre la proyección.</string>
@@ -479,7 +485,7 @@
     <string name="vehicle_type_car">Coche</string>
     <string name="vehicle_type_truck">Camión</string>
     <string name="vehicle_type_motorcycle">Motocicleta</string>
-    <string name="vehicle_type_forced_by_microphone">El micrófono de la unidad está desactivado, así que a Android Auto se le indica que esto es una motocicleta sea cual sea la opción elegida aquí. Eso es lo que hace que el teléfono grabe por sí mismo.</string>
+    <string name="vehicle_type_forced_by_microphone">El micrófono de la unidad principal está desactivado, por lo que el teléfono usa el suyo. Android Auto verá una moto.</string>
     <string name="vehicle_id_description">Identificador interno únicamente. Cambiarlo hará que tu móvil detecte este como un vehículo diferente, reiniciando las preferencias de Android Auto para este coche.</string>
     <string name="head_unit_make_label">Fabricante</string>
     <string name="head_unit_make_description">Fabricante de la radio</string>
@@ -646,6 +652,8 @@
     <!-- Native USB Driver -->
     <string name="use_libusb">Usar controlador USB nativo</string>
     <string name="use_libusb_description">Usa libusb para la comunicación. Desactívalo para usar la API USB estándar de Android.</string>
+    <string name="usb_keep_phone_media_audio">Mantener el audio multimedia del móvil por USB</string>
+    <string name="usb_keep_phone_media_audio_description">Android Auto puede desactivar el audio multimedia Bluetooth del móvil para esta unidad principal durante una sesión USB. Esta opción lo evita. Es posible que las llamadas se queden en el móvil en lugar de en la unidad principal.</string>
 
     <string name="software_video_decoder">Origen del decodificador de software</string>
     <string name="software_video_decoder_bundled">FFmpeg integrado</string>
@@ -1027,8 +1035,6 @@
     <string name="preflight_open_location">Ubicación</string>
     <string name="preflight_later">Más tarde</string>
     <string name="preflight_invalid_bssid">Dirección WiFi no válida. Introduzca seis pares de dígitos hexadecimales (ej. 02:1A:11:FF:3C:4D).</string>
-    <string name="announce_connection_configuration">Pedir un tiempo de espera de conexión más largo</string>
-    <string name="announce_connection_configuration_description">Indica a Android Auto que espere 15 segundos en lugar de 3 antes de considerar la conexión muerta, y que use búferes de socket más grandes. Está pensado para una radio que sale del canal durante unos segundos a mitad de la sesión y se lleva la conexión con ella. No se ha medido si su teléfono respeta algo de esto.</string>
     <string name="native_aa_ignore_external_bt">Ignorar la comprobación de compatibilidad Bluetooth</string>
     <string name="native_aa_ignore_external_bt_description">Esta unidad parece tener el Bluetooth en un módulo aparte que Android no puede alcanzar, por lo que Android Auto inalámbrico se desactiva automáticamente. Desactivado de forma predeterminada. Actívelo solo si cree que eso es incorrecto: cuando la detección acierta, la conexión falla en silencio y el registro parece correcto.</string>
     <string name="native_aa_setup_qr_title">Configurar con código QR</string>
@@ -1148,8 +1154,11 @@
     <string name="category_more_features">Más funciones</string>
     <string name="pref_enable_floating_button_title">Botón flotante del iniciador</string>
     <string name="pref_enable_floating_button_summary">Muestra un botón flotante sobre el iniciador OEM y otras apps para volver rápidamente a Open Headunit</string>
+    <string name="pref_floating_button_connection_status_title">Indicador de estado de conexión</string>
+    <string name="pref_floating_button_connection_status_summary">Usa la Opacidad sin conexión cuando no hay ningún teléfono conectado y se atenúa hasta la Opacidad del botón flotante mientras hay uno conectado. Al 0 %, el botón se oculta y deja pasar los toques.</string>
     <string name="pref_floating_button_size_title">Tamaño del botón flotante</string>
     <string name="pref_floating_button_opacity_title">Opacidad del botón flotante</string>
+    <string name="pref_floating_button_disconnected_opacity_title">Opacidad sin conexión</string>
     <string name="pref_floating_button_x_title">Posición horizontal (X)</string>
     <string name="pref_floating_button_y_title">Posición vertical (Y)</string>
     <string name="pref_aa_exit_action_title">Acción al salir de Android Auto</string>
@@ -1237,6 +1246,8 @@
     <string name="exit_dialog_end_stay_armed_note">Sesión terminada. La red WiFi sigue activa, así que tu teléfono puede reconectarse por sí solo.</string>
     <string name="connection_issue_banner_stale_endpoint">Tu teléfono está probando una dirección de red antigua de esta unidad. Si no se conecta, olvida esta unidad en Android Auto en tu teléfono y conéctate de nuevo.</string>
     <string name="connection_issue_banner_hands_free_record_refused">El Bluetooth de esta unidad rechazó la configuración de manos libres que necesita Android Auto, así que puede que la conexión inalámbrica no se inicie. Un cable u otro modo inalámbrico no lo necesita.</string>
+    <string name="connection_issue_banner_home_wifi_rejoined">Esta unidad sigue volviendo a conectarse al WiFi de tu casa durante Android Auto, lo que puede hacer que la imagen se entrecorte, sobre todo en unidades de 2,4 GHz. Toca para desactivar la reconexión automática a esa red, o espera a estar fuera de su alcance.</string>
+    <string name="connection_issue_banner_stale_usb_accessory">Android Auto en el teléfono ha dejado de responder por USB y la app no ha podido reiniciarlo. Desconecta el teléfono, espera cinco segundos y vuelve a conectarlo.</string>
     <string name="native_aa_wake_remeasure">Volver a medir el despertar Bluetooth</string>
     <string name="native_aa_wake_verdict_unmeasured">Aún no medido</string>
     <string name="native_aa_wake_verdict_safe">Seguro en esta unidad</string>

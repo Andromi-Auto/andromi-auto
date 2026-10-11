@@ -18,7 +18,9 @@ import com.andrerinas.openheadunit.decoder.video.VideoDecoder
 import com.andrerinas.openheadunit.location.LocationHolder
 import com.andrerinas.openheadunit.App
 import com.andrerinas.openheadunit.utils.AppLog
+import com.andrerinas.openheadunit.utils.HeadUnitScreenConfig
 import com.andrerinas.openheadunit.utils.Settings
+import com.andrerinas.openheadunit.utils.VideoFallbackPolicy
 import com.andrerinas.openheadunit.utils.Utils
 
 interface AapControl {
@@ -94,6 +96,12 @@ internal class AapControlMedia(
     private fun mediaStartRequest(request: Media.Start, channel: Int): Int {
         AppLog.i("Media Start Request %s: session=%d, config_index=%d", Channel.name(channel), request.sessionId, request.configurationIndex)
 
+        // The phone's pick must reach the geometry before the first frame is laid out.
+        if (channel == Channel.ID_VID &&
+            VideoFallbackPolicy.adopts(request.configurationIndex, HeadUnitScreenConfig.hasOfferedFallback())) {
+            HeadUnitScreenConfig.adoptFallback()
+        }
+
         aapTransport.setSessionId(channel, request.sessionId)
         aapTransport.noteAudioSinkStarted(channel)
         aapAudio.preparePlayback(channel)
@@ -109,7 +117,8 @@ internal class AapControlMedia(
             status = Media.Config.ConfigStatus.STATUS_READY
             this.maxUnacked = maxUnacked
 
-            addConfigurationIndices(0)
+            val offered = channel == Channel.ID_VID && HeadUnitScreenConfig.hasOfferedFallback()
+            VideoFallbackPolicy.configurationIndices(offered).forEach { addConfigurationIndices(it) }
         }.build()
         AppLog.i("Config response: %s (maxUnacked=%d)", configResponse, maxUnacked)
         val msg = AapMessage(channel, Media.MsgType.MEDIA_MESSAGE_CONFIG_VALUE, configResponse)
@@ -144,10 +153,12 @@ internal class AapControlMedia(
                 // backlog turn into visible input lag when 2K HEVC is decoded in software.
                 return if (aapTransport.isWireless) 6 else 8
             }
-            // Left wide for hardware decode, deliberately: a keyframe fragments into a dozen or
-            // more messages, so narrowing this stalls the phone mid-keyframe and caps throughput at
-            // window/RTT. The phone does not hold to it either - one told 12 ran our backlog to 120
-            // - so the bound that works is the decoder discarding frames it is behind on.
+            // Keep the hardware path's wider window: shrinking it limits throughput by the
+            // number of outstanding DATA messages and their ACK round-trip time. Credits count
+            // complete DATA messages, not individual fragments of a keyframe.
+            // The advertised window alone is not a memory bound: a captured peer told to use 12
+            // still drove the backlog to 120. The video queue therefore has its own bound for
+            // peers that exceed the window. The software-HEVC window above remains separate.
             return if (aapTransport.isWireless) 12 else 16
         }
 
@@ -347,7 +358,8 @@ internal class AapControlService(
 
     private fun pingRequest(request: Control.PingRequest, channel: Int): Int {
         val response = Control.PingResponse.newBuilder()
-                .setTimestamp(System.nanoTime())
+                // Echo the phone's correlation token; the two monotonic clocks have different origins.
+                .setTimestamp(request.timestamp)
                 .build()
 
         val msg = AapMessage(channel, Control.ControlMsgType.MESSAGE_PING_RESPONSE_VALUE, response)
@@ -370,6 +382,7 @@ internal class AapControlService(
     }
 
     private fun byebyeRequest(request: Control.ByeByeRequest, channel: Int): Int {
+        aapTransport.notePeerClose()
         AppLog.i("!!! RECEIVED BYEBYE REQUEST FROM PHONE !!! Reason: ${request.reason}")
 
         val msg = AapMessage(channel, Control.ControlMsgType.MESSAGE_BYEBYE_RESPONSE_VALUE, Control.ByeByeResponse.newBuilder().build())
@@ -480,6 +493,12 @@ internal class AapControlGateway(
             return channelOpenRequest(request, message.channel)
         }
 
+        // Type numbers are scoped by service. CONTROL explicitly selects generic control
+        // handling even on an audio/video channel; channel number alone cannot choose the
+        // protobuf schema. ChannelOpen above is handled before the service is established.
+        if (message.flags.toInt() and AapMessageFraming.FLAG_BIT_CONTROL != 0) {
+            return serviceControl.execute(message)
+        }
         when (message.channel) {
             Channel.ID_CTR -> return serviceControl.execute(message)
             Channel.ID_INP -> return touchControl.execute(message)

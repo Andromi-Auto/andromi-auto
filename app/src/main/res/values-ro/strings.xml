@@ -430,6 +430,12 @@
     <string name="monochrome_icons_description">Utilizați pictograme în tonuri de gri pe ecranul principal în modul Întunecat sau Negru extrem</string>
     <string name="use_extreme_dark">Folosiți negru extrem</string>
     <string name="use_extreme_dark_description">Utilizați fundal negru pur când modul întunecat este activ</string>
+    <string name="performance_overlay_settings">Suprapunere de performanță</string>
+    <string name="overlay_field_fps">FPS</string>
+    <string name="overlay_field_cpu">CPU</string>
+    <string name="overlay_field_temperature">Temperatură</string>
+    <string name="overlay_field_frame_age">Vechimea cadrului</string>
+    <string name="performance_overlay_no_lines">Fără linii</string>
     <string name="show_performance_overlay">Afișează suprapunerea de performanță</string>
     <string name="overlay_position">Poziția suprapunerii de performanță</string>
     <string name="overlay_permission_required">Pornirea automată necesită permisiunea \'Afișare peste alte aplicații\'</string>
@@ -476,7 +482,7 @@
     <string name="vehicle_type_car">Automobil</string>
     <string name="vehicle_type_truck">Camion</string>
     <string name="vehicle_type_motorcycle">Motocicletă</string>
-    <string name="vehicle_type_forced_by_microphone">Microfonul unității este dezactivat, așa că Android Auto este informat că acesta este o motocicletă, indiferent ce se alege aici. Asta face telefonul să înregistreze singur.</string>
+    <string name="vehicle_type_forced_by_microphone">Microfonul unității este dezactivat, așa că telefonul îl folosește pe al său. Android Auto va vedea o motocicletă.</string>
     <string name="vehicle_id_description">Doar identificator intern. Schimbarea acestuia va face ca telefonul dvs. să detecteze acesta ca un vehicul diferit, resetând preferințele Android Auto pentru această mașină.</string>
     <string name="head_unit_make_label">Producător</string>
     <string name="head_unit_make_description">Producătorul unității principale</string>
@@ -638,6 +644,8 @@
     <!-- Native USB Driver -->
     <string name="use_libusb">Utilizați driverul USB nativ</string>
     <string name="use_libusb_description">Utilizează libusb pentru comunicare. Dezactivați pentru a utiliza API-ul USB standard Android.</string>
+    <string name="usb_keep_phone_media_audio">Păstrează activ audio media al telefonului prin USB</string>
+    <string name="usb_keep_phone_media_audio_description">Android Auto poate dezactiva audio media Bluetooth al telefonului pentru această unitate principală în timpul unei sesiuni USB. Această opțiune împiedică acest lucru. Apelurile pot rămâne astfel pe telefon, nu pe unitatea principală.</string>
 
     <string name="software_video_decoder">Sursă decodor software</string>
     <string name="software_video_decoder_bundled">FFmpeg integrat</string>
@@ -1014,8 +1022,6 @@
     <string name="preflight_open_location">Locație</string>
     <string name="preflight_later">Mai târziu</string>
     <string name="preflight_invalid_bssid">Adresă WiFi nevalidă. Introduceți 6 perechi de cifre hexazecimale (ex: 02:1A:11:FF:3C:4D).</string>
-    <string name="announce_connection_configuration">Solicită un timp de așteptare mai lung pentru legătură</string>
-    <string name="announce_connection_configuration_description">Îi spune aplicației Android Auto să aștepte 15 secunde în loc de 3 înainte de a considera legătura moartă și să folosească memorii tampon de socket mai mari. Este menit pentru o radio care părăsește canalul pentru câteva secunde în mijlocul sesiunii și ia legătura cu ea. Nu s-a măsurat dacă telefonul dvs. respectă ceva din toate acestea.</string>
     <string name="native_aa_ignore_external_bt">Ignoră verificarea de compatibilitate Bluetooth</string>
     <string name="native_aa_ignore_external_bt_description">Această unitate pare să țină Bluetooth-ul pe un modul separat la care Android nu ajunge, așa că Android Auto wireless este dezactivat automat. Dezactivat implicit. Activați-l doar dacă credeți că este greșit: când detectarea este corectă, conexiunea eșuează fără niciun semn, iar jurnalul pare în regulă.</string>
     <string name="native_aa_setup_qr_title">Configurare prin cod QR</string>
@@ -1135,8 +1141,11 @@
     <string name="category_more_features">Mai multe funcții</string>
     <string name="pref_enable_floating_button_title">Buton plutitor lansator</string>
     <string name="pref_enable_floating_button_summary">Afișează un buton plutitor peste lansatorul OEM și alte aplicații pentru a reveni rapid la Open Headunit</string>
+    <string name="pref_floating_button_connection_status_title">Indicator stare conexiune</string>
+    <string name="pref_floating_button_connection_status_summary">Folosește Opacitate deconectat când niciun telefon nu este conectat și se estompează la Opacitate buton plutitor cât timp un telefon este conectat. La 0%, butonul este ascuns și lasă atingerile să treacă.</string>
     <string name="pref_floating_button_size_title">Dimensiune buton plutitor</string>
     <string name="pref_floating_button_opacity_title">Opacitate buton plutitor</string>
+    <string name="pref_floating_button_disconnected_opacity_title">Opacitate deconectat</string>
     <string name="pref_floating_button_x_title">Poziție orizontală (X)</string>
     <string name="pref_floating_button_y_title">Poziție verticală (Y)</string>
     <string name="pref_aa_exit_action_title">Acțiune la ieșirea din Android Auto</string>
@@ -1225,6 +1234,8 @@
     <string name="exit_dialog_end_stay_armed_note">Sesiune încheiată. Rețeaua WiFi rămâne activă, așa că telefonul tău se poate reconecta singur.</string>
     <string name="connection_issue_banner_stale_endpoint">Telefonul dvs. încearcă o adresă de rețea veche a acestei unități. Dacă nu se conectează, uitați această unitate în Android Auto de pe telefon și conectați-vă din nou.</string>
     <string name="connection_issue_banner_hands_free_record_refused">Bluetooth-ul acestei unități a refuzat configurația hands-free de care are nevoie Android Auto, așa că este posibil ca legătura wireless să nu pornească. Un cablu sau alt mod wireless nu are nevoie de ea.</string>
+    <string name="connection_issue_banner_home_wifi_rejoined">Această unitate se reconectează întruna la WiFi-ul de acasă în timpul Android Auto, ceea ce poate face imaginea să se blocheze, mai ales la unitățile de 2,4 GHz. Atingeți pentru a opri reconectarea automată la acea rețea sau așteptați să ieșiți din raza ei.</string>
+    <string name="connection_issue_banner_stale_usb_accessory">Android Auto de pe telefon nu mai răspunde prin USB, iar aplicația nu l-a putut reporni. Deconectează telefonul, așteaptă cinci secunde și conectează-l din nou.</string>
     <string name="native_aa_wake_remeasure">Remăsoară trezirea Bluetooth</string>
     <string name="native_aa_wake_verdict_unmeasured">Nemăsurată încă</string>
     <string name="native_aa_wake_verdict_safe">Sigură pe această unitate</string>

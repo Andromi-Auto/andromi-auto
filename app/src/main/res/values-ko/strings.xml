@@ -492,6 +492,12 @@
     <string name="nav_action_ferry">페리</string>
     <string name="nav_action_ferry_train">페리/열차</string>
     <string name="nav_action_destination">도착</string>
+    <string name="performance_overlay_settings">성능 오버레이</string>
+    <string name="overlay_field_fps">FPS</string>
+    <string name="overlay_field_cpu">CPU</string>
+    <string name="overlay_field_temperature">온도</string>
+    <string name="overlay_field_frame_age">프레임 경과 시간</string>
+    <string name="performance_overlay_no_lines">표시 안 함</string>
     <string name="show_performance_overlay">성능 오버레이 표시</string>
     <string name="overlay_position">성능 오버레이 위치</string>
     <string name="show_performance_overlay_description">투영 화면 위에 FPS, CPU 부하, 온도, 프레임 경과 시간을 표시합니다.</string>
@@ -545,7 +551,7 @@
     <string name="vehicle_type_car">승용차</string>
     <string name="vehicle_type_truck">트럭</string>
     <string name="vehicle_type_motorcycle">오토바이</string>
-    <string name="vehicle_type_forced_by_microphone">헤드유닛 마이크가 꺼져 있어 여기서 무엇을 선택하든 Android Auto에는 오토바이라고 전달됩니다. 바로 이것이 휴대전화가 스스로 녹음하게 만듭니다.</string>
+    <string name="vehicle_type_forced_by_microphone">헤드유닛 마이크가 꺼져 있어 휴대전화의 마이크를 사용합니다. Android Auto에는 오토바이로 표시됩니다.</string>
     <string name="vehicle_id_description">내부 식별자로만 사용됩니다. 이 값을 변경하면 휴대폰이 다른 차량으로 인식하여 이 차량의 Android Auto 설정이 초기화됩니다.</string>
     <string name="head_unit_make_label">제조사</string>
     <string name="head_unit_make_description">헤드유닛 제조사</string>
@@ -650,6 +656,8 @@
     <string name="share_hotspot_qr_error">현재 Wi-Fi 핫스팟 정보를 가져올 수 없습니다. 핫스팟이 켜져 있고 위치 서비스가 활성화되어 있는지 확인하세요.</string>
     <string name="use_libusb">네이티브 USB 드라이버 사용</string>
     <string name="use_libusb_description">USB 통신에 libusb를 사용합니다. 비활성화 시 Android 표준 USB API를 사용합니다.</string>
+    <string name="usb_keep_phone_media_audio">USB 연결 중 휴대전화 미디어 오디오 유지</string>
+    <string name="usb_keep_phone_media_audio_description">USB 세션 중에 Android Auto가 이 헤드유닛에 대한 휴대전화의 블루투스 미디어 오디오를 끌 수 있습니다. 이 옵션을 사용 설정하면 이를 막습니다. 이 경우 전화 통화가 헤드유닛이 아닌 휴대전화에 남을 수 있습니다.</string>
     <string name="btn_show_qr">QR 코드 표시</string>
     <string name="renderer_fallback_surface">영상이 계속 멈춰서 이번 세션 동안 화면을 SurfaceView로 전환했습니다. 안정적이면 설정에서 뷰 모드를 SurfaceView로 지정하세요.</string>
     <string name="dpi_resolution_over_panel_warning">선택한 해상도(%1$s)가 패널보다 높습니다. %2$s로 제한되며 DPI도 이에 맞춰 계산됩니다. 화면이 이상하면 권장 해상도(%2$s)를 사용하세요.</string>
@@ -1025,8 +1033,6 @@
     <string name="preflight_open_location">위치</string>
     <string name="preflight_later">나중에</string>
     <string name="preflight_invalid_bssid">유효하지 않은 WiFi 주소입니다. 6쌍의 16진수(예: 02:1A:11:FF:3C:4D)를 입력하세요.</string>
-    <string name="announce_connection_configuration">더 긴 연결 시간 제한 요청</string>
-    <string name="announce_connection_configuration_description">Android Auto에게 연결을 끊긴 것으로 판단하기 전에 3초 대신 15초를 기다리고, 더 큰 소켓 버퍼를 사용하도록 지시합니다. 이는 세션 도중 몇 초간 채널을 벗어나면서 연결을 함께 끊어버리는 무선 장치를 위한 것입니다. 휴대전화가 이를 실제로 따르는지는 측정되지 않았습니다.</string>
     <string name="native_aa_ignore_external_bt">Bluetooth 호환성 검사 무시</string>
     <string name="native_aa_ignore_external_bt_description">이 기기는 Android가 접근할 수 없는 별도 모듈에 Bluetooth를 두고 있는 것으로 보여 무선 Android Auto가 자동으로 꺼집니다. 기본값은 꺼짐입니다. 그 판단이 틀렸다고 생각할 때만 켜세요. 판단이 맞다면 연결은 아무 표시 없이 실패하고 로그는 정상으로 보입니다.</string>
     <string name="native_aa_setup_qr_title">QR 코드로 설정</string>
@@ -1146,8 +1152,11 @@
     <string name="category_more_features">추가 기능</string>
     <string name="pref_enable_floating_button_title">플로팅 런처 버튼</string>
     <string name="pref_enable_floating_button_summary">순정 런처 및 다른 앱 위에 플로팅 버튼을 표시하여 Open Headunit으로 빠르게 복귀합니다</string>
+    <string name="pref_floating_button_connection_status_title">연결 상태 표시</string>
+    <string name="pref_floating_button_connection_status_summary">휴대전화가 연결되지 않으면 연결 끊김 불투명도를 사용하고, 연결되면 플로팅 버튼 불투명도까지 흐려집니다. 0%에서는 버튼이 숨겨지고 탭을 통과시킵니다.</string>
     <string name="pref_floating_button_size_title">플로팅 버튼 크기</string>
     <string name="pref_floating_button_opacity_title">플로팅 버튼 불투명도</string>
+    <string name="pref_floating_button_disconnected_opacity_title">연결 끊김 불투명도</string>
     <string name="pref_floating_button_x_title">수평 위치 (X)</string>
     <string name="pref_floating_button_y_title">수직 위치 (Y)</string>
     <string name="pref_aa_exit_action_title">Android Auto 종료 시 동작</string>
@@ -1236,6 +1245,8 @@
     <string name="exit_dialog_end_stay_armed_note">세션이 종료되었습니다. WiFi 네트워크는 계속 켜져 있으므로 휴대전화가 스스로 다시 연결할 수 있습니다.</string>
     <string name="connection_issue_banner_stale_endpoint">휴대전화가 이 기기의 이전 네트워크 주소로 연결을 시도하고 있습니다. 연결되지 않으면 휴대전화의 Android Auto에서 이 기기를 잊음 처리한 뒤 다시 연결하세요.</string>
     <string name="connection_issue_banner_hands_free_record_refused">이 기기의 블루투스가 Android Auto에 필요한 핸즈프리 설정을 거부해 무선 연결이 시작되지 않을 수 있습니다. 케이블이나 다른 무선 모드는 이것이 필요하지 않습니다.</string>
+    <string name="connection_issue_banner_home_wifi_rejoined">이 기기가 Android Auto 중에 집 WiFi에 계속 다시 연결되어 화면이 끊길 수 있으며, 특히 2.4GHz 기기에서 심합니다. 해당 네트워크의 자동 재연결을 끄려면 탭하거나, 그 범위를 벗어날 때까지 기다리세요.</string>
+    <string name="connection_issue_banner_stale_usb_accessory">휴대전화의 Android Auto가 USB로 응답하지 않으며, 앱에서 다시 시작하지 못했습니다. 휴대전화를 분리하고 5초 기다린 뒤 다시 연결하세요.</string>
     <string name="native_aa_wake_remeasure">Bluetooth 웨이크 재측정</string>
     <string name="native_aa_wake_verdict_unmeasured">아직 측정되지 않음</string>
     <string name="native_aa_wake_verdict_safe">이 기기에서는 안전함</string>
@@ -1247,4 +1258,5 @@
     <string name="pref_set_default_launcher_title">기본 홈 앱</string>
     <string name="pref_default_launcher_status_active">활성 (관리하려면 탭)</string>
     <string name="pref_default_launcher_status_inactive">설정 안 됨 (기본값으로 설정하려면 탭)</string>
+    <string name="audio_settings_reconnect">오디오 설정을 저장했습니다. 적용하려면 Android Auto를 다시 연결해 주세요.</string>
 </resources>

@@ -711,6 +711,12 @@
     <string name="nav_action_ferry">Ferry</string>
     <string name="nav_action_ferry_train">Ferry / train</string>
     <string name="nav_action_destination">Arrivée</string>
+    <string name="performance_overlay_settings">Superposition de performances</string>
+    <string name="overlay_field_fps">FPS</string>
+    <string name="overlay_field_cpu">CPU</string>
+    <string name="overlay_field_temperature">Température</string>
+    <string name="overlay_field_frame_age">Âge de l\'image</string>
+    <string name="performance_overlay_no_lines">Aucune ligne</string>
     <string name="show_performance_overlay">Afficher la superposition de performances</string>
     <string name="overlay_position">Position de la superposition de performances</string>
     <!-- Debug-only: deliberately corrupts the projected video stream so the reassembler's
@@ -773,7 +779,7 @@
     <string name="vehicle_type_car">Voiture</string>
     <string name="vehicle_type_truck">Camion</string>
     <string name="vehicle_type_motorcycle">Moto</string>
-    <string name="vehicle_type_forced_by_microphone">Le microphone de l\'autoradio est désactivé, donc Android Auto est informé qu\'il s\'agit d\'une moto quel que soit le choix fait ici. C\'est ce qui pousse le téléphone à enregistrer lui-même.</string>
+    <string name="vehicle_type_forced_by_microphone">Le microphone de l\'autoradio est coupé, donc le téléphone utilise le sien. Android Auto verra une moto.</string>
     <string name="vehicle_id_description">Identifiant interne uniquement. Changer ceci amènera ton téléphone à considérer qu\'il s\'agit d\'un véhicule différent, réinitialisant tes préférences Android Auto pour cette voiture.</string>
     <string name="head_unit_make_label">Marque</string>
     <string name="head_unit_make_description">Fabricant de l\'autoradio</string>
@@ -901,6 +907,8 @@
     <string name="share_hotspot_qr_error">Impossible de récupérer les identifiants actifs du point d\'accès Wi-Fi. Assure-toi que ton point d\'accès est allumé et que la position est activée.</string>
     <string name="use_libusb">Utiliser le pilote USB natif</string>
     <string name="use_libusb_description">Utiliser libusb pour la communication. Désactive pour utiliser l\'API USB standard d\'Android.</string>
+    <string name="usb_keep_phone_media_audio">Garder le son multimédia du téléphone actif via USB</string>
+    <string name="usb_keep_phone_media_audio_description">Android Auto peut désactiver le son multimédia Bluetooth du téléphone pour cet autoradio pendant une session USB. Cette option l\'empêche. Les appels peuvent alors rester sur le téléphone au lieu de l\'autoradio.</string>
 
     <string name="btn_show_qr">Afficher le code QR</string>
     <string name="su_needed_keymaps_warning">Avertissement : Ton autoradio doit être rooté, ou avoir Shizuku installé. Si c\'est le cas, tu dois autoriser les droits SU quand on te le demande. Les boutons au volant ne seront probablement pas fonctionnels tant que ce n\'est pas réglé.</string>
@@ -1064,8 +1072,6 @@
     <string name="preflight_open_location">Localisation</string>
     <string name="preflight_later">Plus tard</string>
     <string name="preflight_invalid_bssid">Adresse Wi-Fi non valide. Entrez 6 paires de caractères hexadécimaux (ex. 02:1A:11:FF:3C:4D).</string>
-    <string name="announce_connection_configuration">Demander un délai de liaison plus long</string>
-    <string name="announce_connection_configuration_description">Indique à Android Auto d\'attendre 15 secondes au lieu de 3 avant de considérer la liaison comme morte, et d\'utiliser des tampons de socket plus grands. Cela vise une radio qui quitte son canal pendant quelques secondes en cours de session et qui emporte la connexion avec elle. On n\'a pas mesuré si votre téléphone en tient compte.</string>
     <string name="native_aa_ignore_external_bt">Ignorer la vérification de compatibilité Bluetooth</string>
     <string name="native_aa_ignore_external_bt_description">Cet appareil semble gérer le Bluetooth via un module séparé qu\'Android ne peut pas atteindre, Android Auto sans fil est donc désactivé automatiquement. Désactivé par défaut. Ne l\'activez que si vous pensez que c\'est faux : si la détection est correcte, la connexion échoue sans rien signaler et le journal paraît normal.</string>
     <string name="native_aa_setup_qr_title">Configurer par QR code</string>
@@ -1204,8 +1210,11 @@
     <string name="category_more_features">Autres fonctionnalités</string>
     <string name="pref_enable_floating_button_title">Bouton flottant du lanceur</string>
     <string name="pref_enable_floating_button_summary">Affiche un bouton flottant au-dessus du lanceur OEM et d\'autres applications pour revenir rapidement à Open Headunit</string>
+    <string name="pref_floating_button_connection_status_title">Indicateur d\'état de connexion</string>
+    <string name="pref_floating_button_connection_status_summary">Utilise l\'Opacité hors connexion quand aucun téléphone n\'est connecté, puis passe à l\'Opacité du bouton flottant pendant qu\'un téléphone est connecté. À 0 %, le bouton est masqué et laisse passer les appuis.</string>
     <string name="pref_floating_button_size_title">Taille du bouton flottant</string>
     <string name="pref_floating_button_opacity_title">Opacité du bouton flottant</string>
+    <string name="pref_floating_button_disconnected_opacity_title">Opacité hors connexion</string>
     <string name="pref_floating_button_x_title">Position horizontale (X)</string>
     <string name="pref_floating_button_y_title">Position verticale (Y)</string>
     <string name="pref_aa_exit_action_title">Action pour quitter Android Auto</string>
@@ -1268,6 +1277,8 @@
     <string name="exit_dialog_end_stay_armed_note">Session terminée. Le réseau WiFi reste actif, donc votre téléphone peut se reconnecter de lui-même.</string>
     <string name="connection_issue_banner_stale_endpoint">Votre téléphone essaie une ancienne adresse réseau de cet appareil. S\'il ne se connecte pas, oubliez cet appareil dans Android Auto sur votre téléphone, puis reconnectez-vous.</string>
     <string name="connection_issue_banner_hands_free_record_refused">Le Bluetooth de cet appareil a refusé la configuration mains libres dont Android Auto a besoin, la connexion sans fil pourrait donc ne pas démarrer. Un câble ou un autre mode sans fil n\'en a pas besoin.</string>
+    <string name="connection_issue_banner_home_wifi_rejoined">Cet appareil se reconnecte sans cesse à votre WiFi domestique pendant Android Auto, ce qui peut faire saccader l\'image, surtout sur les appareils en 2,4 GHz. Touchez pour désactiver la reconnexion automatique à ce réseau, ou attendez d\'être hors de sa portée.</string>
+    <string name="connection_issue_banner_stale_usb_accessory">Android Auto sur le téléphone ne répond plus via USB, et l\'application n\'a pas pu le relancer. Débranchez le téléphone, attendez cinq secondes, puis rebranchez-le.</string>
     <string name="native_aa_wake_remeasure">Remesurer le réveil Bluetooth</string>
     <string name="native_aa_wake_verdict_unmeasured">Pas encore mesuré</string>
     <string name="native_aa_wake_verdict_safe">Sûr sur cet appareil</string>

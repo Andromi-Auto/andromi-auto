@@ -156,6 +156,19 @@ class NativeAaHandshakeManager(
             )
         }
 
+        /** Whether a press of the WiFi button should forget a measured ZLink refusal first. */
+        fun wifiButtonRemeasures(context: Context): Boolean {
+            val settings = App.provide(context).settings
+            return ExternalBtTransportPolicy.remeasuresOnPress(
+                BluetoothHelper.externalBtEvidence,
+                settings.externalBtZbtTransport,
+                settings.nativeAaIgnoreExternalBt,
+                ZbtDaemonReachability.cached(),
+                settings.externalBtBlinkTransport,
+                BluetoothHelper.fytModuleEvidence
+            )
+        }
+
         fun checkCompatibility(context: Context): Boolean {
             when (transportRoute(context)) {
                 // The module has its own listener and its own compatibility, established by the
@@ -224,6 +237,8 @@ class NativeAaHandshakeManager(
 
     /** The route waits on the daemon's answer, and a wake asked for meanwhile is held for it. */
     @Volatile private var measuringDaemon = false
+    // Bumped by stop() so a measurement that outlives its arming cannot start the next one.
+    @Volatile private var measureGeneration = 0
     @Volatile private var wakeAwaitingModule = false
     // Set by closeAaListeners() so the AA accept loops can tell "we closed this on purpose
     // after a successful handoff" apart from a real socket error, for logging only.
@@ -427,6 +442,10 @@ class NativeAaHandshakeManager(
         private set
     /** When that choice was made, so its exclusive window can expire. */
     @Volatile private var selectionTargetSetAt = 0L
+    /** Whether the user picked that phone, and what its wake rounds have shown since. */
+    @Volatile private var chosenExplicit = false
+    @Volatile private var chosenWakeAnswered = false
+    @Volatile private var chosenWakeUnanswered = false
     /** The phone a driver switch moved away from, refused until somebody is chosen. */
     @Volatile private var switchedAwayFromMac: String? = null
     /** When that switch was asked for, so its refusal window can expire. */
@@ -436,16 +455,28 @@ class NativeAaHandshakeManager(
     @Volatile private var lastRefusedMac: String? = null
     @Volatile private var refusalSpokenAt = 0L
 
+    /** Forgets the chosen driver and everything its wake learned. */
+    private fun clearChosenDriver() {
+        pendingSelectionTargetMac = null
+        selectionTargetSetAt = 0L
+        chosenExplicit = false
+        chosenWakeAnswered = false
+        chosenWakeUnanswered = false
+    }
+
     /**
      * Targets a specific driver device, ending the prompt window and waking only that device.
      */
-    fun selectDriver(mac: String) {
-        AppLog.i("NativeAA: Driver selected: $mac")
+    fun selectDriver(mac: String, explicit: Boolean) {
+        AppLog.i("NativeAA: Driver selected: $mac (${if (explicit) "explicit" else "automatic"} pick)")
         clearSelectionPrompt()
         isSelectionCanceled = false
         selectionCanceledAt = 0L
         pendingSelectionTargetMac = mac
         selectionTargetSetAt = SystemClock.elapsedRealtime()
+        chosenExplicit = explicit
+        chosenWakeAnswered = false
+        chosenWakeUnanswered = false
         // The switch-away stamps deliberately survive the pick. Choosing who to let in is not the
         // same question as whether the phone the driver just left may come straight back.
         clearGateRefusals()
@@ -463,8 +494,7 @@ class NativeAaHandshakeManager(
         AppLog.i("NativeAA: a driver switch is starting, so $previousMac is not let straight back in.")
         switchedAwayFromMac = previousMac
         driverSwitchStartedAt = SystemClock.elapsedRealtime()
-        pendingSelectionTargetMac = null
-        selectionTargetSetAt = 0L
+        clearChosenDriver()
         clearGateRefusals()
     }
 
@@ -511,8 +541,7 @@ class NativeAaHandshakeManager(
         clearSelectionPrompt()
         isSelectionCanceled = false
         selectionCanceledAt = 0L
-        pendingSelectionTargetMac = null
-        selectionTargetSetAt = 0L
+        clearChosenDriver()
         clearDriverSwitch()
         clearGateRefusals()
     }
@@ -572,8 +601,7 @@ class NativeAaHandshakeManager(
         clearSelectionPrompt()
         isSelectionCanceled = true
         selectionCanceledAt = SystemClock.elapsedRealtime()
-        pendingSelectionTargetMac = null
-        selectionTargetSetAt = 0L
+        clearChosenDriver()
         clearDriverSwitch()
         clearGateRefusals()
         pokeJob?.cancel()
@@ -614,16 +642,20 @@ class NativeAaHandshakeManager(
                 }
             }
         }
-        // A handshake in flight during the window can only be the chosen phone's: this gate runs
-        // before handleHandshake is ever launched.
+        // After a lapse, a handshake in flight can be another phone's, so only the chosen phone's
+        // own handshake holds the lock past the floor.
         val chosenWakeActive = manualPokeInFlight || isHandshakeInFlight() || isHandoffSettling()
+        val handshakePeer = if (isHandshakeInFlight() || isHandoffSettling()) activeHandshakeLink?.peerAddress else null
         when (NativeDriverSelectionPolicy.switchGate(
             remoteMac = remoteAddress,
             chosenMac = pendingSelectionTargetMac,
             chosenAgeMs = now - selectionTargetSetAt,
             switchedAwayFrom = switchedAwayFromMac,
             switchAgeMs = now - driverSwitchStartedAt,
-            chosenWakeActive = chosenWakeActive
+            chosenWakeActive = chosenWakeActive,
+            chosenExplicit = chosenExplicit,
+            chosenWakeUnanswered = chosenWakeUnanswered,
+            handshakePeerMac = handshakePeer
         )) {
             NativeDriverSelectionPolicy.SwitchGate.WRONG_PHONE -> return refuseAtGate(
                 remoteAddress,
@@ -770,9 +802,12 @@ class NativeAaHandshakeManager(
     // deciding whether it's safe to force-reinit should check this instead of isActive() alone.
     fun isAttemptInFlight(): Boolean = isHandshakeInFlight() || pokeAttemptInFlight || isHandoffSettling()
 
+    fun isMeasuringDaemon(): Boolean = measuringDaemon
+
     @SuppressLint("MissingPermission")
     fun start() {
-        if (isRunning) return
+        // A measurement in flight calls start() itself when it ends; a second one would ask twice.
+        if (isRunning || measuringDaemon) return
         // None of these survived a mode rebuild by design, and nothing else clears them: a cancel
         // from the last arming would otherwise refuse every phone this one accepts.
         resetSelectionState()
@@ -802,9 +837,14 @@ class NativeAaHandshakeManager(
             notStartedReason = "the vendor Bluetooth daemon is still being asked whether it will carry Android Auto."
             AppLog.i("NativeAA: this unit's Bluetooth is an external module; asking the vendor daemon whether it will carry Android Auto before choosing a route.")
             measuringDaemon = true
+            val generation = measureGeneration
             scope.launch(Dispatchers.IO + CoroutineName("NativeAa-ZbtReachability")) {
-                ZbtDaemonReachability.resolve()
+                ZbtDaemonReachability.resolve(
+                    retryRefusals = true,
+                    keepTrying = { measuringDaemon && measureGeneration == generation }
+                )
                 withContext(Dispatchers.Main.immediate) {
+                    if (measureGeneration != generation) return@withContext
                     measuringDaemon = false
                     start()
                     // The module route took it if it opened; any other answer has nothing to wake.
@@ -1106,12 +1146,16 @@ class NativeAaHandshakeManager(
         wakeStoodDown = !wakePhone
         sessionEndedAt = SystemClock.elapsedRealtime()
         if (!wakePhone) {
-            AppLog.i("NativeAA: the phone ended the session itself, so the listeners reopen without waking it.")
+            // Automatic workers recheck wakesPhone after waits and before each poke.
+            // Do not mutate the shared job slot: a concurrent manual request may now own it.
+            AppLog.i("NativeAA: deliberate session end; reopening listeners without an automatic wake.")
         }
     }
 
     /** Whether an automatic poke may run, or the phone is only listened for. */
-    fun wakesPhone(): Boolean = !wakeStoodDown
+    fun wakesPhone(): Boolean = !wakeStoodDown &&
+        (commManager.connectionState.value as? CommManager.ConnectionState.Disconnected)
+            ?.holdsSettingsWake(SystemClock.elapsedRealtime()) != true
 
     /**
      * Whether a wake here sends anything. False on a module that opens Android Auto by itself,
@@ -2100,7 +2144,7 @@ class NativeAaHandshakeManager(
             AppLog.i("NativeAA: Handoff still settling — not starting a poke that would compete with the phone's WiFi association.")
             return
         }
-        if (wakeStoodDown) {
+        if (!wakesPhone()) {
             // Info for the same reason as the line above: it is the evidence the stand-down holds.
             AppLog.i("NativeAA: the phone ended the last session itself — listening for it rather than waking it.")
             return
@@ -2199,6 +2243,7 @@ class NativeAaHandshakeManager(
             // handshake backoff, so asking it every pass would wipe a selection the user is inside.
             var rearmAsked = false
             while (isActive) {
+                if (!wakesPhone()) break
                 when (PokeReadinessPolicy.step(isRunning, aaListenersClosedForSession, commManager.isConnected)) {
                     PokeReadinessPolicy.Step.STOP -> break
                     PokeReadinessPolicy.Step.REARM_FIRST -> {
@@ -2391,6 +2436,8 @@ class NativeAaHandshakeManager(
                         continue
                     }
 
+                    // Recheck after credential/listener waits, including jobs queued before Save.
+                    if (!wakesPhone()) break
                     AppLog.i("NativeAA: Attempting active poke to device: ${device.name} (${device.address})...")
                     ConnectionStageTracker.report(ConnectionStage.WAKING_PHONE)
                     pokeDevice(device, holdMs = 15000)
@@ -2438,7 +2485,14 @@ class NativeAaHandshakeManager(
 
     /** The WiFi button on the module route: there is no Android device to name, only the module. */
     fun wakeOverModule(): Boolean {
-        val carrier = moduleCarrier ?: return false
+        val carrier = moduleCarrier
+        if (carrier == null) {
+            // The route is still being measured; hold the wake for the channel, as triggerPoke does.
+            if (!measuringDaemon) return false
+            wakeAwaitingModule = true
+            AppLog.i("NativeAA: the vendor daemon is still being asked for a route, so the wake waits for it.")
+            return true
+        }
         wakeStoodDown = false
         sessionEndedAt = 0L
         if (carrier.sendsWake) ConnectionStageTracker.report(ConnectionStage.WAKING_PHONE)
@@ -2506,6 +2560,7 @@ class NativeAaHandshakeManager(
                     val wakeStartedAt = SystemClock.elapsedRealtime()
                     var roundsDialled = 0
                     var outcome = BluetoothWakePolicy.WakeOutcome.STOOD_DOWN
+                    val pickStamp = selectionTargetSetAt
                     fun keepWaking() = NativeDriverSelectionPolicy.chosenWakeContinues(
                         outcome, roundsDialled, SystemClock.elapsedRealtime() - wakeStartedAt
                     )
@@ -2528,6 +2583,23 @@ class NativeAaHandshakeManager(
                         ConnectionStageTracker.report(ConnectionStage.WAKING_PHONE)
                         outcome = pokeDevice(device, holdMs = 20000)
                         AppLog.i("NativeAA: Manual poke to ${device.name} finished.")
+                        // A cancelled job's blocking connect can return after a newer pick.
+                        if (selectionTargetSetAt == pickStamp &&
+                            pendingSelectionTargetMac.equals(device.address, ignoreCase = true)) {
+                            val lapsed = NativeDriverSelectionPolicy.pickLapsedAfterRound(
+                                outcome, chosenWakeAnswered, chosenWakeUnanswered)
+                            if (outcome == BluetoothWakePolicy.WakeOutcome.ANSWERED) chosenWakeAnswered = true
+                            if (chosenExplicit && lapsed != chosenWakeUnanswered) {
+                                chosenWakeUnanswered = lapsed
+                                if (lapsed) {
+                                    AppLog.i("NativeAA: ${device.name ?: "unnamed"} (${device.address}) did not answer a whole " +
+                                        "wake round, so other phones are let in once the first 30s pass.")
+                                } else {
+                                    AppLog.i("NativeAA: ${device.name ?: "unnamed"} (${device.address}) answered a " +
+                                        "wake round, so other phones wait for it again.")
+                                }
+                            }
+                        }
                         if (outcome != BluetoothWakePolicy.WakeOutcome.ANSWERED) {
                             ConnectionStageTracker.retreat(ConnectionStage.WAKING_PHONE, ConnectionStage.WAITING_FOR_PHONE)
                         }
@@ -2730,10 +2802,13 @@ class NativeAaHandshakeManager(
      * Only a served dial used to, and a rejection that works means no dial ever arrives again, so
      * the banner stood forever on exactly the units the fix had repaired.
      */
+    private fun addressMayHaveMoved(): Boolean =
+        launcher.strategy == NativeStrategy.HOTSPOT || settings.wifiDirectAddressRecord?.spannedBoot != true
+
     private fun retireStaleEndpointRecord() {
         val refused = dialRefusedSinceLastLanding
         dialRefusedSinceLastLanding = false
-        if (!StaleEndpointRecordPolicy.retiredByHandshake(refused, launcher.strategy == NativeStrategy.HOTSPOT)) return
+        if (!StaleEndpointRecordPolicy.retiredByHandshake(refused, addressMayHaveMoved())) return
         ConnectionIssues.clear(context, ConnectionIssue.PHONE_HOLDS_STALE_ENDPOINT)
     }
 
@@ -3511,11 +3586,10 @@ class NativeAaHandshakeManager(
                 WppMessageType.VERSION_RESPONSE -> {
                     val v = Wireless.WifiVersionResponse.parseFrom(msg.payload)
                     val device = if (v.hasDeviceInfo()) {
-                        // Fields 3 and 4 are two strings the phone declares and nothing here knows
-                        // the meaning of. Printed only when present, so a capture can name them.
+                        // The phone's name and Bluetooth address, printed only when present.
                         val extra = listOfNotNull(
-                            v.deviceInfo.unknownString3.takeIf { v.deviceInfo.hasUnknownString3() && it.isNotEmpty() },
-                            v.deviceInfo.unknownString4.takeIf { v.deviceInfo.hasUnknownString4() && it.isNotEmpty() },
+                            v.deviceInfo.deviceName.takeIf { v.deviceInfo.hasDeviceName() && it.isNotEmpty() },
+                            v.deviceInfo.bluetoothAddress.takeIf { v.deviceInfo.hasBluetoothAddress() && it.isNotEmpty() },
                         ).joinToString(" ") { "unknown=$it" }
                         " device=${v.deviceInfo.deviceId} lifetime=${v.deviceInfo.connectivityLifetimeId}" +
                             if (extra.isNotEmpty()) " $extra" else ""
@@ -3537,6 +3611,8 @@ class NativeAaHandshakeManager(
                 // these with an exception rather than a reply. Named so a capture says so.
                 WppMessageType.CONNECTION_REJECTION ->
                     AppLog.w("NativeAA: [RX] WifiConnectionRejection, which the phone should never send")
+                WppMessageType.START_REQUEST ->
+                    AppLog.i("NativeAA: [RX] WifiStartRequest from the phone, ignored on purpose")
                 WppMessageType.START_RESPONSE -> {
                     val r = Wireless.WifiStartResponse.parseFrom(msg.payload)
                     val port = if (r.hasPort()) ":${r.port}" else ""
@@ -3581,7 +3657,9 @@ class NativeAaHandshakeManager(
                 }
         }
         val channelType = WppChannelTypePolicy.forHeadUnit(WifiBandCapability.supports5Ghz(context))
-        val request = WppMessages.versionRequest(carInfo(), endpoint, channelType)
+        val channels = WppChannelListPolicy.forGroup(WifiBandCapability.sessionFrequencyMhz())
+        AppLog.i("NativeAA: [TX] version request channel type=$channelType channels=$channels")
+        val request = WppMessages.versionRequest(carInfo(), endpoint, channelType, channels)
         sendProtobuf(output, request.toByteArray(), WppMessageType.VERSION_REQUEST)
     }
 
@@ -3592,6 +3670,9 @@ class NativeAaHandshakeManager(
             val ap = SoftApEndpointStabilityPolicy.advertisement(creds.ssid, creds.psk, creds.bssid, creds.ip) ?: return
             if (settings.softApAdvertisedEndpoint != ap) settings.softApAdvertisedEndpoint = ap
             return
+        }
+        SoftApEndpointStabilityPolicy.advertisement(creds.ssid, creds.psk, creds.bssid, creds.ip)?.let {
+            if (settings.wifiDirectAdvertisedEndpoint != it) settings.wifiDirectAdvertisedEndpoint = it
         }
         val pair = EndpointRetirementPolicy.recordsAdvertisement(transport, creds.ssid, creds.psk) ?: return
         if (settings.wifiDirectAdvertisedIdentity != pair) settings.wifiDirectAdvertisedIdentity = pair
@@ -3730,8 +3811,7 @@ class NativeAaHandshakeManager(
     fun onSessionEstablished() {
         // A phone is projecting, so the switch is over and the choice has been honoured. Left
         // standing, the stamps would refuse the next session's phone on the way in.
-        pendingSelectionTargetMac = null
-        selectionTargetSetAt = 0L
+        clearChosenDriver()
         clearDriverSwitch()
         clearGateRefusals(logSummary = true)
         // The phone is on the network, which is the only thing that retires the stale-group count.
@@ -3749,6 +3829,7 @@ class NativeAaHandshakeManager(
         isRunning = false
         notStartedReason = "the wireless mode was stopped"
         measuringDaemon = false
+        measureGeneration++
         wakeAwaitingModule = false
         standingInForHfp = false
         aaReopenJob?.cancel()

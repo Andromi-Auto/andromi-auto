@@ -84,12 +84,14 @@ class NavigationUpdateIntent(
     turnAngle: Int? = null,
     totalDistanceMeters: Int? = null,
     totalTimeSeconds: Long? = null,
-    estimatedArrival: String? = null
+    estimatedArrival: String? = null,
+    currentRoad: String = ""
 ) : Intent(action) {
     init {
         putExtra(EXTRA_DISTANCE_METERS, distanceMeters?.takeIf { it >= 0 } ?: -1)
         putExtra(EXTRA_TIME_SECONDS, timeSeconds?.takeIf { it >= 0 } ?: -1)
         putExtra(EXTRA_ROAD, road.ifBlank { "" })
+        putExtra(EXTRA_CURRENT_ROAD, currentRoad.ifBlank { "" })
         putExtra(EXTRA_NEXT_EVENT_TYPE, nextEventType.coerceIn(0, 31))
         putExtra(EXTRA_ACTION_TEXT, actionText.ifBlank { "" })
         putExtra(EXTRA_TURN_SIDE, turnSide?.coerceIn(1, 3) ?: TURN_SIDE_UNSPECIFIED)
@@ -109,8 +111,11 @@ class NavigationUpdateIntent(
         /** Time to the next maneuver in seconds, or -1 if not set. */
         const val EXTRA_TIME_SECONDS = "time_seconds"
 
-        /** Road/street name (e.g. current street or turn target). */
+        /** Road the driver will be on after the next maneuver, or empty when unknown. */
         const val EXTRA_ROAD = "road"
+
+        /** Road the car is on now, or empty when the nav app does not name it. */
+        const val EXTRA_CURRENT_ROAD = "current_road"
 
         /**
          * Legacy extra: NextTurnDetail.NextEvent wire values (0…19).
@@ -200,6 +205,11 @@ object HeadUnitCommand {
      * on its own. Native AA on WiFi Direct only; inert elsewhere.
      */
     const val ACTION_END_SESSION_STAY_ARMED = "$PREFIX.ACTION_END_SESSION_STAY_ARMED"
+
+    /**
+     * Wakes the phone named by [EXTRA_MAC] for Native AA. Without a MAC it is the main screen's WiFi
+     * button on a unit whose Bluetooth is an external module, and inert on any other unit.
+     */
     const val ACTION_NATIVE_AA_POKE = "$PREFIX.ACTION_NATIVE_AA_POKE"
 
     /**
@@ -242,7 +252,7 @@ object HeadUnitCommand {
     /** `day`, `night` or `auto` for [ACTION_SET_NIGHT_MODE]. */
     const val EXTRA_STATE = "state"
 
-    /** Bluetooth MAC for [ACTION_NATIVE_AA_POKE]. */
+    /** Bluetooth MAC for [ACTION_NATIVE_AA_POKE]; optional, see there. */
     const val EXTRA_MAC = "extra_mac"
 
     /** Google Nearby endpoint for [ACTION_NEARBY_CONNECT]. */
@@ -309,6 +319,7 @@ class SessionStateIntent(
         const val STATE_FAILED = "failed"
 
         const val REASON_USER_EXIT = "user_exit"
+        const val REASON_SETTINGS_RESTART = "settings_restart"
         const val REASON_LINK_LOST = "link_lost"
         const val REASON_PHONE_LEFT = "phone_left"
         const val REASON_HANDSHAKE_FAILED = "handshake_failed"

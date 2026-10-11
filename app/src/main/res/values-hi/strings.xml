@@ -511,8 +511,11 @@
     <string name="pref_default_launcher_status_inactive">सेट नहीं है (डिफ़ॉल्ट के रूप में सेट करने के लिए टैप करें)</string>
     <string name="pref_enable_floating_button_title">फ़्लोटिंग लॉन्चर बटन</string>
     <string name="pref_enable_floating_button_summary">Open Headunit पर त्वरित वापसी के लिए OEM लॉन्चर और अन्य ऐप्स के ऊपर एक फ़्लोटिंग बटन प्रदर्शित करता है</string>
+    <string name="pref_floating_button_connection_status_title">कनेक्शन स्थिति संकेतक</string>
+    <string name="pref_floating_button_connection_status_summary">कोई फ़ोन कनेक्ट न होने पर डिस्कनेक्ट होने पर अपारदर्शिता का उपयोग करता है, और फ़ोन कनेक्ट होने पर फ़्लोटिंग बटन की अपारदर्शिता तक फीका हो जाता है। 0% पर बटन छिपा रहता है और टैप को आर-पार जाने देता है।</string>
     <string name="pref_floating_button_size_title">फ़्लोटिंग बटन का आकार</string>
     <string name="pref_floating_button_opacity_title">फ़्लोटिंग बटन की अपारदर्शिता</string>
+    <string name="pref_floating_button_disconnected_opacity_title">डिस्कनेक्ट होने पर अपारदर्शिता</string>
     <string name="pref_floating_button_x_title">क्षैतिज स्थिति (X)</string>
     <string name="pref_floating_button_y_title">लंबवत स्थिति (Y)</string>
     <string name="pref_aa_exit_action_title">Android Auto निकास क्रिया</string>
@@ -841,6 +844,12 @@
     <string name="nav_action_ferry">नौका (फेरी)</string>
     <string name="nav_action_ferry_train">फेरी / ट्रेन</string>
     <string name="nav_action_destination">आगमन</string>
+    <string name="performance_overlay_settings">प्रदर्शन ओवरले</string>
+    <string name="overlay_field_fps">FPS</string>
+    <string name="overlay_field_cpu">CPU</string>
+    <string name="overlay_field_temperature">तापमान</string>
+    <string name="overlay_field_frame_age">फ्रेम की आयु</string>
+    <string name="performance_overlay_no_lines">कोई पंक्ति नहीं</string>
     <string name="show_performance_overlay">प्रदर्शन ओवरले दिखाएं</string>
     <string name="overlay_position">प्रदर्शन ओवरले स्थिति</string>
     <string name="five_ghz_channel">5 GHz चैनल</string>
@@ -932,7 +941,7 @@
     <string name="vehicle_type_car">कार</string>
     <string name="vehicle_type_truck">ट्रक</string>
     <string name="vehicle_type_motorcycle">मोटरसाइकिल</string>
-    <string name="vehicle_type_forced_by_microphone">हेड यूनिट माइक्रोफ़ोन बंद है, इसलिए Android Auto को बताया गया है कि यह एक मोटरसाइकिल है।</string>
+    <string name="vehicle_type_forced_by_microphone">हेड यूनिट का माइक्रोफ़ोन बंद है, इसलिए फ़ोन अपना माइक्रोफ़ोन इस्तेमाल करता है। Android Auto को मोटरसाइकिल दिखेगी।</string>
     <string name="vehicle_id_description">केवल आंतरिक पहचानकर्ता। इसे बदलने से आपका फ़ोन इसे एक अलग वाहन के रूप में मानेगा।</string>
     <string name="head_unit_make_label">निर्माता</string>
     <string name="head_unit_make_description">हेड यूनिट निर्माता</string>
@@ -1079,6 +1088,8 @@
     <string name="connection_issue_banner_stale_endpoint">आपका फ़ोन इस यूनिट तक उस नेटवर्क पते पर पहुँचने की कोशिश करता रहता है जो पहले दिया गया था। अपने फ़ोन पर Android Auto खोलें, इस हेड यूनिट को भूल जाएं, और फिर से कनेक्ट करें।</string>
     <string name="connection_issue_banner_hands_free_held">कोई अन्य डिवाइस पहले से ही इस यूनिट के हैंड्स-फ़्री कनेक्शन का उपयोग कर रहा है। दूसरे डिवाइस को डिस्कनेक्ट करें या उसका ब्लूटूथ बंद करें।</string>
     <string name="connection_issue_banner_hands_free_record_refused">इस यूनिट का ब्लूटूथ हैंड्स-फ़्री रिकॉर्ड प्रकाशित नहीं करेगा जिसकी ऐप को आवश्यकता है। केबल या अन्य वायरलेस मोड से कनेक्ट करने पर इसकी आवश्यकता नहीं होती है।</string>
+    <string name="connection_issue_banner_home_wifi_rejoined">यह यूनिट Android Auto के दौरान आपके घर के वाई-फ़ाई से बार-बार दोबारा जुड़ती है, जिससे तस्वीर अटक सकती है, खासकर 2.4 GHz वाली यूनिट पर। उस नेटवर्क के लिए ऑटो-रीकनेक्ट बंद करने के लिए टैप करें, या उसकी रेंज से बाहर होने तक प्रतीक्षा करें।</string>
+    <string name="connection_issue_banner_stale_usb_accessory">फ़ोन पर Android Auto ने USB पर जवाब देना बंद कर दिया, और ऐप उसे फिर से शुरू नहीं कर सका। फ़ोन को निकालें, पाँच सेकंड रुकें और उसे दोबारा लगाएँ।</string>
     <string name="connection_issue_banner_dismiss">खारिज करें</string>
     <string name="auto_connect_pill_cancel">कनेक्ट करना रोकें</string>
     <string name="connection_issue_remedy_hotspot_query">हॉटस्पॉट नाम और पासवर्ड</string>
@@ -1099,8 +1110,6 @@
     <string name="native_aa_wake_verdict_destructive">इस यूनिट पर रोका गया</string>
     <string name="native_aa_wake_remeasure_confirm">Android Auto केवल तभी वायरलेस शुरू करता है जब वह ब्लूटूथ कनेक्शन को बदलते हुए देखता है। यदि वायरलेस अपने आप शुरू होना बंद हो गया है तो इसका उपयोग करें।</string>
     <string name="native_aa_wake_remeasure_done">अगले कनेक्शन पर ब्लूटूथ वेक को फिर से मापा जाएगा।</string>
-    <string name="announce_connection_configuration">अधिक लिंक टाइमआउट का अनुरोध करें</string>
-    <string name="announce_connection_configuration_description">Android Auto को 3 के बजाय 15 सेकंड प्रतीक्षा करने और बड़े सॉकेट बफ़र्स का उपयोग करने के लिए कहता है।</string>
     <string name="native_aa_ignore_external_bt">ब्लूटूथ संगतता जाँच को अनदेखा करें</string>
     <string name="native_aa_ignore_external_bt_description">यह यूनिट ब्लूटूथ को एक अलग मॉड्यूल पर रखती दिखती है जिस तक Android नहीं पहुँच सकता। डिफ़ॉल्ट रूप से बंद।</string>
 
@@ -1138,6 +1147,8 @@
     <string name="share_hotspot_qr_error">सक्रिय वाई-फ़ाई हॉटस्पॉट क्रेडेंशियल पुनर्प्राप्त नहीं किए जा सके। सुनिश्चित करें कि हॉटस्पॉट और स्थान चालू हैं।</string>
     <string name="use_libusb">मूल USB ड्राइवर का उपयोग करें</string>
     <string name="use_libusb_description">संचार के लिए libusb का उपयोग करें। Android के मानक USB API का उपयोग करने के लिए अक्षम करें।</string>
+    <string name="usb_keep_phone_media_audio">USB पर फ़ोन का मीडिया ऑडियो चालू रखें</string>
+    <string name="usb_keep_phone_media_audio_description">USB सेशन के दौरान Android Auto इस हेड यूनिट के लिए फ़ोन का Bluetooth मीडिया ऑडियो बंद कर सकता है। यह विकल्प ऐसा होने से रोकता है। इसके बाद फ़ोन कॉल, हेड यूनिट की जगह फ़ोन पर ही रह सकते हैं।</string>
 
     <string name="btn_show_qr">QR कोड दिखाएं</string>
     <string name="su_needed_keymaps_warning">चेतावनी: आपकी हेडयूनिट या तो रूटेड होनी चाहिए, या Shizuku इंस्टॉल होना चाहिए। यदि ऐसा है, तो संकेत मिलने पर आपको SU अधिकारों की अनुमति देनी होगी।</string>

@@ -433,6 +433,12 @@
     <string name="nav_action_ferry">フェリー</string>
     <string name="nav_action_ferry_train">フェリー / 列車</string>
     <string name="nav_action_destination">到着</string>
+    <string name="performance_overlay_settings">パフォーマンス表示</string>
+    <string name="overlay_field_fps">FPS</string>
+    <string name="overlay_field_cpu">CPU</string>
+    <string name="overlay_field_temperature">温度</string>
+    <string name="overlay_field_frame_age">フレーム経過時間</string>
+    <string name="performance_overlay_no_lines">行なし</string>
     <string name="show_performance_overlay">パフォーマンス表示を表示</string>
     <string name="overlay_position">パフォーマンス表示の位置</string>
     <string name="show_performance_overlay_description">FPS、CPU 負荷、温度、フレーム経過時間を投影画面に重ねて表示します。</string>
@@ -485,7 +491,7 @@
     <string name="vehicle_type_car">乗用車</string>
     <string name="vehicle_type_truck">トラック</string>
     <string name="vehicle_type_motorcycle">バイク</string>
-    <string name="vehicle_type_forced_by_microphone">ヘッドユニットのマイクがオフのため、ここで何を選んでも Android Auto にはバイクとして伝えられます。これによりスマートフォンが自身で録音するようになります。</string>
+    <string name="vehicle_type_forced_by_microphone">ヘッドユニットのマイクがオフのため、スマートフォンの内蔵マイクを使用します。Android Auto にはバイクとして認識されます。</string>
     <string name="vehicle_id_description">内部識別子としてのみ使用されます。これを変更すると、お使いのスマートフォンはこの車両を別の車両として認識し、この車両に関するAndroid Autoの設定がリセットされます。</string>
     <string name="head_unit_make_label">メーカー</string>
     <string name="head_unit_make_description">車載機メーカー</string>
@@ -646,6 +652,8 @@
     <!-- Native USB Driver -->
     <string name="use_libusb">ネイティブUSBドライバーを使用する</string>
     <string name="use_libusb_description">通信にlibusbを使用します。Androidの標準USB APIを使用するには無効にしてください。</string>
+    <string name="usb_keep_phone_media_audio">USB接続中もスマートフォンのメディア音声を維持する</string>
+    <string name="usb_keep_phone_media_audio_description">USBセッション中、Android Autoがこのヘッドユニット向けのスマートフォンのBluetoothメディア音声をオフにすることがあります。この設定をオンにすると、それを防げます。その場合、通話はヘッドユニットではなくスマートフォンに残ることがあります。</string>
 
     <string name="software_video_decoder">ソフトウェアデコーダのソース</string>
     <string name="software_video_decoder_bundled">内蔵FFmpeg</string>
@@ -1022,8 +1030,6 @@
     <string name="preflight_open_location">位置情報</string>
     <string name="preflight_later">後で</string>
     <string name="preflight_invalid_bssid">無効なWiFiアドレスです。6組の16進数を入力してください（例：02:1A:11:FF:3C:4D）。</string>
-    <string name="announce_connection_configuration">より長いリンクタイムアウトを要求</string>
-    <string name="announce_connection_configuration_description">Android Autoに対し、リンクが切断されたと判断するまでの待機時間を3秒ではなく15秒にし、より大きなソケットバッファーを使うよう指示します。これは、セッションの途中で数秒間チャンネルを離れ、接続を道連れにしてしまう無線機を対象としています。お使いのスマートフォンがこれに従うかどうかは測定されていません。</string>
     <string name="native_aa_ignore_external_bt">Bluetooth互換性チェックを無視する</string>
     <string name="native_aa_ignore_external_bt_description">この機器はAndroidから到達できない別モジュールでBluetoothを扱っているようなので、ワイヤレスAndroid Autoは自動的に無効化されます。既定でオフ。判定が誤っていると思う場合のみオンにしてください。判定が正しい場合、接続は何も告げずに失敗し、ログは正常に見えます。</string>
     <string name="native_aa_setup_qr_title">QRコードで設定</string>
@@ -1143,8 +1149,11 @@
     <string name="category_more_features">その他の機能</string>
     <string name="pref_enable_floating_button_title">フローティングランチャーボタン</string>
     <string name="pref_enable_floating_button_summary">純正ランチャーや他のアプリの上にフローティングボタンを表示し、Open Headunitに素早く戻れるようにします</string>
+    <string name="pref_floating_button_connection_status_title">接続状態インジケーター</string>
+    <string name="pref_floating_button_connection_status_summary">スマートフォンが接続されていないときは「未接続時の不透明度」を使い、接続中は「ボタンの不透明度」まで薄くなります。0%ではボタンは非表示になり、タップを通過させます。</string>
     <string name="pref_floating_button_size_title">ボタンのサイズ</string>
     <string name="pref_floating_button_opacity_title">ボタンの不透明度</string>
+    <string name="pref_floating_button_disconnected_opacity_title">未接続時の不透明度</string>
     <string name="pref_floating_button_x_title">水平位置 (X)</string>
     <string name="pref_floating_button_y_title">垂直位置 (Y)</string>
     <string name="pref_aa_exit_action_title">Android Auto 終了時の動作</string>
@@ -1233,6 +1242,8 @@
     <string name="exit_dialog_end_stay_armed_note">セッションを終了しました。WiFiネットワークは維持されるため、スマートフォンが自動的に再接続することがあります。</string>
     <string name="connection_issue_banner_stale_endpoint">スマートフォンはこの機器の古いネットワークアドレスに接続しようとしています。接続できない場合は、スマートフォンのAndroid Autoでこの機器を削除し、再度接続してください。</string>
     <string name="connection_issue_banner_hands_free_record_refused">この機器のBluetoothがAndroid Autoに必要なハンズフリー設定を拒否したため、ワイヤレス接続が開始されない可能性があります。ケーブルまたは他のワイヤレスモードではこれは不要です。</string>
+    <string name="connection_issue_banner_home_wifi_rejoined">この機器はAndroid Auto中に自宅のWiFiへ何度も再接続しており、特に2.4 GHzの機器では映像がカクつくことがあります。タップしてそのネットワークへの自動再接続をオフにするか、圏外に出るまでお待ちください。</string>
+    <string name="connection_issue_banner_stale_usb_accessory">スマートフォンのAndroid AutoがUSB経由で応答しなくなり、アプリで再起動できませんでした。スマートフォンを取り外し、5秒待ってからもう一度接続してください。</string>
     <string name="native_aa_wake_remeasure">Bluetoothの起動を再測定</string>
     <string name="native_aa_wake_verdict_unmeasured">まだ測定されていません</string>
     <string name="native_aa_wake_verdict_safe">この機器では安全です</string>

@@ -13,12 +13,13 @@ Open Headunit is an Android app that allows you to turn your Android tablet or p
 https://github.com/mikereidis/headunit
 
 ## NOTE!
-**Android Auto 17.4 and newer breaks almost all third-party wireless triggers including Self-Mode and the automated launch via Wireless Helper.**
-Google has introduced internal changes preventing projection from launching automatically without the native developer server or hardware dongles. To connect wirelessly or run in Self-Mode on AA 17.4+, please use one of the 4 options below:
+**Android Auto 17.4 and newer can prevent legacy wireless triggers from launching projection, including Self-Mode and automated startup via Wireless Helper. Rooted devices have a workaround: re-enable Android Auto's wireless startup receiver.**
+Choose from the five options below according to your Android Auto version and setup:
 1. **USB Wireless Android Auto Dongle (Recommended):** Hardware dongles provide seamless, hardware-level plug-and-play.
 2. **Native Mode:** Direct Wi-Fi Direct or Headunit Hotspot handshake.
-3. **Headunit Server (Developer Mode):** The **only remaining solution for Self-Mode!** On your phone, open Android Auto developer settings and tap "Start Headunit Server".
-4. **Wireless Helper:** Continues to work reliably for Android Auto versions up to **17.3**.
+3. **Headunit Server (Developer Mode):** An option for wireless projection and Self-Mode without root. On the device running Android Auto, open its developer settings and tap "Start Headunit Server".
+4. **Wireless Helper:** The legacy startup flow works with Android Auto up to **17.3**; for **17.4+** on rooted devices, see option 5.
+5. **Root workaround (AA 17.4+):** Re-enable `WirelessStartupReceiver` with one root command to restore the previous wireless startup flow, including Wireless Helper, without starting the developer headunit server. See [the command and setup below](#5-root-workaround-for-android-auto-174).
 
 ## Screenshots
 <img width="1280" height="800" alt="image" src="https://github.com/user-attachments/assets/22abbc13-75d5-436f-b0ae-2e92b7648d50" />
@@ -36,7 +37,7 @@ Google has introduced internal changes preventing projection from launching auto
 - Click on your phone in the list and wait for Android Auto to start
 
 ### Wireless Connection Options
-Choose from one of four connection strategies depending on your Android Auto version and setup:
+Choose from the five options below depending on your Android Auto version and setup:
 
 #### 1. USB Wireless Android Auto Dongle (Most Reliable)
 - A standard hardware USB Wireless Android Auto Dongle (plugged into the headunit) handles the entire wireless negotiation independently.
@@ -65,7 +66,7 @@ On a detected FYT module unit with this transport off, Native Mode refuses to st
 
 Android Bluetooth driver selection, preferred-phone and wake-list controls are intentionally hidden on this route because Android cannot see or dial phones bonded to the external module. To roll back, turn this transport off and re-enable the stock client with `adb shell pm enable com.syu.carlink` (prefix with `su -c` if needed).
 
-#### 3. Headunit Server (Essential for Self-Mode on AA 17.4+)
+#### 3. Headunit Server (No-Root Option for Self-Mode on AA 17.4+)
 - Starts the native Android Auto developer server directly on your phone or on the same device (Self-Mode).
 - **Setup:**
   1. Open Android Auto settings on your phone (or tablet in Self-Mode).
@@ -73,11 +74,23 @@ Android Bluetooth driver selection, preferred-phone and wake-list controls are i
   3. Tap the three-dot menu in the top right corner and choose **Start headunit server**.
   4. In Open Headunit, tap the **WiFi** button to connect (or use Self-Mode).
 
-#### 4. Wireless Helper (for Android Auto up to v17.3)
+#### 4. Wireless Helper
 - Our companion app triggers the wireless connection automatically in the background.
-- **Compatibility:** Android Auto **v17.3 and below**.
+- **Compatibility:** Android Auto **v17.3 and below**, or **v17.4+** with the root workaround in option 5.
 - **Download:** [Wireless Helper on Google Play Store](https://play.google.com/store/apps/details?id=com.andrerinas.wirelesshelper)
 - **Setup:** Set Open Headunit Wireless Mode to **Helper Mode**, ensure both devices are in the same network or Wi-Fi Direct group, and start the service in the Wireless Helper app.
+
+#### 5. Root Workaround for Android Auto 17.4+
+On the device running Android Auto (normally the phone), open a **root shell**, for example by running `su` in a terminal and granting root access. Then run:
+
+```sh
+pm enable --user 0 \
+com.google.android.projection.gearhead/com.google.android.apps.auto.wireless.setup.receiver.WirelessStartupReceiver
+```
+
+Re-enabling this receiver restores the previous wireless startup flow on affected Android Auto versions. Keep using the same Wireless Helper / Helper Mode setup as before; the developer headunit server is not required for this workaround. Root is needed on the device running Android Auto, not on a separate head unit.
+
+`--user 0` targets the primary Android user. This is an internal Android Auto component: the workaround requires it to exist in the installed version, and future updates may change its name or behavior.
 
 ### Connect Wirelessly via Intent (Power Users)
 You can trigger a wireless connection attempt using an Android Intent. This is useful for automation tools like **Tasker**, **MacroDroid**, or via **ADB**.
@@ -101,7 +114,7 @@ adb shell am start -a android.intent.action.VIEW -d "headunit://connect?ip=192.1
 - Info/Help descriptions to the settings for better understanding
 
 ## Changelog
-### v.3.5.0-beta3
+### v.3.5.0-beta4
 - Native AA: reconnect to a network that is still there, instead of rebuilding it every time
 - Native AA: wake the phone over the Bluetooth module on a cold start, and from the WiFi button
 - Native AA over hotspot: stop advertising an endpoint that moves, bring the hotspot back after a boot or ACC wake- #1014
@@ -117,6 +130,17 @@ adb shell am start -a android.intent.action.VIEW -d "headunit://connect?ip=192.1
 - Mic: isolate capture sessions and bound uplink flow control, thanks to @emotionbug
 - Audio: stabilize playback and AAC recovery with opt-in AAudio, thanks to @emotionbug
 - WPP: retain active control connections and isolate listener generations, thanks to @emotionbug
+- Added: Apps drawer, thanks to @amp3r1
+- Navigation: stop the road name from sticking after the road changes
+- Self Mode: release the dummy VPN once the session is up, and start none for Android Auto 17.4 and later
+- Wireless: hold every automatic bring-up while the unit is asleep, and replay it once when the screen comes on
+- WiFi Direct: stand the station down again when the platform rejoins it mid-session
+- Native AA: ride out a ZLink daemon restart at cold start, and confirm a restarted hotspot stays up
+- Video: no codec on a dying surface, and a picture after a screen-off return in Texture mode
+- Automation: restore the three dropped automation commands, and stop Headunit Server connects preempting each other
+- Fix: crash when the USB service is missing, thanks to @muayyad-alsadi - #1057
+- Added: Performance overlay with its own settings screen, choose which lines it shows
+- Added: Root workaround for Android Auto 17.4+ wireless startup in the README, thanks to @mixalbl4-127
 
 ### v.3.4.0
 - USB: connect non-Pixel phones without fighting a fast-reverting dongle

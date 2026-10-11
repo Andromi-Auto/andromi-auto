@@ -432,6 +432,12 @@
     <string name="monochrome_icons_description">استخدام أيقونات رمادية على الشاشة الرئيسية في الوضع الداكن أو الداكن المطلق</string>
     <string name="use_extreme_dark">استخدام الوضع الداكن المطلق</string>
     <string name="use_extreme_dark_description">استخدام خلفية سوداء بالكامل عند تفعيل الوضع الداكن</string>
+    <string name="performance_overlay_settings">لوحة الأداء</string>
+    <string name="overlay_field_fps">FPS</string>
+    <string name="overlay_field_cpu">CPU</string>
+    <string name="overlay_field_temperature">درجة الحرارة</string>
+    <string name="overlay_field_frame_age">عمر الإطار</string>
+    <string name="performance_overlay_no_lines">بدون أسطر</string>
     <string name="show_performance_overlay">إظهار لوحة الأداء</string>
     <string name="overlay_position">موضع لوحة الأداء</string>
     <string name="show_performance_overlay_description">عرض معدل الإطارات وحمل المعالج ودرجة الحرارة وعمر الإطار فوق العرض.</string>
@@ -478,7 +484,7 @@
     <string name="vehicle_type_car">سيارة</string>
     <string name="vehicle_type_truck">شاحنة</string>
     <string name="vehicle_type_motorcycle">دراجة نارية</string>
-    <string name="vehicle_type_forced_by_microphone">ميكروفون الوحدة الرئيسية معطّل، لذا يتم إبلاغ Android Auto بأن هذه دراجة نارية مهما كان الاختيار هنا. وهذا ما يجعل الهاتف يسجّل بنفسه.</string>
+    <string name="vehicle_type_forced_by_microphone">ميكروفون الوحدة الرئيسية متوقف، لذا يستخدم الهاتف ميكروفونه الخاص. سيرى Android Auto دراجة نارية.</string>
     <string name="vehicle_id_description">معرف داخلي فقط. تغييره سيجعل هاتفك يكتشف هذا كمركبة مختلفة، مما يعيد تعيين تفضيلات Android Auto لهذه السيارة.</string>
     <string name="head_unit_make_label">الشركة المصنعة</string>
     <string name="head_unit_make_description">الشركة المصنعة لوحدة الوسائط</string>
@@ -637,6 +643,8 @@
     <!-- Native USB Driver -->
     <string name="use_libusb">استخدام برنامج تشغيل USB الأصلي</string>
     <string name="use_libusb_description">استخدم libusb للاتصال. قم بتعطيله لاستخدام واجهة برمجة تطبيقات USB القياسية لنظام Android.</string>
+    <string name="usb_keep_phone_media_audio">إبقاء صوت الوسائط في الهاتف قيد التشغيل عبر USB</string>
+    <string name="usb_keep_phone_media_audio_description">قد يوقف Android Auto تشغيل صوت وسائط Bluetooth في الهاتف لوحدة الرأس هذه أثناء جلسة USB. يمنع هذا الخيار ذلك. وقد تبقى المكالمات على الهاتف بدلًا من وحدة الرأس.</string>
 
     <string name="software_video_decoder">مصدر برنامج فك الترميز</string>
     <string name="software_video_decoder_bundled">FFmpeg مدمج</string>
@@ -1015,8 +1023,6 @@
     <string name="preflight_open_location">الموقع</string>
     <string name="preflight_later">لاحقاً</string>
     <string name="preflight_invalid_bssid">عنوان WiFi غير صالح. أدخل 6 أزواج سداسية عشرية مثل 02:1A:11:FF:3C:4D.</string>
-    <string name="announce_connection_configuration">طلب مهلة اتصال أطول</string>
-    <string name="announce_connection_configuration_description">يطلب هذا الخيار من Android Auto الانتظار 15 ثانية بدلاً من 3 قبل اعتبار الاتصال منقطعاً، واستخدام مخازن مؤقتة أكبر للمقبس. وهو موجه لراديو يخرج عن قناته لبضع ثوانٍ في منتصف الجلسة ويأخذ الاتصال معه. لم يُقَس ما إذا كان هاتفك يلتزم بأي من ذلك.</string>
     <string name="native_aa_ignore_external_bt">تجاهل فحص توافق البلوتوث</string>
     <string name="native_aa_ignore_external_bt_description">يبدو أن هذه الوحدة تُبقي البلوتوث على وحدة منفصلة لا يستطيع Android الوصول إليها، لذا يتم إيقاف Android Auto اللاسلكي تلقائياً. معطّل افتراضياً. فعّله فقط إذا كنت تعتقد أن ذلك خطأ: فعندما يكون الاكتشاف صحيحاً، يفشل الاتصال بصمت ويبدو السجل سليماً.</string>
     <string name="native_aa_setup_qr_title">الإعداد عبر رمز QR</string>
@@ -1136,8 +1142,11 @@
     <string name="category_more_features">ميزات إضافية</string>
     <string name="pref_enable_floating_button_title">زر التشغيل العائم</string>
     <string name="pref_enable_floating_button_summary">عرض زر عائم فوق المشغل الأصلي والتطبيقات الأخرى للعودة سريعًا إلى Open Headunit</string>
+    <string name="pref_floating_button_connection_status_title">مؤشر حالة الاتصال</string>
+    <string name="pref_floating_button_connection_status_summary">يستخدم الشفافية عند عدم الاتصال حين لا يكون هاتف متصلاً، ويتلاشى إلى شفافية الزر العائم أثناء اتصال هاتف. عند 0% يكون الزر مخفيًا ويمرر اللمسات.</string>
     <string name="pref_floating_button_size_title">حجم الزر العائم</string>
     <string name="pref_floating_button_opacity_title">شفافية الزر العائم</string>
+    <string name="pref_floating_button_disconnected_opacity_title">الشفافية عند عدم الاتصال</string>
     <string name="pref_floating_button_x_title">الموضع الأفقي (X)</string>
     <string name="pref_floating_button_y_title">الموضع الرأسي (Y)</string>
     <string name="pref_aa_exit_action_title">إجراء الخروج من Android Auto</string>
@@ -1226,6 +1235,8 @@
     <string name="exit_dialog_end_stay_armed_note">انتهت الجلسة. تبقى شبكة WiFi قائمة، لذا قد يعيد هاتفك الاتصال من تلقاء نفسه.</string>
     <string name="connection_issue_banner_stale_endpoint">يحاول هاتفك الوصول إلى هذه الوحدة على عنوان شبكة قديم. إذا لم يتصل، فتناسَ هذه الوحدة في Android Auto على هاتفك ثم اتصل مرة أخرى.</string>
     <string name="connection_issue_banner_hands_free_record_refused">رفض بلوتوث هذه الوحدة إعداد اليدين الحرة الذي يحتاجه Android Auto، لذا قد لا يبدأ الاتصال اللاسلكي. الاتصال بكابل أو بوضع لاسلكي آخر لا يحتاج إلى ذلك.</string>
+    <string name="connection_issue_banner_home_wifi_rejoined">تعيد هذه الوحدة الاتصال بشبكة WiFi المنزلية باستمرار أثناء Android Auto، مما قد يسبب تقطع الصورة، خصوصاً في الوحدات التي تعمل على 2.4 غيغاهرتز. انقر لإيقاف إعادة الاتصال التلقائي بتلك الشبكة، أو انتظر حتى تبتعد عن نطاقها.</string>
+    <string name="connection_issue_banner_stale_usb_accessory">توقف Android Auto على الهاتف عن الاستجابة عبر USB، ولم يتمكن التطبيق من إعادة تشغيله. افصل الهاتف، وانتظر خمس ثوانٍ، ثم أعد توصيله.</string>
     <string name="native_aa_wake_remeasure">إعادة قياس إيقاظ البلوتوث</string>
     <string name="native_aa_wake_verdict_unmeasured">لم يُقَس بعد</string>
     <string name="native_aa_wake_verdict_safe">آمن على هذه الوحدة</string>

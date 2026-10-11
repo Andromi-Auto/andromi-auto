@@ -345,13 +345,18 @@ class WppTcpServer(
             callbacks.noteEndpointRetired()
             return
         }
-        // Once, not per dial: the phone re-dials on its own backoff and a moving stamp would
-        // overtake the user's dismissal every time.
-        ConnectionIssues.raiseOnce(context, ConnectionIssue.PHONE_HOLDS_STALE_ENDPOINT)
-        // What retires it is a Bluetooth handshake landing with no dial beside it, which only the
-        // owner sees. A served dial cannot do it: a rejection that works stops the dialling.
-        callbacks.noteDialRefused()
-        if (!WppTcpServePolicy.rejectsDial(decision, callbacks.canRunRfcomm(), projectionUp)) {
+        val rejects = WppTcpServePolicy.rejectsDial(decision, callbacks.canRunRfcomm(), projectionUp)
+        if (WppTcpServePolicy.raisesStaleEndpointRecord(callbacks.strategy(), callbacks.identity(), rejects)) {
+            // Once, not per dial: the phone re-dials on its own backoff and a moving stamp would
+            // overtake the user's dismissal every time.
+            ConnectionIssues.raiseOnce(context, ConnectionIssue.PHONE_HOLDS_STALE_ENDPOINT)
+            // What retires it is a Bluetooth handshake landing with no dial beside it, which only the
+            // owner sees. A served dial cannot do it: a rejection that works stops the dialling.
+            callbacks.noteDialRefused()
+        } else {
+            AppLog.i("WppTcpServer: this dial reached the group's live address, so the rejection leaves nothing to forget")
+        }
+        if (!rejects) {
             AppLog.w(
                 "WppTcpServer: not serving this dial, and not withdrawing the endpoint because the " +
                     "Bluetooth listeners are not open for the phone to fall back to: $reason"
@@ -395,7 +400,9 @@ class WppTcpServer(
                     }
                     AppLog.i("WppTcpServer: [TX] WifiVersionRequest (Type 4) v${WppHandshakeSession.WPP_VERSION_MAJOR}.${WppHandshakeSession.WPP_VERSION_MINOR}")
                     val channelType = WppChannelTypePolicy.forHeadUnit(WifiBandCapability.supports5Ghz(context))
-                    send(output, WppMessages.versionRequest(callbacks.carInfo(), endpoint, channelType).toByteArray(), WppMessageType.VERSION_REQUEST)
+                    val channels = WppChannelListPolicy.forGroup(WifiBandCapability.sessionFrequencyMhz())
+                    AppLog.i("WppTcpServer: [TX] version request channel type=$channelType channels=$channels")
+                    send(output, WppMessages.versionRequest(callbacks.carInfo(), endpoint, channelType, channels).toByteArray(), WppMessageType.VERSION_REQUEST)
                 }
                 WppAction.SendStartRequest -> {
                     val endpoint = callbacks.projectionEndpoint()

@@ -511,8 +511,11 @@
     <string name="pref_default_launcher_status_inactive">ไม่ได้ตั้งค่า (แตะเพื่อตั้งเป็นค่าเริ่มต้น)</string>
     <string name="pref_enable_floating_button_title">ปุ่มลอยตัวเปิดแอป</string>
     <string name="pref_enable_floating_button_summary">แสดงปุ่มลอยทับลอนเชอร์เดิมและแอปอื่นๆ เพื่อกลับสู่ Open Headunit ได้อย่างรวดเร็ว</string>
+    <string name="pref_floating_button_connection_status_title">ตัวบ่งชี้สถานะการเชื่อมต่อ</string>
+    <string name="pref_floating_button_connection_status_summary">ใช้ความทึบเมื่อไม่ได้เชื่อมต่อ เมื่อไม่มีโทรศัพท์เชื่อมต่อ และค่อยๆ จางเป็นความทึบของปุ่มลอยขณะที่มีโทรศัพท์เชื่อมต่อ ที่ 0% ปุ่มจะถูกซ่อนและปล่อยให้การแตะผ่านไป</string>
     <string name="pref_floating_button_size_title">ขนาดปุ่มลอย</string>
     <string name="pref_floating_button_opacity_title">ความทึบของปุ่มลอย</string>
+    <string name="pref_floating_button_disconnected_opacity_title">ความทึบเมื่อไม่ได้เชื่อมต่อ</string>
     <string name="pref_floating_button_x_title">ตำแหน่งแนวนอน (X)</string>
     <string name="pref_floating_button_y_title">ตำแหน่งแนวตั้ง (Y)</string>
     <string name="pref_aa_exit_action_title">การกระทำเมื่อออกจาก Android Auto</string>
@@ -841,6 +844,12 @@
     <string name="nav_action_ferry">เรือข้ามฟาก</string>
     <string name="nav_action_ferry_train">เรือข้ามฟาก / รถไฟ</string>
     <string name="nav_action_destination">ถึงที่หมาย</string>
+    <string name="performance_overlay_settings">ข้อมูลประสิทธิภาพ</string>
+    <string name="overlay_field_fps">FPS</string>
+    <string name="overlay_field_cpu">CPU</string>
+    <string name="overlay_field_temperature">อุณหภูมิ</string>
+    <string name="overlay_field_frame_age">อายุเฟรม</string>
+    <string name="performance_overlay_no_lines">ไม่มีบรรทัด</string>
     <string name="show_performance_overlay">แสดงข้อมูลประสิทธิภาพ (Performance Overlay)</string>
     <string name="overlay_position">ตำแหน่งข้อมูลประสิทธิภาพ</string>
     <string name="five_ghz_channel">ช่องสัญญาณ 5 GHz</string>
@@ -932,7 +941,7 @@
     <string name="vehicle_type_car">รถยนต์</string>
     <string name="vehicle_type_truck">รถบรรทุก</string>
     <string name="vehicle_type_motorcycle">รถจักรยานยนต์</string>
-    <string name="vehicle_type_forced_by_microphone">ไมโครโฟนของเฮดยูนิตปิดอยู่ ดังนั้น Android Auto จึงได้รับแจ้งว่าเป็นรถจักรยานยนต์</string>
+    <string name="vehicle_type_forced_by_microphone">ไมโครโฟนของเฮดยูนิตปิดอยู่ โทรศัพท์จึงใช้ไมโครโฟนของตัวเอง Android Auto จะเห็นเป็นมอเตอร์ไซค์</string>
     <string name="vehicle_id_description">ตัวระบุภายในเท่านั้น การเปลี่ยนแปลงสิ่งนี้จะทำให้โทรศัพท์ปฏิบัติต่อรถคันนี้เสมือนเป็นรถคันใหม่</string>
     <string name="head_unit_make_label">ผู้ผลิตเฮดยูนิต</string>
     <string name="head_unit_make_description">ผู้ผลิตเฮดยูนิต</string>
@@ -1079,6 +1088,8 @@
     <string name="connection_issue_banner_stale_endpoint">โทรศัพท์ของคุณพยายามเชื่อมต่อที่อยู่เดิมที่ไม่ใช้งานแล้ว เปิด Android Auto บนโทรศัพท์ ลบเฮดยูนิตนี้ แล้วเชื่อมต่อใหม่</string>
     <string name="connection_issue_banner_hands_free_held">มีอุปกรณ์อื่นกำลังใช้การเชื่อมต่อแฮนด์ฟรีของยูนิตนี้อยู่ ตัดการเชื่อมต่ออุปกรณ์อื่นหรือปิดบลูทูธ</string>
     <string name="connection_issue_banner_hands_free_record_refused">บลูทูธของยูนิตนี้ไม่เผยแพร่บันทึกแฮนด์ฟรีที่แอปต้องการ การเชื่อมต่อด้วยสายเคเบิลหรือโหมดไร้สายอื่นไม่จำเป็นต้องใช้</string>
+    <string name="connection_issue_banner_home_wifi_rejoined">ยูนิตนี้เชื่อมต่อ Wi-Fi ที่บ้านซ้ำไปมาขณะใช้ Android Auto ซึ่งอาจทำให้ภาพกระตุก โดยเฉพาะยูนิตที่ใช้ 2.4 GHz แตะเพื่อปิดการเชื่อมต่อใหม่อัตโนมัติสำหรับเครือข่ายนั้น หรือรอจนกว่าคุณจะอยู่นอกระยะ</string>
+    <string name="connection_issue_banner_stale_usb_accessory">Android Auto บนโทรศัพท์หยุดตอบสนองผ่าน USB และแอปไม่สามารถเริ่มใหม่ได้ ถอดโทรศัพท์ออก รอห้าวินาที แล้วเสียบกลับเข้าไปใหม่</string>
     <string name="connection_issue_banner_dismiss">ปิด</string>
     <string name="auto_connect_pill_cancel">หยุดเชื่อมต่อ</string>
     <string name="connection_issue_remedy_hotspot_query">ชื่อและรหัสผ่านฮอตสปอต</string>
@@ -1099,8 +1110,6 @@
     <string name="native_aa_wake_verdict_destructive">ถูกระงับไว้ในยูนิตนี้</string>
     <string name="native_aa_wake_remeasure_confirm">Android Auto จะเริ่มระบบไร้สายเมื่อเห็นการเชื่อมต่อบลูทูธเปลี่ยนไปเท่านั้น</string>
     <string name="native_aa_wake_remeasure_done">การปลุกบลูทูธจะถูกวัดใหม่อีกครั้งในการเชื่อมต่อครั้งถัดไป</string>
-    <string name="announce_connection_configuration">ขอขยายเวลาการหมดเวลาของลิงก์</string>
-    <string name="announce_connection_configuration_description">บอกให้ Android Auto รอ 15 วินาทีแทนที่จะเป็น 3 วินาทีก่อนถือว่าลิงก์ตาย และใช้บัฟเฟอร์ซ็อกเก็ตที่ใหญ่ขึ้น</string>
     <string name="native_aa_ignore_external_bt">ละเว้นการตรวจสอบความเข้ากันได้ของบลูทูธ</string>
     <string name="native_aa_ignore_external_bt_description">ยูนิตนี้ดูเหมือนจะเก็บบลูทูธไว้ในโมดูลแยกต่างหาก ปิดไว้เป็นค่าเริ่มต้น</string>
 
@@ -1138,6 +1147,8 @@
     <string name="share_hotspot_qr_error">ไม่สามารถดึงข้อมูลประจำตัวฮอตสปอต Wi-Fi ที่ใช้งานอยู่ได้ ตรวจสอบว่าเปิดฮอตสปอตและตำแหน่งแล้ว</string>
     <string name="use_libusb">ใช้ไดรเวอร์ USB ดั้งเดิม (Native)</string>
     <string name="use_libusb_description">ใช้ libusb สำหรับการสื่อสาร ปิดใช้งานเพื่อใช้ Android USB API มาตรฐาน</string>
+    <string name="usb_keep_phone_media_audio">คงเสียงสื่อของโทรศัพท์ไว้ผ่าน USB</string>
+    <string name="usb_keep_phone_media_audio_description">Android Auto อาจปิดเสียงสื่อ Bluetooth ของโทรศัพท์สำหรับเครื่องเล่นในรถนี้ระหว่างเซสชัน USB ตัวเลือกนี้ป้องกันไม่ให้เกิดขึ้น สายโทรเข้าอาจอยู่ที่โทรศัพท์แทนที่จะอยู่ที่เครื่องเล่นในรถ</string>
 
     <string name="btn_show_qr">แสดงรหัส QR</string>
     <string name="su_needed_keymaps_warning">คำเตือน: เฮดยูนิตของคุณต้องได้รับการรูท หรือติดตั้ง Shizuku ไว้ คุณต้องอนุญาตสิทธิ์ SU เมื่อมีข้อความแจ้ง</string>

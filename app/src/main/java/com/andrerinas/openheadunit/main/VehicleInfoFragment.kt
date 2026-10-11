@@ -126,15 +126,15 @@ class VehicleInfoFragment : Fragment() {
     }
 
     private fun saveSettings() {
-        pendingVehicleDisplayName?.let { settings.vehicleDisplayName = it }
-        pendingVehicleMake?.let { settings.vehicleMake = it }
-        pendingVehicleModel?.let { settings.vehicleModel = it }
-        pendingVehicleYear?.let { settings.vehicleYear = it }
-        pendingVehicleId?.let { settings.vehicleId = it }
-        pendingVehicleType?.let { settings.vehicleType = it }
-        pendingRightHandDrive?.let { settings.rightHandDrive = it }
-        pendingHeadUnitMake?.let { settings.headUnitMake = it }
-        pendingHeadUnitModel?.let { settings.headUnitModel = it }
+        pendingVehicleDisplayName?.let { if (it != settings.vehicleDisplayName) settings.vehicleDisplayName = it }
+        pendingVehicleMake?.let { if (it != settings.vehicleMake) settings.vehicleMake = it }
+        pendingVehicleModel?.let { if (it != settings.vehicleModel) settings.vehicleModel = it }
+        pendingVehicleYear?.let { if (it != settings.vehicleYear) settings.vehicleYear = it }
+        pendingVehicleId?.let { if (it != settings.vehicleId) settings.vehicleId = it }
+        pendingVehicleType?.let { if (it != settings.vehicleType) settings.vehicleType = it }
+        pendingRightHandDrive?.let { if (it != settings.rightHandDrive) settings.rightHandDrive = it }
+        pendingHeadUnitMake?.let { if (it != settings.headUnitMake) settings.headUnitMake = it }
+        pendingHeadUnitModel?.let { if (it != settings.headUnitModel) settings.headUnitModel = it }
 
         hasChanges = false
         updateSaveButtonState()
@@ -254,12 +254,14 @@ class VehicleInfoFragment : Fragment() {
             onOptionSelected = { index ->
                 pendingVehicleType = VehicleTypePolicy.atIndex(index)
                 checkChanges()
+                updateSettingsList()
             }
         ))
 
-        // The microphone setting overrides this, so say so rather than showing a choice that is
+        // The microphone setting can override the pick, so say so rather than show a choice that is
         // not what goes on the wire.
-        if (!settings.useHeadUnitMicrophone) {
+        if (VehicleTypePolicy.isOverriddenByMicrophone(
+                pendingVehicleType ?: VehicleTypePolicy.CAR, settings.useHeadUnitMicrophone)) {
             items.add(SettingItem.InfoBanner(
                 stableId = "vehicleTypeForcedByMicrophone",
                 textResId = R.string.vehicle_type_forced_by_microphone
