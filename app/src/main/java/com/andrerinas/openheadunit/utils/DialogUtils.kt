@@ -49,12 +49,17 @@ object DialogUtils {
                 true
             }
         }
-        container.isFocusableInTouchMode = true
+        // The body takes focus from the field only for the tap that hides the keyboard, and lets
+        // it go again afterwards, so it never becomes an invisible stop for D-pad or rotary keys.
+        container.setOnFocusChangeListener { view, hasFocus ->
+            if (!hasFocus) view.isFocusable = false
+        }
         // On every view but the fields: a clickable child such as the checkbox keeps its taps,
         // so a listener on the container alone would never see them. Returning false leaves the
         // tap to do what it did before.
         val hideOnTouch = View.OnTouchListener { _, event ->
             if (event.actionMasked == MotionEvent.ACTION_DOWN) {
+                container.isFocusableInTouchMode = true
                 container.requestFocus()
                 val imm = container.context.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
                 imm?.hideSoftInputFromWindow(container.windowToken, 0)
