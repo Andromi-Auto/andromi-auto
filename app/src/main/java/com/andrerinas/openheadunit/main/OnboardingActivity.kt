@@ -776,7 +776,9 @@ class OnboardingActivity : BaseActivity() {
         // Next is a button, so it never takes focus off the DPI field; without this a value the
         // user typed and did not confirm would be dropped in favour of the previous one.
         dpiPicker?.commitPendingInput()
-        settings.dpiPixelDensity = dpiPicker?.dpi ?: result.recommendedDpi
+        val stored = settings.dpiPixelDensity
+        val dpi = dpiPicker?.let { OnboardingDisplayPolicy.dpiToSave(it.dpi, it.hasUserInteracted, stored) } ?: stored
+        if (dpi != stored) settings.dpiPixelDensity = dpi
         if (settings.displaySizePreset != selectedSize.name) settings.displaySizePreset = selectedSize.name
         settings.commit()
         updateDpiOverPanelWarning()
