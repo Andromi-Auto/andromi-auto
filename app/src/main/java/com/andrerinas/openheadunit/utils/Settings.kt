@@ -270,8 +270,7 @@ class Settings(private val context: Context) {
     var nightMode: NightMode
         get() {
             val value = prefs.getInt("night-mode", 0)
-            val mode = NightMode.fromInt(value)
-            return mode!!
+            return NightMode.fromInt(value) ?: NightMode.AUTO
         }
         set(nightMode) {
             prefs.edit().putInt("night-mode", nightMode.value).apply()
@@ -1651,7 +1650,8 @@ class Settings(private val context: Context) {
         LIGHT_SENSOR(4),
         SCREEN_BRIGHTNESS(5),
         CAR_SIGNAL(6),
-        LOCATION(7);
+        LOCATION(7),
+        SYSTEM(8);
 
         companion object {
             private val map = NightMode.values().associateBy(NightMode::value)
