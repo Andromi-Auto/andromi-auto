@@ -17,11 +17,14 @@ object HomeUiHelper {
         val isEnabled: Boolean
     )
 
+    fun isEnabled(chosen: Boolean, isConnected: Boolean): Boolean = chosen || isConnected
+
     fun applyButtonVisibility(
         rootView: View,
-        settings: Settings
+        settings: Settings,
+        isConnected: Boolean = false
     ) {
-        val showsSelf = settings.showsSelf()
+        val showsSelf = isEnabled(settings.showsSelf(), isConnected)
         val showsUsb = settings.showsUsb()
         val showsWifi = settings.showsWifi()
 
@@ -95,7 +98,8 @@ object HomeUiHelper {
         context: Context,
         rootView: View,
         settings: Settings,
-        isNightActive: Boolean
+        isNightActive: Boolean,
+        isConnected: Boolean = false
     ) {
         val selfBtn = rootView.findViewById<MaterialButton>(R.id.self_mode_button)
         val usbBtn = rootView.findViewById<MaterialButton>(R.id.usb_button)
@@ -106,7 +110,7 @@ object HomeUiHelper {
                 settings.appTheme == Settings.AppTheme.EXTREME_DARK ||
                 isNightActive
 
-        val showsSelf = settings.showsSelf()
+        val showsSelf = isEnabled(settings.showsSelf(), isConnected)
         val showsUsb = settings.showsUsb()
         val showsWifi = settings.showsWifi()
 

@@ -135,7 +135,11 @@ class HomeFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                commManager.connectionState.collect { updateProjectionButtonText() }
+                commManager.connectionState.collect {
+                    updateProjectionButtonText()
+                    updateButtonVisibility()
+                    updateButtonStyle()
+                }
             }
         }
 
@@ -339,7 +343,7 @@ class HomeFragment : Fragment() {
         val v = view ?: return
         val appSettings = App.provide(ctx).settings
         val isNightActive = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
-        HomeUiHelper.applyButtonStyles(ctx, v, appSettings, isNightActive)
+        HomeUiHelper.applyButtonStyles(ctx, v, appSettings, isNightActive, commManager.isConnected)
     }
 
     private fun updateButtonScale() {
@@ -355,7 +359,7 @@ class HomeFragment : Fragment() {
         val v = view ?: return
         val ctx = context ?: return
         val appSettings = App.provide(ctx).settings
-        HomeUiHelper.applyButtonVisibility(v, appSettings)
+        HomeUiHelper.applyButtonVisibility(v, appSettings, commManager.isConnected)
     }
 
     private fun updateExitButtonVisibility() {
