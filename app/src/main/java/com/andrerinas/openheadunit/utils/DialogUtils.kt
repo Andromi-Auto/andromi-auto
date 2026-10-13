@@ -6,6 +6,7 @@ import android.content.DialogInterface
 import android.util.TypedValue
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 import android.widget.CheckBox
@@ -49,14 +50,23 @@ object DialogUtils {
             }
         }
         container.isFocusableInTouchMode = true
-        container.setOnTouchListener { view, event ->
+        // On every view but the fields: a clickable child such as the checkbox keeps its taps,
+        // so a listener on the container alone would never see them. Returning false leaves the
+        // tap to do what it did before.
+        val hideOnTouch = View.OnTouchListener { _, event ->
             if (event.actionMasked == MotionEvent.ACTION_DOWN) {
-                view.requestFocus()
-                val imm = view.context.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
-                imm?.hideSoftInputFromWindow(view.windowToken, 0)
+                container.requestFocus()
+                val imm = container.context.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+                imm?.hideSoftInputFromWindow(container.windowToken, 0)
             }
             false
         }
+        fun attach(view: View) {
+            if (view is EditText) return
+            view.setOnTouchListener(hideOnTouch)
+            if (view is ViewGroup) for (i in 0 until view.childCount) attach(view.getChildAt(i))
+        }
+        attach(container)
     }
 
     fun showTextInputDialog(

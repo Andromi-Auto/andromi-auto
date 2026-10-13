@@ -38,8 +38,12 @@ class TextDialogKeyPolicyTest {
     }
 
     @Test
-    fun otherKeysAndMissingEventsDoNotPressOk() {
+    fun oemKeyboardWithNoActionAndNoEventPressesOk() {
+        assertTrue(TextDialogKeyPolicy.isSubmit(EditorInfo.IME_NULL, null, null))
+    }
+
+    @Test
+    fun otherKeysDoNotPressOk() {
         assertFalse(TextDialogKeyPolicy.isSubmit(EditorInfo.IME_NULL, KeyEvent.KEYCODE_A, KeyEvent.ACTION_DOWN))
-        assertFalse(TextDialogKeyPolicy.isSubmit(EditorInfo.IME_NULL, null, null))
     }
 }

@@ -14,12 +14,14 @@ object TextDialogKeyPolicy {
         if (isLastField) EditorInfo.IME_ACTION_DONE else EditorInfo.IME_ACTION_NEXT
 
     /**
-     * True when this editor action should press OK. Most keyboards send Done; some, and hardware
-     * keys, send no action and only an Enter key event, which counts once, on key down.
+     * True when this editor action should press OK. Most keyboards send Done. Hardware Enter sends
+     * no action and a key event, which counts once, on key down. Some OEM keyboards send no action
+     * and no event at all (as DpiPickerView also allows), which counts too.
      */
     fun isSubmit(actionId: Int, keyCode: Int?, keyAction: Int?): Boolean = when (actionId) {
         EditorInfo.IME_ACTION_DONE, EditorInfo.IME_ACTION_GO, EditorInfo.IME_ACTION_SEND -> true
-        EditorInfo.IME_NULL -> keyCode == KeyEvent.KEYCODE_ENTER && keyAction == KeyEvent.ACTION_DOWN
+        EditorInfo.IME_NULL -> (keyCode == null && keyAction == null) ||
+            (keyCode == KeyEvent.KEYCODE_ENTER && keyAction == KeyEvent.ACTION_DOWN)
         else -> false
     }
 }
