@@ -2,6 +2,7 @@ package com.andrerinas.openheadunit.input
 
 import android.view.KeyEvent
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -117,9 +118,29 @@ class KeyCodeTest {
     }
 
     @Test
-    fun `supported list contains KEY_NIGHT_MODE and convert preserves KEYCODE_N`() {
-        assertTrue(KeyCode.supported.contains(KeyCode.KEY_NIGHT_MODE))
-        assertEquals(KeyCode.KEY_NIGHT_MODE, KeyCode.convert(KeyCode.KEY_NIGHT_MODE))
+    fun `the local night key is never announced to the phone`() {
+        assertFalse(KeyCode.supported.contains(KeyCode.KEY_NIGHT_MODE))
         assertEquals(KeyEvent.KEYCODE_N, KeyCode.convert(KeyEvent.KEYCODE_N))
+    }
+
+    @Test
+    fun `a legacy night mapping under KEYCODE_N moves to KEY_NIGHT_MODE`() {
+        val legacy = mapOf(KeyEvent.KEYCODE_N to 300, KeyEvent.KEYCODE_HOME to 301)
+        assertEquals(
+            mapOf(KeyCode.KEY_NIGHT_MODE to 300, KeyEvent.KEYCODE_HOME to 301),
+            KeyCode.migrateLegacyNightKey(legacy)
+        )
+    }
+
+    @Test
+    fun `a keymap without a KEYCODE_N entry is unchanged`() {
+        val keymap = mapOf(KeyEvent.KEYCODE_HOME to 301)
+        assertEquals(keymap, KeyCode.migrateLegacyNightKey(keymap))
+    }
+
+    @Test
+    fun `an existing KEY_NIGHT_MODE mapping wins and the stale entry is dropped`() {
+        val keymap = mapOf(KeyEvent.KEYCODE_N to 300, KeyCode.KEY_NIGHT_MODE to 302)
+        assertEquals(mapOf(KeyCode.KEY_NIGHT_MODE to 302), KeyCode.migrateLegacyNightKey(keymap))
     }
 }

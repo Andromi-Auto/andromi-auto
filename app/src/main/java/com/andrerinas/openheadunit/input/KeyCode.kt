@@ -115,9 +115,18 @@ object KeyCode {
         224, // KEYCODE_WAKEUP → Voice Command
         264, 265, 267, // STEM_PRIMARY, STEM_1, STEM_3 (steering wheel)
         268, 269, 270, 271, // Rotary controller
-        65536, 65537, 65538, // Rotary controller
-        KEY_NIGHT_MODE // Custom night mode keycode
+        65536, 65537, 65538 // Rotary controller
     ).distinct().sorted()
+
+    /**
+     * Keymaps saved before [KEY_NIGHT_MODE] stored the night action under KEYCODE_N, which is
+     * now a letter. Moves that entry once; the night key stays local and is never announced.
+     */
+    fun migrateLegacyNightKey(keymap: Map<Int, Int>): Map<Int, Int> {
+        val physical = keymap[KeyEvent.KEYCODE_N] ?: return keymap
+        val night = keymap[KEY_NIGHT_MODE] ?: physical
+        return keymap - KeyEvent.KEYCODE_N + (KEY_NIGHT_MODE to night)
+    }
 
     val KeyEvent.isMediaSessionKey: Boolean
         get() = keyCode == KeyEvent.KEYCODE_MEDIA_PLAY ||
