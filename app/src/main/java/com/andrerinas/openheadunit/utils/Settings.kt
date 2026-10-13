@@ -9,6 +9,7 @@ import android.hardware.usb.UsbDevice
 import android.location.Location
 import android.media.AudioManager
 import android.os.Build
+import com.andrerinas.openheadunit.input.KeyCode
 import com.andrerinas.openheadunit.input.MediaKeyRoutingPolicy
 import com.andrerinas.openheadunit.view.PerformanceOverlayField
 import com.andrerinas.openheadunit.view.PerformanceOverlayPolicy
@@ -296,7 +297,9 @@ class Settings(private val context: Context) {
                 val codes = it.split("-")
                 map[codes[0].toInt()] = codes[1].toInt()
             }
-            return map
+            val migrated = KeyCode.migrateLegacyNightKey(map)
+            if (migrated != map) keyCodes = migrated.toMutableMap()
+            return migrated.toMutableMap()
         }
         set(codesMap) {
             val list: List<String> = codesMap.map { "${it.key}-${it.value}" }
