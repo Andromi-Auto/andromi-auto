@@ -121,4 +121,80 @@ class AnnouncedDensityPolicyTest {
             AnnouncedDensityPolicy.describe(AnnouncedDensityPolicy.decide(0, small, 800, 480), 800, 480)
         )
     }
+
+    @Test
+    fun `the widescreen maximum per codec width`() {
+        assertEquals(103, AnnouncedDensityPolicy.widescreenMaxDpi(800))
+        assertEquals(165, AnnouncedDensityPolicy.widescreenMaxDpi(1280))
+        assertEquals(247, AnnouncedDensityPolicy.widescreenMaxDpi(1920))
+        assertEquals(0, AnnouncedDensityPolicy.widescreenMaxDpi(0))
+    }
+
+    @Test
+    fun `the widescreen boundary is exact`() {
+        for (w in listOf(800, 1280, 1920)) {
+            val n = AnnouncedDensityPolicy.widescreenMaxDpi(w)
+            assertTrue("$w at $n", AnnouncedDensityPolicy.canvasDp(w, n) >= 1240)
+            assertTrue("$w at ${n + 1}", AnnouncedDensityPolicy.canvasDp(w, n + 1) < 1240)
+        }
+    }
+
+    @Test
+    fun `the widescreen line never names a value the clamp lowers`() {
+        for (r in Settings.Resolution.values().filter { it != Settings.Resolution.AUTO }) {
+            val n = AnnouncedDensityPolicy.widescreenMaxDpi(r.width)
+            assertTrue("${r.resName}", n <= AnnouncedDensityPolicy.huigMaxDpi(r.width, r.height))
+            assertEquals(Reason.AS_STORED, AnnouncedDensityPolicy.decide(n, small, r.width, r.height).reason)
+        }
+    }
+
+    @Test
+    fun `the widescreen hint skips a portrait or unknown codec`() {
+        assertEquals(103, AnnouncedDensityPolicy.widescreenHintDpi(800, 480))
+        assertEquals(0, AnnouncedDensityPolicy.widescreenHintDpi(480, 800))
+        assertEquals(0, AnnouncedDensityPolicy.widescreenHintDpi(0, 0))
+    }
+
+    @Test
+    fun `a resolution that matches the panel is fully visible`() {
+        assertEquals(800 to 480, AnnouncedDensityPolicy.visibleSize(Settings.VideoFitMode.FILL, 800, 480, 800, 480))
+    }
+
+    @Test
+    fun `a resolution larger than a small panel loses its margins`() {
+        assertEquals(1024 to 600, AnnouncedDensityPolicy.visibleSize(Settings.VideoFitMode.FILL, 1024, 600, 1280, 720))
+        assertEquals(1024 to 720, AnnouncedDensityPolicy.visibleSize(Settings.VideoFitMode.CONTAIN, 1024, 768, 1280, 720))
+    }
+
+    @Test
+    fun `the preview of a margined resolution sends what connect sends`() {
+        val (w, h) = AnnouncedDensityPolicy.visibleSize(Settings.VideoFitMode.CONTAIN, 1024, 768, 1280, 720)
+        assertTrue(AnnouncedDensityPolicy.decide(0, small, w, h).announced < AnnouncedDensityPolicy.decide(0, small, 1280, 720).announced)
+    }
+
+    @Test
+    fun `the resolution turns to a portrait panel`() {
+        assertEquals(480 to 800, AnnouncedDensityPolicy.visibleSize(Settings.VideoFitMode.FILL, 480, 800, 800, 480))
+    }
+
+    @Test
+    fun `an unknown panel leaves the resolution whole`() {
+        assertEquals(800 to 480, AnnouncedDensityPolicy.visibleSize(Settings.VideoFitMode.FILL, 0, 0, 800, 480))
+    }
+
+    @Test
+    fun `a panel held in portrait previews a landscape projection`() {
+        assertEquals(1440 to 720, AnnouncedDensityPolicy.orientPanel(720, 1440, portrait = false))
+        assertEquals(720 to 1440, AnnouncedDensityPolicy.orientPanel(1440, 720, portrait = true))
+        val (pw, ph) = AnnouncedDensityPolicy.orientPanel(720, 1440, portrait = false)
+        assertEquals(800 to 480, AnnouncedDensityPolicy.visibleSize(Settings.VideoFitMode.FILL, pw, ph, 800, 480))
+    }
+
+    @Test
+    fun `only an explicit portrait setting projects in portrait`() {
+        for (o in Settings.ScreenOrientation.values()) {
+            val portrait = o == Settings.ScreenOrientation.PORTRAIT || o == Settings.ScreenOrientation.PORTRAIT_REVERSE
+            assertEquals(o.name, portrait, AnnouncedDensityPolicy.projectsPortrait(o))
+        }
+    }
 }
