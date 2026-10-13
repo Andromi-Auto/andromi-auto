@@ -41,4 +41,23 @@ object AnnouncedDensityPolicy {
         val heightBound = visibleH * 160 / HUIG_MIN_HEIGHT_DP < visibleW * 160 / HUIG_MIN_WIDTH_DP
         return Decision(max, stored, if (heightBound) Reason.HEIGHT_FLOOR else Reason.WIDTH_FLOOR)
     }
+
+    /** The fallback keeps the primary's dp canvas: its margins scale by the same width ratio. */
+    fun fallbackDensity(primaryDensity: Int, primaryWidth: Int, fallbackWidth: Int): Int =
+        if (primaryWidth <= 0) primaryDensity
+        else Math.round(primaryDensity.toFloat() * fallbackWidth / primaryWidth)
+
+    /** The `Density is:` log text; the rig greps these exact strings. */
+    fun describe(decision: Decision, visibleW: Int, visibleH: Int): String {
+        val requested = if (decision.requested > 0) decision.requested.toString() else "automatic"
+        val why = when (decision.reason) {
+            Reason.AS_STORED -> "within the HUIG floor"
+            Reason.AUTOMATIC -> "codec-based"
+            Reason.WIDTH_FLOOR -> "clamped to the $HUIG_MIN_WIDTH_DP dp width floor"
+            Reason.HEIGHT_FLOOR -> "clamped to the $HUIG_MIN_HEIGHT_DP dp height floor"
+            Reason.PORTRAIT -> "portrait, not clamped"
+        }
+        return "${decision.announced} (dp canvas ${canvasDp(visibleW, decision.announced)}x" +
+            "${canvasDp(visibleH, decision.announced)}, requested $requested, $why)"
+    }
 }

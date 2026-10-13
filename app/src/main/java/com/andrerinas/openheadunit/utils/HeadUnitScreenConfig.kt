@@ -708,8 +708,6 @@ object HeadUnitScreenConfig {
         )
     }
 
-    fun getDensityDpi(): Int = densityDecision().announced
-
     fun getPixelAspectRatioE4(): Int {
         // The settings row normalises anything <= 0 to 10000, so 10000 is also "unset" and is what
         // lets the derived value through. An explicit non-square choice always wins.

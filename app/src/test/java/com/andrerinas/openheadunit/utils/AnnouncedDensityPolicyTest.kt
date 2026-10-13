@@ -1,5 +1,6 @@
 package com.andrerinas.openheadunit.utils
 
+import com.andrerinas.openheadunit.aap.protocol.proto.Control
 import com.andrerinas.openheadunit.utils.AnnouncedDensityPolicy.Reason
 import com.andrerinas.openheadunit.utils.SystemOptimizer.DisplaySizePreset
 import org.junit.Assert.assertEquals
@@ -86,5 +87,38 @@ class AnnouncedDensityPolicyTest {
                 assertTrue("$p ${r.resName} -> $dpi", AnnouncedDensityPolicy.canvasDp(r.height, dpi) >= 450)
             }
         }
+    }
+
+    @Test
+    fun `the fallback density scales by the width ratio`() {
+        assertEquals(160, AnnouncedDensityPolicy.fallbackDensity(240, 1920, 1280))
+        assertEquals(120, AnnouncedDensityPolicy.fallbackDensity(240, 2560, 1280))
+        assertEquals(80, AnnouncedDensityPolicy.fallbackDensity(240, 3840, 1280))
+        assertEquals(240, AnnouncedDensityPolicy.fallbackDensity(240, 0, 1280))
+    }
+
+    @Test
+    fun `the fallback keeps the primary dp canvas`() {
+        val primary = Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType._1920x1080
+        val fb = VideoFallbackPolicy.fallbackFor(primary)!!
+        val (pw, ph) = VideoFallbackPolicy.sizeOf(primary)
+        val (fw, fh) = VideoFallbackPolicy.sizeOf(fb)
+        val m = VideoFallbackPolicy.scaledMargins(pw, ph, 120, 60, fb)
+        val dpi = 240
+        val fdpi = AnnouncedDensityPolicy.fallbackDensity(dpi, pw, fw)
+        assertTrue(Math.abs(AnnouncedDensityPolicy.canvasDp(pw - 120, dpi) - AnnouncedDensityPolicy.canvasDp(fw - m.width, fdpi)) <= 1)
+        assertTrue(Math.abs(AnnouncedDensityPolicy.canvasDp(ph - 60, dpi) - AnnouncedDensityPolicy.canvasDp(fh - m.height, fdpi)) <= 1)
+    }
+
+    @Test
+    fun `describe pins the rig's grep targets`() {
+        assertEquals(
+            "170 (dp canvas 752x451, requested 171, clamped to the 450 dp height floor)",
+            AnnouncedDensityPolicy.describe(AnnouncedDensityPolicy.decide(171, small, 800, 480), 800, 480)
+        )
+        assertEquals(
+            "150 (dp canvas 853x512, requested automatic, codec-based)",
+            AnnouncedDensityPolicy.describe(AnnouncedDensityPolicy.decide(0, small, 800, 480), 800, 480)
+        )
     }
 }
