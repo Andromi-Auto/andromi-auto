@@ -373,15 +373,13 @@ class AapService : Service() {
 
     private fun shouldActivateMediaSession(): Boolean {
         return MediaSessionActivationPolicy.shouldActivate(
-            isLoopbackSession = commManager.isLoopbackSession,
-            isSelfModeLauncherActive = selfLauncherManager.isActive
+            isLoopbackSession = commManager.isLoopbackSession
         )
     }
 
     private fun shouldSyncAaMediaMetadata(): Boolean {
         return MediaSessionActivationPolicy.shouldSyncAaMetadata(
             isLoopbackSession = commManager.isLoopbackSession,
-            isSelfModeLauncherActive = selfLauncherManager.isActive,
             userPreference = App.provide(this).settings.syncMediaSessionWithAaMetadata
         )
     }

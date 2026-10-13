@@ -7,75 +7,24 @@ import org.junit.Test
 class MediaSessionActivationPolicyTest {
 
     @Test
-    fun `shouldActivate returns false when session is loopback`() {
-        assertFalse(
-            "Loopback sessions run on the same device and should not activate MediaSession",
-            MediaSessionActivationPolicy.shouldActivate(
-                isLoopbackSession = true,
-                isSelfModeLauncherActive = false
-            )
-        )
+    fun `a loopback session does not activate the media session`() {
+        assertFalse(MediaSessionActivationPolicy.shouldActivate(isLoopbackSession = true))
     }
 
     @Test
-    fun `shouldActivate returns false when self mode launcher is active`() {
-        assertFalse(
-            "Self mode launcher running on the same device should not activate MediaSession",
-            MediaSessionActivationPolicy.shouldActivate(
-                isLoopbackSession = false,
-                isSelfModeLauncherActive = true
-            )
-        )
+    fun `a remote session activates the media session`() {
+        assertTrue(MediaSessionActivationPolicy.shouldActivate(isLoopbackSession = false))
     }
 
     @Test
-    fun `shouldActivate returns true for remote USB and WiFi sessions`() {
-        assertTrue(
-            "Remote sessions should activate MediaSession to relay hardware media buttons to phone",
-            MediaSessionActivationPolicy.shouldActivate(
-                isLoopbackSession = false,
-                isSelfModeLauncherActive = false
-            )
-        )
+    fun `a loopback session never syncs metadata, whatever the preference`() {
+        assertFalse(MediaSessionActivationPolicy.shouldSyncAaMetadata(isLoopbackSession = true, userPreference = true))
+        assertFalse(MediaSessionActivationPolicy.shouldSyncAaMetadata(isLoopbackSession = true, userPreference = false))
     }
 
     @Test
-    fun `shouldSyncAaMetadata returns false in self mode even if preference is enabled`() {
-        assertFalse(
-            "Loopback sessions should not publish AA media metadata to local system MediaSession",
-            MediaSessionActivationPolicy.shouldSyncAaMetadata(
-                isLoopbackSession = true,
-                isSelfModeLauncherActive = false,
-                userPreference = true
-            )
-        )
-        assertFalse(
-            "Self mode active launcher should not publish AA media metadata to local system MediaSession",
-            MediaSessionActivationPolicy.shouldSyncAaMetadata(
-                isLoopbackSession = false,
-                isSelfModeLauncherActive = true,
-                userPreference = true
-            )
-        )
-    }
-
-    @Test
-    fun `shouldSyncAaMetadata follows user preference in remote sessions`() {
-        assertTrue(
-            "Remote session should sync metadata when user preference is enabled",
-            MediaSessionActivationPolicy.shouldSyncAaMetadata(
-                isLoopbackSession = false,
-                isSelfModeLauncherActive = false,
-                userPreference = true
-            )
-        )
-        assertFalse(
-            "Remote session should respect user preference when disabled",
-            MediaSessionActivationPolicy.shouldSyncAaMetadata(
-                isLoopbackSession = false,
-                isSelfModeLauncherActive = false,
-                userPreference = false
-            )
-        )
+    fun `a remote session follows the preference`() {
+        assertTrue(MediaSessionActivationPolicy.shouldSyncAaMetadata(isLoopbackSession = false, userPreference = true))
+        assertFalse(MediaSessionActivationPolicy.shouldSyncAaMetadata(isLoopbackSession = false, userPreference = false))
     }
 }
