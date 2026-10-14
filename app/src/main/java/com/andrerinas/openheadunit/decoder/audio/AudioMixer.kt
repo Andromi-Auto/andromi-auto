@@ -61,6 +61,7 @@ class AudioMixer(
         var activeThisCycle = false
         var startupReported = false
         var reportedRebanks = 0L
+        var reportedRebankEntries = 0L
         var reportedDropped = 0L
         var reportedConcealed = 0L
     }
@@ -255,6 +256,14 @@ class AudioMixer(
             lastCycleMs = now
             if (now >= nextPcmDiagnosticMs) {
                 for ((id, state) in channels) {
+                    state.buffer.takeStarvation()?.let { event ->
+                        recordDiagnostic(now, "PCM starvation channel=$id at=${event.atMs}ms " +
+                            "reportDelay=${(now - event.atMs).coerceAtLeast(0)}ms " +
+                            "available=${event.availableFrames} target=${event.targetFrames} frames " +
+                            "lastArrivalAgeMs=${event.lastArrivalAgeMs ?: "unknown"} " +
+                            "lastPcmAgeMs=${event.lastPcmAgeMs ?: "unknown"} " +
+                            "outputBudget=${event.outputBudgetFrames} frames", warning = true)
+                    }
                     state.buffer.takeOverflow()?.let { loss ->
                         recordDiagnostic(now, "PCM overflow channel=$id negotiatedSource=${state.rate}Hz/${state.channels}ch " +
                             "at=${loss.atMs}ms reportDelay=${now - loss.atMs}ms " +
@@ -267,18 +276,31 @@ class AudioMixer(
                             "lastRead=${loss.lastReadMs}ms started=${loss.started} " +
                             "rebanking=${loss.rebanking} ended=${loss.ended}", warning = true)
                     }
+                    state.buffer.takeReserveWindow(now)?.let { reserve ->
+                        recordDiagnostic(now, "PCM reserve channel=$id window=${reserve.windowMs}ms " +
+                            "boundary=${if (reserve.stopped) "Stop" else "periodic"} skippedWindows=${reserve.skippedWindows} " +
+                            "renderCycles=${reserve.cycles} postRenderMin=${reserve.minimumFrames} " +
+                            "postRenderMax=${reserve.maximumFrames} " +
+                            "${if (reserve.stopped) "depthAtStop" else "depth"}=${reserve.depthFrames} " +
+                            "target=${reserve.targetFrames} frames " +
+                            "underrunEventsTotal=${reserve.underrunEvents} rebankEntriesTotal=${reserve.rebankEntries} " +
+                            "concealedFramesTotal=${reserve.concealedFrames} compressedFramesTotal=${reserve.compressedFrames}", remember = false)
+                    }
                     val rebanks = state.buffer.rebanks
+                    val rebankEntries = state.buffer.rebankEntries
                     val dropped = state.buffer.droppedFrames
                     val concealed = state.buffer.concealedFrames
-                    if (rebanks != state.reportedRebanks || dropped != state.reportedDropped ||
+                    if (rebanks != state.reportedRebanks || rebankEntries != state.reportedRebankEntries || dropped != state.reportedDropped ||
                         concealed != state.reportedConcealed) {
                         recordDiagnostic(now, "PCM channel=$id source=${state.rate}Hz/${state.channels}ch " +
                             "target=${state.buffer.targetFrames()} depth=${state.buffer.depthFrames()} frames " +
                             "arrivalGapMax=${state.buffer.maxArrivalGapMs()}ms pcmGapMax=${state.buffer.maxPcmGapMs()}ms " +
                             "rebanksDelta=${rebanks - state.reportedRebanks} " +
+                            "rebankEntriesDelta=${rebankEntries - state.reportedRebankEntries} " +
                             "concealedDelta=${concealed - state.reportedConcealed} " +
                             "droppedDelta=${dropped - state.reportedDropped}", warning = true)
                         state.reportedRebanks = rebanks
+                        state.reportedRebankEntries = rebankEntries
                         state.reportedDropped = dropped
                         state.reportedConcealed = concealed
                     }
@@ -441,8 +463,8 @@ class AudioMixer(
         }
     }
 
-    private fun recordDiagnostic(nowMs: Long, message: String, warning: Boolean = false) {
+    private fun recordDiagnostic(nowMs: Long, message: String, warning: Boolean = false, remember: Boolean = true) {
         val line = "AudioMixer: id=$diagnosticId $message"
-        AudioDiagnostics.report(nowMs, line, warning)
+        AudioDiagnostics.report(nowMs, line, warning, remember)
     }
 }
