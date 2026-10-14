@@ -65,11 +65,13 @@ class DpiSettingsFragment : Fragment() {
         setupToolbar()
 
         // Show which DPI "Automatic" actually sends, and the dp canvas it gives.
-        val (pw, ph, resName) = previewResolution()
+        val p = previewResolution()
+        val (pw, ph, resName) = Triple(p.w, p.h, p.name)
         val auto0 = preview(0)
+        val (cw, ch) = AnnouncedDensityPolicy.phoneCanvas(pw, ph, p.par)
         autoDesc.text = getString(
             R.string.dpi_automatic_desc_canvas, auto0.announced, resName,
-            AnnouncedDensityPolicy.canvasDp(pw, auto0.announced), AnnouncedDensityPolicy.canvasDp(ph, auto0.announced)
+            AnnouncedDensityPolicy.canvasDp(cw, auto0.announced), AnnouncedDensityPolicy.canvasDp(ch, auto0.announced)
         )
 
         val wide = AnnouncedDensityPolicy.widescreenHintDpi(pw, ph)
@@ -167,8 +169,10 @@ class DpiSettingsFragment : Fragment() {
         }
     }
 
-    /** The visible size Android Auto gets at the stored resolution, and that resolution's name. */
-    private fun previewResolution(): Triple<Int, Int, String> {
+    private data class Preview(val w: Int, val h: Int, val name: String, val par: Int)
+
+    /** The visible size Android Auto gets at the stored resolution, its name and the pixel aspect ratio. */
+    private fun previewResolution(): Preview {
         val m = realMetrics()
         val chosen = Settings.Resolution.fromId(settings.resolutionId)
         val r = if (chosen == null || chosen == Settings.Resolution.AUTO) {
@@ -178,25 +182,31 @@ class DpiSettingsFragment : Fragment() {
             m.widthPixels, m.heightPixels, AnnouncedDensityPolicy.projectsPortrait(settings.screenOrientation)
         )
         val (w, h) = AnnouncedDensityPolicy.visibleSize(settings.videoFitMode, pw, ph, r.width, r.height)
-        return Triple(w, h, r.resName)
+        val par = AnnouncedDensityPolicy.pixelAspectE4(
+            settings.videoFitMode, pw, ph, r.width, r.height, settings.pixelAspectRatioE4
+        )
+        return Preview(w, h, r.resName, par)
     }
 
     private fun preview(value: Int): AnnouncedDensityPolicy.Decision {
-        val (w, h, _) = previewResolution()
+        val p = previewResolution()
         val preset = OnboardingDisplayPolicy.initialPreset(
             settings.displaySizePreset, SystemOptimizer.DisplaySizePreset.SMALL_7_8
         )
-        return AnnouncedDensityPolicy.decide(value, preset, w, h)
+        return AnnouncedDensityPolicy.decide(value, preset, p.w, p.h, p.par)
     }
 
     /** Says so while the picked value is lower on the wire than on the slider. */
     private fun updateClampedNote() {
         val picked = picker.dpi
-        val sent = preview(picked).announced
+        val d = preview(picked)
+        val sent = d.announced
         if (autoSwitch.isChecked || sent == picked) {
             clampedNote.visibility = View.GONE
         } else {
-            clampedNote.text = getString(R.string.dpi_clamped_note, picked, sent)
+            val note = if (d.reason == AnnouncedDensityPolicy.Reason.PORTRAIT_FLOOR) R.string.dpi_clamped_note_portrait
+            else R.string.dpi_clamped_note
+            clampedNote.text = getString(note, picked, sent)
             clampedNote.visibility = View.VISIBLE
         }
     }

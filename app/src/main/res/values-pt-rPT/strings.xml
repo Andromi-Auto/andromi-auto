@@ -171,6 +171,7 @@
     <string name="dpi_row_auto_format">Automático: %1$d (%2$dx%3$d dp)</string>
     <string name="dpi_row_clamped_format">%1$d, enviado como %2$d (%3$dx%4$d dp)</string>
     <string name="dpi_clamped_note">O Android Auto precisa de uma área de, pelo menos, 748x450 dp, por isso %1$d DPI é enviado como %2$d.</string>
+    <string name="dpi_clamped_note_portrait">Na vertical, o Google Maps no Android Auto ignora o toque numa área mais estreita do que 730 dp, por isso %1$d DPI é enviado como %2$d.</string>
     <string name="dpi_value_format">%1$d DPI</string>
     <string name="dpi_input_hint">DPI</string>
 
