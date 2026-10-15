@@ -16,7 +16,7 @@ object AnnouncedDensityPolicy {
     const val PORTRAIT_MIN_WIDTH_DP = 730
     private const val FALLBACK_DPI = 160
 
-    enum class Reason { AS_STORED, AUTOMATIC, WIDTH_FLOOR, HEIGHT_FLOOR, PORTRAIT, PORTRAIT_FLOOR }
+    enum class Reason { AS_STORED, AUTOMATIC, WIDTH_FLOOR, HEIGHT_FLOOR, PORTRAIT, PORTRAIT_FLOOR, FLOOR_OVERRIDE }
 
     data class Decision(val announced: Int, val requested: Int, val reason: Reason)
 
@@ -73,7 +73,7 @@ object AnnouncedDensityPolicy {
 
     fun decide(
         stored: Int, preset: DisplaySizePreset, visibleW: Int, visibleH: Int,
-        parE4: Int = ProjectionGeometryPolicy.SQUARE_PIXELS_E4
+        parE4: Int = ProjectionGeometryPolicy.SQUARE_PIXELS_E4, floorOverride: Boolean = false
     ): Decision {
         if (visibleW <= 0 || visibleH <= 0) {
             return if (stored > 0) Decision(stored, stored, Reason.AS_STORED)
@@ -85,8 +85,12 @@ object AnnouncedDensityPolicy {
                 val auto = OnboardingDisplayPolicy.recommendedDpi(preset, visibleW, visibleH, true)
                 return Decision(minOf(auto, max), 0, Reason.PORTRAIT)
             }
-            return if (stored <= max) Decision(stored, stored, Reason.PORTRAIT)
-            else Decision(max, stored, Reason.PORTRAIT_FLOOR)
+            // The user's "Use anyway" lifts a floor for a stored value only, never for Automatic.
+            return when {
+                stored <= max -> Decision(stored, stored, Reason.PORTRAIT)
+                floorOverride -> Decision(stored, stored, Reason.FLOOR_OVERRIDE)
+                else -> Decision(max, stored, Reason.PORTRAIT_FLOOR)
+            }
         }
         if (stored <= 0) {
             return Decision(
@@ -95,6 +99,7 @@ object AnnouncedDensityPolicy {
         }
         val max = huigMaxDpi(visibleW, visibleH)
         if (stored <= max) return Decision(stored, stored, Reason.AS_STORED)
+        if (floorOverride) return Decision(stored, stored, Reason.FLOOR_OVERRIDE)
         val heightBound = visibleH * 160 / HUIG_MIN_HEIGHT_DP < visibleW * 160 / HUIG_MIN_WIDTH_DP
         return Decision(max, stored, if (heightBound) Reason.HEIGHT_FLOOR else Reason.WIDTH_FLOOR)
     }
@@ -117,6 +122,8 @@ object AnnouncedDensityPolicy {
             Reason.HEIGHT_FLOOR -> "clamped to the $HUIG_MIN_HEIGHT_DP dp height floor"
             Reason.PORTRAIT -> "portrait, within the $PORTRAIT_MIN_WIDTH_DP dp width floor"
             Reason.PORTRAIT_FLOOR -> "clamped to the $PORTRAIT_MIN_WIDTH_DP dp portrait width floor"
+            Reason.FLOOR_OVERRIDE -> if (visibleH > visibleW) "the $PORTRAIT_MIN_WIDTH_DP dp portrait width floor overridden"
+            else "the ${HUIG_MIN_WIDTH_DP}x$HUIG_MIN_HEIGHT_DP dp HUIG floor overridden"
         }
         val (w, h) = phoneCanvas(visibleW, visibleH, parE4)
         return "${decision.announced} (dp canvas ${canvasDp(w, decision.announced)}x" +

@@ -178,6 +178,46 @@ class AnnouncedDensityPolicyTest {
             "175 (dp canvas 731x1170, requested 198, clamped to the 730 dp portrait width floor)",
             AnnouncedDensityPolicy.describe(AnnouncedDensityPolicy.decide(198, small, 720, 1280, 11111), 720, 1280, 11111)
         )
+        assertEquals(
+            "198 (dp canvas 646x1034, requested 198, the 730 dp portrait width floor overridden)",
+            AnnouncedDensityPolicy.describe(
+                AnnouncedDensityPolicy.decide(198, small, 720, 1280, 11111, floorOverride = true), 720, 1280, 11111
+            )
+        )
+    }
+
+    @Test
+    fun `the override sends a stored portrait value above the floor`() {
+        val d = AnnouncedDensityPolicy.decide(198, small, 720, 1280, 11111, floorOverride = true)
+        assertEquals(AnnouncedDensityPolicy.Decision(198, 198, Reason.FLOOR_OVERRIDE), d)
+    }
+
+    @Test
+    fun `the override leaves a value under the floor and Automatic alone`() {
+        assertEquals(
+            AnnouncedDensityPolicy.Decision(160, 160, Reason.PORTRAIT),
+            AnnouncedDensityPolicy.decide(160, small, 720, 1280, 11111, floorOverride = true)
+        )
+        assertEquals(
+            AnnouncedDensityPolicy.decide(0, small, 720, 1280, 11111),
+            AnnouncedDensityPolicy.decide(0, small, 720, 1280, 11111, floorOverride = true)
+        )
+    }
+
+    @Test
+    fun `the override sends a stored landscape value above the HUIG floor`() {
+        assertEquals(
+            AnnouncedDensityPolicy.Decision(171, 171, Reason.FLOOR_OVERRIDE),
+            AnnouncedDensityPolicy.decide(171, small, 800, 480, floorOverride = true)
+        )
+        assertEquals(
+            "171 (dp canvas 748x449, requested 171, the 748x450 dp HUIG floor overridden)",
+            AnnouncedDensityPolicy.describe(AnnouncedDensityPolicy.decide(171, small, 800, 480, floorOverride = true), 800, 480)
+        )
+        assertEquals(
+            AnnouncedDensityPolicy.decide(0, small, 800, 480),
+            AnnouncedDensityPolicy.decide(0, small, 800, 480, floorOverride = true)
+        )
     }
 
     @Test
