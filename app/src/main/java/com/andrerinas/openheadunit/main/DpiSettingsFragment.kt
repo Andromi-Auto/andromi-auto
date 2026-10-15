@@ -43,9 +43,12 @@ class DpiSettingsFragment : Fragment() {
     private lateinit var widescreenHint: TextView
     private lateinit var overPanelWarning: TextView
     private lateinit var clampedNote: TextView
+    private lateinit var overrideButton: MaterialButton
     private var saveButton: MaterialButton? = null
 
     private var initialValue = 0
+    private var initialOverride = false
+    private var pendingOverride = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.fragment_dpi_settings, container, false)
@@ -61,6 +64,12 @@ class DpiSettingsFragment : Fragment() {
         widescreenHint = view.findViewById(R.id.dpi_widescreen_hint)
         overPanelWarning = view.findViewById(R.id.dpi_over_panel_warning)
         clampedNote = view.findViewById(R.id.dpi_clamped_note)
+        overrideButton = view.findViewById(R.id.dpi_portrait_override_button)
+        overrideButton.setOnClickListener {
+            pendingOverride = !pendingOverride
+            updateSaveButtonState()
+            updateClampedNote()
+        }
 
         setupToolbar()
 
@@ -87,6 +96,8 @@ class DpiSettingsFragment : Fragment() {
         updateOverPanelWarning()
 
         initialValue = settings.dpiPixelDensity
+        initialOverride = settings.dpiFloorOverride
+        pendingOverride = initialOverride
         val auto = initialValue == 0
         autoSwitch.isChecked = auto
         picker.dpi = if (auto) auto0.announced else initialValue
@@ -133,8 +144,10 @@ class DpiSettingsFragment : Fragment() {
     /** 0 = Automatic (device density), otherwise the chosen DPI. */
     private fun currentValue(): Int = if (autoSwitch.isChecked) 0 else picker.dpi
 
+    private fun hasChanges(): Boolean = currentValue() != initialValue || pendingOverride != initialOverride
+
     private fun updateSaveButtonState() {
-        val changed = currentValue() != initialValue
+        val changed = hasChanges()
         saveButton?.isEnabled = changed
         // DPI only applies on the next Android Auto connection.
         saveButton?.text = getString(if (changed) R.string.save_and_restart else R.string.save)
@@ -146,10 +159,12 @@ class DpiSettingsFragment : Fragment() {
         picker.commitPendingInput()
         val value = currentValue()
         settings.dpiPixelDensity = value
+        if (pendingOverride != initialOverride) settings.dpiFloorOverride = pendingOverride
         settings.commit()
         // Keep SettingsFragment's pending value in sync so it does not overwrite this on save.
         findNavController().previousBackStackEntry?.savedStateHandle?.set(KEY_DPI_RESULT, value)
         initialValue = value
+        initialOverride = pendingOverride
         updateSaveButtonState()
         ToastUtils.showToast(requireContext(), R.string.settings_saved, Toast.LENGTH_SHORT, force = true)
     }
@@ -157,7 +172,7 @@ class DpiSettingsFragment : Fragment() {
     private fun handleBackPress() {
         // So the unsaved-changes prompt weighs the value the user typed, not the one it replaced.
         picker.commitPendingInput()
-        if (currentValue() != initialValue) {
+        if (hasChanges()) {
             MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
                 .setTitle(R.string.unsaved_changes)
                 .setMessage(R.string.unsaved_changes_message)
@@ -188,27 +203,37 @@ class DpiSettingsFragment : Fragment() {
         return Preview(w, h, r.resName, par)
     }
 
-    private fun preview(value: Int): AnnouncedDensityPolicy.Decision {
+    private fun preview(value: Int, override: Boolean = pendingOverride): AnnouncedDensityPolicy.Decision {
         val p = previewResolution()
         val preset = OnboardingDisplayPolicy.initialPreset(
             settings.displaySizePreset, SystemOptimizer.DisplaySizePreset.SMALL_7_8
         )
-        return AnnouncedDensityPolicy.decide(value, preset, p.w, p.h, p.par)
+        return AnnouncedDensityPolicy.decide(value, preset, p.w, p.h, p.par, override)
     }
 
-    /** Says so while the picked value is lower on the wire than on the slider. */
+    /** Says so while the picked value is lower on the wire than on the slider, or sent past a floor. */
     private fun updateClampedNote() {
         val picked = picker.dpi
         val d = preview(picked)
-        val sent = d.announced
-        if (autoSwitch.isChecked || sent == picked) {
-            clampedNote.visibility = View.GONE
-        } else {
-            val note = if (d.reason == AnnouncedDensityPolicy.Reason.PORTRAIT_FLOOR) R.string.dpi_clamped_note_portrait
-            else R.string.dpi_clamped_note
-            clampedNote.text = getString(note, picked, sent)
-            clampedNote.visibility = View.VISIBLE
+        val reason = if (autoSwitch.isChecked) null else d.reason
+        val floor = preview(picked, false).announced
+        val portrait = previewResolution().let { it.h > it.w }
+        val note = when {
+            reason == AnnouncedDensityPolicy.Reason.FLOOR_OVERRIDE -> getString(
+                if (portrait) R.string.dpi_portrait_override_note else R.string.dpi_floor_override_note, picked, floor
+            )
+            reason == AnnouncedDensityPolicy.Reason.PORTRAIT_FLOOR ->
+                getString(R.string.dpi_clamped_note_portrait, picked, d.announced)
+            reason != null && d.announced != picked -> getString(R.string.dpi_clamped_note, picked, d.announced)
+            else -> null
         }
+        clampedNote.text = note ?: ""
+        clampedNote.visibility = if (note != null) View.VISIBLE else View.GONE
+        overrideButton.setText(
+            if (reason == AnnouncedDensityPolicy.Reason.FLOOR_OVERRIDE) R.string.resolution_use_recommended
+            else R.string.resolution_use_anyway
+        )
+        overrideButton.visibility = if (note != null) View.VISIBLE else View.GONE
     }
 
     private fun realMetrics(): DisplayMetrics {

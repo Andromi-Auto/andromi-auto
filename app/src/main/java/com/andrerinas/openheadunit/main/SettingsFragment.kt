@@ -3435,7 +3435,9 @@ class SettingsFragment : Fragment() {
         val par = com.andrerinas.openheadunit.utils.AnnouncedDensityPolicy.pixelAspectE4(
             fit, ow, oh, res.width, res.height, pendingPixelAspectRatioE4 ?: settings.pixelAspectRatioE4
         )
-        val d = com.andrerinas.openheadunit.utils.AnnouncedDensityPolicy.decide(stored, preset, vw, vh, par)
+        val d = com.andrerinas.openheadunit.utils.AnnouncedDensityPolicy.decide(
+            stored, preset, vw, vh, par, settings.dpiFloorOverride
+        )
         val (sw, sh) = com.andrerinas.openheadunit.utils.AnnouncedDensityPolicy.phoneCanvas(vw, vh, par)
         val cw = com.andrerinas.openheadunit.utils.AnnouncedDensityPolicy.canvasDp(sw, d.announced)
         val ch = com.andrerinas.openheadunit.utils.AnnouncedDensityPolicy.canvasDp(sh, d.announced)
