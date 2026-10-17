@@ -46,7 +46,7 @@ class PcmReserveObservationTest {
         bank.render(out, 1050); bank.render(out, 1060)
         assertEquals(2L, bank.rebanks)
         assertEquals(1L, bank.rebankEntries)
-        val snapshot = bank.takeReserveWindow(6000)!!
+        val snapshot = bank.takeReserveWindow(61_000)!!
         assertEquals(2L, snapshot.underrunEvents)
         assertEquals(1L, snapshot.rebankEntries)
         assertEquals(0, snapshot.minimumFrames)
@@ -57,13 +57,13 @@ class PcmReserveObservationTest {
         feed(bank, 0, 960)
         bank.render(out, 1000); bank.render(out, 1010)
         feed(bank, 1020, 2048)
-        assertNull(bank.takeReserveWindow(5999))
-        val snapshot = bank.takeReserveWindow(6000)!!
+        assertNull(bank.takeReserveWindow(60_999))
+        val snapshot = bank.takeReserveWindow(61_000)!!
         assertEquals(0, snapshot.minimumFrames)
         assertEquals(480, snapshot.maximumFrames)
         assertEquals(2048, snapshot.depthFrames)
         assertEquals(2, snapshot.cycles)
-        assertNull(bank.takeReserveWindow(12000))
+        assertNull(bank.takeReserveWindow(121_000))
     }
 
     @Test fun `reset and preroll do not masquerade as active zero-depth observations`() {
@@ -78,7 +78,7 @@ class PcmReserveObservationTest {
         assertNull(bank.takeReserveWindow(18000))
         feed(bank, 18000, 9600)
         bank.render(out, 20000) // Let this new preroll deadline expire.
-        val snapshot = bank.takeReserveWindow(25000)!!
+        val snapshot = bank.takeReserveWindow(80_000)!!
         assertEquals(1, snapshot.cycles)
         assertEquals(bank.depthFrames(), snapshot.minimumFrames)
     }
@@ -99,8 +99,8 @@ class PcmReserveObservationTest {
         assertEquals(0L, bank.rebankEntries)
         feed(bank, 10_000, 960)
         bank.render(out, 11_000)
-        val snapshot = bank.takeReserveWindow(16_000)!!
-        assertEquals(5000L, snapshot.windowMs)
+        val snapshot = bank.takeReserveWindow(71_000)!!
+        assertEquals(60_000L, snapshot.windowMs)
         assertEquals(480, snapshot.minimumFrames)
     }
 

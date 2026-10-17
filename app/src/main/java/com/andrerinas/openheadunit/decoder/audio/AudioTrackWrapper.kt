@@ -337,8 +337,11 @@ class AudioTrackWrapper(
     // Call only after a successful PCM handoff, with codec ownership still protected.
     // Output format (including float PCM) determines frames; AAC input count does not.
     private fun noteHealthyOutput(size: Int, format: PcmInputFormat) {
-        aacRecovery.decodedPcm(size / format.bytesPerFrame, format.sampleRate,
-            SystemClock.elapsedRealtime())
+        val now = SystemClock.elapsedRealtime()
+        if (aacRecovery.decodedPcm(size / format.bytesPerFrame, format.sampleRate, now)) {
+            AudioDiagnostics.report(now,
+                "AAC channel=$channelId retry budget renewed after sustained PCM output")
+        }
     }
 
     private fun noteOutputCopied(source: MediaCodec, ptsUs: Long) {

@@ -30,9 +30,10 @@ internal class AacDecoderRecovery {
      * Require ten seconds of decoded audio AND elapsed time with no long output gap: a burst
      * draining old input, or an occasional successful buffer between failures, cannot rearm
      * a broken decoder. The caller must exclude output from a retired codec under its lock.
+     * Return true only at renewal so the caller can log that edge without periodic noise.
      */
-    @Synchronized fun decodedPcm(frames: Int, sampleRate: Int, nowMs: Long) {
-        if (attempts == 0 || pending || exhausted || frames <= 0 || sampleRate <= 0) return
+    @Synchronized fun decodedPcm(frames: Int, sampleRate: Int, nowMs: Long): Boolean {
+        if (attempts == 0 || pending || exhausted || frames <= 0 || sampleRate <= 0) return false
         if (lastHealthyMs < 0 || nowMs < lastHealthyMs || nowMs - lastHealthyMs > 1000) {
             clearProgress()
             healthySinceMs = nowMs
@@ -41,7 +42,11 @@ internal class AacDecoderRecovery {
         healthyOutputUs = minOf(AacDecoderRecoveryPolicy.HEALTHY_OUTPUT_MS * 1000,
             healthyOutputUs + frames.toLong() * 1_000_000 / sampleRate)
         if (healthyOutputUs >= AacDecoderRecoveryPolicy.HEALTHY_OUTPUT_MS * 1000 &&
-            nowMs - healthySinceMs >= AacDecoderRecoveryPolicy.HEALTHY_OUTPUT_MS) resetBudget()
+            nowMs - healthySinceMs >= AacDecoderRecoveryPolicy.HEALTHY_OUTPUT_MS) {
+            resetBudget()
+            return true
+        }
+        return false
     }
 
     /** Retirement can race output after next() consumed a rebuild request. Do not let that

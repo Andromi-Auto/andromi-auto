@@ -103,6 +103,8 @@ internal class AdaptivePcmBuffer(
         val stopped: Boolean = false, val skippedWindows: Long = 0
     )
 
+    // Continuous playback needs one summary per minute; Stop still flushes short prompts.
+    // Keep extrema for the whole window so slower logging cannot hide a brief low reserve.
     @Synchronized fun takeReserveWindow(nowMs: Long): ReserveWindow? {
         pendingStoppedReserve?.let {
             pendingStoppedReserve = null
@@ -110,7 +112,7 @@ internal class AdaptivePcmBuffer(
             skippedReserveWindows = 0
             return snapshot
         }
-        if (reserveWindowStartMs < 0 || nowMs - reserveWindowStartMs < 5000 || reserveCycles == 0) return null
+        if (reserveWindowStartMs < 0 || nowMs - reserveWindowStartMs < 60_000 || reserveCycles == 0) return null
         val snapshot = reserveSnapshot(nowMs)
         clearReserveWindow()
         return snapshot
