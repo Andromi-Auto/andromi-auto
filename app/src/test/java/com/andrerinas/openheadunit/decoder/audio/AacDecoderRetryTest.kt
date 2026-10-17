@@ -4,6 +4,18 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class AacDecoderRetryTest {
+    @Test fun `healthy output reports budget renewal exactly once`() {
+        val recovery = AacDecoderRecovery()
+        recovery.request()
+        recovery.next(0)
+        var renewals = 0
+        for (tick in 0..300) {
+            if (recovery.decodedPcm(4800, 48000, tick * 100L)) renewals++
+        }
+        assertEquals(1, renewals)
+        assertFalse(recovery.decodedPcm(4800, 48000, 30_100))
+    }
+
     @Test fun `construction failure arms recovery without requiring a codec callback`() {
         val recovery = AacDecoderRecovery()
         recovery.request()
