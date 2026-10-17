@@ -1,5 +1,5 @@
 # Changelog
-### v.3.5.0-beta5
+### v.3.5.0
 - Native AA: reconnect to a network that is still there, wake the phone over Bluetooth or the external module, bring a lost group or hotspot back after sleep, boot or ACC wake, stop advertising an address that moves, and pick, wake or hold back only for a phone that is on
 - Wireless: BSSID recovery via IPv6 EUI-64, keep the station stood down mid-session, hold every automatic bring-up while the unit is asleep, and log a refused start at boot instead of crashing
 - Added: Option to use Open Headunit as a launcher
