@@ -160,7 +160,7 @@ class RecoveringPcmOutputTest {
     }
 
     @Test fun `retry renewal requires ten seconds of both output and elapsed time without gaps`() {
-        for (mode in listOf("healthy", "burst", "gap", "sparse", "pause")) {
+        for (mode in listOf("healthy", "burst", "gap", "sparse")) {
             var now = 0L
             var working = false
             val device = Device()
@@ -176,7 +176,6 @@ class RecoveringPcmOutputTest {
             output.write(pcm, 0, pcm.size)
             repeat(1001) { tick ->
                 if (mode == "gap" && tick == 500) now += 1001
-                if (mode == "pause" && tick == 500) { output.pause(); output.start() }
                 output.write(pcm, 0, if (mode == "sparse") 2 else pcm.size)
                 if (mode != "burst") now += 10
             }
@@ -188,7 +187,172 @@ class RecoveringPcmOutputTest {
         }
     }
 
-    private class Device(var result: Int = Int.MAX_VALUE) : PcmOutput {
+    @Test fun `clean short prompts renew recovery despite long intentional pauses`() {
+        var now = 0L
+        var unavailable = false
+        val device = Device(recordAccepted = false)
+        val output = RecoveringPcmOutput(device, {
+            check(!unavailable)
+            device.result = Int.MAX_VALUE
+            device
+        }, { now }, {})
+        val pcm = ShortArray(960)
+        // One isolated fault followed by two completely clean prompts. There is enough
+        // good output between faults, but never a ten-second uninterrupted prompt.
+        repeat(36) { prompt ->
+            output.preparePlayback(); output.start()
+            repeat(400) { tick ->
+                if (prompt % 3 == 0 && tick == 100) device.result = -6
+                output.write(pcm, 0, pcm.size)
+                now += 10
+            }
+            output.pause()
+            now += 56_000
+        }
+        val before = device.acceptedSamples
+        val outageAt = now
+        device.result = -6
+        output.preparePlayback(); output.start()
+        repeat(1000) {
+            unavailable = now - outageAt < 2000
+            output.write(pcm, 0, pcm.size)
+            now += 10
+        }
+        assertTrue("a recovered route must not wait for another Start", device.acceptedSamples > before)
+        assertFalse(output.isParked)
+    }
+
+    @Test fun `idle time and instantaneous bursts across pauses cannot renew retries`() {
+        for (burst in listOf(false, true)) {
+            var now = 0L
+            var working = false
+            val device = Device(recordAccepted = false)
+            val output = RecoveringPcmOutput(null, {
+                check(working)
+                device
+            }, { now }, {})
+            val pcm = ShortArray(960)
+            repeat(3000) { output.write(pcm, 0, pcm.size); now += 10 }
+            assertTrue(output.isParked)
+            working = true
+            output.preparePlayback(); output.start()
+            output.write(pcm, 0, pcm.size)
+            repeat(20) {
+                // More than ten seconds of submitted PCM in burst mode, but no active
+                // elapsed time. Single writes also must not turn the minute-long idle into health.
+                repeat(if (burst) 100 else 1) { output.write(pcm, 0, pcm.size) }
+                output.pause()
+                now += 60_000
+                output.preparePlayback(); output.start()
+            }
+            working = false
+            device.result = -6
+            repeat(1000) { output.write(pcm, 0, pcm.size); now += 10 }
+            assertTrue("burst=$burst", output.isParked)
+            assertFalse(output.retryReady)
+        }
+    }
+
+    @Test fun `lifecycle failures output replacement and unexplained gaps discard earned health`() {
+        for (mode in listOf("pause", "epoch", "start", "gap")) {
+            var now = 0L
+            var working = false
+            val device = Device(recordAccepted = false)
+            val output = RecoveringPcmOutput(null, {
+                check(working)
+                device
+            }, { now }, {})
+            val pcm = ShortArray(960)
+            repeat(3000) { output.write(pcm, 0, pcm.size); now += 10 }
+            assertTrue(output.isParked)
+            working = true
+            output.preparePlayback(); output.start()
+            output.write(pcm, 0, pcm.size)
+            repeat(901) { output.write(pcm, 0, pcm.size); now += 10 }
+            when (mode) {
+                "epoch" -> { output.pause(); device.outputEpoch++; output.start() }
+                "start" -> { output.pause(); device.failStart = true; output.start() }
+                "gap" -> now += 1001
+                else -> {
+                    device.failPause = true
+                    output.pause()
+                    device.failPause = false
+                    output.start()
+                }
+            }
+            repeat(201) { output.write(pcm, 0, pcm.size); now += 10 }
+            device.result = -6
+            working = false
+            repeat(1000) { output.write(pcm, 0, pcm.size); now += 10 }
+            assertTrue("$mode reused old health", output.isParked)
+            assertFalse(output.retryReady)
+        }
+    }
+
+    @Test fun `clean short prompts can restore an already exhausted automatic budget`() {
+        var now = 0L
+        var working = false
+        val device = Device(recordAccepted = false)
+        val output = RecoveringPcmOutput(null, {
+            check(working)
+            device.result = Int.MAX_VALUE
+            device
+        }, { now }, {})
+        val pcm = ShortArray(960)
+        repeat(3000) { output.write(pcm, 0, pcm.size); now += 10 }
+        assertTrue(output.isParked)
+        working = true
+        repeat(4) {
+            output.preparePlayback(); output.start()
+            repeat(301) { output.write(pcm, 0, pcm.size); now += 10 }
+            output.pause()
+            now += 60_000
+        }
+        output.preparePlayback(); output.start()
+        val before = device.acceptedSamples
+        val outageAt = now
+        device.result = -6
+        repeat(1000) {
+            working = now - outageAt >= 2000
+            output.write(pcm, 0, pcm.size)
+            now += 10
+        }
+        assertTrue(device.acceptedSamples > before)
+        assertFalse(output.isParked)
+    }
+
+    @Test fun `combined active time must cross ten seconds even across clean pauses`() {
+        for (secondPromptTicks in listOf(500, 502)) {
+            var now = 0L
+            var working = false
+            val device = Device(recordAccepted = false)
+            val output = RecoveringPcmOutput(null, {
+                check(working)
+                device
+            }, { now }, {})
+            val pcm = ShortArray(960)
+            repeat(3000) { output.write(pcm, 0, pcm.size); now += 10 }
+            assertTrue(output.isParked)
+            working = true
+            output.preparePlayback(); output.start()
+            output.write(pcm, 0, pcm.size) // Reopen; no PCM accepted yet.
+            for (ticks in listOf(501, secondPromptTicks)) {
+                output.preparePlayback(); output.start()
+                repeat(ticks) { output.write(pcm, 0, pcm.size); now += 10 }
+                output.pause()
+                now += 60_000
+            }
+            // 5000 + 4990 active ms must not renew; 5000 + 5010 must renew.
+            output.preparePlayback(); output.start()
+            working = false
+            device.result = -6
+            repeat(100) { output.write(pcm, 0, pcm.size); now += 10 }
+            now += 1000
+            assertEquals("ticks=$secondPromptTicks", secondPromptTicks == 502, output.retryReady)
+        }
+    }
+
+    private class Device(var result: Int = Int.MAX_VALUE, val recordAccepted: Boolean = true) : PcmOutput {
         override val name = "AudioTrack"
         override val capacityFrames = 19200
         override var bufferFrames = 19200
@@ -196,14 +360,24 @@ class RecoveringPcmOutputTest {
         override val underruns = 0
         var closes = 0
         var starts = 0
+        var failPause = false
+        var failStart = false
+        override var outputEpoch = 0L
         val accepted = mutableListOf<Short>()
-        override fun start() { starts++ }
-        override fun pause() {}
+        var acceptedSamples = 0L
+        override fun start() {
+            starts++
+            if (failStart) { failStart = false; error("start failed once") }
+        }
+        override fun pause() { check(!failPause) }
         override fun close() { closes++ }
         override fun setBufferFrames(frames: Int): Int { bufferFrames = frames; return frames }
         override fun write(data: ShortArray, offset: Int, count: Int): Int {
             val n = minOf(count, result)
-            if (n > 0) accepted.addAll(data.slice(offset until offset + n))
+            if (n > 0) {
+                acceptedSamples += n
+                if (recordAccepted) accepted.addAll(data.slice(offset until offset + n))
+            }
             return n
         }
     }

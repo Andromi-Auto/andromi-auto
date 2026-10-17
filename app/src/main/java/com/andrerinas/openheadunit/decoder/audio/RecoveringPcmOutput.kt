@@ -18,7 +18,7 @@ internal class RecoveringPcmOutput(
     @Volatile private var retryAtMs = 0L
     private var cooldowns = 0
     private var stableSamples = 0L
-    private var stableSinceMs = -1L
+    private var stableActiveMs = 0L
     private var lastProgressMs = -1L
     @Volatile private var terminal = false
     private var requestedFrames = metadata.minimumBufferFrames
@@ -66,7 +66,11 @@ internal class RecoveringPcmOutput(
 
     override fun pause() {
         started = false
-        clearProgress()
+        // Callers must pause only after real PCM has drained, as AudioMixer does.
+        // Preserve successful output across short prompts, but never count idle time.
+        // A thrown pause failure clears progress through recover(); an inner fallback
+        // that handles the failure itself invalidates progress through its output epoch.
+        lastProgressMs = -1
         try { delegate?.pause() }
         catch (e: Exception) { recover("pause: ${e.message}", watchdog.onFailure()) }
     }
@@ -126,21 +130,25 @@ internal class RecoveringPcmOutput(
 
     private fun clearProgress() {
         stableSamples = 0
-        stableSinceMs = -1
+        stableActiveMs = 0
         lastProgressMs = -1
     }
 
     private fun noteProgress(samples: Long) {
         val now = nowMs()
-        if (lastProgressMs < 0 || now < lastProgressMs || now - lastProgressMs > 1000) {
-            clearProgress()
-            stableSinceMs = now
+        if (lastProgressMs >= 0) {
+            val elapsed = now - lastProgressMs
+            if (elapsed < 0 || elapsed > 1000) clearProgress()
+            else stableActiveMs = (stableActiveMs + elapsed).coerceAtMost(10_000)
         }
         lastProgressMs = now
-        // Mixer output is always 48 kHz stereo. Require audio duration AND elapsed time:
-        // a fast burst into an empty device buffer is not ten seconds of healthy output.
+        // Mixer output is always 48 kHz stereo. Require ten seconds of audio AND active
+        // write time: neither a fast buffer fill nor idle time proves a healthy route.
+        // Intentional pauses preserve earned progress; faults, output replacement and
+        // unexplained gaps discard it. Otherwise guidance-only playback could accumulate
+        // old failures forever simply because no individual prompt lasts ten seconds.
         stableSamples = (stableSamples + samples).coerceAtMost(48000L * 2 * 10)
-        if (stableSamples >= 48000L * 2 * 10 && now - stableSinceMs >= 10_000) {
+        if (stableSamples >= 48000L * 2 * 10 && stableActiveMs >= 10_000) {
             cooldowns = 0
             watchdog = OutputWriteWatchdog()
             clearProgress()
@@ -152,7 +160,7 @@ internal class RecoveringPcmOutput(
         // then allow three automatic bursts after 1s, 2s and 5s. A permanently broken route
         // must not repeatedly interrupt the car radio by reacquiring focus forever. Retain
         // pending PCM after that budget. Start permits another bounded attempt, while
-        // only ten seconds of continuous successful output renews automatic retries.
+        // only ten seconds of successful active output renews automatic retries.
         clearProgress()
         val delayMs = when (cooldowns) { 0 -> 1000L; 1 -> 2000L; 2 -> 5000L; else -> null }
         cooldowns = (cooldowns + 1).coerceAtMost(3)
