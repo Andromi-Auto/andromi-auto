@@ -9,7 +9,7 @@ package com.andrerinas.openheadunit.aap
 internal class PresentationQueue(
     private val post: (Runnable, Long) -> Boolean,
     private val cancel: (Runnable) -> Unit,
-    private val onError: (Exception) -> Unit,
+    private val onError: (Throwable) -> Unit,
 ) {
     enum class Slot { METADATA, PLAYBACK, NAV_NOTIFICATION, NAV_BROADCAST }
 
@@ -52,6 +52,8 @@ internal class PresentationQueue(
     }
 
     private fun safely(action: () -> Unit) {
-        try { action() } catch (e: Exception) { onError(e) }
+        // Display work now runs on Main. Contain callback Errors as well as Exceptions here,
+        // so a failed bitmap/notification update does not escape onto the application thread.
+        try { action() } catch (e: Throwable) { onError(e) }
     }
 }

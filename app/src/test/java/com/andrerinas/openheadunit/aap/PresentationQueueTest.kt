@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit
 internal class PresentationScheduler {
     data class Task(val runnable: Runnable, val delay: Long)
     val tasks = mutableListOf<Task>()
-    val errors = mutableListOf<Exception>()
+    val errors = mutableListOf<Throwable>()
     fun queue() = PresentationQueue(
         post = { r, delay -> tasks.add(Task(r, delay)); true },
         cancel = { r -> tasks.removeAll { it.runnable === r } },
@@ -70,6 +70,23 @@ class PresentationQueueTest {
         queue.close { error("cleanup failure") }
         scheduler.drain()
         assertEquals(2, scheduler.errors.size)
+    }
+
+    @Test fun errorDoesNotEscapeMainOrPreventLaterUpdatesAndCleanup() {
+        val scheduler = PresentationScheduler()
+        val queue = scheduler.queue()
+        val failure = OutOfMemoryError("simulated bitmap allocation failure")
+        val calls = mutableListOf<String>()
+        queue.submit(PresentationQueue.Slot.METADATA) { throw failure }
+        queue.submit(PresentationQueue.Slot.PLAYBACK) { calls.add("playback") }
+        scheduler.drain()
+        queue.submit(PresentationQueue.Slot.METADATA) { calls.add("next metadata") }
+        scheduler.drain()
+        queue.close { calls.add("cleanup"); throw AssertionError("cleanup failure") }
+        scheduler.drain()
+        assertEquals(listOf("playback", "next metadata", "cleanup"), calls)
+        assertSame(failure, scheduler.errors[0])
+        assertTrue(scheduler.errors[1] is AssertionError)
     }
 
     @Test fun rejectedPostDoesNotLeaveSlotLatched() {
