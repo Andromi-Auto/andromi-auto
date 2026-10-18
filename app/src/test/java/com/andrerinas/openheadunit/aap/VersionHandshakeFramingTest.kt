@@ -2,6 +2,9 @@ package com.andrerinas.openheadunit.aap
 
 import android.os.SystemClock
 import com.andrerinas.openheadunit.connection.projection.ProjectionConnection
+import com.andrerinas.openheadunit.connection.projection.StandardUsbProjectionConnection
+import com.andrerinas.openheadunit.connection.projection.LibusbProjectionConnection
+import com.andrerinas.openheadunit.connection.projection.AbstractUsbProjectionConnection
 import org.junit.Assert.*
 import org.junit.Test
 import org.mockito.Mockito.*
@@ -17,6 +20,94 @@ class VersionHandshakeFramingTest {
     @org.junit.After fun restoreLog() { log.close() }
     private val response = byteArrayOf(0, 3, 0, 8, 0, 2, 0, 1, 0, 7, 0, 0)
     private val tlsFrame = byteArrayOf(0, 3, 0, 3, 0, 3, 22)
+
+    @Test fun `misaligned old USB tail is discarded before request without accessory recovery`() = mockStatic(SystemClock::class.java).use {
+        for (chunkSize in listOf(1, 2, 7)) {
+            val stale = byteArrayOf(0x12, 0x34, 0x56, 0x78, 0x55, 0x55, 0x55)
+            val stream = stale + response + tlsFrame
+            val connection = mock(ProjectionConnection::class.java)
+            `when`(connection.type).thenReturn(ProjectionConnection.Type.USB)
+            `when`(connection.isConnected).thenReturn(true)
+            var sent = false
+            var position = 0
+            `when`(connection.sendBlocking(any(), anyInt(), anyInt())).thenAnswer { sent = true; 10 }
+            `when`(connection.recvBlocking(any(), anyInt(), anyInt(), anyBoolean())).thenAnswer { call ->
+                if (!sent && position == stale.size) 0 else {
+                    val available = (if (!sent) stale.size else stream.size) - position
+                    val count = minOf(call.getArgument<Int>(1), available, chunkSize)
+                    stream.copyInto(call.getArgument<ByteArray>(0), 0, position, position + count)
+                    position += count
+                    count
+                }
+            }
+            val ssl = mock(AapSsl::class.java)
+            run(transport(ssl), connection)
+            verify(ssl).performHandshake(connection)
+            verify(connection, times(1)).sendBlocking(any(), anyInt(), anyInt())
+            assertEquals(stale.size + response.size, position)
+        }
+    }
+
+    @Test fun `USB pre-request idle gap preserves every stale frame split`() = mockStatic(SystemClock::class.java).use {
+        for (flags in listOf(9, 13, 15)) {
+            val extra = if (AapMessageFraming.carriesTotalLength(flags)) byteArrayOf(-1, -1, -1, -1) else byteArrayOf()
+            val stale = byteArrayOf(5, flags.toByte(), 0, 4) + extra + byteArrayOf(0, 3, 0, 8)
+            for (split in 1 until stale.size) {
+                val stream = stale + response + tlsFrame
+                val connection = mock(ProjectionConnection::class.java)
+                `when`(connection.type).thenReturn(ProjectionConnection.Type.USB)
+                `when`(connection.isConnected).thenReturn(true)
+                var sent = false
+                var position = 0
+                `when`(connection.sendBlocking(any(), anyInt(), anyInt())).thenAnswer { sent = true; 10 }
+                `when`(connection.recvBlocking(any(), anyInt(), anyInt(), anyBoolean())).thenAnswer { call ->
+                    if (!sent && position == split) 0 else {
+                        val count = minOf(call.getArgument<Int>(1), if (!sent) split - position else stream.size - position)
+                        stream.copyInto(call.getArgument<ByteArray>(0), 0, position, position + count)
+                        position += count
+                        count
+                    }
+                }
+                val ssl = mock(AapSsl::class.java)
+                run(transport(ssl), connection)
+                verify(ssl).performHandshake(connection)
+                verify(connection, times(1)).sendBlocking(any(), anyInt(), anyInt())
+                assertEquals(stale.size + response.size, position)
+            }
+        }
+    }
+
+    @Test fun `continuous stale traffic cannot hold the pre-request drain indefinitely`() = mockStatic(SystemClock::class.java).use { clock ->
+        var now = 0L
+        clock.`when`<Long> { SystemClock.elapsedRealtime() }.thenAnswer { now }
+        val connection = mock(ProjectionConnection::class.java)
+        `when`(connection.type).thenReturn(ProjectionConnection.Type.USB)
+        `when`(connection.isConnected).thenReturn(true)
+        var sent = false
+        var position = 0
+        `when`(connection.sendBlocking(any(), anyInt(), anyInt())).thenAnswer {
+            assertEquals(500L, now)
+            sent = true
+            10
+        }
+        `when`(connection.recvBlocking(any(), anyInt(), anyInt(), anyBoolean())).thenAnswer { call ->
+            val out = call.getArgument<ByteArray>(0)
+            if (!sent) {
+                byteArrayOf(5, 15, 0, 0).copyInto(out)
+                now += call.getArgument<Int>(2)
+                4
+            } else {
+                val count = call.getArgument<Int>(1)
+                response.copyInto(out, 0, position, position + count)
+                position += count
+                count
+            }
+        }
+        val ssl = mock(AapSsl::class.java)
+        run(transport(ssl), connection)
+        verify(ssl).performHandshake(connection)
+        Unit
+    }
 
     private fun transport(ssl: AapSsl): AapTransport {
         val transport = mock(AapTransport::class.java, CALLS_REAL_METHODS)
@@ -123,7 +214,7 @@ class VersionHandshakeFramingTest {
         `when`(connection.recvBlocking(any(), anyInt(), anyInt(), anyBoolean())).thenAnswer { call ->
             if (draining) {
                 draining = false
-                assertEquals(50, call.getArgument<Int>(2))
+                assertEquals(100, call.getArgument<Int>(2))
                 0 // Old traffic arrives only after the initial drain went quiet.
             } else {
                 assertTrue(call.getArgument<Int>(2) >= 100)
@@ -146,7 +237,7 @@ class VersionHandshakeFramingTest {
         } finally { com.andrerinas.openheadunit.utils.AppLog.LOGGER = original }
     }
 
-    @Test fun `negative or short request writes never replay on USB or WiFi`() = mockStatic(SystemClock::class.java).use {
+    @Test fun `negative or short writes never replay on unknown endpoints or WiFi`() = mockStatic(SystemClock::class.java).use {
         for (type in ProjectionConnection.Type.entries) for (result in listOf(-7, -1, 0, 5)) {
             val connection = mock(ProjectionConnection::class.java)
             `when`(connection.type).thenReturn(type)
@@ -162,4 +253,115 @@ class VersionHandshakeFramingTest {
             assertEquals(AapTransport.HandshakeFailure.TRANSPORT_ERROR, transport.lastHandshakeFailure)
         }
     }
+
+    @Test fun `USB negative version write retries only when the actual endpoint fits the whole request`() = mockStatic(SystemClock::class.java).use {
+        for (libusb in listOf(false, true)) for (packetSize in listOf(0, 8, 16, 64, 512, 1024)) {
+            for (result in listOf(-7, -1, 0, 5)) {
+                val connection: AbstractUsbProjectionConnection = if (libusb)
+                    mock(LibusbProjectionConnection::class.java) else mock(StandardUsbProjectionConnection::class.java)
+                `when`(connection.type).thenReturn(ProjectionConnection.Type.USB)
+                `when`(connection.isConnected).thenReturn(true)
+                `when`(connection.outMaxPacketSize).thenReturn(packetSize)
+                var sends = 0
+                var position = 0
+                `when`(connection.sendBlocking(any(), anyInt(), anyInt())).thenAnswer { if (++sends == 1) result else 10 }
+                `when`(connection.recvBlocking(any(), anyInt(), anyInt(), anyBoolean())).thenAnswer { call ->
+                    if (sends == 0) 0 else {
+                        val count = call.getArgument<Int>(1)
+                        response.copyInto(call.getArgument<ByteArray>(0), 0, position, position + count)
+                        position += count
+                        count
+                    }
+                }
+                val ssl = mock(AapSsl::class.java)
+                val transport = transport(ssl)
+                run(transport, connection)
+                if (packetSize >= 10 && result < 0) {
+                    assertEquals(2, sends)
+                    verify(ssl).performHandshake(connection)
+                } else {
+                    assertEquals(1, sends)
+                    verifyNoInteractions(ssl)
+                    assertEquals(AapTransport.HandshakeFailure.TRANSPORT_ERROR, transport.lastHandshakeFailure)
+                }
+            }
+        }
+    }
+
+    @Test fun `USB write retries stop on attempts deadline or disconnect`() = mockStatic(SystemClock::class.java).use { clock ->
+        for (mode in listOf("attempts", "deadline", "disconnect")) {
+            var now = 0L
+            var alive = true
+            clock.`when`<Long> { SystemClock.elapsedRealtime() }.thenAnswer { now }
+            val connection = mock(LibusbProjectionConnection::class.java)
+            `when`(connection.type).thenReturn(ProjectionConnection.Type.USB)
+            `when`(connection.isConnected).thenAnswer { alive }
+            `when`(connection.outMaxPacketSize).thenReturn(64)
+            `when`(connection.sendBlocking(any(), anyInt(), anyInt())).thenAnswer {
+                if (mode == "deadline") now = 9999
+                if (mode == "disconnect") alive = false
+                -7
+            }
+            val ssl = mock(AapSsl::class.java)
+            val transport = transport(ssl)
+            run(transport, connection)
+            verify(connection, times(if (mode == "attempts") 3 else 1)).sendBlocking(any(), anyInt(), anyInt())
+            verifyNoInteractions(ssl)
+            assertEquals(AapTransport.HandshakeFailure.TRANSPORT_ERROR, transport.lastHandshakeFailure)
+        }
+    }
+
+    @Test fun `fully delivered USB request with an error can retry and its duplicate response is skipped in TLS`() =
+        mockStatic(SystemClock::class.java).use {
+            val connection = mock(LibusbProjectionConnection::class.java)
+            `when`(connection.type).thenReturn(ProjectionConnection.Type.USB)
+            `when`(connection.isConnected).thenReturn(true)
+            `when`(connection.outMaxPacketSize).thenReturn(64)
+            val stream = response + response + tlsFrame + byteArrayOf(99)
+            var sends = 0
+            var position = 0
+            `when`(connection.sendBlocking(any(), anyInt(), anyInt())).thenAnswer {
+                // The first complete request reached the phone, despite an error at the host.
+                if (++sends == 1) -7 else 10
+            }
+            `when`(connection.recvBlocking(any(), anyInt(), anyInt(), anyBoolean())).thenAnswer { call ->
+                if (sends == 0) 0 else {
+                    val count = call.getArgument<Int>(1)
+                    stream.copyInto(call.getArgument<ByteArray>(0), 0, position, position + count)
+                    position += count
+                    count
+                }
+            }
+            val engine = mock(javax.net.ssl.SSLEngine::class.java)
+            val session = mock(javax.net.ssl.SSLSession::class.java)
+            val context = mock(javax.net.ssl.SSLContext::class.java)
+            `when`(context.createSSLEngine(anyString(), anyInt())).thenReturn(engine)
+            `when`(engine.session).thenReturn(session)
+            `when`(session.packetBufferSize).thenReturn(64)
+            `when`(session.applicationBufferSize).thenReturn(64)
+            var finished = false
+            `when`(engine.handshakeStatus).thenAnswer {
+                if (finished) javax.net.ssl.SSLEngineResult.HandshakeStatus.NOT_HANDSHAKING
+                else javax.net.ssl.SSLEngineResult.HandshakeStatus.NEED_UNWRAP
+            }
+            `when`(engine.unwrap(any<java.nio.ByteBuffer>(), any<java.nio.ByteBuffer>())).thenAnswer { call ->
+                val data = call.getArgument<java.nio.ByteBuffer>(0)
+                assertEquals(1, data.remaining())
+                assertEquals(22, data.get().toInt())
+                finished = true
+                javax.net.ssl.SSLEngineResult(javax.net.ssl.SSLEngineResult.Status.OK,
+                    javax.net.ssl.SSLEngineResult.HandshakeStatus.FINISHED, 1, 0)
+            }
+            val ssl = mock(AapSsl::class.java)
+            `when`(ssl.performHandshake(connection)).thenAnswer {
+                assertTrue(AapSslContext(context).performHandshake(connection))
+                false // Stop the fixture before AuthComplete; the real TLS reader was exercised.
+            }
+            run(transport(ssl), connection)
+            assertTrue(finished)
+            assertEquals(2, sends)
+            assertEquals(stream.size - 1, position)
+            verify(engine, times(1)).unwrap(any<java.nio.ByteBuffer>(), any<java.nio.ByteBuffer>())
+            Unit
+        }
 }

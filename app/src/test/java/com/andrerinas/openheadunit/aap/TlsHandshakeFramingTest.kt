@@ -36,7 +36,7 @@ class TlsHandshakeFramingTest {
     }
 
     @Test fun `TLS never skips an encrypted old session envelope`() = mockStatic(SystemClock::class.java).use {
-        for (flags in 0x08..0x0b) {
+        for (flags in 0x08..0x0f) {
             val engine = mock(SSLEngine::class.java)
             `when`(engine.handshakeStatus).thenReturn(SSLEngineResult.HandshakeStatus.NEED_UNWRAP)
             val connection = mock(ProjectionConnection::class.java)
