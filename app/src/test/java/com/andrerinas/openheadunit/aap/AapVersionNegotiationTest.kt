@@ -13,7 +13,7 @@ class AapVersionNegotiationTest {
     private fun frame(major: Int, minor: Int, status: Int, tail: ByteArray = ByteArray(0)): ByteArray {
         fun hi(v: Int) = ((v shr 8) and 0xFF).toByte()
         fun lo(v: Int) = (v and 0xFF).toByte()
-        return byteArrayOf(0, 3, 0, 8, 0, 2, hi(major), lo(major), hi(minor), lo(minor),
+        return byteArrayOf(0, 3, hi(8 + tail.size), lo(8 + tail.size), 0, 2, hi(major), lo(major), hi(minor), lo(minor),
             hi(status), lo(status)) + tail
     }
 
@@ -78,5 +78,23 @@ class AapVersionNegotiationTest {
     @Test
     fun `a frame too short to hold a version is refused`() {
         assertNull(AapVersionNegotiation.parse(frame(1, 2, 0), 11))
+    }
+    @Test
+    fun `parser rejects incomplete extra or wrongly framed bytes`() {
+        val good = frame(1, 7, 0)
+        assertNull(AapVersionNegotiation.parse(good, good.size + 1))
+        assertNull(AapVersionNegotiation.parse(good + byteArrayOf(0), good.size + 1))
+        for (index in listOf(0, 1, 2, 3, 4, 5)) {
+            val bad = good.copyOf().also { it[index] = (it[index] + 1).toByte() }
+            assertNull(AapVersionNegotiation.parse(bad, bad.size))
+        }
+        assertTrue(AapVersionNegotiation.parse(frame(1, 1, 0), 12)!!.accepted)
+        assertTrue(AapVersionNegotiation.parse(frame(6, 1, 0), 12)!!.accepted)
+    }
+
+    @Test fun `only successful status permits TLS`() {
+        assertTrue(AapVersionNegotiation.parse(frame(1, 7, 0), 12)!!.accepted)
+        assertFalse(AapVersionNegotiation.parse(frame(1, 7, -1), 12)!!.accepted)
+        assertFalse(AapVersionNegotiation.parse(frame(1, 7, 1), 12)!!.accepted)
     }
 }

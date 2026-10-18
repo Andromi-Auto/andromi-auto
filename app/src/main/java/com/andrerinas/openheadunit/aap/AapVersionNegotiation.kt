@@ -25,6 +25,9 @@ object AapVersionNegotiation {
         val status: Int,
         val requestedConfig: Control.ConnectionConfiguration?
     ) {
+        /** A failed version exchange must never advance to TLS authentication. */
+        val accepted: Boolean get() = status == 0
+
         /** True once the negotiated version carries the 1.6 message set. */
         val supports16: Boolean get() = major > 1 || (major == 1 && minor >= FEATURE_MINOR_1_6)
 
@@ -34,11 +37,15 @@ object AapVersionNegotiation {
 
     /**
      * [frame] is the whole received frame including the 6 byte header, [length] the bytes read.
-     * Returns null when the frame is too short to be a version response.
+     * Returns null for an incomplete response or a mismatched envelope.
      */
     fun parse(frame: ByteArray, length: Int): Result? {
-        if (length < 12) return null
+        if (length < 12 || length > frame.size) return null
         fun u16(i: Int) = ((frame[i].toInt() and 0xFF) shl 8) or (frame[i + 1].toInt() and 0xFF)
+        // Length covers type + body, excluding the four-byte transport header. A read may
+        // contain several frames; callers must pass exactly one complete response.
+        if (frame[0] != 0.toByte() || frame[1] != 3.toByte() ||
+            u16(4) != 2 || u16(2) != length - 4) return null
         val status = u16(10)
         var config: Control.ConnectionConfiguration? = null
         if (length > 12) {
