@@ -90,6 +90,23 @@ class HandshakeFrameReaderTest {
         assertEquals(3, reads)
     }
 
+    @Test fun `a receive count beyond the requested header or body is rejected`() {
+        for (invalidRead in 1..2) {
+            var reads = 0
+            val reader = HandshakeFrameReader({ 0L }) { out, length, _ ->
+                reads++
+                if (reads == invalidRead) length + 1 else {
+                    // Supply the valid header before exercising the body count guard.
+                    version.copyInto(out, 0, 0, length)
+                    length
+                }
+            }
+            val failure = assertThrows(IOException::class.java) { reader.readFrame(1) }
+            assertEquals("Handshake read exceeded requested length", failure.message)
+            assertEquals(invalidRead, reads)
+        }
+    }
+
     @Test fun `USB does not start a bulk transfer with less than its minimum budget`() {
         var now = 0L
         var reads = 0
