@@ -1047,7 +1047,7 @@ class AapTransport(
     private fun handshake(connection: ProjectionConnection): Boolean {
         lastHandshakeFailure = HandshakeFailure.OTHER
         try {
-            val isUsb = connection !is SocketProjectionConnection && !connection.isSingleMessage
+            val isUsb = connection.type == ProjectionConnection.Type.USB
             // Increased delay for AA 16.4+ stability on USB - skip for Sockets
             if (isUsb) {
                 SystemClock.sleep(500)
@@ -1074,6 +1074,7 @@ class AapTransport(
             var ret = -1
             var attempt = 0
             var received = false
+            var versionFrameSize = 0
             // Separates "the peer is not answering" from "our own link broke". Only the first
             // is worth reporting upwards: it is the one the user can do something about.
             var peerSentBytes = false
@@ -1084,12 +1085,13 @@ class AapTransport(
             val versionDeadline = SystemClock.elapsedRealtime() + HANDSHAKE_TIMEOUT_MS
             // Bounded reads leave the following TLS frame in the socket/USB receive buffer.
             // Keep this reader across retries so a timeout cannot discard a partial response.
-            val frames = HandshakeFrameReader(SystemClock::elapsedRealtime, if (isUsb) 100 else 1) { bytes, length, timeout ->
+            val frames = HandshakeFrameReader(SystemClock::elapsedRealtime, if (isUsb) 100 else 1,
+                skipEncryptedFrames = true) { bytes, length, timeout ->
                 val started = SystemClock.elapsedRealtime()
                 val count = connection.recvBlocking(bytes, length, timeout, false)
                 if (count > 0) peerSentBytes = true
                 if (HandshakeMessagePolicy.isReadError(count, SystemClock.elapsedRealtime() - started,
-                        timeout, timeoutLooksLikeError = connection !is SocketProjectionConnection)) {
+                        timeout, timeoutLooksLikeError = isUsb)) {
                     transportError = true
                 }
                 ret = count
@@ -1108,7 +1110,11 @@ class AapTransport(
                     AppLog.w("Handshake: Version request send failed (ret=$ret), attempt $attempt")
                     transportError = true
                     // Re-sending after a partial write would put a second header inside the
-                    // first frame. Start a fresh connection instead.
+                    // first frame. A negative USB result also hides transferred bytes: libusb
+                    // reports status and count separately, and nativeWrite returns only status
+                    // on failure. This layer does not know the endpoint packet size either,
+                    // so it cannot assume the request went as one indivisible USB packet.
+                    // Start a fresh connection rather than infer zero progress from an error.
                     lastHandshakeFailure = HandshakeFailure.TRANSPORT_ERROR
                     return false
                 }
@@ -1128,8 +1134,8 @@ class AapTransport(
                     val frame = try {
                         frames.readFrame(recvDeadline)
                     } catch (e: java.io.IOException) {
-                        // A stale encrypted USB envelope cannot be resynchronised by treating its
-                        // body as another header. Let connection recovery reopen the transport.
+                        // Known encrypted envelopes were consumed by length. An unknown header
+                        // has no safe skip boundary; let recovery reopen the transport.
                         lastHandshakeFailure = HandshakeFailure.TRANSPORT_ERROR
                         throw e
                     } ?: break
@@ -1145,14 +1151,15 @@ class AapTransport(
                             return false
                         }
                         negotiatedVersion = negotiated
-                        AppLog.i("Handshake: Version response ${negotiated.major}.${negotiated.minor}, " +
-                            "requested ${AapVersionNegotiation.ANNOUNCED_MAJOR}.${AapVersionNegotiation.ANNOUNCED_MINOR}, status ${negotiated.statusName}")
+                        AppLog.i("Handshake: the phone selected ${negotiated.major}.${negotiated.minor} " +
+                            "(we asked for ${AapVersionNegotiation.ANNOUNCED_MAJOR}.${AapVersionNegotiation.ANNOUNCED_MINOR}), status ${negotiated.statusName}")
                         negotiated.requestedConfig?.let {
                             AppLog.i("Handshake: the phone asks for ping timeout " +
                                 "${it.pingConfiguration.timeoutMs}ms, read timeout " +
                                 "${it.wirelessTcpConfiguration.socketReadTimeoutMs}ms")
                         }
                         received = true
+                        versionFrameSize = frame.size
                         break
                     }
                     // Wrong message — log and keep draining.
@@ -1187,7 +1194,7 @@ class AapTransport(
                 }
                 return false
             }
-            AppLog.i("Handshake: Version response recv ret: %d", ret)
+            AppLog.i("Handshake: Version response recv ret: %d", versionFrameSize)
             lastHandshakeFailure = HandshakeFailure.SSL
 
             AppLog.d("Handshake: Starting SSL handshake via performHandshake(). TS: ${SystemClock.elapsedRealtime()}")

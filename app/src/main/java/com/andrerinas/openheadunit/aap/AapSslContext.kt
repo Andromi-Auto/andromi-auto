@@ -40,7 +40,9 @@ class AapSslContext internal constructor(private val sslContext: SSLContext): Aa
             connection.recvBlocking(bytes, length, timeout, false)
         }
 
-        // Hard cap on the entire SSL phase.
+        // Give a slow dongle the whole 15 s TLS phase, including an initially silent peer.
+        // A quiet first 2 s is not a separate failure; partial frames and TLS records share
+        // this deadline without renewing it. A transport error still stops the read early.
         val deadline = android.os.SystemClock.elapsedRealtime() + SSL_HANDSHAKE_TIMEOUT_MS
 
         while (getHandshakeStatus() != SSLEngineResult.HandshakeStatus.FINISHED &&

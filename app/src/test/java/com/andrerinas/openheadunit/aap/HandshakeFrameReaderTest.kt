@@ -8,6 +8,68 @@ class HandshakeFrameReaderTest {
     private val version = byteArrayOf(0, 3, 0, 8, 0, 2, 0, 1, 0, 7, 0, 0)
     private val tls = byteArrayOf(0, 3, 0, 5, 0, 3, 22, 3, 3)
 
+    @Test fun `stale encrypted envelopes survive every split and leave TLS untouched`() {
+        for (flags in 0x08..0x0b) for (length in listOf(0, 1, 8)) {
+            // The total is deliberately enormous: only this envelope's u16 length is skipped.
+            val extra = if (flags == 9) byteArrayOf(-1, -1, -1, -1) else byteArrayOf()
+            val stale = byteArrayOf(5, flags.toByte(), 0, length.toByte()) + extra + ByteArray(length)
+            for (split in 1 until stale.size) {
+                val stream = stale + version + tls
+                var position = 0
+                var now = 0L
+                var pause = true
+                val reader = HandshakeFrameReader({ now }, skipEncryptedFrames = true) { out, size, timeout ->
+                    if (position == split && pause) { pause = false; now += timeout; 0 } else {
+                        val count = minOf(size, if (position < split) split - position else stream.size - position)
+                        stream.copyInto(out, 0, position, position + count)
+                        position += count
+                        count
+                    }
+                }
+                assertNull(reader.readFrame(100))
+                assertArrayEquals(version, reader.readFrame(200))
+                assertEquals(stale.size + version.size, position)
+                assertArrayEquals(tls, reader.readFrame(200))
+            }
+        }
+    }
+
+    @Test fun `skipping is bounded by envelope length and the original deadline`() {
+        val stale = byteArrayOf(5, 9, -1, -1) + ByteArray(4) { -1 } + ByteArray(65535)
+        val stream = stale + version
+        var position = 0
+        val reader = HandshakeFrameReader({ 0L }, skipEncryptedFrames = true) { out, size, _ ->
+            assertTrue(size <= 65539)
+            stream.copyInto(out, 0, position, position + size)
+            position += size
+            size
+        }
+        assertArrayEquals(version, reader.readFrame(100))
+        assertEquals(stream.size, position)
+
+        var now = 0L
+        var reads = 0
+        val endless = HandshakeFrameReader({ now }, skipEncryptedFrames = true) { out, size, _ ->
+            assertEquals(4, size)
+            byteArrayOf(5, 8, 0, 0).copyInto(out)
+            now++
+            reads++
+            4
+        }
+        assertNull(endless.readFrame(10))
+        assertEquals(10, reads)
+    }
+
+    @Test fun `version skipping still rejects unknown flags and malformed cleartext`() {
+        for (flags in listOf(1, 2, 4, 7, 12, 255, 3)) {
+            val reader = HandshakeFrameReader({ 0L }, skipEncryptedFrames = true) { out, _, _ ->
+                byteArrayOf(0, flags.toByte(), 0, 1).copyInto(out)
+                4
+            }
+            assertThrows(IOException::class.java) { reader.readFrame(100) }
+        }
+    }
+
     @Test fun `every split boundary survives a timeout and leaves the next phase untouched`() {
         for (split in 1 until version.size) {
             val stream = version + tls

@@ -13,6 +13,42 @@ class TlsHandshakeFramingTest {
     private val version = byteArrayOf(0, 3, 0, 8, 0, 2, 0, 1, 0, 7, 0, 0)
     private val tls = byteArrayOf(0, 3, 0, 5, 0, 3, 22, 3, 3)
 
+    @Test fun `silent TLS uses one 15 second budget on USB and WiFi`() = mockStatic(SystemClock::class.java).use { clock ->
+        for (type in ProjectionConnection.Type.entries) {
+            var now = 0L
+            clock.`when`<Long> { SystemClock.elapsedRealtime() }.thenAnswer { now }
+            val engine = mock(SSLEngine::class.java)
+            `when`(engine.handshakeStatus).thenReturn(SSLEngineResult.HandshakeStatus.NEED_UNWRAP)
+            val connection = mock(ProjectionConnection::class.java)
+            `when`(connection.type).thenReturn(type)
+            var reads = 0
+            `when`(connection.recvBlocking(any(), anyInt(), anyInt(), anyBoolean())).thenAnswer {
+                assertEquals(15000 - now.toInt(), it.getArgument<Int>(2))
+                now += 1000 // Early empty returns do not restart the phase timeout.
+                reads++
+                0
+            }
+            assertFalse(context(engine).performHandshake(connection))
+            assertEquals(15000L, now)
+            assertEquals(15, reads)
+            verify(engine, never()).unwrap(any<ByteBuffer>(), any<ByteBuffer>())
+        }
+    }
+
+    @Test fun `TLS never skips an encrypted old session envelope`() = mockStatic(SystemClock::class.java).use {
+        for (flags in 0x08..0x0b) {
+            val engine = mock(SSLEngine::class.java)
+            `when`(engine.handshakeStatus).thenReturn(SSLEngineResult.HandshakeStatus.NEED_UNWRAP)
+            val connection = mock(ProjectionConnection::class.java)
+            `when`(connection.recvBlocking(any(), anyInt(), anyInt(), anyBoolean())).thenAnswer {
+                byteArrayOf(5, flags.toByte(), 0, 8).copyInto(it.getArgument<ByteArray>(0))
+                4
+            }
+            assertThrows(java.io.IOException::class.java) { context(engine).performHandshake(connection) }
+            verify(engine, never()).unwrap(any<ByteBuffer>(), any<ByteBuffer>())
+        }
+    }
+
     private fun context(engine: SSLEngine): AapSslContext {
         val context = mock(SSLContext::class.java)
         val session = mock(SSLSession::class.java)
