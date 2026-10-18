@@ -121,7 +121,9 @@ Java_com_andrerinas_openheadunit_connection_usb_UsbNative_nativeRead(JNIEnv *env
             LOGE("libusb_bulk_transfer read failed: %d", r);
             return r;
         }
-        return 0;
+        // libusb reports bytes already delivered even when the remaining transfer times out.
+        // They belong to the stream and must reach the Kotlin receive buffer exactly once.
+        return transferred;
     }
     return transferred;
 }
