@@ -64,4 +64,17 @@ class P2pStackWedgePolicyTest {
         val oneExpired = listOf(now - 3_700_000, now - 2_000_000, now - 1_000_000)
         assertTrue(P2pStackWedgePolicy.mayAutoRestart(true, false, now, oneExpired))
     }
+
+    @Test
+    fun `another app cycling the stack is not a wedge, however many creates fail`() {
+        assertFalse(P2pStackWedgePolicy.isWedged(true, disableEdgesInWindow = 40, createFailuresInWindow = 10, foreignChurnSeen = true))
+    }
+
+    @Test
+    fun `foreign churn counts only while it is recent`() {
+        assertTrue(P2pStackWedgePolicy.foreignChurnRecent(now, now - 30_000))
+        assertFalse(P2pStackWedgePolicy.foreignChurnRecent(now, now - 61_000))
+        assertFalse(P2pStackWedgePolicy.foreignChurnRecent(now, 0L))
+        assertFalse(P2pStackWedgePolicy.foreignChurnRecent(now, now + 5_000))
+    }
 }

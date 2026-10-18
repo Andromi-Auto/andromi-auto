@@ -53,13 +53,9 @@ enum class ConnectionIssue {
     WIFI_DIRECT_STACK_CYCLED,
 
     /**
-     * This unit's WiFi Direct stack is wedged: WiFi is on, the stack keeps reporting itself disabled,
-     * and every group request fails. Only a WiFi restart frees it. See
+     * WiFi Direct is wedged and only a WiFi restart frees it, which the banner performs when root or
+     * local ADB allows. Unlike [WIFI_DIRECT_STACK_CYCLED] no other app is involved: see
      * [com.andrerinas.openheadunit.connection.wifi.direct.P2pStackWedgePolicy].
-     *
-     * Separate from [WIFI_DIRECT_STACK_CYCLED], whose cause is another app and whose remedy is
-     * stopping it: here the cause is a dead interface left in the supplicant, and the remedy is a
-     * WiFi restart, which the banner performs itself when root or local ADB allows.
      */
     WIFI_DIRECT_STACK_STUCK,
 

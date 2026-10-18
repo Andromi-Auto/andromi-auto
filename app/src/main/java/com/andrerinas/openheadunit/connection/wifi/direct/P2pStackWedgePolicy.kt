@@ -1,24 +1,10 @@
 package com.andrerinas.openheadunit.connection.wifi.direct
 
 /**
- * Whether this unit's WiFi Direct stack is wedged, and whether the app may restart WiFi to free it.
- *
- * Measured on a MediaTek phone on Android 10: when the app's process dies while it owns a group,
- * wpa_supplicant keeps the dead P2P interface registered. From then on every attempt to bring the
- * interface back fails inside the framework (`WifiP2pNative: Failed to setup P2p iface in
- * supplicant`), so it is added and torn down in a loop, the state broadcast flips between disabled
- * and enabled, and every createGroup answers BUSY. Nothing the app asks for can succeed until WiFi
- * itself is switched off and on, which restarts the supplicant. It does not clear on its own.
- *
- * The signature that separates this from an ordinary refusal is the pair: the state broadcast keeps
- * reporting WiFi Direct as disabled while WiFi is on, *and* creates keep failing. A radio that is
- * merely refusing a band never disables P2P, and a user switching WiFi off is not "WiFi on".
- * [P2pInterfaceChurnPolicy] covers a different case - another app cycling the stack while we ask
- * for nothing - and by design never counts edges that land while a request of ours is out, which
- * is exactly when this one happens.
- *
- * Android 10 and later refuse to let an app switch WiFi, so the restart needs root or this unit's
- * own ADB, and is opt-in. Without either the banner offers the system WiFi panel instead.
+ * Whether WiFi Direct is wedged: WiFi on, the stack keeps reporting disabled and our creates keep
+ * failing, until WiFi itself restarts (measured on a MediaTek Android 10 unit). Another app cycling
+ * the stack looks alike, so [P2pInterfaceChurnPolicy] seeing churn rules this out. Times are
+ * `SystemClock.elapsedRealtime()`, which a head unit setting its clock after boot cannot move.
  */
 object P2pStackWedgePolicy {
 
@@ -46,17 +32,31 @@ object P2pStackWedgePolicy {
     fun countRecent(times: Collection<Long>, now: Long, windowMs: Long = WINDOW_MS): Int =
         times.count { val age = now - it; age in 0..windowMs }
 
-    /** True when WiFi is on but its Direct stack keeps reporting disabled and our creates keep failing. */
-    fun isWedged(wifiEnabled: Boolean, disableEdgesInWindow: Int, createFailuresInWindow: Int): Boolean =
+    /** Most stamps kept per deque; well above any count that matters, so the log can say "at least". */
+    const val MAX_STAMPS = 512
+
+    /**
+     * True when WiFi is on, its Direct stack keeps reporting disabled and our creates keep failing.
+     * Never while another app is cycling the stack: that case has its own banner and its own remedy.
+     */
+    fun isWedged(
+        wifiEnabled: Boolean,
+        disableEdgesInWindow: Int,
+        createFailuresInWindow: Int,
+        foreignChurnSeen: Boolean = false,
+    ): Boolean =
         wifiEnabled &&
+            !foreignChurnSeen &&
             disableEdgesInWindow >= MIN_DISABLE_EDGES &&
             createFailuresInWindow >= MIN_CREATE_FAILURES
 
+    /** Whether [P2pInterfaceChurnPolicy] judged a window as foreign churn within [WINDOW_MS] of [now]. */
+    fun foreignChurnRecent(now: Long, lastForeignChurnAtMs: Long): Boolean =
+        lastForeignChurnAtMs > 0L && (now - lastForeignChurnAtMs) in 0..WINDOW_MS
+
     /**
-     * Whether an automatic restart may run now.
-     *
-     * Never while a session is connected: a live projection proves the stack works, and restarting
-     * WiFi would end it. Never without the user's opt-in, because it switches WiFi off for every app.
+     * Whether an automatic restart may run now: never without the opt-in, since it switches WiFi
+     * off for every app, and never during a live session, which proves the stack works.
      */
     fun mayAutoRestart(
         optedIn: Boolean,

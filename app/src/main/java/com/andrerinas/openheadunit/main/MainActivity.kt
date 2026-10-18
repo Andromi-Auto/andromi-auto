@@ -1341,20 +1341,6 @@ class MainActivity : BaseActivity() {
     }
 
     /**
-     * Open Settings on the row that fixes [issue].
-     *
-     * Seeds the search box rather than using EXTRA_DESTINATION, which targets a whole screen: every
-     * remedy is a row inside the settings list, and search is the only thing that reaches them
-     * regardless of the Basic/Advanced tier. Static BSSID is Advanced-only, so a Basic-mode user
-     * sent to Settings without this would not find the row the banner just named.
-     *
-     * The hotspot query is a phrase carried in both override rows' search keywords rather than
-     * either row's title, because that condition needs *both* of them: with a manual name set the
-     * device's own configuration is never read, so a blank password is sent as an open network
-     * instead of falling back. Seeding the name alone landed the user on one row, with nothing on
-     * screen saying the other was also required.
-     */
-    /**
      * The stuck-stack banner's action. Restarts WiFi itself when it can; otherwise opens the system
      * WiFi panel, where switching WiFi off and on is two taps.
      */
@@ -1382,6 +1368,20 @@ class MainActivity : BaseActivity() {
         }
     }
 
+    /**
+     * Open Settings on the row that fixes [issue].
+     *
+     * Seeds the search box rather than using EXTRA_DESTINATION, which targets a whole screen: every
+     * remedy is a row inside the settings list, and search is the only thing that reaches them
+     * regardless of the Basic/Advanced tier. Static BSSID is Advanced-only, so a Basic-mode user
+     * sent to Settings without this would not find the row the banner just named.
+     *
+     * The hotspot query is a phrase carried in both override rows' search keywords rather than
+     * either row's title, because that condition needs *both* of them: with a manual name set the
+     * device's own configuration is never read, so a blank password is sent as an open network
+     * instead of falling back. Seeding the name alone landed the user on one row, with nothing on
+     * screen saying the other was also required.
+     */
     private fun openRemedyFor(issue: ConnectionIssue) {
         val query = when (issue) {
             // The remedy is on the phone, so there is no row here to send anyone to.
