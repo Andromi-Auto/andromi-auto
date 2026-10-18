@@ -778,7 +778,7 @@ for name in ['ProjectionConnection.kt','AbstractUsbProjectionConnection.kt','Sta
 import java.util.concurrent.atomic.AtomicInteger
 class UsbDevice{val interfaceCount=1;fun getInterface(i:Int)=UsbInterface()}
 class UsbInterface
-class UsbEndpoint
+class UsbEndpoint{val maxPacketSize=64}
 class UsbManager{var openHook:((UsbDevice)->UsbDeviceConnection?)?=null;var permitted=true;fun hasPermission(d:UsbDevice)=permitted;fun openDevice(d:UsbDevice)=openHook?.invoke(d)?:UsbDeviceConnection()}
 class UsbDeviceConnection{
  val closes=AtomicInteger();val releases=AtomicInteger()
