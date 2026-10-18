@@ -17,6 +17,9 @@ internal class AapNavigation(
 ) {
     private val helper = AapNavigationHelper(context)
     private val snapshot = AapNavigationHelper.NavigationSnapshot()
+    // Written on the reader, read by the serial presentation executor at retirement. A pending
+    // update counts too: close cancels its debounce, but external displays still need a clear.
+    @Volatile private var hasNavigationBroadcast = false
     fun process(message: AapMessage): Boolean {
         if (message.channel != Channel.ID_NAV) return false
 
@@ -147,6 +150,7 @@ internal class AapNavigation(
         // TimedMessage contains immutable protobufs; copy the mutable container on the reader.
         // Main must never inspect the snapshot while the next packet is changing it.
         val copy = snapshot.copy()
+        hasNavigationBroadcast = true
         presentation.submit(PresentationQueue.Slot.NAV_BROADCAST, BROADCAST_DEBOUNCE_MS) {
             helper.sendFullNavigationBroadcast(copy, navEventType)
         }
@@ -164,8 +168,24 @@ internal class AapNavigation(
         presentation.submit(PresentationQueue.Slot.NAV_NOTIFICATION) { helper.cancelNotification() }
     }
 
-    /** Called on the presentation executor after session retirement, not on the reader. */
-    fun cancelNotification() = helper.cancelNotification()
+    /** Called once on the serial presentation executor after pending updates are cancelled. */
+    fun close() {
+        try {
+            if (hasNavigationBroadcast) {
+                // A STOP inside the debounce window must survive disconnect. Use an empty owned
+                // snapshot, just like the phone's STOP, rather than the reader's mutable state.
+                // The existing broadcast represents STOP with empty roads/unknown maneuver;
+                // navEventType is diagnostic, not a separate event field in the Android intent.
+                // This clear runs after any claimed old update and before the next session's UI.
+                helper.sendFullNavigationBroadcast(
+                    AapNavigationHelper.NavigationSnapshot(), NAV_EVENT_TYPE_STOP,
+                )
+            }
+        } finally {
+            // A broadcast failure must not leave the local navigation notification behind.
+            helper.cancelNotification()
+        }
+    }
 
     companion object {
         private const val BROADCAST_DEBOUNCE_MS = 1000L

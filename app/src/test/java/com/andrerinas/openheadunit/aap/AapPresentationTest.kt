@@ -69,7 +69,7 @@ class AapPresentationTest {
         assertFalse(statuses.single().hasState())
     }
 
-    @Test fun navigationUsesCapturedSnapshotAndRetirementCancelsBroadcast() {
+    @Test fun navigationUsesCapturedSnapshotAndRetirementClearsBroadcast() {
         mockConstruction(AapNavigationHelper::class.java).use { helpers ->
             val scheduler = PresentationScheduler()
             val queue = scheduler.queue()
@@ -87,9 +87,11 @@ class AapPresentationTest {
             nav.process(AapMessage(Channel.ID_NAV, NavigationStatus.MsgType.NEXTTURNDETAILS_VALUE,
                 NavigationStatus.NextTurnDetail.newBuilder().setRoad("Second road").build()))
             assertEquals("First road", captured.firstValue.nextTurnDetail!!.payload.road)
-            queue.close { nav.cancelNotification() }
+            queue.close { nav.close() }
             scheduler.drain()
-            verify(helper, never()).sendFullNavigationBroadcast(any(), any())
+            val cleared = argumentCaptor<AapNavigationHelper.NavigationSnapshot>()
+            verify(helper).sendFullNavigationBroadcast(cleared.capture(), eq(2))
+            assertEquals(AapNavigationHelper.NavigationSnapshot(), cleared.firstValue)
             verify(helper).cancelNotification()
             verify(helper, times(1)).showNotificationForSnapshot(any(), anyOrNull())
         }
@@ -107,6 +109,153 @@ class AapPresentationTest {
             scheduler.drain()
             verify(helpers.constructed().single(), never()).showNotificationForSnapshot(any(), anyOrNull())
             verify(helpers.constructed().single()).cancelNotification()
+        }
+    }
+
+    @Test fun sessionCloseClearsPendingOrPublishedNavigationOnce() {
+        mockStatic(SystemClock::class.java).use {
+            // Pending turn, published turn, pending STOP, and already published STOP all need
+            // a final empty snapshot. Repeating close must not schedule another clear.
+            val scenarios = listOf(
+                Triple(false, false, false), // pending turn
+                Triple(true, false, false),  // published turn
+                Triple(true, true, false),   // published turn with pending STOP
+                Triple(true, true, true),    // STOP already published
+            )
+            for ((publishTurn, sendStop, publishStop) in scenarios) {
+                mockConstruction(AapNavigationHelper::class.java).use { helpers ->
+                    val scheduler = PresentationScheduler()
+                    val handler = AapMessageHandlerType(mock(), mock(), mock(), mock(), mock(), mock(),
+                        presentation = scheduler.queue())
+                    val helper = helpers.constructed().single()
+                    handler.handle(AapMessage(Channel.ID_NAV, NavigationStatus.MsgType.NEXTTURNDETAILS_VALUE,
+                        NavigationStatus.NextTurnDetail.newBuilder().setRoad("Last road").build()))
+                    if (publishTurn) scheduler.drain()
+                    if (sendStop) {
+                        handler.handle(AapMessage(Channel.ID_NAV,
+                            NavigationStatus.MsgType.INSTRUMENT_CLUSTER_STOP_VALUE,
+                            NavigationStatus.NavigationState.getDefaultInstance()))
+                        if (publishStop) scheduler.drain()
+                    }
+                    clearInvocations(helper)
+                    handler.close()
+                    handler.close()
+                    verifyNoInteractions(helper) // Cleanup must remain off the reader.
+                    scheduler.drain()
+                    verify(helper).sendFullNavigationBroadcast(
+                        eq(AapNavigationHelper.NavigationSnapshot()), eq(2))
+                    verify(helper).cancelNotification()
+                    verifyNoMoreInteractions(helper)
+                }
+            }
+        }
+    }
+
+    @Test fun emptyStopSnapshotUsesExistingBroadcastClearValues() {
+        val context = mock<Context>()
+        whenever(context.applicationContext).thenReturn(context)
+        whenever(context.getString(com.andrerinas.openheadunit.R.string.nav_action_unknown)).thenReturn("Unknown")
+        var arguments: List<*>? = null
+        mockConstruction(com.andrerinas.openheadunit.contract.NavigationUpdateIntent::class.java) { _, construction ->
+            arguments = construction.arguments()
+        }.use { intents ->
+            AapNavigationHelper(context).sendFullNavigationBroadcast(AapNavigationHelper.NavigationSnapshot(), 2)
+            // The public intent has no STOP event field. Its existing clear representation is
+            // empty roads, UNKNOWN nextEventType, and absent distance/time/turn/destination data.
+            assertEquals(listOf(null, null, "", 0, "Unknown", null, null, null, null, null, null, ""), arguments)
+            verify(context).sendBroadcast(intents.constructed().single(),
+                com.andrerinas.openheadunit.contract.NavigationUpdateIntent.BROADCAST_PERMISSION)
+        }
+    }
+
+    @Test fun sessionWithoutNavigationDoesNotBroadcastStop() {
+        mockConstruction(AapNavigationHelper::class.java).use { helpers ->
+            val scheduler = PresentationScheduler()
+            val handler = AapMessageHandlerType(mock(), mock(), mock(), mock(), mock(), mock(),
+                presentation = scheduler.queue())
+            handler.close()
+            scheduler.drain()
+            verify(helpers.constructed().single()).cancelNotification()
+            verify(helpers.constructed().single(), never()).sendFullNavigationBroadcast(any(), any())
+        }
+    }
+
+    @Test fun oldNavigationClearPrecedesReplacementTurn() {
+        mockStatic(SystemClock::class.java).use {
+            mockConstruction(AapNavigationHelper::class.java).use { helpers ->
+                val scheduler = PresentationScheduler()
+                val old = AapMessageHandlerType(mock(), mock(), mock(), mock(), mock(), mock(),
+                    presentation = scheduler.queue())
+                old.handle(AapMessage(Channel.ID_NAV, NavigationStatus.MsgType.NEXTTURNDETAILS_VALUE,
+                    NavigationStatus.NextTurnDetail.newBuilder().setRoad("Old road").build()))
+                // Simulate a task already removed from Main's queue, but not yet run.
+                val dequeued = scheduler.tasks.removeAt(0).runnable
+                old.close()
+                val replacement = AapMessageHandlerType(mock(), mock(), mock(), mock(), mock(), mock(),
+                    presentation = scheduler.queue())
+                replacement.handle(AapMessage(Channel.ID_NAV, NavigationStatus.MsgType.NEXTTURNDETAILS_VALUE,
+                    NavigationStatus.NextTurnDetail.newBuilder().setRoad("New road").build()))
+                dequeued.run()
+                scheduler.drain()
+                val oldHelper = helpers.constructed()[0]
+                val newHelper = helpers.constructed()[1]
+                val order = inOrder(oldHelper, newHelper)
+                order.verify(oldHelper).sendFullNavigationBroadcast(
+                    eq(AapNavigationHelper.NavigationSnapshot()), eq(2))
+                order.verify(oldHelper).cancelNotification()
+                val latest = argumentCaptor<AapNavigationHelper.NavigationSnapshot>()
+                order.verify(newHelper).sendFullNavigationBroadcast(latest.capture(), eq(0))
+                assertEquals("New road", latest.firstValue.nextTurnDetail!!.payload.road)
+                verify(oldHelper, times(1)).sendFullNavigationBroadcast(any(), any())
+            }
+        }
+    }
+
+    @Test fun closeDuringClaimedTurnPublishesStopAfterThatTurn() {
+        mockStatic(SystemClock::class.java).use {
+            mockConstruction(AapNavigationHelper::class.java).use { helpers ->
+                val scheduler = PresentationScheduler()
+                val handler = AapMessageHandlerType(mock(), mock(), mock(), mock(), mock(), mock(),
+                    presentation = scheduler.queue())
+                val helper = helpers.constructed().single()
+                val events = mutableListOf<String>()
+                doAnswer {
+                    events.add("turn started")
+                    handler.close()
+                    events.add("turn finished")
+                    null
+                }.whenever(helper).sendFullNavigationBroadcast(any(), eq(0))
+                doAnswer { events.add("stop"); null }
+                    .whenever(helper).sendFullNavigationBroadcast(any(), eq(2))
+                handler.handle(AapMessage(Channel.ID_NAV, NavigationStatus.MsgType.NEXTTURNDETAILS_VALUE,
+                    NavigationStatus.NextTurnDetail.newBuilder().setRoad("Old road").build()))
+                scheduler.drain()
+                assertEquals(listOf("turn started", "turn finished", "stop"), events)
+                verify(helper).cancelNotification()
+            }
+        }
+    }
+
+    @Test fun failingFinalBroadcastStillCancelsNotificationAndClosesMedia() {
+        mockStatic(SystemClock::class.java).use {
+            mockConstruction(AapNavigationHelper::class.java).use { helpers ->
+                val scheduler = PresentationScheduler()
+                val calls = mutableListOf<AaPresentationSession>()
+                val session = AaPresentationSession()
+                val handler = AapMessageHandlerType(mock(), mock(), mock(), mock(), mock(), mock(),
+                    onAaPresentationClosed = { calls.add(it) }, presentationSession = session,
+                    presentation = scheduler.queue())
+                handler.handle(AapMessage(Channel.ID_NAV, NavigationStatus.MsgType.INSTRUMENT_CLUSTER_STOP_VALUE,
+                    NavigationStatus.NavigationState.getDefaultInstance()))
+                val failure = AssertionError("broadcast unavailable")
+                val helper = helpers.constructed().single()
+                doThrow(failure).whenever(helper).sendFullNavigationBroadcast(any(), eq(2))
+                handler.close()
+                scheduler.drain()
+                verify(helper).cancelNotification()
+                assertEquals(listOf(session), calls)
+                assertEquals(listOf(failure), scheduler.errors)
+            }
         }
     }
 

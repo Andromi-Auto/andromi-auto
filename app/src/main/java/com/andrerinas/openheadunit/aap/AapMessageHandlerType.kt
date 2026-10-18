@@ -33,7 +33,7 @@ internal class AapMessageHandlerType(
     override fun close() {
         presentationSession.retire()
         presentation.close {
-            try { aapNavigation.cancelNotification() }
+            try { aapNavigation.close() }
             finally { onAaPresentationClosed?.invoke(presentationSession) }
         }
     }
