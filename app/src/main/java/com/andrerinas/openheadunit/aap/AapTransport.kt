@@ -1079,22 +1079,38 @@ class AapTransport(
             var peerSentBytes = false
             var transportError = false
             // Outer deadline prevents the loop from running for minutes on an unresponsive device.
-            // Each send+recv pair uses 2 s per operation; 3 attempts × 4 s ≈ 12 s worst-case,
-            // capped here at HANDSHAKE_TIMEOUT_MS so a stuck device fails fast.
+            // The first two receive windows allow 2 s each; the last uses the remaining budget.
+            // Partial frames retain their bytes, but never extend this deadline.
             val versionDeadline = SystemClock.elapsedRealtime() + HANDSHAKE_TIMEOUT_MS
+            // Bounded reads leave the following TLS frame in the socket/USB receive buffer.
+            // Keep this reader across retries so a timeout cannot discard a partial response.
+            val frames = HandshakeFrameReader(SystemClock::elapsedRealtime, if (isUsb) 100 else 1) { bytes, length, timeout ->
+                val started = SystemClock.elapsedRealtime()
+                val count = connection.recvBlocking(bytes, length, timeout, false)
+                if (count > 0) peerSentBytes = true
+                if (HandshakeMessagePolicy.isReadError(count, SystemClock.elapsedRealtime() - started,
+                        timeout, timeoutLooksLikeError = connection !is SocketProjectionConnection)) {
+                    transportError = true
+                }
+                ret = count
+                count
+            }
             while (attempt < 3 && connection.isConnected) {
                 if (SystemClock.elapsedRealtime() >= versionDeadline) {
                     AppLog.e("Handshake: Version exchange timed out after $attempt attempt(s).")
                     return false
                 }
                 attempt++
-                ret = connection.sendBlocking(version, version.size, 2000)
+                ret = connection.sendBlocking(version, version.size,
+                    minOf(2000L, versionDeadline - SystemClock.elapsedRealtime()).coerceAtLeast(1).toInt())
                 AppLog.d("Handshake: Version request sent. ret: $ret. attempt: $attempt. TS: ${SystemClock.elapsedRealtime()}")
-                if (ret < 0) {
+                if (ret != version.size) {
                     AppLog.w("Handshake: Version request send failed (ret=$ret), attempt $attempt")
                     transportError = true
-                    SystemClock.sleep(200)
-                    continue
+                    // Re-sending after a partial write would put a second header inside the
+                    // first frame. Start a fresh connection instead.
+                    lastHandshakeFailure = HandshakeFailure.TRANSPORT_ERROR
+                    return false
                 }
 
                 AppLog.d("Handshake: Waiting for version response. TS: ${SystemClock.elapsedRealtime()}")
@@ -1106,48 +1122,44 @@ class AapTransport(
                 // until the deadline expires.
                 // The last request waits out the whole budget: a USB dongle relaying over WiFi can
                 // answer after 6 s, and giving up there leaves its answers for the next attempt.
-                val recvDeadline = if (attempt < 3) SystemClock.elapsedRealtime() + 2000
-                    else maxOf(versionDeadline, SystemClock.elapsedRealtime() + 2000)
+                val recvDeadline = if (attempt < 3) minOf(versionDeadline, SystemClock.elapsedRealtime() + 2000)
+                    else versionDeadline
                 while (SystemClock.elapsedRealtime() < recvDeadline) {
-                    val remaining = (recvDeadline - SystemClock.elapsedRealtime())
-                        .toInt().coerceAtLeast(100)
-                    val readStart = SystemClock.elapsedRealtime()
-                    ret = connection.recvBlocking(buffer, buffer.size, remaining, false)
-                    val readMs = SystemClock.elapsedRealtime() - readStart
-                    if (HandshakeMessagePolicy.isReadError(ret, readMs, remaining,
-                            timeoutLooksLikeError = connection !is SocketProjectionConnection)) {
-                        transportError = true
+                    val frame = try {
+                        frames.readFrame(recvDeadline)
+                    } catch (e: java.io.IOException) {
+                        // A stale encrypted USB envelope cannot be resynchronised by treating its
+                        // body as another header. Let connection recovery reopen the transport.
+                        lastHandshakeFailure = HandshakeFailure.TRANSPORT_ERROR
+                        throw e
+                    } ?: break
+                    if (HandshakeMessagePolicy.isTerminalResponse(frame)) {
+                        AppLog.e("Handshake: peer terminated version negotiation")
+                        return false
                     }
-                    if (ret > 0) peerSentBytes = true
-                    if (ret <= 0) break  // timeout or error — fall through to outer retry
-                    if (ret >= 6
-                        && buffer[0] == 0.toByte()
-                        && buffer[4] == 0.toByte()
-                        && buffer[5] == 2.toByte()) {
-                        val negotiated = AapVersionNegotiation.parse(buffer, ret)
-                        if (negotiated != null) {
-                            negotiatedVersion = negotiated
-                            AppLog.i("Handshake: Version response received: the phone selected " +
-                                    "${negotiated.major}.${negotiated.minor} " +
-                                    "(we asked for ${AapVersionNegotiation.ANNOUNCED_MAJOR}." +
-                                    "${AapVersionNegotiation.ANNOUNCED_MINOR}), " +
-                                    "status ${negotiated.statusName}")
-                            negotiated.requestedConfig?.let {
-                                AppLog.i("Handshake: the phone asks for ping timeout " +
-                                        "${it.pingConfiguration.timeoutMs}ms, read timeout " +
-                                        "${it.wirelessTcpConfiguration.socketReadTimeoutMs}ms")
-                            }
-                        } else {
-                            AppLog.i("Handshake: Version response received (ret=$ret, attempt=$attempt).")
+                    if (HandshakeMessagePolicy.isLateVersionResponse(frame)) {
+                        val negotiated = AapVersionNegotiation.parse(frame, frame.size)
+                        if (negotiated == null || !negotiated.accepted) {
+                            AppLog.e("Handshake: rejected VERSION_RESPONSE: " +
+                                (negotiated?.let { "${it.major}.${it.minor}, ${it.statusName}" } ?: "malformed body"))
+                            return false
+                        }
+                        negotiatedVersion = negotiated
+                        AppLog.i("Handshake: Version response ${negotiated.major}.${negotiated.minor}, " +
+                            "requested ${AapVersionNegotiation.ANNOUNCED_MAJOR}.${AapVersionNegotiation.ANNOUNCED_MINOR}, status ${negotiated.statusName}")
+                        negotiated.requestedConfig?.let {
+                            AppLog.i("Handshake: the phone asks for ping timeout " +
+                                "${it.pingConfiguration.timeoutMs}ms, read timeout " +
+                                "${it.wirelessTcpConfiguration.socketReadTimeoutMs}ms")
                         }
                         received = true
                         break
                     }
                     // Wrong message — log and keep draining.
-                    val ch   = buffer[0].toInt() and 0xFF
-                    val type = ((buffer[4].toInt() and 0xFF) shl 8) or (buffer[5].toInt() and 0xFF)
+                    val ch   = frame[0].toInt() and 0xFF
+                    val type = ((frame[4].toInt() and 0xFF) shl 8) or (frame[5].toInt() and 0xFF)
                     AppLog.w("Handshake: Ignoring unexpected message " +
-                             "(ch=$ch, type=0x${type.toString(16)}, len=$ret). " +
+                             "(ch=$ch, type=0x${type.toString(16)}, len=${frame.size}). " +
                              "Waiting for VERSION_RESPONSE.")
                 }
                 if (received) break
