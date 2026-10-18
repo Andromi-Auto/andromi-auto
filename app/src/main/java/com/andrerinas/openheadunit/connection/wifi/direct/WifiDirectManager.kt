@@ -238,6 +238,9 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
     @Volatile
     private var wifiRestartInFlight = false
     private var lastWedgeReportAtMs = 0L
+    // When the churn check last judged a window as another app cycling the stack, elapsedRealtime.
+    @Volatile
+    private var lastForeignChurnElapsedMs = 0L
     private val recoveryScope = kotlinx.coroutines.CoroutineScope(
         kotlinx.coroutines.SupervisorJob() + kotlinx.coroutines.Dispatchers.IO
     )
@@ -786,21 +789,33 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
     }
 
     private fun noteP2pDisableEdge() {
-        val now = System.currentTimeMillis()
-        synchronized(wedgeLock) {
-            p2pDisableEdges.addLast(now)
-            while (p2pDisableEdges.size > 32) p2pDisableEdges.removeFirst()
-        }
+        val now = SystemClock.elapsedRealtime()
+        synchronized(wedgeLock) { addWedgeStamp(p2pDisableEdges, now) }
     }
 
     /** Count a failed group create, then judge whether the stack is wedged. */
     private fun noteGroupCreateFailure() {
-        val now = System.currentTimeMillis()
-        synchronized(wedgeLock) {
-            groupCreateFailures.addLast(now)
-            while (groupCreateFailures.size > 32) groupCreateFailures.removeFirst()
-        }
+        val now = SystemClock.elapsedRealtime()
+        synchronized(wedgeLock) { addWedgeStamp(groupCreateFailures, now) }
         checkStackWedged(now)
+    }
+
+    /** Drops stamps older than the window, so the count in the log is the real one up to the cap. */
+    private fun addWedgeStamp(stamps: ArrayDeque<Long>, now: Long) {
+        stamps.addLast(now)
+        while (stamps.isNotEmpty() && now - stamps.first() > P2pStackWedgePolicy.WINDOW_MS) stamps.removeFirst()
+        while (stamps.size > P2pStackWedgePolicy.MAX_STAMPS) stamps.removeFirst()
+    }
+
+    /**
+     * WiFi has just come on: the disabled broadcasts from the off period, and the creates that fail
+     * while WiFi Direct comes back, belong to the toggle and not to a wedge, so judge afresh.
+     */
+    private fun noteWifiEnabled() {
+        synchronized(wedgeLock) {
+            p2pDisableEdges.clear()
+            groupCreateFailures.clear()
+        }
     }
 
     /**
@@ -822,20 +837,26 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
                 wifiRestartTimes.toList()
             )
         }
-        if (!P2pStackWedgePolicy.isWedged(wifiEnabled, edges, failures)) return
+        // The churn check's verdict, not its running count: before our first request every edge
+        // counts as foreign, and a wedged stack floods them, so the running count would hide it.
+        val foreignChurn = P2pStackWedgePolicy.foreignChurnRecent(now, lastForeignChurnElapsedMs)
+        if (!P2pStackWedgePolicy.isWedged(wifiEnabled, edges, failures, foreignChurn)) return
 
         // Once a minute: the creates keep failing every two seconds while this holds.
         if (now - lastWedgeReportAtMs in 0 until P2pStackWedgePolicy.WINDOW_MS) return
         lastWedgeReportAtMs = now
+        fun counted(n: Int) = if (n >= P2pStackWedgePolicy.MAX_STAMPS) "at least $n" else "$n"
         AppLog.w(
             "WifiDirectManager: WiFi Direct looks wedged - WiFi is on, the stack reported disabled " +
-                "$edges times and $failures group creates failed in the last " +
+                "${counted(edges)} times and ${counted(failures)} group creates failed in the last " +
                 "${P2pStackWedgePolicy.WINDOW_MS / 1000}s. Only a WiFi restart frees it."
         )
         ConnectionIssues.raise(context, ConnectionIssue.WIFI_DIRECT_STACK_STUCK)
 
         val optedIn = try { App.provide(context).settings.autoRestartWifiWhenP2pStuck } catch (e: Exception) { false }
-        val sessionConnected = isNativeSessionConnected?.invoke() == true
+        // CommManager as well as the Native provider, so a Helper-mode WiFi Direct session counts.
+        val sessionConnected = isNativeSessionConnected?.invoke() == true ||
+            try { App.provide(context).commManager.isConnected } catch (e: Exception) { false }
         if (!P2pStackWedgePolicy.mayAutoRestart(optedIn, sessionConnected, now, restarts)) {
             if (optedIn) AppLog.i("WifiDirectManager: automatic WiFi restart held back (cooldown, hourly limit or live session).")
             return
@@ -869,6 +890,9 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
         val now = System.currentTimeMillis()
         val elapsed = now - churnWindowStartedAtMs
         if (churnWindowStartedAtMs == 0L || elapsed >= P2pInterfaceChurnPolicy.WINDOW_MS || elapsed < 0L) {
+            if (P2pInterfaceChurnPolicy.isForeignChurn(churnForeignEventsInWindow)) {
+                lastForeignChurnElapsedMs = SystemClock.elapsedRealtime()
+            }
             if (P2pInterfaceChurnPolicy.isForeignChurn(churnForeignEventsInWindow) &&
                 P2pInterfaceChurnPolicy.shouldReport(now, lastChurnReportAtMs)
             ) {
@@ -926,6 +950,11 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
                         cancelNativeJoinWatchdog()
                         nativeRecreateCount = 0
                     }
+                }
+
+                WifiManager.WIFI_STATE_CHANGED_ACTION -> {
+                    val wifiState = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, WifiManager.WIFI_STATE_UNKNOWN)
+                    if (wifiState == WifiManager.WIFI_STATE_ENABLED) noteWifiEnabled()
                 }
 
                 WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION -> {
@@ -1054,6 +1083,8 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
                 addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION)
                 addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION)
                 addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION)
+                // Only to judge a wedge afresh after WiFi comes back; see noteWifiEnabled().
+                addAction(WifiManager.WIFI_STATE_CHANGED_ACTION)
             }
             ContextCompat.registerReceiver(context, receiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED)
             isReceiverRegistered = true

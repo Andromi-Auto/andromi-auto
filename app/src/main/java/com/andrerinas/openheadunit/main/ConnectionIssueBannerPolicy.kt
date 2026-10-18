@@ -193,20 +193,21 @@ object ConnectionIssueBannerPolicy {
         //
         // One at a time rather than a list: these panels are commonly 1024x600 and often 800x480,
         // and three stacked warnings would be the screen.
+        //
+        // Dismissal is per occurrence, not permanent. Hiding what the user has already read costs
+        // nothing; hiding the next failure too would make the banner useless on the second drive.
+        // Filtered before the ranking, so a dismissed record can never hide a newer one.
         val candidates = standing
             .filter { it.raisedAtEpochMs != 0L }
             .filter { it.issue in relevant }
             .filter { it.issue !in remedyApplied }
-        // A wedged stack is the cause of the refusal beside it, and the refusal is re-raised on
-        // every failed create while only the wedge's restart can fix it - so newest-wins would
-        // keep the symptom on screen and hide the one banner that carries the remedy.
-        val newest = candidates.firstOrNull { it.issue == ConnectionIssue.WIFI_DIRECT_STACK_STUCK }
-            ?: candidates.maxByOrNull { it.raisedAtEpochMs }
-            ?: return null
-
-        // Dismissal is per occurrence, not permanent. Hiding what the user has already read costs
-        // nothing; hiding the next failure too would make the banner useless on the second drive.
-        if (newest.raisedAtEpochMs <= dismissedAtEpochMs) return null
+            .filter { it.raisedAtEpochMs > dismissedAtEpochMs }
+        val newest = candidates.maxByOrNull { it.raisedAtEpochMs } ?: return null
+        // The one exception to newest-wins: a wedged stack causes the refusal re-raised on every
+        // failed create, so that symptom must not hide the banner carrying the remedy. Only that.
+        if (newest.issue == ConnectionIssue.WIFI_DIRECT_GROUP_REFUSED &&
+            candidates.any { it.issue == ConnectionIssue.WIFI_DIRECT_STACK_STUCK }
+        ) return ConnectionIssue.WIFI_DIRECT_STACK_STUCK
 
         return newest.issue
     }

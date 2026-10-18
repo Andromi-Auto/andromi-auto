@@ -10,11 +10,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 /**
- * Restarts this unit's WiFi to free a wedged WiFi Direct stack. See [P2pStackWedgePolicy].
- *
- * Android 10 and later return false from `WifiManager.setWifiEnabled` for an app targeting them,
- * so the restart goes through the same two privileged routes [OemAppManager] uses: root, or this
- * unit's own ADB on 127.0.0.1:5555. With neither, [wifiPanelIntent] is the one-tap fallback.
+ * Restarts WiFi to free a wedged WiFi Direct stack ([P2pStackWedgePolicy]). Android 10+ refuses
+ * `setWifiEnabled` to apps, so this uses [OemAppManager]'s routes: root, or this unit's own ADB.
+ * With neither, [wifiPanelIntent] is the one-tap fallback.
  */
 object WifiStackRecovery {
 
