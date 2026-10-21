@@ -157,6 +157,36 @@ class VersionHandshakeFramingTest {
         }
     }
 
+    @Test fun `compatible nonzero version statuses reach TLS with their status preserved`() = mockStatic(SystemClock::class.java).use {
+        for (type in ProjectionConnection.Type.entries) {
+            for (status in listOf(1, -8, 255)) {
+                val frame = response.copyOf().also {
+                    it[10] = (status shr 8).toByte()
+                    it[11] = status.toByte()
+                }
+                val connection = mock(ProjectionConnection::class.java)
+                `when`(connection.type).thenReturn(type)
+                `when`(connection.isConnected).thenReturn(true)
+                var sent = false
+                var position = 0
+                `when`(connection.sendBlocking(any(), anyInt(), anyInt())).thenAnswer { sent = true; 10 }
+                `when`(connection.recvBlocking(any(), anyInt(), anyInt(), anyBoolean())).thenAnswer {
+                    if (!sent) 0 else {
+                        val count = minOf(it.getArgument<Int>(1), frame.size - position)
+                        frame.copyInto(it.getArgument<ByteArray>(0), 0, position, position + count)
+                        position += count
+                        count
+                    }
+                }
+                val ssl = mock(AapSsl::class.java)
+                val transport = transport(ssl)
+                run(transport, connection)
+                verify(ssl).performHandshake(connection)
+                assertEquals(status, transport.negotiatedVersion!!.status)
+            }
+        }
+    }
+
     @Test fun `rejected truncated and malformed responses never reach TLS`() = mockStatic(SystemClock::class.java).use {
         val invalid = listOf(
             response.copyOf().also { it[10] = -1; it[11] = -1 },

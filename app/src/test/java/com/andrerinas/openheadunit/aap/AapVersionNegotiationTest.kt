@@ -92,9 +92,13 @@ class AapVersionNegotiationTest {
         assertTrue(AapVersionNegotiation.parse(frame(6, 1, 0), 12)!!.accepted)
     }
 
-    @Test fun `only successful status permits TLS`() {
+    @Test fun `only no compatible version refuses TLS`() {
         assertTrue(AapVersionNegotiation.parse(frame(1, 7, 0), 12)!!.accepted)
         assertFalse(AapVersionNegotiation.parse(frame(1, 7, -1), 12)!!.accepted)
-        assertFalse(AapVersionNegotiation.parse(frame(1, 7, 1), 12)!!.accepted)
+        // GAL codes: 1(STATUS_UNSOLICITED_MESSAGE), -8(STATUS_MEDIA_CONFIG_MISMATCH).
+        // The remaining values exercise unknown codes and the signed 16-bit boundaries.
+        for (status in listOf(1, -8, 255, 32767, -32768)) {
+            assertTrue("status=$status", AapVersionNegotiation.parse(frame(1, 7, status), 12)!!.accepted)
+        }
     }
 }
