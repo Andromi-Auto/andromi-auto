@@ -816,6 +816,8 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
             p2pDisableEdges.clear()
             groupCreateFailures.clear()
         }
+        // A named create refused while WiFi was off says nothing about the unit; ask by name again.
+        namedFallbackRefused = false
     }
 
     /**
@@ -871,7 +873,7 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
         }
         recoveryScope.launch {
             try {
-                WifiStackRecovery.restartWifi(context, "WiFi Direct wedged")
+                WifiStackRecovery.restartWifi(context, "WiFi Direct wedged", automatic = true)
             } finally {
                 wifiRestartInFlight = false
             }

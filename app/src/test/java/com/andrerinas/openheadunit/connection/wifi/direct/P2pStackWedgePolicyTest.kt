@@ -77,4 +77,12 @@ class P2pStackWedgePolicyTest {
         assertFalse(P2pStackWedgePolicy.foreignChurnRecent(now, 0L))
         assertFalse(P2pStackWedgePolicy.foreignChurnRecent(now, now + 5_000))
     }
+
+    @Test
+    fun `an automatic restart uses ADB only after it was proven at setup`() {
+        assertTrue(P2pStackWedgePolicy.mayRestartAutomatically(viaRoot = true, viaAdb = false, adbVerified = false))
+        assertTrue(P2pStackWedgePolicy.mayRestartAutomatically(viaRoot = false, viaAdb = true, adbVerified = true))
+        assertFalse(P2pStackWedgePolicy.mayRestartAutomatically(viaRoot = false, viaAdb = true, adbVerified = false))
+        assertFalse(P2pStackWedgePolicy.mayRestartAutomatically(viaRoot = false, viaAdb = false, adbVerified = true))
+    }
 }

@@ -4806,18 +4806,21 @@ class SettingsFragment : Fragment() {
     }
 
     /**
-     * Ask for root now, while the user is at the settings screen, and say which route the automatic
-     * restart will use. Asking later would put a root prompt in front of a driver.
+     * Ask for root, or run one ADB command, now, while the user is at the settings screen. Asking
+     * later would put a root prompt or "Allow USB debugging?" in front of a driver.
      */
     private fun probeWifiRestartRoute() {
         viewLifecycleOwner.lifecycleScope.launch {
             val ctx = context ?: return@launch
             val rootGranted = WifiStackRecovery.requestRoot()
             settings.wifiRestartRootGranted = rootGranted
+            val adbVerified = !rootGranted &&
+                WifiStackRecovery.availableRoute() == OemAppManager.ExecutionBackend.ADB &&
+                WifiStackRecovery.verifyAdb(ctx.applicationContext)
+            settings.wifiRestartAdbVerified = adbVerified
             val message = when {
                 rootGranted -> R.string.auto_restart_wifi_root_granted
-                WifiStackRecovery.availableRoute() == OemAppManager.ExecutionBackend.ADB ->
-                    R.string.auto_restart_wifi_adb
+                adbVerified -> R.string.auto_restart_wifi_adb
                 else -> R.string.auto_restart_wifi_unavailable
             }
             ToastUtils.showToast(ctx, message, Toast.LENGTH_LONG, force = true)
