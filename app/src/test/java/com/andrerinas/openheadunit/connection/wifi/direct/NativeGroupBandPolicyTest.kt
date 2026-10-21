@@ -257,9 +257,30 @@ class NativeGroupBandPolicyTest {
     }
 
     @Test
-    fun `only an exhausted ladder under AUTO is recorded`() {
-        assertTrue(NativeGroupBandPolicy.recordsBandedRefusal(P2pBandPreference.AUTO, ladderExhausted = true))
-        assertFalse(NativeGroupBandPolicy.recordsBandedRefusal(P2pBandPreference.AUTO, ladderExhausted = false))
-        assertFalse(NativeGroupBandPolicy.recordsBandedRefusal(P2pBandPreference.FORCE_2_4GHZ, ladderExhausted = true))
+    fun `only an exhausted ladder under AUTO with every rung refused is recorded`() {
+        assertTrue(NativeGroupBandPolicy.recordsBandedRefusal(P2pBandPreference.AUTO, ladderExhausted = true, everyRungRefused = true))
+        assertFalse(NativeGroupBandPolicy.recordsBandedRefusal(P2pBandPreference.AUTO, ladderExhausted = false, everyRungRefused = true))
+        assertFalse(NativeGroupBandPolicy.recordsBandedRefusal(P2pBandPreference.FORCE_2_4GHZ, ladderExhausted = true, everyRungRefused = true))
+    }
+
+    @Test
+    fun `a ladder with a busy rung is not recorded`() {
+        assertFalse(NativeGroupBandPolicy.recordsBandedRefusal(P2pBandPreference.AUTO, ladderExhausted = true, everyRungRefused = false))
+    }
+
+    @Test
+    fun `only ERROR counts as a refusal of the band`() {
+        assertTrue(NativeGroupBandPolicy.isBandRefusal(reason = 0, crashed = false))
+        assertFalse(NativeGroupBandPolicy.isBandRefusal(reason = 2, crashed = false))
+        assertFalse(NativeGroupBandPolicy.isBandRefusal(reason = 1, crashed = false))
+        assertFalse(NativeGroupBandPolicy.isBandRefusal(reason = 0, crashed = true))
+    }
+
+    @Test
+    fun `the refusal is stored only when the no-band group is on 5GHz`() {
+        assertTrue(NativeGroupBandPolicy.storesBandedRefusalAt(5180))
+        assertTrue(NativeGroupBandPolicy.storesBandedRefusalAt(5745))
+        assertFalse(NativeGroupBandPolicy.storesBandedRefusalAt(2437))
+        assertFalse(NativeGroupBandPolicy.storesBandedRefusalAt(0))
     }
 }
