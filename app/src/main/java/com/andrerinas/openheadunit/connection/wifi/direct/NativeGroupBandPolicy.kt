@@ -134,21 +134,8 @@ object NativeGroupBandPolicy {
     }
 
     /**
-     * Whether this bring-up should skip the banded request and go straight to the no-band create.
-     *
-     * Measured on a MediaTek Helio P22 phone on Android 10: every `setGroupOperatingBand` create is
-     * refused with ERROR (Internal Error), on every session, and the no-band create that follows
-     * comes up on 5 GHz anyway. The ladder in front of it is four refusals two seconds apart, so
-     * each connection paid about 8.5 s for an answer the unit had already given. The refusal is
-     * a property of the radio firmware, not of the moment, so it is remembered against the build
-     * fingerprint and the ladder is skipped while that build is the one running.
-     *
-     * Only for [P2pBandPreference.AUTO], whose fallback is the platform's choice anyway: the two
-     * forced positions mean the user asked for that band, so they keep asking. Never with a pinned
-     * channel either, which is an explicit choice with its own ladder. A firmware update changes
-     * the fingerprint and so asks again, and changing the band setting clears the record.
-     *
-     * @param refusedOnFingerprint the build the refusal was recorded on, or null if none was.
+     * Whether AUTO goes straight to the no-band create because this firmware refused every banded
+     * request before. A forced band or a pinned channel is the user's choice and is still asked for.
      */
     fun skipsBandedRequest(
         preference: P2pBandPreference,
@@ -160,12 +147,24 @@ object NativeGroupBandPolicy {
         !refusedOnFingerprint.isNullOrEmpty() &&
         refusedOnFingerprint == currentFingerprint
 
+    /** The P2P reason that means the driver refused the request; BUSY and the rest are transient. */
+    const val REASON_REFUSED = 0
+
+    /** Whether a failed rung counts as a refusal of the band rather than a busy or crashed framework. */
+    fun isBandRefusal(reason: Int, crashed: Boolean): Boolean = !crashed && reason == REASON_REFUSED
+
     /**
-     * Whether a no-band group that formed after the banded ladder was exhausted should be recorded
-     * as this unit's standing answer. Only under [P2pBandPreference.AUTO], for the reason above.
+     * Whether an exhausted banded ladder may become this unit's standing answer: only under AUTO, and
+     * only when every rung was refused. A busy framework says nothing about the band.
      */
-    fun recordsBandedRefusal(preference: P2pBandPreference, ladderExhausted: Boolean): Boolean =
-        ladderExhausted && preference == P2pBandPreference.AUTO
+    fun recordsBandedRefusal(preference: P2pBandPreference, ladderExhausted: Boolean, everyRungRefused: Boolean): Boolean =
+        ladderExhausted && everyRungRefused && preference == P2pBandPreference.AUTO
+
+    /**
+     * Whether the no-band group that followed may be stored. Only above 4000 MHz: there skipping the
+     * band costs nothing, while a 2.4 GHz group would turn the narrow-band cap on for every drive.
+     */
+    fun storesBandedRefusalAt(frequencyMhz: Int): Boolean = frequencyMhz > 4000
 
     /** What a failed Native AA group request does next. */
     enum class NextStep {

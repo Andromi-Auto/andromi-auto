@@ -228,12 +228,15 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
     private var pinnedChannelAbandoned = false
 
     /**
-     * Set when the banded ladder has just been exhausted under AUTO and the no-band create is on
-     * its way, so the group that forms can be recorded as this unit's standing answer. Only the
-     * ladder sets it; the join watchdog's own standard fallback is a different question.
+     * Set when the banded ladder ended in refusals under AUTO, so the no-band group that follows can
+     * be stored as this unit's standing answer once its frequency is known. Only the ladder sets it.
      */
     @Volatile
     private var bandedRefusalPending = false
+
+    // Whether every rung of the current banded ladder failed with ERROR; one BUSY or crash clears it.
+    @Volatile
+    private var bandedLadderAllRefused = true
 
     /**
      * The frequency this group was asked for, or 0 where the band was asked for instead.
@@ -2253,6 +2256,7 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
             standardCreateGroup(mgr, ch, 0, NATIVE_GROUP_MODE_STANDARD_REMEMBERED)
             return
         }
+        if (retryCount == 0) bandedLadderAllRefused = true
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             try {
@@ -2440,6 +2444,7 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
         reasonStr: String,
         crash: Throwable?,
     ) {
+        if (!NativeGroupBandPolicy.isBandRefusal(reason, crash != null)) bandedLadderAllRefused = false
         // Ahead of the ladder: inside the platform's own create window nothing on it can succeed.
         if (shouldCancelStuckCreate(reason)) {
             cancelStuckCreate(
@@ -2480,7 +2485,9 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
 
             NativeGroupBandPolicy.NextStep.STANDARD_FALLBACK -> {
                 AppLog.w("WifiDirectManager: $requestLabel createGroup retries exhausted ($reasonStr). Falling back to standard createGroup.")
-                bandedRefusalPending = NativeGroupBandPolicy.recordsBandedRefusal(preference, ladderExhausted = true)
+                bandedRefusalPending = NativeGroupBandPolicy.recordsBandedRefusal(
+                    preference, ladderExhausted = true, everyRungRefused = bandedLadderAllRefused
+                )
                 standardCreateGroup(mgr, ch, 0, NATIVE_GROUP_MODE_STANDARD_FALLBACK)
             }
 
@@ -2744,14 +2751,8 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
             ConnectionIssues.clear(context, ConnectionIssue.FIVE_GHZ_CHANNEL_REFUSED)
         }
         nativeGroupCreationMode = groupMode
-        if (bandedRefusalPending && groupMode == NATIVE_GROUP_MODE_STANDARD_FALLBACK) {
-            bandedRefusalPending = false
-            App.provide(context).settings.wifiDirectBandedRefusedOn = Build.FINGERPRINT
-            AppLog.i(
-                "WifiDirectManager: recorded that this unit refuses banded groups on this firmware; " +
-                    "the next bring-up goes straight to the no-band group."
-            )
-        }
+        // The refusal is stored in notifyNativeGroupStarted(), once the group's frequency is known.
+        if (groupMode != NATIVE_GROUP_MODE_STANDARD_FALLBACK) bandedRefusalPending = false
         // The platform chose the band here, so there is no mismatch to correct, and no
         // frequency was named either.
         nativeRequestedBand = NativeGroupBandPolicy.Band.UNSPECIFIED
@@ -2971,6 +2972,18 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
     }
 
     private fun notifyNativeGroupStarted(ssid: String, frequency: Int, band: String) {
+        if (bandedRefusalPending && frequency > 0 && nativeGroupCreationMode == NATIVE_GROUP_MODE_STANDARD_FALLBACK) {
+            bandedRefusalPending = false
+            if (NativeGroupBandPolicy.storesBandedRefusalAt(frequency)) {
+                App.provide(context).settings.wifiDirectBandedRefusedOn = Build.FINGERPRINT
+                AppLog.i(
+                    "WifiDirectManager: recorded that this unit refuses banded groups on this firmware; " +
+                        "the next bring-up goes straight to the no-band group."
+                )
+            } else {
+                AppLog.i("WifiDirectManager: the no-band group is on $frequency MHz, so the banded refusal is not stored.")
+            }
+        }
         val frequencyText = if (frequency > 0) "$frequency MHz" else "frequency unknown"
         val message = "Native AA WiFi Direct: $band ($frequencyText), $nativeGroupCreationMode"
         if (message == lastNativeGroupStatusMessage) return

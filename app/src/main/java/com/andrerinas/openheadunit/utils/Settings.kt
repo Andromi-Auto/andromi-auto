@@ -597,7 +597,8 @@ class Settings(private val context: Context) {
             val editor = prefs.edit()
             if (value.isNullOrEmpty()) editor.remove(KEY_WIFI_DIRECT_BANDED_REFUSED_ON)
             else editor.putString(KEY_WIFI_DIRECT_BANDED_REFUSED_ON, value)
-            editor.apply()
+            // commit(), not apply(): written once per firmware, and a force-stop must not lose it.
+            editor.commit()
         }
 
     /**
