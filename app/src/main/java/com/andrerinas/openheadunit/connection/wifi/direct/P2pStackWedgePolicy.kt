@@ -55,6 +55,13 @@ object P2pStackWedgePolicy {
         lastForeignChurnAtMs > 0L && (now - lastForeignChurnAtMs) in 0..WINDOW_MS
 
     /**
+     * Whether an automatic restart may use this route. Root counts once granted; ADB only after a
+     * real command ran at setup, so an unpaired key never raises "Allow USB debugging?" on the road.
+     */
+    fun mayRestartAutomatically(viaRoot: Boolean, viaAdb: Boolean, adbVerified: Boolean): Boolean =
+        viaRoot || (viaAdb && adbVerified)
+
+    /**
      * Whether an automatic restart may run now: never without the opt-in, since it switches WiFi
      * off for every app, and never during a live session, which proves the stack works.
      */
