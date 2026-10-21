@@ -86,6 +86,7 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
         private const val NATIVE_GROUP_MODE_5GHZ_REQUESTED = "5GHz requested"
         private const val NATIVE_GROUP_MODE_24GHZ_REQUESTED = "2.4GHz requested"
         private const val NATIVE_GROUP_MODE_STANDARD_FALLBACK = "standard fallback"
+        private const val NATIVE_GROUP_MODE_STANDARD_REMEMBERED = "standard (banded refusal remembered)"
         private const val NATIVE_GROUP_MODE_STANDARD_LEGACY = "standard (no 5GHz API)"
         // Native AA join recovery: if no phone joins the quiet-host group within this window,
         // tear it down and recreate a fresh one (bounded), dropping the forced 5GHz band after
@@ -225,6 +226,17 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
      */
     @Volatile
     private var pinnedChannelAbandoned = false
+
+    /**
+     * Set when the banded ladder ended in refusals under AUTO, so the no-band group that follows can
+     * be stored as this unit's standing answer once its frequency is known. Only the ladder sets it.
+     */
+    @Volatile
+    private var bandedRefusalPending = false
+
+    // Whether every rung of the current banded ladder failed with ERROR; one BUSY or crash clears it.
+    @Volatile
+    private var bandedLadderAllRefused = true
 
     /**
      * The frequency this group was asked for, or 0 where the band was asked for instead.
@@ -2072,6 +2084,7 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
         native5GhzBandMismatchRetries = 0
         nativeRequestedBand = NativeGroupBandPolicy.Band.UNSPECIFIED
         nativeRequestedFrequency = 0
+        bandedRefusalPending = false
         // legacyChannelAttempt is deliberately not reset here. The handshake calls
         // triggerWifiDirectRefresh() every ten seconds while it waits for credentials, and each one
         // lands back in this method - so resetting made rung 1 the only rung the ladder ever tried.
@@ -2225,6 +2238,25 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
         // which two open issues spent weeks guessing at.
         AppLog.i("WifiDirectManager: ${WifiBandCapability.describe(supports5Ghz)}.")
         AppLog.i("WifiDirectManager: Band preference is ${NativeGroupBandPolicy.describePreference(preference, supports5Ghz)}.")
+
+        // Only on the first rung: the ladder's own retries are already past this decision.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && retryCount == 0 &&
+            NativeGroupBandPolicy.skipsBandedRequest(
+                preference = preference,
+                channelPinned = requestedFrequency > 0,
+                refusedOnFingerprint = appSettings.wifiDirectBandedRefusedOn,
+                currentFingerprint = Build.FINGERPRINT ?: "",
+            )
+        ) {
+            AppLog.i(
+                "WifiDirectManager: this unit refused every $bandLabel group request on this firmware " +
+                    "before and then hosted the no-band group, so the band request is skipped. " +
+                    "Changing the WiFi Direct band setting asks again."
+            )
+            standardCreateGroup(mgr, ch, 0, NATIVE_GROUP_MODE_STANDARD_REMEMBERED)
+            return
+        }
+        if (retryCount == 0) bandedLadderAllRefused = true
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             try {
@@ -2412,6 +2444,7 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
         reasonStr: String,
         crash: Throwable?,
     ) {
+        if (!NativeGroupBandPolicy.isBandRefusal(reason, crash != null)) bandedLadderAllRefused = false
         // Ahead of the ladder: inside the platform's own create window nothing on it can succeed.
         if (shouldCancelStuckCreate(reason)) {
             cancelStuckCreate(
@@ -2452,6 +2485,9 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
 
             NativeGroupBandPolicy.NextStep.STANDARD_FALLBACK -> {
                 AppLog.w("WifiDirectManager: $requestLabel createGroup retries exhausted ($reasonStr). Falling back to standard createGroup.")
+                bandedRefusalPending = NativeGroupBandPolicy.recordsBandedRefusal(
+                    preference, ladderExhausted = true, everyRungRefused = bandedLadderAllRefused
+                )
                 standardCreateGroup(mgr, ch, 0, NATIVE_GROUP_MODE_STANDARD_FALLBACK)
             }
 
@@ -2684,6 +2720,13 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
                                 "finishing a create of ours rather than refusing to host one. Waiting for it."
                         )
                     }
+                    if (groupMode == NATIVE_GROUP_MODE_STANDARD_REMEMBERED) {
+                        // The shortcut is only worth keeping while it works. Forgetting it puts the
+                        // banded ladder back in front of the next bring-up.
+                        App.provide(context).settings.wifiDirectBandedRefusedOn = null
+                        AppLog.w("WifiDirectManager: the remembered no-band route failed too; forgetting it so the next bring-up asks for the band again.")
+                    }
+                    bandedRefusalPending = false
                     isGroupCreatingOrCreated = false
                     releaseNativeCreateWindow("the unit refused the group")
                 }
@@ -2708,6 +2751,8 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
             ConnectionIssues.clear(context, ConnectionIssue.FIVE_GHZ_CHANNEL_REFUSED)
         }
         nativeGroupCreationMode = groupMode
+        // The refusal is stored in notifyNativeGroupStarted(), once the group's frequency is known.
+        if (groupMode != NATIVE_GROUP_MODE_STANDARD_FALLBACK) bandedRefusalPending = false
         // The platform chose the band here, so there is no mismatch to correct, and no
         // frequency was named either.
         nativeRequestedBand = NativeGroupBandPolicy.Band.UNSPECIFIED
@@ -2927,6 +2972,18 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
     }
 
     private fun notifyNativeGroupStarted(ssid: String, frequency: Int, band: String) {
+        if (bandedRefusalPending && frequency > 0 && nativeGroupCreationMode == NATIVE_GROUP_MODE_STANDARD_FALLBACK) {
+            bandedRefusalPending = false
+            if (NativeGroupBandPolicy.storesBandedRefusalAt(frequency)) {
+                App.provide(context).settings.wifiDirectBandedRefusedOn = Build.FINGERPRINT
+                AppLog.i(
+                    "WifiDirectManager: recorded that this unit refuses banded groups on this firmware; " +
+                        "the next bring-up goes straight to the no-band group."
+                )
+            } else {
+                AppLog.i("WifiDirectManager: the no-band group is on $frequency MHz, so the banded refusal is not stored.")
+            }
+        }
         val frequencyText = if (frequency > 0) "$frequency MHz" else "frequency unknown"
         val message = "Native AA WiFi Direct: $band ($frequencyText), $nativeGroupCreationMode"
         if (message == lastNativeGroupStatusMessage) return
