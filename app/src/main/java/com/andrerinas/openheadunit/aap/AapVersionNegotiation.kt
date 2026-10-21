@@ -25,8 +25,11 @@ object AapVersionNegotiation {
         val status: Int,
         val requestedConfig: Control.ConnectionConfiguration?
     ) {
-        /** A failed version exchange must never advance to TLS authentication. */
-        val accepted: Boolean get() = status == 0
+        /**
+         * Only -1(STATUS_NO_COMPATIBLE_VERSION) refuses negotiation. Phones also return
+         * statuses other than 0(STATUS_SUCCESS) on working sessions; TLS must still be tried.
+         */
+        val accepted: Boolean get() = status != Common.MessageStatus.STATUS_NO_COMPATIBLE_VERSION_VALUE
 
         /** True once the negotiated version carries the 1.6 message set. */
         val supports16: Boolean get() = major > 1 || (major == 1 && minor >= FEATURE_MINOR_1_6)
@@ -59,7 +62,7 @@ object AapVersionNegotiation {
                 null
             }
         }
-        // status is a signed 16-bit MessageStatus, so -1 arrives as 0xFFFF.
+        // Signed 16-bit MessageStatus: -1(STATUS_NO_COMPATIBLE_VERSION) arrives as 0xFFFF.
         val signed = if (status >= 0x8000) status - 0x10000 else status
         return Result(u16(6), u16(8), signed, config)
     }

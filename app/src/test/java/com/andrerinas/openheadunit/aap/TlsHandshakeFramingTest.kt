@@ -60,6 +60,12 @@ class TlsHandshakeFramingTest {
     }
 
     @Test fun `late response and fragmented TLS envelopes reach engine as payload only`() = mockStatic(SystemClock::class.java).use {
+        for (status in listOf(0, 1, -8, 255)) {
+            assertLateVersionReachesTls(status)
+        }
+    }
+
+    private fun assertLateVersionReachesTls(status: Int) {
         val engine = mock(SSLEngine::class.java)
         var finished = false
         `when`(engine.handshakeStatus).thenAnswer {
@@ -72,7 +78,11 @@ class TlsHandshakeFramingTest {
             finished = true
             SSLEngineResult(SSLEngineResult.Status.OK, SSLEngineResult.HandshakeStatus.FINISHED, 3, 0)
         }
-        val stream = version + tls + byteArrayOf(99)
+        val lateVersion = version.copyOf().also {
+            it[10] = (status shr 8).toByte()
+            it[11] = status.toByte()
+        }
+        val stream = lateVersion + tls + byteArrayOf(99)
         var position = 0
         val connection = mock(ProjectionConnection::class.java)
         `when`(connection.type).thenReturn(ProjectionConnection.Type.USB)
@@ -85,11 +95,11 @@ class TlsHandshakeFramingTest {
         assertTrue(context(engine).performHandshake(connection))
         assertEquals(version.size + tls.size, position)
         verify(engine, times(1)).unwrap(any<ByteBuffer>(), any<ByteBuffer>())
-        Unit
     }
 
     @Test fun `non TLS message or rejected late version is not fed to engine`() = mockStatic(SystemClock::class.java).use {
-        for (frame in listOf(version.copyOf().also { it[11] = -1 }, tls.copyOf().also { it[5] = 11 },
+        // Both bytes must be FF: 0xFFFF is -1(STATUS_NO_COMPATIBLE_VERSION), not 0x00FF(255).
+        for (frame in listOf(version.copyOf().also { it[10] = -1; it[11] = -1 }, tls.copyOf().also { it[5] = 11 },
                 tls.copyOf().also { it[0] = 1 })) {
             val engine = mock(SSLEngine::class.java)
             `when`(engine.handshakeStatus).thenReturn(SSLEngineResult.HandshakeStatus.NEED_UNWRAP)

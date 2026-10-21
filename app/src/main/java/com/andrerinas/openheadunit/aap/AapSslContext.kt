@@ -121,8 +121,8 @@ class AapSslContext internal constructor(private val sslContext: SSLContext): Aa
         while (SystemClock.elapsedRealtime() < deadline) {
             val frame = frames.readFrame(deadline) ?: return null
             if (HandshakeMessagePolicy.isLateVersionResponse(frame)) {
-                // Retried requests can produce extra responses. Skip only valid successes;
-                // a rejection must not be mistaken for a TLS record or silently ignored.
+                // Retried requests can produce extra responses. Skip well-formed responses
+                // unless they report -1(STATUS_NO_COMPATIBLE_VERSION), just as before TLS.
                 if (AapVersionNegotiation.parse(frame, frame.size)?.accepted != true) {
                     AppLog.e("SSL Handshake: invalid late VERSION_RESPONSE")
                     return null
