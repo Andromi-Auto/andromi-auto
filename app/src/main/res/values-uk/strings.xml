@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Open Headunit</string>
+    <string name="app_name">Andromi Auto</string>
     <string name="menu">Меню</string>
     <string name="settings">Налаштування</string>
 
@@ -14,7 +14,7 @@
     <string name="video">Android Auto</string>
     <string name="self_mode">Самостійний режим</string>
     <string name="to_android_auto">В Android Auto</string>
-    <string name="title">Open Headunit</string>
+    <string name="title">Andromi Auto</string>
     <string name="remove">Видалити</string>
     <string name="usb">USB</string>
     <string name="wifi">Wi-Fi</string>
@@ -165,14 +165,14 @@
     <string name="usb_auto_connect_description">Автоматично підключатися до відомого USB-пристрою при запуску програми.</string>
     <string name="auto_start_bt_label">Автозапуск при Bluetooth</string>
     <string name="auto_start_overlay_missing_hint">Дозвіл на показ поверх інших застосунків не надано, тому автозапуск покаже сповіщення замість відкриття екрана. Торкніться, щоб надати.</string>
-    <string name="auto_start_bt_description">Автоматично відкривати Open Headunit при підключенні певного пристрою Bluetooth.</string>
+    <string name="auto_start_bt_description">Автоматично відкривати Andromi Auto при підключенні певного пристрою Bluetooth.</string>
     <string name="auto_start_offer_title">Запускати автоматично?</string>
     <string name="auto_start_offer_message">Запускати застосунок автоматично з цим пристроєм, %1$s?</string>
     <string name="auto_start_offer_yes">Так</string>
     <string name="auto_start_offer_no">Ні</string>
     <string name="auto_start_offer_countdown">Ні через %1$d с</string>
     <string name="auto_start_wifi_label">Автозапуск через Wi-Fi</string>
-    <string name="auto_start_wifi_description">Автоматично відкривати Open Headunit при підключенні до певної мережі Wi-Fi (SSID).</string>
+    <string name="auto_start_wifi_description">Автоматично відкривати Andromi Auto при підключенні до певної мережі Wi-Fi (SSID).</string>
     <string name="auto_start_wifi_ssid_label">SSID Wi-Fi</string>
     <string name="auto_start_wifi_ssid_description">Підключатися лише при з\'єднанні з цією мережею Wi-Fi (SSID)</string>
     <string name="auto_start_wifi_warning">Застаріла функція: може працювати нестабільно на Android 8+ через фонові обмеження. Переконайтеся, що додаток виключено з оптимізації батареї.</string>
@@ -188,7 +188,7 @@
     <string name="auto_start_settings">Налаштування автозапуску</string>
     <string name="auto_start_settings_description">Налаштуйте, коли додаток запускається автоматично</string>
     <string name="auto_start_oem_warning">Цей пристрій може вимагати увімкнення автозапуску та видалення оптимізації батареї або фонових обмежень для цього додатку.\n\nНа головних пристроях з Quick Boot (швидке завантаження) автозапуск може не працювати. Знайдіть \"DuraSpeed\" у системних налаштуваннях та увімкніть там цей додаток. На деяких пристроях DuraSpeed прихований, і вам може знадобитися додаток на кшталт \"Hidden Settings\" щоб його знайти. Якщо у вас немає DuraSpeed, спробуйте вимкнути Quick Boot.</string>
-    <string name="car_launcher_autostart_info">Open Headunit налаштовано як лаунчер авто. Він запускається автоматично під час завантаження системи.</string>
+    <string name="car_launcher_autostart_info">Andromi Auto налаштовано як лаунчер авто. Він запускається автоматично під час завантаження системи.</string>
     <string name="auto_start_on_boot_label">Запуск при завантаженні</string>
     <string name="auto_start_on_boot_description">Автоматично відкривати додаток при запуску пристрою. Потрібен дозвіл \'Відображення поверх інших додатків\' на Android 10+</string>
     <string name="auto_start_screen_on_label">Запуск при увімкненні екрана</string>
@@ -198,7 +198,7 @@
     <string name="bt_permission_denied_title">Потрібен дозвіл Bluetooth</string>
     <string name="bt_permission_denied_message">Дозвіл Bluetooth необхідний для вибору сполучених пристроїв. Надайте його в налаштуваннях застосунку.</string>
     <string name="overlay_permission_title">Дозвіл на запуск у фоні</string>
-    <string name="overlay_permission_description">Щоб Open Headunit міг автоматично відкриватися при підключенні Bluetooth, увімкніть дозвіл \"Показувати поверх інших програм\" на наступному екрані.</string>
+    <string name="overlay_permission_description">Щоб Andromi Auto міг автоматично відкриватися при підключенні Bluetooth, увімкніть дозвіл \"Показувати поверх інших програм\" на наступному екрані.</string>
     <string name="open_settings">Налаштування</string>
     <string name="wireless_connection_settings">Бездротове з\'єднання</string>
     <string name="right_hand_drive">Правостороннє керування</string>
@@ -278,10 +278,10 @@
     <!-- Info Settings -->
     <string name="category_info">Інформація</string>
     <string name="about">Про застосунок і підтримка</string>
-    <string name="about_description">Отримати більше інформації про Open Headunit</string>
+    <string name="about_description">Отримати більше інформації про Andromi Auto</string>
     <string name="version">Версія</string>
     <string name="check_for_updates">Перевірити оновлення</string>
-    <string name="check_for_updates_description">Перевірити наявність новішої версії Open Headunit</string>
+    <string name="check_for_updates_description">Перевірити наявність новішої версії Andromi Auto</string>
     <string name="checking_for_updates">Перевірка оновлень…</string>
     <string name="update_available_title">Доступне оновлення</string>
     <string name="update_available_playstore_message">Доступна новіша версія (%1$s). Перейдіть у Google Play Store, щоб оновити додаток.</string>
@@ -291,7 +291,7 @@
     <string name="update_check_failed">Не вдалося перевірити оновлення. Перевірте з\'єднання з інтернетом.</string>
     <string name="open_play_store">Відкрити Play Store</string>
     <string name="open_github_releases">Відкрити GitHub Releases</string>
-    <string name="about_title">Про Open Headunit</string>
+    <string name="about_title">Про Andromi Auto</string>
     <string name="copyright">© 2025-%d André Rinas</string>
 
     <!-- Safety Disclaimer -->
@@ -302,7 +302,7 @@
         <b>1. Зосередьтеся на дорозі</b><br/>
         Використовувати цю програму за кермом небезпечно. Завжди пріоритизуйте безпечне керування та дотримуйтесь усіх місцевих правил дорожнього руху. Використовуйте це ПЗ лише тоді, коли це безпечно.<br/><br/>
         <b>2. Обмеження відповідальності</b><br/>
-        Open Headunit надається як є, без будь-яких гарантій. Розробники не несуть відповідальності за будь-які аварії, пошкодження вашого автомобіля або пристрою, а також за будь-які правові наслідки, що можуть виникнути внаслідок використання цього програмного забезпечення.<br/><br/>
+        Andromi Auto надається як є, без будь-яких гарантій. Розробники не несуть відповідальності за будь-які аварії, пошкодження вашого автомобіля або пристрою, а також за будь-які правові наслідки, що можуть виникнути внаслідок використання цього програмного забезпечення.<br/><br/>
         <b>3. Відсутність афілійованості</b><br/>
         Цей проєкт є незалежною ініціативою з відкритим вихідним кодом і не повʼязаний, не схвалений та не має жодного відношення до компанії Google LLC або бренду Android Auto.
     ]]></string>
@@ -350,7 +350,7 @@
     <string name="wifi_disconnect_toast">Android Auto від\'єднано: При бездротовому AA вимкніть \"Перемикання між мережами\" або \"Прискорення мережі\" в налаштуваннях WiFi телефону</string>
     <string name="reset_usb_option">Скинути USB-підключення</string>
     <string name="reset_usb_timeout">USB-пристрій не знайдено. Перевірте підключення.</string>
-    <string name="notification_service_running">Open Headunit запущено</string>
+    <string name="notification_service_running">Andromi Auto запущено</string>
     <string name="notification_projection_active">Трансляція Android Auto активна</string>
     <string name="shortcut_connect_title">Підключити</string>
     <string name="shortcut_connect_desc">Підключитися до останнього пристрою</string>
@@ -619,7 +619,7 @@
     <string name="settings_backup_saved_to">Резервну копію налаштувань збережено у:\n%1$s</string>
     <string name="share_settings_backup">Поділитися резервною копією</string>
     <string name="import_settings">Імпортувати налаштування</string>
-    <string name="import_settings_description">Відновити налаштування з резервної копії Open Headunit</string>
+    <string name="import_settings_description">Відновити налаштування з резервної копії Andromi Auto</string>
     <string name="import_settings_app_folder">Імпортувати з папки резервних копій застосунку</string>
     <string name="import_settings_downloads">Імпортувати із Завантажень</string>
     <string name="import_settings_choose_file">Виберіть файл резервної копії</string>
@@ -627,8 +627,8 @@
     <string name="settings_imported">Налаштування імпортовано: %1$d застосовано, %2$d пропущено</string>
     <string name="settings_import_failed">Не вдалося імпортувати налаштування: %1$s</string>
     <string name="no_settings_backups_title">Резервні копії не знайдено</string>
-    <string name="no_settings_backups_message">У папці резервних копій застосунку не знайдено резервних копій Open Headunit. Спочатку експортуйте копію, потім імпортуйте її звідси.</string>
-    <string name="no_settings_backups_downloads_message">У Завантаженнях не знайдено резервних копій Open Headunit. Спочатку експортуйте копію в Завантаження, потім імпортуйте її звідси.</string>
+    <string name="no_settings_backups_message">У папці резервних копій застосунку не знайдено резервних копій Andromi Auto. Спочатку експортуйте копію, потім імпортуйте її звідси.</string>
+    <string name="no_settings_backups_downloads_message">У Завантаженнях не знайдено резервних копій Andromi Auto. Спочатку експортуйте копію в Завантаження, потім імпортуйте її звідси.</string>
     <string name="no_file_picker_title">Вибір файлів недоступний</string>
     <string name="no_file_picker_message">На цьому пристрої немає сумісного засобу вибору файлів. Натомість можна скористатися Завантаженнями або папкою резервних копій застосунку.</string>
     <string name="storage_permission_denied_backup">У доступі до сховища відмовлено. Не вдалося використати Завантаження.</string>
@@ -727,7 +727,7 @@
     <string name="onb_next">Далі</string>
     <string name="onb_skip">Пропустити</string>
     <string name="onb_ready_finish">Готово</string>
-    <string name="onb_welcome_title">Ласкаво просимо до Open Headunit</string>
+    <string name="onb_welcome_title">Ласкаво просимо до Andromi Auto</string>
     <string name="onb_welcome_body">Це швидке налаштування перевірить ваш пристрій і підбере найкращі параметри відео, дисплея та темного режиму. Ви завжди можете змінити все пізніше в Налаштуваннях.</string>
     <string name="onb_safety_title">Безпека понад усе</string>
     <string name="onb_safety_accept">Я прочитав(-ла) та приймаю умови</string>
@@ -853,7 +853,7 @@
     <string name="support_rules_connection_title">Вкажіть спосіб підключення</string>
     <string name="support_rules_connection_desc">USB-кабель, USB бездротовий адаптер, WiFi Direct, WiFi (headunit server) або Self Mode. Якщо бездротовий — вкажіть модель адаптера чи донгла.</string>
     <string name="support_rules_appversion_title">Вкажіть версію застосунку</string>
-    <string name="support_rules_appversion_desc">Версію Open Headunit, яку вказано на екрані «Про застосунок і підтримка».</string>
+    <string name="support_rules_appversion_desc">Версію Andromi Auto, яку вказано на екрані «Про застосунок і підтримка».</string>
     <string name="support_rules_logs_title">Додайте логи одразу після того, як сталася проблема</string>
     <string name="support_rules_logs_desc">Перейдіть до Налаштувань на вкладку Додатково, увімкніть Режим налагодження в розділі Налагодження, відтворіть проблему, а потім одразу натисніть «Експортувати журнал подій» — щоб лог охопив саме той момент, а не лише запуск. Прикріпіть цей файл до свого звернення.</string>
     <string name="support_rules_search_title">Без дублікатів</string>
@@ -930,8 +930,8 @@
     <string name="github_issues_url">https://github.com/andreknieriem/open-headunit/issues</string>
     <string name="support_rules_english_title">All posts in English</string>
     <string name="boot_loop_paused_title">Wireless start-up paused</string>
-    <string name="boot_loop_paused_generic">This device restarted three times in a row shortly after Open Headunit started wireless, so wireless was left off this time. USB still works. Open the app to turn it back on.</string>
-    <string name="boot_loop_paused_native_wifi_direct">This device restarted three times in a row shortly after Open Headunit started wireless, so wireless was left off this time. On some head units the WiFi chipset takes the whole system down when a phone joins a WiFi Direct network. Try switching Android Auto mode to the head unit hotspot. USB still works.</string>
+    <string name="boot_loop_paused_generic">This device restarted three times in a row shortly after Andromi Auto started wireless, so wireless was left off this time. USB still works. Open the app to turn it back on.</string>
+    <string name="boot_loop_paused_native_wifi_direct">This device restarted three times in a row shortly after Andromi Auto started wireless, so wireless was left off this time. On some head units the WiFi chipset takes the whole system down when a phone joins a WiFi Direct network. Try switching Android Auto mode to the head unit hotspot. USB still works.</string>
     <string name="vehicle_make_hint">A real car brand shows that brand\'s logo on the Android Auto exit button, but Android Auto then stops listing apps installed from outside the Play Store. Set it back to \"Google\" to get those apps listed again.</string>
     <string name="external_bt_nativeaa">Native Wireless cannot work on this head unit</string>
     <string name="external_bt_nativeaa_desc">Телефон спарюється з власним модулем Bluetooth цього пристрою (%1$s), а не з тим, який Android надає застосункам, тому бездротове рукостискання ніколи до нього не дійде.\n\nЦей застосунок може дістатися того модуля лише через службу ZJ/ZLink, яку цей пристрій не запускає. Скористайтеся замість цього USB або одним із режимів WiFi.</string>
@@ -1152,7 +1152,7 @@
 
     <string name="category_more_features">Додаткові функції</string>
     <string name="pref_enable_floating_button_title">Плаваюча кнопка запуску</string>
-    <string name="pref_enable_floating_button_summary">Відображає плаваючу кнопку поверх штатного лаунчера та інших програм для швидкого повернення до Open Headunit</string>
+    <string name="pref_enable_floating_button_summary">Відображає плаваючу кнопку поверх штатного лаунчера та інших програм для швидкого повернення до Andromi Auto</string>
     <string name="pref_floating_button_connection_status_title">Індикатор стану підключення</string>
     <string name="pref_floating_button_connection_status_summary">Коли телефон не підключено, використовує прозорість при відключенні, а коли підключено, плавно переходить до прозорості плаваючої кнопки. При 0% кнопка прихована й пропускає дотики.</string>
     <string name="pref_floating_button_size_title">Розмір плаваючої кнопки</string>
@@ -1180,7 +1180,7 @@
     <string name="oem_app_backend_adb">Метод виконання: Self-ADB (127.0.0.1:5555) підключено</string>
     <string name="oem_app_backend_none">Метод виконання: Немає. Увімкніть бездротове налагодження або виконайте "adb tcpip 5555"</string>
     <string name="oem_app_autokill_switch">Автоматично вимикати конфліктні програми OEM при запуску</string>
-    <string name="oem_app_autokill_switch_desc">Зупиняє конфліктні програми та фонові служби під час запуску Open Headunit.</string>
+    <string name="oem_app_autokill_switch_desc">Зупиняє конфліктні програми та фонові служби під час запуску Andromi Auto.</string>
     <string name="oem_app_autokill_enabled">Автоматичне вимкнення активне</string>
     <string name="oem_app_none_detected">Конфліктних програм OEM не виявлено.</string>
     <string name="oem_app_btn_commands">Команди</string>
@@ -1255,7 +1255,7 @@
     <string name="native_aa_wake_remeasure_confirm">Android Auto запускає бездротове підключення, лише коли бачить зміну підключення Bluetooth. Там, де цей пристрій уже утримує гучний зв\'язок, додатку доводиться розірвати його, щоб це викликати, тож він один раз вимірює, чи зв\'язок повертається, і зупиняється, якщо не повертається. Використайте це, якщо бездротове підключення перестало запускатися саме і ви готові на мить втратити гучний зв\'язок, поки воно пробує знову.</string>
     <string name="native_aa_wake_remeasure_done">Пробудження Bluetooth буде виміряно знову під час наступного підключення.</string>
     <string name="pref_enable_car_launcher_title">Використовувати як лаунчер авто</string>
-    <string name="pref_enable_car_launcher_summary">Реєструє Open Headunit як головний екран при натисканні кнопки Home в авто</string>
+    <string name="pref_enable_car_launcher_summary">Реєструє Andromi Auto як головний екран при натисканні кнопки Home в авто</string>
     <string name="pref_set_default_launcher_title">Головна програма за замовчуванням</string>
     <string name="pref_default_launcher_status_active">Активно (Натисніть для керування)</string>
     <string name="pref_default_launcher_status_inactive">Не вибрано (Натисніть для налаштування)</string>

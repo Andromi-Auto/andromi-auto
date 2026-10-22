@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Open Headunit</string>
+    <string name="app_name">Andromi Auto</string>
     <string name="menu">მენიუ</string>
     <string name="settings">პარამეტრები</string>
 
@@ -14,7 +14,7 @@
     <string name="video">Android Auto</string>
     <string name="self_mode">ავტონომიური რეჟიმი</string>
     <string name="to_android_auto">Android Auto-ზე გადასვლა</string>
-    <string name="title">Open Headunit</string>
+    <string name="title">Andromi Auto</string>
     <string name="remove">წაშლა</string>
     <string name="usb">USB</string>
     <string name="wifi">WiFi</string>
@@ -192,7 +192,7 @@
     <string name="usb_auto_connect_description">ცნობილ USB მოწყობილობასთან ავტომატური დაკავშირება აპლიკაციის გახსნისას.</string>
     <string name="auto_start_bt_label">ავტო-გაშვება Bluetooth-ით</string>
     <string name="auto_start_overlay_missing_hint">სხვა აპების ზემოდან ჩვენება ნებადართული არაა, ამიტომ ავტოგაშვება ეკრანის გახსნის ნაცვლად შეტყობინებას აჩვენებს. შეეხეთ ნებართვისთვის.</string>
-    <string name="auto_start_bt_description">Open Headunit-ის ავტომატური გახსნა კონკრეტული Bluetooth მოწყობილობის დაკავშირებისას.</string>
+    <string name="auto_start_bt_description">Andromi Auto-ის ავტომატური გახსნა კონკრეტული Bluetooth მოწყობილობის დაკავშირებისას.</string>
     <string name="auto_start_offer_title">ავტომატურად გაეშვას?</string>
     <string name="auto_start_offer_message">გსურს აპლიკაციის ავტომატური გაშვება ამ მოწყობილობასთან, %1$s?</string>
     <string name="auto_start_offer_yes">დიახ</string>
@@ -207,7 +207,7 @@
     <string name="auto_start_settings">ავტო-გაშვების პარამეტრები</string>
     <string name="auto_start_settings_description">კონფიგურაცია, თუ როდის ჩაირთოს აპლიკაცია ავტომატურად</string>
     <string name="auto_start_oem_warning">ამ მოწყობილობაზე შესაძლოა საჭირო გახდეს ავტო-გაშვების ნებართვის ჩართვა და ამ აპისთვის ელემენტის ოპტიმიზაციის ან ფონური შეზღუდვების მოხსნა.\n\nსწრაფი ჩატვირთვის (Quick Boot) მქონე მონიტორებზე ავტო-გაშვება შეიძლება საიმედოდ არ იმუშაოს. მოძებნეთ \"DuraSpeed\" სისტემურ პარამეტრებში და ჩართეთ ეს აპი იქ. ზოგიერთ მონიტორზე DuraSpeed დამალულია და მის საპოვნელად შესაძლოა დაგჭირდეთ აპლიკაცია \"Hidden Settings\". თუ DuraSpeed არ გაქვთ, სცადეთ Quick Boot-ის გამორთვა.</string>
-    <string name="car_launcher_autostart_info">Open Headunit კონფიგურირებულია, როგორც მანქანის გამშვები. ის ავტომატურად იწყება სისტემის ჩატვირთვისას.</string>
+    <string name="car_launcher_autostart_info">Andromi Auto კონფიგურირებულია, როგორც მანქანის გამშვები. ის ავტომატურად იწყება სისტემის ჩატვირთვისას.</string>
     <string name="auto_start_on_boot_label">გაშვება ჩატვირთვისას (Boot)</string>
     <string name="auto_start_on_boot_description">აპლიკაციის ავტომატური გახსნა მოწყობილობის ჩართვისას. საჭიროებს \'სხვა აპებზე ჩვენების\' (Display over other apps) ნებართვას Android 10+ ვერსიებზე</string>
     <string name="auto_start_screen_on_label">გაშვება ეკრანის ჩართვისას</string>
@@ -215,7 +215,7 @@
     <string name="select_bt_device">აირჩიეთ Bluetooth მოწყობილობა</string>
     <string name="bt_device_not_set">არ არის მითითებული</string>
     <string name="auto_start_wifi_label">ავტო-გაშვება WiFi-ით</string>
-    <string name="auto_start_wifi_description">Open Headunit-ის ავტომატური გახსნა კონკრეტულ WiFi SSID-თან დაკავშირებისას.</string>
+    <string name="auto_start_wifi_description">Andromi Auto-ის ავტომატური გახსნა კონკრეტულ WiFi SSID-თან დაკავშირებისას.</string>
     <string name="auto_start_wifi_ssid_label">WiFi SSID</string>
     <string name="auto_start_wifi_ssid_description">დაკავშირება მხოლოდ ამ WiFi SSID-თან ყოფნისას</string>
     <string name="auto_start_wifi_warning">მოძველებული ფუნქცია: შესაძლოა საიმედოდ არ იმუშაოს Android 8+ ვერსიებზე ფონური შეზღუდვების გამო. დარწმუნდით, რომ აპლიკაცია ამოღებულია ელემენტის ოპტიმიზაციიდან.</string>
@@ -224,7 +224,7 @@
     <string name="bt_permission_denied_title">საჭიროა Bluetooth ნებართვა</string>
     <string name="bt_permission_denied_message">დაწყვილებული მოწყობილობების ასარჩევად საჭიროა Bluetooth ნებართვა. გთხოვთ, მიანიჭოთ იგი აპლიკაციის პარამეტრებიდან.</string>
     <string name="overlay_permission_title">ფონური გაშვების ნებართვა</string>
-    <string name="overlay_permission_description">იმისათვის, რომ Open Headunit ავტომატურად გაიხსნას Bluetooth-ის დაკავშირებისას, გთხოვთ, შემდეგ ეკრანზე ჩართოთ ნებართვა \"ჩვენება სხვა აპების ზემოთ\" (Display over other apps).</string>
+    <string name="overlay_permission_description">იმისათვის, რომ Andromi Auto ავტომატურად გაიხსნას Bluetooth-ის დაკავშირებისას, გთხოვთ, შემდეგ ეკრანზე ჩართოთ ნებართვა \"ჩვენება სხვა აპების ზემოთ\" (Display over other apps).</string>
     <string name="open_settings">პარამეტრები</string>
     <string name="right_hand_drive">მარჯვენასაჭიანი მართვა</string>
     <string name="right_hand_drive_description">ინტერფეისის მორგება მარჯვენა საჭის მქონე ავტომობილებისთვის</string>
@@ -318,10 +318,10 @@
 
     <string name="category_info">ინფორმაცია</string>
     <string name="about">შესახებ &amp; მხარდაჭერა</string>
-    <string name="about_description">მიიღეთ მეტი ინფორმაცია Open Headunit-ის შესახებ</string>
+    <string name="about_description">მიიღეთ მეტი ინფორმაცია Andromi Auto-ის შესახებ</string>
     <string name="version">ვერსია</string>
     <string name="check_for_updates">განახლებების შემოწმება</string>
-    <string name="check_for_updates_description">შემოწმება, ხელმისაწვდომია თუ არა Open Headunit-ის ახალი ვერსია</string>
+    <string name="check_for_updates_description">შემოწმება, ხელმისაწვდომია თუ არა Andromi Auto-ის ახალი ვერსია</string>
     <string name="checking_for_updates">მოწმდება განახლებები…</string>
     <string name="update_available_title">განახლება ხელმისაწვდომია</string>
     <string name="update_available_playstore_message">ხელმისაწვდომია უფრო ახალი ვერსია (%1$s). გთხოვთ, ეწვიოთ Google Play Store-ს აპლიკაციის განსაახლებლად.</string>
@@ -331,7 +331,7 @@
     <string name="update_check_failed">განახლებების შემოწმება ვერ მოხერხდა. გთხოვთ, შეამოწმოთ ინტერნეტთან კავშირი.</string>
     <string name="open_play_store">Play Store-ის გახსნა</string>
     <string name="open_github_releases">GitHub Releases-ის გახსნა</string>
-    <string name="about_title">Open Headunit-ის შესახებ</string>
+    <string name="about_title">Andromi Auto-ის შესახებ</string>
     <string name="copyright">© 2025-%d André Rinas</string>
 
     <string name="disclaimer_title">უსაფრთხოება &amp; პასუხისმგებლობა</string>
@@ -341,7 +341,7 @@
         <b>1. ყურადღება გზაზე</b><br/>
         მართვის დროს ამ პროგრამის გამოყენებამ შეიძლება გაგიფანტოთ ყურადღება და შექმნას საფრთხე. ყოველთვის მიანიჭეთ უპირატესობა უსაფრთხო მართვას და დაიცავით საგზაო მოძრაობის ყველა ადგილობრივი წესი. გამოიყენეთ ეს აპლიკაცია მხოლოდ მაშინ, როდესაც ეს უსაფრთხოა.<br/><br/>
         <b>2. პასუხისმგებლობის შეზღუდვა</b><br/>
-        Open Headunit მოწოდებულია "როგორც არის" (as is) ყოველგვარი გარანტიის გარეშე. დეველოპერები არ იღებენ პასუხისმგებლობას რაიმე სახის ავარიაზე, თქვენი ავტომობილის/მოწყობილობის დაზიანებაზე ან სამართლებრივ შედეგებზე, რომლებიც გამოწვეულია ამ პროგრამის გამოყენებით.<br/><br/>
+        Andromi Auto მოწოდებულია "როგორც არის" (as is) ყოველგვარი გარანტიის გარეშე. დეველოპერები არ იღებენ პასუხისმგებლობას რაიმე სახის ავარიაზე, თქვენი ავტომობილის/მოწყობილობის დაზიანებაზე ან სამართლებრივ შედეგებზე, რომლებიც გამოწვეულია ამ პროგრამის გამოყენებით.<br/><br/>
         <b>3. დამოუკიდებლობა</b><br/>
         ეს პროექტი არის დამოუკიდებელი ღია კოდის მქონე ინიციატივა და არ არის ასოცირებული, დამტკიცებული ან დაკავშირებული Google LLC-სთან ან Android Auto ბრენდთან.
     ]]></string>
@@ -374,7 +374,7 @@
     <string name="export_settings_downloads">ჩამოტვირთვებში (Downloads) შენახვა</string>
     <string name="export_settings_app_folder">აპის სარეზერვო საქაღალდეში შენახვა</string>
     <string name="import_settings">პარამეტრების იმპორტი</string>
-    <string name="import_settings_description">პარამეტრების აღდგენა Open Headunit-ის სარეზერვო ასლიდან</string>
+    <string name="import_settings_description">პარამეტრების აღდგენა Andromi Auto-ის სარეზერვო ასლიდან</string>
     <string name="import_settings_choose_file">აირჩიეთ სარეზერვო ფაილი</string>
     <string name="import_settings_downloads">იმპორტი ჩამოტვირთვებიდან (Downloads)</string>
     <string name="import_settings_app_folder">იმპორტი აპის სარეზერვო საქაღალდიდან</string>
@@ -392,8 +392,8 @@
     <string name="no_file_picker_title">ფაილების მენეჯერი ვერ მოიძებნა</string>
     <string name="no_file_picker_message">ამ მოწყობილობას არ აქვს თავსებადი ფაილების მენეჯერი. ამის ნაცვლად შეგიძლიათ გამოიყენოთ ჩამოტვირთვები ან აპის სარეზერვო საქაღალდე.</string>
     <string name="no_settings_backups_title">სარეზერვო ასლები ვერ მოიძებნა</string>
-    <string name="no_settings_backups_message">აპის სარეზერვო საქაღალდეში Open Headunit-ის ასლები ვერ მოიძებნა. ჯერ გააკეთეთ ექსპორტი ამ საქაღალდეში, შემდეგ კი სცადეთ იმპორტი.</string>
-    <string name="no_settings_backups_downloads_message">ჩამოტვირთვებში Open Headunit-ის სარეზერვო ასლები ვერ მოიძებნა. ჯერ გააკეთეთ ექსპორტი ჩამოტვირთვებში, შემდეგ კი სცადეთ იმპორტი.</string>
+    <string name="no_settings_backups_message">აპის სარეზერვო საქაღალდეში Andromi Auto-ის ასლები ვერ მოიძებნა. ჯერ გააკეთეთ ექსპორტი ამ საქაღალდეში, შემდეგ კი სცადეთ იმპორტი.</string>
+    <string name="no_settings_backups_downloads_message">ჩამოტვირთვებში Andromi Auto-ის სარეზერვო ასლები ვერ მოიძებნა. ჯერ გააკეთეთ ექსპორტი ჩამოტვირთვებში, შემდეგ კი სცადეთ იმპორტი.</string>
     <string name="share_settings_backup">პარამეტრების სარეზერვო ასლის გაზიარება</string>
     <string name="logs_exported">ლოგების ექსპორტი შესრულებულია</string>
     <string name="log_saved_to">ლოგი შენახულია აქ:\n%s</string>
@@ -416,7 +416,7 @@
     <string name="wifi_disconnect_toast">Android Auto გაითიშა: თუ იყენებთ უ線ო კავშირს, გამორთეთ ფუნქციები \"Switch between networks\" ან \"Network acceleration\" ტელეფონის WiFi პარამეტრებიდან</string>
     <string name="reset_usb_option">USB კავშირის გადატვირთვა</string>
     <string name="reset_usb_timeout">USB მოწყობილობა ვერ მოიძებნა. გთხოვთ, შეამოწმოთ კავშირი.</string>
-    <string name="notification_service_running">Open Headunit აქტიურია</string>
+    <string name="notification_service_running">Andromi Auto აქტიურია</string>
     <string name="notification_projection_active">Android Auto პროეცირებულია</string>
     <string name="shortcut_connect_title">დაკავშირება</string>
     <string name="shortcut_connect_desc">ავტო-კავშირი ბოლო ტელეფონთან</string>
@@ -658,7 +658,7 @@
     <string name="onb_next">შემდეგი</string>
     <string name="onb_skip">გამოტოვება</string>
     <string name="onb_ready_finish">დასრულება</string>
-    <string name="onb_welcome_title">კეთილი იყოს თქვენი მობრძანება Open Headunit-ში</string>
+    <string name="onb_welcome_title">კეთილი იყოს თქვენი მობრძანება Andromi Auto-ში</string>
     <string name="onb_welcome_body">ეს სწრაფი გამართვა ასკანირებს თქვენს მოწყობილობას და ირჩევს ვიდეოს, ეკრანისა და ბნელი რეჟიმის საუკეთესო პარამეტრებს. ყველაფრის შეცვლა მოგვიანებით პარამეტრებში შეგიძლიათ.</string>
     <string name="onb_safety_title">უპირველესად უსაფრთხოება</string>
     <string name="onb_safety_accept">წავიკითხე და ვეთანხმები პირობებს</string>
@@ -754,7 +754,7 @@
     <string name="support_rules_connection_title">მიუთითეთ, როგორ უკავშირდებით</string>
     <string name="support_rules_connection_desc">USB კაბელი, USB უსადენო ადაპტერი, WiFi Direct, WiFi (headunit server) ან Self Mode. თუ კავშირი უსადენოა, დაამატეთ ადაპტერის ან დონგლის მოდელი.</string>
     <string name="support_rules_appversion_title">მიუთითეთ აპის ვერსია</string>
-    <string name="support_rules_appversion_desc">Open Headunit-ის ვერსია, რომელიც ნაჩვენებია შესახებ ეკრანზე.</string>
+    <string name="support_rules_appversion_desc">Andromi Auto-ის ვერსია, რომელიც ნაჩვენებია შესახებ ეკრანზე.</string>
     <string name="support_rules_logs_title">მიამაგრეთ ლოგი — პრობლემის შემდეგ დაუყოვნებლივ</string>
     <string name="support_rules_logs_desc">გახსენით პარამეტრები, გადადით დამატებითი ჩანართზე, ჩართეთ გამართვის რეჟიმი გამართვა განყოფილებაში, გაიმეორეთ პრობლემა, შემდეგ დაუყოვნებლივ შეეხეთ ლოგების ექსპორტი, რათა ლოგი მოიცავდეს შეცდომის მომენტს და არა მხოლოდ გაშვებას. მიამაგრეთ ეს ფაილი საკითხს.</string>
     <string name="support_rules_search_title">დუბლიკატები არ გახსნათ</string>
@@ -857,8 +857,8 @@
     <string name="github_issues_url">https://github.com/andreknieriem/open-headunit/issues</string>
     <string name="support_rules_english_title">All posts in English</string>
     <string name="boot_loop_paused_title">Wireless start-up paused</string>
-    <string name="boot_loop_paused_generic">This device restarted three times in a row shortly after Open Headunit started wireless, so wireless was left off this time. USB still works. Open the app to turn it back on.</string>
-    <string name="boot_loop_paused_native_wifi_direct">This device restarted three times in a row shortly after Open Headunit started wireless, so wireless was left off this time. On some head units the WiFi chipset takes the whole system down when a phone joins a WiFi Direct network. Try switching Android Auto mode to the head unit hotspot. USB still works.</string>
+    <string name="boot_loop_paused_generic">This device restarted three times in a row shortly after Andromi Auto started wireless, so wireless was left off this time. USB still works. Open the app to turn it back on.</string>
+    <string name="boot_loop_paused_native_wifi_direct">This device restarted three times in a row shortly after Andromi Auto started wireless, so wireless was left off this time. On some head units the WiFi chipset takes the whole system down when a phone joins a WiFi Direct network. Try switching Android Auto mode to the head unit hotspot. USB still works.</string>
     <string name="vehicle_make_hint">A real car brand shows that brand\'s logo on the Android Auto exit button, but Android Auto then stops listing apps installed from outside the Play Store. Set it back to \"Google\" to get those apps listed again.</string>
     <string name="external_bt_nativeaa">Native Wireless cannot work on this head unit</string>
     <string name="external_bt_nativeaa_desc">თქვენი ტელეფონი წყვილდება ამ მოწყობილობის საკუთარ Bluetooth მოდულთან (%1$s), და არა იმასთან, რომელსაც Android აპებს აწვდის, ამიტომ უსადენო ხელის ჩამორთმევა მასთან ვერასდროს მიაღწევდა.\n\nამ აპს ამ მოდულამდე მისასვლელი მხოლოდ ZJ/ZLink სერვისის გავლით აქვს, რომელსაც ეს მოწყობილობა არ უშვებს. ამის ნაცვლად გამოიყენეთ USB ან რომელიმე WiFi რეჟიმი.</string>
@@ -1132,7 +1132,7 @@
 
     <string name="category_more_features">მეტი ფუნქცია</string>
     <string name="pref_enable_floating_button_title">მცურავი ღილაკი</string>
-    <string name="pref_enable_floating_button_summary">აჩვენებს მცურავ ღილაკს სისტემურ ლაუნჩერსა და აპებზე Open Headunit-ში სწრაფად დასაბრუნებლად</string>
+    <string name="pref_enable_floating_button_summary">აჩვენებს მცურავ ღილაკს სისტემურ ლაუნჩერსა და აპებზე Andromi Auto-ში სწრაფად დასაბრუნებლად</string>
     <string name="pref_floating_button_connection_status_title">კავშირის სტატუსის ინდიკატორი</string>
     <string name="pref_floating_button_connection_status_summary">ტელეფონის არარსებობისას იყენებს გათიშულის გამჭვირვალობას, ხოლო ტელეფონის დაკავშირებისას ქრება მცურავი ღილაკის გამჭვირვალობამდე. 0%-ზე ღილაკი დამალულია და შეხებებს გაატარებს.</string>
     <string name="pref_floating_button_size_title">მცურავი ღილაკის ზომა</string>
@@ -1160,7 +1160,7 @@
     <string name="oem_app_backend_adb">შესრულების მეთოდი: Self-ADB (127.0.0.1:5555) დაკავშირებულია</string>
     <string name="oem_app_backend_none">შესრულების მეთოდი: არ არის. ჩართეთ Wireless Debugging ან გაუშვით "adb tcpip 5555"</string>
     <string name="oem_app_autokill_switch">კონფლიქტური OEM აპების ავტო-გათიშვა გაშვებისას</string>
-    <string name="oem_app_autokill_switch_desc">აჩუმებს ცნობილ კონფლიქტურ აპებსა და პროცესებს Open Headunit-ის გაშვებისას.</string>
+    <string name="oem_app_autokill_switch_desc">აჩუმებს ცნობილ კონფლიქტურ აპებსა და პროცესებს Andromi Auto-ის გაშვებისას.</string>
     <string name="oem_app_autokill_enabled">ავტო-გათიშვა აქტიურია</string>
     <string name="oem_app_none_detected">კონფლიქტური OEM აპლიკაციები არ მოიძებნა.</string>
     <string name="oem_app_btn_commands">ბრძანებები</string>
@@ -1235,7 +1235,7 @@
     <string name="native_aa_wake_remeasure_confirm">Android Auto უსადენო კავშირს მხოლოდ მაშინ იწყებს, როცა ხედავს Bluetooth კავშირის ცვლილებას. სადაც ეს მოწყობილობა უკვე ინარჩუნებს ჰენდსფრის კავშირს, აპმა უნდა გაწყვიტოს ის ამის გამოსაწვევად, ამიტომ ერთხელ ზომავს, უბრუნდება თუ არა კავშირი, და ჩერდება, თუ არ უბრუნდება. გამოიყენეთ ეს, თუ უსადენო კავშირმა შეწყვიტა თავისით დაწყება და მზად ხართ, წამით დაკარგოთ ჰენდსფრი, სანამ ის ხელახლა ცდის.</string>
     <string name="native_aa_wake_remeasure_done">Bluetooth გაღვიძება ხელახლა გაიზომება შემდეგ დაკავშირებაზე.</string>
     <string name="pref_enable_car_launcher_title">მანქანის გამშვებად გამოყენება</string>
-    <string name="pref_enable_car_launcher_summary">Open Headunit-ის მთავარ ეკრანად რეგისტრაცია მანქანის Home ღილაკზე დაჭერისას</string>
+    <string name="pref_enable_car_launcher_summary">Andromi Auto-ის მთავარ ეკრანად რეგისტრაცია მანქანის Home ღილაკზე დაჭერისას</string>
     <string name="pref_set_default_launcher_title">ნაგულისხმევი მთავარი აპი</string>
     <string name="pref_default_launcher_status_active">აქტიური (შეეხეთ მართვისთვის)</string>
     <string name="pref_default_launcher_status_inactive">არ არის დაყენებული (შეეხეთ ასარჩევად)</string>

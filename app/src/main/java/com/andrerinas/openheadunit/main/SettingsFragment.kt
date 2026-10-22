@@ -3245,8 +3245,22 @@ class SettingsFragment : Fragment() {
             ))
         }
 
-        fullSettingsList = items
+        fullSettingsList = withoutRemovedRows(items)
         renderSettings(scrollState)
+    }
+
+    /**
+     * Andromi Auto keeps only what Self Mode needs. The rows below belong to USB, wireless,
+     * head-unit hardware, launcher and update features of Open Headunit; a category header left
+     * with no rows under it is dropped too.
+     */
+    private fun withoutRemovedRows(items: List<SettingItem>): List<SettingItem> {
+        val kept = items.filter { it.stableId !in REMOVED_ROWS }
+        return kept.filterIndexed { i, item ->
+            item !is SettingItem.CategoryHeader ||
+                (i + 1 < kept.size && kept[i + 1] !is SettingItem.CategoryHeader &&
+                    kept[i + 1].stableId != "bottomSaveButton")
+        }
     }
 
     private fun setupTabsAndSearch(view: View) {
@@ -5278,6 +5292,29 @@ class SettingsFragment : Fragment() {
     }
 
     companion object {
+
+        /** Settings rows Andromi Auto does not show (see [withoutRemovedRows]). */
+        private val REMOVED_ROWS = setOf(
+            // General: connection choice, head-unit vehicle info, USB library
+            "connectionMode", "vehicleInfoSettings", "useLibusb",
+            // Automation: auto start / auto connect belong to USB and wireless
+            "autoStartSettings", "autoConnectSettings",
+            // More features: car launcher, floating button, other head-unit apps
+            "enableCarLauncher", "setDefaultLauncher", "enableFloatingButton",
+            "floatingButtonConnectionStatusMode", "floatingButtonSizeDp", "floatingButtonOpacityPercent",
+            "floatingButtonDisconnectedOpacityPercent", "floatingButtonXPercent", "floatingButtonYPercent",
+            "oemAppManagement",
+            // Navigation: the phone already gives Android Auto its own GPS in Self Mode
+            "gpsNavigation", "showNavigationNotifications", "fakeSpeed",
+            // Graphic: Andromi Auto always runs in portrait
+            "screenOrientation",
+            // Theming of Open Headunit's own home screen
+            "loadingScreen", "customization",
+            // Input: head-unit keys and rotary controllers
+            "keymap", "enableRotary",
+            // Info: Open Headunit's update check and support page
+            "check_for_updates", "support"
+        )
         private val SAVE_ITEM_ID = 1001
 
         /**

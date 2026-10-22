@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Open Headunit</string>
+    <string name="app_name">Andromi Auto</string>
     <string name="menu">Menu</string>
     <string name="settings">Pengaturan</string>
 
@@ -19,7 +19,7 @@
     <string name="onb_next">Berikutnya</string>
     <string name="onb_skip">Lewati</string>
     <string name="onb_ready_finish">Selesai</string>
-    <string name="onb_welcome_title">Selamat datang di Open Headunit</string>
+    <string name="onb_welcome_title">Selamat datang di Andromi Auto</string>
     <string name="onb_welcome_body">Penyiapan cepat ini memindai perangkat Anda dan memilih pengaturan video, tampilan, dan mode malam terbaik. Anda dapat mengubah semuanya nanti di Pengaturan.</string>
     <string name="onb_safety_title">Utamakan keselamatan</string>
     <string name="onb_safety_accept">Saya telah membaca dan menyetujui persyaratan</string>
@@ -193,7 +193,7 @@
     <string name="video">Android Auto</string>
     <string name="self_mode">Mode Mandiri</string>
     <string name="to_android_auto">Ke Android Auto</string>
-    <string name="title">Open Headunit</string>
+    <string name="title">Andromi Auto</string>
     <string name="remove">Hapus</string>
     <string name="usb">USB</string>
     <string name="wifi">Wi-Fi</string>
@@ -402,7 +402,7 @@
     <string name="usb_auto_connect_description">Hubungkan secara otomatis ke perangkat USB yang dikenal saat aplikasi dibuka.</string>
     <string name="auto_start_bt_label">Mulai otomatis saat Bluetooth tersambung</string>
     <string name="auto_start_overlay_missing_hint">Izin tampilkan di atas aplikasi lain belum diberikan, sehingga mulai otomatis akan menampilkan notifikasi alih-alih membuka layar. Ketuk untuk memberikan izin.</string>
-    <string name="auto_start_bt_description">Buka Open Headunit secara otomatis saat perangkat Bluetooth tertentu tersambung.</string>
+    <string name="auto_start_bt_description">Buka Andromi Auto secara otomatis saat perangkat Bluetooth tertentu tersambung.</string>
     <!-- Asked once, after the first connection, when this unit is paired to exactly one phone. -->
     <string name="auto_start_offer_title">Mulai secara otomatis?</string>
     <string name="auto_start_offer_message">Apakah Anda ingin memulai aplikasi secara otomatis dengan perangkat ini, %1$s?</string>
@@ -439,7 +439,7 @@
     <string name="auto_disconnect_bt_delay_hint">Sambungan Bluetooth dapat terputus sejenak saat profil tersambung kembali. Sesi hanya berakhir jika perangkat masih hilang setelah durasi ini.</string>
     <string name="auto_disconnect_bt_kill_hint">Mengakhiri sesi seperti tombol Keluar saat Bluetooth perangkat yang dipilih terputus, misalnya saat mobil dimatikan. Pilih Bluetooth mobil jika unit ini tersanding dengannya. Untuk juga menutup aplikasi dan menampilkan layar beranda, aktifkan \"Tutup aplikasi saat terputus\" di bawah Otomatisasi.</string>
     <string name="auto_start_wifi_label">Mulai otomatis saat Wi-Fi tersambung</string>
-    <string name="auto_start_wifi_description">Buka Open Headunit secara otomatis saat terhubung ke SSID Wi-Fi tertentu.</string>
+    <string name="auto_start_wifi_description">Buka Andromi Auto secara otomatis saat terhubung ke SSID Wi-Fi tertentu.</string>
     <string name="auto_start_wifi_ssid_label">SSID Wi-Fi</string>
     <string name="auto_start_wifi_ssid_description">Hubungkan hanya jika tersambung ke SSID Wi-Fi ini</string>
     <string name="auto_start_wifi_warning">Fitur Lama: Ini mungkin tidak berfungsi andal di Android 8+ karena pembatasan latar belakang. Pastikan aplikasi dikecualikan dari pengoptimalan baterai.</string>
@@ -448,7 +448,7 @@
     <string name="bt_permission_denied_title">Izin Bluetooth Diperlukan</string>
     <string name="bt_permission_denied_message">Izin Bluetooth diperlukan untuk memilih perangkat tersanding. Berikan izin di pengaturan aplikasi.</string>
     <string name="overlay_permission_title">Izin Mulai di Latar Belakang</string>
-    <string name="overlay_permission_description">Untuk mengizinkan Open Headunit terbuka secara otomatis saat Bluetooth tersambung, aktifkan izin \"Tampilkan di atas aplikasi lain\" pada layar berikutnya.</string>
+    <string name="overlay_permission_description">Untuk mengizinkan Andromi Auto terbuka secara otomatis saat Bluetooth tersambung, aktifkan izin \"Tampilkan di atas aplikasi lain\" pada layar berikutnya.</string>
     <string name="open_settings">Pengaturan</string>
     <string name="cannot_open_settings">Tidak dapat membuka pengaturan sistem</string>
     <string name="right_hand_drive">Kemudi kanan</string>
@@ -513,12 +513,12 @@
     <!-- More Features Settings -->
     <string name="category_more_features">Fitur Lainnya</string>
     <string name="pref_enable_car_launcher_title">Gunakan sebagai Peluncur Mobil</string>
-    <string name="pref_enable_car_launcher_summary">Mendaftarkan Open Headunit sebagai aplikasi layar beranda saat tombol Home mobil atau headunit ditekan</string>
+    <string name="pref_enable_car_launcher_summary">Mendaftarkan Andromi Auto sebagai aplikasi layar beranda saat tombol Home mobil atau headunit ditekan</string>
     <string name="pref_set_default_launcher_title">Aplikasi Beranda Default</string>
     <string name="pref_default_launcher_status_active">Aktif (Ketuk untuk mengelola)</string>
     <string name="pref_default_launcher_status_inactive">Belum diatur (Ketuk untuk mengatur sebagai default)</string>
     <string name="pref_enable_floating_button_title">Tombol Peluncur Melayang</string>
-    <string name="pref_enable_floating_button_summary">Menampilkan tombol melayang di atas peluncur OEM dan aplikasi lain untuk kembali ke Open Headunit dengan cepat</string>
+    <string name="pref_enable_floating_button_summary">Menampilkan tombol melayang di atas peluncur OEM dan aplikasi lain untuk kembali ke Andromi Auto dengan cepat</string>
     <string name="pref_floating_button_connection_status_title">Indikator Status Koneksi</string>
     <string name="pref_floating_button_connection_status_summary">Memakai Opasitas Terputus saat tidak ada ponsel yang terhubung, lalu memudar ke Opasitas Tombol Melayang saat ponsel terhubung. Pada 0%, tombol disembunyikan dan meneruskan ketukan.</string>
     <string name="pref_floating_button_size_title">Ukuran Tombol Melayang</string>
@@ -630,7 +630,7 @@
     <!-- Info Settings -->
     <string name="category_info">Info</string>
     <string name="about">Tentang &amp; Dukungan</string>
-    <string name="about_description">Dapatkan informasi lebih lanjut tentang Open Headunit</string>
+    <string name="about_description">Dapatkan informasi lebih lanjut tentang Andromi Auto</string>
 
     <!-- Support / report a problem screen -->
     <string name="support">Laporkan masalah</string>
@@ -651,7 +651,7 @@
     <string name="support_rules_connection_title">Sebutkan cara Anda terhubung</string>
     <string name="support_rules_connection_desc">Kabel USB, adaptor nirkabel USB, Wi-Fi Direct, Wi-Fi (headunit server), atau Mode Mandiri. Jika nirkabel, tambahkan model adaptor atau dongle.</string>
     <string name="support_rules_appversion_title">Sertakan versi aplikasi</string>
-    <string name="support_rules_appversion_desc">Versi Open Headunit, ditampilkan di layar Tentang.</string>
+    <string name="support_rules_appversion_desc">Versi Andromi Auto, ditampilkan di layar Tentang.</string>
     <string name="support_rules_logs_title">Lampirkan log, segera setelah masalah terjadi</string>
     <string name="support_rules_logs_desc">Alihkan Pengaturan ke tab Lanjutan, aktifkan Mode Debug di bagian Debug, reproduksi masalahnya, lalu ketuk Ekspor Log tepat setelahnya agar log mencakup momen saat kerusakan terjadi. Lampirkan file tersebut ke issue Anda.</string>
     <string name="support_rules_search_title">Hindari duplikasi</string>
@@ -664,7 +664,7 @@
     <string name="support_rules_oneissue_desc">Batasi setiap issue untuk satu masalah saja agar dapat dilacak dan diperbaiki. Buka issue terpisah untuk masalah yang tidak berhubungan.</string>
     <string name="version">Versi</string>
     <string name="check_for_updates">Periksa pembaruan</string>
-    <string name="check_for_updates_description">Periksa apakah versi terbaru Open Headunit tersedia</string>
+    <string name="check_for_updates_description">Periksa apakah versi terbaru Andromi Auto tersedia</string>
     <string name="checking_for_updates">Memeriksa pembaruan…</string>
     <string name="update_available_title">Pembaruan Tersedia</string>
     <string name="update_available_playstore_message">Versi yang lebih baru (%1$s) telah tersedia. Silakan kunjungi Google Play Store untuk memperbarui aplikasi Anda.</string>
@@ -674,7 +674,7 @@
     <string name="update_check_failed">Gagal memeriksa pembaruan. Silakan periksa koneksi internet Anda.</string>
     <string name="open_play_store">Buka Play Store</string>
     <string name="open_github_releases">Buka GitHub Releases</string>
-    <string name="about_title">Tentang Open Headunit</string>
+    <string name="about_title">Tentang Andromi Auto</string>
     <string name="copyright">© 2025-%d André Rinas</string>
 
     <!-- Safety Disclaimer -->
@@ -685,7 +685,7 @@
         <b>1. Fokus pada Jalan</b><br/>
         Mengoperasikan perangkat lunak ini saat mengemudi dapat mengalihkan perhatian dan berbahaya. Selalu utamakan mengemudi yang aman dan patuhi semua peraturan lalu lintas setempat. Gunakan aplikasi ini hanya jika aman untuk melakukannya.<br/><br/>
         <b>2. Batasan Tanggung Jawab</b><br/>
-        Open Headunit disediakan "sebagaimana adanya" tanpa jaminan apa pun. Pengembang tidak bertanggung jawab atas kecelakaan, kerusakan pada kendaraan/perangkat Anda, atau konsekuensi hukum yang timbul dari penggunaan perangkat lunak ini.<br/><br/>
+        Andromi Auto disediakan "sebagaimana adanya" tanpa jaminan apa pun. Pengembang tidak bertanggung jawab atas kecelakaan, kerusakan pada kendaraan/perangkat Anda, atau konsekuensi hukum yang timbul dari penggunaan perangkat lunak ini.<br/><br/>
         <b>3. Tanpa Afiliasi</b><br/>
         Proyek ini adalah inisiatif sumber terbuka independen dan tidak berafiliasi dengan, didukung oleh, atau terhubung dengan Google LLC atau merek Android Auto.
     ]]></string>
@@ -719,7 +719,7 @@
     <string name="export_settings_downloads">Simpan ke Unduhan</string>
     <string name="export_settings_app_folder">Simpan ke folder cadangan aplikasi</string>
     <string name="import_settings">Impor pengaturan</string>
-    <string name="import_settings_description">Pulihkan pengaturan dari cadangan Open Headunit</string>
+    <string name="import_settings_description">Pulihkan pengaturan dari cadangan Andromi Auto</string>
     <string name="import_settings_choose_file">Pilih file cadangan</string>
     <string name="import_settings_downloads">Impor dari Unduhan</string>
     <string name="import_settings_app_folder">Impor dari folder cadangan aplikasi</string>
@@ -737,8 +737,8 @@
     <string name="no_file_picker_title">Tidak ada pemilih file yang tersedia</string>
     <string name="no_file_picker_message">Perangkat ini tidak memiliki pemilih file yang kompatibel. Anda dapat menggunakan Unduhan atau folder cadangan aplikasi sebagai gantinya.</string>
     <string name="no_settings_backups_title">Tidak ada cadangan yang ditemukan</string>
-    <string name="no_settings_backups_message">Tidak ada cadangan Open Headunit yang ditemukan di folder cadangan aplikasi. Ekspor cadangan ke folder aplikasi terlebih dahulu, lalu impor dari sini.</string>
-    <string name="no_settings_backups_downloads_message">Tidak ada cadangan Open Headunit yang ditemukan di Unduhan. Ekspor cadangan ke Unduhan terlebih dahulu, lalu impor dari sini.</string>
+    <string name="no_settings_backups_message">Tidak ada cadangan Andromi Auto yang ditemukan di folder cadangan aplikasi. Ekspor cadangan ke folder aplikasi terlebih dahulu, lalu impor dari sini.</string>
+    <string name="no_settings_backups_downloads_message">Tidak ada cadangan Andromi Auto yang ditemukan di Unduhan. Ekspor cadangan ke Unduhan terlebih dahulu, lalu impor dari sini.</string>
     <string name="share_settings_backup">Bagikan cadangan pengaturan</string>
     <string name="logs_exported">Log Diekspor</string>
     <string name="log_saved_to">Log disimpan di:\n%s</string>
@@ -787,10 +787,10 @@
     <string name="wifi_disconnect_toast">Android Auto terputus: Jika menggunakan AA nirkabel, nonaktifkan \"Beralih antar jaringan\" atau \"Akselerasi jaringan\" di pengaturan Wi-Fi ponsel</string>
     <string name="reset_usb_option">Atur Ulang Koneksi USB</string>
     <string name="reset_usb_timeout">Perangkat USB tidak ditemukan. Silakan periksa koneksi.</string>
-    <string name="notification_service_running">Open Headunit sedang berjalan</string>
+    <string name="notification_service_running">Andromi Auto sedang berjalan</string>
     <string name="boot_loop_paused_title">Memulai nirkabel dijeda</string>
-    <string name="boot_loop_paused_generic">Perangkat ini dimulai ulang tiga kali berturut-turut sesaat setelah Open Headunit memulai nirkabel, jadi nirkabel dinonaktifkan kali ini. USB tetap berfungsi. Buka aplikasi untuk mengaktifkannya kembali.</string>
-    <string name="boot_loop_paused_native_wifi_direct">Perangkat ini dimulai ulang tiga kali berturut-turut sesaat setelah Open Headunit memulai nirkabel, jadi nirkabel dinonaktifkan kali ini. Pada beberapa head unit, chipset Wi-Fi membuat seluruh sistem crash saat ponsel bergabung ke jaringan Wi-Fi Direct. Coba alihkan mode Android Auto ke hotspot head unit. USB tetap berfungsi.</string>
+    <string name="boot_loop_paused_generic">Perangkat ini dimulai ulang tiga kali berturut-turut sesaat setelah Andromi Auto memulai nirkabel, jadi nirkabel dinonaktifkan kali ini. USB tetap berfungsi. Buka aplikasi untuk mengaktifkannya kembali.</string>
+    <string name="boot_loop_paused_native_wifi_direct">Perangkat ini dimulai ulang tiga kali berturut-turut sesaat setelah Andromi Auto memulai nirkabel, jadi nirkabel dinonaktifkan kali ini. Pada beberapa head unit, chipset Wi-Fi membuat seluruh sistem crash saat ponsel bergabung ke jaringan Wi-Fi Direct. Coba alihkan mode Android Auto ke hotspot head unit. USB tetap berfungsi.</string>
     <string name="notification_projection_active">Android Auto diproyeksikan</string>
     <string name="shortcut_connect_title">Hubungkan</string>
     <string name="shortcut_connect_desc">Hubungkan otomatis ke ponsel terakhir</string>
@@ -1225,7 +1225,7 @@
     <string name="sunrise_reference_help">Titik referensi yang digunakan untuk menghitung matahari terbit dan terbenam. Pilih lokasi Anda sekali; ini berfungsi tanpa GPS.</string>
 
     <!-- One-time rename notice shown on the home screen. Both the old name ("Headunit Revived")
-         and the new name ("Open Headunit") are hardcoded on purpose, so the message reads clearly
+         and the new name ("Andromi Auto") are hardcoded on purpose, so the message reads clearly
          even before the app name resource changes. -->
     <string name="rename_notice_title">Nama kami berubah menjadi Open Headunit</string>
     <string name="rename_notice_message">Headunit Revived berkembang berkat Anda, dan kini memiliki identitasnya sendiri: Open Headunit. Kami meluncurkan nama baru ini pada pembaruan berikutnya, jadi Anda mungkin masih melihat nama lama di beberapa tempat untuk sementara waktu.\n\nAplikasi yang sama, tim yang sama di belakangnya, dan semua pengaturan Anda tetap persis seperti semula.</string>
@@ -1269,12 +1269,12 @@
     <string name="show_only_phones">Tampilkan hanya ponsel</string>
     <string name="oem_app_management">Manajemen Konflik Aplikasi OEM (ADB)</string>
     <string name="oem_app_management_desc">Deteksi dan nonaktifkan aplikasi yang bertentangan (Zlink, AutoKit, dll.)</string>
-    <string name="oem_app_explanation">Aplikasi bawaan pabrik head unit (mis. Zlink, AutoKit, SpeedPlay) sering kali mencegat koneksi USB dan Bluetooth, mencegah Open Headunit terhubung. Anda dapat menonaktifkannya melalui Root atau Self-ADB (port 5555).</string>
+    <string name="oem_app_explanation">Aplikasi bawaan pabrik head unit (mis. Zlink, AutoKit, SpeedPlay) sering kali mencegat koneksi USB dan Bluetooth, mencegah Andromi Auto terhubung. Anda dapat menonaktifkannya melalui Root atau Self-ADB (port 5555).</string>
     <string name="oem_app_backend_root">Metode eksekusi: Root (su) tersedia</string>
     <string name="oem_app_backend_adb">Metode eksekusi: Self-ADB (127.0.0.1:5555) terhubung</string>
     <string name="oem_app_backend_none">Metode eksekusi: Tidak ada. Aktifkan Debugging Nirkabel atau jalankan \"adb tcpip 5555\"</string>
     <string name="oem_app_autokill_switch">Nonaktifkan otomatis aplikasi OEM yang berkonflik saat mulai</string>
-    <string name="oem_app_autokill_switch_desc">Membungkam aplikasi dan daemon latar belakang yang diketahui bertentangan setiap kali Open Headunit dimulai.</string>
+    <string name="oem_app_autokill_switch_desc">Membungkam aplikasi dan daemon latar belakang yang diketahui bertentangan setiap kali Andromi Auto dimulai.</string>
     <string name="oem_app_autokill_enabled">Penonaktifan otomatis aktif</string>
     <string name="oem_app_none_detected">Tidak ada aplikasi OEM berkonflik yang terdeteksi.</string>
     <string name="oem_app_btn_commands">Perintah</string>

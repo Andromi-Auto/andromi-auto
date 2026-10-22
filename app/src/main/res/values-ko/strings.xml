@@ -1,7 +1,7 @@
 <resources>
     <string name="aaudio_output">AAudio 출력 (실험적)</string>
     <string name="aaudio_output_description">저지연 미디어 출력을 사용합니다. 지원하지 않으면 AudioTrack으로 자동 전환합니다.</string>
-    <string name="app_name">Open Headunit</string>
+    <string name="app_name">Andromi Auto</string>
     <string name="menu">메뉴</string>
     <string name="settings">설정</string>
 
@@ -16,7 +16,7 @@
     <string name="video">Android Auto</string>
     <string name="self_mode">단독 모드</string>
     <string name="to_android_auto">Android Auto로 전환</string>
-    <string name="title">Open Headunit</string>
+    <string name="title">Andromi Auto</string>
     <string name="remove">제거</string>
     <string name="usb">USB</string>
     <string name="wifi">Wi-Fi</string>
@@ -195,14 +195,14 @@
     <string name="usb_auto_connect_description">앱 실행 시 알려진 USB 기기에 자동으로 연결합니다.</string>
     <string name="auto_start_bt_label">블루투스 연결 시 자동 시작</string>
     <string name="auto_start_overlay_missing_hint">다른 앱 위에 표시 권한이 없어 자동 시작이 화면을 열지 않고 알림을 표시합니다. 탭하여 허용하세요.</string>
-    <string name="auto_start_bt_description">특정 블루투스 기기가 연결되면 Open Headunit를 자동으로 실행합니다.</string>
+    <string name="auto_start_bt_description">특정 블루투스 기기가 연결되면 Andromi Auto를 자동으로 실행합니다.</string>
     <string name="auto_start_offer_title">자동으로 시작할까요?</string>
     <string name="auto_start_offer_message">이 기기(%1$s)에서 앱을 자동으로 시작할까요?</string>
     <string name="auto_start_offer_yes">예</string>
     <string name="auto_start_offer_no">아니요</string>
     <string name="auto_start_offer_countdown">%1$d초 후 아니요</string>
     <string name="auto_start_wifi_label">Wi-Fi 연결 시 자동 시작</string>
-    <string name="auto_start_wifi_description">특정 Wi-Fi SSID에 연결될 때 Open Headunit를 자동으로 실행합니다.</string>
+    <string name="auto_start_wifi_description">특정 Wi-Fi SSID에 연결될 때 Andromi Auto를 자동으로 실행합니다.</string>
     <string name="auto_start_wifi_ssid_label">Wi-Fi SSID</string>
     <string name="auto_start_wifi_ssid_description">이 Wi-Fi SSID에 연결된 경우에만 자동 시작을 시도합니다</string>
     <string name="auto_start_wifi_warning">레거시 기능: 백그라운드 제한으로 인해 Android 8 이상에서는 동작이 불안정할 수 있습니다. 앱을 배터리 최적화 대상에서 제외했는지 확인하세요.</string>
@@ -217,7 +217,7 @@
     <string name="auto_start_settings">자동 시작 설정</string>
     <string name="auto_start_settings_description">앱 자동 시작 조건을 설정합니다</string>
     <string name="auto_start_oem_warning">이 기기에서는 이 앱의 자동 시작을 허용하고, 배터리 최적화 대상에서 제외하거나 백그라운드 제한을 해제해야 할 수 있습니다.\n\nQuick Boot(빠른 부팅)를 사용하는 헤드유닛에서는 자동 시작이 작동하지 않을 수 있습니다. 시스템 설정에서 \"DuraSpeed\"를 찾아 이 앱을 허용하세요. 일부 헤드유닛에서는 DuraSpeed가 숨겨져 있어 \"Hidden Settings\" 같은 앱으로 찾아야 할 수 있습니다. DuraSpeed가 없으면 Quick Boot를 비활성화해 보세요.</string>
-    <string name="car_launcher_autostart_info">Open Headunit이 차량용 런처로 설정되어 있습니다. 시스템 부팅 시 자동으로 시작됩니다.</string>
+    <string name="car_launcher_autostart_info">Andromi Auto이 차량용 런처로 설정되어 있습니다. 시스템 부팅 시 자동으로 시작됩니다.</string>
     <string name="auto_start_on_boot_label">부팅 시 자동 시작</string>
     <string name="auto_start_on_boot_description">기기가 부팅될 때 앱을 자동으로 실행합니다. Android 10 이상에서는 \'다른 앱 위에 표시\' 권한이 필요합니다</string>
     <string name="auto_start_screen_on_label">화면 켜짐 시 자동 실행</string>
@@ -227,7 +227,7 @@
     <string name="bt_permission_denied_title">블루투스 권한 필요</string>
     <string name="bt_permission_denied_message">페어링된 기기를 선택하려면 블루투스 권한이 필요합니다. 앱 설정에서 권한을 허용하세요.</string>
     <string name="overlay_permission_title">백그라운드 실행 권한</string>
-    <string name="overlay_permission_description">블루투스 기기가 연결될 때 Open Headunit를 자동으로 실행하려면 다음 화면에서 \"다른 앱 위에 표시\" 권한을 허용하세요.</string>
+    <string name="overlay_permission_description">블루투스 기기가 연결될 때 Andromi Auto를 자동으로 실행하려면 다음 화면에서 \"다른 앱 위에 표시\" 권한을 허용하세요.</string>
     <string name="open_settings">설정</string>
     <string name="right_hand_drive">우핸들</string>
     <string name="right_hand_drive_description">우핸들 차량에 맞게 UI를 배치합니다</string>
@@ -330,10 +330,10 @@
     <!-- Info Settings -->
     <string name="category_info">정보</string>
     <string name="about">정보 및 지원</string>
-    <string name="about_description">Open Headunit에 대한 자세한 정보를 확인하세요</string>
+    <string name="about_description">Andromi Auto에 대한 자세한 정보를 확인하세요</string>
     <string name="version">버전</string>
     <string name="check_for_updates">업데이트 확인</string>
-    <string name="check_for_updates_description">Open Headunit의 최신 버전이 있는지 확인합니다</string>
+    <string name="check_for_updates_description">Andromi Auto의 최신 버전이 있는지 확인합니다</string>
     <string name="checking_for_updates">업데이트 확인 중…</string>
     <string name="update_available_title">업데이트 가능</string>
     <string name="update_available_playstore_message">최신 버전(%1$s)이 출시되었습니다. Google Play 스토어에서 앱을 업데이트하세요.</string>
@@ -343,7 +343,7 @@
     <string name="update_check_failed">업데이트 확인에 실패했습니다. 인터넷 연결을 확인하세요.</string>
     <string name="open_play_store">Play 스토어 열기</string>
     <string name="open_github_releases">GitHub Releases 열기</string>
-    <string name="about_title">Open Headunit 정보</string>
+    <string name="about_title">Andromi Auto 정보</string>
     <string name="copyright">© 2025-%d André Rinas</string>
 
     <!-- Safety Disclaimer -->
@@ -354,7 +354,7 @@
         <b>1. 운전에 집중하세요</b><br/>
         운전 중 이 소프트웨어를 조작하면 주의가 분산되어 위험할 수 있습니다. 항상 안전 운전을 최우선으로 하고, 모든 현지 교통 법규를 준수하세요. 이 앱은 안전한 상황에서만 사용하세요.<br/><br/>
         <b>2. 책임 제한</b><br/>
-        Open Headunit는 어떠한 종류의 보증도 없이 "있는 그대로" 제공됩니다. 개발자는 이 소프트웨어 사용으로 인해 발생한 사고, 차량/기기 손상 또는 법적 결과에 대한 책임을 지지 않습니다.<br/><br/>
+        Andromi Auto는 어떠한 종류의 보증도 없이 "있는 그대로" 제공됩니다. 개발자는 이 소프트웨어 사용으로 인해 발생한 사고, 차량/기기 손상 또는 법적 결과에 대한 책임을 지지 않습니다.<br/><br/>
         <b>3. 제휴 없음</b><br/>
         이 프로젝트는 독립적인 오픈소스 프로젝트이며, Google LLC 또는 Android Auto 브랜드와 제휴, 보증 또는 관련이 없습니다.
     ]]></string>
@@ -406,8 +406,8 @@
     <string name="no_file_picker_title">사용 가능한 파일 선택 앱 없음</string>
     <string name="no_file_picker_message">이 기기에는 호환되는 파일 선택 앱이 없습니다. 대신 다운로드 폴더 또는 앱 백업 폴더를 사용할 수 있습니다.</string>
     <string name="no_settings_backups_title">백업을 찾을 수 없음</string>
-    <string name="no_settings_backups_message">앱 백업 폴더에서 Open Headunit 백업을 찾을 수 없습니다. 먼저 앱 백업 폴더로 백업을 내보낸 뒤 다시 시도하세요.</string>
-    <string name="no_settings_backups_downloads_message">다운로드 폴더에서 Open Headunit 백업을 찾을 수 없습니다. 먼저 다운로드 폴더로 백업을 내보낸 뒤 다시 시도하세요.</string>
+    <string name="no_settings_backups_message">앱 백업 폴더에서 Andromi Auto 백업을 찾을 수 없습니다. 먼저 앱 백업 폴더로 백업을 내보낸 뒤 다시 시도하세요.</string>
+    <string name="no_settings_backups_downloads_message">다운로드 폴더에서 Andromi Auto 백업을 찾을 수 없습니다. 먼저 다운로드 폴더로 백업을 내보낸 뒤 다시 시도하세요.</string>
     <string name="share_settings_backup">설정 백업 공유</string>
     <string name="logs_exported">로그 내보내기 완료</string>
     <string name="log_saved_to">로그 저장 위치:\n%s</string>
@@ -430,7 +430,7 @@
     <string name="wifi_disconnect_toast">Android Auto 연결 끊김: 무선 Android Auto를 사용하는 경우 휴대폰 Wi-Fi 설정에서 \"네트워크 전환\" 또는 \"네트워크 가속\"을 비활성화하세요</string>
     <string name="reset_usb_option">USB 연결 초기화</string>
     <string name="reset_usb_timeout">USB 기기를 찾을 수 없습니다. 연결을 확인하세요.</string>
-    <string name="notification_service_running">Open Headunit 실행 중</string>
+    <string name="notification_service_running">Andromi Auto 실행 중</string>
     <string name="notification_projection_active">Android Auto 화면 출력 중</string>
     <string name="shortcut_connect_title">연결</string>
     <string name="shortcut_connect_desc">최근 사용한 휴대폰에 자동 연결</string>
@@ -731,7 +731,7 @@
     <string name="onb_next">다음</string>
     <string name="onb_skip">건너뛰기</string>
     <string name="onb_ready_finish">완료</string>
-    <string name="onb_welcome_title">Open Headunit에 오신 것을 환영합니다</string>
+    <string name="onb_welcome_title">Andromi Auto에 오신 것을 환영합니다</string>
     <string name="onb_welcome_body">이 빠른 설정은 기기를 검사하여 가장 적합한 비디오, 디스플레이, 다크 모드 설정을 자동으로 선택합니다. 모든 항목은 나중에 설정에서 변경할 수 있습니다.</string>
     <string name="onb_safety_title">안전이 우선입니다</string>
     <string name="onb_safety_accept">약관을 읽고 동의합니다</string>
@@ -828,7 +828,7 @@
     <string name="support_rules_connection_title">연결 방식을 알려주세요</string>
     <string name="support_rules_connection_desc">USB 케이블, USB 무선 어댑터, WiFi Direct, WiFi(헤드유닛 서버) 또는 Self Mode 중 하나를 알려주세요. 무선 연결이라면 어댑터나 동글 모델도 함께 기재해 주세요.</string>
     <string name="support_rules_appversion_title">앱 버전을 포함해 주세요</string>
-    <string name="support_rules_appversion_desc">정보 및 지원 화면에 표시된 Open Headunit 버전을 알려주세요.</string>
+    <string name="support_rules_appversion_desc">정보 및 지원 화면에 표시된 Andromi Auto 버전을 알려주세요.</string>
     <string name="support_rules_logs_title">문제 발생 직후에 로그를 첨부해 주세요</string>
     <string name="support_rules_logs_desc">설정의 고급 탭으로 이동해 디버그 섹션에서 디버그 모드를 켠 다음, 문제를 재현하고 바로 로그 내보내기를 탭하세요. 이렇게 해야 앱 시작 시점이 아닌 문제가 발생한 순간이 로그에 포함됩니다. 해당 파일을 이슈에 첨부해 주세요.</string>
     <string name="support_rules_search_title">중복 금지</string>
@@ -929,8 +929,8 @@
     <string name="github_issues_url">https://github.com/andreknieriem/open-headunit/issues</string>
     <string name="support_rules_english_title">All posts in English</string>
     <string name="boot_loop_paused_title">Wireless start-up paused</string>
-    <string name="boot_loop_paused_generic">This device restarted three times in a row shortly after Open Headunit started wireless, so wireless was left off this time. USB still works. Open the app to turn it back on.</string>
-    <string name="boot_loop_paused_native_wifi_direct">This device restarted three times in a row shortly after Open Headunit started wireless, so wireless was left off this time. On some head units the WiFi chipset takes the whole system down when a phone joins a WiFi Direct network. Try switching Android Auto mode to the head unit hotspot. USB still works.</string>
+    <string name="boot_loop_paused_generic">This device restarted three times in a row shortly after Andromi Auto started wireless, so wireless was left off this time. USB still works. Open the app to turn it back on.</string>
+    <string name="boot_loop_paused_native_wifi_direct">This device restarted three times in a row shortly after Andromi Auto started wireless, so wireless was left off this time. On some head units the WiFi chipset takes the whole system down when a phone joins a WiFi Direct network. Try switching Android Auto mode to the head unit hotspot. USB still works.</string>
     <string name="vehicle_make_hint">A real car brand shows that brand\'s logo on the Android Auto exit button, but Android Auto then stops listing apps installed from outside the Play Store. Set it back to \"Google\" to get those apps listed again.</string>
     <string name="external_bt_nativeaa">Native Wireless cannot work on this head unit</string>
     <string name="external_bt_nativeaa_desc">휴대전화는 Android가 앱에 제공하는 블루투스가 아니라 이 헤드유닛 자체의 블루투스 모듈(%1$s)과 페어링되므로, 무선 핸드셰이크는 그곳에 결코 도달하지 못합니다.\n\n이 앱은 ZJ/ZLink 서비스를 통해서만 그 모듈에 도달할 수 있는데, 이 헤드유닛은 그 서비스를 실행하지 않습니다. 대신 USB나 WiFi 모드를 사용하십시오.</string>
@@ -1159,7 +1159,7 @@
 
     <string name="category_more_features">추가 기능</string>
     <string name="pref_enable_floating_button_title">플로팅 런처 버튼</string>
-    <string name="pref_enable_floating_button_summary">순정 런처 및 다른 앱 위에 플로팅 버튼을 표시하여 Open Headunit으로 빠르게 복귀합니다</string>
+    <string name="pref_enable_floating_button_summary">순정 런처 및 다른 앱 위에 플로팅 버튼을 표시하여 Andromi Auto으로 빠르게 복귀합니다</string>
     <string name="pref_floating_button_connection_status_title">연결 상태 표시</string>
     <string name="pref_floating_button_connection_status_summary">휴대전화가 연결되지 않으면 연결 끊김 불투명도를 사용하고, 연결되면 플로팅 버튼 불투명도까지 흐려집니다. 0%에서는 버튼이 숨겨지고 탭을 통과시킵니다.</string>
     <string name="pref_floating_button_size_title">플로팅 버튼 크기</string>
@@ -1187,7 +1187,7 @@
     <string name="oem_app_backend_adb">실행 방법: Self-ADB (127.0.0.1:5555) 연결됨</string>
     <string name="oem_app_backend_none">실행 방법: 없음. 무선 디버깅을 켜거나 "adb tcpip 5555"를 실행하세요</string>
     <string name="oem_app_autokill_switch">시작 시 충돌하는 OEM 앱 자동 비활성화</string>
-    <string name="oem_app_autokill_switch_desc">Open Headunit이 시작될 때 충돌 앱 및 데몬을 자동으로 종료합니다.</string>
+    <string name="oem_app_autokill_switch_desc">Andromi Auto이 시작될 때 충돌 앱 및 데몬을 자동으로 종료합니다.</string>
     <string name="oem_app_autokill_enabled">자동 비활성화 활성</string>
     <string name="oem_app_none_detected">충돌하는 OEM 앱이 감지되지 않았습니다.</string>
     <string name="oem_app_btn_commands">명령어</string>
@@ -1262,7 +1262,7 @@
     <string name="native_aa_wake_remeasure_confirm">Android Auto는 Bluetooth 연결이 바뀌는 것을 감지해야만 무선 연결을 시작합니다. 이 기기가 이미 핸즈프리 링크를 잡고 있는 경우, 앱은 이를 끊어야 이 변화를 일으킬 수 있으므로 링크가 돌아오는지 한 번 측정하고, 돌아오지 않으면 멈춥니다. 무선 연결이 스스로 시작되지 않게 되었고, 다시 시도하는 동안 잠시 핸즈프리를 잃어도 괜찮다면 이것을 사용하세요.</string>
     <string name="native_aa_wake_remeasure_done">다음 연결에서 Bluetooth 웨이크가 다시 측정됩니다.</string>
     <string name="pref_enable_car_launcher_title">차량용 런처로 사용</string>
-    <string name="pref_enable_car_launcher_summary">차량의 홈 버튼을 눌렀을 때 Open Headunit을 홈 화면 앱으로 등록합니다</string>
+    <string name="pref_enable_car_launcher_summary">차량의 홈 버튼을 눌렀을 때 Andromi Auto을 홈 화면 앱으로 등록합니다</string>
     <string name="pref_set_default_launcher_title">기본 홈 앱</string>
     <string name="pref_default_launcher_status_active">활성 (관리하려면 탭)</string>
     <string name="pref_default_launcher_status_inactive">설정 안 됨 (기본값으로 설정하려면 탭)</string>
@@ -1274,24 +1274,24 @@
     <string name="wifi_scan_enable">무선 연결 중 탐색 일시 중지</string>
     <string name="wifi_scan_off">사용 안 함</string>
     <string name="wifi_scan_prepare">Shizuku 준비</string>
-    <string name="wifi_scan_adb_wireless">Android 11 이상\n1. Shizuku를 열어 무선 디버깅 페어링·시작 안내를 따르세요.\n2. 이 화면으로 돌아와 Open Headunit을 허용하세요.\n\n페어링에 Wi-Fi 연결이 필요할 수 있으므로 Android Auto 연결 전에 준비하세요. 무선 디버깅이 없으면 Shizuku의 컴퓨터·USB 시작 안내를 이용하세요.</string>
-    <string name="wifi_scan_adb_usb">Android 8~10\n1. Shizuku의 컴퓨터·USB 시작 안내를 따르세요.\n2. 이 화면으로 돌아와 Open Headunit을 허용하세요.\n\n지원되는 FYT 기기는 위의 ‘이 FYT 기기에서 Shizuku 시작’ 버튼도 사용할 수 있습니다.</string>
+    <string name="wifi_scan_adb_wireless">Android 11 이상\n1. Shizuku를 열어 무선 디버깅 페어링·시작 안내를 따르세요.\n2. 이 화면으로 돌아와 Andromi Auto을 허용하세요.\n\n페어링에 Wi-Fi 연결이 필요할 수 있으므로 Android Auto 연결 전에 준비하세요. 무선 디버깅이 없으면 Shizuku의 컴퓨터·USB 시작 안내를 이용하세요.</string>
+    <string name="wifi_scan_adb_usb">Android 8~10\n1. Shizuku의 컴퓨터·USB 시작 안내를 따르세요.\n2. 이 화면으로 돌아와 Andromi Auto을 허용하세요.\n\n지원되는 FYT 기기는 위의 ‘이 FYT 기기에서 Shizuku 시작’ 버튼도 사용할 수 있습니다.</string>
     <string name="wifi_scan_developer_settings">디버깅 설정 열기</string>
     <string name="wifi_scan_open_shizuku">Shizuku 열기</string>
     <string name="wifi_scan_fyt_start">이 FYT 기기에서 Shizuku 시작</string>
-    <string name="wifi_scan_fyt_confirm">이 FYT 기기에서 Shizuku를 시작합니다.\n\n• 무선 ADB를 켜며, ‘무선 ADB 종료’를 누를 때까지 유지합니다.\n• 디버깅 승인 창이 표시되면 허용하세요.\n• 여기서는 Open Headunit이 연 ADB만 종료합니다. 기존 ADB 설정은 변경하지 않습니다. 신뢰할 수 있는 네트워크에서 사용하세요.\n\n한 번 설정한 뒤에는 이 옵션이 켜져 있고 Shizuku가 꺼져 있으면 Native 무선 연결 시 한 번 자동 시작을 시도합니다. Android가 디버깅 승인을 다시 요청할 수 있습니다.</string>
+    <string name="wifi_scan_fyt_confirm">이 FYT 기기에서 Shizuku를 시작합니다.\n\n• 무선 ADB를 켜며, ‘무선 ADB 종료’를 누를 때까지 유지합니다.\n• 디버깅 승인 창이 표시되면 허용하세요.\n• 여기서는 Andromi Auto이 연 ADB만 종료합니다. 기존 ADB 설정은 변경하지 않습니다. 신뢰할 수 있는 네트워크에서 사용하세요.\n\n한 번 설정한 뒤에는 이 옵션이 켜져 있고 Shizuku가 꺼져 있으면 Native 무선 연결 시 한 번 자동 시작을 시도합니다. Android가 디버깅 승인을 다시 요청할 수 있습니다.</string>
     <string name="wifi_scan_continue">계속</string>
     <string name="wifi_scan_fyt_authorize">시작 중… 이 기기에 디버깅 승인 창이 표시되면 허용하세요.</string>
     <string name="wifi_scan_wifi_settings">Wi-Fi 설정 열기</string>
     <string name="wifi_scan_done">완료</string>
     <string name="wifi_scan_install">Shizuku 설치</string>
-    <string name="wifi_scan_authorize">Open Headunit 허용</string>
+    <string name="wifi_scan_authorize">Andromi Auto 허용</string>
     <string name="wifi_scan_retry">다시 시도</string>
     <string name="wifi_scan_fyt_finished">Shizuku를 시작했습니다. 계속하려면 접근을 허용하세요.</string>
     <string name="wifi_scan_fyt_failed">Shizuku를 시작하지 못했습니다. Shizuku 앱의 시작 안내를 이용하세요.</string>
     <string name="wifi_scan_fyt_recovery">ADB 정리를 완료하지 못했습니다. ‘무선 ADB 종료’를 눌러 다시 시도하세요. 실패하면 시스템 설정에서 디버깅을 끄거나 기기를 재시작하세요.</string>
     <string name="wifi_scan_fyt_restore">무선 ADB 종료</string>
-    <string name="wifi_scan_fyt_restored">Open Headunit이 연 ADB를 더 이상 사용하지 않습니다.</string>
+    <string name="wifi_scan_fyt_restored">Andromi Auto이 연 ADB를 더 이상 사용하지 않습니다.</string>
     <string name="wifi_scan_restore_system">Android에서 Wi-Fi 스캔 복구</string>
     <string name="wifi_scan_help">Shizuku 설정 도움말</string>
     <string name="wifi_scan_recovery_notice">지난 연결에서 변경한 Wi-Fi 설정을 복구해 주세요.</string>
@@ -1305,24 +1305,24 @@
     <string name="wifi_scan_summary_unsupported">현재 Android 버전·연결 방식에서 지원 안 됨</string>
     <string name="wifi_scan_summary_wifi_off">핫스팟 사용 시 일반 Wi-Fi 끄기 필요</string>
     <string name="wifi_scan_summary_start">Shizuku 서비스가 실행되지 않음</string>
-    <string name="wifi_scan_summary_permission">Shizuku에서 Open Headunit 허용 필요</string>
+    <string name="wifi_scan_summary_permission">Shizuku에서 Andromi Auto 허용 필요</string>
     <string name="wifi_scan_summary_update">이 옵션을 사용하려면 Shizuku 업데이트 필요</string>
     <string name="wifi_scan_status_working">처리 중</string>
     <string name="wifi_scan_summary_install">Shizuku가 설치되지 않음</string>
     <string name="wifi_scan_status_enabled">활성화</string>
-    <string name="wifi_scan_permission_explanation">Shizuku 승인은 Wi-Fi 탐색을 멈추고 사용 후 해제하는 데 필요합니다. Android의 위치·주변 기기 권한과는 다릅니다.\n\n‘Open Headunit 허용’을 누르고 Shizuku 창에서 승인하세요.\n이전에 거부해 창이 나타나지 않으면 Shizuku 앱에서 직접 허용하세요.</string>
+    <string name="wifi_scan_permission_explanation">Shizuku 승인은 Wi-Fi 탐색을 멈추고 사용 후 해제하는 데 필요합니다. Android의 위치·주변 기기 권한과는 다릅니다.\n\n‘Andromi Auto 허용’을 누르고 Shizuku 창에서 승인하세요.\n이전에 거부해 창이 나타나지 않으면 Shizuku 앱에서 직접 허용하세요.</string>
     <string name="wifi_scan_step">%1$d. %2$s</string>
     <string name="wifi_scan_step_done">%1$d. %2$s · 완료</string>
     <string name="wifi_scan_step_install">Shizuku 설치</string>
     <string name="wifi_scan_step_start">Shizuku 서비스 시작</string>
-    <string name="wifi_scan_step_allow">Shizuku에서 Open Headunit 허용</string>
+    <string name="wifi_scan_step_allow">Shizuku에서 Andromi Auto 허용</string>
     <string name="wifi_scan_detail_installed">Shizuku 앱: 설치됨</string>
     <string name="wifi_scan_detail_not_installed">Shizuku 앱: 미설치</string>
     <string name="wifi_scan_detail_running">Shizuku 서비스: 실행 중</string>
     <string name="wifi_scan_detail_stopped">Shizuku 서비스: 미실행</string>
-    <string name="wifi_scan_detail_permission_unknown">Open Headunit 사용 허용: 서비스 시작 후 확인 가능</string>
-    <string name="wifi_scan_detail_allowed">Open Headunit 사용 허용: 허용됨</string>
-    <string name="wifi_scan_detail_not_allowed">Open Headunit 사용 허용: 허용되지 않음</string>
+    <string name="wifi_scan_detail_permission_unknown">Andromi Auto 사용 허용: 서비스 시작 후 확인 가능</string>
+    <string name="wifi_scan_detail_allowed">Andromi Auto 사용 허용: 허용됨</string>
+    <string name="wifi_scan_detail_not_allowed">Andromi Auto 사용 허용: 허용되지 않음</string>
     <string name="wifi_scan_detail_debugging_on">USB 디버깅: 켜짐</string>
     <string name="wifi_scan_detail_debugging_off">USB 디버깅: 꺼짐</string>
     <string name="wifi_scan_detail_fyt_available">FYT 시작: 사용 가능</string>
@@ -1341,14 +1341,14 @@
     <string name="wifi_scan_fyt_stage_wait">Shizuku 서비스 응답 대기</string>
     <string name="wifi_scan_fyt_stage_restore">ADB 종료 및 설정 복구</string>
     <string name="wifi_scan_fyt_close_help">무선 ADB를 종료하면\n• Wi-Fi 탐색 설정을 먼저 복구합니다. 복구에 실패하면 ADB를 유지합니다.\n• Shizuku가 중지되거나 USB 디버깅 연결이 끊길 수 있습니다.\n• 연결 시 FYT 자동 시작도 중지합니다. 다시 사용하려면 FYT 시작 버튼을 누르세요.\n\n이 앱에서 종료할 ADB가 없으면 버튼은 비활성화됩니다.</string>
-    <string name="wifi_scan_fyt_adb_owned">무선 ADB: Open Headunit에서 관리 중 · 아래 버튼으로 종료</string>
-    <string name="wifi_scan_fyt_adb_unowned">무선 ADB: Open Headunit에서 관리하는 연결 없음</string>
+    <string name="wifi_scan_fyt_adb_owned">무선 ADB: Andromi Auto에서 관리 중 · 아래 버튼으로 종료</string>
+    <string name="wifi_scan_fyt_adb_unowned">무선 ADB: Andromi Auto에서 관리하는 연결 없음</string>
     <string name="wifi_scan_section_common">공통 준비</string>
-    <string name="wifi_scan_common_help">1. Shizuku를 설치하세요.\n2. 아래 FYT 또는 일반 기기 방법으로 서비스를 시작하세요.\n3. 이 화면에서 Open Headunit을 허용하세요.</string>
+    <string name="wifi_scan_common_help">1. Shizuku를 설치하세요.\n2. 아래 FYT 또는 일반 기기 방법으로 서비스를 시작하세요.\n3. 이 화면에서 Andromi Auto을 허용하세요.</string>
     <string name="wifi_scan_section_fyt">FYT 기기에서</string>
     <string name="wifi_scan_fyt_help">지원되는 FYT 기기는 여기에서 Shizuku를 바로 시작할 수 있습니다.\n사용하는 동안 무선 ADB를 유지하고, 필요할 때 아래 버튼으로 종료하세요.</string>
     <string name="wifi_scan_section_other">일반 기기에서</string>
     <string name="wifi_scan_other_help">FYT 시작을 사용할 수 없는 기기는 아래 방법으로 Shizuku를 시작하세요.</string>
-    <string name="wifi_scan_fyt_restore_scans">Wi-Fi 탐색 설정을 복구하지 못해 무선 ADB를 유지했습니다. Shizuku를 실행하고 Open Headunit을 허용한 뒤 다시 시도하세요. 위쪽의 Wi-Fi 설정 복구 기능도 이용할 수 있습니다.</string>
+    <string name="wifi_scan_fyt_restore_scans">Wi-Fi 탐색 설정을 복구하지 못해 무선 ADB를 유지했습니다. Shizuku를 실행하고 Andromi Auto을 허용한 뒤 다시 시도하세요. 위쪽의 Wi-Fi 설정 복구 기능도 이용할 수 있습니다.</string>
     <string name="wifi_scan_legacy_limit">Android 8~10의 재요청\n• 연결 시 한 번, 연결 중에는 5분마다 일시 중지를 요청합니다.\n• Android가 그 사이 탐색을 다시 켤 수 있습니다. 반복 처리 부담을 줄이기 위한 간격이며, 모든 탐색을 계속 막지는 못합니다.\n\n탐색을 다시 켜지 못하면 Shizuku를 실행한 상태에서 재시도하세요. 기기를 재부팅하면 이 임시 제어는 초기화됩니다.</string>
 </resources>

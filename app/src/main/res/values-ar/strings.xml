@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Open Headunit</string>
+    <string name="app_name">Andromi Auto</string>
     <string name="menu">القائمة</string>
     <string name="settings">الإعدادات</string>
 
@@ -14,7 +14,7 @@
     <string name="video">Android Auto</string>
     <string name="self_mode">الوضع الذاتي</string>
     <string name="to_android_auto">إلى Android Auto</string>
-    <string name="title">Open Headunit</string>
+    <string name="title">Andromi Auto</string>
     <string name="remove">إزالة</string>
     <string name="usb">USB</string>
     <string name="wifi">واي فاي</string>
@@ -165,14 +165,14 @@
     <string name="usb_auto_connect_description">الاتصال تلقائيا بجهاز USB معروف عند فتح التطبيق.</string>
     <string name="auto_start_bt_label">التشغيل التلقائي عبر البلوتوث</string>
     <string name="auto_start_overlay_missing_hint">لم يتم منح إذن العرض فوق التطبيقات الأخرى، لذا سيعرض التشغيل التلقائي إشعارًا بدلًا من فتح الشاشة. اضغط للمنح.</string>
-    <string name="auto_start_bt_description">فتح Open Headunit تلقائيا عند اتصال جهاز بلوتوث محدد.</string>
+    <string name="auto_start_bt_description">فتح Andromi Auto تلقائيا عند اتصال جهاز بلوتوث محدد.</string>
     <string name="auto_start_offer_title">بدء تلقائي؟</string>
     <string name="auto_start_offer_message">هل تريد تشغيل التطبيق تلقائيًا مع هذا الجهاز، %1$s؟</string>
     <string name="auto_start_offer_yes">نعم</string>
     <string name="auto_start_offer_no">لا</string>
     <string name="auto_start_offer_countdown">لا خلال %1$d ثانية</string>
     <string name="auto_start_wifi_label">تشغيل تلقائي عبر الواي فاي</string>
-    <string name="auto_start_wifi_description">فتح Open Headunit تلقائياً عند الاتصال بشبكة واي فاي محددة (SSID).</string>
+    <string name="auto_start_wifi_description">فتح Andromi Auto تلقائياً عند الاتصال بشبكة واي فاي محددة (SSID).</string>
     <string name="auto_start_wifi_ssid_label">اسم شبكة الواي فاي (SSID)</string>
     <string name="auto_start_wifi_ssid_description">الاتصال فقط عند الارتباط بشبكة الواي فاي هذه</string>
     <string name="auto_start_wifi_warning">ميزة قديمة: قد لا تعمل بشكل موثوق على Android 8+ بسبب قيود الخلفية. تأكد من استثناء التطبيق من تحسين البطارية.</string>
@@ -188,7 +188,7 @@
     <string name="auto_start_settings">إعدادات التشغيل التلقائي</string>
     <string name="auto_start_settings_description">تهيئة متى يبدأ التطبيق تلقائياً</string>
     <string name="auto_start_oem_warning">قد يتطلب هذا الجهاز تفعيل التشغيل التلقائي وإزالة تحسين البطارية أو قيود الخلفية لهذا التطبيق.\n\nفي أجهزة الوسائط المتعددة التي تحتوي على التشغيل السريع (Quick Boot)، قد لا يعمل التشغيل التلقائي. ابحث عن \"DuraSpeed\" في إعدادات النظام وقم بتفعيل هذا التطبيق هناك. في بعض الأجهزة، يكون DuraSpeed مخفياً وقد تحتاج إلى تطبيق مثل \"Hidden Settings\" للعثور عليه. إذا لم يكن لديك DuraSpeed، حاول تعطيل التشغيل السريع.</string>
-    <string name="car_launcher_autostart_info">تم تكوين Open Headunit كمشغل للسيارة. يبدأ تلقائيًا عند تشغيل النظام.</string>
+    <string name="car_launcher_autostart_info">تم تكوين Andromi Auto كمشغل للسيارة. يبدأ تلقائيًا عند تشغيل النظام.</string>
     <string name="auto_start_on_boot_label">التشغيل عند الإقلاع</string>
     <string name="auto_start_on_boot_description">فتح التطبيق تلقائيًا عند بدء تشغيل الجهاز. يتطلب إذن \'العرض فوق التطبيقات الأخرى\' على Android 10+</string>
     <string name="auto_start_screen_on_label">التشغيل عند تشغيل الشاشة</string>
@@ -198,7 +198,7 @@
     <string name="bt_permission_denied_title">مطلوب إذن البلوتوث</string>
     <string name="bt_permission_denied_message">إذن البلوتوث مطلوب لاختيار الأجهزة المقترنة. يرجى منحه في إعدادات التطبيق.</string>
     <string name="overlay_permission_title">إذن البدء في الخلفية</string>
-    <string name="overlay_permission_description">للسماح لـ Open Headunit بالفتح التلقائي عند اتصال البلوتوث، يرجى تفعيل إذن \"العرض فوق التطبيقات الأخرى\" في الشاشة التالية.</string>
+    <string name="overlay_permission_description">للسماح لـ Andromi Auto بالفتح التلقائي عند اتصال البلوتوث، يرجى تفعيل إذن \"العرض فوق التطبيقات الأخرى\" في الشاشة التالية.</string>
     <string name="open_settings">الإعدادات</string>
     <string name="wireless_connection_settings">اتصال لاسلكي</string>
     <string name="right_hand_drive">القيادة على اليمين</string>
@@ -278,10 +278,10 @@
     <!-- Info Settings -->
     <string name="category_info">المعلومات</string>
     <string name="about">حول &amp; الدعم</string>
-    <string name="about_description">الحصول على مزيد من المعلومات حول Open Headunit</string>
+    <string name="about_description">الحصول على مزيد من المعلومات حول Andromi Auto</string>
     <string name="version">الإصدار</string>
     <string name="check_for_updates">التحقق من وجود تحديثات</string>
-    <string name="check_for_updates_description">التحقق مما إذا كان هناك إصدار أحدث من Open Headunit متاحاً</string>
+    <string name="check_for_updates_description">التحقق مما إذا كان هناك إصدار أحدث من Andromi Auto متاحاً</string>
     <string name="checking_for_updates">جارٍ التحقق من وجود تحديثات…</string>
     <string name="update_available_title">تحديث متاح</string>
     <string name="update_available_playstore_message">يتوفر إصدار أحدث (%1$s). يرجى زيارة متجر Google Play لتحديث تطبيقك.</string>
@@ -291,7 +291,7 @@
     <string name="update_check_failed">فشل التحقق من وجود تحديثات. يرجى التحقق من اتصال الإنترنت.</string>
     <string name="open_play_store">فتح متجر Play</string>
     <string name="open_github_releases">فتح إصدارات GitHub</string>
-    <string name="about_title">حول Open Headunit</string>
+    <string name="about_title">حول Andromi Auto</string>
     <string name="copyright">© 2025-%d André Rinas</string>
 
     <!-- Safety Disclaimer -->
@@ -302,7 +302,7 @@
         <b>١. التركيز على الطريق</b><br/>
         استخدام هذا البرنامج أثناء القيادة قد يشتت الانتباه ويكون خطيرا. أول الأولوية دائما للقيادة الآمنة والالتزام بأنظمة المرور المحلية. استخدم هذا التطبيق فقط عند الأمان التام.<br/><br/>
         <b>٢. تحديد المسؤولية</b><br/>
-        يقدم Open Headunit "كما هو" دون أي ضمان من أي نوع. لا يتحمل المطورون أي مسؤولية عن الحوادث أو الأضرار التي تلحق بسيارتك/جهازك أو أي تبعات قانونية ناجمة عن استخدام هذا البرنامج.<br/><br/>
+        يقدم Andromi Auto "كما هو" دون أي ضمان من أي نوع. لا يتحمل المطورون أي مسؤولية عن الحوادث أو الأضرار التي تلحق بسيارتك/جهازك أو أي تبعات قانونية ناجمة عن استخدام هذا البرنامج.<br/><br/>
         <b>٣. عدم الانتساب</b><br/>
         هذا المشروع مبادرة مفتوحة المصدر مستقلة، وليس له أي صلة أو اعتماد أو ارتباط بشركة Google LLC أو علامة Android Auto التجارية.
     ]]></string>
@@ -348,7 +348,7 @@
     <string name="connection_interrupted">فُقد الاتصال</string>
     <string name="connection_interrupted_detail">جارٍ إعادة المحاولة…</string>
     <string name="wifi_disconnect_toast">تم قطع اتصال Android Auto: إذا كنت تستخدم AA لاسلكي، عطّل \"التبديل بين الشبكات\" أو \"تسريع الشبكة\" في إعدادات WiFi الهاتف</string>
-    <string name="notification_service_running">Open Headunit يعمل</string>
+    <string name="notification_service_running">Andromi Auto يعمل</string>
     <string name="notification_projection_active">Android Auto قيد الإسقاط</string>
     <string name="shortcut_connect_title">اتصال</string>
     <string name="shortcut_connect_desc">الاتصال بآخر جهاز معروف</string>
@@ -618,7 +618,7 @@
     <string name="settings_backup_saved_to">تم حفظ النسخة الاحتياطية في:\n%1$s</string>
     <string name="share_settings_backup">مشاركة النسخة الاحتياطية</string>
     <string name="import_settings">استيراد الإعدادات</string>
-    <string name="import_settings_description">استعادة الإعدادات من نسخة احتياطية لـ Open Headunit</string>
+    <string name="import_settings_description">استعادة الإعدادات من نسخة احتياطية لـ Andromi Auto</string>
     <string name="import_settings_app_folder">استيراد من مجلد نسخ التطبيق</string>
     <string name="import_settings_downloads">استيراد من التنزيلات</string>
     <string name="import_settings_choose_file">اختر ملف النسخة الاحتياطية</string>
@@ -626,8 +626,8 @@
     <string name="settings_imported">تم استيراد الإعدادات: %1$d مطبَّقة، %2$d تم تجاوزها</string>
     <string name="settings_import_failed">فشل استيراد الإعدادات: %1$s</string>
     <string name="no_settings_backups_title">لا توجد نسخ احتياطية</string>
-    <string name="no_settings_backups_message">لم يتم العثور على أي نسخ احتياطية لـ Open Headunit في مجلد نسخ التطبيق. قم بتصدير نسخة احتياطية أولاً ثم استوردها من هنا.</string>
-    <string name="no_settings_backups_downloads_message">لم يتم العثور على أي نسخ احتياطية لـ Open Headunit في التنزيلات. قم بتصدير نسخة احتياطية إلى التنزيلات أولاً ثم استوردها من هنا.</string>
+    <string name="no_settings_backups_message">لم يتم العثور على أي نسخ احتياطية لـ Andromi Auto في مجلد نسخ التطبيق. قم بتصدير نسخة احتياطية أولاً ثم استوردها من هنا.</string>
+    <string name="no_settings_backups_downloads_message">لم يتم العثور على أي نسخ احتياطية لـ Andromi Auto في التنزيلات. قم بتصدير نسخة احتياطية إلى التنزيلات أولاً ثم استوردها من هنا.</string>
     <string name="no_file_picker_title">لا يوجد منتقي ملفات</string>
     <string name="no_file_picker_message">هذا الجهاز لا يحتوي على منتقي ملفات متوافق. يمكنك استخدام التنزيلات أو مجلد نسخ التطبيق بدلاً من ذلك.</string>
     <string name="storage_permission_denied_backup">تم رفض إذن التخزين. تعذر استخدام التنزيلات.</string>
@@ -725,7 +725,7 @@
     <string name="onb_next">التالي</string>
     <string name="onb_skip">تخطي</string>
     <string name="onb_ready_finish">إنهاء</string>
-    <string name="onb_welcome_title">مرحبا بك في Open Headunit</string>
+    <string name="onb_welcome_title">مرحبا بك في Andromi Auto</string>
     <string name="onb_welcome_body">يفحص هذا الإعداد السريع جهازك ويختار لك أفضل إعدادات الفيديو والعرض والوضع الداكن. يمكنك تغيير كل شيء لاحقا في الإعدادات.</string>
     <string name="onb_safety_title">السلامة أولا</string>
     <string name="onb_safety_accept">لقد قرأت الشروط وأوافق عليها</string>
@@ -827,7 +827,7 @@
     <string name="support_rules_connection_title">اذكر طريقة الاتصال</string>
     <string name="support_rules_connection_desc">كابل USB، أو محول USB لاسلكي، أو WiFi Direct، أو WiFi (خادم وحدة الرأس)، أو Self Mode. إن كان الاتصال لاسلكيًا، أضف طراز المحول أو الدونغل.</string>
     <string name="support_rules_appversion_title">أرفق إصدار التطبيق</string>
-    <string name="support_rules_appversion_desc">إصدار Open Headunit، المعروض في شاشة حول.</string>
+    <string name="support_rules_appversion_desc">إصدار Andromi Auto، المعروض في شاشة حول.</string>
     <string name="support_rules_logs_title">أرفق السجلات فور حدوث المشكلة</string>
     <string name="support_rules_logs_desc">انتقل إلى الإعدادات وافتح تبويب متقدم، ثم فعّل وضع التصحيح في قسم تصحيح الأخطاء، وأعد إنتاج المشكلة، ثم اضغط تصدير السجلات مباشرة بعدها حتى يغطي السجل لحظة الخلل لا مجرد بداية التشغيل. أرفق الملف بمشكلتك.</string>
     <string name="support_rules_search_title">لا تكرار</string>
@@ -927,8 +927,8 @@
     <string name="github_issues_url">https://github.com/andreknieriem/open-headunit/issues</string>
     <string name="support_rules_english_title">All posts in English</string>
     <string name="boot_loop_paused_title">Wireless start-up paused</string>
-    <string name="boot_loop_paused_generic">This device restarted three times in a row shortly after Open Headunit started wireless, so wireless was left off this time. USB still works. Open the app to turn it back on.</string>
-    <string name="boot_loop_paused_native_wifi_direct">This device restarted three times in a row shortly after Open Headunit started wireless, so wireless was left off this time. On some head units the WiFi chipset takes the whole system down when a phone joins a WiFi Direct network. Try switching Android Auto mode to the head unit hotspot. USB still works.</string>
+    <string name="boot_loop_paused_generic">This device restarted three times in a row shortly after Andromi Auto started wireless, so wireless was left off this time. USB still works. Open the app to turn it back on.</string>
+    <string name="boot_loop_paused_native_wifi_direct">This device restarted three times in a row shortly after Andromi Auto started wireless, so wireless was left off this time. On some head units the WiFi chipset takes the whole system down when a phone joins a WiFi Direct network. Try switching Android Auto mode to the head unit hotspot. USB still works.</string>
     <string name="vehicle_make_hint">A real car brand shows that brand\'s logo on the Android Auto exit button, but Android Auto then stops listing apps installed from outside the Play Store. Set it back to \"Google\" to get those apps listed again.</string>
     <string name="external_bt_nativeaa">Native Wireless cannot work on this head unit</string>
     <string name="external_bt_nativeaa_desc">يقترن هاتفك بوحدة البلوتوث الخاصة بهذه الوحدة (%1$s)، لا بالبلوتوث الذي يوفّره أندرويد للتطبيقات، لذا فإن مصافحة الاتصال اللاسلكي لن تصل إليه أبداً.\n\nلا يمكن لهذا التطبيق الوصول إلى تلك الوحدة إلا عبر خدمة ZJ/ZLink، وهذه الوحدة لا تُشغّل هذه الخدمة. استخدم USB أو أحد أوضاع WiFi بدلاً من ذلك.</string>
@@ -1149,7 +1149,7 @@
 
     <string name="category_more_features">ميزات إضافية</string>
     <string name="pref_enable_floating_button_title">زر التشغيل العائم</string>
-    <string name="pref_enable_floating_button_summary">عرض زر عائم فوق المشغل الأصلي والتطبيقات الأخرى للعودة سريعًا إلى Open Headunit</string>
+    <string name="pref_enable_floating_button_summary">عرض زر عائم فوق المشغل الأصلي والتطبيقات الأخرى للعودة سريعًا إلى Andromi Auto</string>
     <string name="pref_floating_button_connection_status_title">مؤشر حالة الاتصال</string>
     <string name="pref_floating_button_connection_status_summary">يستخدم الشفافية عند عدم الاتصال حين لا يكون هاتف متصلاً، ويتلاشى إلى شفافية الزر العائم أثناء اتصال هاتف. عند 0% يكون الزر مخفيًا ويمرر اللمسات.</string>
     <string name="pref_floating_button_size_title">حجم الزر العائم</string>
@@ -1177,7 +1177,7 @@
     <string name="oem_app_backend_adb">طريقة التنفيذ: Self-ADB متصل (127.0.0.1:5555)</string>
     <string name="oem_app_backend_none">طريقة التنفيذ: لا يوجد. فعّل تصحيح الأخطاء اللاسلكي أو نفّذ "adb tcpip 5555"</string>
     <string name="oem_app_autokill_switch">تعطيل تطبيقات المصنع المتعارضة تلقائيًا عند بدء التشغيل</string>
-    <string name="oem_app_autokill_switch_desc">إيقاف التطبيقات والخدمات المتعارضة المعروفة عند بدء تشغيل Open Headunit.</string>
+    <string name="oem_app_autokill_switch_desc">إيقاف التطبيقات والخدمات المتعارضة المعروفة عند بدء تشغيل Andromi Auto.</string>
     <string name="oem_app_autokill_enabled">التعطيل التلقائي نشط</string>
     <string name="oem_app_none_detected">لم يتم اكتشاف أي تطبيقات مصنع متعارضة.</string>
     <string name="oem_app_btn_commands">الأوامر</string>
@@ -1252,7 +1252,7 @@
     <string name="native_aa_wake_remeasure_confirm">لا يبدأ Android Auto الاتصال اللاسلكي إلا عندما يرى تغيّر اتصال البلوتوث. وحيث تحتفظ هذه الوحدة بالفعل بوصلة اليدين الحرة، يتعين على التطبيق قطعها لإحداث ذلك، لذا يقيس مرة واحدة ما إذا كانت الوصلة تعود ويتوقف إن لم تعد. استخدم هذا إذا توقف الاتصال اللاسلكي عن البدء من تلقاء نفسه وكنت مستعدًا لفقدان ميزة اليدين الحرة للحظة بينما يحاول مجددًا.</string>
     <string name="native_aa_wake_remeasure_done">سيُعاد قياس إيقاظ البلوتوث عند الاتصال التالي.</string>
     <string name="pref_enable_car_launcher_title">الاستخدام كمشغل سيارة</string>
-    <string name="pref_enable_car_launcher_summary">تسجيل Open Headunit كتطبيق الشاشة الرئيسية عند الضغط على زر الصفحة الرئيسية</string>
+    <string name="pref_enable_car_launcher_summary">تسجيل Andromi Auto كتطبيق الشاشة الرئيسية عند الضغط على زر الصفحة الرئيسية</string>
     <string name="pref_set_default_launcher_title">تطبيق الصفحة الرئيسية الافتراضي</string>
     <string name="pref_default_launcher_status_active">نشط (اضغط للإدارة)</string>
     <string name="pref_default_launcher_status_inactive">غير محدد (اضغط لتعيين كافتراضي)</string>

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Open Headunit</string>
+    <string name="app_name">Andromi Auto</string>
     <string name="menu">Menu</string>
     <string name="settings">Instellingen</string>
     <string name="title_activity_settings">Instellingen</string>
@@ -13,7 +13,7 @@
     <string name="video">Android Auto</string>
     <string name="self_mode">Self Mode</string>
     <string name="to_android_auto">Naar Android Auto</string>
-    <string name="title">Open Headunit</string>
+    <string name="title">Andromi Auto</string>
     <string name="remove">Verwijder</string>
     <string name="usb">USB</string>
     <string name="wifi">WiFi</string>
@@ -164,14 +164,14 @@
     <string name="usb_auto_connect_description">Automatisch verbinden met een bekend USB-apparaat wanneer de applicatie wordt geopend.</string>
     <string name="auto_start_bt_label">Automatisch starten bij Bluetooth</string>
     <string name="auto_start_overlay_missing_hint">Over andere apps weergeven is niet toegestaan, dus automatisch starten toont een melding in plaats van het scherm te openen. Tik om toe te staan.</string>
-    <string name="auto_start_bt_description">Start Open Headunit automatisch wanneer een specifiek Bluetooth-apparaat verbinding maakt.</string>
+    <string name="auto_start_bt_description">Start Andromi Auto automatisch wanneer een specifiek Bluetooth-apparaat verbinding maakt.</string>
     <string name="auto_start_offer_title">Automatisch starten?</string>
     <string name="auto_start_offer_message">Wil je de app automatisch starten met dit apparaat, %1$s?</string>
     <string name="auto_start_offer_yes">Ja</string>
     <string name="auto_start_offer_no">Nee</string>
     <string name="auto_start_offer_countdown">Nee over %1$d s</string>
     <string name="auto_start_wifi_label">Automatisch starten bij WiFi</string>
-    <string name="auto_start_wifi_description">Opent Open Headunit automatisch bij verbinding met een specifieke WiFi-SSID.</string>
+    <string name="auto_start_wifi_description">Opent Andromi Auto automatisch bij verbinding met een specifieke WiFi-SSID.</string>
     <string name="auto_start_wifi_ssid_label">WiFi-SSID</string>
     <string name="auto_start_wifi_ssid_description">Alleen verbinden bij verbinding met deze WiFi-SSID</string>
     <string name="auto_start_wifi_warning">Legacy-functie: Dit werkt mogelijk niet betrouwbaar op Android 8+ vanwege achtergrondbeperkingen. Zorg ervoor dat de app is uitgesloten van batterijoptimalisatie.</string>
@@ -187,7 +187,7 @@
     <string name="auto_start_settings">Instellingen automatisch starten</string>
     <string name="auto_start_settings_description">Stel in wanneer de app automatisch start</string>
     <string name="auto_start_oem_warning">Dit apparaat vereist mogelijk het inschakelen van autostart en het verwijderen van batterijoptimalisatie of achtergrondbeperkingen voor deze app.\n\nOp headunits met Quick Boot (snel opstarten) werkt autostart mogelijk niet. Zoek naar \"DuraSpeed\" in de systeeminstellingen en schakel deze app daar in. Op sommige headunits is DuraSpeed verborgen en heeft u mogelijk een app zoals \"Hidden Settings\" nodig om het te vinden. Als u geen DuraSpeed heeft, probeer Quick Boot uit te schakelen.</string>
-    <string name="car_launcher_autostart_info">Open Headunit is geconfigureerd als auto-launcher. Het start automatisch op bij het opstarten van het systeem.</string>
+    <string name="car_launcher_autostart_info">Andromi Auto is geconfigureerd als auto-launcher. Het start automatisch op bij het opstarten van het systeem.</string>
     <string name="auto_start_on_boot_label">Starten bij opstarten</string>
     <string name="auto_start_on_boot_description">De app automatisch openen wanneer het apparaat opstart. Vereist de machtiging \'Weergeven over andere apps\' op Android 10+</string>
     <string name="auto_start_screen_on_label">Starten bij scherm aan</string>
@@ -197,7 +197,7 @@
     <string name="bt_permission_denied_title">Bluetooth-toestemming vereist</string>
     <string name="bt_permission_denied_message">Bluetooth-toestemming is nodig om gekoppelde apparaten te selecteren. Verleen deze in de app-instellingen.</string>
     <string name="overlay_permission_title">Toestemming voor starten op achtergrond</string>
-    <string name="overlay_permission_description">Om Open Headunit automatisch te openen wanneer Bluetooth verbinding maakt, dient u de toestemming \"Weergeven over andere apps\" in te schakelen in het volgende scherm.</string>
+    <string name="overlay_permission_description">Om Andromi Auto automatisch te openen wanneer Bluetooth verbinding maakt, dient u de toestemming \"Weergeven over andere apps\" in te schakelen in het volgende scherm.</string>
     <string name="open_settings">Instellingen</string>
     <string name="wireless_connection_settings">Draadloze verbinding</string>
     <string name="right_hand_drive">Rechts hand gestuurd</string>
@@ -277,10 +277,10 @@
     <!-- Info Settings -->
     <string name="category_info">Info</string>
     <string name="about">Over &amp; Support</string>
-    <string name="about_description">Meer informatie over Open Headunit</string>
+    <string name="about_description">Meer informatie over Andromi Auto</string>
     <string name="version">Versie</string>
     <string name="check_for_updates">Controleren op updates</string>
-    <string name="check_for_updates_description">Controleren of er een nieuwere versie van Open Headunit beschikbaar is</string>
+    <string name="check_for_updates_description">Controleren of er een nieuwere versie van Andromi Auto beschikbaar is</string>
     <string name="checking_for_updates">Controleren op updates…</string>
     <string name="update_available_title">Update beschikbaar</string>
     <string name="update_available_playstore_message">Er is een nieuwere versie (%1$s) beschikbaar. Ga naar de Google Play Store om je app bij te werken.</string>
@@ -290,7 +290,7 @@
     <string name="update_check_failed">Kan niet op updates controleren. Controleer je internetverbinding.</string>
     <string name="open_play_store">Play Store openen</string>
     <string name="open_github_releases">GitHub Releases openen</string>
-    <string name="about_title">Over Open Headunit</string>
+    <string name="about_title">Over Andromi Auto</string>
     <string name="copyright">© 2025-%d André Rinas</string>
 
     <!-- Safety Disclaimer -->
@@ -301,7 +301,7 @@
         <b>1. Focus on the Road</b><br/>
         Operating this software while driving can be distracting and dangerous. Always prioritize safe driving and adhere to all local traffic regulations. Use this application only when it is safe to do so.<br/><br/>
         <b>2. Limitation of Liability</b><br/>
-        Open Headunit is provided "as is" without warranty of any kind. The developers assume no liability for any accidents, damage to your vehicle/device, or legal consequences arising from the use of this software.<br/><br/>
+        Andromi Auto is provided "as is" without warranty of any kind. The developers assume no liability for any accidents, damage to your vehicle/device, or legal consequences arising from the use of this software.<br/><br/>
         <b>3. No Affiliation</b><br/>
         This project is an independent open-source initiative and is not affiliated with, endorsed by, or connected to Google LLC or the Android Auto brand.
     ]]></string>
@@ -349,7 +349,7 @@
     <string name="wifi_disconnect_toast">Android Auto losgekoppeld: Bij draadloze AA, schakel \"Wisselen tussen netwerken\" of \"Netwerkversnelling\" uit in WiFi-instellingen van telefoon</string>
     <string name="reset_usb_option">USB-verbinding resetten</string>
     <string name="reset_usb_timeout">USB-apparaat niet gevonden. Controleer de verbinding.</string>
-    <string name="notification_service_running">Open Headunit is actief</string>
+    <string name="notification_service_running">Andromi Auto is actief</string>
     <string name="notification_projection_active">Android Auto wordt geprojecteerd</string>
     <string name="shortcut_connect_title">Verbinden</string>
     <string name="shortcut_connect_desc">Verbinden met laatst bekende apparaat</string>
@@ -618,7 +618,7 @@
     <string name="settings_backup_saved_to">Back-up opgeslagen in:\n%1$s</string>
     <string name="share_settings_backup">Back-up delen</string>
     <string name="import_settings">Instellingen importeren</string>
-    <string name="import_settings_description">Herstel instellingen vanuit een Open Headunit back-up</string>
+    <string name="import_settings_description">Herstel instellingen vanuit een Andromi Auto back-up</string>
     <string name="import_settings_app_folder">Importeren uit back-upmap van app</string>
     <string name="import_settings_downloads">Importeren uit Downloads</string>
     <string name="import_settings_choose_file">Back-upbestand kiezen</string>
@@ -626,8 +626,8 @@
     <string name="settings_imported">Instellingen geïmporteerd: %1$d toegepast, %2$d overgeslagen</string>
     <string name="settings_import_failed">Importeren van instellingen mislukt: %1$s</string>
     <string name="no_settings_backups_title">Geen back-ups gevonden</string>
-    <string name="no_settings_backups_message">Er zijn geen Open Headunit back-ups gevonden in de back-upmap van de app. Exporteer eerst een back-up en importeer deze daarna van hier.</string>
-    <string name="no_settings_backups_downloads_message">Er zijn geen Open Headunit back-ups gevonden in Downloads. Exporteer eerst een back-up naar Downloads en importeer deze daarna van hier.</string>
+    <string name="no_settings_backups_message">Er zijn geen Andromi Auto back-ups gevonden in de back-upmap van de app. Exporteer eerst een back-up en importeer deze daarna van hier.</string>
+    <string name="no_settings_backups_downloads_message">Er zijn geen Andromi Auto back-ups gevonden in Downloads. Exporteer eerst een back-up naar Downloads en importeer deze daarna van hier.</string>
     <string name="no_file_picker_title">Geen bestandskiezer beschikbaar</string>
     <string name="no_file_picker_message">Dit apparaat heeft geen compatibele bestandskiezer. Gebruik in plaats daarvan Downloads of de back-upmap van de app.</string>
     <string name="storage_permission_denied_backup">Toegang tot opslag geweigerd. Downloads kon niet worden gebruikt.</string>
@@ -725,7 +725,7 @@
     <string name="onb_next">Volgende</string>
     <string name="onb_skip">Overslaan</string>
     <string name="onb_ready_finish">Voltooien</string>
-    <string name="onb_welcome_title">Welkom bij Open Headunit</string>
+    <string name="onb_welcome_title">Welkom bij Andromi Auto</string>
     <string name="onb_welcome_body">Deze snelle installatie scant je apparaat en kiest de beste video-, weergave- en nachtmodusinstellingen voor je. Je kunt alles later wijzigen in Instellingen.</string>
     <string name="onb_safety_title">Veiligheid eerst</string>
     <string name="onb_safety_accept">Ik heb de voorwaarden gelezen en ga ermee akkoord</string>
@@ -852,7 +852,7 @@
     <string name="support_rules_connection_title">Zeg hoe je verbindt</string>
     <string name="support_rules_connection_desc">USB-kabel, draadloze USB-adapter, WiFi Direct, WiFi (headunit server) of Self Mode. Als het draadloos is, voeg dan het model van de adapter of dongle toe.</string>
     <string name="support_rules_appversion_title">Vermeld de app-versie</string>
-    <string name="support_rules_appversion_desc">De versie van Open Headunit, te zien op het scherm Over &amp; Support.</string>
+    <string name="support_rules_appversion_desc">De versie van Andromi Auto, te zien op het scherm Over &amp; Support.</string>
     <string name="support_rules_logs_title">Voeg logs toe, direct nadat het gebeurt</string>
     <string name="support_rules_logs_desc">Ga naar het tabblad Geavanceerd in Instellingen, zet Debug Modus aan in het gedeelte Debug, reproduceer het probleem en tik daarna meteen op Logs exporteren zodat het logbestand het moment van de fout bevat en niet alleen de start. Voeg dat bestand toe aan je issue.</string>
     <string name="support_rules_search_title">Geen duplicaten</string>
@@ -929,8 +929,8 @@
     <string name="github_issues_url">https://github.com/andreknieriem/open-headunit/issues</string>
     <string name="support_rules_english_title">All posts in English</string>
     <string name="boot_loop_paused_title">Wireless start-up paused</string>
-    <string name="boot_loop_paused_generic">This device restarted three times in a row shortly after Open Headunit started wireless, so wireless was left off this time. USB still works. Open the app to turn it back on.</string>
-    <string name="boot_loop_paused_native_wifi_direct">This device restarted three times in a row shortly after Open Headunit started wireless, so wireless was left off this time. On some head units the WiFi chipset takes the whole system down when a phone joins a WiFi Direct network. Try switching Android Auto mode to the head unit hotspot. USB still works.</string>
+    <string name="boot_loop_paused_generic">This device restarted three times in a row shortly after Andromi Auto started wireless, so wireless was left off this time. USB still works. Open the app to turn it back on.</string>
+    <string name="boot_loop_paused_native_wifi_direct">This device restarted three times in a row shortly after Andromi Auto started wireless, so wireless was left off this time. On some head units the WiFi chipset takes the whole system down when a phone joins a WiFi Direct network. Try switching Android Auto mode to the head unit hotspot. USB still works.</string>
     <string name="vehicle_make_hint">A real car brand shows that brand\'s logo on the Android Auto exit button, but Android Auto then stops listing apps installed from outside the Play Store. Set it back to \"Google\" to get those apps listed again.</string>
     <string name="external_bt_nativeaa">Native Wireless cannot work on this head unit</string>
     <string name="external_bt_nativeaa_desc">Je telefoon koppelt met de eigen Bluetooth-module van deze headunit (%1$s), niet met de Bluetooth die Android aan apps aanbiedt, dus de draadloze handshake zou hem nooit bereiken.\n\nDeze app kan die module alleen bereiken via een ZJ/ZLink-dienst, die deze headunit niet draait. Gebruik in plaats daarvan USB of een wifi-modus.</string>
@@ -1151,7 +1151,7 @@
 
     <string name="category_more_features">Meer functies</string>
     <string name="pref_enable_floating_button_title">Zwevende startknop</string>
-    <string name="pref_enable_floating_button_summary">Toont een zwevende knop over het OEM-startscherm en andere apps om snel terug te keren naar Open Headunit</string>
+    <string name="pref_enable_floating_button_summary">Toont een zwevende knop over het OEM-startscherm en andere apps om snel terug te keren naar Andromi Auto</string>
     <string name="pref_floating_button_connection_status_title">Verbindingsstatus-indicator</string>
     <string name="pref_floating_button_connection_status_summary">Gebruikt de transparantie bij verbroken verbinding als er geen telefoon is verbonden en vervaagt naar de Transparantie van zwevende knop zodra er een telefoon is verbonden. Bij 0% is de knop verborgen en laat hij tikken door.</string>
     <string name="pref_floating_button_size_title">Grootte van zwevende knop</string>
@@ -1179,7 +1179,7 @@
     <string name="oem_app_backend_adb">Uitvoeringsmethode: Self-ADB (127.0.0.1:5555) verbonden</string>
     <string name="oem_app_backend_none">Uitvoeringsmethode: Geen. Schakel draadloos debuggen in of voer "adb tcpip 5555" uit</string>
     <string name="oem_app_autokill_switch">Conflicterende OEM-apps automatisch uitschakelen bij opstarten</string>
-    <string name="oem_app_autokill_switch_desc">Onderdrukt bekende conflicterende apps en daemons bij het starten van Open Headunit.</string>
+    <string name="oem_app_autokill_switch_desc">Onderdrukt bekende conflicterende apps en daemons bij het starten van Andromi Auto.</string>
     <string name="oem_app_autokill_enabled">Automatisch uitschakelen actief</string>
     <string name="oem_app_none_detected">Geen conflicterende OEM-apps gevonden.</string>
     <string name="oem_app_btn_commands">Opdrachten</string>
@@ -1254,7 +1254,7 @@
     <string name="native_aa_wake_remeasure_confirm">Android Auto start draadloos alleen als het de Bluetooth-verbinding ziet veranderen. Als dit apparaat de handsfreeverbinding al vasthoudt, moet de app die verbreken om dat te laten gebeuren, dus meet hij één keer of de verbinding terugkomt en stopt hij als dat niet zo is. Gebruik dit als draadloos niet meer vanzelf start en je bereid bent handsfree even kwijt te raken terwijl hij het opnieuw probeert.</string>
     <string name="native_aa_wake_remeasure_done">De Bluetooth-wekking wordt bij de volgende verbinding opnieuw gemeten.</string>
     <string name="pref_enable_car_launcher_title">Als auto-launcher gebruiken</string>
-    <string name="pref_enable_car_launcher_summary">Registreert Open Headunit als startscherm-app wanneer op de Home-knop van de auto wordt gedrukt</string>
+    <string name="pref_enable_car_launcher_summary">Registreert Andromi Auto als startscherm-app wanneer op de Home-knop van de auto wordt gedrukt</string>
     <string name="pref_set_default_launcher_title">Standaard start-app</string>
     <string name="pref_default_launcher_status_active">Actief (Tik om te beheren)</string>
     <string name="pref_default_launcher_status_inactive">Niet ingesteld (Tik om in te stellen)</string>

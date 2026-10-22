@@ -40,7 +40,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintVertical_bias="0.45">
 
-        <!-- ── Row 1: Self Mode + USB ── -->
+        <!-- ── Row 1: Self Mode + Settings ── -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -104,7 +104,7 @@
 
             </LinearLayout>
 
-            <!-- USB cell -->
+            <!-- Settings cell -->
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -117,7 +117,7 @@
                     android:layout_height="wrap_content">
 
                     <com.google.android.material.button.MaterialButton
-                        android:id="@+id/usb_button"
+                        android:id="@+id/settings_button"
                         android:layout_width="0dp"
                         android:layout_height="0dp"
                         android:elevation="6dp"
@@ -127,9 +127,9 @@
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:backgroundTint="@null"
-                        android:background="@drawable/gradient_orange"
+                        android:background="@drawable/gradient_darkblue"
                         app:iconGravity="textStart"
-                        app:icon="@drawable/ic_usb_white"
+                        app:icon="@drawable/ic_settings_white"
                         app:iconTint="#ffffff"
                         app:iconSize="48dp"
                         app:iconPadding="0dp"
@@ -139,10 +139,10 @@
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <TextView
-                    android:id="@+id/usb_text"
+                    android:id="@+id/settings_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/usb"
+                    android:text="@string/settings"
                     android:textColor="@color/text_primary"
                     android:shadowColor="@color/text_shadow"
                     android:shadowDx="0"
@@ -157,10 +157,11 @@
 
         </LinearLayout>
 
-        <!-- ── Row 2: WiFi + Settings ── -->
+        <!-- ── Row 2: WiFi + USB, hidden: Andromi Auto only has Self Mode ── -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:visibility="gone"
             android:orientation="horizontal">
 
             <!-- WiFi cell -->
@@ -214,7 +215,7 @@
 
             </LinearLayout>
 
-            <!-- Settings cell -->
+            <!-- USB cell -->
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -227,7 +228,7 @@
                     android:layout_height="wrap_content">
 
                     <com.google.android.material.button.MaterialButton
-                        android:id="@+id/settings_button"
+                        android:id="@+id/usb_button"
                         android:layout_width="0dp"
                         android:layout_height="0dp"
                         android:elevation="6dp"
@@ -237,9 +238,9 @@
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:backgroundTint="@null"
-                        android:background="@drawable/gradient_darkblue"
+                        android:background="@drawable/gradient_orange"
                         app:iconGravity="textStart"
-                        app:icon="@drawable/ic_settings_white"
+                        app:icon="@drawable/ic_usb_white"
                         app:iconTint="#ffffff"
                         app:iconSize="48dp"
                         app:iconPadding="0dp"
@@ -249,10 +250,10 @@
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <TextView
-                    android:id="@+id/settings_text"
+                    android:id="@+id/usb_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/settings"
+                    android:text="@string/usb"
                     android:textColor="@color/text_primary"
                     android:shadowColor="@color/text_shadow"
                     android:shadowDx="0"

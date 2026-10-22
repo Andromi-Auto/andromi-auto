@@ -35,6 +35,9 @@ class AboutFragment : Fragment() {
         val contentText = view.findViewById<TextView>(R.id.about_content_text)
         
         val sb = StringBuilder()
+        // Andromi Auto is a modified version of Open Headunit (AGPL-3.0): say so and where its source is.
+        sb.append("<b>Andromi Auto is a modified version of Open Headunit by André Rinas, kept to Self Mode for Xiaomi cars.</b><br/>")
+        sb.append("Source code: <a href=\"https://github.com/Andromi-Auto/andromi-auto\">https://github.com/Andromi-Auto/andromi-auto</a><br/><br/>")
         sb.append("<b>Special thanks to Mike Reidis for the original idea and android auto protocol and code.</b><br/>")
         sb.append("<a href=\"https://github.com/mikereidis/headunit\">https://github.com/mikereidis/headunit</a><br/><br/>")
         sb.append("<h3>Issues, bugs, and feedback or questions</h3>")

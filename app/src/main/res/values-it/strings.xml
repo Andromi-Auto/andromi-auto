@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Open Headunit</string>
+    <string name="app_name">Andromi Auto</string>
     <string name="menu">Menu</string>
     <string name="settings">Impostazioni</string>
 
@@ -14,7 +14,7 @@
     <string name="video">Android Auto</string>
     <string name="self_mode">Modalità Self</string>
     <string name="to_android_auto">A Android Auto</string>
-    <string name="title">Open Headunit</string>
+    <string name="title">Andromi Auto</string>
     <string name="remove">Rimuovi</string>
     <string name="usb">USB</string>
     <string name="wifi">WiFi</string>
@@ -190,14 +190,14 @@
     <string name="usb_auto_connect_description">Connettiti automaticamente a un dispositivo USB noto all\'apertura dell\'applicazione.</string>
     <string name="auto_start_bt_label">Avvio automatico su Bluetooth</string>
     <string name="auto_start_overlay_missing_hint">La visualizzazione sopra le altre app non è consentita, quindi l\'avvio automatico mostrerà una notifica invece di aprire la schermata. Tocca per concedere.</string>
-    <string name="auto_start_bt_description">Apri automaticamente Open Headunit quando si connette un dispositivo Bluetooth specifico.</string>
+    <string name="auto_start_bt_description">Apri automaticamente Andromi Auto quando si connette un dispositivo Bluetooth specifico.</string>
     <string name="auto_start_offer_title">Avviare automaticamente?</string>
     <string name="auto_start_offer_message">Vuoi avviare automaticamente l\'app con questo dispositivo, %1$s?</string>
     <string name="auto_start_offer_yes">Sì</string>
     <string name="auto_start_offer_no">No</string>
     <string name="auto_start_offer_countdown">No tra %1$d s</string>
     <string name="auto_start_wifi_label">Avvio automatico su WiFi</string>
-    <string name="auto_start_wifi_description">Apre Open Headunit automaticamente quando ci si connette a un SSID WiFi specifico.</string>
+    <string name="auto_start_wifi_description">Apre Andromi Auto automaticamente quando ci si connette a un SSID WiFi specifico.</string>
     <string name="auto_start_wifi_ssid_label">SSID WiFi</string>
     <string name="auto_start_wifi_ssid_description">Connetti solo se associato a questo SSID WiFi</string>
     <string name="auto_start_wifi_warning">Funzione legacy: Potrebbe non funzionare in modo affidabile su Android 8+ a causa delle restrizioni in background. Assicurati che l\'app sia esclusa dall\'ottimizzazione della batteria.</string>
@@ -213,7 +213,7 @@
     <string name="auto_start_settings">Impostazioni avvio automatico</string>
     <string name="auto_start_settings_description">Configura quando l\'app deve avviarsi automaticamente</string>
     <string name="auto_start_oem_warning">Questo dispositivo potrebbe richiedere l\'abilitazione dell\'avvio automatico e la rimozione dell\'ottimizzazione della batteria o delle restrizioni in background per questa app.\n\nSulle head unit con Quick Boot (avvio rapido), l\'avvio automatico potrebbe non funzionare. Cerca \"DuraSpeed\" nelle impostazioni di sistema e abilita questa app. Su alcune head unit, DuraSpeed è nascosto e potrebbe essere necessaria un\'app come \"Hidden Settings\" per trovarlo. Se non hai DuraSpeed, prova a disabilitare Quick Boot.</string>
-    <string name="car_launcher_autostart_info">Open Headunit è configurato come launcher auto. Si avvia automaticamente all\'avvio del sistema.</string>
+    <string name="car_launcher_autostart_info">Andromi Auto è configurato come launcher auto. Si avvia automaticamente all\'avvio del sistema.</string>
     <string name="auto_start_on_boot_label">Avvia all\'accensione</string>
     <string name="auto_start_on_boot_description">Apri l\'app automaticamente all\'avvio del dispositivo. Richiede il permesso \'Mostra sopra altre app\' su Android 10+</string>
     <string name="auto_start_screen_on_label">Avvia all\'accensione dello schermo</string>
@@ -223,7 +223,7 @@
     <string name="bt_permission_denied_title">Permesso Bluetooth richiesto</string>
     <string name="bt_permission_denied_message">Il permesso Bluetooth è necessario per selezionare i dispositivi associati. Per favore, concedilo nelle impostazioni dell\'app.</string>
     <string name="overlay_permission_title">Permesso avvio in background</string>
-    <string name="overlay_permission_description">Per consentire a Open Headunit di aprirsi automaticamente quando si connette il Bluetooth, abilita il permesso \"Mostra sopra altre app\" nella schermata successiva.</string>
+    <string name="overlay_permission_description">Per consentire a Andromi Auto di aprirsi automaticamente quando si connette il Bluetooth, abilita il permesso \"Mostra sopra altre app\" nella schermata successiva.</string>
     <string name="open_settings">Impostazioni</string>
     <string name="right_hand_drive">Guida a destra</string>
     <string name="right_hand_drive_description">Posiziona l\'interfaccia utente per la guida sul lato destro</string>
@@ -303,10 +303,10 @@
     <!-- Info Settings -->
     <string name="category_info">Informazioni</string>
     <string name="about">Informazioni e Supporto</string>
-    <string name="about_description">Ottieni maggiori informazioni su Open Headunit</string>
+    <string name="about_description">Ottieni maggiori informazioni su Andromi Auto</string>
     <string name="version">Versione</string>
     <string name="check_for_updates">Controlla aggiornamenti</string>
-    <string name="check_for_updates_description">Verifica se è disponibile una versione più recente di Open Headunit</string>
+    <string name="check_for_updates_description">Verifica se è disponibile una versione più recente di Andromi Auto</string>
     <string name="checking_for_updates">Controllo aggiornamenti…</string>
     <string name="update_available_title">Aggiornamento disponibile</string>
     <string name="update_available_playstore_message">È disponibile una nuova versione (%1$s). Visita Google Play Store per aggiornare l\'app.</string>
@@ -316,7 +316,7 @@
     <string name="update_check_failed">Impossibile verificare la presenza di aggiornamenti. Controlla la connessione internet.</string>
     <string name="open_play_store">Apri Play Store</string>
     <string name="open_github_releases">Apri GitHub Releases</string>
-    <string name="about_title">Informazioni su Open Headunit</string>
+    <string name="about_title">Informazioni su Andromi Auto</string>
     <string name="copyright">© 2025-%d André Rinas</string>
 
     <!-- Safety Disclaimer -->
@@ -327,7 +327,7 @@
         <b>1. Concentrati sulla strada</b><br/>
         L\'utilizzo di questo software durante la guida può distrarre e risultare pericoloso. Dai sempre priorità a una guida sicura e rispetta tutte le normative locali sul traffico. Utilizza questa applicazione solo quando è sicuro farlo.<br/><br/>
         <b>2. Limitazione di responsabilità</b><br/>
-        Open Headunit è fornito "così com\'è" senza garanzie di alcun tipo. Gli sviluppatori non si assumono alcuna responsabilità per eventuali incidenti, danni al veicolo/dispositivo o conseguenze legali derivanti dall\'uso di questo software.<br/><br/>
+        Andromi Auto è fornito "così com\'è" senza garanzie di alcun tipo. Gli sviluppatori non si assumono alcuna responsabilità per eventuali incidenti, danni al veicolo/dispositivo o conseguenze legali derivanti dall\'uso di questo software.<br/><br/>
         <b>3. Nessuna affiliazione</b><br/>
         Questo progetto è un\'iniziativa indipendente open-source e non è affiliato, approvato o collegato a Google LLC o al marchio Android Auto.
     ]]></string>
@@ -375,7 +375,7 @@
     <string name="wifi_disconnect_toast">Android Auto scollegato: Se usi AA wireless, disabilita \"Passa tra reti\" o \"Accelerazione di rete\" nelle impostazioni WiFi del telefono</string>
     <string name="reset_usb_option">Ripristina connessione USB</string>
     <string name="reset_usb_timeout">Dispositivo USB non trovato. Controllare la connessione.</string>
-    <string name="notification_service_running">Open Headunit è in esecuzione</string>
+    <string name="notification_service_running">Andromi Auto è in esecuzione</string>
     <string name="notification_projection_active">Android Auto è proiettato</string>
     <string name="shortcut_connect_title">Connetti</string>
     <string name="shortcut_connect_desc">Connetti automaticamente all\'ultimo telefono</string>
@@ -625,7 +625,7 @@
     <string name="settings_backup_saved_to">Backup impostazioni salvato in:\n%1$s</string>
     <string name="share_settings_backup">Condividi backup impostazioni</string>
     <string name="import_settings">Importa impostazioni</string>
-    <string name="import_settings_description">Ripristina le impostazioni da un backup di Open Headunit</string>
+    <string name="import_settings_description">Ripristina le impostazioni da un backup di Andromi Auto</string>
     <string name="import_settings_app_folder">Importa dalla cartella backup dell\'app</string>
     <string name="import_settings_downloads">Importa da Download</string>
     <string name="import_settings_choose_file">Scegli file di backup</string>
@@ -633,8 +633,8 @@
     <string name="settings_imported">Impostazioni importate: %1$d applicate, %2$d saltate</string>
     <string name="settings_import_failed">Importazione delle impostazioni non riuscita: %1$s</string>
     <string name="no_settings_backups_title">Nessun backup trovato</string>
-    <string name="no_settings_backups_message">Nessun backup di Open Headunit trovato nella cartella backup dell\'app. Esporta prima un backup e poi importalo da qui.</string>
-    <string name="no_settings_backups_downloads_message">Nessun backup di Open Headunit trovato in Download. Esporta prima un backup in Download e poi importalo da qui.</string>
+    <string name="no_settings_backups_message">Nessun backup di Andromi Auto trovato nella cartella backup dell\'app. Esporta prima un backup e poi importalo da qui.</string>
+    <string name="no_settings_backups_downloads_message">Nessun backup di Andromi Auto trovato in Download. Esporta prima un backup in Download e poi importalo da qui.</string>
     <string name="no_file_picker_title">Nessun selettore file disponibile</string>
     <string name="no_file_picker_message">Questo dispositivo non ha un selettore file compatibile. Puoi usare Download o la cartella backup dell\'app.</string>
     <string name="storage_permission_denied_backup">Permesso di archiviazione negato. Impossibile usare Download.</string>
@@ -732,7 +732,7 @@
     <string name="onb_next">Avanti</string>
     <string name="onb_skip">Salta</string>
     <string name="onb_ready_finish">Fine</string>
-    <string name="onb_welcome_title">Benvenuto in Open Headunit</string>
+    <string name="onb_welcome_title">Benvenuto in Andromi Auto</string>
     <string name="onb_welcome_body">Questa configurazione rapida analizza il tuo dispositivo e sceglie per te le migliori impostazioni video, di visualizzazione e di modalità notte. Potrai modificare tutto in seguito nelle Impostazioni.</string>
     <string name="onb_safety_title">La sicurezza prima di tutto</string>
     <string name="onb_safety_accept">Ho letto e accetto i termini</string>
@@ -829,7 +829,7 @@
     <string name="support_rules_connection_title">Di\' come ti connetti</string>
     <string name="support_rules_connection_desc">Cavo USB, adattatore wireless USB, WiFi Direct, WiFi (headunit server) o Self Mode. Se è wireless, aggiungi il modello dell\'adattatore o dongle.</string>
     <string name="support_rules_appversion_title">Includi la versione dell\'app</string>
-    <string name="support_rules_appversion_desc">La versione di Open Headunit, mostrata nella schermata Informazioni e Supporto.</string>
+    <string name="support_rules_appversion_desc">La versione di Andromi Auto, mostrata nella schermata Informazioni e Supporto.</string>
     <string name="support_rules_logs_title">Allega i log, subito dopo che accade</string>
     <string name="support_rules_logs_desc">Vai nella scheda Avanzate delle Impostazioni, attiva la Modalità Debug nella sezione Debug, riproduci il problema, poi tocca Esporta Log subito dopo, in modo che il log copra il momento in cui si è rotto e non solo l\'avvio. Allega quel file alla segnalazione.</string>
     <string name="support_rules_search_title">Nessun duplicato</string>
@@ -932,8 +932,8 @@
     <string name="github_issues_url">https://github.com/andreknieriem/open-headunit/issues</string>
     <string name="support_rules_english_title">All posts in English</string>
     <string name="boot_loop_paused_title">Wireless start-up paused</string>
-    <string name="boot_loop_paused_generic">This device restarted three times in a row shortly after Open Headunit started wireless, so wireless was left off this time. USB still works. Open the app to turn it back on.</string>
-    <string name="boot_loop_paused_native_wifi_direct">This device restarted three times in a row shortly after Open Headunit started wireless, so wireless was left off this time. On some head units the WiFi chipset takes the whole system down when a phone joins a WiFi Direct network. Try switching Android Auto mode to the head unit hotspot. USB still works.</string>
+    <string name="boot_loop_paused_generic">This device restarted three times in a row shortly after Andromi Auto started wireless, so wireless was left off this time. USB still works. Open the app to turn it back on.</string>
+    <string name="boot_loop_paused_native_wifi_direct">This device restarted three times in a row shortly after Andromi Auto started wireless, so wireless was left off this time. On some head units the WiFi chipset takes the whole system down when a phone joins a WiFi Direct network. Try switching Android Auto mode to the head unit hotspot. USB still works.</string>
     <string name="vehicle_make_hint">A real car brand shows that brand\'s logo on the Android Auto exit button, but Android Auto then stops listing apps installed from outside the Play Store. Set it back to \"Google\" to get those apps listed again.</string>
     <string name="external_bt_nativeaa">Native Wireless cannot work on this head unit</string>
     <string name="external_bt_nativeaa_desc">Il telefono si accoppia con il modulo Bluetooth proprio di questa unità (%1$s), non con quello che Android espone alle app, quindi l\'handshake wireless non lo raggiungerebbe mai.\n\nQuesta app può raggiungere quel modulo solo tramite un servizio ZJ/ZLink, che questa unità non esegue. Usa invece USB o una modalità WiFi.</string>
@@ -1154,7 +1154,7 @@
 
     <string name="category_more_features">Altre funzionalità</string>
     <string name="pref_enable_floating_button_title">Pulsante mobile di avvio</string>
-    <string name="pref_enable_floating_button_summary">Mostra un pulsante mobile sopra il launcher OEM e altre app per tornare rapidamente a Open Headunit</string>
+    <string name="pref_enable_floating_button_summary">Mostra un pulsante mobile sopra il launcher OEM e altre app per tornare rapidamente a Andromi Auto</string>
     <string name="pref_floating_button_connection_status_title">Indicatore di stato della connessione</string>
     <string name="pref_floating_button_connection_status_summary">Usa l\'Opacità da disconnesso quando nessun telefono è connesso e sfuma fino all\'Opacità del pulsante mobile mentre un telefono è connesso. Allo 0%, il pulsante è nascosto e lascia passare i tocchi.</string>
     <string name="pref_floating_button_size_title">Dimensione del pulsante mobile</string>
@@ -1182,7 +1182,7 @@
     <string name="oem_app_backend_adb">Metodo di esecuzione: Self-ADB (127.0.0.1:5555) connesso</string>
     <string name="oem_app_backend_none">Metodo di esecuzione: Nessuno. Abilita debug wireless o esegui "adb tcpip 5555"</string>
     <string name="oem_app_autokill_switch">Disabilita automaticamente app OEM in conflitto all\'avvio</string>
-    <string name="oem_app_autokill_switch_desc">Silenzia le app e i daemon in conflitto all\'avvio di Open Headunit.</string>
+    <string name="oem_app_autokill_switch_desc">Silenzia le app e i daemon in conflitto all\'avvio di Andromi Auto.</string>
     <string name="oem_app_autokill_enabled">Disabilitazione automatica attiva</string>
     <string name="oem_app_none_detected">Nessuna app OEM in conflitto rilevata.</string>
     <string name="oem_app_btn_commands">Comandi</string>
@@ -1257,7 +1257,7 @@
     <string name="native_aa_wake_remeasure_confirm">Android Auto avvia il wireless solo quando vede il cambiamento della connessione Bluetooth. Dove questa unità detiene già il collegamento vivavoce, l\'app deve interromperlo per farlo accadere, quindi misura una volta se il collegamento ritorna e si ferma se non ritorna. Usa questo se il wireless ha smesso di avviarsi da solo e sei disposto a perdere il vivavoce per un momento mentre riprova.</string>
     <string name="native_aa_wake_remeasure_done">Il risveglio Bluetooth verrà misurato di nuovo alla prossima connessione.</string>
     <string name="pref_enable_car_launcher_title">Usa come launcher auto</string>
-    <string name="pref_enable_car_launcher_summary">Registra Open Headunit come schermata iniziale quando si preme il pulsante Home dell\'auto</string>
+    <string name="pref_enable_car_launcher_summary">Registra Andromi Auto come schermata iniziale quando si preme il pulsante Home dell\'auto</string>
     <string name="pref_set_default_launcher_title">App Home predefinita</string>
     <string name="pref_default_launcher_status_active">Attivo (Tocca per gestire)</string>
     <string name="pref_default_launcher_status_inactive">Non impostato (Tocca per impostare)</string>
