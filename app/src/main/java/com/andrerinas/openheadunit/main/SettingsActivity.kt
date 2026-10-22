@@ -99,7 +99,7 @@ class SettingsActivity : BaseActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        requestedOrientation = Settings(this).screenOrientation.androidOrientation
+        requestedOrientation = com.andrerinas.openheadunit.utils.CarScreenOrientation.requested(this)
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         ContextCompat.registerReceiver(this, setupExitReceiver, IntentFilter().apply {
@@ -119,7 +119,7 @@ class SettingsActivity : BaseActivity() {
         } else if (appSettings.useGradientBackground) {
             theme.applyStyle(R.style.ThemeOverlay_GradientBackground, true)
         }
-        requestedOrientation = appSettings.screenOrientation.androidOrientation
+        requestedOrientation = com.andrerinas.openheadunit.utils.CarScreenOrientation.requested(this)
 
         setContentView(R.layout.activity_settings)
 
