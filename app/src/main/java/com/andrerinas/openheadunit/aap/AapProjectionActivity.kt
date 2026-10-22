@@ -2412,10 +2412,6 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
     override fun onConfigurationChanged(newConfig: android.content.res.Configuration) {
         super.onConfigurationChanged(newConfig)
         AppLog.i("[AapProjectionActivity] onConfigurationChanged: orientation=${newConfig.orientation}")
-        if (settings.screenOrientation == Settings.ScreenOrientation.FOLLOW_WINDOW) {
-            val wanted = com.andrerinas.openheadunit.utils.CarScreenOrientation.requested(this)
-            if (requestedOrientation != wanted) requestedOrientation = wanted
-        }
         if (!HeadUnitScreenConfig.isResolutionLocked) {
             HeadUnitScreenConfig.init(this, resources.displayMetrics, settings)
         } else if (commManager.isConnected) {
@@ -2464,9 +2460,6 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
                 // Before resolution is locked, allow sensor to orient the activity
                 requestedOrientation = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_SENSOR
             }
-        } else if (screenOrientation == Settings.ScreenOrientation.FOLLOW_WINDOW) {
-            // Andromi Auto: portrait on the tall car screen size, landscape on the wide ones.
-            requestedOrientation = com.andrerinas.openheadunit.utils.CarScreenOrientation.requested(this)
         } else {
             requestedOrientation = screenOrientation.androidOrientation
         }
