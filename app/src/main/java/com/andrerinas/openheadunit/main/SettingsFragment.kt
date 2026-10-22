@@ -5304,8 +5304,6 @@ class SettingsFragment : Fragment() {
             "oemAppManagement",
             // Navigation: the phone already gives Android Auto its own GPS in Self Mode
             "gpsNavigation", "showNavigationNotifications", "fakeSpeed",
-            // Graphic: Andromi Auto always runs in portrait
-            "screenOrientation",
             // Theming of Open Headunit's own home screen
             "loadingScreen", "customization",
             // Input: head-unit keys and rotary controllers

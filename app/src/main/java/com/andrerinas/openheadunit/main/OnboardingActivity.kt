@@ -100,7 +100,7 @@ class OnboardingActivity : BaseActivity() {
         skipBtn = findViewById(R.id.onb_skip)
         stepper = findViewById(R.id.onb_stepper)
 
-        selectedPortrait = true // Andromi Auto always runs in portrait
+        selectedPortrait = resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
         selectedSize = OnboardingDisplayPolicy.initialPreset(settings.displaySizePreset, estimateSizePreset())
 
         buildStepperDots()
@@ -269,7 +269,6 @@ class OnboardingActivity : BaseActivity() {
             followSizeWithPicker()
         }
         val orientGroup = findViewById<MaterialButtonToggleGroup>(R.id.onb_orient_group)
-        orientGroup.visibility = View.GONE
         orientGroup.check(if (selectedPortrait) R.id.onb_orient_port else R.id.onb_orient_land)
         orientGroup.addOnButtonCheckedListener { _, id, checked ->
             if (!checked) return@addOnButtonCheckedListener

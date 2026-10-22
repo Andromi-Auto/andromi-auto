@@ -129,6 +129,7 @@ class HomeFragment : Fragment() {
         view.findViewById<View>(R.id.auto_start_card)?.setOnClickListener {
             startActivity(Intent(requireContext(), AutoStartSetupActivity::class.java))
         }
+        setupOrientationSwitch(view)
 
         setupListeners()
         updateProjectionButtonText()
@@ -720,6 +721,31 @@ class HomeFragment : Fragment() {
         }
         portraitLayoutListener = listener
         gridLayout.viewTreeObserver.addOnGlobalLayoutListener(listener)
+    }
+
+    /**
+     * Andromi Auto: portrait / landscape switch on the home screen, the same setting as
+     * Settings > Graphic > Screen orientation. Portrait for car size 1, landscape for 2 and 3.
+     */
+    private fun setupOrientationSwitch(view: View) {
+        val group = view.findViewById<com.google.android.material.button.MaterialButtonToggleGroup>(R.id.orientation_group)
+            ?: return
+        val appSettings = App.provide(requireContext()).settings
+        val landscapeNow = when (appSettings.screenOrientation) {
+            Settings.ScreenOrientation.LANDSCAPE, Settings.ScreenOrientation.LANDSCAPE_REVERSE -> true
+            Settings.ScreenOrientation.PORTRAIT, Settings.ScreenOrientation.PORTRAIT_REVERSE -> false
+            else -> resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+        }
+        group.check(if (landscapeNow) R.id.orientation_landscape else R.id.orientation_portrait)
+        group.addOnButtonCheckedListener { _, checkedId, isChecked ->
+            if (!isChecked) return@addOnButtonCheckedListener
+            val wanted = if (checkedId == R.id.orientation_landscape) Settings.ScreenOrientation.LANDSCAPE
+                else Settings.ScreenOrientation.PORTRAIT
+            if (appSettings.screenOrientation == wanted) return@addOnButtonCheckedListener
+            appSettings.screenOrientation = wanted
+            AppLog.i("HomeFragment: screen orientation set to $wanted from the home screen")
+            requireActivity().requestedOrientation = wanted.androidOrientation
+        }
     }
 
     private fun updateProjectionButtonText() {

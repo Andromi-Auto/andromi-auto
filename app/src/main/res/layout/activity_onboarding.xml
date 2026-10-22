@@ -233,7 +233,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    android:visibility="gone"
                     android:text="@string/onb_display_orientation_label"
                     android:textAppearance="?attr/textAppearanceTitleSmall" />
                 <com.google.android.material.button.MaterialButtonToggleGroup

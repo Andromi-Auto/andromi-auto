@@ -238,8 +238,8 @@ class QuickSettingsFragment : DialogFragment() {
             onClick = { dismiss() }
         ))
 
-        // Andromi Auto: always portrait, and no fake speed (the phone gives Android Auto its own GPS).
-        settingsAdapter.submitList(items.filter { it.stableId != "screenOrientation" && it.stableId != "fakeSpeed" })
+        // Andromi Auto: no fake speed (the phone gives Android Auto its own GPS).
+        settingsAdapter.submitList(items.filter { it.stableId != "fakeSpeed" })
     }
 
     private fun notifyChange(needsViewRecreate: Boolean = false, needsAudioRestart: Boolean = false, sensorRefresh: Boolean = false, applyFullscreen: Boolean = false) {
