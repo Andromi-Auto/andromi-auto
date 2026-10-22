@@ -12,17 +12,17 @@ private typealias R = Control.Service.MediaSinkService.VideoConfiguration.VideoC
 class VideoFallbackPolicyTest {
 
     @Test
-    fun `landscape primaries above 720p fall back to 1280x720`() {
+    fun `landscape 1080p falls back to 720p, 1440p and 4K to 1080p`() {
         assertEquals(R._1280x720, VideoFallbackPolicy.fallbackFor(R._1920x1080))
-        assertEquals(R._1280x720, VideoFallbackPolicy.fallbackFor(R._2560x1440))
-        assertEquals(R._1280x720, VideoFallbackPolicy.fallbackFor(R._3840x2160))
+        assertEquals(R._1920x1080, VideoFallbackPolicy.fallbackFor(R._2560x1440))
+        assertEquals(R._1920x1080, VideoFallbackPolicy.fallbackFor(R._3840x2160))
     }
 
     @Test
-    fun `portrait primaries above 720p fall back to 720x1280`() {
+    fun `portrait 1080p falls back to 720p, 1440p and 4K to 1080p`() {
         assertEquals(R._720x1280, VideoFallbackPolicy.fallbackFor(R._1080x1920))
-        assertEquals(R._720x1280, VideoFallbackPolicy.fallbackFor(R._1440x2560))
-        assertEquals(R._720x1280, VideoFallbackPolicy.fallbackFor(R._2160x3840))
+        assertEquals(R._1080x1920, VideoFallbackPolicy.fallbackFor(R._1440x2560))
+        assertEquals(R._1080x1920, VideoFallbackPolicy.fallbackFor(R._2160x3840))
     }
 
     @Test

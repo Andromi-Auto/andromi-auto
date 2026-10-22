@@ -23,6 +23,7 @@ import com.andrerinas.openheadunit.app.BaseActivity
 import com.andrerinas.openheadunit.utils.BluetoothHelper
 import com.andrerinas.openheadunit.utils.RootSetup
 import com.andrerinas.openheadunit.utils.Settings
+import com.andrerinas.openheadunit.utils.ToastUtils
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.color.MaterialColors
@@ -148,8 +149,8 @@ class AutoStartSetupActivity : BaseActivity() {
                 }
                 is RootSetup.Result.Failed -> {
                     manual.visibility = View.VISIBLE
-                    Toast.makeText(this@AutoStartSetupActivity,
-                        getString(R.string.andromi_root_failed, result.message), Toast.LENGTH_LONG).show()
+                    ToastUtils.showToast(this@AutoStartSetupActivity,
+                        getString(R.string.andromi_root_failed, result.message), Toast.LENGTH_LONG, force = true)
                 }
             }
             render()
@@ -188,5 +189,5 @@ class AutoStartSetupActivity : BaseActivity() {
     private fun canOpenFromBackground(): Boolean =
         Build.VERSION.SDK_INT < 23 || android.provider.Settings.canDrawOverlays(this)
 
-    private fun toast(res: Int) = Toast.makeText(this, res, Toast.LENGTH_SHORT).show()
+    private fun toast(res: Int) = ToastUtils.showToast(this, res, Toast.LENGTH_SHORT, force = true)
 }
