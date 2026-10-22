@@ -105,6 +105,14 @@ class AppDrawerFragment : DialogFragment() {
         setStyle(STYLE_NORMAL, R.style.AppTheme_Fullscreen)
     }
 
+    // Andromi Auto: this screen has its own full-screen theme, which replaces the wallpaper
+    // (Monet) colours the activity has; put them back on everything it inflates.
+    override fun onGetLayoutInflater(savedInstanceState: Bundle?): LayoutInflater {
+        val inflater = super.onGetLayoutInflater(savedInstanceState)
+        return inflater.cloneInContext(
+            com.google.android.material.color.DynamicColors.wrapContextIfAvailable(inflater.context))
+    }
+
     override fun onStart() {
         super.onStart()
         if (dialog != null) {

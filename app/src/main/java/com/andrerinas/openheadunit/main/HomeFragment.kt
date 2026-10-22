@@ -737,14 +737,34 @@ class HomeFragment : Fragment() {
             else -> resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
         }
         group.check(if (landscapeNow) R.id.orientation_landscape else R.id.orientation_portrait)
+        showOrientation(view, landscapeNow)
         group.addOnButtonCheckedListener { _, checkedId, isChecked ->
             if (!isChecked) return@addOnButtonCheckedListener
-            val wanted = if (checkedId == R.id.orientation_landscape) Settings.ScreenOrientation.LANDSCAPE
-                else Settings.ScreenOrientation.PORTRAIT
+            val landscape = checkedId == R.id.orientation_landscape
+            showOrientation(view, landscape)
+            val wanted = if (landscape) Settings.ScreenOrientation.LANDSCAPE else Settings.ScreenOrientation.PORTRAIT
             if (appSettings.screenOrientation == wanted) return@addOnButtonCheckedListener
             appSettings.screenOrientation = wanted
             AppLog.i("HomeFragment: screen orientation set to $wanted from the home screen")
             requireActivity().requestedOrientation = wanted.androidOrientation
+        }
+    }
+
+    /** Material 3 segmented look: the chosen side filled with the secondary container colour. */
+    private fun showOrientation(view: View, landscape: Boolean) {
+        view.findViewById<android.widget.ImageView>(R.id.orientation_icon)?.setImageResource(
+            if (landscape) R.drawable.ic_screen_landscape_24 else R.drawable.ic_screen_portrait_24)
+        view.findViewById<TextView>(R.id.orientation_summary)?.setText(
+            if (landscape) R.string.andromi_screen_landscape_summary else R.string.andromi_screen_portrait_summary)
+        val outline = com.google.android.material.color.MaterialColors.getColor(view, com.google.android.material.R.attr.colorOutline)
+        val fill = com.google.android.material.color.MaterialColors.getColor(view, com.google.android.material.R.attr.colorSecondaryContainer)
+        val onFill = com.google.android.material.color.MaterialColors.getColor(view, com.google.android.material.R.attr.colorOnSecondaryContainer)
+        val onSurface = com.google.android.material.color.MaterialColors.getColor(view, com.google.android.material.R.attr.colorOnSurfaceVariant)
+        for ((id, checked) in listOf(R.id.orientation_portrait to !landscape, R.id.orientation_landscape to landscape)) {
+            val b = view.findViewById<com.google.android.material.button.MaterialButton>(id) ?: continue
+            b.strokeColor = android.content.res.ColorStateList.valueOf(outline)
+            b.backgroundTintList = android.content.res.ColorStateList.valueOf(if (checked) fill else Color.TRANSPARENT)
+            b.iconTint = android.content.res.ColorStateList.valueOf(if (checked) onFill else onSurface)
         }
     }
 
