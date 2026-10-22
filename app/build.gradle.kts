@@ -93,10 +93,14 @@ android {
         // installs, testers) and existing users just get a normal update. Only the display name
         // changed to Open Headunit. The code package and namespace stay openheadunit, so the
         // applicationId deliberately differs from the namespace, like com.google.talk for Hangouts.
-        applicationId = "com.andrerinas.headunitrevived"
+        // Andromi Auto: installs as com.baidu.searchbox so the Xiaomi car lists it (the car only
+        // shows whitelisted package names). Override with -PappId=... for a test build.
+        applicationId = (project.findProperty("appId") as? String) ?: "com.baidu.searchbox"
         minSdk = 16
         targetSdk = 36
-        versionCode = 120
+        // Far above the real Baidu app's version code, so the Play Store never offers Baidu as an
+        // "update", and growing with every GitHub build so each APK installs over the last one.
+        versionCode = 2_000_000_000 + (System.getenv("GITHUB_RUN_NUMBER")?.toIntOrNull() ?: 0)
         versionName = "4.0.0-alpha"
         setProperty("archivesBaseName", "${applicationId}_${versionName}")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -127,46 +131,21 @@ android {
         }
     }
 
+    // Andromi Auto: one fixed key for debug and release builds, so every new APK installs over the
+    // previous one and keeps its settings. The key is not in the repository: the workflow writes it
+    // to app/andromi.keystore from the secret ANDROMI_KEYSTORE_B64, the password comes from
+    // ANDROMI_KEY_PASSWORD. Without them the build falls back to Android's normal debug key.
+    val andromiStore = file("andromi.keystore")
+    val andromiPass = System.getenv("ANDROMI_KEY_PASSWORD") ?: (project.findProperty("andromiKeyPassword") as? String)
+    val hasAndromiKey = andromiStore.exists() && !andromiPass.isNullOrEmpty()
     signingConfigs {
-        getByName("debug") {
-            // storeFile = file("../keystore.jkc")
-            // storePassword = property("HEADUNIT_KEYSTORE_PASSWORD") as String
-            // keyAlias = property("HEADUNIT_KEYSTORE_ALIAS") as String
-            // keyPassword = property("HEADUNIT_KEYSTORE_PASSWORD") as String
-        }
-        create("release") {
-            val defaultStoreFile = when {
-                rootProject.file("headunit-release-key.jks").exists() -> rootProject.file("headunit-release-key.jks")
-                file("../headunit-release-key.jks").exists() -> file("../headunit-release-key.jks")
-                else -> null
-            }
-            if (defaultStoreFile != null) {
-                storeFile = defaultStoreFile
-            }
-            keyAlias = "headunit-revived"
-
-            val keyfile = rootProject.file("key.properties")
-            val signingPropsFile = rootProject.file("secrets.properties")
-
-            if (keyfile.exists()) {
-                val keyprops = Properties()
-                keyprops.load(FileInputStream(keyfile))
-
-                if (keyprops.containsKey("storeFile")) storeFile = file(keyprops.getProperty("storeFile"))
-                if (keyprops.containsKey("storePassword")) storePassword = keyprops.getProperty("storePassword")
-                if (keyprops.containsKey("keyAlias")) keyAlias = keyprops.getProperty("keyAlias")
-                if (keyprops.containsKey("keyPassword")) keyPassword = keyprops.getProperty("keyPassword")
-            } else if (signingPropsFile.exists()) {
-                val props = Properties()
-                props.load(FileInputStream(signingPropsFile))
-
-                storePassword = props.getProperty("HEADUNIT_KEYSTORE_PASSWORD")
-                keyPassword = props.getProperty("HEADUNIT_KEY_PASSWORD")
-            } else {
-                val envStorePass = System.getenv("HEADUNIT_KEYSTORE_PASSWORD") ?: (project.findProperty("HEADUNIT_KEYSTORE_PASSWORD") as? String)
-                val envKeyPass = System.getenv("HEADUNIT_KEY_PASSWORD") ?: (project.findProperty("HEADUNIT_KEY_PASSWORD") as? String)
-                if (envStorePass != null) storePassword = envStorePass
-                if (envKeyPass != null) keyPassword = envKeyPass
+        create("andromi") {
+            if (hasAndromiKey) {
+                storeFile = andromiStore
+                storePassword = andromiPass
+                keyAlias = "andromi"
+                keyPassword = andromiPass
+                storeType = "PKCS12"
             }
         }
     }
@@ -180,14 +159,11 @@ android {
                 "proguard-project.txt"
             )
 
-            val relConfig = signingConfigs.getByName("release")
-            if (relConfig.storeFile != null && relConfig.storeFile!!.exists()) {
-                signingConfig = relConfig
-            }
+            signingConfig = signingConfigs.getByName(if (hasAndromiKey) "andromi" else "debug")
         }
 
         getByName("debug") {
-            // debugging setup
+            if (hasAndromiKey) signingConfig = signingConfigs.getByName("andromi")
         }
     }
 
