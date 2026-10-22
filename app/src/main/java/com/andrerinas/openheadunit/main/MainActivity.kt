@@ -127,7 +127,7 @@ class MainActivity : BaseActivity() {
         override fun onReceive(context: Context, intent: Intent) {
             if (intent.action == AapService.ACTION_ORIENTATION_CHANGED) {
                 AppLog.i("MainActivity: Orientation change broadcast received. Updating.")
-                requestedOrientation = com.andrerinas.openheadunit.utils.CarScreenOrientation.requested(this@MainActivity)
+                requestedOrientation = Settings(this@MainActivity).screenOrientation.androidOrientation
             }
         }
     }
@@ -147,7 +147,7 @@ class MainActivity : BaseActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        requestedOrientation = com.andrerinas.openheadunit.utils.CarScreenOrientation.requested(this)
+        requestedOrientation = Settings(this).screenOrientation.androidOrientation
         super.onCreate(savedInstanceState)
 
         logLaunchSource()
@@ -215,7 +215,7 @@ class MainActivity : BaseActivity() {
         applyCustomHomeBackground()
 
         val appSettings = Settings(this)
-        requestedOrientation = com.andrerinas.openheadunit.utils.CarScreenOrientation.requested(this)
+        requestedOrientation = appSettings.screenOrientation.androidOrientation
 
         // Sync UsbAttachedActivity and CarLauncher component states with settings.
         lifecycleScope.launch(Dispatchers.IO) {
@@ -1223,7 +1223,7 @@ class MainActivity : BaseActivity() {
 
         checkSetupFlow()
 
-        requestedOrientation = com.andrerinas.openheadunit.utils.CarScreenOrientation.requested(this)
+        requestedOrientation = Settings(this).screenOrientation.androidOrientation
         ContextCompat.registerReceiver(this, orientationReceiver, android.content.IntentFilter(AapService.ACTION_ORIENTATION_CHANGED), ContextCompat.RECEIVER_NOT_EXPORTED)
         isOrientationReceiverRegistered = true
 
