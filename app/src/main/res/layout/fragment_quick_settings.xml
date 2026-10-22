@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="?attr/colorSurface"
+    android:background="?android:attr/colorBackground"
     android:padding="8dp">
 
     <com.google.android.material.appbar.MaterialToolbar
@@ -12,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         app:title="@string/exit_dialog_settings"
-        app:navigationIcon="@drawable/ic_close_white"
+        app:navigationIcon="@drawable/ic_close_24"
         app:titleTextColor="?attr/colorOnSurface"
         app:navigationIconTint="?attr/colorOnSurface" />
 

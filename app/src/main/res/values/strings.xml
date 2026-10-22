@@ -1469,4 +1469,7 @@
     <string name="andromi_status_video_fallback">Android Auto refused %1$s and used this size instead. Try a lower resolution or the H.265 codec.</string>
     <string name="andromi_portrait">Portrait</string>
     <string name="andromi_landscape">Landscape</string>
+    <string name="andromi_screen_title">Screen</string>
+    <string name="andromi_screen_portrait_summary">Portrait · for car size 1</string>
+    <string name="andromi_screen_landscape_summary">Landscape · for car sizes 2 and 3</string>
 </resources>
