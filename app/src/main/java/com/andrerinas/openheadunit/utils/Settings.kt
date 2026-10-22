@@ -360,10 +360,10 @@ class Settings(private val context: Context) {
             prefs.edit().putInt("view-mode", viewMode.value).apply()
         }
 
-    // Andromi Auto: always follows the window, so it fits each of the car screen's three sizes
-    // and Android Auto starts in the same shape. There is no setting for it.
+    // Andromi Auto: always portrait. The Xiaomi car only lets an app be pinned to its screen
+    // when the app asks for portrait.
     var screenOrientation: ScreenOrientation
-        get() = ScreenOrientation.FOLLOW_WINDOW
+        get() = ScreenOrientation.PORTRAIT
         set(orientation) {
             prefs.edit().putInt(KEY_SCREEN_ORIENTATION, orientation.value).apply()
         }
@@ -2204,10 +2204,7 @@ class Settings(private val context: Context) {
         LANDSCAPE(2, android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE),
         LANDSCAPE_REVERSE(3, android.content.pm.ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE),
         PORTRAIT(4, android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT),
-        PORTRAIT_REVERSE(5, android.content.pm.ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT),
-        // Andromi Auto: no fixed orientation; the app takes whatever shape its window has (the
-        // Xiaomi car screen has three sizes, portrait and landscape).
-        FOLLOW_WINDOW(6, android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+        PORTRAIT_REVERSE(5, android.content.pm.ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT);
 
         companion object {
             private val map = values().associateBy(ScreenOrientation::value)
