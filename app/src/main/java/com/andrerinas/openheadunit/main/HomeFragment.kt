@@ -378,11 +378,8 @@ class HomeFragment : Fragment() {
         val ctx = context ?: return
         val appSettings = App.provide(ctx).settings
         val isLauncherActive = appSettings.isCarLauncherActive
-        val shouldShowExit = CarLauncherManager.shouldShowExitButton(
-            isCarLauncherEnabled = appSettings.enableCarLauncher,
-            isDefaultLauncher = CarLauncherManager.isDefaultLauncher(ctx)
-        )
-        exitButton.visibility = if (shouldShowExit) View.VISIBLE else View.GONE
+        // Andromi Auto: no Exit button on the home screen.
+        exitButton.visibility = View.GONE
         appsButton.visibility = if (isLauncherActive) View.VISIBLE else View.GONE
         if (isLauncherActive) {
             AppDrawerFragment.preload(ctx)
