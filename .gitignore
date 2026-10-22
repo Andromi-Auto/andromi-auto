@@ -82,3 +82,6 @@ deploy_old_tablet.sh
 .antigravitycli
 .agents
 dev-note8.ps1
+
+# Andromi Auto signing key (comes from GitHub secrets)
+app/andromi.keystore
