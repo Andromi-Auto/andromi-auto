@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Open Headunit</string>
+    <string name="app_name">Andromi Auto</string>
     <string name="menu">เมนู</string>
     <string name="settings">การตั้งค่า</string>
 
@@ -19,7 +19,7 @@
     <string name="onb_next">ถัดไป</string>
     <string name="onb_skip">ข้าม</string>
     <string name="onb_ready_finish">เสร็จสิ้น</string>
-    <string name="onb_welcome_title">ยินดีต้อนรับสู่ Open Headunit</string>
+    <string name="onb_welcome_title">ยินดีต้อนรับสู่ Andromi Auto</string>
     <string name="onb_welcome_body">การตั้งค่าด่วนนี้จะสแกนอุปกรณ์ของคุณและเลือกการตั้งค่าวิดีโอ การแสดงผล และโหมดกลางคืนที่ดีที่สุดสำหรับคุณ คุณสามารถเปลี่ยนทุกอย่างได้ในภายหลังในการตั้งค่า</string>
     <string name="onb_safety_title">ปลอดภัยไว้ก่อน</string>
     <string name="onb_safety_accept">ฉันได้อ่านและยอมรับข้อกำหนดแล้ว</string>
@@ -193,7 +193,7 @@
     <string name="video">Android Auto</string>
     <string name="self_mode">โหมดตนเอง (Self Mode)</string>
     <string name="to_android_auto">ไปที่ Android Auto</string>
-    <string name="title">Open Headunit</string>
+    <string name="title">Andromi Auto</string>
     <string name="remove">ลบ</string>
     <string name="usb">USB</string>
     <string name="wifi">Wi-Fi</string>
@@ -402,7 +402,7 @@
     <string name="usb_auto_connect_description">เชื่อมต่อกับอุปกรณ์ USB ที่รู้จักโดยอัตโนมัติเมื่อเปิดแอปพลิเคชัน</string>
     <string name="auto_start_bt_label">เริ่มอัตโนมัติเมื่อเชื่อมต่อบลูทูธ</string>
     <string name="auto_start_overlay_missing_hint">ยังไม่ได้รับสิทธิ์แสดงทับแอปอื่น การเริ่มอัตโนมัติจะแสดงการแจ้งเตือนแทนการเปิดหน้าจอ แตะเพื่ออนุญาต</string>
-    <string name="auto_start_bt_description">เปิด Open Headunit โดยอัตโนมัติเมื่ออุปกรณ์บลูทูธเฉพาะเชื่อมต่อ</string>
+    <string name="auto_start_bt_description">เปิด Andromi Auto โดยอัตโนมัติเมื่ออุปกรณ์บลูทูธเฉพาะเชื่อมต่อ</string>
     <!-- Asked once, after the first connection, when this unit is paired to exactly one phone. -->
     <string name="auto_start_offer_title">เริ่มต้นโดยอัตโนมัติหรือไม่?</string>
     <string name="auto_start_offer_message">คุณต้องการเริ่มแอปโดยอัตโนมัติกับอุปกรณ์นี้ %1$s หรือไม่?</string>
@@ -439,7 +439,7 @@
     <string name="auto_disconnect_bt_delay_hint">ลิงก์บลูทูธอาจหลุดไปชั่วขณะขณะเชื่อมต่อโปรไฟล์ใหม่ เซสชันจะสิ้นสุดลงก็ต่อเมื่ออุปกรณ์ยังคงหายไปหลังจากช่วงเวลานี้</string>
     <string name="auto_disconnect_bt_kill_hint">สิ้นสุดเซสชันเหมือนปุ่มออกเมื่อบลูทูธของอุปกรณ์ที่เลือกหายไป หากต้องการปิดแอปและแสดงหน้าจอหลักด้วย ให้เปิด \"ปิดแอปเมื่อตัดการเชื่อมต่อ\" ภายใต้ระบบอัตโนมัติ</string>
     <string name="auto_start_wifi_label">เริ่มอัตโนมัติเมื่อเชื่อมต่อ Wi-Fi</string>
-    <string name="auto_start_wifi_description">เปิด Open Headunit อัตโนมัติเมื่อเชื่อมต่อกับ Wi-Fi SSID ที่ระบุ</string>
+    <string name="auto_start_wifi_description">เปิด Andromi Auto อัตโนมัติเมื่อเชื่อมต่อกับ Wi-Fi SSID ที่ระบุ</string>
     <string name="auto_start_wifi_ssid_label">Wi-Fi SSID</string>
     <string name="auto_start_wifi_ssid_description">เชื่อมต่อเฉพาะเมื่อเชื่อมต่อกับ Wi-Fi SSID นี้</string>
     <string name="auto_start_wifi_warning">คุณลักษณะดั้งเดิม: อาจทำงานได้ไม่เสถียรใน Android 8+ เนื่องจากข้อจำกัดเบื้องหลัง ตรวจสอบว่าแอปได้รับการยกเว้นจากการเพิ่มประสิทธิภาพแบตเตอรี่แล้ว</string>
@@ -448,7 +448,7 @@
     <string name="bt_permission_denied_title">ต้องได้รับสิทธิ์บลูทูธ</string>
     <string name="bt_permission_denied_message">ต้องได้รับสิทธิ์บลูทูธเพื่อเลือกอุปกรณ์ที่จับคู่ โปรดให้สิทธิ์ในการตั้งค่าแอป</string>
     <string name="overlay_permission_title">สิทธิ์การเริ่มทำงานในพื้นหลัง</string>
-    <string name="overlay_permission_description">หากต้องการให้ Open Headunit เปิดโดยอัตโนมัติเมื่อเชื่อมต่อบลูทูธ โปรดเปิดใช้งานสิทธิ์ \"แสดงทับแอปอื่น\" ในหน้าจอถัดไป</string>
+    <string name="overlay_permission_description">หากต้องการให้ Andromi Auto เปิดโดยอัตโนมัติเมื่อเชื่อมต่อบลูทูธ โปรดเปิดใช้งานสิทธิ์ \"แสดงทับแอปอื่น\" ในหน้าจอถัดไป</string>
     <string name="open_settings">การตั้งค่า</string>
     <string name="cannot_open_settings">ไม่สามารถเปิดการตั้งค่าระบบได้</string>
     <string name="right_hand_drive">พวงมาลัยขวา</string>
@@ -513,12 +513,12 @@
     <!-- More Features Settings -->
     <string name="category_more_features">คุณสมบัติเพิ่มเติม</string>
     <string name="pref_enable_car_launcher_title">ใช้เป็น Car Launcher</string>
-    <string name="pref_enable_car_launcher_summary">ลงทะเบียน Open Headunit เป็นแอปหน้าจอหลักเมื่อกดปุ่ม Home ของรถหรือเฮดยูนิต</string>
+    <string name="pref_enable_car_launcher_summary">ลงทะเบียน Andromi Auto เป็นแอปหน้าจอหลักเมื่อกดปุ่ม Home ของรถหรือเฮดยูนิต</string>
     <string name="pref_set_default_launcher_title">แอปหน้าจอหลักเริ่มต้น</string>
     <string name="pref_default_launcher_status_active">ใช้งานอยู่ (แตะเพื่อจัดการ)</string>
     <string name="pref_default_launcher_status_inactive">ไม่ได้ตั้งค่า (แตะเพื่อตั้งเป็นค่าเริ่มต้น)</string>
     <string name="pref_enable_floating_button_title">ปุ่มลอยตัวเปิดแอป</string>
-    <string name="pref_enable_floating_button_summary">แสดงปุ่มลอยทับลอนเชอร์เดิมและแอปอื่นๆ เพื่อกลับสู่ Open Headunit ได้อย่างรวดเร็ว</string>
+    <string name="pref_enable_floating_button_summary">แสดงปุ่มลอยทับลอนเชอร์เดิมและแอปอื่นๆ เพื่อกลับสู่ Andromi Auto ได้อย่างรวดเร็ว</string>
     <string name="pref_floating_button_connection_status_title">ตัวบ่งชี้สถานะการเชื่อมต่อ</string>
     <string name="pref_floating_button_connection_status_summary">ใช้ความทึบเมื่อไม่ได้เชื่อมต่อ เมื่อไม่มีโทรศัพท์เชื่อมต่อ และค่อยๆ จางเป็นความทึบของปุ่มลอยขณะที่มีโทรศัพท์เชื่อมต่อ ที่ 0% ปุ่มจะถูกซ่อนและปล่อยให้การแตะผ่านไป</string>
     <string name="pref_floating_button_size_title">ขนาดปุ่มลอย</string>
@@ -630,7 +630,7 @@
     <!-- Info Settings -->
     <string name="category_info">ข้อมูล</string>
     <string name="about">เกี่ยวกับ &amp; ฝ่ายสนับสนุน</string>
-    <string name="about_description">รับข้อมูลเพิ่มเติมเกี่ยวกับ Open Headunit</string>
+    <string name="about_description">รับข้อมูลเพิ่มเติมเกี่ยวกับ Andromi Auto</string>
 
     <!-- Support / report a problem screen -->
     <string name="support">รายงานปัญหา</string>
@@ -651,7 +651,7 @@
     <string name="support_rules_connection_title">ระบุวิธีที่คุณเชื่อมต่อ</string>
     <string name="support_rules_connection_desc">สาย USB, อะแดปเตอร์ไร้สาย USB, Wi-Fi Direct, Wi-Fi (เซิร์ฟเวอร์เฮดยูนิต) หรือโหมดตนเอง หากเป็นแบบไร้สาย ให้ระบุรุ่นอะแดปเตอร์หรือดองเกิล</string>
     <string name="support_rules_appversion_title">ระบุเวอร์ชันของแอป</string>
-    <string name="support_rules_appversion_desc">เวอร์ชัน Open Headunit ที่แสดงบนหน้าจอเกี่ยวกับ</string>
+    <string name="support_rules_appversion_desc">เวอร์ชัน Andromi Auto ที่แสดงบนหน้าจอเกี่ยวกับ</string>
     <string name="support_rules_logs_title">แนบไฟล์บันทึกทันทีหลังจากเกิดปัญหา</string>
     <string name="support_rules_logs_desc">สลับการตั้งค่าไปที่แท็บขั้นสูง เปิดโหมดดีบัก ทำให้เกิดปัญหาซ้ำ จากนั้นแตะส่งออกบันทึกทันที แนบไฟล์นั้นเข้ากับปัญหาของคุณ</string>
     <string name="support_rules_search_title">หลีกเลี่ยงการสร้างซ้ำ</string>
@@ -664,7 +664,7 @@
     <string name="support_rules_oneissue_desc">จำกัดแต่ละโพสต์ไว้ที่ปัญหาเดียวเพื่อให้สามารถติดตามและแก้ไขได้</string>
     <string name="version">เวอร์ชัน</string>
     <string name="check_for_updates">ตรวจหาการอัปเดต</string>
-    <string name="check_for_updates_description">ตรวจสอบว่ามี Open Headunit เวอร์ชันใหม่กว่าหรือไม่</string>
+    <string name="check_for_updates_description">ตรวจสอบว่ามี Andromi Auto เวอร์ชันใหม่กว่าหรือไม่</string>
     <string name="checking_for_updates">กำลังตรวจหาการอัปเดต…</string>
     <string name="update_available_title">มีการอัปเดต</string>
     <string name="update_available_playstore_message">มีเวอร์ชันใหม่กว่า (%1$s) พร้อมใช้งาน โปรดไปที่ Google Play Store เพื่ออัปเดตแอปของคุณ</string>
@@ -674,7 +674,7 @@
     <string name="update_check_failed">ไม่สามารถตรวจหาการอัปเดตได้ โปรดตรวจสอบการเชื่อมต่ออินเทอร์เน็ตของคุณ</string>
     <string name="open_play_store">เปิด Play Store</string>
     <string name="open_github_releases">เปิด GitHub Releases</string>
-    <string name="about_title">เกี่ยวกับ Open Headunit</string>
+    <string name="about_title">เกี่ยวกับ Andromi Auto</string>
     <string name="copyright">© 2025-%d André Rinas</string>
 
     <!-- Safety Disclaimer -->
@@ -685,7 +685,7 @@
         <b>1. มีสมาธิกับท้องถนน</b><br/>
         การใช้งานซอฟต์แวร์นี้ขณะขับรถอาจทำให้เสียสมาธิและเป็นอันตรายได้ ให้ความสำคัญกับการขับขี่อย่างปลอดภัยเสมอและปฏิบัติตามกฎจราจรในท้องถิ่นทั้งหมด ใช้งานแอปพลิเคชันนี้เมื่อปลอดภัยเท่านั้น<br/><br/>
         <b>2. ข้อจำกัดความรับผิดชอบ</b><br/>
-        Open Headunit จัดทำขึ้น "ตามสภาพ" โดยไม่มีการรับประกันใดๆ ผู้พัฒนาจะไม่รับผิดชอบต่ออุบัติเหตุ ความเสียหายต่อรถยนต์/อุปกรณ์ของคุณ หรือผลทางกฎหมายที่เกิดจากการใช้ซอฟต์แวร์นี้<br/><br/>
+        Andromi Auto จัดทำขึ้น "ตามสภาพ" โดยไม่มีการรับประกันใดๆ ผู้พัฒนาจะไม่รับผิดชอบต่ออุบัติเหตุ ความเสียหายต่อรถยนต์/อุปกรณ์ของคุณ หรือผลทางกฎหมายที่เกิดจากการใช้ซอฟต์แวร์นี้<br/><br/>
         <b>3. ไม่มีความเกี่ยวข้อง</b><br/>
         โครงการนี้เป็นโครงการโอเพ่นซอร์สอิสระ และไม่มีส่วนเกี่ยวข้อง ได้รับการรับรอง หรือเชื่อมต่อกับ Google LLC หรือแบรนด์ Android Auto แต่อย่างใด
     ]]></string>
@@ -719,7 +719,7 @@
     <string name="export_settings_downloads">บันทึกลงในดาวน์โหลด</string>
     <string name="export_settings_app_folder">บันทึกลงในโฟลเดอร์สำรองของแอป</string>
     <string name="import_settings">นำเข้าการตั้งค่า</string>
-    <string name="import_settings_description">กู้คืนการตั้งค่าจากข้อมูลสำรอง Open Headunit</string>
+    <string name="import_settings_description">กู้คืนการตั้งค่าจากข้อมูลสำรอง Andromi Auto</string>
     <string name="import_settings_choose_file">เลือกไฟล์สำรอง</string>
     <string name="import_settings_downloads">นำเข้าจากดาวน์โหลด</string>
     <string name="import_settings_app_folder">นำเข้าจากโฟลเดอร์สำรองของแอป</string>
@@ -737,8 +737,8 @@
     <string name="no_file_picker_title">ไม่มีตัวเลือกไฟล์ที่ใช้ได้</string>
     <string name="no_file_picker_message">อุปกรณ์นี้ไม่มีตัวเลือกไฟล์ที่เข้ากันได้ คุณสามารถใช้โฟลเดอร์ดาวน์โหลดหรือโฟลเดอร์สำรองของแอปแทนได้</string>
     <string name="no_settings_backups_title">ไม่พบข้อมูลสำรอง</string>
-    <string name="no_settings_backups_message">ไม่พบข้อมูลสำรอง Open Headunit ในโฟลเดอร์สำรองของแอป</string>
-    <string name="no_settings_backups_downloads_message">ไม่พบข้อมูลสำรอง Open Headunit ในโฟลเดอร์ดาวน์โหลด</string>
+    <string name="no_settings_backups_message">ไม่พบข้อมูลสำรอง Andromi Auto ในโฟลเดอร์สำรองของแอป</string>
+    <string name="no_settings_backups_downloads_message">ไม่พบข้อมูลสำรอง Andromi Auto ในโฟลเดอร์ดาวน์โหลด</string>
     <string name="share_settings_backup">แชร์ข้อมูลสำรองการตั้งค่า</string>
     <string name="logs_exported">ส่งออกบันทึกแล้ว</string>
     <string name="log_saved_to">บันทึกไฟล์ไว้ที่:\n%s</string>
@@ -787,10 +787,10 @@
     <string name="wifi_disconnect_toast">Android Auto ตัดการเชื่อมต่อ: หากใช้ AA ไร้สาย ให้ปิดใช้งาน \"สลับระหว่างเครือข่าย\" ในการตั้งค่า Wi-Fi ของโทรศัพท์</string>
     <string name="reset_usb_option">รีเซ็ตการเชื่อมต่อ USB</string>
     <string name="reset_usb_timeout">ไม่พบอุปกรณ์ USB โปรดตรวจสอบการเชื่อมต่อ</string>
-    <string name="notification_service_running">Open Headunit กำลังทำงาน</string>
+    <string name="notification_service_running">Andromi Auto กำลังทำงาน</string>
     <string name="boot_loop_paused_title">หยุดการเริ่มต้นไร้สายชั่วคราว</string>
-    <string name="boot_loop_paused_generic">อุปกรณ์นี้รีสตาร์ทสามครั้งติดต่อกันหลังจาก Open Headunit เริ่มการทำงานแบบไร้สาย ดังนั้นจึงปิดระบบไร้สายไว้ในครั้งนี้ USB ยังคงใช้งานได้ เปิดแอปเพื่อเปิดใช้งานอีกครั้ง</string>
-    <string name="boot_loop_paused_native_wifi_direct">อุปกรณ์นี้รีสตาร์ทสามครั้งติดต่อกันหลังจาก Open Headunit เริ่มระบบไร้สาย บนเฮดยูนิตบางรุ่น ชิปเซ็ต Wi-Fi จะทำให้ระบบล่มเมื่อโทรศัพท์เข้าร่วมเครือข่าย Wi-Fi Direct ลองเปลี่ยนโหมดเป็นฮอตสปอตเฮดยูนิต USB ยังคงใช้งานได้</string>
+    <string name="boot_loop_paused_generic">อุปกรณ์นี้รีสตาร์ทสามครั้งติดต่อกันหลังจาก Andromi Auto เริ่มการทำงานแบบไร้สาย ดังนั้นจึงปิดระบบไร้สายไว้ในครั้งนี้ USB ยังคงใช้งานได้ เปิดแอปเพื่อเปิดใช้งานอีกครั้ง</string>
+    <string name="boot_loop_paused_native_wifi_direct">อุปกรณ์นี้รีสตาร์ทสามครั้งติดต่อกันหลังจาก Andromi Auto เริ่มระบบไร้สาย บนเฮดยูนิตบางรุ่น ชิปเซ็ต Wi-Fi จะทำให้ระบบล่มเมื่อโทรศัพท์เข้าร่วมเครือข่าย Wi-Fi Direct ลองเปลี่ยนโหมดเป็นฮอตสปอตเฮดยูนิต USB ยังคงใช้งานได้</string>
     <string name="notification_projection_active">Android Auto กำลังฉายภาพ</string>
     <string name="shortcut_connect_title">เชื่อมต่อ</string>
     <string name="shortcut_connect_desc">เชื่อมต่ออัตโนมัติกับโทรศัพท์เครื่องล่าสุด</string>
@@ -1267,12 +1267,12 @@
     <string name="show_only_phones">แสดงเฉพาะโทรศัพท์</string>
     <string name="oem_app_management">การจัดการข้อขัดแย้งของแอป OEM (ADB)</string>
     <string name="oem_app_management_desc">ตรวจหาและปิดใช้งานแอปที่ขัดแย้งกัน (Zlink, AutoKit ฯลฯ)</string>
-    <string name="oem_app_explanation">แอปของเฮดยูนิตจากโรงงานมักจะดักจับการเชื่อมต่อ USB และบลูทูธ ทำให้ Open Headunit ไม่สามารถเชื่อมต่อได้ คุณสามารถปิดใช้งานผ่าน Root หรือ Self-ADB (พอร์ต 5555)</string>
+    <string name="oem_app_explanation">แอปของเฮดยูนิตจากโรงงานมักจะดักจับการเชื่อมต่อ USB และบลูทูธ ทำให้ Andromi Auto ไม่สามารถเชื่อมต่อได้ คุณสามารถปิดใช้งานผ่าน Root หรือ Self-ADB (พอร์ต 5555)</string>
     <string name="oem_app_backend_root">วิธีการดำเนินการ: รูท (su) พร้อมใช้งาน</string>
     <string name="oem_app_backend_adb">วิธีการดำเนินการ: Self-ADB (127.0.0.1:5555) เชื่อมต่อแล้ว</string>
     <string name="oem_app_backend_none">วิธีการดำเนินการ: ไม่มี เปิดใช้การแก้จุดบกพร่องแบบไร้สายหรือรัน \"adb tcpip 5555\"</string>
     <string name="oem_app_autokill_switch">ปิดใช้งานแอป OEM ที่ขัดแย้งกันโดยอัตโนมัติเมื่อเริ่มต้น</string>
-    <string name="oem_app_autokill_switch_desc">ปิดกั้นแอปที่ขัดแย้งกันและดาเอมอนพื้นหลังเมื่อ Open Headunit เริ่มทำงาน</string>
+    <string name="oem_app_autokill_switch_desc">ปิดกั้นแอปที่ขัดแย้งกันและดาเอมอนพื้นหลังเมื่อ Andromi Auto เริ่มทำงาน</string>
     <string name="oem_app_autokill_enabled">การปิดใช้งานอัตโนมัติทำงานอยู่</string>
     <string name="oem_app_none_detected">ไม่พบแอป OEM ที่ขัดแย้งกัน</string>
     <string name="oem_app_btn_commands">คำสั่ง</string>

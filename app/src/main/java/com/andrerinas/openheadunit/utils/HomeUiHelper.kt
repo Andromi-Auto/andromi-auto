@@ -41,17 +41,11 @@ object HomeUiHelper {
         selfTxt?.visibility = View.VISIBLE
         selfTxt?.alpha = if (showsSelf) 1.0f else 0.4f
 
-        usbBtn?.visibility = View.VISIBLE
-        usbBtn?.isEnabled = showsUsb
-        usbBtn?.isClickable = showsUsb
-        usbTxt?.visibility = View.VISIBLE
-        usbTxt?.alpha = if (showsUsb) 1.0f else 0.4f
-
-        wifiBtn?.visibility = View.VISIBLE
-        wifiBtn?.isEnabled = showsWifi
-        wifiBtn?.isClickable = showsWifi
-        wifiTxt?.visibility = View.VISIBLE
-        wifiTxt?.alpha = if (showsWifi) 1.0f else 0.4f
+        // Andromi Auto: no USB or wireless connections, only Self Mode.
+        usbBtn?.visibility = if (showsUsb) View.VISIBLE else View.GONE
+        usbTxt?.visibility = if (showsUsb) View.VISIBLE else View.GONE
+        wifiBtn?.visibility = if (showsWifi) View.VISIBLE else View.GONE
+        wifiTxt?.visibility = if (showsWifi) View.VISIBLE else View.GONE
     }
 
     fun applyButtonScale(

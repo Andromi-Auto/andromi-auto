@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-<string name="app_name">Open Headunit</string>
+<string name="app_name">Andromi Auto</string>
     <string name="menu">Menu</string>
     <string name="settings">Definições</string>
 
@@ -20,7 +20,7 @@
     <string name="onb_next">Seguinte</string>
     <string name="onb_skip">Ignorar</string>
     <string name="onb_ready_finish">Concluir</string>
-    <string name="onb_welcome_title">Bem-vindo ao Open Headunit</string>
+    <string name="onb_welcome_title">Bem-vindo ao Andromi Auto</string>
     <string name="onb_welcome_body">Esta configuração rápida analisa o seu dispositivo e seleciona as melhores definições de vídeo, ecrã e modo noturno. Pode alterar tudo mais tarde nas Definições.</string>
     <string name="onb_safety_title">Segurança em primeiro lugar</string>
     <string name="onb_safety_accept">Li e aceito os termos</string>
@@ -194,7 +194,7 @@
     <string name="video">Android Auto</string>
     <string name="self_mode">Modo Próprio</string>
     <string name="to_android_auto">Para o Android Auto</string>
-    <string name="title">Open Headunit</string>
+    <string name="title">Andromi Auto</string>
     <string name="remove">Remover</string>
     <string name="usb">USB</string>
     <string name="wifi">Wi-Fi</string>
@@ -403,7 +403,7 @@
     <string name="usb_auto_connect_description">Liga automaticamente a um dispositivo USB conhecido quando a aplicação é aberta.</string>
     <string name="auto_start_bt_label">Arranque automático com Bluetooth</string>
     <string name="auto_start_overlay_missing_hint">A permissão para apresentar sobre outras aplicações não foi concedida, pelo que o arranque automático apresentará uma notificação em vez de abrir o ecrã. Toque para conceder.</string>
-    <string name="auto_start_bt_description">Abre o Open Headunit automaticamente quando um dispositivo Bluetooth específico se liga.</string>
+    <string name="auto_start_bt_description">Abre o Andromi Auto automaticamente quando um dispositivo Bluetooth específico se liga.</string>
     <!-- Asked once, after the first connection, when this unit is paired to exactly one phone. -->
     <string name="auto_start_offer_title">Iniciar automaticamente?</string>
     <string name="auto_start_offer_message">Deseja iniciar a aplicação automaticamente com este dispositivo, %1$s?</string>
@@ -440,7 +440,7 @@
     <string name="auto_disconnect_bt_delay_hint">Uma ligação Bluetooth pode cair por instantes enquanto os perfis se reconectam. A sessão só termina se o dispositivo continuar ausente após este período.</string>
     <string name="auto_disconnect_bt_kill_hint">Termina a sessão como o botão Sair faz quando o Bluetooth de um dispositivo escolhido se desliga, por exemplo quando o carro é desligado. Para fechar também a aplicação e mostrar o ecrã inicial, ative \"Fechar aplicação ao desligar\" em Automatização.</string>
     <string name="auto_start_wifi_label">Arranque automático com Wi-Fi</string>
-    <string name="auto_start_wifi_description">Abre o Open Headunit automaticamente quando ligado a um SSID Wi-Fi específico.</string>
+    <string name="auto_start_wifi_description">Abre o Andromi Auto automaticamente quando ligado a um SSID Wi-Fi específico.</string>
     <string name="auto_start_wifi_ssid_label">SSID Wi-Fi</string>
     <string name="auto_start_wifi_ssid_description">Ligar apenas quando ligado a este SSID Wi-Fi</string>
     <string name="auto_start_wifi_warning">Funcionalidade Legada: Pode não funcionar de forma fiável no Android 8+ devido a restrições em segundo plano. Certifique-se de que a aplicação está excluída da otimização de bateria.</string>
@@ -449,7 +449,7 @@
     <string name="bt_permission_denied_title">Permissão de Bluetooth necessária</string>
     <string name="bt_permission_denied_message">A permissão de Bluetooth é necessária para selecionar dispositivos emparelhados. Conceda-a nas definições da aplicação.</string>
     <string name="overlay_permission_title">Permissão de arranque em segundo plano</string>
-    <string name="overlay_permission_description">Para permitir que o Open Headunit abra automaticamente quando o Bluetooth se liga, ative a permissão \"Apresentar sobre outras aplicações\" no ecrã seguinte.</string>
+    <string name="overlay_permission_description">Para permitir que o Andromi Auto abra automaticamente quando o Bluetooth se liga, ative a permissão \"Apresentar sobre outras aplicações\" no ecrã seguinte.</string>
     <string name="open_settings">Definições</string>
     <string name="cannot_open_settings">Não foi possível abrir as definições do sistema</string>
     <string name="right_hand_drive">Volante à direita (RHD)</string>
@@ -514,12 +514,12 @@
     <!-- More Features Settings -->
     <string name="category_more_features">Mais funcionalidades</string>
     <string name="pref_enable_car_launcher_title">Utilizar como Car Launcher</string>
-    <string name="pref_enable_car_launcher_summary">Regista o Open Headunit como aplicação de ecrã inicial quando o botão Home do carro ou da unidade é premido</string>
+    <string name="pref_enable_car_launcher_summary">Regista o Andromi Auto como aplicação de ecrã inicial quando o botão Home do carro ou da unidade é premido</string>
     <string name="pref_set_default_launcher_title">Aplicação de ecrã inicial predefinida</string>
     <string name="pref_default_launcher_status_active">Ativo (Toque para gerir)</string>
     <string name="pref_default_launcher_status_inactive">Não definido (Toque para definir como predefinição)</string>
     <string name="pref_enable_floating_button_title">Botão flutuante de abertura</string>
-    <string name="pref_enable_floating_button_summary">Apresenta um botão flutuante sobre o lançador de fábrica e outras aplicações para regressar rapidamente ao Open Headunit</string>
+    <string name="pref_enable_floating_button_summary">Apresenta um botão flutuante sobre o lançador de fábrica e outras aplicações para regressar rapidamente ao Andromi Auto</string>
     <string name="pref_floating_button_connection_status_title">Indicador de estado da ligação</string>
     <string name="pref_floating_button_connection_status_summary">Usa a Opacidade desligado quando nenhum telemóvel está ligado e desvanece para a Opacidade do botão flutuante enquanto um telemóvel está ligado. A 0%, o botão fica oculto e deixa passar os toques.</string>
     <string name="pref_floating_button_size_title">Tamanho do botão flutuante</string>
@@ -630,7 +630,7 @@
 <!-- Info Settings -->
     <string name="category_info">Informação</string>
     <string name="about">Acerca de &amp; Apoio</string>
-    <string name="about_description">Obter mais informações sobre o Open Headunit</string>
+    <string name="about_description">Obter mais informações sobre o Andromi Auto</string>
 
     <!-- Support / report a problem screen -->
     <string name="support">Reportar um problema</string>
@@ -651,7 +651,7 @@
     <string name="support_rules_connection_title">Indique como efetua a ligação</string>
     <string name="support_rules_connection_desc">Cabo USB, adaptador sem fios USB, Wi-Fi Direct, Wi-Fi (servidor da unidade) ou Modo Próprio. Se for sem fios, adicione o modelo do adaptador.</string>
     <string name="support_rules_appversion_title">Inclua a versão da aplicação</string>
-    <string name="support_rules_appversion_desc">A versão do Open Headunit, apresentada no ecrã Acerca de.</string>
+    <string name="support_rules_appversion_desc">A versão do Andromi Auto, apresentada no ecrã Acerca de.</string>
     <string name="support_rules_logs_title">Anexe registos logo após a ocorrência</string>
     <string name="support_rules_logs_desc">Mude as Definições para o separador Avançado, ative o Modo de depuração, reproduza o problema e toque em Exportar registos logo a seguir. Anexe esse ficheiro ao seu problema.</string>
     <string name="support_rules_search_title">Sem duplicados</string>
@@ -664,7 +664,7 @@
     <string name="support_rules_oneissue_desc">Mantenha cada publicação focada num único problema para que possa ser acompanhado e corrigido.</string>
     <string name="version">Versão</string>
     <string name="check_for_updates">Procurar atualizações</string>
-    <string name="check_for_updates_description">Verificar se existe uma versão mais recente do Open Headunit disponível</string>
+    <string name="check_for_updates_description">Verificar se existe uma versão mais recente do Andromi Auto disponível</string>
     <string name="checking_for_updates">A procurar atualizações…</string>
     <string name="update_available_title">Atualização disponível</string>
     <string name="update_available_playstore_message">Está disponível uma versão mais recente (%1$s). Visite a Google Play Store para atualizar a sua aplicação.</string>
@@ -674,7 +674,7 @@
     <string name="update_check_failed">Falha ao procurar atualizações. Verifique a sua ligação à internet.</string>
     <string name="open_play_store">Abrir Play Store</string>
     <string name="open_github_releases">Abrir GitHub Releases</string>
-    <string name="about_title">Acerca do Open Headunit</string>
+    <string name="about_title">Acerca do Andromi Auto</string>
     <string name="copyright">© 2025-%d André Rinas</string>
 
     <!-- Safety Disclaimer -->
@@ -685,7 +685,7 @@
         <b>1. Mantenha o Foco na Estrada</b><br/>
         Operar este software durante a condução pode ser uma distração perigosa. Dê sempre prioridade a uma condução segura e cumpra todas as regras de trânsito locais. Utilize esta aplicação apenas quando for seguro fazê-lo.<br/><br/>
         <b>2. Limitação de Responsabilidade</b><br/>
-        O Open Headunit é fornecido "tal como está", sem garantias de qualquer tipo. Os programadores não assumem qualquer responsabilidade por acidentes, danos no seu veículo/dispositivo ou consequências legais decorrentes do uso deste software.<br/><br/>
+        O Andromi Auto é fornecido "tal como está", sem garantias de qualquer tipo. Os programadores não assumem qualquer responsabilidade por acidentes, danos no seu veículo/dispositivo ou consequências legais decorrentes do uso deste software.<br/><br/>
         <b>3. Sem Afiliação</b><br/>
         Este projeto é uma iniciativa independente de código aberto e não é afiliado, apoiado ou associado à Google LLC ou à marca Android Auto.
     ]]></string>
@@ -719,7 +719,7 @@
     <string name="export_settings_downloads">Guardar em Transferências</string>
     <string name="export_settings_app_folder">Guardar na pasta de cópias da aplicação</string>
     <string name="import_settings">Importar definições</string>
-    <string name="import_settings_description">Restaurar definições de uma cópia de segurança do Open Headunit</string>
+    <string name="import_settings_description">Restaurar definições de uma cópia de segurança do Andromi Auto</string>
     <string name="import_settings_choose_file">Escolher ficheiro de cópia de segurança</string>
     <string name="import_settings_downloads">Importar de Transferências</string>
     <string name="import_settings_app_folder">Importar da pasta de cópias da aplicação</string>
@@ -737,8 +737,8 @@
     <string name="no_file_picker_title">Nenhum seletor de ficheiros disponível</string>
     <string name="no_file_picker_message">Este dispositivo não possui um seletor de ficheiros compatível. Pode utilizar as Transferências ou a pasta da aplicação.</string>
     <string name="no_settings_backups_title">Nenhuma cópia de segurança encontrada</string>
-    <string name="no_settings_backups_message">Nenhuma cópia do Open Headunit encontrada na pasta da aplicação.</string>
-    <string name="no_settings_backups_downloads_message">Nenhuma cópia do Open Headunit encontrada na pasta Transferências.</string>
+    <string name="no_settings_backups_message">Nenhuma cópia do Andromi Auto encontrada na pasta da aplicação.</string>
+    <string name="no_settings_backups_downloads_message">Nenhuma cópia do Andromi Auto encontrada na pasta Transferências.</string>
     <string name="share_settings_backup">Partilhar cópia de segurança</string>
     <string name="logs_exported">Registos exportados</string>
     <string name="log_saved_to">Registo guardado em:\n%s</string>
@@ -787,9 +787,9 @@
     <string name="wifi_disconnect_toast">Android Auto desligado: Se estiver a utilizar AA sem fios, desative \"Mudar entre redes\" nas definições de Wi-Fi do telemóvel</string>
     <string name="reset_usb_option">Repor ligação USB</string>
     <string name="reset_usb_timeout">Dispositivo USB não encontrado. Verifique a ligação.</string>
-    <string name="notification_service_running">O Open Headunit está em execução</string>
+    <string name="notification_service_running">O Andromi Auto está em execução</string>
     <string name="boot_loop_paused_title">Arranque sem fios pausado</string>
-    <string name="boot_loop_paused_generic">Este dispositivo reiniciou três vezes consecutivas após o Open Headunit iniciar o modo sem fios, pelo que o modo sem fios foi desativado desta vez. O USB continua a funcionar.</string>
+    <string name="boot_loop_paused_generic">Este dispositivo reiniciou três vezes consecutivas após o Andromi Auto iniciar o modo sem fios, pelo que o modo sem fios foi desativado desta vez. O USB continua a funcionar.</string>
     <string name="boot_loop_paused_native_wifi_direct">Este dispositivo reiniciou três vezes consecutivas. Em algumas unidades, o chipset Wi-Fi bloqueia o sistema quando um telemóvel adere a uma rede Wi-Fi Direct. Experimente mudar para o hotspot da unidade.</string>
     <string name="notification_projection_active">O Android Auto está a ser projetado</string>
     <string name="shortcut_connect_title">Ligar</string>
@@ -1267,12 +1267,12 @@
     <string name="show_only_phones">Mostrar apenas telemóveis</string>
     <string name="oem_app_management">Gestão de conflitos de aplicações OEM (ADB)</string>
     <string name="oem_app_management_desc">Detetar e desativar aplicações em conflito (Zlink, AutoKit, etc.)</string>
-    <string name="oem_app_explanation">As aplicações de fábrica da unidade intercetam frequentemente as ligações USB e Bluetooth, impedindo o Open Headunit de se ligar. Pode desativá-las através de Root ou Self-ADB (porta 5555).</string>
+    <string name="oem_app_explanation">As aplicações de fábrica da unidade intercetam frequentemente as ligações USB e Bluetooth, impedindo o Andromi Auto de se ligar. Pode desativá-las através de Root ou Self-ADB (porta 5555).</string>
     <string name="oem_app_backend_root">Método de execução: Root (su) disponível</string>
     <string name="oem_app_backend_adb">Método de execução: Self-ADB (127.0.0.1:5555) ligado</string>
     <string name="oem_app_backend_none">Método de execução: Nenhum. Ative a Depuração sem fios ou execute \"adb tcpip 5555\"</string>
     <string name="oem_app_autokill_switch">Desativar automaticamente aplicações OEM em conflito no arranque</string>
-    <string name="oem_app_autokill_switch_desc">Silencia aplicações em conflito conhecidas e daemons em segundo plano sempre que o Open Headunit inicia.</string>
+    <string name="oem_app_autokill_switch_desc">Silencia aplicações em conflito conhecidas e daemons em segundo plano sempre que o Andromi Auto inicia.</string>
     <string name="oem_app_autokill_enabled">Desativação automática ativa</string>
     <string name="oem_app_none_detected">Nenhuma aplicação OEM em conflito detetada.</string>
     <string name="oem_app_btn_commands">Comandos</string>

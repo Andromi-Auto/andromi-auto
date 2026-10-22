@@ -23,7 +23,11 @@ object RenameNotice {
 
     private var dialog: AlertDialog? = null
 
+    private const val ANDROMI_AUTO = true
+
     fun maybeShow(activity: Activity?, settings: Settings) {
+        // Andromi Auto: Open Headunit's "our name is changing" notice does not apply here.
+        if (ANDROMI_AUTO) return
         if (activity == null || activity.isFinishing) return
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1 && activity.isDestroyed) return
         if (settings.renameNoticeShown) return

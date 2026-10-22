@@ -360,11 +360,10 @@ class Settings(private val context: Context) {
             prefs.edit().putInt("view-mode", viewMode.value).apply()
         }
 
+    // Andromi Auto: always portrait. The Xiaomi car only lets an app be pinned to its screen
+    // when the app asks for portrait.
     var screenOrientation: ScreenOrientation
-        get() {
-            val value = prefs.getInt(KEY_SCREEN_ORIENTATION, 0)
-            return ScreenOrientation.fromInt(value) ?: ScreenOrientation.SYSTEM
-        }
+        get() = ScreenOrientation.PORTRAIT
         set(orientation) {
             prefs.edit().putInt(KEY_SCREEN_ORIENTATION, orientation.value).apply()
         }
@@ -1150,16 +1149,13 @@ class Settings(private val context: Context) {
      * Empty = nothing chosen yet, so everything is shown. Migrated once from the legacy
      * single-choice [primaryConnection].
      */
+    // Andromi Auto: Self Mode is the only connection, so the USB and wireless parts of the app
+    // (buttons, settings, auto-connect) stay hidden whatever was stored before.
     var connectionModes: Set<ConnectionMode>
-        get() {
-            val stored = prefs.getStringSet("connection-modes", null)
-            if (stored != null) return stored.mapNotNull { ConnectionMode.fromKey(it) }.toSet()
-            val migrated = migrateLegacyConnectionModes()
-            connectionModes = migrated
-            return migrated
-        }
+        get() = setOf(ConnectionMode.SELF)
+        @Suppress("UNUSED_PARAMETER")
         set(value) {
-            prefs.edit().putStringSet("connection-modes", value.map { it.key }.toSet()).apply()
+            prefs.edit().putStringSet("connection-modes", setOf(ConnectionMode.SELF.key)).apply()
         }
 
     private fun migrateLegacyConnectionModes(): Set<ConnectionMode> = when (primaryConnection) {

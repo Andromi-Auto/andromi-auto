@@ -100,7 +100,7 @@ class OnboardingActivity : BaseActivity() {
         skipBtn = findViewById(R.id.onb_skip)
         stepper = findViewById(R.id.onb_stepper)
 
-        selectedPortrait = resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
+        selectedPortrait = true // Andromi Auto always runs in portrait
         selectedSize = OnboardingDisplayPolicy.initialPreset(settings.displaySizePreset, estimateSizePreset())
 
         buildStepperDots()
@@ -151,8 +151,11 @@ class OnboardingActivity : BaseActivity() {
      * choice (this device vs the connected phone) makes no sense in Self Mode, where there is no
      * separate phone, so it is hidden there.
      */
+    // Andromi Auto: Self Mode only, so no connection choice, no USB/wireless automation, no
+    // head-unit vehicle info and no GPS source choice.
     private fun isStepHidden(s: Int): Boolean =
-        s == STEP_GPS && !settings.showsExternalGps()
+        s == STEP_CONNECTION || s == STEP_AUTOMATION || s == STEP_VEHICLE ||
+            (s == STEP_GPS && !settings.showsExternalGps())
 
     /** The steps actually shown, in order, after removing the ones that do not apply. */
     private fun visibleSteps(): List<Int> = (0 until STEP_COUNT).filter { !isStepHidden(it) }
@@ -266,6 +269,7 @@ class OnboardingActivity : BaseActivity() {
             followSizeWithPicker()
         }
         val orientGroup = findViewById<MaterialButtonToggleGroup>(R.id.onb_orient_group)
+        orientGroup.visibility = View.GONE
         orientGroup.check(if (selectedPortrait) R.id.onb_orient_port else R.id.onb_orient_land)
         orientGroup.addOnButtonCheckedListener { _, id, checked ->
             if (!checked) return@addOnButtonCheckedListener

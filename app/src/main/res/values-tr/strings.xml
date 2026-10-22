@@ -1,6 +1,6 @@
 
 <resources>
-    <string name="app_name">Open Headunit</string>
+    <string name="app_name">Andromi Auto</string>
     <string name="menu">Menü</string>
     <string name="settings">Ayarlar</string>
 
@@ -15,7 +15,7 @@
     <string name="video">Android Auto</string>
     <string name="self_mode">Dahili Mod</string>
     <string name="to_android_auto">Android Auto\'ya Geç</string>
-    <string name="title">Open Headunit</string>
+    <string name="title">Andromi Auto</string>
     <string name="remove">Kaldır</string>
     <string name="usb">USB</string>
     <string name="wifi">WiFi</string>
@@ -187,14 +187,14 @@
     <string name="usb_auto_connect_description">Uygulama açıldığında bilinen bir USB cihazına otomatik olarak bağlan.</string>
     <string name="auto_start_bt_label">Bluetooth ile otomatik başlat</string>
     <string name="auto_start_overlay_missing_hint">Diğer uygulamaların üzerinde gösterme izni verilmedi, bu yüzden otomatik başlatma ekranı açmak yerine bir bildirim gösterecek. İzin vermek için dokunun.</string>
-    <string name="auto_start_bt_description">Belirli bir Bluetooth cihazı bağlandığında Open Headunit\'ı otomatik olarak aç.</string>
+    <string name="auto_start_bt_description">Belirli bir Bluetooth cihazı bağlandığında Andromi Auto\'ı otomatik olarak aç.</string>
     <string name="auto_start_offer_title">Otomatik başlatılsın mı?</string>
     <string name="auto_start_offer_message">Uygulamanın bu cihazla otomatik başlatılmasını ister misin, %1$s?</string>
     <string name="auto_start_offer_yes">Evet</string>
     <string name="auto_start_offer_no">Hayır</string>
     <string name="auto_start_offer_countdown">%1$d sn sonra Hayır</string>
     <string name="auto_start_wifi_label">WiFi ile otomatik başlat</string>
-    <string name="auto_start_wifi_description">Belirli bir WiFi SSID\'sine bağlandığında Open Headunit\'ı otomatik olarak aç.</string>
+    <string name="auto_start_wifi_description">Belirli bir WiFi SSID\'sine bağlandığında Andromi Auto\'ı otomatik olarak aç.</string>
     <string name="auto_start_wifi_ssid_label">WiFi SSID</string>
     <string name="auto_start_wifi_ssid_description">Sadece bu WiFi SSID\'sine bağlandığında bağlan</string>
     <string name="auto_start_wifi_warning">Eski özellik: Arka plan kısıtlamaları nedeniyle Android 8+ sürümlerinde güvenilir şekilde çalışmayabilir. Uygulamanın pil optimizasyonundan muaf tutulduğundan emin olun.</string>
@@ -210,7 +210,7 @@
     <string name="auto_start_settings">Otomatik başlatma ayarları</string>
     <string name="auto_start_settings_description">Uygulamanın ne zaman otomatik başlayacağını yapılandırın</string>
     <string name="auto_start_oem_warning">Bu cihaz, otomatik başlatmanın etkinleştirilmesini ve bu uygulama için pil optimizasyonunun veya arka plan kısıtlamalarının kaldırılmasını gerektirebilir.\n\nQuick Boot (hızlı önyükleme) özelliğine sahip multimedya sistemlerinde otomatik başlatma çalışmayabilir. Sistem ayarlarınızda \"DuraSpeed\" seçeneğini arayın ve bu uygulamayı orada etkinleştirin. Bazı sistemlerde DuraSpeed gizlidir; bulmak için \"Hidden Settings\" gibi bir uygulamaya ihtiyacınız olabilir. DuraSpeed yoksa, Quick Boot\'u devre dışı bırakmayı deneyin.</string>
-    <string name="car_launcher_autostart_info">Open Headunit araç başlatıcısı olarak yapılandırıldı. Sistem açılışında otomatik olarak başlar.</string>
+    <string name="car_launcher_autostart_info">Andromi Auto araç başlatıcısı olarak yapılandırıldı. Sistem açılışında otomatik olarak başlar.</string>
     <string name="auto_start_on_boot_label">Açılışta başlat</string>
     <string name="auto_start_on_boot_description">Cihaz açıldığında uygulamayı otomatik olarak açar. Android 10+ sürümlerinde \'Diğer uygulamaların üzerinde görüntüleme\' izni gerektirir</string>
     <string name="auto_start_screen_on_label">Ekran açıldığında başlat</string>
@@ -220,7 +220,7 @@
     <string name="bt_permission_denied_title">Bluetooth İzni Gerekli</string>
     <string name="bt_permission_denied_message">Eşleşmiş cihazları seçmek için Bluetooth izni gereklidir. Lütfen uygulama ayarlarından izin verin.</string>
     <string name="overlay_permission_title">Arka Planda Başlatma İzni</string>
-    <string name="overlay_permission_description">Bluetooth bağlandığında Open Headunit\'ın otomatik olarak açılmasına izin vermek için lütfen bir sonraki ekranda \"Diğer uygulamaların üzerinde görüntüleme\" iznini etkinleştirin.</string>
+    <string name="overlay_permission_description">Bluetooth bağlandığında Andromi Auto\'ın otomatik olarak açılmasına izin vermek için lütfen bir sonraki ekranda \"Diğer uygulamaların üzerinde görüntüleme\" iznini etkinleştirin.</string>
     <string name="open_settings">Ayarlar</string>
     <string name="right_hand_drive">Sağdan direksiyon</string>
     <string name="right_hand_drive_description">Arayüzü sağdan direksiyonlu sürüş için konumlandırın</string>
@@ -297,10 +297,10 @@
 
     <string name="category_info">Bilgi</string>
     <string name="about">Hakkında &amp; Destek</string>
-    <string name="about_description">Open Headunit hakkında daha fazla bilgi alın</string>
+    <string name="about_description">Andromi Auto hakkında daha fazla bilgi alın</string>
     <string name="version">Sürüm</string>
     <string name="check_for_updates">Güncellemeleri denetle</string>
-    <string name="check_for_updates_description">Open Headunit\'in daha yeni bir sürümünün olup olmadığını kontrol edin</string>
+    <string name="check_for_updates_description">Andromi Auto\'in daha yeni bir sürümünün olup olmadığını kontrol edin</string>
     <string name="checking_for_updates">Güncellemeler denetleniyor…</string>
     <string name="update_available_title">Güncelleme Mevcut</string>
     <string name="update_available_playstore_message">Daha yeni bir sürüm (%1$s) mevcut. Uygulamanızı güncellemek için lütfen Google Play Store\'u ziyaret edin.</string>
@@ -310,7 +310,7 @@
     <string name="update_check_failed">Güncellemeler denetlenemedi. Lütfen internet bağlantınızı kontrol edin.</string>
     <string name="open_play_store">Play Store\'u Aç</string>
     <string name="open_github_releases">GitHub Releases\'ı Aç</string>
-    <string name="about_title">Open Headunit Hakkında</string>
+    <string name="about_title">Andromi Auto Hakkında</string>
     <string name="copyright">© 2025-%d André Rinas</string>
 
     <string name="disclaimer_title">Güvenlik &amp; Sorumluluk</string>
@@ -320,7 +320,7 @@
         <b>1. Yola Odaklanın</b><br/>
         Bu yazılımı sürüş sırasında kullanmak dikkat dağıtıcı ve tehlikeli olabilir. Daima güvenli sürüşe öncelik verin ve tüm yerel trafik kurallarına uyun. Bu uygulamayı yalnızca güvenli olduğunda kullanın.<br/><br/>
         <b>2. Sorumluluk Sınırı</b><br/>
-        Open Headunit "olduğu gibi" sunulmaktadır ve herhangi bir garanti vermez. Geliştiriciler, bu yazılımın kullanımından kaynaklanan herhangi bir kaza, aracınıza/cihazınıza gelen hasar veya yasal sonuçlar için sorumluluk kabul etmez.<br/><br/>
+        Andromi Auto "olduğu gibi" sunulmaktadır ve herhangi bir garanti vermez. Geliştiriciler, bu yazılımın kullanımından kaynaklanan herhangi bir kaza, aracınıza/cihazınıza gelen hasar veya yasal sonuçlar için sorumluluk kabul etmez.<br/><br/>
         <b>3. Bağlantı yok</b><br/>
         Bu proje bağımsız bir açık kaynak girişimidir ve Google LLC veya Android Auto markasıyla bağlı değildir, onlar tarafından onaylanmamıştır veya onlarla bağlantılı değildir.
     ]]></string>
@@ -367,7 +367,7 @@
     <string name="wifi_disconnect_toast">Android Auto bağlantısı kesildi: Kablosuz AA kullanıyorsanız, telefon WiFi ayarlarında \"Ağlar arası geçiş yap\" veya \"Ağ hızlandırma\" seçeneklerini devre dışı bırakın</string>
     <string name="reset_usb_option">USB Bağlantısını Sıfırla</string>
     <string name="reset_usb_timeout">USB cihazı bulunamadı. Lütfen bağlantıyı kontrol edin.</string>
-    <string name="notification_service_running">Open Headunit çalışıyor</string>
+    <string name="notification_service_running">Andromi Auto çalışıyor</string>
     <string name="notification_projection_active">Android Auto yansıtılıyor</string>
     <string name="shortcut_connect_title">Bağlan</string>
     <string name="shortcut_connect_desc">Son telefona otomatik bağlan</string>
@@ -592,7 +592,7 @@
     <string name="settings_backup_saved_to">Ayar yedeği şuraya kaydedildi:\n%1$s</string>
     <string name="share_settings_backup">Ayar yedeğini paylaş</string>
     <string name="import_settings">Ayarları içe aktar</string>
-    <string name="import_settings_description">Bir Open Headunit yedeğinden ayarları geri yükle</string>
+    <string name="import_settings_description">Bir Andromi Auto yedeğinden ayarları geri yükle</string>
     <string name="import_settings_app_folder">Uygulama yedek klasöründen içe aktar</string>
     <string name="import_settings_downloads">İndirilenlerden içe aktar</string>
     <string name="import_settings_choose_file">Yedek dosyasını seç</string>
@@ -600,8 +600,8 @@
     <string name="settings_imported">Ayarlar içe aktarıldı: %1$d uygulandı, %2$d atlandı</string>
     <string name="settings_import_failed">Ayarlar içe aktarılamadı: %1$s</string>
     <string name="no_settings_backups_title">Yedek bulunamadı</string>
-    <string name="no_settings_backups_message">Uygulama yedek klasöründe Open Headunit yedeği bulunamadı. Önce bir yedek dışa aktarın, ardından buradan içe aktarın.</string>
-    <string name="no_settings_backups_downloads_message">İndirilenlerde Open Headunit yedeği bulunamadı. Önce İndirilenlere bir yedek dışa aktarın, ardından buradan içe aktarın.</string>
+    <string name="no_settings_backups_message">Uygulama yedek klasöründe Andromi Auto yedeği bulunamadı. Önce bir yedek dışa aktarın, ardından buradan içe aktarın.</string>
+    <string name="no_settings_backups_downloads_message">İndirilenlerde Andromi Auto yedeği bulunamadı. Önce İndirilenlere bir yedek dışa aktarın, ardından buradan içe aktarın.</string>
     <string name="no_file_picker_title">Dosya seçici mevcut değil</string>
     <string name="no_file_picker_message">Bu cihazda uyumlu bir dosya seçici yok. Bunun yerine İndirilenleri veya uygulama yedek klasörünü kullanabilirsiniz.</string>
     <string name="storage_permission_denied_backup">Depolama izni reddedildi. İndirilenler kullanılamadı.</string>
@@ -722,7 +722,7 @@
     <string name="onb_next">İleri</string>
     <string name="onb_skip">Atla</string>
     <string name="onb_ready_finish">Bitir</string>
-    <string name="onb_welcome_title">Open Headunit\'a hoş geldiniz</string>
+    <string name="onb_welcome_title">Andromi Auto\'a hoş geldiniz</string>
     <string name="onb_welcome_body">Bu hızlı kurulum cihazınızı tarar ve sizin için en iyi video, ekran ve gece modu ayarlarını seçer. Her şeyi daha sonra Ayarlar\'dan değiştirebilirsiniz.</string>
     <string name="onb_safety_title">Önce güvenlik</string>
     <string name="onb_safety_accept">Şartları okudum ve kabul ediyorum</string>
@@ -824,7 +824,7 @@
     <string name="support_rules_connection_title">Nasıl bağlandığınızı belirtin</string>
     <string name="support_rules_connection_desc">USB kablo, USB kablosuz adaptör, WiFi Direct, WiFi (headunit sunucusu) veya Self Mode. Kablosuz bağlantı kullanıyorsanız adaptör veya dongle modelini de ekleyin.</string>
     <string name="support_rules_appversion_title">Uygulama sürümünü ekleyin</string>
-    <string name="support_rules_appversion_desc">Hakkında ekranında gösterilen Open Headunit sürümü.</string>
+    <string name="support_rules_appversion_desc">Hakkında ekranında gösterilen Andromi Auto sürümü.</string>
     <string name="support_rules_logs_title">Olduğu anda günlükleri ekleyin</string>
     <string name="support_rules_logs_desc">Ayarlar\'da Gelişmiş sekmesini açın, Hata Ayıklama bölümünde Hata Ayıklama Modu\'nu etkinleştirin, sorunu yeniden oluşturun ve hemen ardından Günlükleri Dışa Aktar\'a dokunun; böylece günlük yalnızca başlangıcı değil sorunun yaşandığı anı da kapsar. Bu dosyayı konunuza ekleyin.</string>
     <string name="support_rules_search_title">Mükerrer konu açmayın</string>
@@ -924,8 +924,8 @@
     <string name="github_issues_url">https://github.com/andreknieriem/open-headunit/issues</string>
     <string name="support_rules_english_title">All posts in English</string>
     <string name="boot_loop_paused_title">Wireless start-up paused</string>
-    <string name="boot_loop_paused_generic">This device restarted three times in a row shortly after Open Headunit started wireless, so wireless was left off this time. USB still works. Open the app to turn it back on.</string>
-    <string name="boot_loop_paused_native_wifi_direct">This device restarted three times in a row shortly after Open Headunit started wireless, so wireless was left off this time. On some head units the WiFi chipset takes the whole system down when a phone joins a WiFi Direct network. Try switching Android Auto mode to the head unit hotspot. USB still works.</string>
+    <string name="boot_loop_paused_generic">This device restarted three times in a row shortly after Andromi Auto started wireless, so wireless was left off this time. USB still works. Open the app to turn it back on.</string>
+    <string name="boot_loop_paused_native_wifi_direct">This device restarted three times in a row shortly after Andromi Auto started wireless, so wireless was left off this time. On some head units the WiFi chipset takes the whole system down when a phone joins a WiFi Direct network. Try switching Android Auto mode to the head unit hotspot. USB still works.</string>
     <string name="vehicle_make_hint">A real car brand shows that brand\'s logo on the Android Auto exit button, but Android Auto then stops listing apps installed from outside the Play Store. Set it back to \"Google\" to get those apps listed again.</string>
     <string name="external_bt_nativeaa">Native Wireless cannot work on this head unit</string>
     <string name="external_bt_nativeaa_desc">Telefonunuz, Android\'in uygulamalara sunduğu Bluetooth yerine bu ana ünitenin kendi Bluetooth modülüyle (%1$s) eşleşir, bu yüzden kablosuz el sıkışması ona hiçbir zaman ulaşmaz.\n\nBu uygulama o modüle yalnızca bu ana ünitenin çalıştırmadığı bir ZJ/ZLink hizmeti üzerinden ulaşabilir. Bunun yerine USB\'yi veya bir WiFi modunu kullanın.</string>
@@ -1146,7 +1146,7 @@
 
     <string name="category_more_features">Daha Fazla Özellik</string>
     <string name="pref_enable_floating_button_title">Kayan Başlatıcı Düğmesi</string>
-    <string name="pref_enable_floating_button_summary">Open Headunit\'e hızlıca dönmek için OEM başlatıcı ve diğer uygulamaların üzerinde kayan bir düğme gösterir</string>
+    <string name="pref_enable_floating_button_summary">Andromi Auto\'e hızlıca dönmek için OEM başlatıcı ve diğer uygulamaların üzerinde kayan bir düğme gösterir</string>
     <string name="pref_floating_button_connection_status_title">Bağlantı Durumu Göstergesi</string>
     <string name="pref_floating_button_connection_status_summary">Telefon bağlı değilken Bağlantı Kesikken Opaklık değerini kullanır, telefon bağlıyken Kayan Düğme Opaklığına doğru soluklaşır. %0\'da düğme gizlenir ve dokunuşları geçirir.</string>
     <string name="pref_floating_button_size_title">Kayan Düğme Boyutu</string>
@@ -1174,7 +1174,7 @@
     <string name="oem_app_backend_adb">Yürütme yöntemi: Self-ADB (127.0.0.1:5555) bağlı</string>
     <string name="oem_app_backend_none">Yürütme yöntemi: Yok. Kablosuz Hata Ayıklamayı açın veya "adb tcpip 5555" çalıştırın</string>
     <string name="oem_app_autokill_switch">Başlangıçta çakışan OEM uygulamalarını otomatik devre dışı bırak</string>
-    <string name="oem_app_autokill_switch_desc">Open Headunit başladığında çakışan uygulamaları ve servisleri susturur.</string>
+    <string name="oem_app_autokill_switch_desc">Andromi Auto başladığında çakışan uygulamaları ve servisleri susturur.</string>
     <string name="oem_app_autokill_enabled">Otomatik devre dışı bırakma etkin</string>
     <string name="oem_app_none_detected">Çakışan OEM uygulaması algılanmadı.</string>
     <string name="oem_app_btn_commands">Komutlar</string>
@@ -1249,7 +1249,7 @@
     <string name="native_aa_wake_remeasure_confirm">Android Auto, kablosuz bağlantıyı yalnızca Bluetooth bağlantısının değiştiğini gördüğünde başlatır. Bu cihazın eller serbest bağlantısını zaten elinde tuttuğu durumlarda, uygulamanın bunu tetiklemek için bağlantıyı koparması gerekir; bu yüzden bağlantının geri gelip gelmediğini bir kez ölçer ve gelmezse durur. Kablosuz bağlantı kendiliğinden başlamayı bıraktıysa ve tekrar denerken bir an için eller serbesti kaybetmeyi göze alıyorsan bunu kullan.</string>
     <string name="native_aa_wake_remeasure_done">Bluetooth uyandırması bir sonraki bağlantıda yeniden ölçülecek.</string>
     <string name="pref_enable_car_launcher_title">Araç Başlatıcısı Olarak Kullan</string>
-    <string name="pref_enable_car_launcher_summary">Araç veya ana ünite Home düğmesine basıldığında Open Headunit\'ı ana ekran olarak kaydeder</string>
+    <string name="pref_enable_car_launcher_summary">Araç veya ana ünite Home düğmesine basıldığında Andromi Auto\'ı ana ekran olarak kaydeder</string>
     <string name="pref_set_default_launcher_title">Varsayılan Ana Ekran Uygulaması</string>
     <string name="pref_default_launcher_status_active">Etkin (Yönetmek için dokunun)</string>
     <string name="pref_default_launcher_status_inactive">Ayarlanmadı (Varsayılan yapmak için dokunun)</string>

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Open Headunit</string>
+    <string name="app_name">Andromi Auto</string>
     <string name="menu">मेनू</string>
     <string name="settings">सेटिंग्स</string>
 
@@ -19,7 +19,7 @@
     <string name="onb_next">अगला</string>
     <string name="onb_skip">छोड़ें</string>
     <string name="onb_ready_finish">समाप्त</string>
-    <string name="onb_welcome_title">Open Headunit में आपका स्वागत है</string>
+    <string name="onb_welcome_title">Andromi Auto में आपका स्वागत है</string>
     <string name="onb_welcome_body">यह त्वरित सेटअप आपके डिवाइस को स्कैन करता है और आपके लिए सर्वश्रेष्ठ वीडियो, डिस्प्ले और नाइट मोड सेटिंग्स चुनता है। आप बाद में सेटिंग्स में सब कुछ बदल सकते हैं।</string>
     <string name="onb_safety_title">सुरक्षा सर्वोपरि</string>
     <string name="onb_safety_accept">मैंने शर्तें पढ़ ली हैं और स्वीकार करता हूँ</string>
@@ -193,7 +193,7 @@
     <string name="video">Android Auto</string>
     <string name="self_mode">सेल्फ़ मोड</string>
     <string name="to_android_auto">Android Auto पर जाएँ</string>
-    <string name="title">Open Headunit</string>
+    <string name="title">Andromi Auto</string>
     <string name="remove">हटाएं</string>
     <string name="usb">USB</string>
     <string name="wifi">वाई-फ़ाई</string>
@@ -402,7 +402,7 @@
     <string name="usb_auto_connect_description">एप्लिकेशन खोले जाने पर किसी ज्ञात USB डिवाइस से स्वचालित रूप से कनेक्ट करें।</string>
     <string name="auto_start_bt_label">ब्लूटूथ पर ऑटो-स्टार्ट</string>
     <string name="auto_start_overlay_missing_hint">अन्य ऐप्स के ऊपर प्रदर्शित करने की अनुमति नहीं दी गई है, इसलिए ऑटो-स्टार्ट स्क्रीन खोलने के बजाय एक नोटिफ़िकेशन दिखाएगा। अनुमति देने के लिए टैप करें।</string>
-    <string name="auto_start_bt_description">किसी विशिष्ट ब्लूटूथ डिवाइस के कनेक्ट होने पर Open Headunit स्वचालित रूप से खोलें।</string>
+    <string name="auto_start_bt_description">किसी विशिष्ट ब्लूटूथ डिवाइस के कनेक्ट होने पर Andromi Auto स्वचालित रूप से खोलें।</string>
     <!-- Asked once, after the first connection, when this unit is paired to exactly one phone. -->
     <string name="auto_start_offer_title">स्वचालित रूप से प्रारंभ करें?</string>
     <string name="auto_start_offer_message">क्या आप इस डिवाइस, %1$s के साथ ऐप को स्वचालित रूप से प्रारंभ करना चाहते हैं?</string>
@@ -439,7 +439,7 @@
     <string name="auto_disconnect_bt_delay_hint">प्रोफ़ाइल पुनः कनेक्ट होने के दौरान एक पल के लिए ब्लूटूथ लिंक टूट सकता है। सत्र केवल तभी समाप्त होता है जब डिवाइस अभी भी इतने समय के बाद अनुपस्थित हो।</string>
     <string name="auto_disconnect_bt_kill_hint">चुने गए डिवाइस का ब्लूटूथ बंद होने पर सत्र समाप्त करता है जैसे निकास बटन करता है, उदाहरण के लिए कार बंद होने पर। यदि यह यूनिट कार के ब्लूटूथ के साथ युग्मित है, तो उसे चुनें। ऐप को बंद करने और होम स्क्रीन दिखाने के लिए, ऑटोमेशन के तहत \"डिस्कनेक्ट होने पर ऐप बंद करें\" चालू करें।</string>
     <string name="auto_start_wifi_label">वाई-फ़ाई पर ऑटो-स्टार्ट</string>
-    <string name="auto_start_wifi_description">किसी विशिष्ट वाई-फ़ाई SSID से कनेक्ट होने पर Open Headunit स्वचालित रूप से खोलें।</string>
+    <string name="auto_start_wifi_description">किसी विशिष्ट वाई-फ़ाई SSID से कनेक्ट होने पर Andromi Auto स्वचालित रूप से खोलें।</string>
     <string name="auto_start_wifi_ssid_label">वाई-फ़ाई SSID</string>
     <string name="auto_start_wifi_ssid_description">केवल तभी कनेक्ट करें जब इस वाई-फ़ाई SSID से जुड़े हों</string>
     <string name="auto_start_wifi_warning">विरासत सुविधा: पृष्ठभूमि प्रतिबंधों के कारण यह Android 8+ पर विश्वसनीय रूप से काम नहीं कर सकता है। सुनिश्चित करें कि ऐप बैटरी अनुकूलन से बाहर रखा गया है।</string>
@@ -448,7 +448,7 @@
     <string name="bt_permission_denied_title">ब्लूटूथ अनुमति आवश्यक है</string>
     <string name="bt_permission_denied_message">युग्मित डिवाइस चुनने के लिए ब्लूटूथ अनुमति आवश्यक है। कृपया इसे ऐप सेटिंग्स में प्रदान करें।</string>
     <string name="overlay_permission_title">पृष्ठभूमि प्रारंभ अनुमति</string>
-    <string name="overlay_permission_description">ब्लूटूथ कनेक्ट होने पर Open Headunit को स्वचालित रूप से खोलने की अनुमति देने के लिए, कृपया अगली स्क्रीन में \"अन्य ऐप्स के ऊपर प्रदर्शित करें\" अनुमति सक्षम करें।</string>
+    <string name="overlay_permission_description">ब्लूटूथ कनेक्ट होने पर Andromi Auto को स्वचालित रूप से खोलने की अनुमति देने के लिए, कृपया अगली स्क्रीन में \"अन्य ऐप्स के ऊपर प्रदर्शित करें\" अनुमति सक्षम करें।</string>
     <string name="open_settings">सेटिंग्स</string>
     <string name="cannot_open_settings">सिस्टम सेटिंग्स नहीं खोली जा सकीं</string>
     <string name="right_hand_drive">दाएँ हाथ की ड्राइविंग (RHD)</string>
@@ -513,12 +513,12 @@
     <!-- More Features Settings -->
     <string name="category_more_features">अधिक सुविधाएँ</string>
     <string name="pref_enable_car_launcher_title">कार लॉन्चर के रूप में उपयोग करें</string>
-    <string name="pref_enable_car_launcher_summary">कार या हेडयूनिट होम बटन दबाए जाने पर Open Headunit को होम स्क्रीन ऐप के रूप में पंजीकृत करता है</string>
+    <string name="pref_enable_car_launcher_summary">कार या हेडयूनिट होम बटन दबाए जाने पर Andromi Auto को होम स्क्रीन ऐप के रूप में पंजीकृत करता है</string>
     <string name="pref_set_default_launcher_title">डिफ़ॉल्ट होम ऐप</string>
     <string name="pref_default_launcher_status_active">सक्रिय (प्रबंधित करने के लिए टैप करें)</string>
     <string name="pref_default_launcher_status_inactive">सेट नहीं है (डिफ़ॉल्ट के रूप में सेट करने के लिए टैप करें)</string>
     <string name="pref_enable_floating_button_title">फ़्लोटिंग लॉन्चर बटन</string>
-    <string name="pref_enable_floating_button_summary">Open Headunit पर त्वरित वापसी के लिए OEM लॉन्चर और अन्य ऐप्स के ऊपर एक फ़्लोटिंग बटन प्रदर्शित करता है</string>
+    <string name="pref_enable_floating_button_summary">Andromi Auto पर त्वरित वापसी के लिए OEM लॉन्चर और अन्य ऐप्स के ऊपर एक फ़्लोटिंग बटन प्रदर्शित करता है</string>
     <string name="pref_floating_button_connection_status_title">कनेक्शन स्थिति संकेतक</string>
     <string name="pref_floating_button_connection_status_summary">कोई फ़ोन कनेक्ट न होने पर डिस्कनेक्ट होने पर अपारदर्शिता का उपयोग करता है, और फ़ोन कनेक्ट होने पर फ़्लोटिंग बटन की अपारदर्शिता तक फीका हो जाता है। 0% पर बटन छिपा रहता है और टैप को आर-पार जाने देता है।</string>
     <string name="pref_floating_button_size_title">फ़्लोटिंग बटन का आकार</string>
@@ -630,7 +630,7 @@
     <!-- Info Settings -->
     <string name="category_info">जानकारी</string>
     <string name="about">परिचय और सहायता</string>
-    <string name="about_description">Open Headunit के बारे में अधिक जानकारी प्राप्त करें</string>
+    <string name="about_description">Andromi Auto के बारे में अधिक जानकारी प्राप्त करें</string>
 
     <!-- Support / report a problem screen -->
     <string name="support">समस्या की रिपोर्ट करें</string>
@@ -651,7 +651,7 @@
     <string name="support_rules_connection_title">बताएं कि आप कैसे कनेक्ट करते हैं</string>
     <string name="support_rules_connection_desc">USB केबल, USB वायरलेस अडैप्टर, वाई-फ़ाई डायरेक्ट, वाई-फ़ाई (हेडयूनिट सर्वर) या सेल्फ़ मोड। यदि वायरलेस है, तो अडैप्टर या डोंगल मॉडल जोड़ें।</string>
     <string name="support_rules_appversion_title">ऐप संस्करण शामिल करें</string>
-    <string name="support_rules_appversion_desc">Open Headunit संस्करण, जो अबाउट स्क्रीन पर दिखाया गया है।</string>
+    <string name="support_rules_appversion_desc">Andromi Auto संस्करण, जो अबाउट स्क्रीन पर दिखाया गया है।</string>
     <string name="support_rules_logs_title">समस्या होने के तुरंत बाद लॉग संलग्न करें</string>
     <string name="support_rules_logs_desc">सेटिंग्स को एडवांस्ड टैब पर स्विच करें, डिबग सेक्शन में डिबग मोड चालू करें, समस्या को दोबारा उत्पन्न करें, फिर ठीक बाद एक्सपोर्ट लॉग पर टैप करें ताकि लॉग उस समय को कवर करे जब यह टूटा था। उस फ़ाइल को अपने इश्यू में संलग्न करें।</string>
     <string name="support_rules_search_title">कोई डुप्लिकेट नहीं</string>
@@ -664,7 +664,7 @@
     <string name="support_rules_oneissue_desc">प्रत्येक इश्यू को एक ही समस्या तक सीमित रखें ताकि इसे ट्रैक और ठीक किया जा सके।</string>
     <string name="version">संस्करण</string>
     <string name="check_for_updates">अपडेट की जांच करें</string>
-    <string name="check_for_updates_description">जांचें कि क्या Open Headunit का कोई नया संस्करण उपलब्ध है</string>
+    <string name="check_for_updates_description">जांचें कि क्या Andromi Auto का कोई नया संस्करण उपलब्ध है</string>
     <string name="checking_for_updates">अपडेट की जांच की जा रही है…</string>
     <string name="update_available_title">अपडेट उपलब्ध है</string>
     <string name="update_available_playstore_message">एक नया संस्करण (%1$s) उपलब्ध है। कृपया ऐप अपडेट करने के लिए Google Play Store पर जाएं।</string>
@@ -674,7 +674,7 @@
     <string name="update_check_failed">अपडेट की जांच करने में विफल। कृपया अपना इंटरनेट कनेक्शन जांचें।</string>
     <string name="open_play_store">Play Store खोलें</string>
     <string name="open_github_releases">GitHub Releases खोलें</string>
-    <string name="about_title">Open Headunit के बारे में</string>
+    <string name="about_title">Andromi Auto के बारे में</string>
     <string name="copyright">© 2025-%d André Rinas</string>
 
     <!-- Safety Disclaimer -->
@@ -685,7 +685,7 @@
         <b>1. सड़क पर ध्यान दें</b><br/>
         गाड़ी चलाते समय इस सॉफ़्टवेयर को संचालित करना ध्यान भटकाने वाला और खतरनाक हो सकता है। हमेशा सुरक्षित ड्राइविंग को प्राथमिकता दें और सभी स्थानीय यातायात नियमों का पालन करें। इस एप्लिकेशन का उपयोग केवल तभी करें जब ऐसा करना सुरक्षित हो।<br/><br/>
         <b>2. दायित्व की सीमा</b><br/>
-        Open Headunit किसी भी प्रकार की वारंटी के बिना "जैसा है" प्रदान किया जाता है। डेवलपर्स किसी भी दुर्घटना, आपके वाहन/डिवाइस की क्षति, या इस सॉफ़्टवेयर के उपयोग से उत्पन्न होने वाले कानूनी परिणामों के लिए कोई दायित्व नहीं लेते हैं।<br/><br/>
+        Andromi Auto किसी भी प्रकार की वारंटी के बिना "जैसा है" प्रदान किया जाता है। डेवलपर्स किसी भी दुर्घटना, आपके वाहन/डिवाइस की क्षति, या इस सॉफ़्टवेयर के उपयोग से उत्पन्न होने वाले कानूनी परिणामों के लिए कोई दायित्व नहीं लेते हैं।<br/><br/>
         <b>3. कोई संबद्धता नहीं</b><br/>
         यह परियोजना एक स्वतंत्र ओपन-सोर्स पहल है और यह Google LLC या Android Auto ब्रांड से संबद्ध, समर्थित या जुड़ी नहीं है।
     ]]></string>
@@ -719,7 +719,7 @@
     <string name="export_settings_downloads">डाउनलोड में सहेजें</string>
     <string name="export_settings_app_folder">ऐप बैकअप फ़ोल्डर में सहेजें</string>
     <string name="import_settings">सेटिंग्स आयात करें</string>
-    <string name="import_settings_description">Open Headunit बैकअप से सेटिंग्स पुनर्स्थापित करें</string>
+    <string name="import_settings_description">Andromi Auto बैकअप से सेटिंग्स पुनर्स्थापित करें</string>
     <string name="import_settings_choose_file">बैकअप फ़ाइल चुनें</string>
     <string name="import_settings_downloads">डाउनलोड से आयात करें</string>
     <string name="import_settings_app_folder">ऐप बैकअप फ़ोल्डर से आयात करें</string>
@@ -737,8 +737,8 @@
     <string name="no_file_picker_title">कोई फ़ाइल पिकर उपलब्ध नहीं</string>
     <string name="no_file_picker_message">इस डिवाइस में संगत फ़ाइल पिकर नहीं है। आप इसके बजाय डाउनलोड या ऐप बैकअप फ़ोल्डर का उपयोग कर सकते हैं।</string>
     <string name="no_settings_backups_title">कोई बैकअप नहीं मिला</string>
-    <string name="no_settings_backups_message">ऐप बैकअप फ़ोल्डर में कोई Open Headunit बैकअप नहीं मिला।</string>
-    <string name="no_settings_backups_downloads_message">डाउनलोड में कोई Open Headunit बैकअप नहीं मिला।</string>
+    <string name="no_settings_backups_message">ऐप बैकअप फ़ोल्डर में कोई Andromi Auto बैकअप नहीं मिला।</string>
+    <string name="no_settings_backups_downloads_message">डाउनलोड में कोई Andromi Auto बैकअप नहीं मिला।</string>
     <string name="share_settings_backup">सेटिंग्स बैकअप साझा करें</string>
     <string name="logs_exported">लॉग निर्यात किए गए</string>
     <string name="log_saved_to">लॉग यहाँ सहेजा गया:\n%s</string>
@@ -787,10 +787,10 @@
     <string name="wifi_disconnect_toast">Android Auto डिस्कनेक्ट हो गया: यदि वायरलेस AA का उपयोग कर रहे हैं, तो फ़ोन वाई-फ़ाई सेटिंग्स में \"नेटवर्क के बीच स्विच करें\" को अक्षम करें</string>
     <string name="reset_usb_option">USB कनेक्शन रीसेट करें</string>
     <string name="reset_usb_timeout">USB डिवाइस नहीं मिला। कृपया कनेक्शन जांचें।</string>
-    <string name="notification_service_running">Open Headunit चल रहा है</string>
+    <string name="notification_service_running">Andromi Auto चल रहा है</string>
     <string name="boot_loop_paused_title">वायरलेस स्टार्टअप रुका</string>
-    <string name="boot_loop_paused_generic">Open Headunit द्वारा वायरलेस शुरू करने के तुरंत बाद यह डिवाइस लगातार तीन बार पुनरारंभ हुआ, इसलिए इस बार वायरलेस बंद रखा गया। USB अभी भी काम करता है। इसे वापस चालू करने के लिए ऐप खोलें।</string>
-    <string name="boot_loop_paused_native_wifi_direct">Open Headunit द्वारा वायरलेस शुरू करने के तुरंत बाद यह डिवाइस लगातार तीन बार पुनरारंभ हुआ। कुछ हेडयूनिट्स पर वाई-फ़ाई चिपसेट पूरे सिस्टम को क्रैश कर देता है जब कोई फ़ोन वाई-फ़ाई डायरेक्ट नेटवर्क से जुड़ता है। हेडयूनिट हॉटस्पॉट का प्रयास करें।</string>
+    <string name="boot_loop_paused_generic">Andromi Auto द्वारा वायरलेस शुरू करने के तुरंत बाद यह डिवाइस लगातार तीन बार पुनरारंभ हुआ, इसलिए इस बार वायरलेस बंद रखा गया। USB अभी भी काम करता है। इसे वापस चालू करने के लिए ऐप खोलें।</string>
+    <string name="boot_loop_paused_native_wifi_direct">Andromi Auto द्वारा वायरलेस शुरू करने के तुरंत बाद यह डिवाइस लगातार तीन बार पुनरारंभ हुआ। कुछ हेडयूनिट्स पर वाई-फ़ाई चिपसेट पूरे सिस्टम को क्रैश कर देता है जब कोई फ़ोन वाई-फ़ाई डायरेक्ट नेटवर्क से जुड़ता है। हेडयूनिट हॉटस्पॉट का प्रयास करें।</string>
     <string name="notification_projection_active">Android Auto प्रोजेक्ट किया गया है</string>
     <string name="shortcut_connect_title">कनेक्ट करें</string>
     <string name="shortcut_connect_desc">अंतिम फ़ोन से स्वतः कनेक्ट करें</string>
@@ -1267,12 +1267,12 @@
     <string name="show_only_phones">केवल फ़ोन दिखाएं</string>
     <string name="oem_app_management">OEM ऐप संघर्ष प्रबंधन (ADB)</string>
     <string name="oem_app_management_desc">परस्पर विरोधी ऐप्स (Zlink, AutoKit, आदि) का पता लगाएं और अक्षम करें</string>
-    <string name="oem_app_explanation">फ़ैक्टरी हेडयूनिट साथी ऐप्स अक्सर USB और ब्लूटूथ कनेक्शन को रोकते हैं, जिससे Open Headunit कनेक्ट नहीं हो पाता है। आप उन्हें रूट या सेल्फ़-ADB (पोर्ट 5555) के माध्यम से अक्षम कर सकते हैं।</string>
+    <string name="oem_app_explanation">फ़ैक्टरी हेडयूनिट साथी ऐप्स अक्सर USB और ब्लूटूथ कनेक्शन को रोकते हैं, जिससे Andromi Auto कनेक्ट नहीं हो पाता है। आप उन्हें रूट या सेल्फ़-ADB (पोर्ट 5555) के माध्यम से अक्षम कर सकते हैं।</string>
     <string name="oem_app_backend_root">निष्पादन विधि: रूट (su) उपलब्ध</string>
     <string name="oem_app_backend_adb">निष्पादन विधि: सेल्फ़-ADB (127.0.0.1:5555) कनेक्टेड</string>
     <string name="oem_app_backend_none">निष्पादन विधि: कोई नहीं। वायरलेस डिबगिंग सक्षम करें या \"adb tcpip 5555\" चलाएं</string>
     <string name="oem_app_autokill_switch">स्टार्टअप पर परस्पर विरोधी OEM ऐप्स को स्वतः अक्षम करें</string>
-    <string name="oem_app_autokill_switch_desc">Open Headunit शुरू होने पर ज्ञात परस्पर विरोधी ऐप्स और बैकग्राउंड डेमॉन को शांत करता है।</string>
+    <string name="oem_app_autokill_switch_desc">Andromi Auto शुरू होने पर ज्ञात परस्पर विरोधी ऐप्स और बैकग्राउंड डेमॉन को शांत करता है।</string>
     <string name="oem_app_autokill_enabled">ऑटो-डिसेबल सक्रिय</string>
     <string name="oem_app_none_detected">कोई ज्ञात परस्पर विरोधी OEM ऐप नहीं मिला।</string>
     <string name="oem_app_btn_commands">कमांड</string>
