@@ -125,10 +125,9 @@ class HomeFragment : Fragment() {
         appsButton = view.findViewById(R.id.apps_button)
         self_mode_text = view.findViewById(R.id.self_mode_text)
 
-        // Portrait layout: cap grid width so square buttons never overflow
-        // into the WiFi-pill or Exit-button areas on compact/square devices.
-        if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
-            constrainPortraitGridWidth(view)
+        // Andromi Auto: automatic start (root, car Bluetooth, on/off) has its own screen.
+        view.findViewById<View>(R.id.auto_start_card)?.setOnClickListener {
+            startActivity(Intent(requireContext(), AutoStartSetupActivity::class.java))
         }
 
         setupListeners()
@@ -725,10 +724,17 @@ class HomeFragment : Fragment() {
 
     private fun updateProjectionButtonText() {
         if (commManager.isConnected) {
-            self_mode_text.text = getString(R.string.to_android_auto)
+            self_mode_button.text = getString(R.string.andromi_back_to_aa)
         } else {
-            self_mode_text.text = getString(R.string.self_mode)
+            self_mode_button.text = getString(R.string.andromi_start)
         }
+        // Andromi Auto: the line under the name says how Android Auto will start.
+        self_mode_text.text = getString(
+            if (App.provide(requireContext()).settings.autoStartSelfMode) R.string.andromi_auto_start_home_summary_on
+            else R.string.self_mode)
+        view?.findViewById<TextView>(R.id.auto_start_summary)?.text = getString(
+            if (App.provide(requireContext()).settings.autoStartSelfMode) R.string.andromi_auto_start_home_summary_on
+            else R.string.andromi_auto_start_home_summary_off)
     }
 
     override fun onResume() {
@@ -740,9 +746,6 @@ class HomeFragment : Fragment() {
         updateButtonVisibility()
         updateTextColors()
         updateExitButtonVisibility()
-        if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
-            view?.let { constrainPortraitGridWidth(it) }
-        }
 
         val appSettings = App.provide(requireContext()).settings
         if (requestDriverSelection) {
@@ -1269,6 +1272,8 @@ class HomeFragment : Fragment() {
     }
 
     private fun updateTextColors() {
+        // Andromi Auto: the Material 3 layout takes its colours from the theme (dynamic colours).
+        if (ANDROMI_MATERIAL_HOME) return
         val appSettings = App.provide(requireContext()).settings
         val nightModeFlags = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
         val isLightMode = nightModeFlags != Configuration.UI_MODE_NIGHT_YES
@@ -1296,6 +1301,7 @@ class HomeFragment : Fragment() {
     }
 
     companion object {
+        private const val ANDROMI_MATERIAL_HOME = true
         private var hasAutoStarted = false
         private var hasCheckedNativeDriverSelection = false
         var forceSelfModeLaunch = false

@@ -4,15 +4,10 @@
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowFullscreen">false</item>
         <item name="android:windowContentOverlay">@null</item>
-        <item name="android:windowBackground">@drawable/bg</item>
+        <!-- Andromi Auto: Material 3 with the phone's dynamic (Monet) colours, see App.onCreate. -->
+        <item name="android:windowBackground">?android:attr/colorBackground</item>
         <item name="android:windowTranslucentNavigation">false</item>
         <item name="android:windowTranslucentStatus">false</item>
-        <item name="colorPrimary">@color/brand_teal</item>
-        <item name="colorSecondary">@color/brand_teal</item>
-        <item name="colorAccent">@color/brand_teal</item>
-        <item name="android:colorAccent">@color/brand_teal</item>
-        <item name="android:dialogTheme">@style/DarkAlertDialog</item>
-        <item name="android:alertDialogTheme">@style/DarkAlertDialog</item>
         <item name="materialAlertDialogTheme">@style/DarkAlertDialog</item>
     </style>
 
@@ -22,43 +17,17 @@
         <item name="android:windowFullscreen">true</item>
     </style>
 
-    <style name="SplashTheme" parent="AppTheme">
-        <item name="android:windowBackground">@drawable/splash_background</item>
-        <item name="android:statusBarColor">@color/splash_background</item>
-        <item name="android:navigationBarColor">@color/splash_background</item>
-    </style>
+    <style name="SplashTheme" parent="AppTheme" />
 
     <style name="SplashTheme.Fullscreen" parent="SplashTheme">
         <item name="android:windowFullscreen">true</item>
     </style>
 
-    <style name="DarkAlertDialog" parent="Theme.Material3.DayNight.Dialog.Alert">
-        <item name="colorPrimary">@color/brand_teal</item>
-        <item name="colorOnPrimary">@android:color/white</item>
-        <item name="colorSecondary">@color/brand_teal</item>
-        <item name="colorOnSecondary">@android:color/white</item>
-        <item name="android:colorAccent">@color/brand_teal</item>
-        <item name="android:background">?attr/colorSurface</item>
-        <item name="android:textColorPrimary">@color/adaptive_text_color</item>
-        <item name="buttonBarPositiveButtonStyle">@style/DialogButton.Positive</item>
-        <item name="buttonBarNegativeButtonStyle">@style/DialogButton.Negative</item>
-        <item name="shapeAppearance">@style/ShapeAppearanceOverlay.App.Dialog.Rounded</item>
-        <item name="shapeAppearanceOverlay">@style/ShapeAppearanceOverlay.App.Dialog.Rounded</item>
-    </style>
+    <!-- Andromi Auto: plain Material 3 dialog in the dynamic colours (the name is kept, it is used everywhere). -->
+    <style name="DarkAlertDialog" parent="ThemeOverlay.Material3.MaterialAlertDialog" />
 
-    <style name="DialogButton.Positive" parent="Widget.Material3.Button">
-        <item name="android:textColor">@android:color/white</item>
-        <item name="backgroundTint">@color/brand_teal</item>
-        <item name="android:backgroundTint">@color/brand_teal</item>
-        <item name="android:background">@drawable/btn_primary_teal</item>
-    </style>
-
-    <style name="DialogButton.Negative" parent="Widget.Material3.Button.TextButton">
-        <item name="android:textColor">@color/brand_teal</item>
-        <item name="colorSecondary">@color/brand_teal</item>
-    </style>
     <style name="DialogWindowTitle" parent="android:Widget.TextView">
-        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textColor">?attr/colorOnSurface</item>
         <item name="android:textSize">22sp</item>
     </style>
 

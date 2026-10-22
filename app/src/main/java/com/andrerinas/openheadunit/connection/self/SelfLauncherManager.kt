@@ -11,9 +11,11 @@ import com.andrerinas.openheadunit.utils.DummyVpnPolicy
 import com.andrerinas.openheadunit.connection.self.launchers.SelfLauncherBTDiscovery
 import com.andrerinas.openheadunit.connection.self.launchers.SelfLauncherBroadcast
 import com.andrerinas.openheadunit.connection.self.launchers.SelfLauncherLegacy
+import com.andrerinas.openheadunit.connection.self.launchers.SelfLauncherRoot
 import com.andrerinas.openheadunit.connection.self.launchers.SelfLauncherV17_4
 import com.andrerinas.openheadunit.connection.wifi.WifiLauncherManager
 import com.andrerinas.openheadunit.utils.AppLog
+import com.andrerinas.openheadunit.utils.RootSetup
 import com.andrerinas.openheadunit.utils.VpnControl
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -130,7 +132,15 @@ class SelfLauncherManager(
 
             val path = installedPath(service)
 
-            if (path == SelfLaunchPath.HEADUNIT_SERVER) {
+            if (RootSetup.isReady(service)) {
+                // Andromi Auto: the root setup re-enabled Android Auto's WirelessStartupReceiver,
+                // so Self Mode starts on its own, without the developer headunit server.
+                AppLog.i("SelfMode: WirelessStartupReceiver enabled (root setup). Using the 5288 route.")
+                launchers = arrayOf(
+                    SelfLauncherRoot(this@SelfLauncherManager, services),
+                    SelfLauncherLegacy(this@SelfLauncherManager, services)
+                )
+            } else if (path == SelfLaunchPath.HEADUNIT_SERVER) {
                 AppLog.i("SelfMode: AA 17.4+ detected. Connecting directly to Headunit Server on 127.0.0.1:5277...")
                 launchers = arrayOf(
                     SelfLauncherV17_4(this@SelfLauncherManager, services)
@@ -408,6 +418,9 @@ class SelfLauncherManager(
                 AppLog.w("SelfMode: Failed to query AA version: ${e.message}")
                 null
             }
+            // Andromi Auto: with the receiver re-enabled the 5288 route works on any version,
+            // so the deadline, VPN and disconnect rules follow that route.
+            if (RootSetup.isReady(context)) return SelfLaunchPath.LEGACY
             return SelfLaunchRoutePolicy.pathFor(vName)
         }
     }

@@ -25,7 +25,7 @@ import com.andrerinas.openheadunit.view.DpiPickerView
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.switchmaterial.SwitchMaterial
+import com.google.android.material.materialswitch.MaterialSwitch
 
 /**
  * Sub-screen to choose the Android Auto DPI with a slider, a live graphic and
@@ -38,7 +38,7 @@ class DpiSettingsFragment : Fragment() {
     private val settings by lazy { App.provide(requireContext()).settings }
     private lateinit var toolbar: MaterialToolbar
     private lateinit var picker: DpiPickerView
-    private lateinit var autoSwitch: SwitchMaterial
+    private lateinit var autoSwitch: MaterialSwitch
     private lateinit var autoDesc: TextView
     private lateinit var widescreenHint: TextView
     private lateinit var overPanelWarning: TextView

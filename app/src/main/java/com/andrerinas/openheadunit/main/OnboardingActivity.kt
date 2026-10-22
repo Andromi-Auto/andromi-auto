@@ -35,7 +35,7 @@ import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.switchmaterial.SwitchMaterial
+import com.google.android.material.materialswitch.MaterialSwitch
 import com.google.android.material.textfield.TextInputEditText
 
 /**
@@ -294,28 +294,28 @@ class OnboardingActivity : BaseActivity() {
         findViewById<MaterialButton>(R.id.onb_night_button).setOnClickListener { showNightModeDialog() }
 
         // --- Automation: simple toggles inline, priority + advanced via the real screens ---
-        findViewById<SwitchMaterial>(R.id.onb_autoconnect_last_switch).apply {
+        findViewById<MaterialSwitch>(R.id.onb_autoconnect_last_switch).apply {
             isChecked = settings.autoConnectLastSession
             setOnCheckedChangeListener { _, v -> settings.autoConnectLastSession = v }
         }
-        findViewById<SwitchMaterial>(R.id.onb_autoconnect_single_switch).apply {
+        findViewById<MaterialSwitch>(R.id.onb_autoconnect_single_switch).apply {
             isChecked = settings.autoConnectSingleUsbDevice
             setOnCheckedChangeListener { _, v -> settings.autoConnectSingleUsbDevice = v }
         }
         // USB-only auto-start toggles (also written to device storage, like AutoStartFragment).
-        findViewById<SwitchMaterial>(R.id.onb_autostart_usb_switch).apply {
+        findViewById<MaterialSwitch>(R.id.onb_autostart_usb_switch).apply {
             isChecked = settings.autoStartOnUsb
             setOnCheckedChangeListener { _, v ->
                 settings.autoStartOnUsb = v
                 Settings.syncAutoStartOnUsbToDeviceStorage(this@OnboardingActivity, v)
             }
         }
-        findViewById<SwitchMaterial>(R.id.onb_reopen_switch).apply {
+        findViewById<MaterialSwitch>(R.id.onb_reopen_switch).apply {
             isChecked = settings.reopenOnReconnection
             setOnCheckedChangeListener { _, v -> settings.reopenOnReconnection = v }
         }
         // WiFi-only auto-start toggle.
-        findViewById<SwitchMaterial>(R.id.onb_autostart_wifi_switch).apply {
+        findViewById<MaterialSwitch>(R.id.onb_autostart_wifi_switch).apply {
             isChecked = settings.autoStartOnWifi
             setOnCheckedChangeListener { _, v ->
                 settings.autoStartOnWifi = v
@@ -348,7 +348,7 @@ class OnboardingActivity : BaseActivity() {
      * how people conclude the app has no sound.
      */
     private fun bindAudioStep() {
-        findViewById<SwitchMaterial>(R.id.onb_audio_separate_switch).apply {
+        findViewById<MaterialSwitch>(R.id.onb_audio_separate_switch).apply {
             isChecked = settings.separateAudioStreams
             setOnCheckedChangeListener { _, checked ->
                 settings.separateAudioStreams = checked
@@ -432,7 +432,7 @@ class OnboardingActivity : BaseActivity() {
         // Steering wheel side: reuse the existing right-hand-drive setting and mirror the
         // dashboard illustration live (wheel moves to the right when right-hand drive is on).
         val dashboard = findViewById<ImageView>(R.id.onb_vehicle_dashboard)
-        val rhdSwitch = findViewById<SwitchMaterial>(R.id.onb_vehicle_rhd_switch)
+        val rhdSwitch = findViewById<MaterialSwitch>(R.id.onb_vehicle_rhd_switch)
         fun applyWheelSide(rhd: Boolean) { dashboard.scaleX = if (rhd) -1f else 1f }
         rhdSwitch.isChecked = settings.rightHandDrive
         applyWheelSide(settings.rightHandDrive)

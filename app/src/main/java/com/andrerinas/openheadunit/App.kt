@@ -46,6 +46,8 @@ class App : Application(), Application.ActivityLifecycleCallbacks {
         super.onCreate()
         instance = this
         registerActivityLifecycleCallbacks(this)
+        // Andromi Auto: every screen uses the phone's wallpaper colours (Material You / Monet).
+        com.google.android.material.color.DynamicColors.applyToActivitiesIfAvailable(this)
 
         try {
             val packageReceiver = object : BroadcastReceiver() {
