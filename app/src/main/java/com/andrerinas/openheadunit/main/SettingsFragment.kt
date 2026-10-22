@@ -113,6 +113,8 @@ class SettingsFragment : Fragment() {
     private lateinit var toolbar: MaterialToolbar
     private var saveButton: MaterialButton? = null
     private var resetButton: MaterialButton? = null
+    private var saveFab: com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton? = null
+    private var statusAdapter: SettingsStatusAdapter? = null
 
     // Basic/Advanced tab + search state (Feature A)
     private var settingsTabGroup: com.google.android.material.button.MaterialButtonToggleGroup? = null
@@ -455,7 +457,10 @@ class SettingsFragment : Fragment() {
         settingsAdapter = SettingsAdapter()
         settingsRecyclerView = view.findViewById(R.id.settingsRecyclerView)
         settingsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
-        settingsRecyclerView.adapter = settingsAdapter
+        statusAdapter = SettingsStatusAdapter {
+            startActivity(Intent(requireContext(), AutoStartSetupActivity::class.java))
+        }
+        settingsRecyclerView.adapter = androidx.recyclerview.widget.ConcatAdapter(statusAdapter, settingsAdapter)
 
         setupTabsAndSearch(view)
 
@@ -670,26 +675,10 @@ class SettingsFragment : Fragment() {
             handleBackPress()
         }
 
-        val resetItem = toolbar.menu.add(0, RESET_ITEM_ID, 0, getString(R.string.reset_settings))
-        resetItem.setShowAsAction(android.view.MenuItem.SHOW_AS_ACTION_ALWAYS)
-        resetItem.setActionView(R.layout.layout_reset_button)
-
-        resetButton = resetItem.actionView?.findViewById(R.id.reset_button_widget)
-        resetButton?.contentDescription = getString(R.string.reset_settings)
-        resetButton?.setOnClickListener {
-            startResetSettings()
-        }
-
-        // Add the Save item with custom layout
-        val saveItem = toolbar.menu.add(0, SAVE_ITEM_ID, 1, getString(R.string.save))
-        saveItem.setShowAsAction(android.view.MenuItem.SHOW_AS_ACTION_ALWAYS)
-        saveItem.setActionView(R.layout.layout_save_button)
-
-        // Get the button from the action view
-        saveButton = saveItem.actionView?.findViewById(R.id.save_button_widget)
-        saveButton?.setOnClickListener {
-            saveSettings()
-        }
+        // Andromi Auto: no Reset/Save buttons in the bar. Save is a floating button that only
+        // shows when something changed; Reset is the last row of the list.
+        saveFab = view?.findViewById(R.id.settingsSaveFab)
+        saveFab?.setOnClickListener { saveSettings() }
 
         updateSaveButtonState()
     }
@@ -723,6 +712,10 @@ class SettingsFragment : Fragment() {
     private fun updateSaveButtonState() {
         saveButton?.isEnabled = hasChanges
         saveButton?.text = if (requiresRestart) getString(R.string.save_and_restart) else getString(R.string.save)
+        saveFab?.let { fab ->
+            fab.text = if (requiresRestart) getString(R.string.save_and_restart) else getString(R.string.save)
+            if (hasChanges) fab.show() else fab.hide()
+        }
     }
 
     private fun saveSettings() {
@@ -3266,7 +3259,8 @@ class SettingsFragment : Fragment() {
      * with no rows under it is dropped too.
      */
     private fun withoutRemovedRows(items: List<SettingItem>): List<SettingItem> {
-        val kept = items.filter { it.stableId !in REMOVED_ROWS }
+        val kept = items.filter { it.stableId !in REMOVED_ROWS && it.stableId != "bottomSaveButton" &&
+            it.stableId != "andromiAutoStart" }
         return kept.filterIndexed { i, item ->
             item !is SettingItem.CategoryHeader ||
                 (i + 1 < kept.size && kept[i + 1] !is SettingItem.CategoryHeader &&
@@ -3275,16 +3269,9 @@ class SettingsFragment : Fragment() {
     }
 
     private fun setupTabsAndSearch(view: View) {
-        settingsTabGroup = view.findViewById(R.id.settingsTabGroup)
+        // Andromi Auto: no Basic / Advanced tabs any more, everything is in one list.
+        settingsTabGroup = null
         searchInput = view.findViewById(R.id.settingsSearch)
-
-        settingsTabGroup?.check(if (pendingAdvancedSettings == false) R.id.tabBasic else R.id.tabAdvanced)
-        settingsTabGroup?.addOnButtonCheckedListener { _, checkedId, isChecked ->
-            if (!isChecked) return@addOnButtonCheckedListener
-            pendingAdvancedSettings = (checkedId == R.id.tabAdvanced)
-            checkChanges()
-            renderSettings()
-        }
 
         searchInput?.addTextChangedListener(object : android.text.TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -3388,9 +3375,8 @@ class SettingsFragment : Fragment() {
             return headerMatchesQuery || searchableText(item).contains(query, ignoreCase = true)
         }
 
-        if (pendingAdvancedSettings == true) return true
-
-        return item.stableId in basicSettingIds
+        // Andromi Auto: one list, no Basic / Advanced split.
+        return true
     }
 
     // Items scoped to a USB connection (the Wireless Connection category is the WiFi scope).
@@ -4311,6 +4297,7 @@ class SettingsFragment : Fragment() {
             settings = App.provide(requireContext()).settings
             updateSettingsList()
         }
+        statusAdapter?.notifyItemChanged(0)
 
         // A probe started before the vendor's projection app took the screen is still running. Pick
         // its row back up, so coming back here shows where it got to rather than a stale line.
@@ -5324,7 +5311,14 @@ class SettingsFragment : Fragment() {
             // Input: head-unit keys and rotary controllers
             "keymap", "enableRotary",
             // Info: Open Headunit's update check and support page
-            "check_for_updates", "support"
+            "check_for_updates", "support",
+            // Graphic: head-up display mirroring is for a windscreen HUD, not a car screen
+            "hudMirroring", "forcedScale",
+            // Video: wireless link limits and developer tests of the video path
+            "narrowBandProfileCap", "debugVideoLowLatency", "debugForceMemoryProfile",
+            "debugVideoFeedHold", "debugVideoFaultInjection", "debugVideoFaultRate", "debugVideoFaultBudget",
+            // Debug: commands from other apps (Tasker etc.)
+            "allowExternalConfiguration"
         )
         private val SAVE_ITEM_ID = 1001
 

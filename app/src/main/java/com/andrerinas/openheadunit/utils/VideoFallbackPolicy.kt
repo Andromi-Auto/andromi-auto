@@ -17,9 +17,13 @@ object VideoFallbackPolicy {
     data class Margins(val width: Int, val height: Int)
 
     /** Null for sizes the phone never refuses. */
+    // Andromi Auto: 1440p and 4K fall back to Full HD, not 720p. A phone that refuses the high
+    // size still gets a sharp picture on the car screen instead of the blurry 720p one.
     fun fallbackFor(primary: R): R? = when (primary) {
-        R._1920x1080, R._2560x1440, R._3840x2160 -> R._1280x720
-        R._1080x1920, R._1440x2560, R._2160x3840 -> R._720x1280
+        R._2560x1440, R._3840x2160 -> R._1920x1080
+        R._1440x2560, R._2160x3840 -> R._1080x1920
+        R._1920x1080 -> R._1280x720
+        R._1080x1920 -> R._720x1280
         else -> null
     }
 

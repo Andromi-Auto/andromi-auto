@@ -101,6 +101,10 @@ internal class AapControlMedia(
             VideoFallbackPolicy.adopts(request.configurationIndex, HeadUnitScreenConfig.hasOfferedFallback())) {
             HeadUnitScreenConfig.adoptFallback()
         }
+        // Andromi Auto: remember the size Android Auto really sends, for Settings.
+        if (channel == Channel.ID_VID) {
+            App.instance?.let { com.andrerinas.openheadunit.utils.VideoStreamInfo.recordStart(it, request.configurationIndex) }
+        }
 
         aapTransport.setSessionId(channel, request.sessionId)
         aapTransport.noteAudioSinkStarted(channel)
