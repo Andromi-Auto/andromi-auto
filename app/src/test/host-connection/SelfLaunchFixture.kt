@@ -126,6 +126,9 @@ class SelfLauncherV17_4(manager: SelfLauncherManager, services: SelfLauncherServ
     override suspend fun run(): Boolean { services.aap.directConnects++; services.aap.directLaunchHook?.invoke(); return true }
 }
 class SelfLauncherBroadcast(manager: SelfLauncherManager, services: SelfLauncherServices) : SelfLauncher(manager, services)
+// Andromi Auto's root route: off in the fixture, so the routes under test are the original ones.
+class SelfLauncherRoot(manager: SelfLauncherManager, services: SelfLauncherServices) : SelfLauncher(manager, services)
+object RootSetup { fun isReady(context: Any?) = false }
 class SelfLauncherBTDiscovery(manager: SelfLauncherManager, services: SelfLauncherServices) : SelfLauncher(manager, services)
 
 // Android effects are observable at the same calls made by production methods.
