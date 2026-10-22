@@ -100,7 +100,7 @@ class OnboardingActivity : BaseActivity() {
         skipBtn = findViewById(R.id.onb_skip)
         stepper = findViewById(R.id.onb_stepper)
 
-        selectedPortrait = resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
+        selectedPortrait = true // Andromi Auto always runs in portrait
         selectedSize = OnboardingDisplayPolicy.initialPreset(settings.displaySizePreset, estimateSizePreset())
 
         buildStepperDots()
