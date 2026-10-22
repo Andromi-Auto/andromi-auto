@@ -360,10 +360,11 @@ class Settings(private val context: Context) {
             prefs.edit().putInt("view-mode", viewMode.value).apply()
         }
 
-    // Andromi Auto: always portrait. The Xiaomi car only lets an app be pinned to its screen
-    // when the app asks for portrait.
     var screenOrientation: ScreenOrientation
-        get() = ScreenOrientation.PORTRAIT
+        get() {
+            val value = prefs.getInt(KEY_SCREEN_ORIENTATION, 0)
+            return ScreenOrientation.fromInt(value) ?: ScreenOrientation.SYSTEM
+        }
         set(orientation) {
             prefs.edit().putInt(KEY_SCREEN_ORIENTATION, orientation.value).apply()
         }

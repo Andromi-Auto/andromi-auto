@@ -1467,4 +1467,6 @@
     <string name="andromi_status_video_none_note">Start Android Auto once and come back here to see the size it sends.</string>
     <string name="andromi_status_video_note">This is the size Android Auto sent last time. Change it under Graphic → Resolution.</string>
     <string name="andromi_status_video_fallback">Android Auto refused %1$s and used this size instead. Try a lower resolution or the H.265 codec.</string>
+    <string name="andromi_portrait">Portrait</string>
+    <string name="andromi_landscape">Landscape</string>
 </resources>
