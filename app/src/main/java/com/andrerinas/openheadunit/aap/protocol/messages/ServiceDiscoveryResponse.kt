@@ -148,6 +148,8 @@ internal class ServiceDiscoveryResponse(context: Context, audioConfig: AudioSess
 
                     // A phone that refuses the first size walks the list, so give it one it accepts.
                     val fallback = VideoFallbackPolicy.fallbackFor(negotiatedResolution)
+                    com.andrerinas.openheadunit.utils.VideoStreamInfo.recordOffer(
+                        negotiatedResolution, fallback, effectiveCodec, announcedFps)
                     if (fallback != null) {
                         val primarySize = VideoFallbackPolicy.sizeOf(negotiatedResolution)
                         val margins = VideoFallbackPolicy.scaledMargins(

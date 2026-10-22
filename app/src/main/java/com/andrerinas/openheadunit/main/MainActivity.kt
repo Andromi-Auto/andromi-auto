@@ -165,6 +165,9 @@ class MainActivity : BaseActivity() {
         }
 
         setTheme(R.style.AppTheme)
+        // setTheme() above drops the wallpaper colours DynamicColors put on before onCreate;
+        // put them back so the home screen uses Monet like every other screen.
+        com.google.android.material.color.DynamicColors.applyToActivityIfAvailable(this)
         val mainSettings = Settings(this)
         val isNightActive = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
         val isExtremeDark = mainSettings.appTheme == Settings.AppTheme.EXTREME_DARK ||
