@@ -2363,6 +2363,9 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
     }
 
     companion object {
+        /** Andromi Auto: how far the window's shape may drift before the session restarts. */
+        private const val WINDOW_SHAPE_TOLERANCE = 0.12f
+        private const val WINDOW_SHAPE_SETTLE_MS = 900L
         /** Long enough for a surface callback to arrive first on a return, short enough to beat the stall window. */
         private const val RETURN_REARM_DELAY_MS = 300L
         const val EXTRA_FOCUS = "focus"
@@ -2411,7 +2414,42 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         AppLog.i("[AapProjectionActivity] onConfigurationChanged: orientation=${newConfig.orientation}")
         if (!HeadUnitScreenConfig.isResolutionLocked) {
             HeadUnitScreenConfig.init(this, resources.displayMetrics, settings)
+        } else if (commManager.isConnected) {
+            scheduleWindowShapeCheck()
         }
+    }
+
+    /**
+     * Andromi Auto: the car screen switches between three sizes (portrait, compact landscape,
+     * wide landscape). Android Auto cannot change its picture's shape inside a session, so when
+     * the window settles on a shape that no longer matches the negotiated one, the session is
+     * restarted the way a settings change restarts it, and Self Mode reconnects in the new shape.
+     */
+    private val windowShapeCheck = Runnable {
+        if (isFinishing || !commManager.isConnected || !HeadUnitScreenConfig.isResolutionLocked) return@Runnable
+        val root = window.decorView
+        val winW = root.width
+        val winH = root.height
+        if (winW <= 0 || winH <= 0) return@Runnable
+        val canvasW = HeadUnitScreenConfig.getNegotiatedWidth() - HeadUnitScreenConfig.getWidthMargin()
+        val canvasH = HeadUnitScreenConfig.getNegotiatedHeight() - HeadUnitScreenConfig.getHeightMargin()
+        if (canvasW <= 0 || canvasH <= 0) return@Runnable
+        val windowAspect = winW.toFloat() / winH
+        val canvasAspect = canvasW.toFloat() / canvasH
+        val flipped = (winW > winH) != (canvasW > canvasH)
+        val off = kotlin.math.abs(windowAspect - canvasAspect) / canvasAspect
+        if (!flipped && off < WINDOW_SHAPE_TOLERANCE) return@Runnable
+        AppLog.i("[AapProjectionActivity] Window is now ${winW}x$winH, Android Auto draws ${canvasW}x$canvasH: restarting the session in the new shape")
+        commManager.disconnect(isUserExit = false, honorKillOnDisconnect = false,
+            reason = com.andrerinas.openheadunit.connection.CommManager.DisconnectReason.SETTINGS_RESTART)
+        HeadUnitScreenConfig.init(this, resources.displayMetrics, settings)
+    }
+
+    private fun scheduleWindowShapeCheck() {
+        val root = window.decorView
+        root.removeCallbacks(windowShapeCheck)
+        // The car animates between sizes; wait until the window has settled.
+        root.postDelayed(windowShapeCheck, WINDOW_SHAPE_SETTLE_MS)
     }
 
     private fun applyOrientationSettings() {

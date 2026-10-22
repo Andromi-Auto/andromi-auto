@@ -17,7 +17,7 @@ object ScreenOrientationPolicy {
         AS_READ,
     }
 
-    /** AUTO and SYSTEM take the orientation the configuration is actually in. */
+    /** AUTO, SYSTEM and FOLLOW_WINDOW take the orientation the configuration is actually in. */
     fun normalisation(
         setting: Settings.ScreenOrientation,
         configLandscape: Boolean,
@@ -28,7 +28,8 @@ object ScreenOrientationPolicy {
         Settings.ScreenOrientation.PORTRAIT,
         Settings.ScreenOrientation.PORTRAIT_REVERSE -> Normalisation.PORTRAIT
         Settings.ScreenOrientation.AUTO,
-        Settings.ScreenOrientation.SYSTEM -> when {
+        Settings.ScreenOrientation.SYSTEM,
+        Settings.ScreenOrientation.FOLLOW_WINDOW -> when {
             configLandscape -> Normalisation.LANDSCAPE
             configPortrait -> Normalisation.PORTRAIT
             else -> Normalisation.AS_READ
