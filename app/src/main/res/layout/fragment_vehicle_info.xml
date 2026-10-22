@@ -17,9 +17,8 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             app:title="@string/vehicle_info_settings"
-            app:navigationIcon="@drawable/ic_arrow_back_white"
-            app:titleTextColor="?android:attr/textColorPrimary"
-            app:navigationIconTint="?android:attr/textColorPrimary" />
+            app:navigationIcon="@drawable/ic_arrow_back_24"
+            app:navigationIconTint="?attr/colorOnSurface" />
 
     </com.google.android.material.appbar.AppBarLayout>
 

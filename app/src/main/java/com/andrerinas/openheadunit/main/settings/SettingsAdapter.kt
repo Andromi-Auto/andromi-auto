@@ -310,6 +310,15 @@ class SettingsAdapter : ListAdapter<SettingItem, RecyclerView.ViewHolder>(Settin
         private val btn2: com.google.android.material.button.MaterialButton = itemView.findViewById(R.id.btnOption2)
         private val btn3: com.google.android.material.button.MaterialButton = itemView.findViewById(R.id.btnOption3)
 
+        private fun applySegmentState(button: com.google.android.material.button.MaterialButton, checked: Boolean) {
+            button.isChecked = checked
+            val bg = if (checked) com.google.android.material.R.attr.colorSecondaryContainer else android.R.attr.colorBackground
+            val fg = if (checked) com.google.android.material.R.attr.colorOnSecondaryContainer else com.google.android.material.R.attr.colorOnSurface
+            button.backgroundTintList = android.content.res.ColorStateList.valueOf(
+                if (checked) com.google.android.material.color.MaterialColors.getColor(button, bg) else android.graphics.Color.TRANSPARENT)
+            button.setTextColor(com.google.android.material.color.MaterialColors.getColor(button, fg))
+        }
+
         fun bind(setting: SettingItem.SegmentedButtonSettingEntry) {
             settingName.setText(setting.nameResId)
 
@@ -325,47 +334,29 @@ class SettingsAdapter : ListAdapter<SettingItem, RecyclerView.ViewHolder>(Settin
                 }
             }
 
-            // Fixed 16dp radius like cards/save button
-            val radius = 16f * itemView.resources.displayMetrics.density
+            // Andromi Auto: Material 3 segmented button (pill ends, 1dp outline, the chosen one
+            // filled with the secondary container colour).
+            val full = com.google.android.material.shape.RelativeCornerSize(0.5f)
 
             visibleButtons.forEachIndexed { index, button ->
-                val shapeModel = when (index) {
-                    0 -> com.google.android.material.shape.ShapeAppearanceModel.builder()
-                        .setTopLeftCornerSize(radius).setBottomLeftCornerSize(radius)
-                        .setTopRightCornerSize(0f).setBottomRightCornerSize(0f)
-                        .build()
-                    visibleButtons.size - 1 -> com.google.android.material.shape.ShapeAppearanceModel.builder()
-                        .setTopRightCornerSize(radius).setBottomRightCornerSize(radius)
-                        .setTopLeftCornerSize(0f).setBottomLeftCornerSize(0f)
-                        .build()
-                    else -> com.google.android.material.shape.ShapeAppearanceModel.builder()
-                        .setAllCornerSizes(0f)
-                        .build()
-                }
-                button.shapeAppearanceModel = shapeModel
-
-                // Manual selection state handling
-                val isSelected = index == setting.selectedIndex
-                button.isChecked = isSelected
-
-                // Bring active button to front so its 2dp border wins the overlap
+                val builder = com.google.android.material.shape.ShapeAppearanceModel.builder().setAllCornerSizes(0f)
+                if (index == 0) builder.setTopLeftCornerSize(full).setBottomLeftCornerSize(full)
+                if (index == visibleButtons.size - 1) builder.setTopRightCornerSize(full).setBottomRightCornerSize(full)
+                button.shapeAppearanceModel = builder.build()
+                button.strokeWidth = (1 * itemView.resources.displayMetrics.density).toInt()
+                button.strokeColor = android.content.res.ColorStateList.valueOf(
+                    com.google.android.material.color.MaterialColors.getColor(button, com.google.android.material.R.attr.colorOutline))
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    button.elevation = if (isSelected) 2f else 0f
-                    button.stateListAnimator = null // Disable default elevation animations
+                    button.elevation = 0f
+                    button.stateListAnimator = null
                 }
-
-                // Ensure stroke is 2dp and themed
-                button.strokeWidth = (2 * itemView.resources.displayMetrics.density).toInt()
+                applySegmentState(button, index == setting.selectedIndex)
 
                 button.setOnClickListener {
                     if (index != setting.selectedIndex) {
                         // Instant UI feedback: uncheck all, check this one
-                        visibleButtons.forEach {
-                            it.isChecked = false
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) it.elevation = 0f
-                        }
-                        button.isChecked = true
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) button.elevation = 2f
+                        visibleButtons.forEach { applySegmentState(it, false) }
+                        applySegmentState(button, true)
 
                         setting.onOptionSelected(index)
                     }

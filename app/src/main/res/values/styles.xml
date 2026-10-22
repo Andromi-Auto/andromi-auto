@@ -47,7 +47,7 @@
     </style>
 
     <!-- Segmented Button Shapes -->
-    <style name="ShapeAppearance.App.Button.Left" parent="ShapeAppearance.MaterialComponents.SmallComponent">
+    <style name="ShapeAppearance.App.Button.Left" parent="ShapeAppearance.Material3.SmallComponent">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSizeTopLeft">24dp</item>
         <item name="cornerSizeBottomLeft">24dp</item>
@@ -55,12 +55,12 @@
         <item name="cornerSizeBottomRight">0dp</item>
     </style>
 
-    <style name="ShapeAppearance.App.Button.Middle" parent="ShapeAppearance.MaterialComponents.SmallComponent">
+    <style name="ShapeAppearance.App.Button.Middle" parent="ShapeAppearance.Material3.SmallComponent">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">0dp</item>
     </style>
 
-    <style name="ShapeAppearance.App.Button.Right" parent="ShapeAppearance.MaterialComponents.SmallComponent">
+    <style name="ShapeAppearance.App.Button.Right" parent="ShapeAppearance.Material3.SmallComponent">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSizeTopLeft">0dp</item>
         <item name="cornerSizeBottomLeft">0dp</item>

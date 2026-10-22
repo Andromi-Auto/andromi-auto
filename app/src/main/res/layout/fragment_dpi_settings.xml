@@ -17,9 +17,8 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             app:title="@string/dpi"
-            app:navigationIcon="@drawable/ic_arrow_back_white"
-            app:titleTextColor="?android:attr/textColorPrimary"
-            app:navigationIconTint="?android:attr/textColorPrimary" />
+            app:navigationIcon="@drawable/ic_arrow_back_24"
+            app:navigationIconTint="?attr/colorOnSurface" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -48,19 +47,19 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/dpi_automatic"
-                        android:textAppearance="?attr/textAppearanceSubtitle1" />
+                        android:textAppearance="?attr/textAppearanceTitleMedium" />
                     <TextView
                         android:id="@+id/dpi_auto_desc"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/dpi_automatic_desc"
-                        android:textAppearance="?attr/textAppearanceCaption" />
+                        android:textAppearance="?attr/textAppearanceBodySmall" />
                     <TextView
                         android:id="@+id/dpi_widescreen_hint"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:textAppearance="?attr/textAppearanceCaption"
+                        android:textAppearance="?attr/textAppearanceBodySmall"
                         android:visibility="gone" />
                 </LinearLayout>
                 <com.google.android.material.materialswitch.MaterialSwitch
@@ -81,7 +80,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
                 android:textColor="?attr/colorError"
-                android:textAppearance="?attr/textAppearanceCaption"
+                android:textAppearance="?attr/textAppearanceBodySmall"
                 android:visibility="gone" />
 
             <com.google.android.material.button.MaterialButton
@@ -97,7 +96,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
                 android:textColor="?attr/colorError"
-                android:textAppearance="?attr/textAppearanceCaption"
+                android:textAppearance="?attr/textAppearanceBodySmall"
                 android:visibility="gone" />
 
             <TextView
@@ -105,7 +104,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:text="@string/onb_dpi_help"
-                android:textAppearance="?attr/textAppearanceCaption" />
+                android:textAppearance="?attr/textAppearanceBodySmall" />
 
         </LinearLayout>
     </ScrollView>

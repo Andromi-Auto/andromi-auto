@@ -70,8 +70,8 @@
             android:layout_width="20dp"
             android:layout_height="20dp"
             android:layout_marginEnd="10dp"
-            app:srcCompat="@drawable/ic_warning_white"
-            app:tint="@color/warning_banner_icon"
+            app:srcCompat="@drawable/ic_error_outline_24"
+            app:tint="?attr/colorOnErrorContainer"
             android:importantForAccessibility="no" />
 
         <TextView
@@ -79,8 +79,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:textColor="?android:attr/textColorSecondary"
-            android:textSize="13sp"
+            android:textAppearance="?attr/textAppearanceBodyMedium"
+            android:textColor="?attr/colorOnErrorContainer"
             android:lineSpacingExtra="2dp"
             tools:text="Your phone connected over Bluetooth, but nothing this unit sent ever reached it." />
 
@@ -89,8 +89,8 @@
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:layout_marginStart="8dp"
-            app:srcCompat="@android:drawable/ic_menu_close_clear_cancel"
-            app:tint="?android:attr/textColorSecondary"
+            app:srcCompat="@drawable/ic_close_24"
+            app:tint="?attr/colorOnErrorContainer"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/connection_issue_banner_dismiss" />
 
@@ -198,9 +198,8 @@
             android:clickable="true"
             android:focusable="true"
             android:text="@string/cancel"
-            android:textColor="@android:color/white"
-            android:textSize="14sp"
-            android:textStyle="bold" />
+            android:textAppearance="?attr/textAppearanceLabelLarge"
+            android:textColor="?attr/colorOnSurface" />
 
     </FrameLayout>
 
@@ -215,10 +214,11 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|center_horizontal"
         android:layout_marginBottom="16dp"
-        android:paddingLeft="15dp"
-        android:paddingRight="15dp"
-        android:paddingTop="7dp"
-        android:paddingBottom="7dp"
+        android:paddingStart="20dp"
+        android:paddingEnd="8dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        android:elevation="3dp"
         android:background="@drawable/bg_pill_translucent"
         android:gravity="center_vertical"
         android:orientation="horizontal"
@@ -231,7 +231,7 @@
             android:layout_width="20dp"
             android:layout_height="20dp"
             android:indeterminate="true"
-            android:indeterminateTint="@android:color/white" />
+            android:indeterminateTint="?attr/colorPrimary" />
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -244,18 +244,16 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/android_auto_starting"
-                android:textColor="?attr/colorOnSurface"
-                android:textSize="14sp"
-                android:textStyle="bold" />
+                android:textAppearance="?attr/textAppearanceLabelLarge"
+                android:textColor="?attr/colorOnSurface" />
 
             <TextView
                 android:id="@+id/auto_connect_pill_stage_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="1dp"
-                android:alpha="0.8"
-                android:textColor="?attr/colorOnSurface"
-                android:textSize="12sp"
+                android:textAppearance="?attr/textAppearanceBodySmall"
+                android:textColor="?attr/colorOnSurfaceVariant"
                 android:visibility="gone"
                 tools:text="Creating the WiFi network"
                 tools:visibility="visible" />
@@ -265,9 +263,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="1dp"
-                android:alpha="0.8"
-                android:textColor="?attr/colorOnSurface"
-                android:textSize="12sp"
+                android:textAppearance="?attr/textAppearanceBodySmall"
+                android:textColor="?attr/colorOnSurfaceVariant"
                 android:visibility="gone"
                 tools:text="WiFi Direct on 5 GHz (5805 MHz)"
                 tools:visibility="visible" />
@@ -279,8 +276,8 @@
             android:layout_width="36dp"
             android:layout_height="36dp"
             android:layout_marginStart="11dp"
-            app:srcCompat="@android:drawable/ic_menu_close_clear_cancel"
-            app:tint="?attr/colorOnSurface"
+            app:srcCompat="@drawable/ic_close_24"
+            app:tint="?attr/colorOnSurfaceVariant"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/auto_connect_pill_cancel" />
 

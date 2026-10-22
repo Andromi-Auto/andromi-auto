@@ -26,16 +26,15 @@
                 android:textColor="?attr/colorOnSurface"/>
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_top_minus"
-                style="@style/Widget.Material3.Button.IconButton"
+                style="@style/Widget.Material3.Button.TonalButton"
+                app:cornerRadius="24dp"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:text="-"
                 android:textSize="24sp"
-                android:textColor="@android:color/white"
                 android:padding="0dp"
                 android:insetTop="0dp"
                 android:insetBottom="0dp"
-                app:backgroundTint="?attr/colorPrimary"
                 app:iconPadding="0dp" />
             <EditText
                 android:id="@+id/input_top"
@@ -48,16 +47,15 @@
                 android:text="0"/>
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_top_plus"
-                style="@style/Widget.Material3.Button.IconButton"
+                style="@style/Widget.Material3.Button.TonalButton"
+                app:cornerRadius="24dp"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:text="+"
                 android:textSize="24sp"
-                android:textColor="@android:color/white"
                 android:padding="0dp"
                 android:insetTop="0dp"
                 android:insetBottom="0dp"
-                app:backgroundTint="?attr/colorPrimary"
                 app:iconPadding="0dp" />
         </LinearLayout>
 
@@ -77,16 +75,15 @@
                 android:textColor="?attr/colorOnSurface"/>
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_bottom_minus"
-                style="@style/Widget.Material3.Button.IconButton"
+                style="@style/Widget.Material3.Button.TonalButton"
+                app:cornerRadius="24dp"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:text="-"
                 android:textSize="24sp"
-                android:textColor="@android:color/white"
                 android:padding="0dp"
                 android:insetTop="0dp"
-                android:insetBottom="0dp"
-                app:backgroundTint="?attr/colorPrimary" />
+                android:insetBottom="0dp" />
             <EditText
                 android:id="@+id/input_bottom"
                 android:layout_width="0dp"
@@ -98,16 +95,15 @@
                 android:text="0"/>
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_bottom_plus"
-                style="@style/Widget.Material3.Button.IconButton"
+                style="@style/Widget.Material3.Button.TonalButton"
+                app:cornerRadius="24dp"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:text="+"
                 android:textSize="24sp"
-                android:textColor="@android:color/white"
                 android:padding="0dp"
                 android:insetTop="0dp"
-                android:insetBottom="0dp"
-                app:backgroundTint="?attr/colorPrimary" />
+                android:insetBottom="0dp" />
         </LinearLayout>
 
         <!-- Left -->
@@ -126,16 +122,15 @@
                 android:textColor="?attr/colorOnSurface"/>
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_left_minus"
-                style="@style/Widget.Material3.Button.IconButton"
+                style="@style/Widget.Material3.Button.TonalButton"
+                app:cornerRadius="24dp"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:text="-"
                 android:textSize="24sp"
-                android:textColor="@android:color/white"
                 android:padding="0dp"
                 android:insetTop="0dp"
-                android:insetBottom="0dp"
-                app:backgroundTint="?attr/colorPrimary" />
+                android:insetBottom="0dp" />
             <EditText
                 android:id="@+id/input_left"
                 android:layout_width="0dp"
@@ -147,16 +142,15 @@
                 android:text="0"/>
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_left_plus"
-                style="@style/Widget.Material3.Button.IconButton"
+                style="@style/Widget.Material3.Button.TonalButton"
+                app:cornerRadius="24dp"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:text="+"
                 android:textSize="24sp"
-                android:textColor="@android:color/white"
                 android:padding="0dp"
                 android:insetTop="0dp"
-                android:insetBottom="0dp"
-                app:backgroundTint="?attr/colorPrimary" />
+                android:insetBottom="0dp" />
         </LinearLayout>
 
         <!-- Right -->
@@ -175,16 +169,15 @@
                 android:textColor="?attr/colorOnSurface"/>
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_right_minus"
-                style="@style/Widget.Material3.Button.IconButton"
+                style="@style/Widget.Material3.Button.TonalButton"
+                app:cornerRadius="24dp"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:text="-"
                 android:textSize="24sp"
-                android:textColor="@android:color/white"
                 android:padding="0dp"
                 android:insetTop="0dp"
-                android:insetBottom="0dp"
-                app:backgroundTint="?attr/colorPrimary" />
+                android:insetBottom="0dp" />
             <EditText
                 android:id="@+id/input_right"
                 android:layout_width="0dp"
@@ -196,16 +189,15 @@
                 android:text="0"/>
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_right_plus"
-                style="@style/Widget.Material3.Button.IconButton"
+                style="@style/Widget.Material3.Button.TonalButton"
+                app:cornerRadius="24dp"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:text="+"
                 android:textSize="24sp"
-                android:textColor="@android:color/white"
                 android:padding="0dp"
                 android:insetTop="0dp"
-                android:insetBottom="0dp"
-                app:backgroundTint="?attr/colorPrimary" />
+                android:insetBottom="0dp" />
         </LinearLayout>
 
     </LinearLayout>

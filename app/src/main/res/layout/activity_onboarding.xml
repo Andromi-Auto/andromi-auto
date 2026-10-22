@@ -36,29 +36,29 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/onb_welcome_title"
-                    android:textAppearance="?attr/textAppearanceHeadline5"
-                    android:textStyle="bold" />
+                    android:textAppearance="?attr/textAppearanceHeadlineSmall"
+                    />
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
                     android:text="@string/onb_welcome_body"
-                    android:textAppearance="?attr/textAppearanceBody1" />
+                    android:textAppearance="?attr/textAppearanceBodyLarge" />
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="24dp"
                     android:text="@string/app_language"
-                    android:textAppearance="?attr/textAppearanceSubtitle2" />
+                    android:textAppearance="?attr/textAppearanceTitleSmall" />
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
                     android:text="@string/onb_language_help"
-                    android:textAppearance="?attr/textAppearanceCaption" />
+                    android:textAppearance="?attr/textAppearanceBodySmall" />
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/onb_language_button"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
@@ -78,14 +78,14 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/onb_safety_title"
-                    android:textAppearance="?attr/textAppearanceHeadline5"
-                    android:textStyle="bold" />
+                    android:textAppearance="?attr/textAppearanceHeadlineSmall"
+                    />
                 <TextView
                     android:id="@+id/onb_safety_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
-                    android:textAppearance="?attr/textAppearanceBody2" />
+                    android:textAppearance="?attr/textAppearanceBodyMedium" />
                 <com.google.android.material.checkbox.MaterialCheckBox
                     android:id="@+id/onb_safety_accept"
                     android:layout_width="match_parent"
@@ -107,14 +107,14 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/onb_connection_title"
-                    android:textAppearance="?attr/textAppearanceHeadline5"
-                    android:textStyle="bold" />
+                    android:textAppearance="?attr/textAppearanceHeadlineSmall"
+                    />
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:text="@string/onb_connection_help"
-                    android:textAppearance="?attr/textAppearanceBody2" />
+                    android:textAppearance="?attr/textAppearanceBodyMedium" />
                 <com.google.android.material.button.MaterialButtonToggleGroup
                     android:id="@+id/onb_conn_group"
                     android:layout_width="match_parent"
@@ -124,7 +124,7 @@
                     app:singleSelection="false">
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/onb_conn_usb"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         app:icon="@drawable/ic_usb"
@@ -132,7 +132,7 @@
                         android:text="@string/onb_conn_usb_label" />
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/onb_conn_wifi"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         app:icon="@drawable/ic_wifi"
@@ -140,7 +140,7 @@
                         android:text="@string/connection_kind_wifi" />
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/onb_conn_self"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         app:icon="@drawable/ic_directions_car"
@@ -152,7 +152,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
-                    android:textAppearance="?attr/textAppearanceCaption" />
+                    android:textAppearance="?attr/textAppearanceBodySmall" />
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -161,13 +161,13 @@
                     android:background="@drawable/bg_setting_single"
                     android:text="@string/onb_connection_warning"
                     android:textColor="?attr/colorError"
-                    android:textAppearance="?attr/textAppearanceCaption" />
+                    android:textAppearance="?attr/textAppearanceBodySmall" />
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
                     android:text="@string/onb_change_later"
-                    android:textAppearance="?attr/textAppearanceCaption" />
+                    android:textAppearance="?attr/textAppearanceBodySmall" />
             </LinearLayout>
         </ScrollView>
 
@@ -183,20 +183,20 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/onb_display_title"
-                    android:textAppearance="?attr/textAppearanceHeadline5"
-                    android:textStyle="bold" />
+                    android:textAppearance="?attr/textAppearanceHeadlineSmall"
+                    />
                 <TextView
                     android:id="@+id/onb_display_detected"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:textAppearance="?attr/textAppearanceBody2" />
+                    android:textAppearance="?attr/textAppearanceBodyMedium" />
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
                     android:text="@string/onb_display_size_label"
-                    android:textAppearance="?attr/textAppearanceSubtitle2" />
+                    android:textAppearance="?attr/textAppearanceTitleSmall" />
                 <com.google.android.material.button.MaterialButtonToggleGroup
                     android:id="@+id/onb_size_group"
                     android:layout_width="match_parent"
@@ -206,25 +206,25 @@
                     app:singleSelection="true">
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/onb_size_phone"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/setup_size_phone" />
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/onb_size_small"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/setup_size_small" />
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/onb_size_standard"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/setup_size_standard" />
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/onb_size_large"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/setup_size_large" />
@@ -235,7 +235,7 @@
                     android:layout_marginTop="16dp"
                     android:visibility="gone"
                     android:text="@string/onb_display_orientation_label"
-                    android:textAppearance="?attr/textAppearanceSubtitle2" />
+                    android:textAppearance="?attr/textAppearanceTitleSmall" />
                 <com.google.android.material.button.MaterialButtonToggleGroup
                     android:id="@+id/onb_orient_group"
                     android:layout_width="match_parent"
@@ -244,14 +244,14 @@
                     app:singleSelection="true">
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/onb_orient_land"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
                         android:layout_width="0dp"
                         android:layout_weight="1"
                         android:layout_height="wrap_content"
                         android:text="@string/setup_orientation_landscape" />
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/onb_orient_port"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
                         android:layout_width="0dp"
                         android:layout_weight="1"
                         android:layout_height="wrap_content"
@@ -262,7 +262,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
                     android:text="@string/onb_change_later"
-                    android:textAppearance="?attr/textAppearanceCaption" />
+                    android:textAppearance="?attr/textAppearanceBodySmall" />
             </LinearLayout>
         </ScrollView>
 
@@ -278,14 +278,14 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/onb_display_dpi_label"
-                    android:textAppearance="?attr/textAppearanceHeadline5"
-                    android:textStyle="bold" />
+                    android:textAppearance="?attr/textAppearanceHeadlineSmall"
+                    />
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:text="@string/onb_dpi_help"
-                    android:textAppearance="?attr/textAppearanceBody2" />
+                    android:textAppearance="?attr/textAppearanceBodyMedium" />
                 <com.andrerinas.openheadunit.view.DpiPickerView
                     android:id="@+id/onb_dpi_picker"
                     android:layout_width="match_parent"
@@ -296,21 +296,21 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:textAppearance="?attr/textAppearanceCaption" />
+                    android:textAppearance="?attr/textAppearanceBodySmall" />
                 <TextView
                     android:id="@+id/onb_dpi_over_panel_warning"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:textColor="?attr/colorError"
-                    android:textAppearance="?attr/textAppearanceCaption"
+                    android:textAppearance="?attr/textAppearanceBodySmall"
                     android:visibility="gone" />
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
                     android:text="@string/onb_change_later"
-                    android:textAppearance="?attr/textAppearanceCaption" />
+                    android:textAppearance="?attr/textAppearanceBodySmall" />
             </LinearLayout>
         </ScrollView>
 
@@ -326,17 +326,17 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/onb_appearance_title"
-                    android:textAppearance="?attr/textAppearanceHeadline5"
-                    android:textStyle="bold" />
+                    android:textAppearance="?attr/textAppearanceHeadlineSmall"
+                    />
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
                     android:text="@string/onb_appearance_theme_label"
-                    android:textAppearance="?attr/textAppearanceSubtitle2" />
+                    android:textAppearance="?attr/textAppearanceTitleSmall" />
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/onb_theme_button"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
@@ -346,10 +346,10 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="20dp"
                     android:text="@string/onb_appearance_night_label"
-                    android:textAppearance="?attr/textAppearanceSubtitle2" />
+                    android:textAppearance="?attr/textAppearanceTitleSmall" />
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/onb_night_button"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
@@ -359,7 +359,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
                     android:text="@string/onb_appearance_more_hint"
-                    android:textAppearance="?attr/textAppearanceCaption" />
+                    android:textAppearance="?attr/textAppearanceBodySmall" />
             </LinearLayout>
         </ScrollView>
 
@@ -375,14 +375,14 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/onb_audio_title"
-                    android:textAppearance="?attr/textAppearanceHeadline5"
-                    android:textStyle="bold" />
+                    android:textAppearance="?attr/textAppearanceHeadlineSmall"
+                    />
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:text="@string/onb_audio_help"
-                    android:textAppearance="?attr/textAppearanceBody2" />
+                    android:textAppearance="?attr/textAppearanceBodyMedium" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -395,7 +395,7 @@
                         android:layout_weight="1"
                         android:layout_height="wrap_content"
                         android:text="@string/separate_audio_streams"
-                        android:textAppearance="?attr/textAppearanceBody1" />
+                        android:textAppearance="?attr/textAppearanceBodyLarge" />
                     <com.google.android.material.materialswitch.MaterialSwitch
                         android:id="@+id/onb_audio_separate_switch"
                         android:layout_width="wrap_content"
@@ -409,7 +409,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
                     android:text="@string/audio_channel_media"
-                    android:textAppearance="?attr/textAppearanceSubtitle2" />
+                    android:textAppearance="?attr/textAppearanceTitleSmall" />
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -418,14 +418,14 @@
                     android:layout_marginTop="4dp">
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/onb_audio_media_button"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
                         android:layout_width="0dp"
                         android:layout_weight="1"
                         android:layout_height="wrap_content"
                         app:icon="@android:drawable/ic_menu_manage" />
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/onb_audio_media_test"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
+                        style="@style/Widget.Material3.Button.OutlinedButton.Icon"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
@@ -446,7 +446,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
                         android:text="@string/audio_channel_guidance"
-                        android:textAppearance="?attr/textAppearanceSubtitle2" />
+                        android:textAppearance="?attr/textAppearanceTitleSmall" />
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -455,14 +455,14 @@
                         android:layout_marginTop="4dp">
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/onb_audio_guidance_button"
-                            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                            style="@style/Widget.Material3.Button.OutlinedButton"
                             android:layout_width="0dp"
                             android:layout_weight="1"
                             android:layout_height="wrap_content"
                             app:icon="@android:drawable/ic_menu_manage" />
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/onb_audio_guidance_test"
-                            style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
+                            style="@style/Widget.Material3.Button.OutlinedButton.Icon"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="8dp"
@@ -484,7 +484,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
                         android:text="@string/audio_channel_system"
-                        android:textAppearance="?attr/textAppearanceSubtitle2" />
+                        android:textAppearance="?attr/textAppearanceTitleSmall" />
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -493,14 +493,14 @@
                         android:layout_marginTop="4dp">
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/onb_audio_system_button"
-                            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                            style="@style/Widget.Material3.Button.OutlinedButton"
                             android:layout_width="0dp"
                             android:layout_weight="1"
                             android:layout_height="wrap_content"
                             app:icon="@android:drawable/ic_menu_manage" />
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/onb_audio_system_test"
-                            style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
+                            style="@style/Widget.Material3.Button.OutlinedButton.Icon"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="8dp"
@@ -516,7 +516,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
                     android:text="@string/onb_audio_more_hint"
-                    android:textAppearance="?attr/textAppearanceCaption" />
+                    android:textAppearance="?attr/textAppearanceBodySmall" />
             </LinearLayout>
         </ScrollView>
 
@@ -532,14 +532,14 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/onb_automation_title"
-                    android:textAppearance="?attr/textAppearanceHeadline5"
-                    android:textStyle="bold" />
+                    android:textAppearance="?attr/textAppearanceHeadlineSmall"
+                    />
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:text="@string/onb_automation_help"
-                    android:textAppearance="?attr/textAppearanceBody2" />
+                    android:textAppearance="?attr/textAppearanceBodyMedium" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -552,7 +552,7 @@
                         android:layout_weight="1"
                         android:layout_height="wrap_content"
                         android:text="@string/auto_connect_last_session"
-                        android:textAppearance="?attr/textAppearanceBody1" />
+                        android:textAppearance="?attr/textAppearanceBodyLarge" />
                     <com.google.android.material.materialswitch.MaterialSwitch
                         android:id="@+id/onb_autoconnect_last_switch"
                         android:layout_width="wrap_content"
@@ -571,7 +571,7 @@
                         android:layout_weight="1"
                         android:layout_height="wrap_content"
                         android:text="@string/auto_connect_single_usb"
-                        android:textAppearance="?attr/textAppearanceBody1" />
+                        android:textAppearance="?attr/textAppearanceBodyLarge" />
                     <com.google.android.material.materialswitch.MaterialSwitch
                         android:id="@+id/onb_autoconnect_single_switch"
                         android:layout_width="wrap_content"
@@ -591,7 +591,7 @@
                         android:layout_weight="1"
                         android:layout_height="wrap_content"
                         android:text="@string/auto_start_usb_label"
-                        android:textAppearance="?attr/textAppearanceBody1" />
+                        android:textAppearance="?attr/textAppearanceBodyLarge" />
                     <com.google.android.material.materialswitch.MaterialSwitch
                         android:id="@+id/onb_autostart_usb_switch"
                         android:layout_width="wrap_content"
@@ -611,7 +611,7 @@
                         android:layout_weight="1"
                         android:layout_height="wrap_content"
                         android:text="@string/reopen_on_reconnection_label"
-                        android:textAppearance="?attr/textAppearanceBody1" />
+                        android:textAppearance="?attr/textAppearanceBodyLarge" />
                     <com.google.android.material.materialswitch.MaterialSwitch
                         android:id="@+id/onb_reopen_switch"
                         android:layout_width="wrap_content"
@@ -631,7 +631,7 @@
                         android:layout_weight="1"
                         android:layout_height="wrap_content"
                         android:text="@string/auto_start_wifi_label"
-                        android:textAppearance="?attr/textAppearanceBody1" />
+                        android:textAppearance="?attr/textAppearanceBodyLarge" />
                     <com.google.android.material.materialswitch.MaterialSwitch
                         android:id="@+id/onb_autostart_wifi_switch"
                         android:layout_width="wrap_content"
@@ -643,7 +643,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
                     android:text="@string/onb_automation_more_hint"
-                    android:textAppearance="?attr/textAppearanceCaption" />
+                    android:textAppearance="?attr/textAppearanceBodySmall" />
 
                 <TextView
                     android:id="@+id/onb_automation_oem"
@@ -653,7 +653,7 @@
                     android:padding="12dp"
                     android:background="@drawable/bg_setting_single"
                     android:text="@string/auto_start_oem_warning"
-                    android:textAppearance="?attr/textAppearanceCaption" />
+                    android:textAppearance="?attr/textAppearanceBodySmall" />
             </LinearLayout>
         </ScrollView>
 
@@ -669,14 +669,14 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/onb_gps_title"
-                    android:textAppearance="?attr/textAppearanceHeadline5"
-                    android:textStyle="bold" />
+                    android:textAppearance="?attr/textAppearanceHeadlineSmall"
+                    />
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:text="@string/onb_gps_help"
-                    android:textAppearance="?attr/textAppearanceBody2" />
+                    android:textAppearance="?attr/textAppearanceBodyMedium" />
                 <com.google.android.material.button.MaterialButtonToggleGroup
                     android:id="@+id/onb_gps_group"
                     android:layout_width="match_parent"
@@ -686,14 +686,14 @@
                     app:selectionRequired="true">
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/onb_gps_device"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
                         android:layout_width="0dp"
                         android:layout_weight="1"
                         android:layout_height="wrap_content"
                         android:text="@string/onb_gps_this_device" />
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/onb_gps_phone"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
                         android:layout_width="0dp"
                         android:layout_weight="1"
                         android:layout_height="wrap_content"
@@ -704,7 +704,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
                     android:text="@string/onb_change_later"
-                    android:textAppearance="?attr/textAppearanceCaption" />
+                    android:textAppearance="?attr/textAppearanceBodySmall" />
             </LinearLayout>
         </ScrollView>
 
@@ -720,8 +720,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/onb_vehicle_title"
-                    android:textAppearance="?attr/textAppearanceHeadline5"
-                    android:textStyle="bold" />
+                    android:textAppearance="?attr/textAppearanceHeadlineSmall"
+                    />
 
                 <FrameLayout
                     android:layout_width="match_parent"
@@ -759,7 +759,7 @@
                         android:layout_weight="1"
                         android:layout_height="wrap_content"
                         android:text="@string/right_hand_drive"
-                        android:textAppearance="?attr/textAppearanceBody1" />
+                        android:textAppearance="?attr/textAppearanceBodyLarge" />
                     <com.google.android.material.materialswitch.MaterialSwitch
                         android:id="@+id/onb_vehicle_rhd_switch"
                         android:layout_width="wrap_content"
@@ -769,11 +769,11 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/right_hand_drive_description"
-                    android:textAppearance="?attr/textAppearanceCaption" />
+                    android:textAppearance="?attr/textAppearanceBodySmall" />
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/onb_vehicle_input_layout"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
@@ -806,7 +806,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
                     android:text="@string/vehicle_type_label"
-                    android:textAppearance="?attr/textAppearanceSubtitle2" />
+                    android:textAppearance="?attr/textAppearanceTitleSmall" />
                 <com.google.android.material.button.MaterialButtonToggleGroup
                     android:id="@+id/onb_vehicle_type_group"
                     android:layout_width="match_parent"
@@ -817,21 +817,21 @@
                     app:selectionRequired="true">
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/onb_vehicle_type_car"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="@string/vehicle_type_car" />
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/onb_vehicle_type_truck"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="@string/vehicle_type_truck" />
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/onb_vehicle_type_motorcycle"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
@@ -843,7 +843,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:text="@string/vehicle_type_forced_by_microphone"
-                    android:textAppearance="?attr/textAppearanceCaption"
+                    android:textAppearance="?attr/textAppearanceBodySmall"
                     android:visibility="gone" />
 
                 <TextView
@@ -851,19 +851,19 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
                     android:text="@string/onb_vehicle_help_aa"
-                    android:textAppearance="?attr/textAppearanceCaption" />
+                    android:textAppearance="?attr/textAppearanceBodySmall" />
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:text="@string/onb_vehicle_help_sideload"
-                    android:textAppearance="?attr/textAppearanceCaption" />
+                    android:textAppearance="?attr/textAppearanceBodySmall" />
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:text="@string/onb_vehicle_help_advanced"
-                    android:textAppearance="?attr/textAppearanceCaption" />
+                    android:textAppearance="?attr/textAppearanceBodySmall" />
             </LinearLayout>
         </ScrollView>
 
@@ -879,14 +879,14 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/onb_permissions_title"
-                    android:textAppearance="?attr/textAppearanceHeadline5"
-                    android:textStyle="bold" />
+                    android:textAppearance="?attr/textAppearanceHeadlineSmall"
+                    />
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:text="@string/onb_permissions_help"
-                    android:textAppearance="?attr/textAppearanceBody2" />
+                    android:textAppearance="?attr/textAppearanceBodyMedium" />
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/onb_perms_enable_all"
                     android:layout_width="match_parent"
@@ -914,14 +914,14 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/onb_ready_title"
-                    android:textAppearance="?attr/textAppearanceHeadline5"
-                    android:textStyle="bold" />
+                    android:textAppearance="?attr/textAppearanceHeadlineSmall"
+                    />
                 <TextView
                     android:id="@+id/onb_ready_summary"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
-                    android:textAppearance="?attr/textAppearanceBody1" />
+                    android:textAppearance="?attr/textAppearanceBodyLarge" />
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -1125,7 +1125,7 @@
         <!-- Secondary action on its own row so it never crowds Back/Next -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/onb_skip"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
+            style="@style/Widget.Material3.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
@@ -1143,7 +1143,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:contentDescription="@string/back"
-                app:icon="@drawable/ic_arrow_back" />
+                app:icon="@drawable/ic_arrow_back_24" />
             <View
                 android:layout_width="0dp"
                 android:layout_height="1dp"

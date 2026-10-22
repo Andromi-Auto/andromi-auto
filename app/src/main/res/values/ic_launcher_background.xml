@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="ic_launcher_background">#3198EF</color>
-    <!-- Andromi Auto: Xiaomi orange, background of the launcher icon. -->
+    <!-- Andromi Auto: Xiaomi orange (the mark) and white (background of the launcher icon). -->
     <color name="andromi_orange">#FF6900</color>
+    <color name="andromi_icon_background">#FFFFFF</color>
 </resources>
