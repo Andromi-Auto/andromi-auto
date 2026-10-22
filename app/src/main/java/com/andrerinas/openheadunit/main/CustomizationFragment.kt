@@ -33,7 +33,7 @@ import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.button.MaterialButtonToggleGroup
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.switchmaterial.SwitchMaterial
+import com.google.android.material.materialswitch.MaterialSwitch
 import com.google.android.material.textfield.TextInputEditText
 import com.andrerinas.openheadunit.App
 import com.andrerinas.openheadunit.R
@@ -86,7 +86,7 @@ class CustomizationFragment : Fragment() {
     private var rowColorUsb: View? = null
     private var rowColorWifi: View? = null
     private var rowColorSettings: View? = null
-    private var switchAutoMonochromeNight: SwitchMaterial? = null
+    private var switchAutoMonochromeNight: MaterialSwitch? = null
     private var btnMakeAllMonochrome: MaterialButton? = null
     private var btnResetColors: MaterialButton? = null
 

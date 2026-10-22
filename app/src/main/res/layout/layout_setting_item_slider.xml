@@ -15,8 +15,8 @@
         android:id="@+id/settingName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="?android:attr/textColorPrimary"
-        android:textSize="16sp"
+        android:textAppearance="?attr/textAppearanceBodyLarge"
+        android:textColor="?attr/colorOnSurface"
         tools:text="Stability timeout" />
 
     <TextView
@@ -24,8 +24,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="2dp"
-        android:textColor="?android:attr/textColorSecondary"
-        android:textSize="14sp"
+        android:textAppearance="?attr/textAppearanceBodyMedium"
+        android:textColor="?attr/colorOnSurfaceVariant"
         tools:text="10 s" />
 
     <SeekBar

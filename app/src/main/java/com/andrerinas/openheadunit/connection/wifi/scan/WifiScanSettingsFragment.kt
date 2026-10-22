@@ -30,7 +30,7 @@ import com.andrerinas.openheadunit.R
 import com.andrerinas.openheadunit.utils.AppLog
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.switchmaterial.SwitchMaterial
+import com.google.android.material.materialswitch.MaterialSwitch
 import kotlinx.coroutines.launch
 
 /** Permission and ADB setup stay on one screen; returning from Settings resumes the next step. */
@@ -38,7 +38,7 @@ class WifiScanSettingsFragment : Fragment() {
     private lateinit var status: TextView
     private lateinit var permission: MaterialButton
     private lateinit var retry: MaterialButton
-    private lateinit var toggle: SwitchMaterial
+    private lateinit var toggle: MaterialSwitch
     private lateinit var progress: TextView
     private lateinit var fyt: MaterialButton
     private lateinit var restoreAdb: MaterialButton
@@ -103,7 +103,7 @@ class WifiScanSettingsFragment : Fragment() {
         }
         text(R.string.wifi_scan_title).textSize = 24f
         text(R.string.wifi_scan_explanation)
-        toggle = SwitchMaterial(context).apply {
+        toggle = MaterialSwitch(context).apply {
             setText(R.string.wifi_scan_enable)
             setTextColor(colors(foreground, legibleText(surface, disabledText)))
             isChecked = WifiScanControl.enabled()

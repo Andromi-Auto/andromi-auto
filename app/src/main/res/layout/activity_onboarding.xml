@@ -396,7 +396,7 @@
                         android:layout_height="wrap_content"
                         android:text="@string/separate_audio_streams"
                         android:textAppearance="?attr/textAppearanceBody1" />
-                    <com.google.android.material.switchmaterial.SwitchMaterial
+                    <com.google.android.material.materialswitch.MaterialSwitch
                         android:id="@+id/onb_audio_separate_switch"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content" />
@@ -553,7 +553,7 @@
                         android:layout_height="wrap_content"
                         android:text="@string/auto_connect_last_session"
                         android:textAppearance="?attr/textAppearanceBody1" />
-                    <com.google.android.material.switchmaterial.SwitchMaterial
+                    <com.google.android.material.materialswitch.MaterialSwitch
                         android:id="@+id/onb_autoconnect_last_switch"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content" />
@@ -572,7 +572,7 @@
                         android:layout_height="wrap_content"
                         android:text="@string/auto_connect_single_usb"
                         android:textAppearance="?attr/textAppearanceBody1" />
-                    <com.google.android.material.switchmaterial.SwitchMaterial
+                    <com.google.android.material.materialswitch.MaterialSwitch
                         android:id="@+id/onb_autoconnect_single_switch"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content" />
@@ -592,7 +592,7 @@
                         android:layout_height="wrap_content"
                         android:text="@string/auto_start_usb_label"
                         android:textAppearance="?attr/textAppearanceBody1" />
-                    <com.google.android.material.switchmaterial.SwitchMaterial
+                    <com.google.android.material.materialswitch.MaterialSwitch
                         android:id="@+id/onb_autostart_usb_switch"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content" />
@@ -612,7 +612,7 @@
                         android:layout_height="wrap_content"
                         android:text="@string/reopen_on_reconnection_label"
                         android:textAppearance="?attr/textAppearanceBody1" />
-                    <com.google.android.material.switchmaterial.SwitchMaterial
+                    <com.google.android.material.materialswitch.MaterialSwitch
                         android:id="@+id/onb_reopen_switch"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content" />
@@ -632,7 +632,7 @@
                         android:layout_height="wrap_content"
                         android:text="@string/auto_start_wifi_label"
                         android:textAppearance="?attr/textAppearanceBody1" />
-                    <com.google.android.material.switchmaterial.SwitchMaterial
+                    <com.google.android.material.materialswitch.MaterialSwitch
                         android:id="@+id/onb_autostart_wifi_switch"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content" />
@@ -760,7 +760,7 @@
                         android:layout_height="wrap_content"
                         android:text="@string/right_hand_drive"
                         android:textAppearance="?attr/textAppearanceBody1" />
-                    <com.google.android.material.switchmaterial.SwitchMaterial
+                    <com.google.android.material.materialswitch.MaterialSwitch
                         android:id="@+id/onb_vehicle_rhd_switch"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content" />

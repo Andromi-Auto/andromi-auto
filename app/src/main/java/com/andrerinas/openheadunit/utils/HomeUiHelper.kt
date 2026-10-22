@@ -10,6 +10,8 @@ import com.google.android.material.button.MaterialButton
 
 object HomeUiHelper {
 
+    private const val ANDROMI_MATERIAL_HOME = true
+
     private data class ButtonConfig(
         val button: MaterialButton?,
         val defaultDrawableRes: Int,
@@ -29,7 +31,6 @@ object HomeUiHelper {
         val showsWifi = settings.showsWifi()
 
         val selfBtn = rootView.findViewById<View>(R.id.self_mode_button)
-        val selfTxt = rootView.findViewById<View>(R.id.self_mode_text)
         val usbBtn = rootView.findViewById<View>(R.id.usb_button)
         val usbTxt = rootView.findViewById<View>(R.id.usb_text)
         val wifiBtn = rootView.findViewById<View>(R.id.wifi_button)
@@ -38,8 +39,6 @@ object HomeUiHelper {
         selfBtn?.visibility = View.VISIBLE
         selfBtn?.isEnabled = showsSelf
         selfBtn?.isClickable = showsSelf
-        selfTxt?.visibility = View.VISIBLE
-        selfTxt?.alpha = if (showsSelf) 1.0f else 0.4f
 
         // Andromi Auto: no USB or wireless connections, only Self Mode.
         usbBtn?.visibility = if (showsUsb) View.VISIBLE else View.GONE
@@ -54,6 +53,8 @@ object HomeUiHelper {
         isPortrait: Boolean,
         density: Float
     ) {
+        // Andromi Auto: the Material 3 home screen has fixed sizes.
+        if (ANDROMI_MATERIAL_HOME) return
         val validScale = if (scalePercent in 60..120) scalePercent else 100
         val scaleFactor = validScale / 100.0f
 
@@ -95,6 +96,8 @@ object HomeUiHelper {
         isNightActive: Boolean,
         isConnected: Boolean = false
     ) {
+        // Andromi Auto: the Material 3 home screen keeps the theme's (dynamic) colours.
+        if (ANDROMI_MATERIAL_HOME) return
         val selfBtn = rootView.findViewById<MaterialButton>(R.id.self_mode_button)
         val usbBtn = rootView.findViewById<MaterialButton>(R.id.usb_button)
         val wifiBtn = rootView.findViewById<MaterialButton>(R.id.wifi_button)

@@ -39,6 +39,12 @@ class AutoStartReceiver : BroadcastReceiver() {
             return
         }
 
+        // Andromi Auto: the car's Bluetooth only starts Android Auto while "Automatic start" is on.
+        if (!com.andrerinas.openheadunit.App.provide(context).settings.autoStartSelfMode) {
+            AppLog.d("AutoStartReceiver: automatic start is off. Ignoring BT event.")
+            return
+        }
+
         if (action == BluetoothDevice.ACTION_ACL_CONNECTED) {
             val device = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
                 intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE, BluetoothDevice::class.java)

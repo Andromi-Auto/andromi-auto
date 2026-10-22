@@ -234,6 +234,11 @@
         </activity-alias>
 
         <activity
+            android:name=".main.AutoStartSetupActivity"
+            android:exported="false"
+            android:theme="@style/AppTheme" />
+
+        <activity
             android:name=".main.SettingsActivity"
             android:label="@string/settings"
             android:windowSoftInputMode="stateHidden|adjustResize"

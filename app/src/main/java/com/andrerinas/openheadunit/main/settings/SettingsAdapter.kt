@@ -216,7 +216,7 @@ class SettingsAdapter : ListAdapter<SettingItem, RecyclerView.ViewHolder>(Settin
     class ToggleSettingViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val settingName: TextView = itemView.findViewById(R.id.settingName)
         private val settingDescription: TextView = itemView.findViewById(R.id.settingDescription)
-        private val settingSwitch: Switch = itemView.findViewById(R.id.settingSwitch)
+        private val settingSwitch: android.widget.CompoundButton = itemView.findViewById(R.id.settingSwitch)
 
         fun bind(setting: SettingItem.ToggleSettingEntry) {
             if (setting.nameOverride != null) settingName.text = setting.nameOverride

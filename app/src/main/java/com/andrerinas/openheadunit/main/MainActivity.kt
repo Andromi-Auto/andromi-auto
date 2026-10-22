@@ -263,6 +263,11 @@ class MainActivity : BaseActivity() {
             // The connect pill and the Self Mode launch are raised from handleLaunchIntent, so a
             // warm activity handed the same intent behaves the same way.
             findViewById<View>(R.id.splash_overlay)?.visibility = View.GONE
+        } else if (savedInstanceState == null && AndromiAutoStart.startsOnOpen(this)) {
+            // Andromi Auto: automatic start is on, so skip the splash and the start screen and
+            // show only the "Android Auto is starting" screen. HomeFragment starts Self Mode.
+            findViewById<View>(R.id.splash_overlay)?.visibility = View.GONE
+            beginAutoConnect("Andromi Auto automatic start", ConnectionUiMode.OVERLAY)
         } else if (savedInstanceState == null) {
             val elapsedSinceStart = SystemClock.elapsedRealtime() - App.appStartTime
             val targetTotalDuration = 1200L
@@ -1113,7 +1118,10 @@ class MainActivity : BaseActivity() {
             // The service refuses this arrival while the pill's X holds, and a pill with nothing
             // behind it would otherwise sit there for the watchdog's full deadline.
             if (!commManager.isConnected && AapService.instance?.wirelessCancelledByUser() != true) {
-                beginAutoConnect(LAUNCH_SOURCE_BLUETOOTH, ConnectionUiMode.PILL)
+                // Andromi Auto: Self Mode only, so the car's Bluetooth means "start Android Auto
+                // now": the full "Android Auto is starting" screen instead of a small pill.
+                val mode = if (settings.showsWifi()) ConnectionUiMode.PILL else ConnectionUiMode.OVERLAY
+                beginAutoConnect(LAUNCH_SOURCE_BLUETOOTH, mode)
             }
             val launchesSelfMode = BtAutoStartRearmPolicy.launchesSelfMode(
                 selfSelected = settings.showsSelf(),

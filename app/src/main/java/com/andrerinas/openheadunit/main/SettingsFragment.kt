@@ -1060,6 +1060,17 @@ class SettingsFragment : Fragment() {
         // --- General Settings ---
         items.add(SettingItem.CategoryHeader("general", R.string.category_general))
 
+        // Andromi Auto: automatic start (root setup, car Bluetooth, on/off) has its own screen.
+        items.add(SettingItem.SettingEntry(
+            stableId = "andromiAutoStart",
+            nameResId = R.string.andromi_auto_start_title,
+            value = getString(if (settings.autoStartSelfMode) R.string.andromi_auto_start_home_summary_on
+                else R.string.andromi_auto_start_home_summary_off),
+            onClick = { _ ->
+                startActivity(Intent(requireContext(), AutoStartSetupActivity::class.java))
+            }
+        ))
+
         // Auto-Optimize Wizard
         items.add(SettingItem.SettingEntry(
             stableId = "autoOptimize",
@@ -5343,7 +5354,7 @@ class SettingsFragment : Fragment() {
         val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_oem_app_manager, null)
 
         val tvBackendStatus = dialogView.findViewById<TextView>(R.id.tvBackendStatus)
-        val switchAutoKill = dialogView.findViewById<com.google.android.material.switchmaterial.SwitchMaterial>(R.id.switchAutoKill)
+        val switchAutoKill = dialogView.findViewById<com.google.android.material.materialswitch.MaterialSwitch>(R.id.switchAutoKill)
         val progressLoading = dialogView.findViewById<ProgressBar>(R.id.progressLoading)
         val appsContainer = dialogView.findViewById<LinearLayout>(R.id.appsContainer)
         val tvEmptyState = dialogView.findViewById<TextView>(R.id.tvEmptyState)
