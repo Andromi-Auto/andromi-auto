@@ -198,7 +198,7 @@ class OnboardingActivity : BaseActivity() {
         if (stepper.childCount != steps.size) buildStepperDots()
         val density = resources.displayMetrics.density
         val active = resolveAttrColor(com.google.android.material.R.attr.colorPrimary)
-        val inactive = 0x33808080
+        val inactive = resolveAttrColor(com.google.android.material.R.attr.colorOutlineVariant)
         val currentPos = steps.indexOf(step).coerceAtLeast(0)
         for (i in steps.indices) {
             val dot = stepper.getChildAt(i) ?: continue

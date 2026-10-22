@@ -1,15 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item>
-        <shape>
-            <solid android:color="?attr/colorSurfaceContainer" />
-            <corners android:radius="24dp" />
-        </shape>
-    </item>
-    <item>
-        <shape>
-            <solid android:color="#1A448AFF" />
-            <corners android:radius="24dp" />
-        </shape>
-    </item>
-</layer-list>
+<!-- Material 3 info banner: secondary container colour, large rounded corners. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="?attr/colorSecondaryContainer" />
+    <corners android:radius="24dp" />
+</shape>

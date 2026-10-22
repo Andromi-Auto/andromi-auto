@@ -14,7 +14,5 @@
         android:minHeight="0dp"
         android:text="@string/add_new"
         android:enabled="true"
-        android:textColor="@android:color/white"
-        app:cornerRadius="20dp"
-        app:backgroundTint="?attr/colorPrimary" />
+        app:cornerRadius="20dp" />
 </FrameLayout>

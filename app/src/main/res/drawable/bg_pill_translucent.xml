@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Material 3 status pill: highest surface container, fully rounded. -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="#40000000" />
-    <corners android:radius="20dp" />
+    <solid android:color="?attr/colorSurfaceContainerHighest" />
+    <corners android:radius="28dp" />
 </shape>

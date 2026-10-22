@@ -1,20 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Andromi Auto launcher icon: the Android Auto symbol in white, on Xiaomi orange (background). -->
+<!--
+    Andromi Auto launcher icon (foreground, on a white background): the Android Auto mark in
+    Xiaomi orange. Each shape has a darker left half and a lighter right half, like the original.
+    Generated from the reference picture; shapes are polygons with round (arc) corners.
+-->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <path
-        android:fillColor="#FFFFFF"
-        android:strokeColor="#FFFFFF"
-        android:strokeWidth="3.5"
-        android:strokeLineJoin="round"
-        android:pathData="M54,25 L78.5,73 L67.5,73 L54,46.5 L40.5,73 L29.5,73 Z" />
-    <path
-        android:fillColor="#FFFFFF"
-        android:strokeColor="#FFFFFF"
-        android:strokeWidth="2.5"
-        android:strokeLineJoin="round"
-        android:pathData="M54,55 L65,79 L54,73.5 L43,79 Z" />
+    <group
+        android:pivotX="54"
+        android:pivotY="52.1"
+        android:scaleX="0.6"
+        android:scaleY="0.6"
+        android:translateY="1.9">
+        <group>
+            <clip-path android:pathData="M0,0H54V108H0Z" />
+            <path android:fillColor="#F26100" android:pathData="M59.20,23.17 L87.88,73.16 A4.57,4.57 0 0 1 83.92,80.00 L75.68,80.00 A0.50,0.50 0 0 1 75.24,79.74 L54.88,42.88 A1.00,1.00 0 0 0 53.12,42.88 L32.76,79.74 A0.50,0.50 0 0 1 32.32,80.00 L24.08,80.00 A4.57,4.57 0 0 1 20.12,73.16 L48.80,23.17 A6.00,6.00 0 0 1 59.20,23.17 Z" />
+        </group>
+        <group>
+            <clip-path android:pathData="M54,0H108V108H54Z" />
+            <path android:fillColor="#FF6900" android:pathData="M59.20,23.17 L87.88,73.16 A4.57,4.57 0 0 1 83.92,80.00 L75.68,80.00 A0.50,0.50 0 0 1 75.24,79.74 L54.88,42.88 A1.00,1.00 0 0 0 53.12,42.88 L32.76,79.74 A0.50,0.50 0 0 1 32.32,80.00 L24.08,80.00 A4.57,4.57 0 0 1 20.12,73.16 L48.80,23.17 A6.00,6.00 0 0 1 59.20,23.17 Z" />
+        </group>
+        <group>
+            <clip-path android:pathData="M0,0H54V108H0Z" />
+            <path android:fillColor="#F2F2F2" android:pathData="M57.49,43.54 L78.29,80.73 A4.50,4.50 0 0 1 73.01,87.22 L54.45,81.37 A1.50,1.50 0 0 0 53.55,81.37 L34.99,87.22 A4.50,4.50 0 0 1 29.71,80.73 L50.51,43.54 A4.00,4.00 0 0 1 57.49,43.54 Z" />
+        </group>
+        <group>
+            <clip-path android:pathData="M54,0H108V108H54Z" />
+            <path android:fillColor="#E3E3E3" android:pathData="M57.49,43.54 L78.29,80.73 A4.50,4.50 0 0 1 73.01,87.22 L54.45,81.37 A1.50,1.50 0 0 0 53.55,81.37 L34.99,87.22 A4.50,4.50 0 0 1 29.71,80.73 L50.51,43.54 A4.00,4.00 0 0 1 57.49,43.54 Z" />
+        </group>
+    </group>
 </vector>
