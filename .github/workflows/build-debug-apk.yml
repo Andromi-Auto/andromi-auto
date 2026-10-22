@@ -6,7 +6,8 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
+  actions: write
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -54,16 +55,47 @@ jobs:
           ANDROMI_KEY_PASSWORD: ${{ secrets.ANDROMI_KEY_PASSWORD }}
         run: ./gradlew :app:assembleGithubDebug :app:assembleGithubRelease --no-daemon --stacktrace
 
+      - name: Name the APK files
+        run: |
+          mkdir -p dist
+          cp app/build/outputs/apk/github/debug/*.apk dist/Andromi-Auto-debug.apk
+          cp app/build/outputs/apk/github/release/*.apk dist/Andromi-Auto-release.apk
+
+      - name: Remove the build files of older runs (they fill the storage quota)
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api --paginate "repos/$GITHUB_REPOSITORY/actions/artifacts?per_page=100" --jq '.artifacts[].id' | while read -r id; do
+            gh api -X DELETE "repos/$GITHUB_REPOSITORY/actions/artifacts/$id" >/dev/null || true
+          done
+
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
+        continue-on-error: true
         with:
           name: andromi-auto-debug
-          path: app/build/outputs/apk/github/debug/*.apk
-          if-no-files-found: error
+          path: dist/Andromi-Auto-debug.apk
+          retention-days: 7
 
       - name: Upload release APK
         uses: actions/upload-artifact@v4
+        continue-on-error: true
         with:
           name: andromi-auto-release
-          path: app/build/outputs/apk/github/release/*.apk
-          if-no-files-found: error
+          path: dist/Andromi-Auto-release.apk
+          retention-days: 7
+
+      - name: Put the test build on the branch's test release page
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: test-${{ github.ref_name }}
+        run: |
+          NOTES="Test build ${{ github.run_number }} of branch ${{ github.ref_name }} (commit ${GITHUB_SHA::7}). Not a release: install Andromi-Auto-debug.apk to test."
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" dist/Andromi-Auto-debug.apk dist/Andromi-Auto-release.apk --clobber
+            gh release edit "$TAG" --notes "$NOTES" --prerelease --latest=false
+          else
+            gh release create "$TAG" dist/Andromi-Auto-debug.apk dist/Andromi-Auto-release.apk --target "$GITHUB_SHA" \
+              --title "Test build ($TAG)" --prerelease --latest=false --notes "$NOTES"
+          fi
