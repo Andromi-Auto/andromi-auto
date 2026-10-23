@@ -2,7 +2,8 @@
 <!--
     Andromi Auto settings: Material 3 large top app bar that collapses on scroll, a pill search
     bar, one list of everything (no Basic / Advanced split) and a Save button that only appears
-    when something changed. Colours come from the wallpaper (Monet).
+    when something changed. Colours come from the wallpaper (Monet). The bar keeps the page colour
+    when the list scrolls under it, so the pinned search pill does not blend into a tinted bar.
 -->
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -18,6 +19,7 @@
         android:background="?android:attr/colorBackground"
         android:fitsSystemWindows="true"
         app:liftOnScroll="true"
+        app:liftOnScrollColor="?android:attr/colorBackground"
         app:liftOnScrollTargetViewId="@id/settingsRecyclerView">
 
         <com.google.android.material.appbar.CollapsingToolbarLayout

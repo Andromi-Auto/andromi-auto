@@ -189,7 +189,11 @@ class HomeFragment : Fragment() {
                         }
                     }
                     Settings.AUTO_CONNECT_SELF_MODE -> {
-                        if ((appSettings.autoStartSelfMode || forceSelfModeLaunch) && !hasAutoStarted && !commManager.isConnected) {
+                        // Andromi Auto: automatic start waits for the car's Bluetooth; a forced
+                        // launch (the car connecting) has already seen it.
+                        if ((forceSelfModeLaunch || (appSettings.autoStartSelfMode &&
+                                AndromiAutoStart.carConnected(requireContext()))) &&
+                            !hasAutoStarted && !commManager.isConnected) {
                             hasAutoStarted = true
                             forceSelfModeLaunch = false // Reset once processed
                             (requireActivity() as? MainActivity)?.beginAutoConnect(
