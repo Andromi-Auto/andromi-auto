@@ -36,6 +36,7 @@ import com.andrerinas.openheadunit.app.BootCompleteReceiver
 import com.andrerinas.openheadunit.app.BootLoopPolicy
 import com.andrerinas.openheadunit.app.BtAutoDisconnectArm
 import com.andrerinas.openheadunit.app.BtAutoDisconnectPolicy
+import com.andrerinas.openheadunit.main.AndromiAutoStart
 import com.andrerinas.openheadunit.app.BtAutoStartRearmPolicy
 import com.andrerinas.openheadunit.app.ForegroundServiceTypePolicy
 import com.andrerinas.openheadunit.app.WifiAutoStartReceiver
@@ -2235,9 +2236,6 @@ class AapService : Service() {
                 android.bluetooth.BluetoothDevice.ACTION_ACL_DISCONNECTED -> false
                 else -> return
             }
-            val watched = App.provide(this@AapService).settings.autoDisconnectBluetoothDeviceMacs
-            if (watched.isEmpty()) return
-
             val device = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 intent.getParcelableExtra(android.bluetooth.BluetoothDevice.EXTRA_DEVICE, android.bluetooth.BluetoothDevice::class.java)
             } else {
@@ -2245,6 +2243,11 @@ class AapService : Service() {
                 intent.getParcelableExtra(android.bluetooth.BluetoothDevice.EXTRA_DEVICE)
             }
             val mac = device?.address
+
+            onAndromiCarLinkEvent(mac, connected)
+
+            val watched = App.provide(this@AapService).settings.autoDisconnectBluetoothDeviceMacs
+            if (watched.isEmpty()) return
 
             when (BtAutoDisconnectPolicy.onAclEvent(watched, mac, connected)) {
                 BtAutoDisconnectArm.IGNORE -> {}
@@ -2260,6 +2263,43 @@ class AapService : Service() {
 
     private fun isSessionUp(): Boolean =
         commManager.isConnected || commManager.connectionState.value is CommManager.ConnectionState.Connecting
+
+    /** Andromi Auto: the pending "the car went away" stop, cancelled if the car comes back. */
+    private var carGoneStopJob: kotlinx.coroutines.Job? = null
+
+    /**
+     * Andromi Auto: with automatic start on, the car's Bluetooth going away stops Android Auto
+     * and the head unit server the way Exit does, after a short grace for a Bluetooth blip.
+     */
+    private fun onAndromiCarLinkEvent(mac: String?, connected: Boolean) {
+        val settings = App.provide(this).settings
+        val carMacs = settings.autoStartBluetoothDeviceMacs
+        if (AndromiAutoStart.isCarBack(carMacs, mac, connected)) {
+            if (carGoneStopJob?.also { it.cancel() } != null) {
+                AppLog.i("AapService: automatic start: the car ($mac) is back; Android Auto keeps running.")
+            }
+            carGoneStopJob = null
+            return
+        }
+        if (!AndromiAutoStart.isCarLeaving(settings.autoStartSelfMode, carMacs, mac, connected)) return
+        if (!isSessionUp() && !selfLauncherManager.isActive && !selfLauncherManager.isLaunchInFlight()) {
+            AppLog.i("AapService: automatic start: the car ($mac) went away, but Android Auto is not running.")
+            return
+        }
+        AppLog.i("AapService: automatic start: the car ($mac) went away; stopping Android Auto in " +
+            "${AndromiAutoStart.CAR_GONE_GRACE_MS}ms unless it comes back.")
+        carGoneStopJob?.cancel()
+        carGoneStopJob = serviceScope.launch {
+            delay(AndromiAutoStart.CAR_GONE_GRACE_MS)
+            carGoneStopJob = null
+            AppLog.i("AapService: automatic start: the car stayed away; stopping Android Auto and the head unit server.")
+            try {
+                startService(Intent(this@AapService, AapService::class.java).setAction(ACTION_STOP_SERVICE))
+            } catch (e: Exception) {
+                AppLog.e("AapService: automatic start: could not stop Android Auto: ${e.message}")
+            }
+        }
+    }
 
     private fun armBtAutoDisconnect(mac: String) {
         if (!isSessionUp()) {
@@ -3015,6 +3055,8 @@ class AapService : Service() {
         }
         try { unregisterReceiver(btAutoDisconnectReceiver) } catch (_: Exception) {}
         cancelAllBtAutoDisconnects()
+        carGoneStopJob?.cancel()
+        carGoneStopJob = null
         btAutoDisconnectStandDown = false
         stationScanMonitor.stop(this)
         try { carKeysManager.unregisterAll() } catch (e: Exception) { AppLog.w("AapService: Error unregistering carKeysManager: ${e.message}") }
