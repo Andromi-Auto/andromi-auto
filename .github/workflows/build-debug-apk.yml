@@ -1,8 +1,11 @@
 name: Build APKs
 
+# development: every push replaces the "development" pre-release.
+# main: every push publishes a new stable release.
+# Run by hand on any other branch: the build goes to that branch's test pre-release.
 on:
   push:
-    branches: [main]
+    branches: [main, development]
   workflow_dispatch:
 
 permissions:
@@ -86,7 +89,31 @@ jobs:
           path: dist/Andromi-Auto-release.apk
           retention-days: 7
 
+      - name: Publish the development pre-release
+        if: github.ref_name == 'development'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: development
+        run: |
+          NOTES="Development build ${{ github.run_number }} (commit ${GITHUB_SHA::7}). Not a stable release: install Andromi-Auto-debug.apk to test."
+          # Recreated each time so the tag follows the newest development commit.
+          gh release delete "$TAG" --cleanup-tag --yes >/dev/null 2>&1 || true
+          gh release create "$TAG" dist/Andromi-Auto-debug.apk dist/Andromi-Auto-release.apk --target "$GITHUB_SHA" \
+            --title "Development build ${{ github.run_number }}" --prerelease --latest=false --notes "$NOTES"
+
+      - name: Publish the stable release
+        if: github.ref_name == 'main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION=$(sed -n 's/^ *versionName = "\(.*\)"/\1/p' app/build.gradle.kts | head -1)
+          TAG="v${VERSION}-build${{ github.run_number }}"
+          NOTES="Andromi Auto ${VERSION}, build ${{ github.run_number }} (commit ${GITHUB_SHA::7}). Install Andromi-Auto-release.apk."
+          gh release create "$TAG" dist/Andromi-Auto-release.apk dist/Andromi-Auto-debug.apk --target "$GITHUB_SHA" \
+            --title "Andromi Auto ${VERSION} (build ${{ github.run_number }})" --latest --notes "$NOTES"
+
       - name: Put the test build on the branch's test release page
+        if: github.ref_name != 'main' && github.ref_name != 'development'
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: test-${{ github.ref_name }}

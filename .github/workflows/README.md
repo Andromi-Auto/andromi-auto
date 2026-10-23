@@ -2,7 +2,7 @@
 
 ## `android-ci.yml` — Android CI
 
-Runs on every pull request and on pushes to `main`. Two parallel jobs:
+Runs on every pull request and on pushes to `main` and `development`. Two parallel jobs:
 
 | Check                         | What it does                                                                                                                                         | Intended to block? |
 | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------: |
@@ -55,3 +55,13 @@ these status checks:
 - **Action pinning:** all actions (GitHub first-party and third-party alike)
   are pinned to major-version tags. Maintainers who want stricter supply-chain
   hygiene can repin them to full commit SHAs.
+
+## `build-debug-apk.yml` — Build APKs
+
+Builds the signed debug and release APKs and publishes them:
+
+| Branch        | Where the APKs go                                                                                  |
+| ------------- | -------------------------------------------------------------------------------------------------- |
+| `development` | The `development` pre-release, replaced on every push. Day-to-day work happens on this branch.     |
+| `main`        | A new stable release per push, tagged `v<versionName>-build<run number>` and marked latest.        |
+| any other     | Run by hand (workflow_dispatch): the branch's `test-<branch>` pre-release.                         |
