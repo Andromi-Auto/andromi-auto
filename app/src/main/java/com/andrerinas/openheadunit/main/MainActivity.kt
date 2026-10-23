@@ -102,6 +102,14 @@ class MainActivity : BaseActivity() {
             if (intent.action == "com.andrerinas.openheadunit.ACTION_FINISH_ACTIVITIES") {
                 AppLog.i("MainActivity: Received finish request. Closing.")
                 finishAffinity()
+            } else if (intent.action == ACTION_CAR_GONE) {
+                // Andromi Auto: the service stopped Android Auto because the car left. Stay on the
+                // home screen, and drop a "starting" screen the stopped launch will never answer.
+                HomeFragment.forceSelfModeLaunch = false
+                if (autoConnectInProgress) {
+                    AppLog.i("MainActivity: the car left, ending the Android Auto start")
+                    endAutoConnect(success = false)
+                }
             }
         }
     }
@@ -289,7 +297,9 @@ class MainActivity : BaseActivity() {
 
         ContextCompat.registerReceiver(
             this, finishReceiver,
-            android.content.IntentFilter("com.andrerinas.openheadunit.ACTION_FINISH_ACTIVITIES"),
+            android.content.IntentFilter("com.andrerinas.openheadunit.ACTION_FINISH_ACTIVITIES").apply {
+                addAction(ACTION_CAR_GONE)
+            },
             ContextCompat.RECEIVER_NOT_EXPORTED
         )
         isFinishReceiverRegistered = true
@@ -1529,6 +1539,8 @@ class MainActivity : BaseActivity() {
         @Volatile var hasRequestedPermissionsThisSession: Boolean = false
         const val EXTRA_LAUNCH_SOURCE = "launch_source"
         const val LAUNCH_SOURCE_BLUETOOTH = "Bluetooth auto-start"
+        /** Andromi Auto: Android Auto was stopped because the car's Bluetooth went away. */
+        const val ACTION_CAR_GONE = "com.andrerinas.openheadunit.ACTION_CAR_GONE"
         const val EXTRA_SHOW_DRIVER_SELECTOR = "show_driver_selector"
 
         /** Launch sources that mean the app opened itself, with nobody necessarily watching. */
