@@ -13,7 +13,8 @@ repeat it.
 
 ## What the app is
 - Repository: `Andromi-Auto/andromi-auto` (public, fork of
-  `andreknieriem/open-headunit`, AGPL-3.0). Work on `main`; every push builds a test APK.
+  `andreknieriem/open-headunit`, AGPL-3.0). Work on `development` (every push builds the
+  `development` pre-release); `main` is for stable releases.
 - Andromi Auto = Open Headunit reduced to **Self Mode**: Android Auto runs on the phone itself and
   this app shows it; HyperOS "Xiaomi Interconnectivity" mirrors the app window to the car screen,
   where the user pins it. It is for the user's own use (and possibly a few others).
@@ -24,10 +25,13 @@ repeat it.
   and stays above the real Baidu app. Never lower the base.
 
 ## Building, signing, releases
-- GitHub Actions `.github/workflows/build-debug-apk.yml` ("Build APKs") on push to `main`:
-  assembles `githubDebug` + `githubRelease`, deletes old artifacts (quota), uploads new ones for
-  7 days, and attaches `Andromi-Auto-debug.apk` / `Andromi-Auto-release.apk` to the prerelease
-  `test-<branch>` (= `test-main`). The user installs from that release page.
+- GitHub Actions `.github/workflows/build-debug-apk.yml` ("Build APKs") on push to `development`
+  or `main`: assembles `githubDebug` + `githubRelease`, deletes old artifacts (quota), uploads new
+  ones for 7 days, and attaches `Andromi-Auto-debug.apk` / `Andromi-Auto-release.apk` to a release:
+  - `development`: the `development` pre-release, deleted and recreated on every push.
+  - `main`: a new stable release `v<versionName>-build<run number>`, marked latest.
+  - Run by hand on another branch: its `test-<branch>` pre-release.
+  The user installs test builds from the `development` pre-release.
 - Signing: one key for debug and release, from repo secrets `ANDROMI_KEYSTORE_B64` (base64
   PKCS12, alias `andromi`) and `ANDROMI_KEY_PASSWORD`. The workflow writes it to
   `app/andromi.keystore` (gitignored). Never commit the keystore or password. Without the secrets
@@ -106,7 +110,8 @@ repeat it.
 - Keep explanations short and non-technical; say exactly what to click and what to send back
   (screenshots, the Settings "Android Auto picture" card, or Settings > Debug > Export logs).
 - Ask before large changes in direction; the user decides look and behaviour.
-- Commit with clear messages and push to `main`; wait for both workflows to be green before
-  telling the user a build is ready.
+- Commit with clear messages and push to `development`; wait for both workflows to be green
+  before telling the user a build is ready. Merge into `main` only when the user asks for a
+  stable release.
 - Keep AGPL obligations: the repository stays public, credits stay in README/About/LICENSE.
 - Never put model names in commits or files.
