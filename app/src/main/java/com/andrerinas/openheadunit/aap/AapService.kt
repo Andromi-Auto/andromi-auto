@@ -2292,13 +2292,29 @@ class AapService : Service() {
         carGoneStopJob = serviceScope.launch {
             delay(AndromiAutoStart.CAR_GONE_GRACE_MS)
             carGoneStopJob = null
-            AppLog.i("AapService: automatic start: the car stayed away; stopping Android Auto and the head unit server.")
-            try {
-                startService(Intent(this@AapService, AapService::class.java).setAction(ACTION_STOP_SERVICE))
-            } catch (e: Exception) {
-                AppLog.e("AapService: automatic start: could not stop Android Auto: ${e.message}")
-            }
+            stopAndroidAutoForCarGone()
         }
+    }
+
+    /**
+     * Ends Android Auto and the head unit server but keeps Andromi open on its home screen, so
+     * the car connecting again starts it the usual way. Ended as a user exit, so the projection
+     * screen closes instead of waiting to reconnect; the Bluetooth auto-start clears that latch.
+     */
+    private fun stopAndroidAutoForCarGone() {
+        AppLog.i("AapService: automatic start: the car stayed away; stopping Android Auto and the head unit server.")
+        val sessionUp = isSessionUp()
+        // First, so a launch still in flight cannot bring a session back.
+        selfLauncherManager.stop(wasConnected = sessionUp)
+        if (sessionUp) {
+            // The stand-down stops the server once the session has closed; see onDisconnect.
+            btAutoDisconnectStandDown = true
+            commManager.disconnect(sendByeBye = true, isUserExit = true, honorKillOnDisconnect = false)
+        } else {
+            wifiLauncherManager.stop(WifiLauncherStopSequence.LAST)
+            userExitedAA = true
+        }
+        sendBroadcast(Intent(MainActivity.ACTION_CAR_GONE).setPackage(packageName))
     }
 
     private fun armBtAutoDisconnect(mac: String) {
