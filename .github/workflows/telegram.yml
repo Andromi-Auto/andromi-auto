@@ -76,6 +76,8 @@ jobs:
           if [ "$CHECK_ONLY" = "true" ]; then
             BOT=$(api getMe | python3 -c "import json,sys; r=json.load(sys.stdin); assert r['ok'], r; print(r['result']['id'], r['result']['username'])")
             echo "Bot: @${BOT#* }"
+            api getChat --data-urlencode "chat_id=$CHAT" \
+              | python3 -c "import json,sys; r=json.load(sys.stdin)['result']; print('Chat:', r.get('title'), '| type:', r.get('type'))"
             api getChatMember --data-urlencode "chat_id=$CHAT" --data-urlencode "user_id=${BOT%% *}" \
               | python3 -c "
           import json, sys
@@ -83,8 +85,10 @@ jobs:
           if not r.get('ok'):
               print('Cannot see the channel:', r.get('description')); sys.exit(1)
           m = r['result']
-          print('Status in the channel:', m['status'], '| can post:', m.get('can_post_messages'))
-          sys.exit(0 if m['status'] == 'creator' or m.get('can_post_messages') else 1)"
+          # can_post_messages exists only for channels; in a group an admin can always post.
+          can = m['status'] == 'creator' or (m['status'] == 'administrator' and m.get('can_post_messages') is not False)
+          print('Status:', m['status'], '| can_post_messages:', m.get('can_post_messages'), '| can post:', can)
+          sys.exit(0 if can else 1)"
             exit $?
           fi
 
