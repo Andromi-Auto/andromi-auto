@@ -95,7 +95,6 @@ class NetworkListFragment : Fragment(), NetworkDiscovery.Listener {
         toolbar.setNavigationOnClickListener {
             findNavController().popBackStack()
         }
-        toolbar.navigationIcon = androidx.core.content.ContextCompat.getDrawable(requireContext(), R.drawable.ic_arrow_back_white)
 
         setupToolbarMenu()
     }

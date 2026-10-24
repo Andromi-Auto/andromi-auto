@@ -16,9 +16,7 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:title="@string/keymap"
-            app:navigationIcon="@drawable/ic_arrow_back_24"
-            app:navigationIconTint="?attr/colorOnSurface" />
+            app:title="@string/keymap" />
 
     </com.google.android.material.appbar.AppBarLayout>
 

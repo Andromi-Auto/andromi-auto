@@ -3,6 +3,7 @@
 <!-- Same header as Settings: Material 3 large title that collapses on scroll. -->
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/autoStartRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?android:attr/colorBackground">
@@ -29,9 +30,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:elevation="0dp"
-                app:layout_collapseMode="pin"
-                app:navigationIcon="@drawable/ic_arrow_back_24"
-                app:navigationIconTint="?attr/colorOnSurface" />
+                app:layout_collapseMode="pin" />
         </com.google.android.material.appbar.CollapsingToolbarLayout>
     </com.google.android.material.appbar.AppBarLayout>
 

@@ -17,8 +17,6 @@ import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import com.andrerinas.openheadunit.App
 import com.andrerinas.openheadunit.R
@@ -26,8 +24,8 @@ import com.andrerinas.openheadunit.app.BaseActivity
 import com.andrerinas.openheadunit.utils.BluetoothHelper
 import com.andrerinas.openheadunit.utils.RootSetup
 import com.andrerinas.openheadunit.utils.Settings
+import com.andrerinas.openheadunit.utils.SystemUI
 import com.andrerinas.openheadunit.utils.ToastUtils
-import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.color.MaterialColors
 import com.google.android.material.materialswitch.MaterialSwitch
@@ -51,15 +49,7 @@ class AutoStartSetupActivity : BaseActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_auto_start_setup)
-        findViewById<MaterialToolbar>(R.id.toolbar).setNavigationOnClickListener { finish() }
-        // The app bar takes the status bar; the list keeps clear of the navigation bar and cutouts.
-        val scroll = findViewById<View>(R.id.autoStartScroll)
-        val basePadding = scroll.paddingBottom
-        ViewCompat.setOnApplyWindowInsetsListener(scroll) { v, insets ->
-            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout())
-            v.setPadding(bars.left, v.paddingTop, bars.right, basePadding + bars.bottom)
-            insets
-        }
+        applyFullscreen()
 
         val switch = findViewById<MaterialSwitch>(R.id.auto_switch)
         switch.isChecked = settings.autoStartSelfMode
@@ -93,6 +83,17 @@ class AutoStartSetupActivity : BaseActivity() {
     override fun onResume() {
         super.onResume()
         render()
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        // A dialog (the device picker, the root prompt) brings the bars back when it closes.
+        if (hasFocus) applyFullscreen()
+    }
+
+    /** The app's full-screen mode, the same as Settings and the home screen. */
+    private fun applyFullscreen() {
+        SystemUI.apply(window, findViewById(R.id.autoStartRoot), settings.fullscreenMode, notesCanvas = false)
     }
 
     private fun render() {
