@@ -1470,8 +1470,7 @@
     <string name="andromi_portrait">Portrait</string>
     <string name="andromi_landscape">Landscape</string>
     <string name="andromi_screen_title">Screen</string>
-    <string name="andromi_screen_portrait_summary">Portrait · for car size 1</string>
-    <string name="andromi_screen_landscape_summary">Landscape · for car sizes 2 and 3</string>
+    <string name="andromi_screen_hint">Use Portrait to pin Andromi Auto on the car screen. After pinning, switch to Landscape for Android Auto.</string>
     <!-- Andromi Auto: update check (stable releases on GitHub) -->
     <string name="andromi_version_value">%1$s · build %2$d</string>
     <string name="andromi_update_summary">Get the newest stable release from GitHub</string>

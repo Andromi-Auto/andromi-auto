@@ -28,8 +28,8 @@ reworked for Xiaomi cars.
 - **Root setup for Android Auto 17.4+:** one tap re-enables Android Auto's startup receiver, so
   Self Mode works without the developer "headunit server". Without root the app shows the exact
   commands to run yourself.
-- **Portrait and landscape:** one switch on the home screen. Portrait for the car's size 1 window,
-  landscape for sizes 2 and 3.
+- **Portrait and landscape:** one switch on the home screen. Use portrait to pin the app on the
+  car screen, then switch to landscape for Android Auto.
 - **Material You:** every screen uses Material 3 and your wallpaper colours (Monet), in light and
   dark mode.
 - **Picture status:** Settings shows the size and codec Android Auto really sent last time.
