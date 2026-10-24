@@ -103,6 +103,7 @@ class SettingsAdapter : ListAdapter<SettingItem, RecyclerView.ViewHolder>(Settin
         private const val VIEW_TYPE_ACTION_BUTTON = 6
         private const val VIEW_TYPE_SEGMENTED = 7
         private const val VIEW_TYPE_STREAM = 8
+        private const val PAYLOAD_GROUP_SHAPE = "group_shape"
     }
 
     override fun getItemViewType(position: Int): Int {
@@ -133,10 +134,28 @@ class SettingsAdapter : ListAdapter<SettingItem, RecyclerView.ViewHolder>(Settin
         }
     }
 
+    // A row's corners depend on its neighbours, which a list change can move without touching the
+    // row itself, so every change re-checks the corners (and only the corners).
+    override fun onCurrentListChanged(previousList: MutableList<SettingItem>, currentList: MutableList<SettingItem>) {
+        if (currentList.isNotEmpty()) notifyItemRangeChanged(0, currentList.size, PAYLOAD_GROUP_SHAPE)
+    }
+
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int, payloads: MutableList<Any>) {
+        if (payloads.isNotEmpty() && payloads.all { it == PAYLOAD_GROUP_SHAPE }) {
+            if (isGroupedRow(holder)) updateItemVisuals(holder.itemView, position)
+            return
+        }
+        onBindViewHolder(holder, position)
+    }
+
+    private fun isGroupedRow(holder: RecyclerView.ViewHolder): Boolean =
+        holder is SettingViewHolder || holder is ToggleSettingViewHolder || holder is SliderSettingViewHolder ||
+            holder is ActionButtonViewHolder || holder is SegmentedButtonViewHolder || holder is StreamSettingViewHolder
+
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val item = getItem(position)
 
-        if (holder is SettingViewHolder || holder is ToggleSettingViewHolder || holder is SliderSettingViewHolder || holder is ActionButtonViewHolder || holder is SegmentedButtonViewHolder || holder is StreamSettingViewHolder) {
+        if (isGroupedRow(holder)) {
             updateItemVisuals(holder.itemView, position)
         }
 
@@ -156,8 +175,9 @@ class SettingsAdapter : ListAdapter<SettingItem, RecyclerView.ViewHolder>(Settin
         val prev = if (position > 0) getItem(position - 1) else null
         val next = if (position < itemCount - 1) getItem(position + 1) else null
 
-        val isTop = prev is SettingItem.CategoryHeader || prev == null
-        val isBottom = next is SettingItem.CategoryHeader || next == null
+        // An info banner is a card of its own, so it ends the group above it and starts the next.
+        val isTop = prev is SettingItem.CategoryHeader || prev is SettingItem.InfoBanner || prev == null
+        val isBottom = next is SettingItem.CategoryHeader || next is SettingItem.InfoBanner || next == null
 
         val bgRes = when {
             isTop && isBottom -> R.drawable.bg_setting_single

@@ -257,6 +257,17 @@ class MainActivity : BaseActivity() {
                     // back press at the root of the app should not finish the launcher.
                     return
                 } else if (System.currentTimeMillis() - lastBackPressTime < 2000) {
+                    // Andromi Auto: leaving the app stops its service too, so the notification
+                    // goes with it. The car's Bluetooth still starts the app through the receiver.
+                    if (AapService.instance != null) {
+                        try {
+                            startService(Intent(this@MainActivity, AapService::class.java).apply {
+                                action = AapService.ACTION_STOP_SERVICE
+                            })
+                        } catch (e: Exception) {
+                            AppLog.w("MainActivity: could not stop the service on exit: ${e.message}")
+                        }
+                    }
                     finish()
                 } else {
                     lastBackPressTime = System.currentTimeMillis()

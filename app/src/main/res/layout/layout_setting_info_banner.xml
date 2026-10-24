@@ -7,6 +7,7 @@
     android:orientation="horizontal"
     android:background="@drawable/bg_info_banner"
     android:padding="16dp"
+    android:layout_marginTop="4dp"
     android:layout_marginBottom="12dp"
     android:gravity="center_vertical">
 
