@@ -97,6 +97,12 @@ repeat it.
   over the white arrow (`#F2F2F2` / `#E3E3E3`) on white (`drawable/ic_launcher_foreground_andromi.xml`,
   monochrome themed icon, legacy webp mipmaps). About screen credits Open Headunit and links this
   repository (AGPL).
+- **Update check** (Settings > Check for updates; `utils/AndromiUpdater.kt`,
+  `utils/AndromiUpdatePolicy.kt`): stable releases only (`releases/latest`, never pre-releases).
+  Builds compare by run number (tag `-build<N>` vs versionCode - 2,000,000,000). Against the
+  60/hour API limit: the API ETag is cached (a 304 is free), and on a refusal the tag is read from
+  the `github.com/<repo>/releases/latest` redirect. Downloads `Andromi-Auto-release.apk` to the
+  cache and opens the system installer (REQUEST_INSTALL_PACKAGES, github flavor manifest only).
 - **Video fallback:** `utils/VideoFallbackPolicy.kt` offers 1080p when 1440p/4K is refused
   (was 720p).
 

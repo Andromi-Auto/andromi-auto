@@ -23,9 +23,8 @@ import android.content.ClipboardManager
 import com.andrerinas.openheadunit.aap.protocol.messages.BluetoothAnnouncePolicy
 import com.andrerinas.openheadunit.utils.OemAppManager
 import com.andrerinas.openheadunit.utils.CarLauncherManager
-import com.andrerinas.openheadunit.ssl.ConscryptInitializer
-import com.andrerinas.openheadunit.utils.UpdateChecker
-import com.andrerinas.openheadunit.utils.UpdateLinkPolicy
+import com.andrerinas.openheadunit.utils.AndromiUpdatePolicy
+import com.andrerinas.openheadunit.utils.AndromiUpdater
 import androidx.activity.OnBackPressedCallback
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
@@ -3201,14 +3200,14 @@ class SettingsFragment : Fragment() {
         items.add(SettingItem.SettingEntry(
             stableId = "version",
             nameResId = R.string.version,
-            value = BuildConfig.VERSION_NAME,
+            value = getString(R.string.andromi_version_value, BuildConfig.VERSION_NAME, AndromiUpdater.installedBuild),
             onClick = { /* Read only */ }
         ))
 
         items.add(SettingItem.SettingEntry(
             stableId = "check_for_updates",
             nameResId = R.string.check_for_updates,
-            value = getString(R.string.check_for_updates_description),
+            value = getString(R.string.andromi_update_summary),
             onClick = {
                 handleCheckForUpdates()
             }
@@ -5308,8 +5307,8 @@ class SettingsFragment : Fragment() {
             "loadingScreen", "customization",
             // Input: head-unit keys and rotary controllers
             "keymap", "enableRotary",
-            // Info: Open Headunit's update check and support page
-            "check_for_updates", "support",
+            // Info: Open Headunit's support page (the update check is Andromi Auto's own)
+            "support",
             // Graphic: head-up display mirroring is for a windscreen HUD, not a car screen
             "hudMirroring", "forcedScale",
             // Video: wireless link limits and developer tests of the video path
@@ -5482,58 +5481,111 @@ class SettingsFragment : Fragment() {
         alertDialog.show()
     }
 
+    /** Andromi Auto: checks the newest stable GitHub release; see [AndromiUpdater]. */
     private fun handleCheckForUpdates() {
         val ctx = context ?: return
         ToastUtils.showToast(ctx, R.string.checking_for_updates, Toast.LENGTH_SHORT, force = true)
 
         viewLifecycleOwner.lifecycleScope.launch {
-            val result = UpdateChecker.check(ctx)
+            val result = AndromiUpdater.check(ctx)
             if (!isAdded) return@launch
+            when (result) {
+                is AndromiUpdater.CheckResult.Found -> when (result.verdict) {
+                    AndromiUpdatePolicy.Verdict.UPDATE_AVAILABLE -> showUpdateAvailable(result)
+                    AndromiUpdatePolicy.Verdict.UP_TO_DATE ->
+                        showUpdateMessage(getString(R.string.andromi_update_up_to_date, result.installedBuild))
+                    AndromiUpdatePolicy.Verdict.AHEAD_OF_STABLE ->
+                        showUpdateMessage(getString(R.string.andromi_update_ahead, result.installedBuild, result.release.build))
+                }
+                AndromiUpdater.CheckResult.NoStableRelease ->
+                    showUpdateMessage(getString(R.string.andromi_update_none_yet))
+                is AndromiUpdater.CheckResult.Failed ->
+                    showUpdateMessage(getString(R.string.update_check_failed))
+            }
+        }
+    }
 
-            result.fold(
-                onSuccess = { info ->
-                    if (info.isUpdateAvailable) {
-                        val message = if (info.isPlayStore) {
-                            getString(R.string.update_available_playstore_message, info.latestVersionName)
-                        } else {
-                            getString(R.string.update_available_github_message, info.latestVersionName)
-                        }
+    private fun showUpdateMessage(message: String) {
+        MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
+            .setTitle(R.string.check_for_updates)
+            .setMessage(message)
+            .setPositiveButton(android.R.string.ok, null)
+            .show()
+    }
 
-                        val builder = MaterialAlertDialogBuilder(ctx, R.style.DarkAlertDialog)
-                            .setTitle(R.string.update_available_title)
-                            .setMessage(message)
-                            .setNegativeButton(R.string.cancel, null)
+    private fun showUpdateAvailable(found: AndromiUpdater.CheckResult.Found) {
+        val ctx = requireContext()
+        MaterialAlertDialogBuilder(ctx, R.style.DarkAlertDialog)
+            .setTitle(R.string.andromi_update_available_title)
+            .setMessage(getString(R.string.andromi_update_available_message, found.release.build, found.installedBuild))
+            .setPositiveButton(R.string.andromi_update_install) { _, _ -> downloadAndInstall(found.release) }
+            .setNegativeButton(R.string.andromi_update_later, null)
+            .setNeutralButton(R.string.andromi_update_release_page) { _, _ ->
+                AndromiUpdater.openInBrowser(ctx, found.release.pageUrl)
+            }
+            .show()
+    }
 
-                        if (info.isPlayStore) {
-                            builder.setPositiveButton(R.string.open_play_store) { _, _ ->
-                                UpdateChecker.openPlayStore(ctx)
-                            }
-                        } else {
-                            builder.setPositiveButton(R.string.open_github_releases) { _, _ ->
-                                val link = UpdateLinkPolicy.linkToOpen(
-                                    info.releaseUrl, info.apkUrl, ConscryptInitializer.isNeededForTls12()
-                                )
-                                AppLog.i("SettingsFragment: opening update link $link")
-                                UpdateChecker.openGitHubReleases(ctx, link)
-                            }
-                        }
-                        builder.show()
-                    } else {
-                        MaterialAlertDialogBuilder(ctx, R.style.DarkAlertDialog)
-                            .setTitle(R.string.update_not_available_title)
-                            .setMessage(getString(R.string.update_not_available_message, info.currentVersionName))
-                            .setPositiveButton(android.R.string.ok, null)
-                            .show()
+    private fun downloadAndInstall(release: AndromiUpdater.StableRelease) {
+        val ctx = context ?: return
+        // Asked before the download, so a refusal does not cost one.
+        if (!AndromiUpdater.canInstall(ctx)) {
+            MaterialAlertDialogBuilder(ctx, R.style.DarkAlertDialog)
+                .setTitle(R.string.andromi_update_allow_install_title)
+                .setMessage(R.string.andromi_update_allow_install_message)
+                .setPositiveButton(R.string.andromi_update_allow_install_open) { _, _ ->
+                    AndromiUpdater.openInstallPermission(ctx)
+                }
+                .setNegativeButton(R.string.cancel, null)
+                .show()
+            return
+        }
+
+        val progress = com.google.android.material.progressindicator.LinearProgressIndicator(ctx).apply {
+            isIndeterminate = true
+            max = 100
+        }
+        val pad = (24 * resources.displayMetrics.density).toInt()
+        val container = android.widget.FrameLayout(ctx).apply {
+            setPadding(pad, pad / 2, pad, 0)
+            addView(progress)
+        }
+        var job: kotlinx.coroutines.Job? = null
+        val dialog = MaterialAlertDialogBuilder(ctx, R.style.DarkAlertDialog)
+            .setTitle(getString(R.string.andromi_update_downloading, release.build))
+            .setView(container)
+            .setCancelable(false)
+            .setNegativeButton(R.string.cancel) { _, _ -> job?.cancel() }
+            .show()
+
+        // The dialog's Cancel stops it; a failed or cancelled download deletes its partial file.
+        job = lifecycleScope.launch {
+            try {
+                val apk = AndromiUpdater.download(ctx.applicationContext, release) { percent ->
+                    if (percent >= 0) {
+                        progress.isIndeterminate = false
+                        progress.setProgressCompat(percent, true)
                     }
-                },
-                onFailure = {
+                }
+                dialog.dismiss()
+                AndromiUpdater.install(ctx.applicationContext, apk)
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                AppLog.i("SettingsFragment: update download cancelled")
+                throw e
+            } catch (e: Exception) {
+                AppLog.e("SettingsFragment: update download failed: ${e.message}", e)
+                dialog.dismiss()
+                if (isAdded) {
                     MaterialAlertDialogBuilder(ctx, R.style.DarkAlertDialog)
                         .setTitle(R.string.check_for_updates)
-                        .setMessage(R.string.update_check_failed)
+                        .setMessage(R.string.andromi_update_download_failed)
                         .setPositiveButton(android.R.string.ok, null)
+                        .setNeutralButton(R.string.andromi_update_release_page) { _, _ ->
+                            AndromiUpdater.openInBrowser(ctx, release.pageUrl)
+                        }
                         .show()
                 }
-            )
+            }
         }
     }
 }
