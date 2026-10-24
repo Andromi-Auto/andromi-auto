@@ -755,8 +755,6 @@ class HomeFragment : Fragment() {
     private fun showOrientation(view: View, landscape: Boolean) {
         view.findViewById<android.widget.ImageView>(R.id.orientation_icon)?.setImageResource(
             if (landscape) R.drawable.ic_screen_landscape_24 else R.drawable.ic_screen_portrait_24)
-        view.findViewById<TextView>(R.id.orientation_summary)?.setText(
-            if (landscape) R.string.andromi_screen_landscape_summary else R.string.andromi_screen_portrait_summary)
         val outline = com.google.android.material.color.MaterialColors.getColor(view, com.google.android.material.R.attr.colorOutline)
         val fill = com.google.android.material.color.MaterialColors.getColor(view, com.google.android.material.R.attr.colorSecondaryContainer)
         val onFill = com.google.android.material.color.MaterialColors.getColor(view, com.google.android.material.R.attr.colorOnSecondaryContainer)

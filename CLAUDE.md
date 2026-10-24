@@ -70,7 +70,8 @@ repeat it.
   `Settings.screenOrientation` and turns the screen at once), Settings button. No Exit button.
   Old styling helpers are switched off (`ANDROMI_MATERIAL_HOME` in `HomeFragment`/`HomeUiHelper`).
 - **Orientation:** Open Headunit's `screenOrientation` setting is used as is. The user switches
-  manually: portrait for car size 1, landscape for sizes 2 and 3. Two attempts at automatic
+  manually. The Screen card says: use Portrait to pin the app on the car screen, then switch
+  to Landscape for Android Auto (no per-size texts). Two attempts at automatic
   orientation were reverted on the user's request; do not reintroduce them unless asked.
 - **Automatic start** (`main/AutoStartSetupActivity.kt`, `utils/RootSetup.kt`,
   `main/AndromiAutoStart.kt`):
