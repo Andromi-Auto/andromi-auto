@@ -14,8 +14,11 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import com.andrerinas.openheadunit.App
 import com.andrerinas.openheadunit.R
@@ -45,9 +48,18 @@ class AutoStartSetupActivity : BaseActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_auto_start_setup)
         findViewById<MaterialToolbar>(R.id.toolbar).setNavigationOnClickListener { finish() }
+        // The app bar takes the status bar; the list keeps clear of the navigation bar and cutouts.
+        val scroll = findViewById<View>(R.id.autoStartScroll)
+        val basePadding = scroll.paddingBottom
+        ViewCompat.setOnApplyWindowInsetsListener(scroll) { v, insets ->
+            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout())
+            v.setPadding(bars.left, v.paddingTop, bars.right, basePadding + bars.bottom)
+            insets
+        }
 
         val switch = findViewById<MaterialSwitch>(R.id.auto_switch)
         switch.isChecked = settings.autoStartSelfMode

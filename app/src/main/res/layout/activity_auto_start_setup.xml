@@ -1,26 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Andromi Auto: "Automatic start" setup (root, car Bluetooth, on/off). Material 3, dynamic colours. -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- Same header as Settings: Material 3 large title that collapses on scroll. -->
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?android:attr/colorBackground"
-    android:fitsSystemWindows="true"
-    android:orientation="vertical">
+    android:background="?android:attr/colorBackground">
 
-    <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/toolbar"
+    <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        app:navigationIcon="@drawable/ic_arrow_back_24"
-        app:title="@string/andromi_auto_start_title" />
+        android:layout_height="wrap_content"
+        android:background="?android:attr/colorBackground"
+        android:fitsSystemWindows="true"
+        app:liftOnScroll="true"
+        app:liftOnScrollColor="?android:attr/colorBackground"
+        app:liftOnScrollTargetViewId="@id/autoStartScroll">
 
-    <ScrollView
+        <com.google.android.material.appbar.CollapsingToolbarLayout
+            style="?attr/collapsingToolbarLayoutLargeStyle"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/collapsingToolbarLayoutLargeSize"
+            app:contentScrim="?android:attr/colorBackground"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
+            app:title="@string/andromi_auto_start_title">
+
+            <com.google.android.material.appbar.MaterialToolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:elevation="0dp"
+                app:layout_collapseMode="pin"
+                app:navigationIcon="@drawable/ic_arrow_back_24"
+                app:navigationIconTint="?attr/colorOnSurface" />
+        </com.google.android.material.appbar.CollapsingToolbarLayout>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/autoStartScroll"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_height="match_parent"
         android:clipToPadding="false"
-        android:paddingBottom="24dp">
+        android:paddingBottom="24dp"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -276,5 +297,5 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
-    </ScrollView>
-</LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
