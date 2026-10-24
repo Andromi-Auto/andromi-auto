@@ -1,0 +1,94 @@
+name: Telegram
+
+# Posts to the Telegram channel with the bot whose token is in the repository secret
+# TELEGRAM_BOT_TOKEN. The bot must be an admin of the channel with "Post messages".
+#
+# - announce: after "Build APKs" publishes a stable release on main, posts the release.
+# - post: run by hand (or by Claude through the API) with a message; check_only tests the
+#   bot's access without posting anything.
+#
+# workflow_run and workflow_dispatch only take effect from the default branch (main).
+on:
+  workflow_run:
+    workflows: ["Build APKs"]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      message:
+        description: "Message text (HTML formatting: <b>, <i>, <a href>)"
+        required: false
+        default: ""
+      check_only:
+        description: "Only check that the bot can post; send nothing"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+env:
+  CHAT: "@xiaomi_cockpit"
+  WEBSITE: "https://andromi-auto.github.io"
+
+jobs:
+  announce:
+    if: >-
+      github.event_name == 'workflow_run' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'main' &&
+      github.event.workflow_run.event == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Announce the new stable release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        run: |
+          if [ -z "$TOKEN" ]; then echo "::error::Secret TELEGRAM_BOT_TOKEN is missing"; exit 1; fi
+          REPO="${{ github.repository }}"
+          NAME=$(gh release view --repo "$REPO" --json name --jq .name)
+          URL=$(gh release view --repo "$REPO" --json url --jq .url)
+          APK="https://github.com/$REPO/releases/latest/download/Andromi-Auto-release.apk"
+          TEXT=$(printf '%s\n\n%s\n\n%s\n%s\n%s' \
+            "🚗 <b>$NAME</b> is out" \
+            "A new stable release of Andromi Auto, Android Auto on your Xiaomi EV." \
+            "⬇️ <a href=\"$APK\">Download the APK</a> · <a href=\"$URL\">Release notes</a>" \
+            "📲 Already installed? Settings → Check for updates" \
+            "🌐 <a href=\"$WEBSITE\">andromi-auto.github.io</a>")
+          curl -sS --fail-with-body "https://api.telegram.org/bot$TOKEN/sendMessage" \
+            --data-urlencode "chat_id=$CHAT" --data-urlencode "text=$TEXT" \
+            --data-urlencode "parse_mode=HTML" --data-urlencode "disable_web_page_preview=true" \
+            | python3 -c "import json,sys; r=json.load(sys.stdin); print('posted' if r.get('ok') else r); sys.exit(0 if r.get('ok') else 1)"
+
+  post:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Post or check
+        env:
+          TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TEXT: ${{ inputs.message }}
+          CHECK_ONLY: ${{ inputs.check_only }}
+        run: |
+          if [ -z "$TOKEN" ]; then echo "::error::Secret TELEGRAM_BOT_TOKEN is missing"; exit 1; fi
+          api() { curl -sS "https://api.telegram.org/bot$TOKEN/$1" "${@:2}"; }
+
+          if [ "$CHECK_ONLY" = "true" ]; then
+            BOT=$(api getMe | python3 -c "import json,sys; r=json.load(sys.stdin); assert r['ok'], r; print(r['result']['id'], r['result']['username'])")
+            echo "Bot: @${BOT#* }"
+            api getChatMember --data-urlencode "chat_id=$CHAT" --data-urlencode "user_id=${BOT%% *}" \
+              | python3 -c "
+          import json, sys
+          r = json.load(sys.stdin)
+          if not r.get('ok'):
+              print('Cannot see the channel:', r.get('description')); sys.exit(1)
+          m = r['result']
+          print('Status in the channel:', m['status'], '| can post:', m.get('can_post_messages'))
+          sys.exit(0 if m['status'] == 'creator' or m.get('can_post_messages') else 1)"
+            exit $?
+          fi
+
+          if [ -z "$TEXT" ]; then echo "::error::No message given"; exit 1; fi
+          api sendMessage --data-urlencode "chat_id=$CHAT" --data-urlencode "text=$TEXT" \
+            --data-urlencode "parse_mode=HTML" \
+            | python3 -c "import json,sys; r=json.load(sys.stdin); print('posted' if r.get('ok') else r); sys.exit(0 if r.get('ok') else 1)"
