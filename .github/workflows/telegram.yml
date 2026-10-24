@@ -18,6 +18,10 @@ on:
         description: "Message text (HTML formatting: <b>, <i>, <a href>)"
         required: false
         default: ""
+      photo_url:
+        description: "Optional image URL: posts the image with the message as its caption (max 1024 characters)"
+        required: false
+        default: ""
       check_only:
         description: "Only check that the bot can post; send nothing"
         type: boolean
@@ -68,6 +72,7 @@ jobs:
         env:
           TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TEXT: ${{ inputs.message }}
+          PHOTO: ${{ inputs.photo_url }}
           CHECK_ONLY: ${{ inputs.check_only }}
         run: |
           if [ -z "$TOKEN" ]; then echo "::error::Secret TELEGRAM_BOT_TOKEN is missing"; exit 1; fi
@@ -93,6 +98,11 @@ jobs:
           fi
 
           if [ -z "$TEXT" ]; then echo "::error::No message given"; exit 1; fi
-          api sendMessage --data-urlencode "chat_id=$CHAT" --data-urlencode "text=$TEXT" \
-            --data-urlencode "parse_mode=HTML" \
+          if [ -n "$PHOTO" ]; then
+            api sendPhoto --data-urlencode "chat_id=$CHAT" --data-urlencode "photo=$PHOTO" \
+              --data-urlencode "caption=$TEXT" --data-urlencode "parse_mode=HTML"
+          else
+            api sendMessage --data-urlencode "chat_id=$CHAT" --data-urlencode "text=$TEXT" \
+              --data-urlencode "parse_mode=HTML"
+          fi \
             | python3 -c "import json,sys; r=json.load(sys.stdin); print('posted' if r.get('ok') else r); sys.exit(0 if r.get('ok') else 1)"
