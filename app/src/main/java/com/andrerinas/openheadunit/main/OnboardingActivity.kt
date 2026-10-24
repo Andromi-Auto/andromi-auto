@@ -18,6 +18,7 @@ import com.andrerinas.openheadunit.R
 import com.andrerinas.openheadunit.aap.VehicleTypePolicy
 import com.andrerinas.openheadunit.app.BaseActivity
 import com.andrerinas.openheadunit.decoder.video.VideoDecoder
+import com.andrerinas.openheadunit.utils.SystemUI
 import com.andrerinas.openheadunit.utils.AppPermissions
 import com.andrerinas.openheadunit.utils.AudioStreamTester
 import com.andrerinas.openheadunit.utils.AppThemeManager
@@ -139,6 +140,18 @@ class OnboardingActivity : BaseActivity() {
         updateNightButtonText()
         permissionBinder?.rebind()
         if (step == STEP_DPI) dpiPicker?.startDemo()
+        applyFullscreen()
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        // A dialog or a system permission screen brings the bars back when it closes.
+        if (hasFocus) applyFullscreen()
+    }
+
+    /** Andromi Auto: the app's full-screen mode, the same as Settings and the home screen. */
+    private fun applyFullscreen() {
+        SystemUI.apply(window, findViewById(R.id.onb_root), settings.fullscreenMode, notesCanvas = false)
     }
 
     override fun onPause() {

@@ -16,9 +16,7 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:title="@string/dpi"
-            app:navigationIcon="@drawable/ic_arrow_back_24"
-            app:navigationIconTint="?attr/colorOnSurface" />
+            app:title="@string/dpi" />
 
     </com.google.android.material.appbar.AppBarLayout>
 

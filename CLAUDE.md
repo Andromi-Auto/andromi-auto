@@ -87,6 +87,11 @@ repeat it.
   (`QuickSettingsFragment`, `AppDrawerFragment`) wrap their inflater with DynamicColors.
   Material Components styles were replaced by Material3 ones everywhere; fixed colours replaced by
   theme roles; switches are `MaterialSwitch`. `DarkAlertDialog` is a plain M3 dialog overlay.
+- **No back arrows** on settings screens (user's choice): back is the phone's back gesture. Only
+  the overlays over Android Auto (Quick Settings, app drawer) keep their close/back button.
+- **Full screen everywhere:** every activity applies `SystemUI.apply(...)` with the user's
+  fullscreen mode in onCreate/onResume and again in `onWindowFocusChanged` (dialogs bring the
+  bars back). A new screen must do the same.
 - **Name and icon:** "Andromi Auto" in every language; Open Headunit's rename notice is off.
   Launcher icon = the Android Auto mark in Xiaomi orange (`#F26100` left / `#FF6900` right halves)
   over the white arrow (`#F2F2F2` / `#E3E3E3`) on white (`drawable/ic_launcher_foreground_andromi.xml`,
