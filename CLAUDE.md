@@ -127,3 +127,8 @@ repeat it.
   stable release.
 - Keep AGPL obligations: the repository stays public, credits stay in README/About/LICENSE.
 - Never put model names in commits or files.
+- **Commit as the user** in every Andromi repository: author and committer
+  `pagnchanak <68956560+pagnchanak@users.noreply.github.com>` (GitHub's private address; set
+  `git config user.name` / `user.email` in each clone). No `Co-Authored-By: Claude` or
+  `Claude-Session` lines in commit messages. Past commits were rewritten this way (Open Headunit's
+  own authors keep their commits untouched).
