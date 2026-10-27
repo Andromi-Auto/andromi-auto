@@ -12,100 +12,130 @@ import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.io.File
+import java.security.MessageDigest
 import java.net.HttpURLConnection
 import java.net.URL
 import javax.net.ssl.HttpsURLConnection
 import kotlin.coroutines.coroutineContext
 
 /**
- * Andromi Auto: checks this repository's latest **stable** release (pre-releases such as the
- * development build are never offered), downloads its APK and hands it to the system installer.
+ * Andromi Auto: finds the newest release of the chosen channel (stable, or the development
+ * pre-release), downloads its APK and hands it to the system installer.
  *
  * GitHub allows 60 API calls an hour per address without a login. Two things keep the check
- * working past that: the API answer's ETag is remembered and sent back, and an unchanged answer
- * (304) is not counted against the limit; and when the API refuses anyway, the tag is read from
- * where the web page `github.com/<repo>/releases/latest` redirects, which has no such limit.
+ * working past that: the API answer is remembered with its ETag and an unchanged answer (304) is
+ * not counted against the limit; and when the API refuses anyway, the `update.json` attached to the
+ * same release is read through the plain download link, which has no such limit.
  */
 object AndromiUpdater {
 
     private const val TAG = "AndromiUpdater"
     private const val REPO = "Andromi-Auto/andromi-auto"
-    private const val API_LATEST = "https://api.github.com/repos/$REPO/releases/latest"
-    private const val WEB_LATEST = "https://github.com/$REPO/releases/latest"
     const val RELEASES_PAGE = "https://github.com/$REPO/releases"
-    /** The installable APK of a stable release, as the workflow names it. */
+    /** The installable APK of every release, as the workflow names it. */
     private const val APK_NAME = "Andromi-Auto-release.apk"
+    private const val DEV_TAG = "development"
 
     private const val PREFS = "andromi_update"
-    private const val KEY_ETAG = "etag"
-    private const val KEY_TAG = "tag"
-    private const val KEY_PAGE = "page"
+    private const val KEY_CHANNEL = "channel"
 
-    data class StableRelease(val tag: String, val build: Int, val pageUrl: String, val apkUrl: String)
+    data class Release(
+        val channel: String,
+        val versionCode: Int,
+        val versionName: String,
+        val apkUrl: String,
+        val pageUrl: String,
+        val sha256: String?,
+        val notes: String,
+    ) {
+        val build: Int get() = AndromiUpdatePolicy.buildOfVersionCode(versionCode.toLong())
+    }
 
     sealed class CheckResult {
         data class Found(
-            val release: StableRelease,
-            val installedBuild: Int,
+            val release: Release,
+            val installedCode: Int,
             val verdict: AndromiUpdatePolicy.Verdict,
         ) : CheckResult()
-        /** No stable release has been published yet. */
-        object NoStableRelease : CheckResult()
+        /** The channel has no release yet. */
+        data class NoRelease(val channel: String) : CheckResult()
         data class Failed(val reason: String) : CheckResult()
     }
 
     val installedBuild: Int
         get() = AndromiUpdatePolicy.buildOfVersionCode(BuildConfig.VERSION_CODE.toLong())
 
+    /** The channel the user chose; until they choose, the one this build came from. */
+    fun channel(context: Context): String =
+        AndromiUpdatePolicy.normalizeChannel(
+            context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+                .getString(KEY_CHANNEL, null) ?: BuildConfig.CHANNEL
+        )
+
+    fun setChannel(context: Context, channel: String) {
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
+            .putString(KEY_CHANNEL, AndromiUpdatePolicy.normalizeChannel(channel)).apply()
+    }
+
+    private fun apiUrl(channel: String) =
+        if (channel == AndromiUpdatePolicy.CHANNEL_STABLE) "https://api.github.com/repos/$REPO/releases/latest"
+        else "https://api.github.com/repos/$REPO/releases/tags/$DEV_TAG"
+
+    private fun mirrorUrl(channel: String) =
+        if (channel == AndromiUpdatePolicy.CHANNEL_STABLE) "https://github.com/$REPO/releases/latest/download/update.json"
+        else "https://github.com/$REPO/releases/download/$DEV_TAG/update.json"
+
+    private fun pageUrl(channel: String) =
+        if (channel == AndromiUpdatePolicy.CHANNEL_STABLE) "https://github.com/$REPO/releases/latest"
+        else "https://github.com/$REPO/releases/tag/$DEV_TAG"
+
     suspend fun check(context: Context): CheckResult = withContext(Dispatchers.IO) {
+        val channel = channel(context)
         val release = try {
-            fromApi(context)
+            fromApi(context, channel)
         } catch (e: Exception) {
-            AppLog.w("$TAG: the API check failed (${e.message}), asking the releases page instead")
+            AppLog.w("$TAG: the API check failed (${e.message}), reading update.json instead")
             null
         } ?: try {
-            fromWebRedirect(context)
+            fromMirror(context, channel)
         } catch (e: Exception) {
-            AppLog.w("$TAG: the releases page check failed: ${e.message}")
+            AppLog.w("$TAG: the update.json check failed: ${e.message}")
             return@withContext CheckResult.Failed(e.message ?: "network error")
         }
 
-        if (release == null) return@withContext CheckResult.NoStableRelease
-        val verdict = AndromiUpdatePolicy.verdict(installedBuild, release.build)
-        AppLog.i("$TAG: latest stable ${release.tag} (build ${release.build}), installed build $installedBuild: $verdict")
-        CheckResult.Found(release, installedBuild, verdict)
+        if (release == null) return@withContext CheckResult.NoRelease(channel)
+        val verdict = AndromiUpdatePolicy.verdict(BuildConfig.VERSION_CODE, release.versionCode)
+        AppLog.i("$TAG: latest $channel ${release.versionName} (code ${release.versionCode}), " +
+            "installed ${BuildConfig.VERSION_NAME} (code ${BuildConfig.VERSION_CODE}): $verdict")
+        CheckResult.Found(release, BuildConfig.VERSION_CODE, verdict)
     }
 
     /**
-     * The API's answer, or null when it has none to give (rate limit, error), which sends the
-     * check to the web page. Throws only for a network failure, which does the same.
+     * The API's answer, or null when it has none to give (no release, rate limit, error), which
+     * sends the check to update.json. Throws only for a network failure, which does the same.
      */
-    private fun fromApi(context: Context): StableRelease? {
+    private fun fromApi(context: Context, channel: String): Release? {
         val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-        val conn = open(context, API_LATEST).apply {
+        val conn = open(context, apiUrl(channel)).apply {
             setRequestProperty("Accept", "application/vnd.github+json")
-            prefs.getString(KEY_ETAG, null)?.let { setRequestProperty("If-None-Match", it) }
+            prefs.getString("etag_$channel", null)?.let { setRequestProperty("If-None-Match", it) }
         }
         try {
             when (val code = conn.responseCode) {
                 HttpURLConnection.HTTP_NOT_MODIFIED -> {
                     // Unchanged since the last check, and not counted against the hourly limit.
-                    val tag = prefs.getString(KEY_TAG, null) ?: return null
-                    return releaseFor(tag, prefs.getString(KEY_PAGE, null))
+                    val body = prefs.getString("body_$channel", null) ?: return null
+                    return fromApiBody(channel, body)
                 }
                 HttpURLConnection.HTTP_OK -> {
-                    val json = JSONObject(conn.inputStream.bufferedReader().use { it.readText() })
-                    val tag = json.optString("tag_name")
-                    val page = json.optString("html_url").ifBlank { null }
+                    val body = conn.inputStream.bufferedReader().use { it.readText() }
                     prefs.edit()
-                        .putString(KEY_ETAG, conn.getHeaderField("ETag"))
-                        .putString(KEY_TAG, tag)
-                        .putString(KEY_PAGE, page)
+                        .putString("etag_$channel", conn.getHeaderField("ETag"))
+                        .putString("body_$channel", body)
                         .apply()
-                    return releaseFor(tag, page) ?: throw IllegalStateException("latest release $tag has no build number")
+                    return fromApiBody(channel, body)
                 }
                 else -> {
-                    // 404 (no stable release yet) also lands here: the web page then says the same.
                     val remaining = conn.getHeaderField("X-RateLimit-Remaining")
                     AppLog.w("$TAG: API answered $code" +
                         if (AndromiUpdatePolicy.isRateLimited(code, remaining)) " (hourly limit spent)" else "")
@@ -117,37 +147,48 @@ object AndromiUpdater {
         }
     }
 
-    /** The tag the web page `releases/latest` redirects to; null when there is no stable release. */
-    private fun fromWebRedirect(context: Context): StableRelease? {
-        val conn = open(context, WEB_LATEST).apply {
-            instanceFollowRedirects = false
-            requestMethod = "HEAD"
-        }
+    private fun fromApiBody(channel: String, body: String): Release? {
+        val json = JSONObject(body)
+        val tag = json.optString("tag_name")
+        val notes = json.optString("body")
+        val info = AndromiUpdatePolicy.parseNotes(notes)
+        val code = info.versionCode ?: AndromiUpdatePolicy.versionCodeOfOldTag(tag)
+            ?: throw IllegalStateException("release $tag has no version code")
+        val assets = json.optJSONArray("assets")
+        val apkUrl = (0 until (assets?.length() ?: 0)).map { assets!!.getJSONObject(it) }
+            .firstOrNull { it.optString("name") == APK_NAME }?.optString("browser_download_url")
+            ?: "https://github.com/$REPO/releases/download/${Uri.encode(tag)}/$APK_NAME"
+        return Release(
+            channel = channel,
+            versionCode = code,
+            versionName = info.versionName ?: json.optString("name").ifBlank { tag },
+            apkUrl = apkUrl,
+            pageUrl = json.optString("html_url").ifBlank { pageUrl(channel) },
+            sha256 = info.sha256,
+            notes = AndromiUpdatePolicy.readableNotes(notes),
+        )
+    }
+
+    /** The update.json of the channel's release; null when there is no such release. */
+    private fun fromMirror(context: Context, channel: String): Release? {
+        val conn = open(context, mirrorUrl(channel)).apply { instanceFollowRedirects = true }
         try {
             val code = conn.responseCode
-            val location = conn.getHeaderField("Location")
-            val tag = AndromiUpdatePolicy.tagFromLatestRedirect(location)
-            if (tag == null) {
-                // With no stable release the page redirects to the release list instead.
-                if (code in 300..399) return null
-                throw IllegalStateException("releases page answered $code")
-            }
-            return releaseFor(tag, null) ?: throw IllegalStateException("latest release $tag has no build number")
+            if (code == HttpURLConnection.HTTP_NOT_FOUND) return null
+            if (code != HttpURLConnection.HTTP_OK) throw IllegalStateException("update.json answered $code")
+            val o = JSONObject(conn.inputStream.bufferedReader().use { it.readText() })
+            return Release(
+                channel = channel,
+                versionCode = o.getInt("versionCode"),
+                versionName = o.getString("versionName"),
+                apkUrl = o.getString("apkUrl"),
+                pageUrl = pageUrl(channel),
+                sha256 = o.optString("sha256").ifBlank { null },
+                notes = o.optString("notes").trim(),
+            )
         } finally {
             conn.disconnect()
         }
-    }
-
-    private fun releaseFor(tag: String, page: String?): StableRelease? {
-        val build = AndromiUpdatePolicy.buildOfTag(tag) ?: return null
-        val encoded = Uri.encode(tag)
-        return StableRelease(
-            tag = tag,
-            build = build,
-            pageUrl = page ?: "https://github.com/$REPO/releases/tag/$encoded",
-            // A plain download link, which the API's limit does not cover either.
-            apkUrl = "https://github.com/$REPO/releases/download/$encoded/$APK_NAME",
-        )
     }
 
     private fun open(context: Context, url: String): HttpURLConnection =
@@ -162,13 +203,15 @@ object AndromiUpdater {
 
     /**
      * Downloads the release APK into the cache, reporting progress as 0..100 (or -1 while the
-     * size is unknown). Redirects to GitHub's file host are followed.
+     * size is unknown). Redirects to GitHub's file host are followed, and the file's sha256 must
+     * match the one the release publishes.
      */
-    suspend fun download(context: Context, release: StableRelease, onProgress: (Int) -> Unit): File =
+    suspend fun download(context: Context, release: Release, onProgress: (Int) -> Unit): File =
         withContext(Dispatchers.IO) {
             val dir = File(context.cacheDir, "updates").apply { mkdirs() }
             dir.listFiles()?.forEach { it.delete() } // only ever one update kept
-            val target = File(dir, "Andromi-Auto-build${release.build}.apk")
+            val target = File(dir, "Andromi-Auto-${release.versionCode}.apk")
+            val digest = MessageDigest.getInstance("SHA-256")
             val conn = open(context, release.apkUrl).apply { instanceFollowRedirects = true }
             try {
                 if (conn.responseCode != HttpURLConnection.HTTP_OK) {
@@ -185,6 +228,7 @@ object AndromiUpdater {
                             val n = input.read(buffer)
                             if (n < 0) break
                             output.write(buffer, 0, n)
+                            digest.update(buffer, 0, n)
                             done += n
                             val percent = if (total > 0) (done * 100 / total).toInt() else -1
                             if (percent != lastPercent) {
@@ -195,7 +239,11 @@ object AndromiUpdater {
                     }
                 }
                 if (total > 0 && done != total) throw IllegalStateException("download incomplete")
-                AppLog.i("$TAG: downloaded ${release.tag} ($done bytes)")
+                val hash = digest.digest().joinToString("") { "%02x".format(it) }
+                if (release.sha256 != null && !hash.equals(release.sha256, ignoreCase = true)) {
+                    throw IllegalStateException("checksum mismatch")
+                }
+                AppLog.i("$TAG: downloaded ${release.versionName} ($done bytes)")
                 target
             } catch (e: Exception) {
                 target.delete()

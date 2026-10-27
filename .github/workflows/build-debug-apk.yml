@@ -1,8 +1,10 @@
 name: Build APKs
 
-# development: every push replaces the "development" pre-release.
-# main: every push publishes a new stable release.
+# development: every push replaces the "development" pre-release (version 4.0.0-dev.<run>).
+# main: a push publishes the stable release v<version.txt> when that tag does not exist yet
+#       (notes from release-notes.md); any other push to main only builds.
 # Run by hand on any other branch: the build goes to that branch's test pre-release.
+# Every release carries update.json, which the app's update check reads (see AndromiUpdater).
 on:
   push:
     branches: [main, development]
@@ -24,6 +26,29 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # tags show whether version.txt has been released already
+
+      - name: Work out the version and channel
+        run: |
+          V="$(tr -d ' \n\r' < version.txt)"
+          PUBLISH=false
+          if [ "$GITHUB_REF_NAME" = main ] && ! git rev-parse -q --verify "refs/tags/v$V" >/dev/null; then
+            CHANNEL=stable; VERSION_NAME="$V"; RELEASE_TAG="v$V"; PUBLISH=true
+          else
+            CHANNEL=dev; VERSION_NAME="$V-dev.$GITHUB_RUN_NUMBER"
+            if [ "$GITHUB_REF_NAME" = development ]; then RELEASE_TAG=development; PUBLISH=true
+            elif [ "$GITHUB_REF_NAME" = main ]; then RELEASE_TAG=""
+            else RELEASE_TAG="test-$GITHUB_REF_NAME"; PUBLISH=true; fi
+          fi
+          [ "$GITHUB_EVENT_NAME" = push ] || [ "$GITHUB_EVENT_NAME" = workflow_dispatch ] || PUBLISH=false
+          {
+            echo "CHANNEL=$CHANNEL"
+            echo "VERSION_NAME=$VERSION_NAME"
+            echo "RELEASE_TAG=$RELEASE_TAG"
+            echo "PUBLISH=$PUBLISH"
+          } >> "$GITHUB_ENV"
+          echo "::notice::$CHANNEL build $VERSION_NAME (publish: $PUBLISH, tag: ${RELEASE_TAG:-none})"
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -89,40 +114,59 @@ jobs:
           path: dist/Andromi-Auto-release.apk
           retention-days: 7
 
+      - name: Release notes and update.json
+        if: env.PUBLISH == 'true'
+        run: |
+          APK=dist/Andromi-Auto-release.apk
+          CODE=$((2000000000 + GITHUB_RUN_NUMBER))
+          SHA256=$(sha256sum "$APK" | cut -d' ' -f1)
+          if [ "$CHANNEL" = stable ]; then
+            CHANGES="$(cat release-notes.md 2>/dev/null || true)"
+            [ -n "$CHANGES" ] || CHANGES="Andromi Auto $VERSION_NAME"
+          elif [ "$GITHUB_REF_NAME" = development ]; then
+            CHANGES="$(git log -1 --pretty=format:'%s' "$GITHUB_SHA")"
+          else
+            CHANGES="Test build of branch $GITHUB_REF_NAME ($(git log -1 --pretty=format:'%s' "$GITHUB_SHA"))"
+          fi
+          printf '%s\n' "$CHANGES" > dist/notes.md
+          printf '\n<!-- versionCode: %s versionName: %s sha256: %s -->\n' "$CODE" "$VERSION_NAME" "$SHA256" >> dist/notes.md
+          jq -n \
+            --arg channel "$CHANNEL" --argjson versionCode "$CODE" --arg versionName "$VERSION_NAME" \
+            --arg apkUrl "https://github.com/$GITHUB_REPOSITORY/releases/download/$RELEASE_TAG/Andromi-Auto-release.apk" \
+            --argjson apkSize "$(stat -c%s "$APK")" --arg sha256 "$SHA256" --arg notes "$CHANGES" --arg commit "$GITHUB_SHA" \
+            '{channel:$channel, versionCode:$versionCode, versionName:$versionName, apkUrl:$apkUrl,
+              apkSize:$apkSize, sha256:$sha256, notes:$notes, commit:$commit}' > dist/update.json
+          cat dist/update.json
+
       - name: Publish the development pre-release
-        if: github.ref_name == 'development'
+        if: env.PUBLISH == 'true' && github.ref_name == 'development'
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: development
         run: |
-          NOTES="Development build ${{ github.run_number }} (commit ${GITHUB_SHA::7}). Not a stable release: install Andromi-Auto-debug.apk to test."
           # Recreated each time so the tag follows the newest development commit.
-          gh release delete "$TAG" --cleanup-tag --yes >/dev/null 2>&1 || true
-          gh release create "$TAG" dist/Andromi-Auto-debug.apk dist/Andromi-Auto-release.apk --target "$GITHUB_SHA" \
-            --title "Development build ${{ github.run_number }}" --prerelease --latest=false --notes "$NOTES"
+          gh release delete "$RELEASE_TAG" --cleanup-tag --yes >/dev/null 2>&1 || true
+          gh release create "$RELEASE_TAG" dist/Andromi-Auto-release.apk dist/Andromi-Auto-debug.apk dist/update.json \
+            --target "$GITHUB_SHA" --title "Development build $VERSION_NAME" --prerelease --latest=false \
+            --notes-file dist/notes.md
 
       - name: Publish the stable release
-        if: github.ref_name == 'main'
+        if: env.PUBLISH == 'true' && env.CHANNEL == 'stable'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          VERSION=$(sed -n 's/^ *versionName = "\(.*\)"/\1/p' app/build.gradle.kts | head -1)
-          TAG="v${VERSION}-build${{ github.run_number }}"
-          NOTES="Andromi Auto ${VERSION}, build ${{ github.run_number }} (commit ${GITHUB_SHA::7}). Install Andromi-Auto-release.apk."
-          gh release create "$TAG" dist/Andromi-Auto-release.apk dist/Andromi-Auto-debug.apk --target "$GITHUB_SHA" \
-            --title "Andromi Auto ${VERSION} (build ${{ github.run_number }})" --latest --notes "$NOTES"
+          # Only the release APK: the F-Droid repository takes every .apk of a stable release.
+          gh release create "$RELEASE_TAG" dist/Andromi-Auto-release.apk dist/update.json \
+            --target "$GITHUB_SHA" --title "Andromi Auto $VERSION_NAME" --latest --notes-file dist/notes.md
 
       - name: Put the test build on the branch's test release page
-        if: github.ref_name != 'main' && github.ref_name != 'development'
+        if: env.PUBLISH == 'true' && github.ref_name != 'main' && github.ref_name != 'development'
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: test-${{ github.ref_name }}
         run: |
-          NOTES="Test build ${{ github.run_number }} of branch ${{ github.ref_name }} (commit ${GITHUB_SHA::7}). Not a release: install Andromi-Auto-debug.apk to test."
-          if gh release view "$TAG" >/dev/null 2>&1; then
-            gh release upload "$TAG" dist/Andromi-Auto-debug.apk dist/Andromi-Auto-release.apk --clobber
-            gh release edit "$TAG" --notes "$NOTES" --prerelease --latest=false
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            gh release upload "$RELEASE_TAG" dist/Andromi-Auto-debug.apk dist/Andromi-Auto-release.apk dist/update.json --clobber
+            gh release edit "$RELEASE_TAG" --notes-file dist/notes.md --prerelease --latest=false
           else
-            gh release create "$TAG" dist/Andromi-Auto-debug.apk dist/Andromi-Auto-release.apk --target "$GITHUB_SHA" \
-              --title "Test build ($TAG)" --prerelease --latest=false --notes "$NOTES"
+            gh release create "$RELEASE_TAG" dist/Andromi-Auto-debug.apk dist/Andromi-Auto-release.apk dist/update.json \
+              --target "$GITHUB_SHA" --title "Test build ($RELEASE_TAG)" --prerelease --latest=false --notes-file dist/notes.md
           fi

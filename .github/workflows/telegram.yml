@@ -50,6 +50,12 @@ jobs:
         run: |
           if [ -z "$TOKEN" ]; then echo "::error::Secret TELEGRAM_BOT_TOKEN is missing"; exit 1; fi
           REPO="${{ github.repository }}"
+          # A push to main without a new version builds but publishes nothing: announce only a
+          # release made from this very commit.
+          TARGET=$(gh release view --repo "$REPO" --json targetCommitish --jq .targetCommitish)
+          if [ "$TARGET" != "${{ github.event.workflow_run.head_sha }}" ]; then
+            echo "No stable release came from this push; nothing to announce."; exit 0
+          fi
           NAME=$(gh release view --repo "$REPO" --json name --jq .name)
           URL=$(gh release view --repo "$REPO" --json url --jq .url)
           APK="https://github.com/$REPO/releases/latest/download/Andromi-Auto-release.apk"

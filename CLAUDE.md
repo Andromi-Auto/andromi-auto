@@ -98,12 +98,21 @@ repeat it.
   over the white arrow (`#F2F2F2` / `#E3E3E3`) on white (`drawable/ic_launcher_foreground_andromi.xml`,
   monochrome themed icon, legacy webp mipmaps). About screen credits Open Headunit and links this
   repository (AGPL).
-- **Update check** (Settings > Check for updates; `utils/AndromiUpdater.kt`,
-  `utils/AndromiUpdatePolicy.kt`): stable releases only (`releases/latest`, never pre-releases).
-  Builds compare by run number (tag `-build<N>` vs versionCode - 2,000,000,000). Against the
-  60/hour API limit: the API ETag is cached (a 304 is free), and on a refusal the tag is read from
-  the `github.com/<repo>/releases/latest` redirect. Downloads `Andromi-Auto-release.apk` to the
-  cache and opens the system installer (REQUEST_INSTALL_PACKAGES, github flavor manifest only).
+- **Versions and channels** (like XEU Forums): `version.txt` holds the stable version (4.0.0).
+  Stable release = push to `main` when tag `v<version.txt>` does not exist yet: release `v4.0.0`
+  (versionName `4.0.0`, notes from `release-notes.md`, only `Andromi-Auto-release.apk` + `update.json`
+  so the F-Droid repo indexes just that). A `main` push without a new version only builds.
+  Dev = push to `development`: pre-release `development`, versionName `4.0.0-dev.<run>`, both APKs
+  + `update.json`. Never "alpha" in names. versionCode stays `2,000,000,000 + run number` for both.
+  Bump `version.txt` + `release-notes.md` for every stable release. The F-Droid repo
+  (`jaycee-h/jaycee-h.github.io`, package `com.baidu.searchbox`) takes stable releases only.
+- **Update check** (Settings > Check for updates, and Update channel: stable or dev;
+  `utils/AndromiUpdater.kt`, `utils/AndromiUpdatePolicy.kt`): follows the chosen channel (default =
+  the channel of the installed build, `BuildConfig.CHANNEL`). Compares by versionCode. Reads the
+  release through the API (ETag cached, 304 is free; versionCode/versionName/sha256 come from the
+  marker comment in the notes) and, when the API refuses, from the release's `update.json` (no limit).
+  Downloads `Andromi-Auto-release.apk`, checks its SHA-256, opens the system installer
+  (REQUEST_INSTALL_PACKAGES, github flavor manifest only). Old `-build<N>` tags still parse.
 - **Video fallback:** `utils/VideoFallbackPolicy.kt` offers 1080p when 1440p/4K is refused
   (was 720p).
 

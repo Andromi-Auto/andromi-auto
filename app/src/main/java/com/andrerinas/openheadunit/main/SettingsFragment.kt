@@ -3207,10 +3207,17 @@ class SettingsFragment : Fragment() {
         items.add(SettingItem.SettingEntry(
             stableId = "check_for_updates",
             nameResId = R.string.check_for_updates,
-            value = getString(R.string.andromi_update_summary),
+            value = getString(R.string.andromi_update_summary, channelLabel(AndromiUpdater.channel(requireContext()))),
             onClick = {
                 handleCheckForUpdates()
             }
+        ))
+
+        items.add(SettingItem.SettingEntry(
+            stableId = "update_channel",
+            nameResId = R.string.andromi_channel_title,
+            value = channelLabel(AndromiUpdater.channel(requireContext())),
+            onClick = { showUpdateChannelDialog() }
         ))
 
         items.add(SettingItem.SettingEntry(
@@ -5481,7 +5488,27 @@ class SettingsFragment : Fragment() {
         alertDialog.show()
     }
 
-    /** Andromi Auto: checks the newest stable GitHub release; see [AndromiUpdater]. */
+    private fun channelLabel(channel: String) = getString(
+        if (channel == AndromiUpdatePolicy.CHANNEL_STABLE) R.string.andromi_channel_stable else R.string.andromi_channel_dev
+    ).lowercase()
+
+    /** Andromi Auto: the user picks which release channel the update check follows. */
+    private fun showUpdateChannelDialog() {
+        val ctx = requireContext()
+        val channels = listOf(AndromiUpdatePolicy.CHANNEL_STABLE, AndromiUpdatePolicy.CHANNEL_DEV)
+        val labels = arrayOf(getString(R.string.andromi_channel_stable_desc), getString(R.string.andromi_channel_dev_desc))
+        MaterialAlertDialogBuilder(ctx, R.style.DarkAlertDialog)
+            .setTitle(R.string.andromi_channel_title)
+            .setSingleChoiceItems(labels, channels.indexOf(AndromiUpdater.channel(ctx))) { dialog, which ->
+                AndromiUpdater.setChannel(ctx, channels[which])
+                dialog.dismiss()
+                updateSettingsList()
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
+    }
+
+    /** Andromi Auto: checks the newest release of the chosen channel; see [AndromiUpdater]. */
     private fun handleCheckForUpdates() {
         val ctx = context ?: return
         ToastUtils.showToast(ctx, R.string.checking_for_updates, Toast.LENGTH_SHORT, force = true)
@@ -5490,15 +5517,19 @@ class SettingsFragment : Fragment() {
             val result = AndromiUpdater.check(ctx)
             if (!isAdded) return@launch
             when (result) {
-                is AndromiUpdater.CheckResult.Found -> when (result.verdict) {
-                    AndromiUpdatePolicy.Verdict.UPDATE_AVAILABLE -> showUpdateAvailable(result)
-                    AndromiUpdatePolicy.Verdict.UP_TO_DATE ->
-                        showUpdateMessage(getString(R.string.andromi_update_up_to_date, result.installedBuild))
-                    AndromiUpdatePolicy.Verdict.AHEAD_OF_STABLE ->
-                        showUpdateMessage(getString(R.string.andromi_update_ahead, result.installedBuild, result.release.build))
+                is AndromiUpdater.CheckResult.Found -> {
+                    val channel = channelLabel(result.release.channel)
+                    when (result.verdict) {
+                        AndromiUpdatePolicy.Verdict.UPDATE_AVAILABLE -> showUpdateAvailable(result)
+                        AndromiUpdatePolicy.Verdict.UP_TO_DATE ->
+                            showUpdateMessage(getString(R.string.andromi_update_up_to_date, channel, result.release.versionName))
+                        AndromiUpdatePolicy.Verdict.AHEAD_OF_CHANNEL ->
+                            showUpdateMessage(getString(R.string.andromi_update_ahead,
+                                BuildConfig.VERSION_NAME, channel, result.release.versionName))
+                    }
                 }
-                AndromiUpdater.CheckResult.NoStableRelease ->
-                    showUpdateMessage(getString(R.string.andromi_update_none_yet))
+                is AndromiUpdater.CheckResult.NoRelease ->
+                    showUpdateMessage(getString(R.string.andromi_update_none_yet, channelLabel(result.channel)))
                 is AndromiUpdater.CheckResult.Failed ->
                     showUpdateMessage(getString(R.string.update_check_failed))
             }
@@ -5517,7 +5548,8 @@ class SettingsFragment : Fragment() {
         val ctx = requireContext()
         MaterialAlertDialogBuilder(ctx, R.style.DarkAlertDialog)
             .setTitle(R.string.andromi_update_available_title)
-            .setMessage(getString(R.string.andromi_update_available_message, found.release.build, found.installedBuild))
+            .setMessage(getString(R.string.andromi_update_available_message,
+                found.release.versionName, channelLabel(found.release.channel), BuildConfig.VERSION_NAME))
             .setPositiveButton(R.string.andromi_update_install) { _, _ -> downloadAndInstall(found.release) }
             .setNegativeButton(R.string.andromi_update_later, null)
             .setNeutralButton(R.string.andromi_update_release_page) { _, _ ->
@@ -5526,7 +5558,7 @@ class SettingsFragment : Fragment() {
             .show()
     }
 
-    private fun downloadAndInstall(release: AndromiUpdater.StableRelease) {
+    private fun downloadAndInstall(release: AndromiUpdater.Release) {
         val ctx = context ?: return
         // Asked before the download, so a refusal does not cost one.
         if (!AndromiUpdater.canInstall(ctx)) {
@@ -5552,7 +5584,7 @@ class SettingsFragment : Fragment() {
         }
         var job: kotlinx.coroutines.Job? = null
         val dialog = MaterialAlertDialogBuilder(ctx, R.style.DarkAlertDialog)
-            .setTitle(getString(R.string.andromi_update_downloading, release.build))
+            .setTitle(getString(R.string.andromi_update_downloading, release.versionName))
             .setView(container)
             .setCancelable(false)
             .setNegativeButton(R.string.cancel) { _, _ -> job?.cancel() }

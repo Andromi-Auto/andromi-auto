@@ -101,7 +101,11 @@ android {
         // Far above the real Baidu app's version code, so the Play Store never offers Baidu as an
         // "update", and growing with every GitHub build so each APK installs over the last one.
         versionCode = 2_000_000_000 + (System.getenv("GITHUB_RUN_NUMBER")?.toIntOrNull() ?: 0)
-        versionName = "4.0.0-alpha"
+        // Set by the "Build APKs" workflow: "4.0.0" for a stable release, "4.0.0-dev.<run>" for a
+        // development build. A local build counts as a development build.
+        versionName = System.getenv("VERSION_NAME") ?: "4.0.0-dev"
+        // Which update channel this build belongs to; the updater follows it until the user picks one.
+        buildConfigField("String", "CHANNEL", "\"${System.getenv("CHANNEL") ?: "dev"}\"")
         setProperty("archivesBaseName", "${applicationId}_${versionName}")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true

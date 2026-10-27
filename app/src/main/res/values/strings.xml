@@ -1471,20 +1471,25 @@
     <string name="andromi_landscape">Landscape</string>
     <string name="andromi_screen_title">Screen</string>
     <string name="andromi_screen_hint">Use Portrait to pin Andromi Auto on the car screen. After pinning, switch to Landscape for Android Auto.</string>
-    <!-- Andromi Auto: update check (stable releases on GitHub) -->
+    <!-- Andromi Auto: update check (stable and dev channels on GitHub) -->
     <string name="andromi_version_value">%1$s · build %2$d</string>
-    <string name="andromi_update_summary">Get the newest stable release from GitHub</string>
+    <string name="andromi_update_summary">Looks on the %1$s channel</string>
+    <string name="andromi_channel_title">Update channel</string>
+    <string name="andromi_channel_stable">Stable</string>
+    <string name="andromi_channel_dev">Dev</string>
+    <string name="andromi_channel_stable_desc">Stable: tested releases</string>
+    <string name="andromi_channel_dev_desc">Dev: every change first, may have bugs</string>
     <string name="andromi_update_available_title">Update available</string>
-    <string name="andromi_update_available_message">Build %1$d is the newest stable release. You have build %2$d.
+    <string name="andromi_update_available_message">%1$s is the newest %2$s release. You have %3$s.
 
 Download and install it now? Your settings stay as they are.</string>
     <string name="andromi_update_install">Download and install</string>
     <string name="andromi_update_later">Later</string>
     <string name="andromi_update_release_page">Release page</string>
-    <string name="andromi_update_up_to_date">You have the newest stable release (build %1$d).</string>
-    <string name="andromi_update_ahead">You have build %1$d, a development build newer than the newest stable release (build %2$d). Nothing to update.</string>
-    <string name="andromi_update_none_yet">No stable release has been published yet.</string>
-    <string name="andromi_update_downloading">Downloading build %1$d…</string>
+    <string name="andromi_update_up_to_date">You have the newest %1$s release (%2$s).</string>
+    <string name="andromi_update_ahead">You have %1$s, newer than the newest %2$s release (%3$s). Nothing to update.</string>
+    <string name="andromi_update_none_yet">No %1$s release has been published yet.</string>
+    <string name="andromi_update_downloading">Downloading %1$s…</string>
     <string name="andromi_update_download_failed">The download did not finish. Check your internet connection and try again, or get the APK from the release page.</string>
     <string name="andromi_update_allow_install_title">Allow installing the update</string>
     <string name="andromi_update_allow_install_message">Android asks once: turn on \"Allow from this source\" for Andromi Auto on the next screen, come back, and tap Download and install again.</string>
