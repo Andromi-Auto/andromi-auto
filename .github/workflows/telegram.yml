@@ -3,7 +3,8 @@ name: Telegram
 # Posts to the Telegram channel with the bot whose token is in the repository secret
 # TELEGRAM_BOT_TOKEN. The bot must be an admin of the channel with "Post messages".
 #
-# - announce: after "Build APKs" publishes a stable release on main, posts the release.
+# - announce: after "Build APKs" publishes a stable release on main, posts the release
+#   (not when the commit message contains [skip telegram]).
 # - post: run by hand (or by Claude through the API) with a message; check_only tests the
 #   bot's access without posting anything.
 #
@@ -40,7 +41,8 @@ jobs:
       github.event_name == 'workflow_run' &&
       github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.head_branch == 'main' &&
-      github.event.workflow_run.event == 'push'
+      github.event.workflow_run.event == 'push' &&
+      !contains(github.event.workflow_run.head_commit.message, '[skip telegram]')
     runs-on: ubuntu-latest
     steps:
       - name: Announce the new stable release
